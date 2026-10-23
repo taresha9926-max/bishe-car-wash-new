@@ -3,6 +3,7 @@ import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/utils/date_formatter.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 
 class CommissionItemCard extends StatelessWidget {
   final CommissionLog log;
@@ -14,6 +15,7 @@ class CommissionItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
     final ratePercent = (log.commissionRate * 100).toStringAsFixed(0);
 
     return Container(
@@ -102,7 +104,7 @@ class CommissionItemCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '${log.carType.displayName} • ${log.servicePackageName}',
+                '${log.carType.localizedName(state.currentLang)} • ${log.servicePackageName}',
                 style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

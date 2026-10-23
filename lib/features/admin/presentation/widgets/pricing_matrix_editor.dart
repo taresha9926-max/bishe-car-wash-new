@@ -17,6 +17,8 @@ class PricingMatrixEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -38,18 +40,18 @@ class PricingMatrixEditor extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   flex: 3,
                   child: Text(
-                    'SERVICE PACKAGE',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+                    state.tr('pricingMatrix').toUpperCase(),
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
                   ),
                 ),
                 ...CarType.values.map((carType) {
                   return Expanded(
                     flex: 2,
                     child: Text(
-                      carType.displayName.split(' ').first.toUpperCase(),
+                      carType.localizedName(state.currentLang).split(' ').first.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
                     ),
@@ -78,7 +80,7 @@ class PricingMatrixEditor extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            pkg.name,
+                            pkg.localizedName(state.currentLang),
                             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                           ),
                           Text(
@@ -140,25 +142,27 @@ class PricingMatrixEditor extends StatelessWidget {
     CarType carType,
     double currentPrice,
   ) {
-    final controller = TextEditingController(text: currentPrice.toStringAsFixed(0));
+    final state = AppStateProvider.read(context);
+    final priceController = TextEditingController(text: currentPrice.toStringAsFixed(0));
 
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Edit Price: ${pkg.name}'),
+        title: Text('${state.tr("pricingMatrix")}: ${pkg.localizedName(state.currentLang)}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Vehicle Category: ${carType.displayName}',
-              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
+              '${carType.localizedName(state.currentLang)} Tariff',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
             ),
             const SizedBox(height: 12),
             CustomTextField(
-              controller: controller,
-              label: 'New Price (Ethiopian Birr - ETB)',
+              controller: priceController,
+              label: 'Price in ETB',
+              hint: 'e.g. 350',
               keyboardType: TextInputType.number,
               prefixIcon: Icons.payments_outlined,
             ),
@@ -167,30 +171,34 @@ class PricingMatrixEditor extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
+            child: Text(state.tr('cancel')),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () async {
-              final newPrice = double.tryParse(controller.text.trim());
+              final newPrice = double.tryParse(priceController.text.trim());
               if (newPrice != null && newPrice > 0) {
-                final state = AppStateProvider.read(context);
-                await state.updateServicePrice(
+                Navigator.pop(dialogCtx);
+                await state.updatePackagePrice(
                   packageId: pkg.id,
                   carType: carType,
                   newPrice: newPrice,
                 );
-                if (dialogCtx.mounted) {
-                  Navigator.pop(dialogCtx);
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
+                      content: Text('Updated ${pkg.localizedName(state.currentLang)} for ${carType.localizedName(state.currentLang)} to $newPrice ETB'),
                       backgroundColor: AppColors.statusCompleted,
-                      content: Text('Updated ${pkg.name} for ${carType.displayName} to $newPrice ETB'),
                     ),
                   );
                 }
               }
             },
-            child: const Text('Save Price'),
+            child: Text(state.tr('save')),
           ),
         ],
       ),

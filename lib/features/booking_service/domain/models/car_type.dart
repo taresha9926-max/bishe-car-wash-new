@@ -1,31 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 
 enum CarType {
   automobile,
   minibus,
   truck;
 
-  String get displayName {
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case CarType.automobile:
-        return 'Automobile';
+        return AppStrings.get('automobile', lang);
       case CarType.minibus:
-        return 'Minibus';
+        return AppStrings.get('minibus', lang);
       case CarType.truck:
-        return 'Truck / SUV';
+        return AppStrings.get('truck', lang);
     }
   }
 
-  String get subLabel {
+  String localizedSubLabel(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case CarType.automobile:
-        return 'Sedan, Hatchback, Compact';
+        return AppStrings.get('automobileSub', lang);
       case CarType.minibus:
-        return 'Toyota HiAce, Dolphin, 12-16 seats';
+        return AppStrings.get('minibusSub', lang);
       case CarType.truck:
-        return 'Pickup, Heavy SUV, Light Truck';
+        return AppStrings.get('truckSub', lang);
     }
   }
+
+  String get displayName => localizedName('EN');
+  String get subLabel => localizedSubLabel('EN');
 
   IconData get icon {
     switch (this) {

@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 
 enum UserRole {
   customer,
   cashier,
   admin;
 
-  String get displayName {
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case UserRole.customer:
-        return 'Customer';
+        return AppStrings.get('customerRole', lang);
       case UserRole.cashier:
-        return 'Cashier';
+        return AppStrings.get('cashierRole', lang);
       case UserRole.admin:
-        return 'Admin';
+        return AppStrings.get('adminRole', lang);
     }
   }
+
+  String get displayName => localizedName('EN');
 
   String get description {
     switch (this) {

@@ -98,7 +98,7 @@ class RoleShellScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                role.displayName,
+                                role.localizedName(state.currentLang),
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -136,17 +136,17 @@ class RoleShellScreen extends StatelessWidget {
                 child: const Icon(Icons.local_car_wash_rounded, color: AppColors.primary, size: 24),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'BISHE',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.textPrimary),
+                      state.tr('appName'),
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.textPrimary),
                     ),
                     Text(
-                      'Auto Care Bishoftu',
-                      style: TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+                      state.tr('bishoftu'),
+                      style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
                     ),
                   ],
                 ),
@@ -155,7 +155,7 @@ class RoleShellScreen extends StatelessWidget {
           ),
           const SizedBox(height: 36),
           const Text(
-            'ROLE CONSOLES',
+            'ROLES',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w800,
@@ -177,7 +177,7 @@ class RoleShellScreen extends StatelessWidget {
                   size: 20,
                 ),
                 title: Text(
-                  role.displayName,
+                  role.localizedName(state.currentLang),
                   style: TextStyle(
                     fontSize: 13.5,
                     fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -195,14 +195,14 @@ class RoleShellScreen extends StatelessWidget {
               color: AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
-                SizedBox(width: 8),
+                const Icon(Icons.location_on_outlined, size: 16, color: AppColors.primary),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Bishoftu Main Facility',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                    state.tr('bishoftu'),
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                 ),
               ],

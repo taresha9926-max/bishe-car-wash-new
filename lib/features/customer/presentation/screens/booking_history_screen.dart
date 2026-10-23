@@ -16,13 +16,13 @@ class BookingHistoryScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Wash History'),
+        title: Text(state.tr('historyTitle')),
       ),
       body: bookings.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
-                'No booking records available',
-                style: TextStyle(color: AppColors.textMuted),
+                state.tr('noRecords'),
+                style: const TextStyle(color: AppColors.textMuted),
               ),
             )
           : ListView.separated(
@@ -73,7 +73,7 @@ class BookingHistoryScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    booking.carType.displayName,
+                                    booking.carType.localizedName(state.currentLang),
                                     style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -84,34 +84,31 @@ class BookingHistoryScreen extends StatelessWidget {
                               ],
                             ),
                             StatusBadge(
-                              label: booking.status.displayName,
+                              label: booking.status.localizedName(state.currentLang),
                               color: booking.status.color,
-                              icon: booking.status.icon,
+                              isSmall: true,
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${booking.package.name} • ${booking.serviceType.displayName}',
+                          booking.package.localizedName(state.currentLang),
                           style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.access_time, size: 13, color: AppColors.textMuted),
-                                const SizedBox(width: 4),
-                                Text(
-                                  DateFormatter.formatDateTime(booking.createdAt),
-                                  style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
-                                ),
-                              ],
+                            Text(
+                              DateFormatter.formatDate(booking.createdAt),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                             Text(
                               CurrencyFormatter.format(booking.totalPrice),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../booking_service/domain/models/service_type.dart';
+import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class StationTypeCard extends StatelessWidget {
   final ServiceType serviceType;
@@ -18,8 +19,13 @@ class StationTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
     final isStation = serviceType == ServiceType.walkInStation;
     final primaryAccent = isStation ? AppColors.bay1Color : AppColors.mobileVanColor;
+
+    final title = isStation ? state.tr('driveInStation') : state.tr('atHomeMobile');
+    final subtitle = isStation ? state.tr('driveInSub') : state.tr('atHomeSub');
+    final badgeText = availableCapacity > 0 ? state.tr('availableNow') : state.tr('busyWashing');
 
     return GestureDetector(
       onTap: onTap,
@@ -65,7 +71,7 @@ class StationTypeCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        serviceType.displayName,
+                        title,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -80,9 +86,7 @@ class StationTypeCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          isStation
-                              ? '$availableCapacity/2 Bays Free'
-                              : (availableCapacity > 0 ? 'Van Ready' : 'Van Busy'),
+                          badgeText,
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -94,33 +98,12 @@ class StationTypeCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    serviceType.description,
+                    subtitle,
                     style: const TextStyle(
                       fontSize: 12.5,
                       color: AppColors.textSecondary,
                       height: 1.35,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        isStation ? Icons.place_rounded : Icons.home_repair_service_rounded,
-                        size: 14,
-                        color: AppColors.textMuted,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        isStation
-                            ? 'Bishoftu Facility Gate (Bays 1 & 2)'
-                            : 'Doorstep service within Bishoftu town',
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

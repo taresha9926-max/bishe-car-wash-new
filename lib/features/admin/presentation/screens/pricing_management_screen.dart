@@ -17,7 +17,7 @@ class PricingManagementScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Service Pricing by Car Type'),
+        title: Text(state.tr('pricingManagementTitle')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -32,14 +32,14 @@ class PricingManagementScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.primary.withOpacity(0.2)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: AppColors.primary, size: 22),
-                  SizedBox(width: 10),
+                  const Icon(Icons.info_outline, color: AppColors.primary, size: 22),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Changes to package pricing immediately reflect across Customer Booking and Cashier Walk-in billing tables.',
-                      style: TextStyle(fontSize: 12.5, color: AppColors.primaryDark, height: 1.35),
+                      state.tr('pricingSubtitle'),
+                      style: const TextStyle(fontSize: 12.5, color: AppColors.primaryDark, height: 1.35),
                     ),
                   ),
                 ],
@@ -47,13 +47,13 @@ class PricingManagementScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
 
-            const Text(
-              'Active Wash Packages',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            Text(
+              state.tr('servicePackages'),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 12),
 
-            ...packages.map((pkg) => _buildPackageCard(context, pkg)),
+            ...packages.map((pkg) => _buildPackageCard(context, state, pkg)),
 
             const SizedBox(height: 24),
           ],
@@ -62,7 +62,7 @@ class PricingManagementScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPackageCard(BuildContext context, WashPackage pkg) {
+  Widget _buildPackageCard(BuildContext context, dynamic state, WashPackage pkg) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -95,7 +95,7 @@ class PricingManagementScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    pkg.name,
+                    pkg.localizedName(state.currentLang),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -123,14 +123,14 @@ class PricingManagementScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  pkg.description,
+                  pkg.localizedDescription(state.currentLang),
                   style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.35),
                 ),
                 const SizedBox(height: 14),
 
-                const Text(
-                  'Pricing by Vehicle Type (Tap to Edit):',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+                Text(
+                  state.tr('pricingSubtitle'),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted),
                 ),
                 const SizedBox(height: 8),
 
@@ -140,7 +140,7 @@ class PricingManagementScreen extends StatelessWidget {
                     final price = pkg.getPriceFor(type);
                     return Expanded(
                       child: InkWell(
-                        onTap: () => _editPrice(context, pkg, type, price),
+                        onTap: () => _editPrice(context, state, pkg, type, price),
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           margin: EdgeInsets.only(right: type != CarType.values.last ? 8 : 0),
@@ -155,22 +155,17 @@ class PricingManagementScreen extends StatelessWidget {
                               Icon(type.icon, size: 20, color: AppColors.primary),
                               const SizedBox(height: 4),
                               Text(
-                                type.displayName.split(' ').first,
+                                type.localizedName(state.currentLang).split(' ').first,
                                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 CurrencyFormatter.format(price),
                                 style: const TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w900,
                                   color: AppColors.primaryDark,
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                'Tap to edit',
-                                style: TextStyle(fontSize: 9.5, color: AppColors.textMuted),
                               ),
                             ],
                           ),
@@ -187,26 +182,33 @@ class PricingManagementScreen extends StatelessWidget {
     );
   }
 
-  void _editPrice(BuildContext context, WashPackage pkg, CarType carType, double currentPrice) {
-    final controller = TextEditingController(text: currentPrice.toStringAsFixed(0));
+  void _editPrice(
+    BuildContext context,
+    dynamic state,
+    WashPackage pkg,
+    CarType type,
+    double currentPrice,
+  ) {
+    final priceController = TextEditingController(text: currentPrice.toStringAsFixed(0));
 
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Edit Price: ${pkg.name}'),
+        title: Text('${state.tr("pricingMatrix")}: ${pkg.localizedName(state.currentLang)}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Target Vehicle: ${carType.displayName}',
-              style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary),
+              '${type.localizedName(state.currentLang)} Tariff',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
             ),
             const SizedBox(height: 12),
             CustomTextField(
-              controller: controller,
-              label: 'Price in Ethiopian Birr (ETB)',
+              controller: priceController,
+              label: 'Price in ETB',
+              hint: 'e.g. 350',
               keyboardType: TextInputType.number,
               prefixIcon: Icons.payments_outlined,
             ),
@@ -215,30 +217,35 @@ class PricingManagementScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
+            child: Text(state.tr('cancel')),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () async {
-              final newPrice = double.tryParse(controller.text.trim());
+              final newPrice = double.tryParse(priceController.text.trim());
               if (newPrice != null && newPrice > 0) {
-                final state = AppStateProvider.read(context);
-                await state.updateServicePrice(
+                Navigator.pop(dialogCtx);
+                final appState = AppStateProvider.read(context);
+                await appState.updatePackagePrice(
                   packageId: pkg.id,
-                  carType: carType,
+                  carType: type,
                   newPrice: newPrice,
                 );
-                if (dialogCtx.mounted) {
-                  Navigator.pop(dialogCtx);
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
+                      content: Text('Updated ${pkg.localizedName(state.currentLang)} price to $newPrice ETB'),
                       backgroundColor: AppColors.statusCompleted,
-                      content: Text('Updated ${pkg.name} price to $newPrice ETB'),
                     ),
                   );
                 }
               }
             },
-            child: const Text('Save Price'),
+            child: Text(state.tr('save')),
           ),
         ],
       ),

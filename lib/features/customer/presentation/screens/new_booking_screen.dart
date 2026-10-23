@@ -66,6 +66,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final packages = state.packages;
+
     if (_selectedPackage == null && packages.isNotEmpty) {
       _selectedPackage = packages.first;
     }
@@ -74,7 +75,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Book Car Wash'),
+        title: Text(state.tr('bookWashTitle')),
         elevation: 0,
       ),
       body: Form(
@@ -85,9 +86,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Choose Service Mode (Walk-in Station vs At-Home Mobile)
-              const Text(
-                '1. Select Service Type',
-                style: TextStyle(
+              Text(
+                state.tr('selectServiceMode'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -118,15 +119,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 22),
 
               // 2. Select Car Type (Automobile, Minibus, Truck)
-              const Text(
-                '2. Select Car Category',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 10),
               CarTypeSelector(
                 selectedType: _selectedCarType,
                 onSelected: (type) {
@@ -138,9 +130,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 22),
 
               // 3. Wash Package
-              const Text(
-                '3. Choose Wash Package',
-                style: TextStyle(
+              Text(
+                state.tr('servicePackages'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -185,7 +177,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                pkg.name,
+                                pkg.localizedName(state.currentLang),
                                 style: TextStyle(
                                   fontSize: 14.5,
                                   fontWeight: FontWeight.w700,
@@ -194,7 +186,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${pkg.durationMinutes} mins • ${pkg.description}',
+                                '${pkg.durationMinutes} mins • ${pkg.localizedDescription(state.currentLang)}',
                                 style: const TextStyle(
                                   fontSize: 11.5,
                                   color: AppColors.textSecondary,
@@ -222,9 +214,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 20),
 
               // 4. Vehicle & Customer Details
-              const Text(
-                '4. Vehicle & Contact Details',
-                style: TextStyle(
+              Text(
+                state.tr('customerRole'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -233,7 +225,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 12),
               CustomTextField(
                 controller: _nameController,
-                label: 'Customer Full Name',
+                label: state.tr('customerName'),
                 hint: 'e.g. Girma Tadesse',
                 prefixIcon: Icons.person_outline,
                 validator: (val) => val == null || val.trim().isEmpty ? 'Please enter your name' : null,
@@ -241,7 +233,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 12),
               CustomTextField(
                 controller: _phoneController,
-                label: 'Phone Number (Ethiopian Mobile)',
+                label: state.tr('customerPhone'),
                 hint: '+251 91 234 5678',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icons.phone_android,
@@ -250,140 +242,120 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 12),
               CustomTextField(
                 controller: _plateController,
-                label: 'License Plate Number',
-                hint: 'e.g. ET-3-B48210 or 3-B12345',
-                prefixIcon: Icons.badge_outlined,
+                label: state.tr('licensePlate'),
+                hint: 'e.g. 3-B78945 ET',
+                prefixIcon: Icons.tag,
                 validator: (val) => val == null || val.trim().isEmpty ? 'Please enter license plate' : null,
               ),
               const SizedBox(height: 12),
 
-              // If At-Home Mobile Service, ask for Bishoftu Area & Address
+              // Address field if At-Home Mobile Van
               if (_selectedServiceType == ServiceType.atHomeMobile) ...[
-                const SizedBox(height: 6),
-                const Text(
-                  'Bishoftu Area / Neighborhood',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.cardBorder),
+                    color: AppColors.mobileVanColor.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.mobileVanColor.withOpacity(0.3)),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: _selectedBishoftuArea,
-                      items: AppConstants.bishoftuAreas.map((area) {
-                        return DropdownMenuItem<String>(
-                          value: area,
-                          child: Text(area, style: const TextStyle(fontSize: 14)),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            _selectedBishoftuArea = val;
-                          });
-                        }
-                      },
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on, color: AppColors.mobileVanColor, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            state.tr('locationArea'),
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        value: _selectedBishoftuArea,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        ),
+                        items: AppConstants.bishoftuAreas.map((area) {
+                          return DropdownMenuItem(value: area, child: Text(area));
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedBishoftuArea = val;
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      CustomTextField(
+                        controller: _addressController,
+                        label: 'Street / Landmark',
+                        hint: 'e.g. Near Asham Africa Resort, House 420',
+                        prefixIcon: Icons.home,
+                        validator: (val) {
+                          if (_selectedServiceType == ServiceType.atHomeMobile && (val == null || val.trim().isEmpty)) {
+                            return 'Please provide street / residence landmark in Bishoftu';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _addressController,
-                  label: 'House / Compound / Street Address',
-                  hint: 'e.g. Near Babogaya View Hotel, Compound #4',
-                  prefixIcon: Icons.home_outlined,
-                  maxLines: 2,
-                  validator: (val) {
-                    if (_selectedServiceType == ServiceType.atHomeMobile &&
-                        (val == null || val.trim().isEmpty)) {
-                      return 'Please provide street / residence location';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
               ],
 
-              // 5. Payment Preference
-              const Text(
-                '5. Payment Method Preference',
-                style: TextStyle(
+              // 5. Payment Selection
+              Text(
+                state.tr('paymentMethod'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 10),
-              _buildPaymentSelector(),
-              const SizedBox(height: 24),
+              _buildPaymentSelector(state),
+              const SizedBox(height: 20),
 
-              // Booking Summary Box
+              // Booking Order Summary Box
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
+                  color: AppColors.primaryDark,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.cardBorder),
                 ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Service Type:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                         Text(
-                          _selectedServiceType.displayName,
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Car Category:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                        Text(
-                          _selectedCarType.displayName,
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Wash Package:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-                        Text(
-                          _selectedPackage?.name ?? '',
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total Service Fee:',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                          _selectedPackage?.localizedName(state.currentLang) ?? '',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                         ),
                         Text(
                           CurrencyFormatter.format(currentPrice),
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primaryDark,
-                          ),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const Divider(color: Colors.white24, height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${state.tr("total")}:',
+                          style: const TextStyle(color: Colors.white70, fontSize: 13),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(currentPrice),
+                          style: const TextStyle(color: AppColors.oromiaGold, fontWeight: FontWeight.w900, fontSize: 20),
                         ),
                       ],
                     ),
@@ -394,8 +366,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
 
               // Submit Button
               CustomButton(
-                text: 'Confirm & Book Now',
-                icon: Icons.check_circle_outline_rounded,
+                text: state.tr('bookNow'),
                 isLoading: _isSubmitting,
                 onPressed: () => _handleBookingSubmit(context),
               ),
@@ -407,7 +378,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     );
   }
 
-  Widget _buildPaymentSelector() {
+  Widget _buildPaymentSelector(dynamic state) {
     return Column(
       children: [
         PaymentMethod.telebirr,
@@ -438,7 +409,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    method.displayName,
+                    method.localizedName(state.currentLang),
                     style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,

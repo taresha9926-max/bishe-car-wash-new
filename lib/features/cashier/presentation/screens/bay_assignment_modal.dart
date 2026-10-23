@@ -89,16 +89,16 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Assign Bay & Washer',
-                    style: TextStyle(
+                  Text(
+                    state.tr('assignBayWasher'),
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    'Vehicle: ${widget.booking.licensePlate} (${widget.booking.carType.displayName})',
+                    '${widget.booking.licensePlate} (${widget.booking.carType.localizedName(state.currentLang)})',
                     style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
                 ],
@@ -112,9 +112,9 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
           const Divider(height: 24),
 
           // 1. Bay Selection (Bay 1, Bay 2, Mobile Van)
-          const Text(
-            'Select Station Bay or Van',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          Text(
+            state.tr('assignVehicle'),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 10),
           Row(
@@ -158,11 +158,11 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          isVacant ? 'FREE' : 'IN USE',
+                          isVacant ? state.tr('availableNow') : state.tr('busyWashing'),
                           style: TextStyle(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            color: isVacant ? AppColors.statusReady : AppColors.statusPending,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: isVacant ? AppColors.statusReady : AppColors.statusCancelled,
                           ),
                         ),
                       ],
@@ -175,15 +175,15 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
           const SizedBox(height: 20),
 
           // 2. Washer Selection
-          const Text(
-            'Select Dedicated Washer',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          Text(
+            state.tr('activeWashers'),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.cardBorder),
             ),
@@ -195,36 +195,12 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
                   return DropdownMenuItem<StaffMember>(
                     value: washer,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CircleAvatar(
-                          radius: 12,
-                          backgroundColor: AppColors.primary.withOpacity(0.12),
-                          child: Text(
-                            washer.name.substring(0, 1),
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primary),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            '${washer.name} (${washer.role.displayName})',
-                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: (washer.isAvailable ? AppColors.statusReady : AppColors.statusPending).withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            washer.isAvailable ? 'AVAILABLE' : 'BUSY',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: washer.isAvailable ? AppColors.statusReady : AppColors.statusPending,
-                            ),
-                          ),
+                        Text(washer.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        Text(
+                          '${washer.role.localizedName(state.currentLang)} • 15% Split',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                         ),
                       ],
                     ),
@@ -242,50 +218,43 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
           ),
           const SizedBox(height: 24),
 
-          // Confirm Button
+          // Action Button
           CustomButton(
-            text: 'Save Assignment & Station Car',
-            icon: Icons.check,
+            text: state.tr('confirm'),
             isLoading: _isSaving,
-            onPressed: () => _handleSave(context),
+            onPressed: () => _handleAssign(context),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _handleSave(BuildContext context) async {
-    if (_selectedWasher == null) return;
-
+  Future<void> _handleAssign(BuildContext context) async {
     setState(() {
       _isSaving = true;
     });
 
     try {
       final state = AppStateProvider.read(context);
+
       await state.assignBayAndWasher(
         bookingId: widget.booking.id,
         bay: _selectedBay,
-        washerId: _selectedWasher!.id,
-        washerName: _selectedWasher!.name,
+        washerId: _selectedWasher?.id ?? 'stf-01',
+        washerName: _selectedWasher?.name ?? 'Washer',
       );
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.statusCompleted,
-            content: Text(
-              '${widget.booking.licensePlate} assigned to ${_selectedBay.displayName} with ${_selectedWasher!.name}',
-            ),
-          ),
-        );
       }
-    } finally {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isSaving = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error assigning bay: $e'), backgroundColor: Colors.red),
+        );
       }
     }
   }

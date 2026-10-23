@@ -54,8 +54,43 @@ class AppStrings {
       AppLanguage.om: 'Bulchiinsa',
       AppLanguage.am: 'አስተዳዳሪ',
     },
+    'back': {
+      AppLanguage.en: 'Back',
+      AppLanguage.om: 'Deebi\'i',
+      AppLanguage.am: 'ተመለስ',
+    },
+    'close': {
+      AppLanguage.en: 'Close',
+      AppLanguage.om: 'Cufi',
+      AppLanguage.am: 'ዝጋ',
+    },
+    'cancel': {
+      AppLanguage.en: 'Cancel',
+      AppLanguage.om: 'Dhiisi',
+      AppLanguage.am: 'ሰርዝ',
+    },
+    'save': {
+      AppLanguage.en: 'Save',
+      AppLanguage.om: 'Oolchi',
+      AppLanguage.am: 'አስቀምጥ',
+    },
+    'confirm': {
+      AppLanguage.en: 'Confirm',
+      AppLanguage.om: 'Mirkaneessi',
+      AppLanguage.am: 'አረጋግጥ',
+    },
+    'all': {
+      AppLanguage.en: 'All',
+      AppLanguage.om: 'Hunda',
+      AppLanguage.am: 'ሁሉም',
+    },
+    'refresh': {
+      AppLanguage.en: 'Refresh',
+      AppLanguage.om: 'Haaromsi',
+      AppLanguage.am: 'አድስ',
+    },
 
-    // Customer Screen
+    // Customer Screen & Home
     'selectServiceMode': {
       AppLanguage.en: 'Select Service Mode',
       AppLanguage.om: 'Gosa Tajaajilaa Filadhaa',
@@ -111,6 +146,18 @@ class AppStrings {
       AppLanguage.om: 'Amma Qabadhaa',
       AppLanguage.am: 'አሁን ይዘዙ',
     },
+    'activeWashTitle': {
+      AppLanguage.en: 'Active Wash Tracking',
+      AppLanguage.om: 'Hordoffii Dhiqannaa Ammaa',
+      AppLanguage.am: 'የአሁኑ እጥበት ሁኔታ መከታተያ',
+    },
+    'openFullTracker': {
+      AppLanguage.en: 'Open Full Live Tracker',
+      AppLanguage.om: 'Hordoffii Guutuu Bani',
+      AppLanguage.am: 'ሙሉ መከታተያውን ክፈት',
+    },
+
+    // Vehicle Types (CarType)
     'automobile': {
       AppLanguage.en: 'Automobile',
       AppLanguage.om: 'Konkolaataa Xiqqaa',
@@ -126,15 +173,177 @@ class AppStrings {
       AppLanguage.om: 'Makiinaa Guddaa',
       AppLanguage.am: 'ትራክ / ፒክአፕ / ቪ8',
     },
-    'activeWashTitle': {
-      AppLanguage.en: 'Active Wash Tracking',
-      AppLanguage.om: 'Hordoffii Dhiqannaa Ammaa',
-      AppLanguage.am: 'የአሁኑ እጥበት ሁኔታ መከታተያ',
+    'automobileSub': {
+      AppLanguage.en: 'Sedan, Hatchback, Compact',
+      AppLanguage.om: 'Sedan, Hatchback, Xiqqaa',
+      AppLanguage.am: 'ሴዳን፣ ሃችባክ፣ አነስተኛ',
     },
-    'openFullTracker': {
-      AppLanguage.en: 'Open Full Live Tracker',
-      AppLanguage.om: 'Hordoffii Guutuu Bani',
-      AppLanguage.am: 'ሙሉ መከታተያውን ክፈት',
+    'minibusSub': {
+      AppLanguage.en: 'Toyota HiAce, Dolphin, 12-16 seats',
+      AppLanguage.om: 'Toyota HiAce, Dolphin, Teessuma 12-16',
+      AppLanguage.am: 'ቶዮታ ሃይአይስ፣ ዶልፊን፣ 12-16 መቀመጫ',
+    },
+    'truckSub': {
+      AppLanguage.en: 'Pickup, Heavy SUV, Light Truck',
+      AppLanguage.om: 'Pikaappi, Makiinaa Guddaa, V8',
+      AppLanguage.am: 'ፒክአፕ፣ ከባድ ቪ8፣ አነስተኛ የጭነት',
+    },
+
+    // Wash Statuses (WashStatus)
+    'statusPending': {
+      AppLanguage.en: 'Pending Approval',
+      AppLanguage.om: 'Eeyyama Eegaa',
+      AppLanguage.am: 'ፍቃድ በመጠባበቅ ላይ',
+    },
+    'statusConfirmed': {
+      AppLanguage.en: 'Confirmed',
+      AppLanguage.om: 'Mirkanaa\'e',
+      AppLanguage.am: 'ተረጋግጧል',
+    },
+    'statusAssignedToBay': {
+      AppLanguage.en: 'Queued in Bay',
+      AppLanguage.om: 'Kutaa Keessatti Qophaa\'e',
+      AppLanguage.am: 'ክፍል ውስጥ ተሰይሟል',
+    },
+    'statusWashing': {
+      AppLanguage.en: 'Washing in Progress',
+      AppLanguage.om: 'Dhiqamaa Jira',
+      AppLanguage.am: 'እየታጠበ ነው',
+    },
+    'statusDrying': {
+      AppLanguage.en: 'Drying & Detailing',
+      AppLanguage.om: 'Gogsamaa fi Qulqullaa\'aa Jira',
+      AppLanguage.am: 'እየደረቀና እየጸዳ ነው',
+    },
+    'statusReadyForPickup': {
+      AppLanguage.en: 'Ready for Pickup',
+      AppLanguage.om: 'Fudhachuuf Qophiidha',
+      AppLanguage.am: 'ለመረከብ ዝግጁ ነው',
+    },
+    'statusCompleted': {
+      AppLanguage.en: 'Completed',
+      AppLanguage.om: 'Xumurameera',
+      AppLanguage.am: 'ተጠናቋል',
+    },
+    'statusCancelled': {
+      AppLanguage.en: 'Cancelled',
+      AppLanguage.om: 'Haqameera',
+      AppLanguage.am: 'ተሰርዟል',
+    },
+
+    // Service Types (ServiceType)
+    'serviceWalkIn': {
+      AppLanguage.en: 'Walk-in Station',
+      AppLanguage.om: 'Kutaa Dhiqannaa',
+      AppLanguage.am: 'የጣቢያ እጥበት',
+    },
+    'serviceAtHome': {
+      AppLanguage.en: 'At-Home Mobile Service',
+      AppLanguage.om: 'Tajaajila Makiinaa Socho\'aa',
+      AppLanguage.am: 'ተንቀሳቃሽ የቤት ለቤት አገልግሎት',
+    },
+
+    // Bay Types (BayType)
+    'bay1Name': {
+      AppLanguage.en: 'Bay 1 (Station)',
+      AppLanguage.om: 'Kutaa 1 (Dhiqannaa)',
+      AppLanguage.am: 'ክፍል 1 (ማጠቢያ)',
+    },
+    'bay2Name': {
+      AppLanguage.en: 'Bay 2 (Station)',
+      AppLanguage.om: 'Kutaa 2 (Dhiqannaa)',
+      AppLanguage.am: 'ክፍል 2 (ማጠቢያ)',
+    },
+    'bayVanName': {
+      AppLanguage.en: 'Mobile Van 1 (At-Home)',
+      AppLanguage.om: 'Makiinaa Socho\'aa 1 (Mana)',
+      AppLanguage.am: 'ተንቀሳቃሽ ቫን 1 (ቤት ለቤት)',
+    },
+
+    // Payment Methods (PaymentMethod)
+    'payCash': {
+      AppLanguage.en: 'Cash (Gate / Handover)',
+      AppLanguage.om: 'Qarshii Harkaa',
+      AppLanguage.am: 'በጥሬ ገንዘብ (ካሽ)',
+    },
+    'payTelebirr': {
+      AppLanguage.en: 'Telebirr (Ethio Telecom)',
+      AppLanguage.om: 'Telebirr (Ityoo Telekom)',
+      AppLanguage.am: 'ቴሌብር (ኢትዮ ቴሌኮም)',
+    },
+    'payCbeBirr': {
+      AppLanguage.en: 'CBE Birr (Commercial Bank)',
+      AppLanguage.om: 'CBE Birr (Baankii Daldala)',
+      AppLanguage.am: 'ሲቢኢ ብር (ንግድ ባንክ)',
+    },
+    'payBank': {
+      AppLanguage.en: 'Bank Transfer / Mobile Banking',
+      AppLanguage.om: 'Dabarsa Baankii',
+      AppLanguage.am: 'በባንክ ሒሳብ ማስተላለፍ',
+    },
+
+    // Database / SQL Packages Localization
+    'pkg_express_name': {
+      AppLanguage.en: 'Express Foam Wash',
+      AppLanguage.om: 'Dhiqannaa Hoomaa Saffisaa',
+      AppLanguage.am: 'አጭር የሳሙና አረፋ እጥበት',
+    },
+    'pkg_express_desc': {
+      AppLanguage.en: 'High-pressure water rinse, active snow foam soak, tire shine & hand dry.',
+      AppLanguage.om: 'Bishaan dhiibbaa guddaa, hoomaa dhiqannaa, gogaa gommaa fi qoorsuu harkaa.',
+      AppLanguage.am: 'በከፍተኛ የውሃ ግፊት ማጠብ፣ ንቁ የሳሙና አረፋ፣ የጎማ ማብሪያና ማድረቅ።',
+    },
+    'pkg_standard_name': {
+      AppLanguage.en: 'Standard Clean & Vacuum',
+      AppLanguage.om: 'Qulqullina Idilee & Vaakiyuumii',
+      AppLanguage.am: 'መደበኛ ሙሉ እጥበትና ቫኪዩም',
+    },
+    'pkg_standard_desc': {
+      AppLanguage.en: 'Complete exterior body wash plus deep interior vacuum, dashboard wipe & glass cleaning.',
+      AppLanguage.om: 'Dhiqannaa alaa guutuu, keessa vaakiyuumii gochuu, daashboordii fi fuula daawwitii qulqulleessuu.',
+      AppLanguage.am: 'ሙሉ የውጭ አካል እጥበት፣ የውስጥ ቫኪዩም፣ ዳሽቦርድ ማፅዳትና መስታወት ማብራት።',
+    },
+    'pkg_deluxe_name': {
+      AppLanguage.en: 'Deluxe Spa & Engine Detail',
+      AppLanguage.om: 'Ispaa Dilaaksii & Qulqullina Motoraa',
+      AppLanguage.am: 'ልዩ ስፓ እና የሞተር እጥበት',
+    },
+    'pkg_deluxe_desc': {
+      AppLanguage.en: 'Comprehensive exterior hand polish, high-temperature interior steam sanitize, engine bay shampoo & synthetic spray wax.',
+      AppLanguage.om: 'Pooliishii harkaa, hurka ho\'aan keessa qulqulleessuu, saamunaa motoraa fi waaksii alaa.',
+      AppLanguage.am: 'የእጅ ፖሊሽ፣ በከፍተኛ ሙቀት እንፋሎት የውስጥ ማፅዳት፣ የሞተር ሻምፑና የሰም ቅባት።',
+    },
+    'pkg_mobile_name': {
+      AppLanguage.en: 'Mobile At-Home Express Van',
+      AppLanguage.om: 'Makiinaa Socho\'aa Mana Keessanitti',
+      AppLanguage.am: 'ተንቀሳቃሽ ቫን (ቤትዎ ድረስ)',
+    },
+    'pkg_mobile_desc': {
+      AppLanguage.en: 'Doorstep wash anywhere in Bishoftu. Onboard high-pressure system, spotless deionized water & silent generator.',
+      AppLanguage.om: 'Bishoftuu keessatti bakka jirtanitti dhiqannaa. Bishaan qulqulluu fi jenereetara sagalee hin qabne.',
+      AppLanguage.am: 'ቢሾፍቱ ውስጥ ባሉበት ቦታ ድረስ መጥቶ ማጠብ። የራሱ የውሃ ታንክና ፀጥተኛ ጄነሬተር ያለው።',
+    },
+
+    // Staff Roles
+    'roleWasher': {
+      AppLanguage.en: 'Car Washer',
+      AppLanguage.om: 'Dhiqaa Konkolaataa',
+      AppLanguage.am: 'መኪና አጣቢ',
+    },
+    'roleCashier': {
+      AppLanguage.en: 'Cashier Desk',
+      AppLanguage.om: 'Qabaa Qarshii',
+      AppLanguage.am: 'ገንዘብ ያዥ',
+    },
+    'roleAdmin': {
+      AppLanguage.en: 'Admin / Manager',
+      AppLanguage.om: 'Bulchaa / Hojii Geggeessaa',
+      AppLanguage.am: 'አስተዳዳሪ / ስራ አስኪያጅ',
+    },
+    'roleLeadDetailer': {
+      AppLanguage.en: 'Lead Detailer',
+      AppLanguage.om: 'Gaggeessaa Qulqullinaa',
+      AppLanguage.am: 'ዋና የእጥበት ባለሙያ',
     },
 
     // Cashier Screen
@@ -289,6 +498,141 @@ class AppStrings {
       AppLanguage.en: 'View All',
       AppLanguage.om: 'Hunda Ilaali',
       AppLanguage.am: 'ሁሉንም እይ',
+    },
+    'digitalReceiptsTitle': {
+      AppLanguage.en: 'Digital Receipts & Verification',
+      AppLanguage.om: 'Nagahee Dijitaalaafi Qorannoo',
+      AppLanguage.am: 'የዲጂታል ደረሰኞችና ማረጋገጫ',
+    },
+    'noDigitalReceipts': {
+      AppLanguage.en: 'No digital payments recorded yet today.',
+      AppLanguage.om: 'Kaffaltiin dijitaalaa har\'aa hin jiru.',
+      AppLanguage.am: 'ዛሬ የተመዘገበ የዲጂታል ክፍያ የለም።',
+    },
+    'viewReceipt': {
+      AppLanguage.en: 'View Receipt',
+      AppLanguage.om: 'Nagahee Ilaali',
+      AppLanguage.am: 'ደረሰኝ እይ',
+    },
+    'noReceipt': {
+      AppLanguage.en: 'No Receipt',
+      AppLanguage.om: 'Nagahee Hin Qabu',
+      AppLanguage.am: 'ደረሰኝ የለም',
+    },
+    'pricingManagementTitle': {
+      AppLanguage.en: 'Service Pricing by Car Type',
+      AppLanguage.om: 'Gatii Tajaajilaa Konkolaataan',
+      AppLanguage.am: 'የእጥበት ዋጋ እንደ መኪናው ዓይነት',
+    },
+    'staffManagementTitle': {
+      AppLanguage.en: 'Staff & Salaries Management',
+      AppLanguage.om: 'Bulchiinsa Hojjettootaafi Miindaa',
+      AppLanguage.am: 'የሰራተኞችና ደመወዝ አስተዳደር',
+    },
+    'commissionLogsTitle': {
+      AppLanguage.en: 'Washer Commission Logs',
+      AppLanguage.om: 'Galmee Komishiinii Dhiqaa',
+      AppLanguage.am: 'የአጣቢዎች ኮሚሽን ዝርዝር መዝገብ',
+    },
+    'addStaff': {
+      AppLanguage.en: 'Add Staff',
+      AppLanguage.om: 'Hojjetaa Dabali',
+      AppLanguage.am: 'ሰራተኛ መዝግብ',
+    },
+    'liveTrackingTitle': {
+      AppLanguage.en: 'Live Wash Tracking',
+      AppLanguage.om: 'Hordoffii Dhiqannaa Kallattii',
+      AppLanguage.am: 'የቀጥታ እጥበት ሁኔታ መከታተያ',
+    },
+    'bookWashTitle': {
+      AppLanguage.en: 'Book Car Wash',
+      AppLanguage.om: 'Dhiqannaa Qabadhaa',
+      AppLanguage.am: 'መኪና እጥበት ይዘዙ',
+    },
+    'walkInTitle': {
+      AppLanguage.en: 'Gate Walk-In Registration',
+      AppLanguage.om: 'Galmee Balbala Duraa',
+      AppLanguage.am: 'የበር ላይ መኪና ምዝገባ',
+    },
+    'paymentDialogTitle': {
+      AppLanguage.en: 'Process Payment',
+      AppLanguage.om: 'Kaffaltii Raawwadhu',
+      AppLanguage.am: 'ክፍያ ተቀበል',
+    },
+    'historyTitle': {
+      AppLanguage.en: 'My Wash History',
+      AppLanguage.om: 'Seenaa Dhiqannaa Koo',
+      AppLanguage.am: 'የቀደመ እጥበት ታሪኬ',
+    },
+    'noRecords': {
+      AppLanguage.en: 'No booking records available',
+      AppLanguage.om: 'Galmeen dhiqannaa hin jiru',
+      AppLanguage.am: 'ምንም የተመዘገበ ታሪክ የለም',
+    },
+    'total': {
+      AppLanguage.en: 'Total',
+      AppLanguage.om: 'Waliigala',
+      AppLanguage.am: 'ጠቅላላ',
+    },
+    'licensePlate': {
+      AppLanguage.en: 'License Plate',
+      AppLanguage.om: 'Gabatee Makiinaa',
+      AppLanguage.am: 'የሰሌዳ ቁጥር',
+    },
+    'customerName': {
+      AppLanguage.en: 'Customer Name',
+      AppLanguage.om: 'Maqaa Maamilaa',
+      AppLanguage.am: 'የደንበኛው ስም',
+    },
+    'customerPhone': {
+      AppLanguage.en: 'Phone Number',
+      AppLanguage.om: 'Lakkoofsa Bilbilaa',
+      AppLanguage.am: 'ስልክ ቁጥር',
+    },
+    'locationArea': {
+      AppLanguage.en: 'Delivery Location / Bishoftu Area',
+      AppLanguage.om: 'Iddoo Geessisaa / Bishoftuu',
+      AppLanguage.am: 'የሚታጠብበት አድራሻ (ቢሾፍቱ)',
+    },
+    'paymentMethod': {
+      AppLanguage.en: 'Payment Method',
+      AppLanguage.om: 'Mala Kaffaltii',
+      AppLanguage.am: 'የክፍያ ዘዴ',
+    },
+    'transactionRef': {
+      AppLanguage.en: 'Transfer Reference (Optional)',
+      AppLanguage.om: 'Koodii Dabarsaa (Dirqama Miti)',
+      AppLanguage.am: 'የክፍያ ማረጋገጫ ቁጥር (አስፈላጊ ከሆነ)',
+    },
+    'uploadReceipt': {
+      AppLanguage.en: 'Upload Payment Screenshot',
+      AppLanguage.om: 'Suuraa Nagahee Galchaa',
+      AppLanguage.am: 'የደረሰኝ ፎቶ / ስክሪንሽት ጫን',
+    },
+    'receiptUploaded': {
+      AppLanguage.en: 'Receipt screenshot attached',
+      AppLanguage.om: 'Suuraan nagahee qabsiifameera',
+      AppLanguage.am: 'የደረሰኙ ፎቶ በተሳካ ሁኔታ ተያይዟል',
+    },
+    'confirmAndPay': {
+      AppLanguage.en: 'Confirm & Complete Payment',
+      AppLanguage.om: 'Mirkaneessiitii Kaffali',
+      AppLanguage.am: 'አረጋግጥና ክፍያ ፈፅም',
+    },
+    'assignBayWasher': {
+      AppLanguage.en: 'Assign Bay / Washer',
+      AppLanguage.om: 'Kutaa / Dhiqaa Ramadi',
+      AppLanguage.am: 'ክፍልና አጣቢ መድብ',
+    },
+    'baseMonthlySalary': {
+      AppLanguage.en: 'BASE MONTHLY SALARY',
+      AppLanguage.om: 'MIINDAA JIOOTAA BU\'UURAA',
+      AppLanguage.am: 'ወርሃዊ ቋሚ ደመወዝ',
+    },
+    'commissionRate': {
+      AppLanguage.en: 'COMMISSION RATE',
+      AppLanguage.om: 'HAMMA KOMISHIINII',
+      AppLanguage.am: 'የኮሚሽን ምጣኔ',
     },
   };
 

@@ -286,6 +286,46 @@ class AppStateNotifier extends ChangeNotifier {
     await _refreshData();
   }
 
+  Future<void> updatePackagePrice({
+    required String packageId,
+    required CarType carType,
+    required double newPrice,
+  }) => updateServicePrice(packageId: packageId, carType: carType, newPrice: newPrice);
+
+  Future<void> addStaffMember({
+    required String name,
+    required String phone,
+    required StaffRole role,
+    required double baseSalary,
+    double commissionRate = AppConstants.defaultCommissionRate,
+  }) => addNewStaff(name: name, phone: phone, role: role, baseSalary: baseSalary, commissionRate: commissionRate);
+
+  Future<WashBooking> registerWalkIn({
+    required String licensePlate,
+    required String customerPhone,
+    required CarType carType,
+    required WashPackage package,
+    required BayType assignedBay,
+    String? assignedWasherId,
+    String? assignedWasherName,
+    required PaymentMethod paymentMethod,
+    bool markPaid = false,
+    String? transactionRef,
+    String? receiptScreenshot,
+  }) => registerWalkInGate(
+    licensePlate: licensePlate,
+    customerPhone: customerPhone,
+    carType: carType,
+    package: package,
+    assignedBay: assignedBay,
+    washerId: assignedWasherId ?? 'stf-01',
+    washerName: assignedWasherName ?? 'Washer',
+    paymentMethod: paymentMethod,
+    markPaid: markPaid,
+    transactionRef: transactionRef,
+    receiptScreenshot: receiptScreenshot,
+  );
+
   /// Admin edits service pricing by car type
   Future<void> updateServicePrice({
     required String packageId,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 
 enum WashStatus {
   pending,
@@ -11,26 +12,29 @@ enum WashStatus {
   completed,
   cancelled;
 
-  String get displayName {
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case WashStatus.pending:
-        return 'Pending Approval';
+        return AppStrings.get('statusPending', lang);
       case WashStatus.confirmed:
-        return 'Confirmed';
+        return AppStrings.get('statusConfirmed', lang);
       case WashStatus.assignedToBay:
-        return 'Queued in Bay';
+        return AppStrings.get('statusAssignedToBay', lang);
       case WashStatus.washing:
-        return 'Washing in Progress';
+        return AppStrings.get('statusWashing', lang);
       case WashStatus.drying:
-        return 'Drying & Detailing';
+        return AppStrings.get('statusDrying', lang);
       case WashStatus.readyForPickup:
-        return 'Ready for Pickup';
+        return AppStrings.get('statusReadyForPickup', lang);
       case WashStatus.completed:
-        return 'Completed';
+        return AppStrings.get('statusCompleted', lang);
       case WashStatus.cancelled:
-        return 'Cancelled';
+        return AppStrings.get('statusCancelled', lang);
     }
   }
+
+  String get displayName => localizedName('EN');
 
   Color get color {
     switch (this) {
@@ -56,7 +60,7 @@ enum WashStatus {
   IconData get icon {
     switch (this) {
       case WashStatus.pending:
-        return Icons.hourglass_top_rounded;
+        return Icons.pending_actions_rounded;
       case WashStatus.confirmed:
         return Icons.check_circle_outline_rounded;
       case WashStatus.assignedToBay:
@@ -68,7 +72,7 @@ enum WashStatus {
       case WashStatus.readyForPickup:
         return Icons.car_repair_rounded;
       case WashStatus.completed:
-        return Icons.verified_rounded;
+        return Icons.task_alt_rounded;
       case WashStatus.cancelled:
         return Icons.cancel_outlined;
     }
@@ -96,7 +100,8 @@ enum WashStatus {
   }
 
   bool get isOngoing =>
-      this != WashStatus.completed &&
-      this != WashStatus.cancelled &&
-      this != WashStatus.pending;
+      this == WashStatus.assignedToBay ||
+      this == WashStatus.washing ||
+      this == WashStatus.drying ||
+      this == WashStatus.readyForPickup;
 }

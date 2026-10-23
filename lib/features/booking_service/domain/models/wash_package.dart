@@ -1,3 +1,4 @@
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'car_type.dart';
 
 class WashPackage {
@@ -16,6 +17,33 @@ class WashPackage {
     required this.pricingByCarType,
     required this.features,
   });
+
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
+    final key = _getPkgKey();
+    if (key != null) {
+      return AppStrings.get('${key}_name', lang);
+    }
+    return name;
+  }
+
+  String localizedDescription(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
+    final key = _getPkgKey();
+    if (key != null) {
+      return AppStrings.get('${key}_desc', lang);
+    }
+    return description;
+  }
+
+  String? _getPkgKey() {
+    final lower = id.toLowerCase() + name.toLowerCase();
+    if (lower.contains('express') || lower.contains('0101')) return 'pkg_express';
+    if (lower.contains('standard') || lower.contains('0102')) return 'pkg_standard';
+    if (lower.contains('deluxe') || lower.contains('0103') || lower.contains('engine')) return 'pkg_deluxe';
+    if (lower.contains('van') || lower.contains('mobile') || lower.contains('0104')) return 'pkg_mobile';
+    return null;
+  }
 
   double getPriceFor(CarType carType) {
     return pricingByCarType[carType] ?? 300.0;

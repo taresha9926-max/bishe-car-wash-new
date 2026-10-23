@@ -4,6 +4,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
+import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class ActiveQueueTile extends StatelessWidget {
   final WashBooking booking;
@@ -21,6 +22,7 @@ class ActiveQueueTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
     final payment = booking.payment;
     final isPaid = payment.isPaid;
 
@@ -69,13 +71,13 @@ class ActiveQueueTile extends StatelessWidget {
                   Icon(booking.carType.icon, size: 16, color: AppColors.textSecondary),
                   const SizedBox(width: 4),
                   Text(
-                    booking.carType.displayName,
+                    booking.carType.localizedName(state.currentLang),
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                 ],
               ),
               StatusBadge(
-                label: booking.status.displayName,
+                label: booking.status.localizedName(state.currentLang),
                 color: booking.status.color,
                 icon: booking.status.icon,
                 isSmall: true,
@@ -94,7 +96,7 @@ class ActiveQueueTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      booking.package.name,
+                      booking.package.localizedName(state.currentLang),
                       style: const TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
@@ -157,7 +159,7 @@ class ActiveQueueTile extends StatelessWidget {
                     const Icon(Icons.person, size: 14, color: AppColors.textSecondary),
                     const SizedBox(width: 5),
                     Text(
-                      booking.assignedWasherName ?? 'Washer Unassigned',
+                      booking.assignedWasherName ?? 'Unassigned',
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                     ),
                   ],
@@ -195,7 +197,7 @@ class ActiveQueueTile extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onAssignBayWasher,
                     icon: const Icon(Icons.swap_horiz_rounded, size: 15),
-                    label: const Text('Assign Bay/Washer', style: TextStyle(fontSize: 11.5)),
+                    label: Text(state.tr('assignBayWasher'), style: const TextStyle(fontSize: 11)),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       side: const BorderSide(color: AppColors.primary, width: 1),
@@ -212,7 +214,7 @@ class ActiveQueueTile extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: onProcessPayment,
                       icon: const Icon(Icons.payments_rounded, size: 15),
-                      label: const Text('Collect Cash/Telebirr', style: TextStyle(fontSize: 11)),
+                      label: Text(state.tr('payButton'), style: const TextStyle(fontSize: 11)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.cashGreen,
                         foregroundColor: Colors.white,
@@ -229,7 +231,7 @@ class ActiveQueueTile extends StatelessWidget {
                 height: 34,
                 child: IconButton.filledTonal(
                   onPressed: onUpdateStatus,
-                  tooltip: 'Next Status Step',
+                  tooltip: 'Next Status',
                   icon: const Icon(Icons.arrow_forward_ios_rounded, size: 13),
                   style: IconButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

@@ -60,7 +60,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
     final washers = state.availableWashers;
 
     if (_package == null && packages.isNotEmpty) {
-      _package = packages[0];
+      _package = packages.first;
     }
     if (_washer == null && washers.isNotEmpty) {
       _washer = washers.first;
@@ -70,7 +70,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gate Walk-In Registration'),
+        title: Text(state.tr('walkInTitle')),
       ),
       body: Form(
         key: _formKey,
@@ -86,21 +86,21 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                   color: AppColors.primaryDark,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.door_sliding_rounded, color: Colors.white, size: 24),
-                    SizedBox(width: 10),
+                    const Icon(Icons.door_sliding_rounded, color: Colors.white, size: 24),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bishoftu Main Facility Gate Entry',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13.5),
+                            state.tr('appName'),
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13.5),
                           ),
                           Text(
-                            'Instantly record arriving vehicle, assign bay & dispatch washer.',
-                            style: TextStyle(color: Colors.white70, fontSize: 11.5),
+                            state.tr('tagline'),
+                            style: const TextStyle(color: Colors.white70, fontSize: 11.5),
                           ),
                         ],
                       ),
@@ -111,14 +111,14 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               const SizedBox(height: 18),
 
               // 1. License Plate & Phone
-              const Text(
-                '1. Vehicle & Customer Contact',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              Text(
+                state.tr('customerRole'),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 10),
               CustomTextField(
                 controller: _plateController,
-                label: 'Vehicle License Plate',
+                label: state.tr('licensePlate'),
                 hint: 'e.g. ET-3-B98124 or 3-B98124',
                 prefixIcon: Icons.badge_outlined,
                 validator: (val) => val == null || val.trim().isEmpty ? 'Please enter license plate' : null,
@@ -126,7 +126,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               const SizedBox(height: 12),
               CustomTextField(
                 controller: _phoneController,
-                label: 'Customer Phone (for Ready SMS)',
+                label: state.tr('customerPhone'),
                 hint: '+251 91 123 4567',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icons.phone_android,
@@ -142,9 +142,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               const SizedBox(height: 18),
 
               // 3. Package Selection
-              const Text(
-                '2. Select Service Package',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              Text(
+                state.tr('servicePackages'),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               ...packages.map((pkg) {
@@ -176,7 +176,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                pkg.name,
+                                pkg.localizedName(state.currentLang),
                                 style: TextStyle(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
@@ -202,9 +202,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               const SizedBox(height: 18),
 
               // 4. Station Bay / Van Assignment
-              const Text(
-                '3. Assign Station Bay or Van',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              Text(
+                state.tr('assignVehicle'),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               Row(
@@ -242,7 +242,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                               ),
                             ),
                             Text(
-                              bayData.isVacant ? 'FREE' : 'BUSY',
+                              bayData.isVacant ? state.tr('availableNow') : state.tr('busyWashing'),
                               style: TextStyle(
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w800,
@@ -259,9 +259,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               const SizedBox(height: 18),
 
               // 5. Assign Washer
-              const Text(
-                '4. Assign Dedicated Washer',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              Text(
+                state.tr('activeWashers'),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               Container(
@@ -278,7 +278,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                     items: washers.map((w) {
                       return DropdownMenuItem<StaffMember>(
                         value: w,
-                        child: Text('${w.name} (${w.role.displayName})', style: const TextStyle(fontSize: 13.5)),
+                        child: Text('${w.name} (${w.role.localizedName(state.currentLang)})', style: const TextStyle(fontSize: 13.5)),
                       );
                     }).toList(),
                     onChanged: (val) {
@@ -302,9 +302,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Collect Payment Now (Gate Checkout)',
-                          style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
+                        Text(
+                          state.tr('confirmAndPay'),
+                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
                         ),
                         Switch(
                           value: _isPaidNow,
@@ -352,7 +352,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                         const SizedBox(height: 10),
                         CustomTextField(
                           controller: _refCodeController,
-                          label: 'Digital Transfer Code',
+                          label: state.tr('transactionRef'),
                           hint: 'e.g. TB-9988221',
                         ),
                       ],
@@ -364,7 +364,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
 
               // Submit
               CustomButton(
-                text: 'Register Entry & Start Washing (${CurrencyFormatter.format(price)})',
+                text: '${state.tr("startWashing")} (${CurrencyFormatter.format(price)})',
                 icon: Icons.check_circle_outline,
                 isLoading: _isSubmitting,
                 onPressed: () => _handleSubmitWalkIn(context),
@@ -379,35 +379,39 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
 
   Future<void> _handleSubmitWalkIn(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
-    if (_package == null || _washer == null) return;
+    if (_package == null) return;
 
     setState(() => _isSubmitting = true);
 
     try {
       final state = AppStateProvider.read(context);
 
-      final booking = await state.registerWalkInGate(
-        licensePlate: _plateController.text.trim(),
+      final booking = await state.registerWalkIn(
+        licensePlate: _plateController.text.trim().toUpperCase(),
         customerPhone: _phoneController.text.trim(),
         carType: _carType,
         package: _package!,
         assignedBay: _bayType,
-        washerId: _washer!.id,
-        washerName: _washer!.name,
+        assignedWasherId: _washer?.id,
+        assignedWasherName: _washer?.name,
         paymentMethod: _paymentMethod,
         markPaid: _isPaidNow,
-        transactionRef: _paymentMethod.isDigital && _refCodeController.text.trim().isNotEmpty
-            ? _refCodeController.text.trim()
-            : null,
+        transactionRef: _isPaidNow && _paymentMethod.isDigital ? _refCodeController.text.trim() : null,
       );
 
       if (mounted) {
-        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.statusCompleted,
             content: Text('Gate entry ${booking.licensePlate} stationed at ${_bayType.displayName}!'),
           ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: Colors.redAccent, content: Text('Error: $e')),
         );
       }
     } finally {

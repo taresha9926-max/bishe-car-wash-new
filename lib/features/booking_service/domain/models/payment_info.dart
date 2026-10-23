@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 
 enum PaymentMethod {
   cash,
@@ -7,18 +8,21 @@ enum PaymentMethod {
   cbeBirr,
   otherBankTransfer;
 
-  String get displayName {
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case PaymentMethod.cash:
-        return 'Cash (Gate / Handover)';
+        return AppStrings.get('payCash', lang);
       case PaymentMethod.telebirr:
-        return 'Telebirr (Ethio Telecom)';
+        return AppStrings.get('payTelebirr', lang);
       case PaymentMethod.cbeBirr:
-        return 'CBE Birr (Commercial Bank)';
+        return AppStrings.get('payCbeBirr', lang);
       case PaymentMethod.otherBankTransfer:
-        return 'Bank Transfer / Mobile Banking';
+        return AppStrings.get('payBank', lang);
     }
   }
+
+  String get displayName => localizedName('EN');
 
   String get shortName {
     switch (this) {

@@ -1,21 +1,26 @@
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
+
 enum StaffRole {
   washer,
   cashier,
   admin,
   leadDetailer;
 
-  String get displayName {
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case StaffRole.washer:
-        return 'Car Washer';
+        return AppStrings.get('roleWasher', lang);
       case StaffRole.cashier:
-        return 'Cashier';
+        return AppStrings.get('roleCashier', lang);
       case StaffRole.admin:
-        return 'Admin / Manager';
+        return AppStrings.get('roleAdmin', lang);
       case StaffRole.leadDetailer:
-        return 'Lead Detailer';
+        return AppStrings.get('roleLeadDetailer', lang);
     }
   }
+
+  String get displayName => localizedName('EN');
 }
 
 class StaffMember {

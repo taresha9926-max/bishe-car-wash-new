@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
+import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class BayLiveStatusCard extends StatelessWidget {
   final StationBay bay;
@@ -20,6 +21,7 @@ class BayLiveStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
     final isVacant = bay.isVacant;
     final bayColor = bay.type.color;
 
@@ -60,7 +62,7 @@ class BayLiveStatusCard extends StatelessWidget {
                     Icon(bay.type.icon, size: 18, color: bayColor),
                     const SizedBox(width: 8),
                     Text(
-                      bay.type.displayName,
+                      bay.type.localizedName(state.currentLang),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -90,7 +92,7 @@ class BayLiveStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        isVacant ? 'VACANT' : 'ACTIVE',
+                        isVacant ? state.tr('availableNow') : state.tr('busyWashing'),
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w800,
@@ -108,23 +110,23 @@ class BayLiveStatusCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(14),
             child: isVacant
-                ? _buildVacantContent()
-                : _buildOccupiedContent(),
+                ? _buildVacantContent(state)
+                : _buildOccupiedContent(state),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildVacantContent() {
+  Widget _buildVacantContent(dynamic state) {
     return Column(
       children: [
         const SizedBox(height: 6),
         const Icon(Icons.car_repair_rounded, size: 36, color: AppColors.textMuted),
         const SizedBox(height: 8),
-        const Text(
-          'Bay is clear & available',
-          style: TextStyle(
+        Text(
+          state.tr('availableNow'),
+          style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppColors.textSecondary,
@@ -137,7 +139,7 @@ class BayLiveStatusCard extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: onAssignTap,
             icon: const Icon(Icons.add, size: 16),
-            label: const Text('Assign Car Here', style: TextStyle(fontSize: 12.5)),
+            label: Text(state.tr('assignVehicle'), style: const TextStyle(fontSize: 12.5)),
             style: OutlinedButton.styleFrom(
               foregroundColor: bay.type.color,
               side: BorderSide(color: bay.type.color, width: 1.2),
@@ -149,7 +151,7 @@ class BayLiveStatusCard extends StatelessWidget {
     );
   }
 
-  Widget _buildOccupiedContent() {
+  Widget _buildOccupiedContent(dynamic state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -159,18 +161,19 @@ class BayLiveStatusCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'VEHICLE PLATE',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted),
-                ),
                 Text(
-                  bay.activeLicensePlate ?? 'N/A',
+                  bay.activeLicensePlate ?? 'Plate Unknown',
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 0.8,
+                    letterSpacing: 1.0,
                     color: AppColors.textPrimary,
                   ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${state.tr("activeWashers")}: ${bay.assignedWasherName ?? "Washer"}',
+                  style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -181,68 +184,39 @@ class BayLiveStatusCard extends StatelessWidget {
                   color: currentWashStatus!.color.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(currentWashStatus!.icon, size: 12, color: currentWashStatus!.color),
-                    const SizedBox(width: 4),
-                    Text(
-                      currentWashStatus!.displayName,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: currentWashStatus!.color,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  currentWashStatus!.localizedName(state.currentLang),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: currentWashStatus!.color,
+                  ),
                 ),
               ),
           ],
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            const Icon(Icons.person, size: 14, color: AppColors.textSecondary),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                'Washer: ${bay.assignedWasherName ?? "Unassigned"}',
-                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        if (bay.startedAt != null) ...[
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              const Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
-              const SizedBox(width: 6),
-              Text(
-                'Started: ${DateFormatter.timeAgo(bay.startedAt!)}',
-                style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
-              ),
-            ],
+        const SizedBox(height: 8),
+        if (bay.startedAt != null)
+          Text(
+            'Started: ${DateFormatter.formatTime(bay.startedAt!)}',
+            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
-        ],
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
           height: 36,
           child: ElevatedButton.icon(
             onPressed: onQuickAdvanceStatus,
-            icon: const Icon(Icons.fast_forward_rounded, size: 16),
+            icon: const Icon(Icons.arrow_forward_rounded, size: 16),
             label: Text(
-              _getNextActionLabel(currentWashStatus),
-              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+              _getQuickActionLabel(currentWashStatus, state),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: bay.type.color,
               foregroundColor: Colors.white,
-              elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
             ),
           ),
         ),
@@ -250,21 +224,19 @@ class BayLiveStatusCard extends StatelessWidget {
     );
   }
 
-  String _getNextActionLabel(WashStatus? status) {
-    if (status == null) return 'Update Status';
+  String _getQuickActionLabel(WashStatus? status, dynamic state) {
+    if (status == null) return state.tr('startWashing');
     switch (status) {
-      case WashStatus.pending:
-      case WashStatus.confirmed:
       case WashStatus.assignedToBay:
-        return 'Start Washing';
+        return state.tr('startWashing');
       case WashStatus.washing:
-        return 'Move to Drying';
+        return state.tr('setToDrying');
       case WashStatus.drying:
-        return 'Mark Ready for Pickup';
+        return state.tr('markReady');
       case WashStatus.readyForPickup:
-        return 'Complete & Free Bay';
+        return state.tr('completeArchive');
       default:
-        return 'Update Status';
+        return state.tr('startWashing');
     }
   }
 }

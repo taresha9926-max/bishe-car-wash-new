@@ -29,7 +29,7 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Washer Commission Logs'),
+        title: Text(state.tr('commissionLogsTitle')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -48,96 +48,76 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.12),
+                    color: Colors.black.withOpacity(0.15),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'TOTAL COMMISSION PAYOUT',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white70,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.statusReady.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          'AUTOMATED LOGS',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.statusReady,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    CurrencyFormatter.format(totalPayout, showDecimals: true),
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.oromiaGold.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(14),
                     ),
+                    child: const Icon(Icons.handshake_rounded, color: AppColors.oromiaGold, size: 28),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Sum of ${filteredLogs.length} completed car washes tracked by system',
-                    style: const TextStyle(fontSize: 12, color: Colors.white60),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.tr('commissionsPaid'),
+                          style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          CurrencyFormatter.format(totalPayout),
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+                        ),
+                        Text(
+                          '${filteredLogs.length} ${state.tr("carsWashed")}',
+                          style: const TextStyle(fontSize: 11, color: AppColors.oromiaGold),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 18),
 
-            // Filter Chips by Washer
-            const Text(
-              'Filter by Washer Staff:',
-              style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-            ),
-            const SizedBox(height: 8),
+            // Washer Filter Bar
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  ChoiceChip(
-                    label: const Text('All Staff'),
+                  FilterChip(
                     selected: _selectedWasherId == 'ALL',
+                    label: Text(state.tr('all')),
                     onSelected: (_) => setState(() => _selectedWasherId = 'ALL'),
                     selectedColor: AppColors.primary,
                     labelStyle: TextStyle(
-                      color: _selectedWasherId == 'ALL' ? Colors.white : AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
+                      color: _selectedWasherId == 'ALL' ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  ...washers.map((washer) {
-                    final isSel = washer.id == _selectedWasherId;
+                  ...washers.map((w) {
+                    final isSel = _selectedWasherId == w.id;
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(washer.name),
+                      child: FilterChip(
                         selected: isSel,
-                        onSelected: (_) => setState(() => _selectedWasherId = washer.id),
+                        label: Text(w.name),
+                        onSelected: (_) => setState(() => _selectedWasherId = w.id),
                         selectedColor: AppColors.primary,
                         labelStyle: TextStyle(
-                          color: isSel ? Colors.white : AppColors.textPrimary,
                           fontWeight: FontWeight.w700,
+                          color: isSel ? Colors.white : AppColors.textPrimary,
                         ),
                       ),
                     );
@@ -150,34 +130,17 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
             // Logs List
             if (filteredLogs.isEmpty)
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: const Column(
-                  children: [
-                    Icon(Icons.receipt_long_outlined, size: 44, color: AppColors.textMuted),
-                    SizedBox(height: 10),
-                    Text(
-                      'No commission logs recorded for this selection',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Commissions are automatically added when a wash is marked completed.',
-                      style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                padding: const EdgeInsets.all(30),
+                alignment: Alignment.center,
+                child: Text(
+                  state.tr('noRecords'),
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
               )
             else
               ...filteredLogs.map((log) => CommissionItemCard(log: log)),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 30),
           ],
         ),
       ),

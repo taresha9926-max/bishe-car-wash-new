@@ -30,20 +30,20 @@ class LiveTrackingScreen extends StatelessWidget {
 
     if (booking == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Live Wash Tracking')),
+        appBar: AppBar(title: Text(state.tr('liveTrackingTitle'))),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.car_crash_outlined, size: 54, color: AppColors.textMuted),
               const SizedBox(height: 12),
-              const Text(
-                'No active bookings found',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              Text(
+                state.tr('noRecords'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 16),
               CustomButton(
-                text: 'Back to Home',
+                text: state.tr('back'),
                 width: 160,
                 onPressed: () => Navigator.pop(context),
               ),
@@ -55,12 +55,12 @@ class LiveTrackingScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Wash Tracking #${booking.id}'),
+        title: Text('${state.tr("liveTrackingTitle")} #${booking.id}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => state.loadData(),
-            tooltip: 'Refresh Status',
+            tooltip: state.tr('refresh'),
           ),
         ],
       ),
@@ -70,11 +70,11 @@ class LiveTrackingScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Status Header Card
-            _buildStatusHeaderCard(booking),
+            _buildStatusHeaderCard(context, state, booking),
             const SizedBox(height: 16),
 
             // Vehicle & Bay Assignment Card
-            _buildVehicleDetailsCard(booking),
+            _buildVehicleDetailsCard(context, state, booking),
             const SizedBox(height: 20),
 
             // Visual Live Progress Stepper
@@ -88,13 +88,13 @@ class LiveTrackingScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.timeline, color: AppColors.primary, size: 20),
-                      SizedBox(width: 8),
+                      const Icon(Icons.timeline, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 8),
                       Text(
-                        'Live Wash Progress',
-                        style: TextStyle(
+                        state.tr('activeWashTitle'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
@@ -103,9 +103,9 @@ class LiveTrackingScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Updated in real-time by the station cashier & washer team:',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  Text(
+                    '${booking.licensePlate} • ${booking.package.localizedName(state.currentLang)}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 20),
                   LiveWashStepper(currentStatus: booking.status),
@@ -115,7 +115,7 @@ class LiveTrackingScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Payment & Bill Summary
-            _buildPaymentCard(booking),
+            _buildPaymentCard(context, state, booking),
             const SizedBox(height: 20),
 
             // Facility Contact Assistance
@@ -134,11 +134,11 @@ class LiveTrackingScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Need to modify booking or request key handover?',
+                          'Bishoftu Station Desk: +251 91 123 4567',
                           style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
                         ),
                         Text(
-                          'Call Bishoftu Gate Desk: +251 91 123 4567',
+                          'Open daily 7:00 AM - 8:00 PM',
                           style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                         ),
                       ],
@@ -158,7 +158,7 @@ class LiveTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusHeaderCard(WashBooking booking) {
+  Widget _buildStatusHeaderCard(BuildContext context, dynamic state, WashBooking booking) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -213,7 +213,7 @@ class LiveTrackingScreen extends StatelessWidget {
                     Icon(booking.status.icon, size: 14, color: booking.status.color),
                     const SizedBox(width: 4),
                     Text(
-                      booking.status.displayName,
+                      booking.status.localizedName(state.currentLang),
                       style: TextStyle(
                         color: booking.status.color,
                         fontSize: 11.5,
@@ -227,7 +227,7 @@ class LiveTrackingScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            _getStatusHeroTitle(booking.status),
+            booking.status.localizedName(state.currentLang),
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
@@ -236,7 +236,7 @@ class LiveTrackingScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            _getStatusHeroSubtitle(booking),
+            '${booking.licensePlate} • ${booking.package.localizedName(state.currentLang)}',
             style: const TextStyle(
               fontSize: 13,
               color: Colors.white70,
@@ -248,7 +248,7 @@ class LiveTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVehicleDetailsCard(WashBooking booking) {
+  Widget _buildVehicleDetailsCard(BuildContext context, dynamic state, WashBooking booking) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -284,7 +284,7 @@ class LiveTrackingScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${booking.carType.displayName} • ${booking.package.name}',
+                      '${booking.carType.localizedName(state.currentLang)} • ${booking.package.localizedName(state.currentLang)}',
                       style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                     ),
                   ],
@@ -298,10 +298,10 @@ class LiveTrackingScreen extends StatelessWidget {
               Expanded(
                 child: _buildDetailSubItem(
                   icon: Icons.garage_rounded,
-                  label: 'Assigned Bay',
+                  label: 'Bay',
                   value: booking.assignedBay != null
-                      ? booking.assignedBay!.displayName
-                      : 'Pending Gate Allocation',
+                      ? booking.assignedBay!.localizedName(state.currentLang)
+                      : 'Pending',
                   color: booking.assignedBay != null ? booking.assignedBay!.color : AppColors.textMuted,
                 ),
               ),
@@ -311,8 +311,8 @@ class LiveTrackingScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 12),
                   child: _buildDetailSubItem(
                     icon: Icons.badge_outlined,
-                    label: 'Washer in Charge',
-                    value: booking.assignedWasherName ?? 'Awaiting Assignment',
+                    label: 'Washer',
+                    value: booking.assignedWasherName ?? 'Assigned Team',
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -328,7 +328,7 @@ class LiveTrackingScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Mobile Delivery: ${booking.deliveryLocation}',
+                    '${state.tr("locationArea")}: ${booking.deliveryLocation}',
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                 ),
@@ -367,7 +367,7 @@ class LiveTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentCard(WashBooking booking) {
+  Widget _buildPaymentCard(BuildContext context, dynamic state, WashBooking booking) {
     final payment = booking.payment;
     final isPaid = payment.isPaid;
 
@@ -384,16 +384,16 @@ class LiveTrackingScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Billing & Payment',
-                style: TextStyle(
+              Text(
+                state.tr('paymentMethod'),
+                style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
               ),
               StatusBadge(
-                label: isPaid ? 'PAID' : 'PAYMENT PENDING',
+                label: isPaid ? 'PAID' : 'PENDING',
                 color: isPaid ? AppColors.statusReady : AppColors.statusPending,
                 icon: isPaid ? Icons.check_circle : Icons.pending,
               ),
@@ -404,7 +404,7 @@ class LiveTrackingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Service Fee (${booking.package.name})',
+                booking.package.localizedName(state.currentLang),
                 style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
               Text(
@@ -417,16 +417,16 @@ class LiveTrackingScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Payment Method',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              Text(
+                state.tr('paymentMethod'),
+                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
               Row(
                 children: [
                   Icon(payment.method.icon, size: 14, color: payment.method.color),
                   const SizedBox(width: 4),
                   Text(
-                    payment.method.displayName,
+                    payment.method.localizedName(state.currentLang),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -442,7 +442,7 @@ class LiveTrackingScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Reference Code', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                Text(state.tr('transactionRef'), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
                 Text(
                   payment.transactionRef!,
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
@@ -453,33 +453,5 @@ class LiveTrackingScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _getStatusHeroTitle(WashStatus status) {
-    switch (status) {
-      case WashStatus.pending:
-        return 'Request Submitted';
-      case WashStatus.confirmed:
-        return 'Booking Confirmed';
-      case WashStatus.assignedToBay:
-        return 'Vehicle Pulled Into Bay';
-      case WashStatus.washing:
-        return 'Active Pressure Wash';
-      case WashStatus.drying:
-        return 'Drying & Detailing';
-      case WashStatus.readyForPickup:
-        return 'Ready for Inspection!';
-      case WashStatus.completed:
-        return 'Wash Completed & Checked Out';
-      case WashStatus.cancelled:
-        return 'Booking Cancelled';
-    }
-  }
-
-  String _getStatusHeroSubtitle(WashBooking booking) {
-    if (booking.assignedBay != null) {
-      return 'Vehicle is currently stationed at ${booking.assignedBay!.displayName} with staff member ${booking.assignedWasherName ?? "Washer team"}.';
-    }
-    return 'Vehicle is queued in our Bishoftu facility awaiting bay entrance.';
   }
 }

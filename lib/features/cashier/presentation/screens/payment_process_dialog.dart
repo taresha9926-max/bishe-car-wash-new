@@ -72,7 +72,6 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         }
       });
     } else {
-      // Mock for non-web environments
       setState(() {
         _uploadedScreenshotName = 'telebirr_transfer_receipt.jpg';
       });
@@ -81,6 +80,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
     final amountDue = widget.booking.totalPrice;
 
     return Dialog(
@@ -96,13 +96,13 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.point_of_sale_rounded, color: AppColors.primary, size: 24),
-                      SizedBox(width: 8),
+                      const Icon(Icons.point_of_sale_rounded, color: AppColors.primary, size: 24),
+                      const SizedBox(width: 8),
                       Text(
-                        'Collect Payment',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                        state.tr('paymentDialogTitle'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),
@@ -126,7 +126,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 child: Column(
                   children: [
                     Text(
-                      'Bill Amount for ${widget.booking.licensePlate}',
+                      '${state.tr("licensePlate")}: ${widget.booking.licensePlate}',
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 4),
@@ -139,7 +139,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                       ),
                     ),
                     Text(
-                      'Package: ${widget.booking.package.name} • ${widget.booking.carType.displayName}',
+                      '${widget.booking.package.localizedName(state.currentLang)} • ${widget.booking.carType.localizedName(state.currentLang)}',
                       style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
                     ),
                   ],
@@ -147,24 +147,24 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               ),
               const SizedBox(height: 16),
 
-              const Text(
-                'Select Payment Channel',
-                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              Text(
+                state.tr('paymentMethod'),
+                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
 
               // Payment Options
-              _buildOption(PaymentMethod.cash, 'Physical Cash (Gate Handover)'),
-              _buildOption(PaymentMethod.telebirr, 'Telebirr (Ethio Telecom Mobile Money)'),
-              _buildOption(PaymentMethod.cbeBirr, 'CBE Birr (Commercial Bank of Ethiopia)'),
-              _buildOption(PaymentMethod.otherBankTransfer, 'Other Digital Bank Transfer'),
+              _buildOption(PaymentMethod.cash, state.tr('payCash')),
+              _buildOption(PaymentMethod.telebirr, state.tr('payTelebirr')),
+              _buildOption(PaymentMethod.cbeBirr, state.tr('payCbeBirr')),
+              _buildOption(PaymentMethod.otherBankTransfer, state.tr('payBank')),
 
               // Digital Payment Fields
               if (_selectedMethod.isDigital) ...[
                 const SizedBox(height: 12),
                 CustomTextField(
                   controller: _refCodeController,
-                  label: 'Digital Transfer Reference / SMS Code',
+                  label: state.tr('transactionRef'),
                   hint: 'e.g. TB-8932014 or CBE-9923184',
                   prefixIcon: Icons.confirmation_number_outlined,
                 ),
@@ -200,7 +200,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                               Text(
                                 _uploadedScreenshotName != null
                                     ? 'Attached: $_uploadedScreenshotName'
-                                    : 'Upload Payment Screenshot / Receipt',
+                                    : state.tr('uploadReceipt'),
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
@@ -209,8 +209,8 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                               ),
                               Text(
                                 _uploadedScreenshotName != null
-                                    ? 'Tap to change screenshot image'
-                                    : 'Customer digital transfer confirmation receipt',
+                                    ? state.tr('receiptUploaded')
+                                    : state.tr('uploadReceipt'),
                                 style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
                               ),
                             ],
@@ -227,7 +227,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
 
               // Action Buttons
               CustomButton(
-                text: 'Confirm & Mark as Paid',
+                text: state.tr('confirmAndPay'),
                 icon: Icons.check_circle_outline,
                 backgroundColor: AppColors.cashGreen,
                 isLoading: _isProcessing,
@@ -249,11 +249,11 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         });
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? method.color.withOpacity(0.08) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          color: isSelected ? method.color.withOpacity(0.08) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? method.color : AppColors.cardBorder,
             width: isSelected ? 1.8 : 1,
@@ -261,26 +261,20 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         ),
         child: Row(
           children: [
-            Icon(method.icon, color: method.color, size: 18),
+            Icon(method.icon, color: method.color, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected ? method.color : AppColors.textPrimary,
                 ),
               ),
             ),
-            Radio<PaymentMethod>(
-              value: method,
-              groupValue: _selectedMethod,
-              activeColor: method.color,
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedMethod = val);
-              },
-            ),
+            if (isSelected)
+              Icon(Icons.check_circle, color: method.color, size: 18),
           ],
         ),
       ),
@@ -288,18 +282,17 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   }
 
   Future<void> _handlePaymentConfirm(BuildContext context, double amount) async {
+    final state = AppStateProvider.read(context);
+    final navigator = Navigator.of(context, rootNavigator: true);
+
     setState(() {
       _isProcessing = true;
     });
 
-    final navigator = Navigator.of(context, rootNavigator: true);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
     try {
-      final state = AppStateProvider.read(context);
-      final refCode = _refCodeController.text.trim().isNotEmpty
+      final refCode = _selectedMethod.isDigital && _refCodeController.text.trim().isNotEmpty
           ? _refCodeController.text.trim()
-          : (_selectedMethod.isDigital ? 'DIG-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}' : null);
+          : null;
 
       await state.processPayment(
         bookingId: widget.booking.id,
@@ -310,23 +303,29 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
       );
 
       navigator.pop();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.cashGreen,
-          content: Text(
-            'Payment of ${CurrencyFormatter.format(amount)} recorded successfully via ${_selectedMethod.shortName}!',
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text('Payment of ${CurrencyFormatter.format(amount)} recorded successfully!'),
+              ],
+            ),
+            backgroundColor: AppColors.statusCompleted,
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Payment error: $e'), backgroundColor: Colors.red),
-      );
-    } finally {
       if (mounted) {
         setState(() {
           _isProcessing = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment error: $e'), backgroundColor: Colors.red),
+        );
       }
     }
   }

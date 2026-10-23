@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 
 enum BayType {
   bay1,
   bay2,
   mobileVan;
 
-  String get displayName {
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case BayType.bay1:
-        return 'Bay 1 (Station)';
+        return AppStrings.get('bay1Name', lang);
       case BayType.bay2:
-        return 'Bay 2 (Station)';
+        return AppStrings.get('bay2Name', lang);
       case BayType.mobileVan:
-        return 'Mobile Van 1 (At-Home)';
+        return AppStrings.get('bayVanName', lang);
     }
   }
+
+  String get displayName => localizedName('EN');
 
   String get shortName {
     switch (this) {
@@ -58,22 +62,22 @@ enum BayStatus {
   String get displayName {
     switch (this) {
       case BayStatus.vacant:
-        return 'Vacant';
+        return 'Available';
       case BayStatus.occupied:
-        return 'In Service';
+        return 'Busy Washing';
       case BayStatus.maintenance:
-        return 'Cleaning';
+        return 'Offline';
     }
   }
 
   Color get color {
     switch (this) {
       case BayStatus.vacant:
-        return const Color(0xFF16A34A);
+        return AppColors.statusReady;
       case BayStatus.occupied:
-        return const Color(0xFF2563EB);
+        return AppColors.statusWashing;
       case BayStatus.maintenance:
-        return const Color(0xFFEA580C);
+        return AppColors.statusCancelled;
     }
   }
 }
@@ -96,6 +100,7 @@ class StationBay {
   });
 
   bool get isVacant => status == BayStatus.vacant;
+  bool get isOccupied => status == BayStatus.occupied;
 
   StationBay copyWith({
     BayType? type,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../booking_service/domain/models/car_type.dart';
+import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class CarTypeSelector extends StatelessWidget {
   final CarType selectedType;
@@ -14,18 +15,11 @@ class CarTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Select Vehicle Category',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 10),
         Row(
           children: CarType.values.map((type) {
             final isSelected = type == selectedType;
@@ -72,7 +66,7 @@ class CarTypeSelector extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        type.displayName,
+                        type.localizedName(state.currentLang),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
@@ -82,7 +76,7 @@ class CarTypeSelector extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        type.subLabel.split(',').first,
+                        type.localizedSubLabel(state.currentLang).split(',').first,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
