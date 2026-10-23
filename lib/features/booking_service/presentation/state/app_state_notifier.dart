@@ -107,6 +107,9 @@ class AppStateNotifier extends ChangeNotifier {
         .fold(0.0, (sum, b) => sum + b.totalPrice);
   }
 
+  double get digitalRevenueETB => totalDigitalRevenueETB;
+  double get cashRevenueETB => totalCashRevenueETB;
+
   double get totalDigitalRevenueETB {
     return _bookings
         .where((b) => b.payment.isPaid && b.payment.method != PaymentMethod.cash)
