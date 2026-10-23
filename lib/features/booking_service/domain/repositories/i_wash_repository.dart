@@ -10,13 +10,13 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_statu
 abstract class IWashRepository {
   Future<List<WashBooking>> getBookings();
   Future<WashBooking?> getBookingById(String id);
+  Future<WashBooking?> getBookingByPlate(String licensePlate);
   Future<WashBooking> createBooking(WashBooking booking);
   Future<WashBooking> updateWashStatus(String bookingId, WashStatus newStatus);
-  Future<WashBooking> assignBayAndWasher({
+  Future<WashBooking> assignBayAndWashers({
     required String bookingId,
     required BayType bay,
-    required String washerId,
-    required String washerName,
+    required List<String> washerNames,
   });
   Future<WashBooking> processPayment({
     required String bookingId,
@@ -31,4 +31,11 @@ abstract class IWashRepository {
   Future<void> updateStaffSalary(String staffId, double baseSalary, double commissionRate);
   Future<void> addStaffMember(StaffMember staff);
   Future<List<CommissionLog>> getCommissionLogs();
+  Future<void> settleCommission(String logId);
+  Future<void> recordSmsNotification({
+    required String bookingId,
+    required String licensePlate,
+    required String recipientPhone,
+    required double amount,
+  });
 }

@@ -1,5 +1,5 @@
 name: bishe_car_wash
-description: "BISHE Car Wash Service mobile app for Bishoftu, Oromia. Multi-role system for Customer booking & tracking, Cashier bay & payment management, and Admin pricing & staff commission logs."
+description: "BISHE Car Wash Service mobile app for Bishoftu, Oromia."
 publish_to: "none"
 version: 1.0.0+1
 
@@ -9,7 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
   cupertino_icons: ^1.0.6
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:

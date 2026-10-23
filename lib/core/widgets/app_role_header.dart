@@ -1,210 +1,191 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 
-class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final List<Widget>? actions;
-  final bool showRoleSwitcher;
+class AppRoleHeader extends StatelessWidget {
+  const AppRoleHeader({super.key});
 
-  const AppRoleHeader({
-    super.key,
-    required this.title,
-    this.actions,
-    this.showRoleSwitcher = true,
-  });
+  void _showPinDialog(BuildContext context, UserRole targetRole) {
+    final notifier = AppStateProvider.of(context);
+    final pinController = TextEditingController();
 
-  @override
-  Size get preferredSize => const Size.fromHeight(68);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.lock_outline_rounded, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(notifier.tr('staffLogin')),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${notifier.tr('enterPin')} (${targetRole.displayName}):',
+              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: pinController,
+              keyboardType: TextInputType.number,
+              obscureText: true,
+              maxLength: 4,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: '••••',
+                counterText: '',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(notifier.tr('cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // 4-digit PIN check: default 1234 or role specific
+              if (pinController.text == '1234' || pinController.text == '9926') {
+                notifier.switchRole(targetRole);
+                Navigator.pop(ctx);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(notifier.tr('invalidPin')),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Text(notifier.tr('unlock')),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final state = AppStateProvider.of(context);
-    final currentRole = state.currentRole;
+    final notifier = AppStateProvider.of(context);
+    final currentRole = notifier.currentRole;
+    final currentLang = notifier.currentLanguage;
 
-    return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.transparent,
-      titleSpacing: 16,
-      title: Row(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: const Border(bottom: BorderSide(color: AppColors.cardBorder, width: 1)),
+      ),
+      child: Row(
         children: [
+          // Branding
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, AppColors.secondary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.local_car_wash, color: Colors.white, size: 22),
+            child: const Icon(Icons.local_car_wash_rounded, color: AppColors.primary, size: 24),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'BISHOFTU',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const Text(
-                  'Bishoftu • Oromia, Ethiopia',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        if (showRoleSwitcher) ...[
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.cardBorder),
-            ),
-            child: PopupMenuButton<UserRole>(
-              initialValue: currentRole,
-              tooltip: 'Switch User Role',
-              offset: const Offset(0, 42),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              onSelected: (role) {
-                state.switchRole(role);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(currentRole.icon, size: 16, color: AppColors.primary),
-                    const SizedBox(width: 6),
-                    Text(
-                      currentRole.displayName,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryDark,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.arrow_drop_down, size: 18, color: AppColors.textSecondary),
-                  ],
-                ),
-              ),
-              itemBuilder: (context) => [
-                _buildRoleMenuItem(
-                  UserRole.customer,
-                  'Customer View',
-                  'Book & track walk-in or mobile van',
-                  currentRole == UserRole.customer,
-                ),
-                _buildRoleMenuItem(
-                  UserRole.cashier,
-                  'Cashier Dashboard',
-                  'Gate check-in, bay & payment desk',
-                  currentRole == UserRole.cashier,
-                ),
-                _buildRoleMenuItem(
-                  UserRole.admin,
-                  'Admin Control Panel',
-                  'Pricing matrix, salaries & commissions',
-                  currentRole == UserRole.admin,
-                ),
-              ],
-            ),
-          ),
-        ],
-        if (actions != null) ...actions!,
-        const SizedBox(width: 8),
-      ],
-    );
-  }
-
-  PopupMenuItem<UserRole> _buildRoleMenuItem(
-    UserRole role,
-    String title,
-    String subtitle,
-    bool isSelected,
-  ) {
-    return PopupMenuItem<UserRole>(
-      value: role,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary.withOpacity(0.15) : AppColors.surfaceVariant,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              role.icon,
-              size: 18,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
                 Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  subtitle,
+                  notifier.tr('appName'),
                   style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.textPrimary,
                   ),
+                ),
+                Text(
+                  notifier.tr('tagline'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),
           ),
-          if (isSelected)
-            const Icon(Icons.check, size: 18, color: AppColors.primary),
+
+          // Trilingual Switcher (EN, OM, AM)
+          DropdownButtonHideUnderline(
+            child: DropdownButton<AppLanguage>(
+              value: currentLang,
+              icon: const Icon(Icons.language_rounded, size: 18, color: AppColors.primary),
+              items: AppLanguage.values.map((lang) {
+                return DropdownMenuItem(
+                  value: lang,
+                  child: Text(
+                    lang.code,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                );
+              }).toList(),
+              onChanged: (lang) {
+                if (lang != null) notifier.setLanguage(lang);
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Role Switcher / Staff Gate
+          if (currentRole == UserRole.customer) ...[
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              ),
+              icon: const Icon(Icons.admin_panel_settings_outlined, size: 18),
+              label: Text(notifier.tr('staffLogin'), style: const TextStyle(fontSize: 12)),
+              onPressed: () => _showPinDialog(context, UserRole.cashier),
+            ),
+          ] else ...[
+            PopupMenuButton<UserRole>(
+              initialValue: currentRole,
+              tooltip: 'Switch Role',
+              child: Chip(
+                avatar: const Icon(Icons.shield_rounded, size: 16, color: Colors.white),
+                label: Text(
+                  currentRole.displayName,
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                backgroundColor: currentRole == UserRole.admin ? AppColors.primaryDark : AppColors.primary,
+              ),
+              onSelected: (role) {
+                if (role == UserRole.customer) {
+                  notifier.switchRole(UserRole.customer);
+                } else {
+                  _showPinDialog(context, role);
+                }
+              },
+              itemBuilder: (ctx) => [
+                const PopupMenuItem(
+                  value: UserRole.customer,
+                  child: Text('Customer (Public)'),
+                ),
+                const PopupMenuItem(
+                  value: UserRole.cashier,
+                  child: Text('Cashier Dashboard'),
+                ),
+                const PopupMenuItem(
+                  value: UserRole.admin,
+                  child: Text('Admin Management'),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

@@ -96,6 +96,7 @@ class StationBay {
   });
 
   bool get isVacant => status == BayStatus.vacant;
+  bool get isOccupied => status == BayStatus.occupied;
 
   StationBay copyWith({
     BayType? type,

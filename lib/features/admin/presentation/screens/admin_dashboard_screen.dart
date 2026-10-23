@@ -1,277 +1,159 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/currency_formatter.dart';
-import '../../../../core/widgets/app_role_header.dart';
-import '../../../booking_service/presentation/state/app_state_provider.dart';
-import '../widgets/commission_item_card.dart';
-import '../widgets/pricing_matrix_editor.dart';
-import '../widgets/revenue_kpi_card.dart';
-import 'commission_logs_screen.dart';
-import 'pricing_management_screen.dart';
-import 'staff_management_screen.dart';
+import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
+import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final state = AppStateProvider.of(context);
-    final netProfit = state.totalRevenueTodayETB - state.totalCommissionsPaidETB;
-    final recentLogs = state.commissionLogs.take(3).toList();
+    final notifier = AppStateProvider.of(context);
+    final bookings = notifier.bookings;
+    final staff = notifier.staff;
+    final packages = notifier.packages;
+    final commissions = notifier.commissions;
 
-    return Scaffold(
-      appBar: const AppRoleHeader(
-        title: 'Admin Control Hub',
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => state.loadData(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    // Financial Analytics
+    final completedBookings = bookings.where((b) => b.payment.isPaid).toList();
+    final totalRevenue = completedBookings.fold<double>(0.0, (sum, b) => sum + b.payment.amount);
+    final telebirrTotal = completedBookings
+        .where((b) => b.payment.method == PaymentMethod.telebirr)
+        .fold<double>(0.0, (sum, b) => sum + b.payment.amount);
+    final cbeTotal = completedBookings
+        .where((b) => b.payment.method == PaymentMethod.cbeBirr)
+        .fold<double>(0.0, (sum, b) => sum + b.payment.amount);
+    final cashTotal = completedBookings
+        .where((b) => b.payment.method == PaymentMethod.cash)
+        .fold<double>(0.0, (sum, b) => sum + b.payment.amount);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            notifier.tr('adminDashboard'),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 16),
+
+          // 1. Financial & Operational Analytics Cards
+          Row(
             children: [
-              // Welcome & Executive Overview Header
-              _buildExecutiveBanner(),
-              const SizedBox(height: 16),
-
-              // KPI Metric Cards Grid
-              Row(
-                children: [
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Total Revenue',
-                      value: CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
-                      subtitle: '${state.totalCompletedCarsToday} cars completed',
-                      icon: Icons.account_balance_wallet_rounded,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Washer Commissions',
-                      value: CurrencyFormatter.formatShort(state.totalCommissionsPaidETB),
-                      subtitle: 'Auto-logged on wash completion',
-                      icon: Icons.handshake_rounded,
-                      color: AppColors.oromiaGold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Net Margin',
-                      value: CurrencyFormatter.formatShort(netProfit > 0 ? netProfit : 0),
-                      subtitle: 'After staff commissions',
-                      icon: Icons.trending_up_rounded,
-                      color: AppColors.statusReady,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Active Washers',
-                      value: '${state.availableWashers.length} Staff',
-                      subtitle: '${state.staff.length} total team on payroll',
-                      icon: Icons.groups_rounded,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Admin Control Panels Shortcuts
-              const Text(
-                'Admin Management Modules',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: _buildMetricCard(
+                  'Vehicles Today',
+                  '${completedBookings.length}',
+                  Icons.directions_car_rounded,
+                  AppColors.primary,
                 ),
               ),
-              const SizedBox(height: 12),
-
-              _buildModuleShortcut(
-                context,
-                title: 'Edit Service Pricing by Car Type',
-                description: 'Manage price matrix for Automobile, Minibus, and Truck categories.',
-                icon: Icons.tune_rounded,
-                color: AppColors.primary,
-                badge: '${state.packages.length} Packages',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PricingManagementScreen(),
-                    ),
-                  );
-                },
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildMetricCard(
+                  'Total Revenue',
+                  '${totalRevenue.toStringAsFixed(0)} ETB',
+                  Icons.payments_rounded,
+                  AppColors.cashGreen,
+                ),
               ),
-              const SizedBox(height: 10),
-
-              _buildModuleShortcut(
-                context,
-                title: 'Staff Salaries & Commission Rates',
-                description: 'Set base monthly salaries and customize washer commission percentage.',
-                icon: Icons.badge_rounded,
-                color: AppColors.secondary,
-                badge: '${state.staff.length} Staff Members',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const StaffManagementScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-
-              _buildModuleShortcut(
-                context,
-                title: 'Washer Commission Audit Logs',
-                description: 'Real-time logs recorded automatically whenever any wash is marked completed.',
-                icon: Icons.receipt_long_rounded,
-                color: AppColors.oromiaGreen,
-                badge: '${state.commissionLogs.length} Auto Logs',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CommissionLogsScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Real-time Pricing Matrix Quick Editor Preview
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Quick Service Pricing Matrix',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PricingManagementScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text('Full View'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Tap any price cell to adjust billing rates across car types in ETB:',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 10),
-              PricingMatrixEditor(packages: state.packages),
-              const SizedBox(height: 24),
-
-              // Recent Commission Logs Stream
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Recent Automated Commission Logs',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CommissionLogsScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text('View All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              if (recentLogs.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.cardBorder),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'No commission logs generated yet. Mark a wash completed to test!',
-                      style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                    ),
-                  ),
-                )
-              else
-                ...recentLogs.map((log) => CommissionItemCard(log: log)),
-
-              const SizedBox(height: 24),
             ],
           ),
-        ),
-      ),
-    );
-  }
+          const SizedBox(height: 12),
 
-  Widget _buildExecutiveBanner() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.darkSurface,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: const Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.primary,
-            child: Icon(Icons.admin_panel_settings, color: Colors.white, size: 22),
-          ),
-          SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'BISHE Executive Control Panel',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
+          // Payment Channel Breakdown
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Payment Channel Breakdown', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _channelItem('Telebirr', '${telebirrTotal.toStringAsFixed(0)} Br', AppColors.telebirrBlue),
+                      _channelItem('CBE Birr', '${cbeTotal.toStringAsFixed(0)} Br', AppColors.cbeBirrPurple),
+                      _channelItem('Cash', '${cashTotal.toStringAsFixed(0)} Br', AppColors.cashGreen),
+                    ],
                   ),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Bishoftu Hub • Automated Washer Commission System Active',
-                  style: TextStyle(fontSize: 11.5, color: Colors.white70),
-                ),
-              ],
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // 2. Dynamic Pricing Manager
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(notifier.tr('pricingManager'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      const Icon(Icons.tune_rounded, color: AppColors.primary),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ...packages.map((pkg) => _buildPackagePriceEditor(context, pkg)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // 3. Washer Payroll & Commission Ledger
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(notifier.tr('payrollCommissions'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  const SizedBox(height: 12),
+                  ...staff.map((washer) {
+                    final earned = commissions
+                        .where((c) => c.washerName.toLowerCase() == washer.name.toLowerCase() && !c.isSettled)
+                        .fold<double>(0.0, (sum, c) => sum + c.commissionEarnedETB);
+
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        child: Text(washer.name[0], style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+                      ),
+                      title: Text(washer.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      subtitle: Text(
+                        'Base: ${washer.baseSalaryMonthlyETB.toStringAsFixed(0)} ETB/mo • Commission: 15% (Unsettled: ${earned.toStringAsFixed(1)} ETB)',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      trailing: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          textStyle: const TextStyle(fontSize: 11),
+                        ),
+                        onPressed: earned > 0
+                            ? () async {
+                                for (final c in commissions.where((c) => c.washerName.toLowerCase() == washer.name.toLowerCase() && !c.isSettled)) {
+                                  await notifier.settleCommission(c.id);
+                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Commissions settled for ${washer.name}')),
+                                );
+                              }
+                            : null,
+                        child: Text(notifier.tr('settleCommission')),
+                      ),
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
         ],
@@ -279,89 +161,77 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModuleShortcut(
-    BuildContext context, {
-    required String title,
-    required String description,
-    required IconData icon,
-    required Color color,
-    required String badge,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
+  Widget _buildMetricCard(String title, String value, IconData icon, Color color) {
+    return Card(
+      child: Padding(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: color)),
+            const SizedBox(height: 2),
+            Text(title, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _channelItem(String label, String amount, Color color) {
+    return Column(
+      children: [
+        Text(amount, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: color)),
+        const SizedBox(height: 2),
+        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+      ],
+    );
+  }
+
+  Widget _buildPackagePriceEditor(BuildContext context, dynamic pkg) {
+    final notifier = AppStateProvider.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(pkg.name as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary)),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              _priceBox('Type A', pkg.getPriceFor(CarType.automobile) as double, (val) {
+                notifier.updatePackagePrice(pkg.id as String, CarType.automobile, val);
+              }),
+              const SizedBox(width: 8),
+              _priceBox('Type B', pkg.getPriceFor(CarType.minibus) as double, (val) {
+                notifier.updatePackagePrice(pkg.id as String, CarType.minibus, val);
+              }),
+              const SizedBox(width: 8),
+              _priceBox('Type C', pkg.getPriceFor(CarType.truck) as double, (val) {
+                notifier.updatePackagePrice(pkg.id as String, CarType.truck, val);
+              }),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _priceBox(String type, double price, Function(double) onSave) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.cardBorder),
+        ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          badge,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: color,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 6),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
+            Text(type, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+            Text('${price.toStringAsFixed(0)} Br', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
           ],
         ),
       ),
