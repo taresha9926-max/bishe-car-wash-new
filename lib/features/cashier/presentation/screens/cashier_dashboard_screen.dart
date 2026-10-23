@@ -193,7 +193,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           Expanded(
             child: _buildKPIColumn(
               state.tr('digitalPay'),
-              CurrencyFormatter.formatShort(state.digitalRevenueETB),
+              CurrencyFormatter.formatShort(state.totalDigitalRevenueETB),
               'Digital payments',
               AppColors.telebirrBlue,
             ),
@@ -202,7 +202,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           Expanded(
             child: _buildKPIColumn(
               state.tr('cashCollected'),
-              CurrencyFormatter.formatShort(state.cashRevenueETB),
+              CurrencyFormatter.formatShort(state.totalCashRevenueETB),
               'At front desk',
               AppColors.cashGreen,
             ),
