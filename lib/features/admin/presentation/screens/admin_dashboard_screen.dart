@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../widgets/commission_item_card.dart';
 import '../widgets/pricing_matrix_editor.dart';
-import '../widgets/revenue_kpi_card.dart';
 import 'commission_logs_screen.dart';
 import 'pricing_management_screen.dart';
 import 'staff_management_screen.dart';
@@ -18,77 +17,75 @@ class AdminDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final netProfit = state.totalRevenueTodayETB - state.totalCommissionsPaidETB;
-    final recentLogs = state.commissionLogs.take(3).toList();
+    final recentLogs = state.commissionLogs.take(4).toList();
+    final isDesktop = ResponsiveLayout.isDesktop(context);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: const AppRoleHeader(
-        title: 'Admin Control Hub',
+        title: 'Executive Administration Hub',
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome & Executive Overview Header
+              // 1. Executive Banner
               _buildExecutiveBanner(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
-              // KPI Metric Cards Grid
-              Row(
-                children: [
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Total Revenue',
-                      value: CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
-                      subtitle: '${state.totalCompletedCarsToday} cars completed',
-                      icon: Icons.account_balance_wallet_rounded,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Washer Commissions',
-                      value: CurrencyFormatter.formatShort(state.totalCommissionsPaidETB),
-                      subtitle: 'Auto-logged on wash completion',
-                      icon: Icons.handshake_rounded,
-                      color: AppColors.oromiaGold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Net Margin',
-                      value: CurrencyFormatter.formatShort(netProfit > 0 ? netProfit : 0),
-                      subtitle: 'After staff commissions',
-                      icon: Icons.trending_up_rounded,
-                      color: AppColors.statusReady,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: RevenueKPICard(
-                      title: 'Active Washers',
-                      value: '${state.availableWashers.length} Staff',
-                      subtitle: '${state.staff.length} total team on payroll',
-                      icon: Icons.groups_rounded,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                ],
+              // 2. Financial & Operational KPIs (Clean Grid)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth >= 750;
+                  return GridView.count(
+                    crossAxisCount: isWide ? 4 : 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: isWide ? 1.5 : 1.25,
+                    children: [
+                      _buildMetricCard(
+                        'Total Revenue',
+                        CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
+                        '${state.totalCompletedCarsToday} cars washed',
+                        Icons.account_balance_wallet_rounded,
+                        AppColors.primary,
+                      ),
+                      _buildMetricCard(
+                        'Commissions',
+                        CurrencyFormatter.formatShort(state.totalCommissionsPaidETB),
+                        '15% washer split',
+                        Icons.handshake_rounded,
+                        AppColors.oromiaGold,
+                      ),
+                      _buildMetricCard(
+                        'Net Station Profit',
+                        CurrencyFormatter.formatShort(netProfit > 0 ? netProfit : 0),
+                        'After payroll cuts',
+                        Icons.trending_up_rounded,
+                        AppColors.statusReady,
+                      ),
+                      _buildMetricCard(
+                        'Active Washers',
+                        '${state.availableWashers.length} Ready',
+                        '${state.staff.length} on team',
+                        Icons.groups_rounded,
+                        AppColors.secondary,
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 24),
 
-              // Admin Control Panels Shortcuts
+              // 3. Operational Management Modules
               const Text(
-                'Admin Management Modules',
+                'Management Operations',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
@@ -97,100 +94,53 @@ class AdminDashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              _buildModuleShortcut(
-                context,
-                title: 'Edit Service Pricing by Car Type',
-                description: 'Manage price matrix for Automobile, Minibus, and Truck categories.',
-                icon: Icons.tune_rounded,
-                color: AppColors.primary,
-                badge: '${state.packages.length} Packages',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PricingManagementScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-
-              _buildModuleShortcut(
-                context,
-                title: 'Staff Salaries & Commission Rates',
-                description: 'Set base monthly salaries and customize washer commission percentage.',
-                icon: Icons.badge_rounded,
-                color: AppColors.secondary,
-                badge: '${state.staff.length} Staff Members',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const StaffManagementScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-
-              _buildModuleShortcut(
-                context,
-                title: 'Washer Commission Audit Logs',
-                description: 'Real-time logs recorded automatically whenever any wash is marked completed.',
-                icon: Icons.receipt_long_rounded,
-                color: AppColors.oromiaGreen,
-                badge: '${state.commissionLogs.length} Auto Logs',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CommissionLogsScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Real-time Pricing Matrix Quick Editor Preview
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Quick Service Pricing Matrix',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                  Expanded(
+                    child: _buildOperationCard(
+                      context,
+                      title: 'Pricing Matrix',
+                      subtitle: 'Edit ETB tariffs for Type A, B, and C',
+                      icon: Icons.tune_rounded,
+                      color: AppColors.primary,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const PricingManagementScreen()),
+                        );
+                      },
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PricingManagementScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text('Full View'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildOperationCard(
+                      context,
+                      title: 'Staff Payroll',
+                      subtitle: 'Base wages & commission rates',
+                      icon: Icons.badge_rounded,
+                      color: AppColors.secondary,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Tap any price cell to adjust billing rates across car types in ETB:',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 24),
+
+              // 4. Live Pricing Matrix Editor Widget
               PricingMatrixEditor(packages: state.packages),
               const SizedBox(height: 24),
 
-              // Recent Commission Logs Stream
+              // 5. Automated Commission Split Ledger
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Recent Automated Commission Logs',
+                    'Recent Washer Commission Splits',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -201,12 +151,10 @@ class AdminDashboardScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const CommissionLogsScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const CommissionLogsScreen()),
                       );
                     },
-                    child: const Text('View All'),
+                    child: const Text('View All', style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
@@ -214,15 +162,15 @@ class AdminDashboardScreen extends StatelessWidget {
 
               if (recentLogs.isEmpty)
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: const Center(
                     child: Text(
-                      'No commission logs generated yet. Mark a wash completed to test!',
+                      'No commission logs recorded yet today.',
                       style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                     ),
                   ),
@@ -230,7 +178,7 @@ class AdminDashboardScreen extends StatelessWidget {
               else
                 ...recentLogs.map((log) => CommissionItemCard(log: log)),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -241,17 +189,24 @@ class AdminDashboardScreen extends StatelessWidget {
   Widget _buildExecutiveBanner() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: AppColors.primaryDark,
         borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryDark.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: const Row(
         children: [
           CircleAvatar(
             radius: 20,
             backgroundColor: AppColors.primary,
-            child: Icon(Icons.admin_panel_settings, color: Colors.white, size: 22),
+            child: Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 22),
           ),
           SizedBox(width: 14),
           Expanded(
@@ -259,16 +214,12 @@ class AdminDashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'BISHE Executive Control Panel',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
+                  'BISHE Executive Control Hub',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'Bishoftu Hub • Automated Washer Commission System Active',
+                  'Bishoftu Main Facility • Automated Commission & Supabase Cloud Active',
                   style: TextStyle(fontSize: 11.5, color: Colors.white70),
                 ),
               ],
@@ -279,13 +230,44 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModuleShortcut(
+  Widget _buildMetricCard(String title, String value, String sub, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted, fontWeight: FontWeight.w700)),
+              Icon(icon, color: color, size: 20),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: color)),
+              const SizedBox(height: 2),
+              Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOperationCard(
     BuildContext context, {
     required String title,
-    required String description,
+    required String subtitle,
     required IconData icon,
     required Color color,
-    required String badge,
     required VoidCallback onTap,
   }) {
     return InkWell(
@@ -297,70 +279,28 @@ class AdminDashboardScreen extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.cardBorder),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color, size: 22),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          badge,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: color,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      height: 1.3,
-                    ),
-                  ),
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
                 ],
               ),
             ),
-            const SizedBox(width: 6),
             const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
           ],
         ),
