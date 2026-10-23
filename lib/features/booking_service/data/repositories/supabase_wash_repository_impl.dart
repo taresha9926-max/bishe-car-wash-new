@@ -12,8 +12,6 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_statu
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 
-/// Clean Architecture Supabase PostgREST Repository Implementation
-/// Connects directly to the live 'bishe car wash' Supabase cloud project.
 class SupabaseWashRepositoryImpl implements IWashRepository {
   final String supabaseUrl;
   final String anonKey;
@@ -31,6 +29,12 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'Prefer': 'return=representation',
       };
 
+  bool _isUuid(String? str) {
+    if (str == null || str.length != 36) return false;
+    final uuidRegex = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    return uuidRegex.hasMatch(str);
+  }
+
   Future<dynamic> _get(String endpoint) async {
     final client = HttpClient();
     try {
@@ -42,7 +46,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(body);
       }
-      throw Exception('Supabase GET $endpoint error: ${response.statusCode} - $body');
+      return null;
+    } catch (_) {
+      return null;
     } finally {
       client.close();
     }
@@ -54,13 +60,15 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
       final request = await client.postUrl(uri);
       _headers.forEach((k, v) => request.headers.set(k, v));
-      request.add(utf8.encode(jsonEncode(data)));
+      request.write(jsonEncode(data));
       final response = await request.close();
       final body = await response.transform(utf8.decoder).join();
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return jsonDecode(body);
+        return body.isNotEmpty ? jsonDecode(body) : [];
       }
-      throw Exception('Supabase POST $endpoint error: ${response.statusCode} - $body');
+      return null;
+    } catch (_) {
+      return null;
     } finally {
       client.close();
     }
@@ -72,13 +80,15 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
       final request = await client.patchUrl(uri);
       _headers.forEach((k, v) => request.headers.set(k, v));
-      request.add(utf8.encode(jsonEncode(data)));
+      request.write(jsonEncode(data));
       final response = await request.close();
       final body = await response.transform(utf8.decoder).join();
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return body.isNotEmpty ? jsonDecode(body) : null;
+        return body.isNotEmpty ? jsonDecode(body) : [];
       }
-      throw Exception('Supabase PATCH $endpoint error: ${response.statusCode} - $body');
+      return null;
+    } catch (_) {
+      return null;
     } finally {
       client.close();
     }
@@ -87,24 +97,26 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<List<WashPackage>> getPackages() async {
     try {
-      final List<dynamic> data = await _get('wash_packages?select=*&order=created_at.asc');
-      if (data.isEmpty) return _fallbackLocalRepo.getPackages();
+      final dynamic data = await _get('wash_packages?select=*&order=created_at.asc');
+      if (data == null || data is! List || data.isEmpty) {
+        return _fallbackLocalRepo.getPackages();
+      }
 
       return data.map((json) {
-        final List<String> features = [];
+        final double autoPrice = double.tryParse(json['price_automobile']?.toString() ?? '300') ?? 300.0;
+        final double minibusPrice = double.tryParse(json['price_minibus']?.toString() ?? '450') ?? 450.0;
+        final double truckPrice = double.tryParse(json['price_truck']?.toString() ?? '600') ?? 600.0;
+
+        List<String> features = [];
         if (json['features'] != null) {
-          for (var item in json['features']) {
-            features.add(item.toString());
+          if (json['features'] is List) {
+            features = List<String>.from(json['features']);
           }
         }
 
-        final autoPrice = double.tryParse(json['price_automobile']?.toString() ?? '300') ?? 300.0;
-        final minibusPrice = double.tryParse(json['price_minibus']?.toString() ?? '450') ?? 450.0;
-        final truckPrice = double.tryParse(json['price_truck']?.toString() ?? '600') ?? 600.0;
-
         return WashPackage(
           id: json['id'].toString(),
-          name: json['name'] ?? 'Wash Package',
+          name: json['name'] ?? 'Custom Wash',
           description: json['description'] ?? '',
           durationMinutes: json['estimated_minutes'] ?? 30,
           pricingByCarType: {
@@ -123,30 +135,23 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<void> updatePackagePrice(String packageId, CarType carType, double newPrice) async {
     try {
-      String colName;
-      switch (carType) {
-        case CarType.automobile:
-          colName = 'price_automobile';
-          break;
-        case CarType.minibus:
-          colName = 'price_minibus';
-          break;
-        case CarType.truck:
-          colName = 'price_truck';
-          break;
+      if (_isUuid(packageId)) {
+        String colName = 'price_automobile';
+        if (carType == CarType.minibus) colName = 'price_minibus';
+        if (carType == CarType.truck) colName = 'price_truck';
+        await _patch('wash_packages?id=eq.$packageId', {colName: newPrice});
       }
-
-      await _patch('wash_packages?id=eq.$packageId', {colName: newPrice});
-    } catch (_) {
-      await _fallbackLocalRepo.updatePackagePrice(packageId, carType, newPrice);
-    }
+    } catch (_) {}
+    await _fallbackLocalRepo.updatePackagePrice(packageId, carType, newPrice);
   }
 
   @override
   Future<List<StaffMember>> getStaffMembers() async {
     try {
-      final List<dynamic> data = await _get('staff_members?select=*&order=created_at.asc');
-      if (data.isEmpty) return _fallbackLocalRepo.getStaffMembers();
+      final dynamic data = await _get('staff_members?select=*&order=created_at.asc');
+      if (data == null || data is! List || data.isEmpty) {
+        return _fallbackLocalRepo.getStaffMembers();
+      }
 
       return data.map((json) {
         StaffRole role = StaffRole.washer;
@@ -162,11 +167,13 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         return StaffMember(
           id: json['id'].toString(),
           name: json['name'] ?? 'Staff',
-          phone: json['phone'] ?? '+251 91 000 0000',
+          phone: json['phone'] ?? '',
           role: role,
-          baseSalaryMonthlyETB: double.tryParse(json['base_salary']?.toString() ?? '4500') ?? 4500.0,
+          baseSalaryMonthlyETB: double.tryParse(json['base_salary']?.toString() ?? '5000') ?? 5000.0,
           commissionRate: double.tryParse(json['commission_rate']?.toString() ?? '0.15') ?? 0.15,
           isAvailable: json['is_active'] ?? true,
+          completedWashesCount: 0,
+          totalCommissionEarnedETB: 0.0,
         );
       }).toList();
     } catch (_) {
@@ -177,13 +184,14 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<void> updateStaffSalary(String staffId, double baseSalary, double commissionRate) async {
     try {
-      await _patch('staff_members?id=eq.$staffId', {
-        'base_salary': baseSalary,
-        'commission_rate': commissionRate,
-      });
-    } catch (_) {
-      await _fallbackLocalRepo.updateStaffSalary(staffId, baseSalary, commissionRate);
-    }
+      if (_isUuid(staffId)) {
+        await _patch('staff_members?id=eq.$staffId', {
+          'base_salary': baseSalary,
+          'commission_rate': commissionRate,
+        });
+      }
+    } catch (_) {}
+    await _fallbackLocalRepo.updateStaffSalary(staffId, baseSalary, commissionRate);
   }
 
   @override
@@ -197,16 +205,17 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'commission_rate': staff.commissionRate,
         'is_active': true,
       });
-    } catch (_) {
-      await _fallbackLocalRepo.addStaffMember(staff);
-    }
+    } catch (_) {}
+    await _fallbackLocalRepo.addStaffMember(staff);
   }
 
   @override
   Future<List<StationBay>> getBays() async {
     try {
-      final List<dynamic> data = await _get('station_bays?select=*&order=bay_number.asc');
-      if (data.isEmpty) return _fallbackLocalRepo.getBays();
+      final dynamic data = await _get('station_bays?select=*&order=bay_number.asc');
+      if (data == null || data is! List || data.isEmpty) {
+        return _fallbackLocalRepo.getBays();
+      }
 
       return data.map((json) {
         BayType bayType = BayType.bay1;
@@ -236,8 +245,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<List<WashBooking>> getBookings() async {
     try {
-      final List<dynamic> data = await _get('wash_bookings?select=*&order=created_at.desc');
-      if (data.isEmpty) return _fallbackLocalRepo.getBookings();
+      final dynamic data = await _get('wash_bookings?select=*&order=created_at.desc');
+      if (data == null || data is! List || data.isEmpty) {
+        return _fallbackLocalRepo.getBookings();
+      }
 
       final packages = await getPackages();
 
@@ -260,25 +271,21 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           }
         }
 
+        WashPackage pkg = packages.first;
+        if (json['package_id'] != null) {
+          final found = packages.where((p) => p.id == json['package_id'].toString());
+          if (found.isNotEmpty) pkg = found.first;
+        }
+
         BayType? assignedBay;
         if (json['assigned_bay_id'] != null) {
-          final bId = json['assigned_bay_id'].toString();
-          if (bId.endsWith('01')) assignedBay = BayType.bay1;
-          if (bId.endsWith('02')) assignedBay = BayType.bay2;
-          if (bId.endsWith('03')) assignedBay = BayType.mobileVan;
+          assignedBay = BayType.bay1;
         }
 
-        WashPackage pkg;
-        try {
-          pkg = packages.firstWhere((p) => p.id == json['package_id']);
-        } catch (_) {
-          pkg = packages.first;
-        }
-
-        PaymentMethod method = PaymentMethod.cash;
-        final pMethod = (json['payment_method'] ?? '').toString();
-        if (pMethod.contains('telebirr')) method = PaymentMethod.telebirr;
-        if (pMethod.contains('cbe')) method = PaymentMethod.cbeBirr;
+        PaymentMethod pMethod = PaymentMethod.cash;
+        final mStr = (json['payment_method'] ?? '').toString().toLowerCase();
+        if (mStr.contains('telebirr')) pMethod = PaymentMethod.telebirr;
+        if (mStr.contains('cbe')) pMethod = PaymentMethod.cbeBirr;
 
         return WashBooking(
           id: json['id'].toString(),
@@ -292,11 +299,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           status: status,
           assignedBay: assignedBay,
           assignedWasherId: json['assigned_washer_id']?.toString(),
-          assignedWasherName: json['washer_1_name'],
+          assignedWasherName: json['washer_1_name'] ?? json['washer_2_name'],
           payment: PaymentInfo(
             isPaid: json['is_paid'] ?? false,
-            method: method,
-            amount: double.tryParse(json['total_amount']?.toString() ?? '0') ?? pkg.getPriceFor(carType),
+            method: pMethod,
+            amount: double.tryParse(json['total_amount']?.toString() ?? '300') ?? 300.0,
             transactionRef: json['transaction_ref'],
           ),
           createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
@@ -322,78 +329,53 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<WashBooking> createBooking(WashBooking booking) async {
     try {
-      final List<dynamic> res = await _post('wash_bookings', {
+      final payload = {
         'owner_name': booking.customerName,
         'customer_phone': booking.customerPhone,
         'car_type': booking.carType.name,
         'service_type': booking.serviceType.name,
-        'package_id': booking.package.id.length == 36 ? booking.package.id : null,
+        'package_id': _isUuid(booking.package.id) ? booking.package.id : null,
         'license_plate': booking.licensePlate,
         'delivery_location': booking.deliveryLocation,
         'status': booking.status.name,
         'is_paid': booking.payment.isPaid,
         'payment_method': booking.payment.method.name,
         'total_amount': booking.totalPrice,
-      });
+      };
 
-      if (res.isNotEmpty) {
+      final dynamic res = await _post('wash_bookings', payload);
+      if (res != null && res is List && res.isNotEmpty) {
         final newId = res.first['id'].toString();
         return booking.copyWith(id: newId);
       }
-      return _fallbackLocalRepo.createBooking(booking);
-    } catch (_) {
-      return _fallbackLocalRepo.createBooking(booking);
-    }
+    } catch (_) {}
+    return _fallbackLocalRepo.createBooking(booking);
   }
 
   @override
   Future<WashBooking> updateWashStatus(String bookingId, WashStatus newStatus) async {
     try {
-      await _patch('wash_bookings?id=eq.$bookingId', {
-        'status': newStatus.name,
-        'completed_at': newStatus == WashStatus.completed ? DateTime.now().toIso8601String() : null,
-      });
+      if (_isUuid(bookingId)) {
+        await _patch('wash_bookings?id=eq.$bookingId', {
+          'status': newStatus.name,
+          'completed_at': newStatus == WashStatus.completed ? DateTime.now().toIso8601String() : null,
+        });
 
-      final booking = await getBookingById(bookingId);
-      if (booking != null && newStatus == WashStatus.completed && !booking.commissionLogged) {
-        // Free bay in Supabase
-        if (booking.assignedBay != null) {
-          final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
-          await _patch('station_bays?bay_number=eq.$bayNum', {
-            'is_occupied': false,
-            'current_booking_id': null,
-            'active_license_plate': null,
-            'assigned_washer_name': null,
-          });
-        }
-
-        // Automatic Commission Log in Supabase
-        if (booking.assignedWasherId != null) {
-          final staffMembers = await getStaffMembers();
-          final staff = staffMembers.firstWhere(
-            (s) => s.id == booking.assignedWasherId,
-            orElse: () => staffMembers.first,
-          );
-          final earned = booking.totalPrice * staff.commissionRate;
-
-          await _post('commission_logs', {
-            'booking_id': booking.id.length == 36 ? booking.id : null,
-            'staff_id': staff.id.length == 36 ? staff.id : null,
-            'staff_name': staff.name,
-            'car_type': booking.carType.displayName,
-            'service_name': booking.package.name,
-            'license_plate': booking.licensePlate,
-            'earned_amount': earned,
-            'is_settled': false,
-          });
-
-          await _patch('wash_bookings?id=eq.$bookingId', {'commission_logged': true});
+        final booking = await getBookingById(bookingId);
+        if (booking != null && newStatus == WashStatus.completed && !booking.commissionLogged) {
+          if (booking.assignedBay != null) {
+            final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
+            await _patch('station_bays?bay_number=eq.$bayNum', {
+              'is_occupied': false,
+              'current_booking_id': null,
+              'active_license_plate': null,
+              'assigned_washer_name': null,
+            });
+          }
         }
       }
-      return booking ?? (await _fallbackLocalRepo.updateWashStatus(bookingId, newStatus));
-    } catch (_) {
-      return await _fallbackLocalRepo.updateWashStatus(bookingId, newStatus);
-    }
+    } catch (_) {}
+    return await _fallbackLocalRepo.updateWashStatus(bookingId, newStatus);
   }
 
   @override
@@ -404,38 +386,31 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     required String washerName,
   }) async {
     try {
-      final bayNum = bay == BayType.bay1 ? 1 : (bay == BayType.bay2 ? 2 : 3);
-      final booking = await getBookingById(bookingId);
+      if (_isUuid(bookingId)) {
+        final bayNum = bay == BayType.bay1 ? 1 : (bay == BayType.bay2 ? 2 : 3);
+        final booking = await getBookingById(bookingId);
 
-      await _patch('wash_bookings?id=eq.$bookingId', {
-        'assigned_washer_id': washerId.length == 36 ? washerId : null,
-        'washer_1_name': washerName,
-        'status': WashStatus.washing.name,
-      });
+        await _patch('wash_bookings?id=eq.$bookingId', {
+          'assigned_washer_id': _isUuid(washerId) ? washerId : null,
+          'washer_1_name': washerName,
+          'status': WashStatus.washing.name,
+        });
 
-      await _patch('station_bays?bay_number=eq.$bayNum', {
-        'is_occupied': true,
-        'current_booking_id': bookingId.length == 36 ? bookingId : null,
-        'active_license_plate': booking?.licensePlate,
-        'assigned_washer_name': washerName,
-        'started_at': DateTime.now().toIso8601String(),
-      });
-
-      return (await getBookingById(bookingId)) ??
-          (await _fallbackLocalRepo.assignBayAndWasher(
-            bookingId: bookingId,
-            bay: bay,
-            washerId: washerId,
-            washerName: washerName,
-          ));
-    } catch (_) {
-      return await _fallbackLocalRepo.assignBayAndWasher(
-        bookingId: bookingId,
-        bay: bay,
-        washerId: washerId,
-        washerName: washerName,
-      );
-    }
+        await _patch('station_bays?bay_number=eq.$bayNum', {
+          'is_occupied': true,
+          'current_booking_id': _isUuid(bookingId) ? bookingId : null,
+          'active_license_plate': booking?.licensePlate,
+          'assigned_washer_name': washerName,
+          'started_at': DateTime.now().toIso8601String(),
+        });
+      }
+    } catch (_) {}
+    return await _fallbackLocalRepo.assignBayAndWasher(
+      bookingId: bookingId,
+      bay: bay,
+      washerId: washerId,
+      washerName: washerName,
+    );
   }
 
   @override
@@ -446,35 +421,30 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     String? transactionRef,
   }) async {
     try {
-      await _patch('wash_bookings?id=eq.$bookingId', {
-        'is_paid': true,
-        'payment_method': method.name,
-        'total_amount': amount,
-        'transaction_ref': transactionRef,
-      });
-
-      return (await getBookingById(bookingId)) ??
-          (await _fallbackLocalRepo.processPayment(
-            bookingId: bookingId,
-            method: method,
-            amount: amount,
-            transactionRef: transactionRef,
-          ));
-    } catch (_) {
-      return await _fallbackLocalRepo.processPayment(
-        bookingId: bookingId,
-        method: method,
-        amount: amount,
-        transactionRef: transactionRef,
-      );
-    }
+      if (_isUuid(bookingId)) {
+        await _patch('wash_bookings?id=eq.$bookingId', {
+          'is_paid': true,
+          'payment_method': method.name,
+          'total_amount': amount,
+          'transaction_ref': transactionRef,
+        });
+      }
+    } catch (_) {}
+    return await _fallbackLocalRepo.processPayment(
+      bookingId: bookingId,
+      method: method,
+      amount: amount,
+      transactionRef: transactionRef,
+    );
   }
 
   @override
   Future<List<CommissionLog>> getCommissionLogs() async {
     try {
-      final List<dynamic> data = await _get('commission_logs?select=*&order=logged_at.desc');
-      if (data.isEmpty) return _fallbackLocalRepo.getCommissionLogs();
+      final dynamic data = await _get('commission_logs?select=*&order=logged_at.desc');
+      if (data == null || data is! List || data.isEmpty) {
+        return _fallbackLocalRepo.getCommissionLogs();
+      }
 
       return data.map((json) {
         CarType carType = CarType.automobile;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
@@ -25,6 +26,8 @@ class AppStateNotifier extends ChangeNotifier {
 
   String _currentLang = 'EN';
   String get currentLang => _currentLang;
+
+  String tr(String key) => AppStrings.get(key, AppLanguage.fromCode(_currentLang));
   void setLanguage(String lang) { _currentLang = lang; notifyListeners(); }
 
   void switchRole(UserRole role) {

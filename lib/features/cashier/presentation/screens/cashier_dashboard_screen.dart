@@ -36,14 +36,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const AppRoleHeader(
-        title: 'Cashier Station Operations',
+      appBar: AppRoleHeader(
+        title: state.tr('cashierTitle'),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_road_rounded),
-        label: const Text('New Walk-In Entry', style: TextStyle(fontWeight: FontWeight.w800)),
+        label: Text(state.tr('newWalkIn'), style: const TextStyle(fontWeight: FontWeight.w800)),
         onPressed: () {
           Navigator.push(
             context,
@@ -69,16 +69,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Active Washing Bays',
-                    style: TextStyle(
+                  Text(
+                    state.tr('activeWashingBays'),
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
-                    '${state.availableBaysCount}/2 Bays Available',
+                    '${state.availableBaysCount}/2 ${state.tr("availableNow")}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -96,21 +96,21 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   if (isWide) {
                     return Row(
                       children: [
-                        Expanded(child: _buildBayCard(context, bay1, allBookings)),
+                        Expanded(child: _buildBayCard(context, state, bay1, allBookings)),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildBayCard(context, bay2, allBookings)),
+                        Expanded(child: _buildBayCard(context, state, bay2, allBookings)),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildBayCard(context, van, allBookings)),
+                        Expanded(child: _buildBayCard(context, state, van, allBookings)),
                       ],
                     );
                   }
                   return Column(
                     children: [
-                      _buildBayCard(context, bay1, allBookings),
+                      _buildBayCard(context, state, bay1, allBookings),
                       const SizedBox(height: 10),
-                      _buildBayCard(context, bay2, allBookings),
+                      _buildBayCard(context, state, bay2, allBookings),
                       const SizedBox(height: 10),
-                      _buildBayCard(context, van, allBookings),
+                      _buildBayCard(context, state, van, allBookings),
                     ],
                   );
                 },
@@ -122,7 +122,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Queue & Vehicles (${filteredBookings.length})',
+                    '${state.tr("queueAndVehicles")} (${filteredBookings.length})',
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -134,7 +134,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               const SizedBox(height: 10),
 
               // Queue Filter Tabs
-              _buildFilterChips(),
+              _buildFilterChips(state),
               const SizedBox(height: 12),
 
               // Queue Items
@@ -154,7 +154,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   ),
                 )
               else
-                ...filteredBookings.map((b) => _buildCleanQueueRow(context, b)),
+                ...filteredBookings.map((b) => _buildCleanQueueRow(context, state, b)),
 
               const SizedBox(height: 40),
             ],
@@ -183,16 +183,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         children: [
           Expanded(
             child: _buildKPIColumn(
-              'Today Revenue',
+              state.tr('todayRevenue'),
               CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
-              '${state.totalCompletedCarsToday} cars washed',
+              '${state.totalCompletedCarsToday} ${state.tr("carsWashed")}',
               AppColors.primary,
             ),
           ),
           const VerticalDivider(width: 1, thickness: 1, color: AppColors.cardBorder),
           Expanded(
             child: _buildKPIColumn(
-              'Telebirr / CBE',
+              state.tr('digitalPay'),
               CurrencyFormatter.formatShort(state.digitalRevenueETB),
               'Digital payments',
               AppColors.telebirrBlue,
@@ -201,7 +201,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           const VerticalDivider(width: 1, thickness: 1, color: AppColors.cardBorder),
           Expanded(
             child: _buildKPIColumn(
-              'Cash Collected',
+              state.tr('cashCollected'),
               CurrencyFormatter.formatShort(state.cashRevenueETB),
               'At front desk',
               AppColors.cashGreen,
@@ -225,7 +225,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  Widget _buildBayCard(BuildContext context, StationBay bay, List<WashBooking> bookings) {
+  Widget _buildBayCard(BuildContext context, dynamic state, StationBay bay, List<WashBooking> bookings) {
     final isOccupied = bay.status == BayStatus.occupied;
     final currentStatus = _getBayWashStatus(bay, bookings);
 
@@ -256,7 +256,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  isOccupied ? (currentStatus?.displayName ?? 'In Service') : 'Available',
+                  isOccupied ? (currentStatus?.displayName ?? state.tr('filterInService')) : state.tr('availableNow'),
                   style: TextStyle(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w800,
@@ -297,7 +297,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                    label: Text(_getAdvanceLabel(currentStatus), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                    label: Text(_getAdvanceLabel(state, currentStatus), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
                     onPressed: () => _advanceBayStatus(context, bay, bookings),
                   )
                 : OutlinedButton.icon(
@@ -306,7 +306,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
-                    label: const Text('Assign Vehicle', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.primary)),
+                    label: Text(state.tr('assignVehicle'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.primary)),
                     onPressed: () => _openAssignModalForBay(context, bay.type, bookings),
                   ),
           ),
@@ -315,25 +315,25 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  String _getAdvanceLabel(WashStatus? status) {
+  String _getAdvanceLabel(dynamic state, WashStatus? status) {
     if (status == null) return 'Advance Wash';
     switch (status) {
       case WashStatus.pending:
       case WashStatus.confirmed:
-        return 'Start Washing';
+        return state.tr('startWashing');
       case WashStatus.assignedToBay:
       case WashStatus.washing:
-        return 'Set to Drying';
+        return state.tr('setToDrying');
       case WashStatus.drying:
-        return 'Mark Ready for Pickup';
+        return state.tr('markReady');
       case WashStatus.readyForPickup:
-        return 'Complete & Archive';
+        return state.tr('completeArchive');
       default:
         return 'Advance Status';
     }
   }
 
-  Widget _buildCleanQueueRow(BuildContext context, WashBooking b) {
+  Widget _buildCleanQueueRow(BuildContext context, dynamic state, WashBooking b) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
@@ -398,7 +398,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 elevation: 0,
               ),
               onPressed: () => PaymentProcessDialog.show(context, b),
-              child: const Text('Pay', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              child: Text(state.tr('payButton'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
             ),
             const SizedBox(width: 6),
           ],
@@ -414,8 +414,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  Widget _buildFilterChips() {
-    final filters = ['All Active', 'Pending Bay', 'In Service', 'Unpaid Only'];
+  Widget _buildFilterChips(dynamic state) {
+    final filters = [
+      state.tr('filterAll'),
+      state.tr('filterPending'),
+      state.tr('filterInService'),
+      state.tr('filterUnpaid'),
+    ];
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

@@ -39,8 +39,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const AppRoleHeader(
-        title: AppConstants.appName,
+      appBar: AppRoleHeader(
+        title: state.tr('appName'),
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
@@ -50,7 +50,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Promotional Rotating Banner (Animated Carousel)
+              // 1. Promotional Rotating Banner
               ServicePromoBanner(
                 onBookTap: () => _openBookingFlow(context, ServiceType.walkInStation),
               ),
@@ -60,16 +60,16 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               _buildCleanStationCapacityBar(context, state, bay1, bay2, van),
               const SizedBox(height: 18),
 
-              // 3. Prominent Active Tracking Card (if ongoing wash exists)
+              // 3. Prominent Active Tracking Card
               if (activeWash != null && activeWash.status.isOngoing) ...[
-                _buildActiveWashCard(context, activeWash),
+                _buildActiveWashCard(context, state, activeWash),
                 const SizedBox(height: 20),
               ],
 
-              // 4. Primary Call to Action Cards (Walk-In Station vs At-Home Van)
-              const Text(
-                'Select Service Mode',
-                style: TextStyle(
+              // 4. Primary Call to Action Cards
+              Text(
+                state.tr('selectServiceMode'),
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -81,12 +81,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   Expanded(
                     child: _buildServiceActionCard(
                       context,
-                      title: 'Drive-in Station',
-                      subtitle: '2 Pressure Wash Bays',
-                      badge: '${state.availableBaysCount} Free Now',
+                      title: state.tr('driveInStation'),
+                      subtitle: state.tr('driveInSub'),
+                      badge: '${state.availableBaysCount} ${state.tr('availableNow')}',
                       isAvailable: state.availableBaysCount > 0,
                       icon: Icons.local_car_wash_rounded,
                       color: AppColors.bay1Color,
+                      actionLabel: state.tr('bookNow'),
                       onTap: () => _openBookingFlow(context, ServiceType.walkInStation),
                     ),
                   ),
@@ -94,12 +95,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   Expanded(
                     child: _buildServiceActionCard(
                       context,
-                      title: 'At-Home Mobile Van',
-                      subtitle: 'Doorstep in Bishoftu',
-                      badge: state.isMobileVanAvailable ? 'Available' : 'On Mission',
+                      title: state.tr('atHomeMobile'),
+                      subtitle: state.tr('atHomeSub'),
+                      badge: state.isMobileVanAvailable ? state.tr('availableNow') : state.tr('busyWashing'),
                       isAvailable: state.isMobileVanAvailable,
                       icon: Icons.rv_hookup_rounded,
                       color: AppColors.mobileVanColor,
+                      actionLabel: state.tr('bookNow'),
                       onTap: () => _openBookingFlow(context, ServiceType.atHomeMobile),
                     ),
                   ),
@@ -111,9 +113,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Service Packages & Pricing',
-                    style: TextStyle(
+                  Text(
+                    state.tr('servicePackages'),
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -127,14 +129,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       );
                     },
                     icon: const Icon(Icons.receipt_long_rounded, size: 16),
-                    label: const Text('My History', style: TextStyle(fontWeight: FontWeight.w700)),
+                    label: Text(state.tr('myHistory'), style: const TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
 
               // Vehicle Category Selector Segment
-              _buildVehicleSelector(),
+              _buildVehicleSelector(state),
               const SizedBox(height: 14),
 
               // Packages Grid
@@ -152,18 +154,18 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                         childAspectRatio: 1.55,
                       ),
                       itemCount: state.packages.length,
-                      itemBuilder: (ctx, i) => _buildPackageCard(context, state.packages[i]),
+                      itemBuilder: (ctx, i) => _buildPackageCard(context, state, state.packages[i]),
                     );
                   }
                   return Column(
-                    children: state.packages.map((pkg) => _buildPackageCard(context, pkg)).toList(),
+                    children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
                   );
                 },
               ),
               const SizedBox(height: 24),
 
-              // Footer: Bishoftu Location & Direct Hotline
-              _buildBishoftuLocationFooter(),
+              // Footer: Bishoftu Location
+              _buildBishoftuLocationFooter(state),
             ],
           ),
         ),
@@ -204,22 +206,22 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: Row(
         children: [
           Expanded(
-            child: _buildBayMiniIndicator('Bay 1', bay1.isVacant),
+            child: _buildBayMiniIndicator('Bay 1', bay1.isVacant, state),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator('Bay 2', bay2.isVacant),
+            child: _buildBayMiniIndicator('Bay 2', bay2.isVacant, state),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator('Mobile Van', van.isVacant),
+            child: _buildBayMiniIndicator('Mobile Van', van.isVacant, state),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBayMiniIndicator(String title, bool isFree) {
+  Widget _buildBayMiniIndicator(String title, bool isFree, dynamic state) {
     final color = isFree ? AppColors.statusReady : AppColors.statusWashing;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -246,7 +248,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
           const SizedBox(height: 2),
           Text(
-            isFree ? 'Available' : 'Busy Washing',
+            isFree ? state.tr('availableNow') : state.tr('busyWashing'),
             style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
@@ -266,6 +268,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     required bool isAvailable,
     required IconData icon,
     required Color color,
+    required String actionLabel,
     required VoidCallback onTap,
   }) {
     return InkWell(
@@ -330,7 +333,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             Row(
               children: [
                 Text(
-                  'Book Now',
+                  actionLabel,
                   style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: color),
                 ),
                 const SizedBox(width: 4),
@@ -343,7 +346,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildVehicleSelector() {
+  Widget _buildVehicleSelector(dynamic state) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -354,6 +357,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: Row(
         children: CarType.values.map((type) {
           final isSelected = type == _previewCarType;
+          String typeName = type.displayName;
+          if (type == CarType.automobile) typeName = state.tr('automobile');
+          if (type == CarType.minibus) typeName = state.tr('minibus');
+          if (type == CarType.truck) typeName = state.tr('truck');
+
           return Expanded(
             child: InkWell(
               onTap: () => setState(() => _previewCarType = type),
@@ -375,7 +383,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      type.displayName,
+                      typeName,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -392,7 +400,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildPackageCard(BuildContext context, WashPackage pkg) {
+  Widget _buildPackageCard(BuildContext context, dynamic state, WashPackage pkg) {
     final price = pkg.getPriceFor(_previewCarType);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -469,7 +477,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                 );
               },
-              child: const Text('Book This Wash', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              child: Text(state.tr('bookThisWash'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
             ),
           ),
         ],
@@ -477,7 +485,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildActiveWashCard(BuildContext context, WashBooking wash) {
+  Widget _buildActiveWashCard(BuildContext context, dynamic state, WashBooking wash) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -510,7 +518,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Active Wash: ${wash.licensePlate}',
+                    '${state.tr("activeWashTitle")}: ${wash.licensePlate}',
                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
                   ),
                 ],
@@ -539,7 +547,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  'Open Full Live Tracker',
+                  state.tr('openFullTracker'),
                   style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: wash.status.color),
                 ),
                 const SizedBox(width: 4),
@@ -552,7 +560,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildBishoftuLocationFooter() {
+  Widget _buildBishoftuLocationFooter(dynamic state) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -563,13 +571,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.location_on, size: 18, color: AppColors.primary),
-              SizedBox(width: 8),
+              const Icon(Icons.location_on, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
               Text(
-                'BISHE Car Wash Station',
-                style: TextStyle(
+                state.tr('appName'),
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -578,11 +586,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Location: Debre Zeyit Expressway Gate, Bishoftu, Oromia\n'
+          Text(
+            'Location: ${state.tr("bishoftu")}\n'
             'Mobile Coverage: Lake Babogaya, Kuriftu, Kebele 01-05\n'
             'Phone: +251 91 123 4567 • Working Hours: 7:00 AM - 8:00 PM',
-            style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.4),
+            style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.4),
           ),
         ],
       ),

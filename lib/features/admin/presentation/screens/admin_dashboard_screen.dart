@@ -22,8 +22,8 @@ class AdminDashboardScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const AppRoleHeader(
-        title: 'Executive Administration Hub',
+      appBar: AppRoleHeader(
+        title: state.tr('adminTitle'),
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
@@ -34,7 +34,7 @@ class AdminDashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Executive Banner
-              _buildExecutiveBanner(),
+              _buildExecutiveBanner(state),
               const SizedBox(height: 18),
 
               // 2. Financial & Operational KPIs (Clean Grid)
@@ -50,28 +50,28 @@ class AdminDashboardScreen extends StatelessWidget {
                     childAspectRatio: isWide ? 1.5 : 1.25,
                     children: [
                       _buildMetricCard(
-                        'Total Revenue',
+                        state.tr('totalRevenueAdmin'),
                         CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
-                        '${state.totalCompletedCarsToday} cars washed',
+                        '${state.totalCompletedCarsToday} ${state.tr("carsWashed")}',
                         Icons.account_balance_wallet_rounded,
                         AppColors.primary,
                       ),
                       _buildMetricCard(
-                        'Commissions',
+                        state.tr('commissionsPaid'),
                         CurrencyFormatter.formatShort(state.totalCommissionsPaidETB),
                         '15% washer split',
                         Icons.handshake_rounded,
                         AppColors.oromiaGold,
                       ),
                       _buildMetricCard(
-                        'Net Station Profit',
+                        state.tr('netStationProfit'),
                         CurrencyFormatter.formatShort(netProfit > 0 ? netProfit : 0),
                         'After payroll cuts',
                         Icons.trending_up_rounded,
                         AppColors.statusReady,
                       ),
                       _buildMetricCard(
-                        'Active Washers',
+                        state.tr('activeWashers'),
                         '${state.availableWashers.length} Ready',
                         '${state.staff.length} on team',
                         Icons.groups_rounded,
@@ -84,9 +84,9 @@ class AdminDashboardScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // 3. Operational Management Modules
-              const Text(
-                'Management Operations',
-                style: TextStyle(
+              Text(
+                state.tr('managementOperations'),
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -99,8 +99,8 @@ class AdminDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildOperationCard(
                       context,
-                      title: 'Pricing Matrix',
-                      subtitle: 'Edit ETB tariffs for Type A, B, and C',
+                      title: state.tr('pricingMatrix'),
+                      subtitle: state.tr('pricingSubtitle'),
                       icon: Icons.tune_rounded,
                       color: AppColors.primary,
                       onTap: () {
@@ -115,8 +115,8 @@ class AdminDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildOperationCard(
                       context,
-                      title: 'Staff Payroll',
-                      subtitle: 'Base wages & commission rates',
+                      title: state.tr('staffPayroll'),
+                      subtitle: state.tr('staffPayrollSub'),
                       icon: Icons.badge_rounded,
                       color: AppColors.secondary,
                       onTap: () {
@@ -139,9 +139,9 @@ class AdminDashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Recent Washer Commission Splits',
-                    style: TextStyle(
+                  Text(
+                    state.tr('recentCommissions'),
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -154,7 +154,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         MaterialPageRoute(builder: (_) => const CommissionLogsScreen()),
                       );
                     },
-                    child: const Text('View All', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: Text(state.tr('viewAll'), style: const TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
@@ -186,7 +186,7 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExecutiveBanner() {
+  Widget _buildExecutiveBanner(dynamic state) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -201,26 +201,26 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: const Row(
+      child: Row(
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 20,
             backgroundColor: AppColors.primary,
             child: Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 22),
           ),
-          SizedBox(width: 14),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'BISHE Executive Control Hub',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
+                  state.tr('adminTitle'),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  'Bishoftu Main Facility • Automated Commission & Supabase Cloud Active',
-                  style: TextStyle(fontSize: 11.5, color: Colors.white70),
+                  '${state.tr("bishoftu")} • Automated Commission & Supabase Cloud Active',
+                  style: const TextStyle(fontSize: 11.5, color: Colors.white70),
                 ),
               ],
             ),
