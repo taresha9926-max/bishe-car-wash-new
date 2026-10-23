@@ -10,11 +10,23 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_statu
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 
 class WashRepositoryImpl implements IWashRepository {
-  List<WashBooking> _bookings = MockWashDataSource.getInitialBookings();
-  List<StationBay> _bays = MockWashDataSource.getInitialBays();
-  List<WashPackage> _packages = MockWashDataSource.getInitialPackages();
-  List<StaffMember> _staff = MockWashDataSource.getInitialStaff();
-  List<CommissionLog> _commissions = MockWashDataSource.getInitialCommissions();
+  List<WashPackage> _packages = [];
+  List<StaffMember> _staff = [];
+  List<StationBay> _bays = [];
+  List<WashBooking> _bookings = [];
+  List<CommissionLog> _commissionLogs = [];
+
+  WashRepositoryImpl() {
+    _initData();
+  }
+
+  void _initData() {
+    _packages = MockWashDataSource.getInitialPackages();
+    _staff = MockWashDataSource.getInitialStaff();
+    _bays = MockWashDataSource.getInitialBays();
+    _bookings = MockWashDataSource.getInitialBookings(_packages);
+    _commissionLogs = MockWashDataSource.getInitialCommissionLogs();
+  }
 
   @override
   Future<List<WashBooking>> getBookings() async {
@@ -31,117 +43,79 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   @override
-  Future<WashBooking?> getBookingByPlate(String licensePlate) async {
-    final clean = licensePlate.trim().toLowerCase();
-    try {
-      return _bookings.firstWhere(
-        (b) => b.licensePlate.trim().toLowerCase() == clean && b.status != WashStatus.cancelled,
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  @override
   Future<WashBooking> createBooking(WashBooking booking) async {
-    _bookings = [booking, ..._bookings];
+    _bookings.insert(0, booking);
+
+    // If bay is already assigned at creation (walk-in gate entry), occupy bay
+    if (booking.assignedBay != null) {
+      _occupyBay(booking.assignedBay!, booking);
+    }
     return booking;
   }
 
   @override
   Future<WashBooking> updateWashStatus(String bookingId, WashStatus newStatus) async {
     final index = _bookings.indexWhere((b) => b.id == bookingId);
-    if (index == -1) throw Exception('Booking $bookingId not found');
-
-    var updated = _bookings[index].copyWith(
-      status: newStatus,
-      completedAt: newStatus == WashStatus.completed ? DateTime.now() : _bookings[index].completedAt,
-    );
-
-    // If completed: split commission 50/50 between the two assigned washers
-    if (newStatus == WashStatus.completed && !updated.commissionLogged) {
-      if (updated.assignedWasherNames.isNotEmpty) {
-        final totalPool = updated.totalPrice * 0.15; // 15% commission pool
-        final perWasher = totalPool / (updated.assignedWasherNames.length.clamp(1, 4));
-
-        for (final washerName in updated.assignedWasherNames) {
-          final staffIdx = _staff.indexWhere((s) => s.name.toLowerCase() == washerName.toLowerCase());
-          final staffId = staffIdx != -1 ? _staff[staffIdx].id : 'stf-${washerName.toLowerCase()}';
-
-          _commissions = [
-            CommissionLog(
-              id: 'comm-${DateTime.now().millisecondsSinceEpoch}-${washerName.hashCode.abs() % 1000}',
-              bookingId: updated.id,
-              washerId: staffId,
-              washerName: washerName,
-              carPlate: updated.licensePlate,
-              carType: updated.carType,
-              servicePackageName: '${updated.package.name} (${updated.carType.displayName})',
-              totalWashPriceETB: updated.totalPrice,
-              commissionRate: 0.15,
-              commissionEarnedETB: perWasher,
-              isSettled: false,
-              completedAt: DateTime.now(),
-            ),
-            ..._commissions,
-          ];
-
-          if (staffIdx != -1) {
-            final st = _staff[staffIdx];
-            _staff[staffIdx] = st.copyWith(
-              completedWashesCount: st.completedWashesCount + 1,
-              totalCommissionEarnedETB: st.totalCommissionEarnedETB + perWasher,
-            );
-          }
-        }
-      }
-
-      // Vacate the assigned bay
-      if (updated.assignedBay != null) {
-        final bayIdx = _bays.indexWhere((b) => b.type == updated.assignedBay);
-        if (bayIdx != -1) {
-          _bays[bayIdx] = _bays[bayIdx].copyWith(
-            status: BayStatus.vacant,
-            clearActive: true,
-          );
-        }
-      }
-
-      updated = updated.copyWith(commissionLogged: true);
+    if (index == -1) {
+      throw Exception('Booking $bookingId not found');
     }
 
-    _bookings[index] = updated;
-    return updated;
+    var booking = _bookings[index];
+    final oldStatus = booking.status;
+
+    booking = booking.copyWith(
+      status: newStatus,
+      completedAt: newStatus == WashStatus.completed ? DateTime.now() : booking.completedAt,
+    );
+
+    // If marked completed, free bay and trigger automatic commission logging
+    if (newStatus == WashStatus.completed && oldStatus != WashStatus.completed) {
+      if (booking.assignedBay != null) {
+        _freeBay(booking.assignedBay!);
+      }
+
+      // Automatic washer commission logging
+      if (!booking.commissionLogged && booking.assignedWasherId != null) {
+        _triggerCommissionLog(booking);
+        booking = booking.copyWith(commissionLogged: true);
+      }
+    }
+
+    _bookings[index] = booking;
+    return booking;
   }
 
   @override
-  Future<WashBooking> assignBayAndWashers({
+  Future<WashBooking> assignBayAndWasher({
     required String bookingId,
     required BayType bay,
-    required List<String> washerNames,
+    required String washerId,
+    required String washerName,
   }) async {
-    final bookingIndex = _bookings.indexWhere((b) => b.id == bookingId);
-    if (bookingIndex == -1) throw Exception('Booking $bookingIndex not found');
-
-    final updated = _bookings[bookingIndex].copyWith(
-      assignedBay: bay,
-      assignedWasherNames: washerNames,
-      status: WashStatus.washing,
-    );
-    _bookings[bookingIndex] = updated;
-
-    final bayIndex = _bays.indexWhere((b) => b.type == bay);
-    if (bayIndex != -1) {
-      _bays[bayIndex] = _bays[bayIndex].copyWith(
-        status: BayStatus.occupied,
-        activeBookingId: updated.id,
-        activeLicensePlate: updated.licensePlate,
-        assignedWasherName: washerNames.join(' & '),
-        startedAt: DateTime.now(),
-      );
+    final index = _bookings.indexWhere((b) => b.id == bookingId);
+    if (index == -1) {
+      throw Exception('Booking $bookingId not found');
     }
 
-    return updated;
+    var booking = _bookings[index];
+
+    // If previously in a different bay, free that bay
+    if (booking.assignedBay != null && booking.assignedBay != bay) {
+      _freeBay(booking.assignedBay!);
+    }
+
+    booking = booking.copyWith(
+      assignedBay: bay,
+      assignedWasherId: washerId,
+      assignedWasherName: washerName,
+      status: booking.status == WashStatus.pending ? WashStatus.assignedToBay : booking.status,
+    );
+
+    _occupyBay(bay, booking);
+    _setWasherBusy(washerId, true);
+
+    _bookings[index] = booking;
+    return booking;
   }
 
   @override
@@ -152,43 +126,52 @@ class WashRepositoryImpl implements IWashRepository {
     String? transactionRef,
   }) async {
     final index = _bookings.indexWhere((b) => b.id == bookingId);
-    if (index == -1) throw Exception('Booking $bookingId not found');
+    if (index == -1) {
+      throw Exception('Booking $bookingId not found');
+    }
 
-    final updated = _bookings[index].copyWith(
-      payment: PaymentInfo(
-        isPaid: true,
-        method: method,
-        amount: amount,
-        paidAt: DateTime.now(),
-        transactionRef: transactionRef ?? 'TX-${DateTime.now().millisecondsSinceEpoch}',
-      ),
+    final booking = _bookings[index];
+    final updatedPayment = booking.payment.copyWith(
+      isPaid: true,
+      method: method,
+      amount: amount,
+      transactionRef: transactionRef,
+      paidAt: DateTime.now(),
     );
-    _bookings[index] = updated;
-    return updated;
+
+    final updatedBooking = booking.copyWith(payment: updatedPayment);
+    _bookings[index] = updatedBooking;
+    return updatedBooking;
   }
 
   @override
-  Future<List<StationBay>> getBays() async => List.unmodifiable(_bays);
+  Future<List<StationBay>> getBays() async {
+    return List.unmodifiable(_bays);
+  }
 
   @override
-  Future<List<WashPackage>> getPackages() async => List.unmodifiable(_packages);
+  Future<List<WashPackage>> getPackages() async {
+    return List.unmodifiable(_packages);
+  }
 
   @override
   Future<void> updatePackagePrice(String packageId, CarType carType, double newPrice) async {
-    final idx = _packages.indexWhere((p) => p.id == packageId);
-    if (idx != -1) {
-      _packages[idx] = _packages[idx].updatePrice(carType, newPrice);
+    final index = _packages.indexWhere((p) => p.id == packageId);
+    if (index != -1) {
+      _packages[index] = _packages[index].updatePrice(carType, newPrice);
     }
   }
 
   @override
-  Future<List<StaffMember>> getStaffMembers() async => List.unmodifiable(_staff);
+  Future<List<StaffMember>> getStaffMembers() async {
+    return List.unmodifiable(_staff);
+  }
 
   @override
   Future<void> updateStaffSalary(String staffId, double baseSalary, double commissionRate) async {
-    final idx = _staff.indexWhere((s) => s.id == staffId);
-    if (idx != -1) {
-      _staff[idx] = _staff[idx].copyWith(
+    final index = _staff.indexWhere((s) => s.id == staffId);
+    if (index != -1) {
+      _staff[index] = _staff[index].copyWith(
         baseSalaryMonthlyETB: baseSalary,
         commissionRate: commissionRate,
       );
@@ -196,26 +179,78 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   @override
-  Future<void> addStaffMember(StaffMember staff) async {
-    _staff = [..._staff, staff];
+  Future<void> addStaffMember(StaffMember member) async {
+    _staff.add(member);
   }
 
   @override
-  Future<List<CommissionLog>> getCommissionLogs() async => List.unmodifiable(_commissions);
+  Future<List<CommissionLog>> getCommissionLogs() async {
+    return List.unmodifiable(_commissionLogs);
+  }
 
-  @override
-  Future<void> settleCommission(String logId) async {
-    final idx = _commissions.indexWhere((c) => c.id == logId);
-    if (idx != -1) {
-      _commissions[idx] = _commissions[idx].copyWith(isSettled: true);
+  // --- Helper state management methods ---
+
+  void _occupyBay(BayType bayType, WashBooking booking) {
+    final index = _bays.indexWhere((b) => b.type == bayType);
+    if (index != -1) {
+      _bays[index] = _bays[index].copyWith(
+        status: BayStatus.occupied,
+        activeBookingId: booking.id,
+        activeLicensePlate: booking.licensePlate,
+        assignedWasherName: booking.assignedWasherName,
+        startedAt: DateTime.now(),
+      );
     }
   }
 
-  @override
-  Future<void> recordSmsNotification({
-    required String bookingId,
-    required String licensePlate,
-    required String recipientPhone,
-    required double amount,
-  }) async {}
+  void _freeBay(BayType bayType) {
+    final index = _bays.indexWhere((b) => b.type == bayType);
+    if (index != -1) {
+      _bays[index] = _bays[index].copyWith(
+        status: BayStatus.vacant,
+        clearActive: true,
+      );
+    }
+  }
+
+  void _setWasherBusy(String staffId, bool isBusy) {
+    final index = _staff.indexWhere((s) => s.id == staffId);
+    if (index != -1) {
+      _staff[index] = _staff[index].copyWith(isAvailable: !isBusy);
+    }
+  }
+
+  void _triggerCommissionLog(WashBooking booking) {
+    if (booking.assignedWasherId == null) return;
+
+    final staffIndex = _staff.indexWhere((s) => s.id == booking.assignedWasherId);
+    final commissionRate = staffIndex != -1 ? _staff[staffIndex].commissionRate : 0.15;
+    final commissionEarned = booking.totalPrice * commissionRate;
+
+    final log = CommissionLog(
+      id: 'COM-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
+      bookingId: booking.id,
+      washerId: booking.assignedWasherId!,
+      washerName: booking.assignedWasherName ?? 'Washer',
+      carPlate: booking.licensePlate,
+      carType: booking.carType,
+      servicePackageName: booking.package.name,
+      totalWashPriceETB: booking.totalPrice,
+      commissionRate: commissionRate,
+      commissionEarnedETB: commissionEarned,
+      completedAt: DateTime.now(),
+    );
+
+    _commissionLogs.insert(0, log);
+
+    // Update staff stats
+    if (staffIndex != -1) {
+      final staff = _staff[staffIndex];
+      _staff[staffIndex] = staff.copyWith(
+        isAvailable: true,
+        completedWashesCount: staff.completedWashesCount + 1,
+        totalCommissionEarnedETB: staff.totalCommissionEarnedETB + commissionEarned,
+      );
+    }
+  }
 }

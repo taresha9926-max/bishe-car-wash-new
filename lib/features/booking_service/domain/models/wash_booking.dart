@@ -5,37 +5,20 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/service_ty
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 
-enum BookingOrigin {
-  walkIn,
-  phoneCall,
-  onlineCustomer;
-
-  String get label {
-    switch (this) {
-      case BookingOrigin.walkIn:
-        return 'Physical Gate Walk-in';
-      case BookingOrigin.phoneCall:
-        return 'Phone Call Reservation';
-      case BookingOrigin.onlineCustomer:
-        return 'Online Customer Booking';
-    }
-  }
-}
-
 class WashBooking {
   final String id;
   final String customerName;
   final String customerPhone;
   final ServiceType serviceType;
-  final String? deliveryLocation;
+  final String? deliveryLocation; // Bishoftu street/landmark for mobile van
   final CarType carType;
   final String licensePlate;
   final WashPackage package;
   final WashStatus status;
   final BayType? assignedBay;
-  final List<String> assignedWasherNames; // Exactly 2 washers when assigned
+  final String? assignedWasherId;
+  final String? assignedWasherName;
   final PaymentInfo payment;
-  final BookingOrigin origin;
   final DateTime createdAt;
   final DateTime? scheduledTime;
   final DateTime? completedAt;
@@ -52,9 +35,9 @@ class WashBooking {
     required this.package,
     this.status = WashStatus.pending,
     this.assignedBay,
-    this.assignedWasherNames = const [],
+    this.assignedWasherId,
+    this.assignedWasherName,
     required this.payment,
-    this.origin = BookingOrigin.onlineCustomer,
     required this.createdAt,
     this.scheduledTime,
     this.completedAt,
@@ -74,9 +57,9 @@ class WashBooking {
     WashPackage? package,
     WashStatus? status,
     BayType? assignedBay,
-    List<String>? assignedWasherNames,
+    String? assignedWasherId,
+    String? assignedWasherName,
     PaymentInfo? payment,
-    BookingOrigin? origin,
     DateTime? createdAt,
     DateTime? scheduledTime,
     DateTime? completedAt,
@@ -93,9 +76,9 @@ class WashBooking {
       package: package ?? this.package,
       status: status ?? this.status,
       assignedBay: assignedBay ?? this.assignedBay,
-      assignedWasherNames: assignedWasherNames ?? this.assignedWasherNames,
+      assignedWasherId: assignedWasherId ?? this.assignedWasherId,
+      assignedWasherName: assignedWasherName ?? this.assignedWasherName,
       payment: payment ?? this.payment,
-      origin: origin ?? this.origin,
       createdAt: createdAt ?? this.createdAt,
       scheduledTime: scheduledTime ?? this.scheduledTime,
       completedAt: completedAt ?? this.completedAt,
