@@ -23,6 +23,10 @@ class AppStateNotifier extends ChangeNotifier {
   UserRole _currentRole = UserRole.customer;
   UserRole get currentRole => _currentRole;
 
+  String _currentLang = 'EN';
+  String get currentLang => _currentLang;
+  void setLanguage(String lang) { _currentLang = lang; notifyListeners(); }
+
   void switchRole(UserRole role) {
     if (_currentRole != role) {
       _currentRole = role;

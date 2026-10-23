@@ -22,6 +22,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final currentRole = state.currentRole;
+    final currentLang = state.currentLang;
 
     return AppBar(
       elevation: 0,
@@ -92,6 +93,32 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        // Language Switcher Dropdown (EN / OM / AM)
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: currentLang,
+              icon: const Icon(Icons.language_rounded, size: 16, color: AppColors.primary),
+              items: const [
+                DropdownMenuItem(value: 'EN', child: Text('EN', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+                DropdownMenuItem(value: 'OM', child: Text('OM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+                DropdownMenuItem(value: 'AM', child: Text('AM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+              ],
+              onChanged: (lang) {
+                if (lang != null) state.setLanguage(lang);
+              },
+            ),
+          ),
+        ),
+
+        // Role Switcher
         if (showRoleSwitcher) ...[
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -109,104 +136,70 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
               onSelected: (role) {
                 state.switchRole(role);
               },
+              itemBuilder: (context) {
+                return UserRole.values.map((role) {
+                  final isCurrent = role == currentRole;
+                  return PopupMenuItem(
+                    value: role,
+                    child: Row(
+                      children: [
+                        Icon(
+                          role.icon,
+                          size: 18,
+                          color: isCurrent ? AppColors.primary : AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          role.displayName,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w500,
+                            color: isCurrent ? AppColors.primary : AppColors.textPrimary,
+                          ),
+                        ),
+                        if (isCurrent) ...[
+                          const Spacer(),
+                          const Icon(Icons.check, size: 16, color: AppColors.primary),
+                        ],
+                      ],
+                    ),
+                  );
+                }).toList();
+              },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(currentRole.icon, size: 16, color: AppColors.primary),
+                    Icon(
+                      currentRole.icon,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       currentRole.displayName,
                       style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryDark,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.arrow_drop_down, size: 18, color: AppColors.textSecondary),
+                    const SizedBox(width: 2),
+                    const Icon(
+                      Icons.arrow_drop_down,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
                   ],
                 ),
               ),
-              itemBuilder: (context) => [
-                _buildRoleMenuItem(
-                  UserRole.customer,
-                  'Customer View',
-                  'Book & track walk-in or mobile van',
-                  currentRole == UserRole.customer,
-                ),
-                _buildRoleMenuItem(
-                  UserRole.cashier,
-                  'Cashier Dashboard',
-                  'Gate check-in, bay & payment desk',
-                  currentRole == UserRole.cashier,
-                ),
-                _buildRoleMenuItem(
-                  UserRole.admin,
-                  'Admin Control Panel',
-                  'Pricing matrix, salaries & commissions',
-                  currentRole == UserRole.admin,
-                ),
-              ],
             ),
           ),
         ],
         if (actions != null) ...actions!,
-        const SizedBox(width: 8),
+        const SizedBox(width: 4),
       ],
-    );
-  }
-
-  PopupMenuItem<UserRole> _buildRoleMenuItem(
-    UserRole role,
-    String title,
-    String subtitle,
-    bool isSelected,
-  ) {
-    return PopupMenuItem<UserRole>(
-      value: role,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary.withOpacity(0.15) : AppColors.surfaceVariant,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              role.icon,
-              size: 18,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (isSelected)
-            const Icon(Icons.check, size: 18, color: AppColors.primary),
-        ],
-      ),
     );
   }
 }
