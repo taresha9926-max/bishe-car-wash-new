@@ -23,6 +23,7 @@ abstract class IWashRepository {
     required PaymentMethod method,
     required double amount,
     String? transactionRef,
+    String? receiptScreenshot,
   });
   Future<List<StationBay>> getBays();
   Future<List<WashPackage>> getPackages();

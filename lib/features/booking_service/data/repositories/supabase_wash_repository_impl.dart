@@ -305,6 +305,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             method: pMethod,
             amount: double.tryParse(json['total_amount']?.toString() ?? '300') ?? 300.0,
             transactionRef: json['transaction_ref'],
+            receiptScreenshot: json['receipt_url'],
           ),
           createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
           completedAt: json['completed_at'] != null ? DateTime.tryParse(json['completed_at']) : null,
@@ -419,6 +420,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     required PaymentMethod method,
     required double amount,
     String? transactionRef,
+    String? receiptScreenshot,
   }) async {
     try {
       if (_isUuid(bookingId)) {
@@ -427,6 +429,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           'payment_method': method.name,
           'total_amount': amount,
           'transaction_ref': transactionRef,
+          'receipt_url': receiptScreenshot,
         });
       }
     } catch (_) {}
@@ -435,6 +438,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       method: method,
       amount: amount,
       transactionRef: transactionRef,
+      receiptScreenshot: receiptScreenshot,
     );
   }
 

@@ -306,6 +306,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         method: _selectedMethod,
         amount: amount,
         transactionRef: refCode,
+        receiptScreenshot: _screenshotBase64,
       );
 
       navigator.pop();

@@ -67,6 +67,7 @@ class PaymentInfo {
   final PaymentMethod method;
   final double amount;
   final String? transactionRef;
+  final String? receiptScreenshot; // Base64 or receipt URL
   final DateTime? paidAt;
 
   const PaymentInfo({
@@ -74,6 +75,7 @@ class PaymentInfo {
     this.method = PaymentMethod.cash,
     required this.amount,
     this.transactionRef,
+    this.receiptScreenshot,
     this.paidAt,
   });
 
@@ -82,6 +84,7 @@ class PaymentInfo {
     PaymentMethod? method,
     double? amount,
     String? transactionRef,
+    String? receiptScreenshot,
     DateTime? paidAt,
   }) {
     return PaymentInfo(
@@ -89,6 +92,7 @@ class PaymentInfo {
       method: method ?? this.method,
       amount: amount ?? this.amount,
       transactionRef: transactionRef ?? this.transactionRef,
+      receiptScreenshot: receiptScreenshot ?? this.receiptScreenshot,
       paidAt: paidAt ?? this.paidAt,
     );
   }

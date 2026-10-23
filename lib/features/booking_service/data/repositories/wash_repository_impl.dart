@@ -124,6 +124,7 @@ class WashRepositoryImpl implements IWashRepository {
     required PaymentMethod method,
     required double amount,
     String? transactionRef,
+    String? receiptScreenshot,
   }) async {
     final index = _bookings.indexWhere((b) => b.id == bookingId);
     if (index == -1) {
@@ -136,6 +137,7 @@ class WashRepositoryImpl implements IWashRepository {
       method: method,
       amount: amount,
       transactionRef: transactionRef,
+      receiptScreenshot: receiptScreenshot,
       paidAt: DateTime.now(),
     );
 

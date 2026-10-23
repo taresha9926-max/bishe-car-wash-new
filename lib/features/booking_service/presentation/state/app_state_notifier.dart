@@ -213,6 +213,7 @@ class AppStateNotifier extends ChangeNotifier {
     required PaymentMethod paymentMethod,
     bool markPaid = false,
     String? transactionRef,
+    String? receiptScreenshot,
   }) async {
     final bookingId = 'BSH-${(100 + _bookings.length + 1)}';
     final price = package.getPriceFor(carType);
@@ -234,6 +235,7 @@ class AppStateNotifier extends ChangeNotifier {
         method: paymentMethod,
         amount: price,
         transactionRef: transactionRef,
+      receiptScreenshot: receiptScreenshot,
         paidAt: markPaid ? DateTime.now() : null,
       ),
       createdAt: DateTime.now(),
@@ -272,12 +274,14 @@ class AppStateNotifier extends ChangeNotifier {
     required PaymentMethod method,
     required double amount,
     String? transactionRef,
+    String? receiptScreenshot,
   }) async {
     await _repository.processPayment(
       bookingId: bookingId,
       method: method,
       amount: amount,
       transactionRef: transactionRef,
+      receiptScreenshot: receiptScreenshot,
     );
     await _refreshData();
   }
