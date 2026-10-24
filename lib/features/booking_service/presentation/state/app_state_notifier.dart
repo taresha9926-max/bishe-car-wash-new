@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
@@ -58,6 +59,22 @@ class AppStateNotifier extends ChangeNotifier {
 
   List<CommissionLog> _commissionLogs = [];
   List<CommissionLog> get commissionLogs => _commissionLogs;
+
+  List<StaffCredential> _credentials = [];
+  List<StaffCredential> get credentials => _credentials;
+
+  /// Authenticate entered PIN for requested role
+  bool authenticateRole(UserRole role, String enteredPin) {
+    if (role == UserRole.customer) return true;
+    final match = _credentials.where((c) => c.role == role && c.isActive);
+    if (match.isEmpty) {
+      // Fallback defaults if no credentials populated
+      if (role == UserRole.admin && enteredPin == '1234') return true;
+      if (role == UserRole.cashier && enteredPin == '0000') return true;
+      return false;
+    }
+    return match.any((c) => c.pin.trim() == enteredPin.trim());
+  }
 
   // Currently active customer booking (for live tracking in Customer UI)
   String? _activeTrackingBookingId;
@@ -149,6 +166,7 @@ class AppStateNotifier extends ChangeNotifier {
       _bays = await _repository.getBays();
       _bookings = await _repository.getBookings();
       _commissionLogs = await _repository.getCommissionLogs();
+      _credentials = await _repository.getStaffCredentials();
 
       if (_bookings.isNotEmpty && _activeTrackingBookingId == null) {
         _activeTrackingBookingId = _bookings.first.id;
@@ -366,12 +384,42 @@ class AppStateNotifier extends ChangeNotifier {
     await _refreshData();
   }
 
+  /// Admin updates staff login pin & name
+  Future<void> updateStaffCredential({
+    required String id,
+    required String pin,
+    required String fullName,
+  }) async {
+    await _repository.updateStaffCredential(id, pin, fullName);
+    await _refreshData();
+  }
+
+  /// Admin creates a new staff login credential
+  Future<void> addStaffCredential({
+    required String username,
+    required String pin,
+    required UserRole role,
+    required String fullName,
+  }) async {
+    final cred = StaffCredential(
+      id: 'cred-${DateTime.now().millisecondsSinceEpoch}',
+      username: username,
+      pin: pin,
+      role: role,
+      fullName: fullName,
+      isActive: true,
+    );
+    await _repository.addStaffCredential(cred);
+    await _refreshData();
+  }
+
   Future<void> _refreshData() async {
     _packages = await _repository.getPackages();
     _staff = await _repository.getStaffMembers();
     _bays = await _repository.getBays();
     _bookings = await _repository.getBookings();
     _commissionLogs = await _repository.getCommissionLogs();
+    _credentials = await _repository.getStaffCredentials();
     notifyListeners();
   }
 }

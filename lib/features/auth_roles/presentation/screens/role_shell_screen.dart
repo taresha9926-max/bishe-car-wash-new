@@ -3,6 +3,7 @@ import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
+import 'package:bishe_car_wash/features/auth_roles/presentation/widgets/role_auth_dialog.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
@@ -80,7 +81,17 @@ class RoleShellScreen extends StatelessWidget {
                     final isSelected = role == currentRole;
                     return Expanded(
                       child: GestureDetector(
-                        onTap: () => state.switchRole(role),
+                        onTap: () async {
+                          if (role == currentRole) return;
+                          if (role == UserRole.customer) {
+                            state.switchRole(role);
+                            return;
+                          }
+                          final auth = await RoleAuthDialog.show(context, role);
+                          if (auth) {
+                            state.switchRole(role);
+                          }
+                        },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -184,7 +195,17 @@ class RoleShellScreen extends StatelessWidget {
                     color: isSelected ? AppColors.primary : AppColors.textPrimary,
                   ),
                 ),
-                onTap: () => state.switchRole(role),
+                onTap: () async {
+                  if (role == currentRole) return;
+                  if (role == UserRole.customer) {
+                    state.switchRole(role);
+                    return;
+                  }
+                  final auth = await RoleAuthDialog.show(context, role);
+                  if (auth) {
+                    state.switchRole(role);
+                  }
+                },
               ),
             );
           }),

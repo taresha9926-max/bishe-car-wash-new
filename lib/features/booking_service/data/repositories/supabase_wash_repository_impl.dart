@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -473,5 +475,54 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     } catch (_) {
       return _fallbackLocalRepo.getCommissionLogs();
     }
+  }
+
+  @override
+  Future<List<StaffCredential>> getStaffCredentials() async {
+    try {
+      final dynamic data = await _get('staff_credentials?select=*&order=role.asc');
+      if (data == null || data is! List || data.isEmpty) {
+        return _fallbackLocalRepo.getStaffCredentials();
+      }
+      return data.map((json) {
+        final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
+        final role = roleStr == 'admin' ? UserRole.admin : UserRole.cashier;
+        return StaffCredential(
+          id: json['id'].toString(),
+          username: json['username']?.toString() ?? 'staff',
+          pin: json['pin_hash']?.toString() ?? '0000',
+          role: role,
+          fullName: json['full_name']?.toString() ?? 'Staff Member',
+          isActive: json['is_active'] == true,
+        );
+      }).toList();
+    } catch (_) {
+      return _fallbackLocalRepo.getStaffCredentials();
+    }
+  }
+
+  @override
+  Future<void> updateStaffCredential(String id, String pin, String fullName) async {
+    try {
+      await _patch('staff_credentials?id=eq.$id', {
+        'pin_hash': pin,
+        'full_name': fullName,
+      });
+    } catch (_) {}
+    await _fallbackLocalRepo.updateStaffCredential(id, pin, fullName);
+  }
+
+  @override
+  Future<void> addStaffCredential(StaffCredential cred) async {
+    try {
+      await _post('staff_credentials', {
+        'username': cred.username,
+        'pin_hash': cred.pin,
+        'role': cred.role.name,
+        'full_name': cred.fullName,
+        'is_active': cred.isActive,
+      });
+    } catch (_) {}
+    await _fallbackLocalRepo.addStaffCredential(cred);
   }
 }

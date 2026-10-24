@@ -1,4 +1,5 @@
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/booking_service/data/datasources/mock_wash_datasource.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
@@ -15,6 +16,7 @@ class WashRepositoryImpl implements IWashRepository {
   List<StationBay> _bays = [];
   List<WashBooking> _bookings = [];
   List<CommissionLog> _commissionLogs = [];
+  List<StaffCredential> _credentials = [];
 
   WashRepositoryImpl() {
     _initData();
@@ -26,6 +28,7 @@ class WashRepositoryImpl implements IWashRepository {
     _bays = MockWashDataSource.getInitialBays();
     _bookings = MockWashDataSource.getInitialBookings(_packages);
     _commissionLogs = MockWashDataSource.getInitialCommissionLogs();
+    _credentials = MockWashDataSource.getInitialCredentials();
   }
 
   @override
@@ -188,6 +191,27 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<List<CommissionLog>> getCommissionLogs() async {
     return List.unmodifiable(_commissionLogs);
+  }
+
+  @override
+  Future<List<StaffCredential>> getStaffCredentials() async {
+    return List.unmodifiable(_credentials);
+  }
+
+  @override
+  Future<void> updateStaffCredential(String id, String pin, String fullName) async {
+    final index = _credentials.indexWhere((c) => c.id == id);
+    if (index != -1) {
+      _credentials[index] = _credentials[index].copyWith(
+        pin: pin,
+        fullName: fullName,
+      );
+    }
+  }
+
+  @override
+  Future<void> addStaffCredential(StaffCredential cred) async {
+    _credentials.add(cred);
   }
 
   // --- Helper state management methods ---

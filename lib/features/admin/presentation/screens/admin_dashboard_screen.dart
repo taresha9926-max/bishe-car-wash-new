@@ -9,6 +9,7 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../widgets/commission_item_card.dart';
 import '../widgets/pricing_matrix_editor.dart';
 import 'commission_logs_screen.dart';
+import 'credentials_management_screen.dart';
 import 'pricing_management_screen.dart';
 import 'staff_management_screen.dart';
 
@@ -130,6 +131,22 @@ class AdminDashboardScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildOperationCard(
+                      context,
+                      title: 'Staff PINs',
+                      subtitle: 'Admin & Cashier logins',
+                      icon: Icons.pin_outlined,
+                      color: AppColors.accent,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CredentialsManagementScreen()),
                         );
                       },
                     ),

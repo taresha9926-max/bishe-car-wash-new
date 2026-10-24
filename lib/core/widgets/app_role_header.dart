@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
+import 'package:bishe_car_wash/features/auth_roles/presentation/widgets/role_auth_dialog.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 
 class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -133,8 +134,16 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
               tooltip: 'Switch User Role',
               offset: const Offset(0, 42),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              onSelected: (role) {
-                state.switchRole(role);
+              onSelected: (role) async {
+                if (role == currentRole) return;
+                if (role == UserRole.customer) {
+                  state.switchRole(role);
+                  return;
+                }
+                final authenticated = await RoleAuthDialog.show(context, role);
+                if (authenticated) {
+                  state.switchRole(role);
+                }
               },
               itemBuilder: (context) {
                 return UserRole.values.map((role) {

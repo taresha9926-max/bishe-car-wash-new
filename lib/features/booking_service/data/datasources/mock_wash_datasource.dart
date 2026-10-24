@@ -1,5 +1,7 @@
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -9,6 +11,27 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_packa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 
 class MockWashDataSource {
+  static List<StaffCredential> getInitialCredentials() {
+    return [
+      const StaffCredential(
+        id: 'cred-admin',
+        username: 'admin',
+        pin: '1234',
+        role: UserRole.admin,
+        fullName: 'Bishe Super Admin',
+        isActive: true,
+      ),
+      const StaffCredential(
+        id: 'cred-cashier',
+        username: 'cashier',
+        pin: '0000',
+        role: UserRole.cashier,
+        fullName: 'Station Gate Cashier',
+        isActive: true,
+      ),
+    ];
+  }
+
   static List<WashPackage> getInitialPackages() {
     return [
       const WashPackage(
