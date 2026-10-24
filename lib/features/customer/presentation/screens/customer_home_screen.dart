@@ -63,15 +63,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
               const SizedBox(height: 18),
 
-              // 2. Real-Time Capacity & Queue ETA Bar
+              // 2. Real-Time Capacity (Bay 1, Bay 2, Mobile Van 1)
               _buildCleanStationCapacityBar(context, state, bay1, bay2, van),
               const SizedBox(height: 18),
 
-              // 3. Vehicles Booked Ahead & Estimated Start Time Card (Live Queue Tracker)
-              _buildLiveQueueAheadCard(context, state, queueAhead),
+              // 3. Privacy-Safe Queue Summary & Estimated Wait Time (No private vehicle details)
+              _buildPrivacySafeQueueCard(context, state, queueAhead, bay1, bay2, van),
               const SizedBox(height: 20),
 
-              // 4. Prominent Active Tracking Card (if user has an ongoing wash)
+              // 4. Prominent Active Tracking Card (only for user's own active booking)
               if (activeWash != null && activeWash.status.isOngoing) ...[
                 _buildActiveWashCard(context, state, activeWash),
                 const SizedBox(height: 20),
@@ -193,22 +193,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  /// Calculates estimated start time for a newly booked car based on ongoing washes and open bays
-  int _calculateEstimatedWaitMinutes(dynamic state, List<WashBooking> queueAhead) {
-    // If there is any open bay, you can be admitted immediately (< 3 mins gate prep)
+  /// Calculates estimated start time for a newly booked car based on ongoing washes and available 2 station bays
+  int _calculateStationWaitMinutes(dynamic state, List<WashBooking> stationQueue) {
     final freeStationBays = state.availableBaysCount;
-    if (freeStationBays > 0 && queueAhead.isEmpty) {
+    if (freeStationBays > 0 && stationQueue.isEmpty) {
       return 0; // Immediate entry
     }
 
-    final activeStationWashes = queueAhead.where((b) => b.serviceType == ServiceType.walkInStation).toList();
-    if (activeStationWashes.isEmpty) {
+    if (stationQueue.isEmpty) {
       return 0;
     }
 
-    // Average duration across active packages
     int totalRemainingMinutes = 0;
-    for (final b in activeStationWashes) {
+    for (final b in stationQueue) {
       final elapsed = DateTime.now().difference(b.createdAt).inMinutes;
       final pkgDuration = b.package.durationMinutes > 0 ? b.package.durationMinutes : 25;
       final remaining = max(5, pkgDuration - elapsed);
@@ -220,11 +217,46 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return max(5, effectiveWait);
   }
 
-  /// Card displaying vehicles currently booked/in-progress ahead and calculated ETA to start
-  Widget _buildLiveQueueAheadCard(BuildContext context, dynamic state, List<WashBooking> queueAhead) {
-    final waitMinutes = _calculateEstimatedWaitMinutes(state, queueAhead);
-    final inProgressCount = queueAhead.where((b) => b.status.isOngoing).length;
-    final waitingCount = queueAhead.where((b) => b.status == WashStatus.pending || b.status == WashStatus.confirmed).length;
+  /// Calculates estimated start time for a newly booked at-home mobile van wash (1 mobile van unit)
+  int _calculateMobileVanWaitMinutes(dynamic state, List<WashBooking> mobileQueue) {
+    if (state.isMobileVanAvailable && mobileQueue.isEmpty) {
+      return 0; // Mobile van is available immediately
+    }
+
+    if (mobileQueue.isEmpty) {
+      return 0;
+    }
+
+    int totalMinutes = 0;
+    for (final b in mobileQueue) {
+      final elapsed = DateTime.now().difference(b.createdAt).inMinutes;
+      final pkgDuration = b.package.durationMinutes > 0 ? b.package.durationMinutes : 40;
+      final remaining = max(10, pkgDuration - elapsed);
+      totalMinutes += remaining;
+    }
+
+    return max(15, totalMinutes);
+  }
+
+  /// Privacy-Safe Queue & Total Estimated Start Time Card
+  /// Does NOT expose other customers' license plates, names, or phone numbers.
+  Widget _buildPrivacySafeQueueCard(
+    BuildContext context,
+    dynamic state,
+    List<WashBooking> queueAhead,
+    StationBay bay1,
+    StationBay bay2,
+    StationBay van,
+  ) {
+    final stationBookings = queueAhead.where((b) => b.serviceType == ServiceType.walkInStation).toList();
+    final mobileBookings = queueAhead.where((b) => b.serviceType == ServiceType.atHomeMobile).toList();
+
+    final stationWaitMins = _calculateStationWaitMinutes(state, stationBookings);
+    final mobileWaitMins = _calculateMobileVanWaitMinutes(state, mobileBookings);
+
+    final totalCarsAhead = queueAhead.length;
+    final totalStationCarsAhead = stationBookings.length;
+    final totalMobileCarsAhead = mobileBookings.length;
 
     return Container(
       decoration: BoxDecoration(
@@ -243,7 +275,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Queue Ahead Title & Dynamic ETA Pill
+          // Header Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -255,14 +287,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.access_time_filled_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(Icons.speed_rounded, color: AppColors.primary, size: 20),
                   ),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Live Wash Queue & Next Available ETA',
+                        'Live Turnaround & Queue Status',
                         style: TextStyle(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w800,
@@ -270,7 +302,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                         ),
                       ),
                       Text(
-                        '$inProgressCount in wash • $waitingCount waiting in queue',
+                        totalCarsAhead == 0
+                            ? 'No queue • Immediate service available'
+                            : '$totalCarsAhead vehicle(s) currently ahead of you',
                         style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ],
@@ -278,33 +312,18 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: waitMinutes == 0
-                      ? AppColors.statusReady.withOpacity(0.12)
-                      : AppColors.oromiaGold.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: waitMinutes == 0 ? AppColors.statusReady : AppColors.oromiaGold,
-                    width: 1,
-                  ),
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      waitMinutes == 0 ? Icons.bolt_rounded : Icons.hourglass_top_rounded,
-                      size: 14,
-                      color: waitMinutes == 0 ? AppColors.statusReady : AppColors.primaryDark,
-                    ),
+                    const Icon(Icons.shield_outlined, size: 12, color: AppColors.textMuted),
                     const SizedBox(width: 4),
-                    Text(
-                      waitMinutes == 0 ? 'No Wait (Bay Ready)' : 'Est. Start: ~$waitMinutes min',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                        color: waitMinutes == 0 ? AppColors.statusReady : AppColors.primaryDark,
-                      ),
+                    const Text(
+                      'Live Queue',
+                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted),
                     ),
                   ],
                 ),
@@ -313,117 +332,113 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
           const SizedBox(height: 14),
 
-          // If no queue ahead
-          if (queueAhead.isEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.check_circle_outline_rounded, color: AppColors.statusReady, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    'No vehicles ahead! Book now for immediate bay entrance at Bishoftu.',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.green.shade800),
-                  ),
-                ],
-              ),
-            )
-          else ...[
-            // List of vehicles ahead
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: queueAhead.take(4).length,
-              separatorBuilder: (_, __) => const Divider(height: 14, color: AppColors.cardBorder),
-              itemBuilder: (context, index) {
-                final item = queueAhead[index];
-                final isOngoing = item.status.isOngoing;
-
-                return Row(
-                  children: [
-                    // Position index indicator
-                    Container(
-                      width: 24,
-                      height: 24,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isOngoing ? AppColors.primary : AppColors.surfaceVariant,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '#${index + 1}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: isOngoing ? Colors.white : AppColors.textSecondary,
-                        ),
-                      ),
+          // Two Service ETA Cards (Station 2-Bays & Mobile 1-Van)
+          Row(
+            children: [
+              // Drive-In Station (2 Bays)
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: stationWaitMins == 0
+                        ? AppColors.statusReady.withOpacity(0.06)
+                        : AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: stationWaitMins == 0
+                          ? AppColors.statusReady.withOpacity(0.4)
+                          : AppColors.cardBorder,
                     ),
-                    const SizedBox(width: 10),
-
-                    // License Plate & Vehicle Type
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                item.licensePlate,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.5,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceVariant,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  item.carType.localizedName(state.currentLang),
-                                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                                ),
-                              ),
-                            ],
+                          const Text(
+                            'Station (2 Bays)',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${item.package.localizedName(state.currentLang)} • ${item.assignedBay != null ? item.assignedBay!.localizedName(state.currentLang) : "Queued"}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                          Icon(
+                            Icons.local_car_wash_rounded,
+                            size: 15,
+                            color: stationWaitMins == 0 ? AppColors.statusReady : AppColors.bay1Color,
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 6),
+                      Text(
+                        stationWaitMins == 0 ? 'Ready Now' : '~$stationWaitMins min wait',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: stationWaitMins == 0 ? AppColors.statusReady : AppColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$totalStationCarsAhead ahead • ${state.availableBaysCount}/2 bays open',
+                        style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
 
-                    // Status Pill
-                    StatusBadge(
-                      label: item.status.localizedName(state.currentLang),
-                      color: item.status.color,
-                      icon: item.status.icon,
-                      isSmall: true,
+              // Mobile Van (1 Van)
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: mobileWaitMins == 0
+                        ? AppColors.statusReady.withOpacity(0.06)
+                        : AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: mobileWaitMins == 0
+                          ? AppColors.statusReady.withOpacity(0.4)
+                          : AppColors.cardBorder,
                     ),
-                  ],
-                );
-              },
-            ),
-
-            if (queueAhead.length > 4) ...[
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  '+ ${queueAhead.length - 4} more vehicle(s) in queue',
-                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Mobile Van (1 Van)',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          ),
+                          Icon(
+                            Icons.rv_hookup_rounded,
+                            size: 15,
+                            color: mobileWaitMins == 0 ? AppColors.statusReady : AppColors.mobileVanColor,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        mobileWaitMins == 0 ? 'Van Ready' : '~$mobileWaitMins min wait',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: mobileWaitMins == 0 ? AppColors.statusReady : AppColors.primaryDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$totalMobileCarsAhead ahead • Doorstep service',
+                        style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
-          ],
+          ),
         ],
       ),
     );
