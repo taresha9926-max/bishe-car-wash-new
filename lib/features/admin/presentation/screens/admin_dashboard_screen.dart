@@ -74,7 +74,7 @@ class AdminDashboardScreen extends StatelessWidget {
                       _buildMetricCard(
                         state.tr('netStationProfit'),
                         CurrencyFormatter.formatShort(netProfit > 0 ? netProfit : 0),
-                        'After payroll cuts',
+                        state.tr('afterPayrollCuts'),
                         Icons.trending_up_rounded,
                         AppColors.statusReady,
                       ),
@@ -139,8 +139,8 @@ class AdminDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildOperationCard(
                       context,
-                      title: 'Staff PINs',
-                      subtitle: 'Admin & Cashier logins',
+                      title: state.tr('staffPins'),
+                      subtitle: state.tr('staffPinsSub'),
                       icon: Icons.pin_outlined,
                       color: AppColors.accent,
                       onTap: () {

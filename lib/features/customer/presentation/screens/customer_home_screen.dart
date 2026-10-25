@@ -321,9 +321,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   children: [
                     const Icon(Icons.shield_outlined, size: 12, color: AppColors.textMuted),
                     const SizedBox(width: 4),
-                    const Text(
-                      'Live Queue',
-                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+                    Text(
+                      state.tr('liveQueue'),
+                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted),
                     ),
                   ],
                 ),
@@ -356,9 +356,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Station (2 Bays)',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          Text(
+                            state.tr('stationBaysTitle'),
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                           ),
                           Icon(
                             Icons.local_car_wash_rounded,
@@ -369,7 +369,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        stationWaitMins == 0 ? 'Ready Now' : '~$stationWaitMins min wait',
+                        stationWaitMins == 0 ? state.tr('readyNow') : '~$stationWaitMins ${state.tr('minWait')}',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w900,
@@ -378,7 +378,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '$totalStationCarsAhead ahead • ${state.availableBaysCount}/2 bays open',
+                        '$totalStationCarsAhead ${state.tr('carsAhead')} • ${state.availableBaysCount}/2 ${state.tr('baysOpen')}',
                         style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                       ),
                     ],
@@ -408,9 +408,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Mobile Van (1 Van)',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          Text(
+                            state.tr('mobileVanTitle'),
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                           ),
                           Icon(
                             Icons.rv_hookup_rounded,
@@ -421,7 +421,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        mobileWaitMins == 0 ? 'Van Ready' : '~$mobileWaitMins min wait',
+                        mobileWaitMins == 0 ? state.tr('vanReady') : '~$mobileWaitMins ${state.tr('minWait')}',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w900,
@@ -430,7 +430,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '$totalMobileCarsAhead ahead • Doorstep service',
+                        '$totalMobileCarsAhead ${state.tr('carsAhead')} • ${state.tr('doorstepService')}',
                         style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                       ),
                     ],
@@ -468,15 +468,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: Row(
         children: [
           Expanded(
-            child: _buildBayMiniIndicator('Bay 1', bay1.isVacant, state),
+            child: _buildBayMiniIndicator(state.tr('bay1'), bay1.isVacant, state),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator('Bay 2', bay2.isVacant, state),
+            child: _buildBayMiniIndicator(state.tr('bay2'), bay2.isVacant, state),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator('Mobile Van', van.isVacant, state),
+            child: _buildBayMiniIndicator(state.tr('mobileVan'), van.isVacant, state),
           ),
         ],
       ),

@@ -298,10 +298,10 @@ class LiveTrackingScreen extends StatelessWidget {
               Expanded(
                 child: _buildDetailSubItem(
                   icon: Icons.garage_rounded,
-                  label: 'Bay',
+                  label: state.tr('bay'),
                   value: booking.assignedBay != null
                       ? booking.assignedBay!.localizedName(state.currentLang)
-                      : 'Pending',
+                      : state.tr('pending'),
                   color: booking.assignedBay != null ? booking.assignedBay!.color : AppColors.textMuted,
                 ),
               ),
@@ -311,8 +311,8 @@ class LiveTrackingScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 12),
                   child: _buildDetailSubItem(
                     icon: Icons.badge_outlined,
-                    label: 'Washer',
-                    value: booking.assignedWasherName ?? 'Assigned Team',
+                    label: state.tr('washer'),
+                    value: booking.assignedWasherName ?? state.tr('assignedTeam'),
                     color: AppColors.textPrimary,
                   ),
                 ),

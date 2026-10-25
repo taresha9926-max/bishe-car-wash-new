@@ -158,7 +158,7 @@ class StaffManagementScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('WASHES TODAY', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    Text(state.tr('washesToday'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
                       '${member.completedWashesCount} cars',

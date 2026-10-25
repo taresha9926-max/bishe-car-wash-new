@@ -207,7 +207,7 @@ class PricingManagementScreen extends StatelessWidget {
             const SizedBox(height: 12),
             CustomTextField(
               controller: priceController,
-              label: 'Price in ETB',
+              label: state.tr('priceInEtb'),
               hint: 'e.g. 350',
               keyboardType: TextInputType.number,
               prefixIcon: Icons.payments_outlined,

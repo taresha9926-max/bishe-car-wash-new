@@ -228,7 +228,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 label: state.tr('customerName'),
                 hint: 'e.g. Girma Tadesse',
                 prefixIcon: Icons.person_outline,
-                validator: (val) => val == null || val.trim().isEmpty ? 'Please enter your name' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterName') : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -237,7 +237,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 hint: '+251 91 234 5678',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icons.phone_android,
-                validator: (val) => val == null || val.length < 9 ? 'Please enter a valid phone number' : null,
+                validator: (val) => val == null || val.length < 9 ? state.tr('enterValidPhone') : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -245,7 +245,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 label: state.tr('licensePlate'),
                 hint: 'e.g. 3-B78945 ET',
                 prefixIcon: Icons.tag,
-                validator: (val) => val == null || val.trim().isEmpty ? 'Please enter license plate' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterPlate') : null,
               ),
               const SizedBox(height: 12),
 
@@ -468,7 +468,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.statusCompleted,
-            content: Text('Booking #${booking.id} created successfully!'),
+            content: Text('${state.tr("bookingSuccess")} (#${booking.id})'),
           ),
         );
 

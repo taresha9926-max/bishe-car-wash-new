@@ -13,6 +13,7 @@ class CredentialsManagementScreen extends StatefulWidget {
 
 class _CredentialsManagementScreenState extends State<CredentialsManagementScreen> {
   void _showEditPinDialog(BuildContext context, StaffCredential cred) {
+    final state = AppStateProvider.read(context);
     final pinController = TextEditingController(text: cred.pin);
     final nameController = TextEditingController(text: cred.fullName);
     bool obscure = false;
@@ -22,14 +23,14 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('Edit ${cred.role == UserRole.admin ? "Admin" : "Cashier"} PIN'),
+          title: Text('${state.tr("editPin")} (${cred.role.localizedName(state.currentLang)})'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
-                  labelText: 'Staff Name / Display Name',
+                  labelText: state.tr('staffDisplayName'),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -40,7 +41,7 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                 keyboardType: TextInputType.number,
                 maxLength: 6,
                 decoration: InputDecoration(
-                  labelText: 'Security PIN (Numeric)',
+                  labelText: state.tr('securityPin'),
                   counterText: '',
                   prefixIcon: const Icon(Icons.pin, size: 20),
                   suffixIcon: IconButton(
@@ -55,7 +56,7 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(state.tr('cancel')),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -73,7 +74,7 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('PIN updated for ${cred.username}!'),
+                      content: Text('${state.tr("savePin")}: ${cred.username}'),
                       backgroundColor: AppColors.statusCompleted,
                     ),
                   );
@@ -83,7 +84,7 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Save PIN'),
+              child: Text(state.tr('savePin')),
             ),
           ],
         ),
@@ -99,9 +100,9 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Staff Access & PIN Credentials',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        title: Text(
+          state.tr('staffPinsTitle'),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
@@ -125,7 +126,7 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Configure security PINs for the Cashier desk and Admin dashboard. Only users with the designated PIN can enter these views.',
+                          state.tr('staffPinsDesc'),
                           style: TextStyle(fontSize: 12.5, color: Colors.blueGrey.shade800),
                         ),
                       ),
@@ -193,7 +194,7 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                           OutlinedButton.icon(
                             onPressed: () => _showEditPinDialog(context, cred),
                             icon: const Icon(Icons.edit, size: 16),
-                            label: const Text('Change PIN'),
+                            label: Text(state.tr('changePin')),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: color,
                               side: BorderSide(color: color.withOpacity(0.4)),

@@ -37,7 +37,7 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
     final state = AppStateProvider.of(context);
     final pin = _pinController.text.trim();
     if (pin.isEmpty) {
-      setState(() => _error = 'Enter PIN');
+      setState(() => _error = state.tr('enterPinPrompt'));
       return;
     }
 
@@ -46,7 +46,7 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
       Navigator.of(context).pop(true);
     } else {
       setState(() {
-        _error = 'Incorrect PIN code';
+        _error = state.tr('incorrectPin');
       });
     }
   }
@@ -55,7 +55,7 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isCashier = widget.targetRole == UserRole.cashier;
-    final title = isCashier ? 'Cashier Authentication' : 'Admin Security Access';
+    final title = '${widget.targetRole.localizedName(state.currentLang)} - ${state.tr("staffPins")}';
     final defaultHint = isCashier ? 'Default PIN: 0000' : 'Default PIN: 1234';
 
     return AlertDialog(
@@ -102,7 +102,7 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
               maxLength: 6,
               style: const TextStyle(letterSpacing: 4, fontWeight: FontWeight.bold, fontSize: 18),
               decoration: InputDecoration(
-                labelText: 'Security PIN',
+                labelText: state.tr('securityPin'),
                 counterText: '',
                 prefixIcon: const Icon(Icons.lock_outline, size: 20),
                 suffixIcon: IconButton(
@@ -127,7 +127,7 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(state.tr('cancel')),
         ),
         ElevatedButton(
           onPressed: _verifyPin,
@@ -136,7 +136,7 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          child: const Text('Unlock'),
+          child: Text(state.tr('unlock')),
         ),
       ],
     );

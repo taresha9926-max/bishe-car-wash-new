@@ -634,6 +634,214 @@ class AppStrings {
       AppLanguage.om: 'HAMMA KOMISHIINII',
       AppLanguage.am: 'የኮሚሽን ምጣኔ',
     },
+    // Queue & Real-Time Capacity
+    'liveQueue': {
+      AppLanguage.en: 'Live Queue',
+      AppLanguage.om: 'Tarree Kallattii',
+      AppLanguage.am: 'የቀጥታ ወረፋ',
+    },
+    'stationBaysTitle': {
+      AppLanguage.en: 'Station (2 Bays)',
+      AppLanguage.om: 'Dhaabbata (Kutaa 2)',
+      AppLanguage.am: 'ዋና ጣቢያ (2 ክፍሎች)',
+    },
+    'mobileVanTitle': {
+      AppLanguage.en: 'Mobile Van (1 Van)',
+      AppLanguage.om: 'Makiinaa Sochooftuu (1)',
+      AppLanguage.am: 'ተንቀሳቃሽ ቫን (1)',
+    },
+    'readyNow': {
+      AppLanguage.en: 'Ready Now',
+      AppLanguage.om: 'Amma Qophiidha',
+      AppLanguage.am: 'አሁን ዝግጁ ነው',
+    },
+    'vanReady': {
+      AppLanguage.en: 'Van Ready',
+      AppLanguage.om: 'Vaanichi Qophiidha',
+      AppLanguage.am: 'ቫኑ ዝግጁ ነው',
+    },
+    'doorstepService': {
+      AppLanguage.en: 'Doorstep service',
+      AppLanguage.om: 'Tajaajila mana dhufaa',
+      AppLanguage.am: 'እስከ ደጅ ድረስ አገልግሎት',
+    },
+    'carsAhead': {
+      AppLanguage.en: 'ahead',
+      AppLanguage.om: 'dura jiru',
+      AppLanguage.am: 'ከፊት ያሉ',
+    },
+    'baysOpen': {
+      AppLanguage.en: 'bays open',
+      AppLanguage.om: 'kutaaleen banaadha',
+      AppLanguage.am: 'ክፍሎች ክፍት ናቸው',
+    },
+    'minWait': {
+      AppLanguage.en: 'min wait',
+      AppLanguage.om: 'daqiiqaa eeggannaa',
+      AppLanguage.am: 'ደቂቃ ጥበቃ',
+    },
+    'bay1': {
+      AppLanguage.en: 'Bay 1',
+      AppLanguage.om: 'Kutaa 1',
+      AppLanguage.am: 'ክፍል 1',
+    },
+    'bay2': {
+      AppLanguage.en: 'Bay 2',
+      AppLanguage.om: 'Kutaa 2',
+      AppLanguage.am: 'ክፍል 2',
+    },
+    'mobileVan': {
+      AppLanguage.en: 'Mobile Van',
+      AppLanguage.om: 'Makiinaa Sochooftuu',
+      AppLanguage.am: 'ተንቀሳቃሽ ቫን',
+    },
+    'washer': {
+      AppLanguage.en: 'Washer',
+      AppLanguage.om: 'Dhiqaa',
+      AppLanguage.am: 'አጣቢ',
+    },
+    'assignedTeam': {
+      AppLanguage.en: 'Assigned Team',
+      AppLanguage.om: 'Garee Ramadame',
+      AppLanguage.am: 'የተመደበ ቡድን',
+    },
+    'pending': {
+      AppLanguage.en: 'Pending',
+      AppLanguage.om: 'Eeggachaa jira',
+      AppLanguage.am: 'በመጠባበቅ ላይ',
+    },
+    'paid': {
+      AppLanguage.en: 'PAID',
+      AppLanguage.om: 'KAFFALAMEERA',
+      AppLanguage.am: 'ተከፍሏል',
+    },
+    // Form Validations & Prompts
+    'enterName': {
+      AppLanguage.en: 'Please enter your name',
+      AppLanguage.om: 'Maaloo maqaa keessan galchaa',
+      AppLanguage.am: 'እባክዎ ስምዎን ያስገቡ',
+    },
+    'enterValidPhone': {
+      AppLanguage.en: 'Please enter a valid phone number',
+      AppLanguage.om: 'Maaloo lakkoofsa bilbilaa sirrii galchaa',
+      AppLanguage.am: 'እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ',
+    },
+    'enterPlate': {
+      AppLanguage.en: 'Please enter license plate',
+      AppLanguage.om: 'Maaloo gabatee makiinaa galchaa',
+      AppLanguage.am: 'እባክዎ የሰሌዳ ቁጥር ያስገቡ',
+    },
+    'bookingSuccess': {
+      AppLanguage.en: 'Booking created successfully!',
+      AppLanguage.om: 'Dhiqannaan milkaa\'inaan qabameera!',
+      AppLanguage.am: 'እጥበቱ በተሳካ ሁኔታ ተመዝግቧል!',
+    },
+    'bookingFailed': {
+      AppLanguage.en: 'Failed to create booking',
+      AppLanguage.om: 'Dhiqannaa qabachuun hin danda\'amne',
+      AppLanguage.am: 'እጥበት መመዝገብ አልተሳካም',
+    },
+    // Admin & Security Staff PINs
+    'staffPins': {
+      AppLanguage.en: 'Staff PINs',
+      AppLanguage.om: 'Koodii Hojjettootaa',
+      AppLanguage.am: 'የሰራተኞች ሚስጥር ቁጥር',
+    },
+    'staffPinsSub': {
+      AppLanguage.en: 'Admin & Cashier logins',
+      AppLanguage.om: 'Galtee Bulchiinsaafi Kaffaltii',
+      AppLanguage.am: 'የአስተዳዳሪና ገንዘብ ያዥ መግቢያ',
+    },
+    'staffPinsTitle': {
+      AppLanguage.en: 'Staff Access & PIN Credentials',
+      AppLanguage.om: 'Koodii Eenyummeessaafi Mirga Galtee',
+      AppLanguage.am: 'የሰራተኞች መግቢያና የሚስጥር ቁጥሮች',
+    },
+    'staffPinsDesc': {
+      AppLanguage.en: 'Configure security PINs for the Cashier desk and Admin dashboard. Only users with the designated PIN can enter these views.',
+      AppLanguage.om: 'Koodii icciitii qabaa qarshiifi bulchiinsaa qindeessaa. Namni koodii qabu qofti seenuu danda\'a.',
+      AppLanguage.am: 'ለገንዘብ ያዥና ለአስተዳዳሪ ክፍሎች የሚስጥር ቁጥር እዚህ ያዘጋጁ። ትክክለኛ ቁጥር ያለው ብቻ መግባት ይችላል።',
+    },
+    'editPin': {
+      AppLanguage.en: 'Edit PIN',
+      AppLanguage.om: 'Koodii Jijjiiri',
+      AppLanguage.am: 'ሚስጥር ቁጥር ቀይር',
+    },
+    'changePin': {
+      AppLanguage.en: 'Change PIN',
+      AppLanguage.om: 'Koodii Jijjiiri',
+      AppLanguage.am: 'ሚስጥር ቁጥር ቀይር',
+    },
+    'savePin': {
+      AppLanguage.en: 'Save PIN',
+      AppLanguage.om: 'Koodii Oolchi',
+      AppLanguage.am: 'ሚስጥር ቁጥር አስቀምጥ',
+    },
+    'securityPin': {
+      AppLanguage.en: 'Security PIN (Numeric)',
+      AppLanguage.om: 'Koodii Icciitii (Lakkoofsa)',
+      AppLanguage.am: 'የሚስጥር ቁጥር (በአሃዝ)',
+    },
+    'staffDisplayName': {
+      AppLanguage.en: 'Staff Name / Display Name',
+      AppLanguage.om: 'Maqaa Hojjetaa',
+      AppLanguage.am: 'የሰራተኛው ሙሉ ስም',
+    },
+    'enterPinPrompt': {
+      AppLanguage.en: 'Enter PIN',
+      AppLanguage.om: 'Koodii galchaa',
+      AppLanguage.am: 'ሚስጥር ቁጥር ያስገቡ',
+    },
+    'incorrectPin': {
+      AppLanguage.en: 'Incorrect PIN code',
+      AppLanguage.om: 'Koodiin dogoggora',
+      AppLanguage.am: 'የተሳሳተ ሚስጥር ቁጥር',
+    },
+    'unlock': {
+      AppLanguage.en: 'Unlock',
+      AppLanguage.om: 'Bani',
+      AppLanguage.am: 'ክፈት',
+    },
+    'digitalPayments': {
+      AppLanguage.en: 'Digital payments',
+      AppLanguage.om: 'Kaffaltii dijitaalaa',
+      AppLanguage.am: 'የዲጂታል ክፍያዎች',
+    },
+    'atFrontDesk': {
+      AppLanguage.en: 'At front desk',
+      AppLanguage.om: 'Balbala duraatti',
+      AppLanguage.am: 'በቀጥታ ፊት ለፊት',
+    },
+    'advanceStatus': {
+      AppLanguage.en: 'Advance Status',
+      AppLanguage.om: 'Sadarkaa Fuulduraa',
+      AppLanguage.am: 'ደረጃውን አሻግር',
+    },
+    'afterPayrollCuts': {
+      AppLanguage.en: 'After payroll cuts',
+      AppLanguage.om: 'Kaffaltii komishiinii booda',
+      AppLanguage.am: 'የሰራተኛ ኮሚሽን ከተቀነሰ በኋላ',
+    },
+    'washesToday': {
+      AppLanguage.en: 'WASHES TODAY',
+      AppLanguage.om: 'DHIQANNAA HAR\'AA',
+      AppLanguage.am: 'የዛሬ እጥበቶች',
+    },
+    'priceInEtb': {
+      AppLanguage.en: 'Price in ETB',
+      AppLanguage.om: 'Gatii Qarshiin',
+      AppLanguage.am: 'ዋጋ በብር',
+    },
+    'fullName': {
+      AppLanguage.en: 'Full Name',
+      AppLanguage.om: 'Maqaa Guutuu',
+      AppLanguage.am: 'ሙሉ ስም',
+    },
+    'receiptImageError': {
+      AppLanguage.en: 'Unable to load receipt image',
+      AppLanguage.om: 'Suuraa nagahee fiduun hin danda\'amne',
+      AppLanguage.am: 'የደረሰኙን ፎቶ ማሳየት አልተቻለም',
+    },
   };
 
   static String get(String key, AppLanguage lang) {

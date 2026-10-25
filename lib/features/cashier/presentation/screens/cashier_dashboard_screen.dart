@@ -194,7 +194,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             child: _buildKPIColumn(
               state.tr('digitalPay'),
               CurrencyFormatter.formatShort(state.totalDigitalRevenueETB),
-              'Digital payments',
+              state.tr('digitalPayments'),
               AppColors.telebirrBlue,
             ),
           ),
@@ -203,7 +203,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             child: _buildKPIColumn(
               state.tr('cashCollected'),
               CurrencyFormatter.formatShort(state.totalCashRevenueETB),
-              'At front desk',
+              state.tr('atFrontDesk'),
               AppColors.cashGreen,
             ),
           ),
@@ -406,7 +406,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           // Quick advance
           IconButton(
             icon: const Icon(Icons.arrow_circle_right_rounded, color: AppColors.primary, size: 28),
-            tooltip: 'Advance Status',
+            tooltip: state.tr('advanceStatus'),
             onPressed: () => _advanceBookingStatus(context, b),
           ),
         ],

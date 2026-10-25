@@ -121,7 +121,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                 label: state.tr('licensePlate'),
                 hint: 'e.g. ET-3-B98124 or 3-B98124',
                 prefixIcon: Icons.badge_outlined,
-                validator: (val) => val == null || val.trim().isEmpty ? 'Please enter license plate' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterPlate') : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -130,7 +130,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                 hint: '+251 91 123 4567',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icons.phone_android,
-                validator: (val) => val == null || val.length < 9 ? 'Please enter phone number' : null,
+                validator: (val) => val == null || val.length < 9 ? state.tr('enterValidPhone') : null,
               ),
               const SizedBox(height: 18),
 
