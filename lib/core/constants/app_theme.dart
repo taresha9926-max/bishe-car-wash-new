@@ -21,6 +21,7 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
       ),
       fontFamily: 'Roboto',
+      fontFamilyFallback: const ['NotoSansEthiopic'],
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
