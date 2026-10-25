@@ -10,7 +10,7 @@ import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../widgets/live_wash_stepper.dart';
 
-class LiveTrackingScreen extends StatelessWidget {
+class LiveTrackingScreen extends StatefulWidget {
   final String? bookingId;
 
   const LiveTrackingScreen({
@@ -19,35 +19,114 @@ class LiveTrackingScreen extends StatelessWidget {
   });
 
   @override
+  State<LiveTrackingScreen> createState() => _LiveTrackingScreenState();
+}
+
+class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String? _queriedBookingId;
+  bool _showSearchHeader = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _queriedBookingId = widget.bookingId;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _performSearch(dynamic state) {
+    final query = _searchController.text.trim();
+    if (query.isEmpty) return;
+    final found = state.findBookingByPhoneOrPlate(query);
+    if (found != null) {
+      setState(() {
+        _queriedBookingId = found.id;
+        _showSearchHeader = false;
+      });
+      state.setActiveTrackingBooking(found.id);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.primaryDark,
+          content: Text(state.tr('noActiveWashFound')),
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final booking = bookingId != null
-        ? state.bookings.firstWhere(
-            (b) => b.id == bookingId,
-            orElse: () => state.activeTrackingBooking ?? state.bookings.first,
-          )
-        : state.activeTrackingBooking;
+    final activeId = _queriedBookingId ?? state.activeTrackingBookingId;
+    WashBooking? booking;
+    if (activeId != null) {
+      try {
+        booking = state.bookings.firstWhere((b) => b.id == activeId);
+      } catch (_) {}
+    }
 
     if (booking == null) {
       return Scaffold(
         appBar: AppBar(title: Text(state.tr('liveTrackingTitle'))),
         body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.car_crash_outlined, size: 54, color: AppColors.textMuted),
-              const SizedBox(height: 12),
-              Text(
-                state.tr('noRecords'),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.radar_rounded, size: 48, color: AppColors.primary),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    state.tr('trackMyCar'),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    state.tr('trackVehiclePrompt'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _searchController,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: InputDecoration(
+                      hintText: state.tr('plateOrPhoneHint'),
+                      prefixIcon: const Icon(Icons.directions_car_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    onSubmitted: (_) => _performSearch(state),
+                  ),
+                  const SizedBox(height: 14),
+                  CustomButton(
+                    text: state.tr('trackNow'),
+                    icon: Icons.search,
+                    onPressed: () => _performSearch(state),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(state.tr('back')),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              CustomButton(
-                text: state.tr('back'),
-                width: 160,
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+            ),
           ),
         ),
       );
@@ -55,8 +134,15 @@ class LiveTrackingScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${state.tr("liveTrackingTitle")} #${booking.id}'),
+        title: Text('${state.tr("liveTrackingTitle")} • ${booking.licensePlate}'),
         actions: [
+          IconButton(
+            icon: Icon(_showSearchHeader ? Icons.close : Icons.search_rounded),
+            tooltip: state.tr('trackAnother'),
+            onPressed: () {
+              setState(() => _showSearchHeader = !_showSearchHeader);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => state.loadData(),
@@ -69,6 +155,46 @@ class LiveTrackingScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_showSearchHeader) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        textCapitalization: TextCapitalization.characters,
+                        decoration: InputDecoration(
+                          hintText: state.tr('plateOrPhoneHint'),
+                          hintStyle: const TextStyle(fontSize: 12),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onSubmitted: (_) => _performSearch(state),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => _performSearch(state),
+                      child: Text(state.tr('trackNow'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             // Status Header Card
             _buildStatusHeaderCard(context, state, booking),
             const SizedBox(height: 16),

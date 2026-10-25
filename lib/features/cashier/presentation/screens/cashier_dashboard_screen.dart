@@ -63,9 +63,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             children: [
               // 1. Shift KPI Stats
               _buildShiftSummaryBanner(state),
+              const SizedBox(height: 16),
+
+              // 2. Real-Time Capacity Quick Status Bar
+              _buildCleanStationCapacityBar(context, state, bay1, bay2, van),
               const SizedBox(height: 20),
 
-              // 2. Physical Station Bays & Mobile Van Cards
+              // 3. Physical Station Bays & Mobile Van Cards
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -494,6 +498,84 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       final booking = bookings.firstWhere((b) => b.id == bay.activeBookingId);
       await _advanceBookingStatus(context, booking);
     } catch (_) {}
+  }
+
+  Widget _buildCleanStationCapacityBar(
+    BuildContext context,
+    dynamic state,
+    StationBay bay1,
+    StationBay bay2,
+    StationBay van,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildBayMiniIndicator(state.tr('bay1'), bay1.isVacant, state),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildBayMiniIndicator(state.tr('bay2'), bay2.isVacant, state),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _buildBayMiniIndicator(state.tr('mobileVan'), van.isVacant, state),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBayMiniIndicator(String title, bool isFree, dynamic state) {
+    final color = isFree ? AppColors.statusReady : AppColors.statusWashing;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 5),
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5, color: AppColors.textPrimary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            isFree ? state.tr('availableNow') : state.tr('busyWashing'),
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _advanceBookingStatus(BuildContext context, WashBooking booking) async {

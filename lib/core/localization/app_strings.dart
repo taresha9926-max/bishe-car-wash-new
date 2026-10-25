@@ -313,6 +313,26 @@ class AppStrings {
       AppLanguage.om: 'Pooliishii harkaa, hurka ho\'aan keessa qulqulleessuu, saamunaa motoraa fi waaksii alaa.',
       AppLanguage.am: 'የእጅ ፖሊሽ፣ በከፍተኛ ሙቀት እንፋሎት የውስጥ ማፅዳት፣ የሞተር ሻምፑና የሰም ቅባት።',
     },
+    'pkg_executive_name': {
+      AppLanguage.en: 'Executive Detailing & Wax',
+      AppLanguage.om: 'Dhiqannaa Sadarkaa Olaanaa & Waaksii',
+      AppLanguage.am: 'ልዩ የዲቴይሊንግ እና የሰም እጥበት',
+    },
+    'pkg_executive_desc': {
+      AppLanguage.en: 'Showroom finish with clay treatment, machine paste wax, leather balm & underbody wash.',
+      AppLanguage.om: 'Haala shooruumii wajjin yaala kileeyii, waaksii maashinii, baalmii gogaa fi dhiqannaa jalaa.',
+      AppLanguage.am: 'የሾውሩም ደረጃ ማብሪያ፣ የማሽን ሰም ቅባት፣ የቆዳ ወንበር እንክብካቤ እና የታችኛው ክፍል እጥበት።',
+    },
+    'pkg_chassis_name': {
+      AppLanguage.en: 'Chassis & Engine Flush',
+      AppLanguage.om: 'Dhiqannaa Chaasii & Motoraa',
+      AppLanguage.am: 'የቻሲስ እና የሞተር እጥበት',
+    },
+    'pkg_chassis_desc': {
+      AppLanguage.en: 'Targeted high-pressure undercarriage rust prevention wash & safe steam engine bay degrease.',
+      AppLanguage.om: 'Bishaan dhiibbaa guddaan jala makiinaa dhiqanii dhangala\'aa motoraa hurkaan qulqulleessuu.',
+      AppLanguage.am: 'በከፍተኛ የውሃ ግፊት ዝገት መከላከያ የታችኛው ክፍል እጥበት እና የሞተር እንፋሎት ጽዳት።',
+    },
     'pkg_mobile_name': {
       AppLanguage.en: 'Mobile At-Home Express Van',
       AppLanguage.om: 'Makiinaa Socho\'aa Mana Keessanitti',
@@ -841,6 +861,46 @@ class AppStrings {
       AppLanguage.en: 'Unable to load receipt image',
       AppLanguage.om: 'Suuraa nagahee fiduun hin danda\'amne',
       AppLanguage.am: 'የደረሰኙን ፎቶ ማሳየት አልተቻለም',
+    },
+    'trackMyCar': {
+      AppLanguage.en: 'Track My Vehicle',
+      AppLanguage.om: 'Dhiqannaa Konkolaataa Koo Hordofi',
+      AppLanguage.am: 'የመኪናዬን እጥበት ሁኔታ ተከታተል',
+    },
+    'trackVehiclePrompt': {
+      AppLanguage.en: 'Enter your plate number or phone to see your vehicle\'s live progress',
+      AppLanguage.om: 'Haala dhiqannaa ilaaluuf gabatee makiinaa ykn bilbila keessan galchaa',
+      AppLanguage.am: 'የመኪናዎን የቀጥታ ሁኔታ ለማየት የሰሌዳ ወይም የስልክ ቁጥር ያስገቡ',
+    },
+    'trackNow': {
+      AppLanguage.en: 'Track Wash',
+      AppLanguage.om: 'Hordofi',
+      AppLanguage.am: 'ተከታተል',
+    },
+    'noActiveWashFound': {
+      AppLanguage.en: 'No active wash found for this vehicle. Please verify your details or book a wash.',
+      AppLanguage.om: 'Dhiqannaan adeemsarra jiru hin argamne. Odeeffannoo keessan mirkaneeffadhaa.',
+      AppLanguage.am: 'ለዚህ መኪና ምንም በመከናወን ላይ ያለ እጥበት አልተገኘም። እባክዎ መረጃዎን ያረጋግጡ።',
+    },
+    'trackAnother': {
+      AppLanguage.en: 'Track another vehicle',
+      AppLanguage.om: 'Konkolaataa biraa hordofi',
+      AppLanguage.am: 'ሌላ መኪና ፈልግ',
+    },
+    'plateOrPhoneHint': {
+      AppLanguage.en: 'e.g. ET-3-B98124 or 0911...',
+      AppLanguage.om: 'Fkn. ET-3-B98124 ykn 0911...',
+      AppLanguage.am: 'ምሳሌ: ET-3-B98124 ወይም 0911...',
+    },
+    'noQueueImmediate': {
+      AppLanguage.en: 'No queue • Immediate service available',
+      AppLanguage.om: 'Tarreen hin jiru • Tajaajila battalaa',
+      AppLanguage.am: 'ወረፋ የለም • ፈጣን አገልግሎት ዝግጁ ነው',
+    },
+    'vehiclesAhead': {
+      AppLanguage.en: 'vehicle(s) currently ahead of you',
+      AppLanguage.om: 'konkolaataan dura keessan jiru',
+      AppLanguage.am: 'ተሽከርካሪ(ዎች) ከእርስዎ ፊት አሉ',
     },
   };
 

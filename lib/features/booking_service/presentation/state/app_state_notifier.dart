@@ -81,26 +81,37 @@ class AppStateNotifier extends ChangeNotifier {
   String? get activeTrackingBookingId => _activeTrackingBookingId;
 
   WashBooking? get activeTrackingBooking {
-    if (_activeTrackingBookingId == null) {
-      // Find the first ongoing booking for quick tracking
-      try {
-        return _bookings.firstWhere(
-          (b) => b.status != WashStatus.completed && b.status != WashStatus.cancelled,
-        );
-      } catch (_) {
-        return _bookings.isNotEmpty ? _bookings.first : null;
-      }
-    }
+    if (_activeTrackingBookingId == null) return null;
     try {
       return _bookings.firstWhere((b) => b.id == _activeTrackingBookingId);
     } catch (_) {
-      return _bookings.isNotEmpty ? _bookings.first : null;
+      return null;
     }
   }
 
   void setActiveTrackingBooking(String bookingId) {
     _activeTrackingBookingId = bookingId;
     notifyListeners();
+  }
+
+  void clearActiveTrackingBooking() {
+    _activeTrackingBookingId = null;
+    notifyListeners();
+  }
+
+  /// Privacy-safe lookup for a customer's specific vehicle
+  WashBooking? findBookingByPhoneOrPlate(String query) {
+    final clean = query.trim().toUpperCase().replaceAll(' ', '').replaceAll('-', '');
+    if (clean.isEmpty) return null;
+    try {
+      return _bookings.firstWhere((b) {
+        final pPlate = b.licensePlate.toUpperCase().replaceAll(' ', '').replaceAll('-', '');
+        final pPhone = b.customerPhone.replaceAll(' ', '').replaceAll('-', '');
+        return pPlate.contains(clean) || clean.contains(pPlate) || pPhone.contains(clean) || clean.contains(pPhone);
+      });
+    } catch (_) {
+      return null;
+    }
   }
 
   // Computed Properties for Dashboard & Metrics
@@ -167,10 +178,6 @@ class AppStateNotifier extends ChangeNotifier {
       _bookings = await _repository.getBookings();
       _commissionLogs = await _repository.getCommissionLogs();
       _credentials = await _repository.getStaffCredentials();
-
-      if (_bookings.isNotEmpty && _activeTrackingBookingId == null) {
-        _activeTrackingBookingId = _bookings.first.id;
-      }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

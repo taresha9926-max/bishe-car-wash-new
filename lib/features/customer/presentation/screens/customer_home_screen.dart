@@ -27,6 +27,13 @@ class CustomerHomeScreen extends StatefulWidget {
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   CarType _previewCarType = CarType.automobile;
+  final TextEditingController _trackController = TextEditingController();
+
+  @override
+  void dispose() {
+    _trackController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +60,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         onRefresh: () => state.loadData(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -61,23 +68,20 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ServicePromoBanner(
                 onBookTap: () => _openBookingFlow(context, ServiceType.walkInStation),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
 
-              // 2. Real-Time Capacity (Bay 1, Bay 2, Mobile Van 1)
-              _buildCleanStationCapacityBar(context, state, bay1, bay2, van),
-              const SizedBox(height: 18),
-
-              // 3. Privacy-Safe Queue Summary & Estimated Wait Time (No private vehicle details)
+              // 2. Privacy-Safe Queue Summary & Estimated Wait Time (No private vehicle details)
               _buildPrivacySafeQueueCard(context, state, queueAhead, bay1, bay2, van),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
-              // 4. Prominent Active Tracking Card (only for user's own active booking)
-              if (activeWash != null && activeWash.status.isOngoing) ...[
-                _buildActiveWashCard(context, state, activeWash),
-                const SizedBox(height: 20),
-              ],
+              // 3. Vehicle Owner Status / Privacy Search Lookup Card
+              if (activeWash != null && activeWash.status.isOngoing)
+                _buildActiveWashCard(context, state, activeWash)
+              else
+                _buildVehicleLookupCard(context, state),
+              const SizedBox(height: 18),
 
-              // 5. Primary Call to Action Cards (Drive-in vs At-Home Mobile)
+              // 4. Primary Call to Action Cards (Drive-in vs At-Home Mobile)
               Text(
                 state.tr('selectServiceMode'),
                 style: const TextStyle(
@@ -261,17 +265,17 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -282,55 +286,55 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.speed_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(Icons.speed_rounded, color: AppColors.primary, size: 18),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
                         'Live Turnaround & Queue Status',
                         style: TextStyle(
-                          fontSize: 14.5,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
                         totalCarsAhead == 0
-                            ? 'No queue • Immediate service available'
-                            : '$totalCarsAhead vehicle(s) currently ahead of you',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            ? state.tr('noQueueImmediate')
+                            : '$totalCarsAhead ${state.tr("vehiclesAhead")}',
+                        style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.shield_outlined, size: 12, color: AppColors.textMuted),
-                    const SizedBox(width: 4),
+                    const Icon(Icons.shield_outlined, size: 11, color: AppColors.textMuted),
+                    const SizedBox(width: 3),
                     Text(
                       state.tr('liveQueue'),
-                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
 
           // Two Service ETA Cards (Station 2-Bays & Mobile 1-Van)
           Row(
@@ -338,12 +342,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               // Drive-In Station (2 Bays)
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: stationWaitMins == 0
                         ? AppColors.statusReady.withOpacity(0.06)
                         : AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: stationWaitMins == 0
                           ? AppColors.statusReady.withOpacity(0.4)
@@ -356,46 +360,50 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            state.tr('stationBaysTitle'),
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          Flexible(
+                            child: Text(
+                              state.tr('stationBaysTitle'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            ),
                           ),
                           Icon(
                             Icons.local_car_wash_rounded,
-                            size: 15,
+                            size: 14,
                             color: stationWaitMins == 0 ? AppColors.statusReady : AppColors.bay1Color,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         stationWaitMins == 0 ? state.tr('readyNow') : '~$stationWaitMins ${state.tr('minWait')}',
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.w900,
                           color: stationWaitMins == 0 ? AppColors.statusReady : AppColors.primaryDark,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         '$totalStationCarsAhead ${state.tr('carsAhead')} • ${state.availableBaysCount}/2 ${state.tr('baysOpen')}',
-                        style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                        style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
 
               // Mobile Van (1 Van)
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: mobileWaitMins == 0
                         ? AppColors.statusReady.withOpacity(0.06)
                         : AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: mobileWaitMins == 0
                           ? AppColors.statusReady.withOpacity(0.4)
@@ -408,30 +416,34 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            state.tr('mobileVanTitle'),
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          Flexible(
+                            child: Text(
+                              state.tr('mobileVanTitle'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            ),
                           ),
                           Icon(
                             Icons.rv_hookup_rounded,
-                            size: 15,
+                            size: 14,
                             color: mobileWaitMins == 0 ? AppColors.statusReady : AppColors.mobileVanColor,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         mobileWaitMins == 0 ? state.tr('vanReady') : '~$mobileWaitMins ${state.tr('minWait')}',
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.w900,
                           color: mobileWaitMins == 0 ? AppColors.statusReady : AppColors.primaryDark,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         '$totalMobileCarsAhead ${state.tr('carsAhead')} • ${state.tr('doorstepService')}',
-                        style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                        style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -444,82 +456,118 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildCleanStationCapacityBar(
-    BuildContext context,
-    dynamic state,
-    StationBay bay1,
-    StationBay bay2,
-    StationBay van,
-  ) {
+  Widget _buildVehicleLookupCard(BuildContext context, dynamic state) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: _buildBayMiniIndicator(state.tr('bay1'), bay1.isVacant, state),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.search_rounded, color: AppColors.primary, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.tr('trackMyCar'),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: AppColors.textPrimary),
+                    ),
+                    Text(
+                      state.tr('trackVehiclePrompt'),
+                      style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildBayMiniIndicator(state.tr('bay2'), bay2.isVacant, state),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildBayMiniIndicator(state.tr('mobileVan'), van.isVacant, state),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: TextField(
+                    controller: _trackController,
+                    textCapitalization: TextCapitalization.characters,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    decoration: InputDecoration(
+                      hintText: state.tr('plateOrPhoneHint'),
+                      hintStyle: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
+                      prefixIcon: const Icon(Icons.directions_car_outlined, size: 18, color: AppColors.textMuted),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.cardBorder)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.cardBorder)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
+                      fillColor: AppColors.surfaceVariant,
+                      filled: true,
+                    ),
+                    onSubmitted: (_) => _handleTrackVehicle(context, state),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 42,
+                child: ElevatedButton.icon(
+                  onPressed: () => _handleTrackVehicle(context, state),
+                  icon: const Icon(Icons.radar_rounded, size: 16),
+                  label: Text(state.tr('trackNow'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBayMiniIndicator(String title, bool isFree, dynamic state) {
-    final color = isFree ? AppColors.statusReady : AppColors.statusWashing;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 5),
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5, color: AppColors.textPrimary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            isFree ? state.tr('availableNow') : state.tr('busyWashing'),
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
+  void _handleTrackVehicle(BuildContext context, dynamic state) {
+    final query = _trackController.text.trim();
+    if (query.isEmpty) return;
+    final found = state.findBookingByPhoneOrPlate(query);
+    if (found != null) {
+      state.setActiveTrackingBooking(found.id);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => LiveTrackingScreen(bookingId: found.id)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.primaryDark,
+          content: Text(state.tr('noActiveWashFound')),
+        ),
+      );
+    }
   }
 
   Widget _buildServiceActionCard(
@@ -706,7 +754,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
                   ),
                   Text(
-                    '~${pkg.durationMinutes} mins',
+                    '~${pkg.durationMinutes} ${state.tr("minWait")}',
                     style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -745,7 +793,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   Widget _buildActiveWashCard(BuildContext context, dynamic state, WashBooking wash) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -777,7 +825,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   const SizedBox(width: 8),
                   Text(
                     '${state.tr("activeWashTitle")}: ${wash.licensePlate}',
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5),
                   ),
                 ],
               ),
@@ -788,30 +836,44 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
-            '${wash.package.localizedName(state.currentLang)} • ${wash.carType.localizedName(state.currentLang)} • Assigned: ${wash.assignedWasherName ?? "Queued"}',
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            '${wash.package.localizedName(state.currentLang)} • ${wash.carType.localizedName(state.currentLang)} • ${wash.assignedWasherName != null ? "${state.tr('washer')}: ${wash.assignedWasherName}" : state.tr("pending")}',
+            style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
           ),
-          const SizedBox(height: 12),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => LiveTrackingScreen(bookingId: wash.id)),
-              );
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  state.tr('openFullTracker'),
-                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: wash.status.color),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () {
+                  _trackController.clear();
+                  state.clearActiveTrackingBooking();
+                },
+                child: Text(
+                  state.tr('trackAnother'),
+                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
-                const SizedBox(width: 4),
-                Icon(Icons.arrow_forward_rounded, size: 14, color: wash.status.color),
-              ],
-            ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => LiveTrackingScreen(bookingId: wash.id)),
+                  );
+                },
+                child: Row(
+                  children: [
+                    Text(
+                      state.tr('openFullTracker'),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: wash.status.color),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_forward_rounded, size: 13, color: wash.status.color),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

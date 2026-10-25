@@ -37,10 +37,12 @@ class WashPackage {
   }
 
   String? _getPkgKey() {
-    final lower = id.toLowerCase() + name.toLowerCase();
+    final lower = ('$id $name').toLowerCase();
     if (lower.contains('express') || lower.contains('0101')) return 'pkg_express';
     if (lower.contains('standard') || lower.contains('0102')) return 'pkg_standard';
-    if (lower.contains('deluxe') || lower.contains('0103') || lower.contains('engine')) return 'pkg_deluxe';
+    if (lower.contains('executive')) return 'pkg_executive';
+    if (lower.contains('chassis') || lower.contains('engine flush')) return 'pkg_chassis';
+    if (lower.contains('deluxe') || lower.contains('0103') || lower.contains('engine detail') || lower.contains('spa')) return 'pkg_deluxe';
     if (lower.contains('van') || lower.contains('mobile') || lower.contains('0104')) return 'pkg_mobile';
     return null;
   }

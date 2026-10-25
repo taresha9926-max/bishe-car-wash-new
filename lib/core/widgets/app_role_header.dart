@@ -24,70 +24,80 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
     final state = AppStateProvider.of(context);
     final currentRole = state.currentRole;
     final currentLang = state.currentLang;
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
-      titleSpacing: 16,
+      titleSpacing: isMobile ? 10 : 16,
       title: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(isMobile ? 6 : 8),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [AppColors.primary, AppColors.secondary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
             ),
-            child: const Icon(Icons.local_car_wash, color: Colors.white, size: 22),
+            child: Icon(Icons.local_car_wash, color: Colors.white, size: isMobile ? 18 : 22),
           ),
-          const SizedBox(width: 12),
-          Expanded(
+          const SizedBox(width: 8),
+          Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Text(
-                        'BISHOFTU',
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: isMobile ? 14.5 : 18,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                          letterSpacing: 0.5,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.3,
                         ),
                       ),
                     ),
+                    if (!isMobile) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'BISHOFTU',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                const Text(
-                  'Bishoftu • Oromia, Ethiopia',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
+                if (!isMobile)
+                  const Text(
+                    'Bishoftu • Oromia, Ethiopia',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -96,21 +106,21 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         // Language Switcher Dropdown (EN / OM / AM)
         Container(
-          margin: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          margin: EdgeInsets.symmetric(vertical: isMobile ? 14 : 14, horizontal: 4),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 8),
           decoration: BoxDecoration(
             color: AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: AppColors.cardBorder),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: currentLang,
-              icon: const Icon(Icons.language_rounded, size: 16, color: AppColors.primary),
+              icon: const Icon(Icons.language_rounded, size: 15, color: AppColors.primary),
               items: const [
-                DropdownMenuItem(value: 'EN', child: Text('EN', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
-                DropdownMenuItem(value: 'OM', child: Text('OM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
-                DropdownMenuItem(value: 'AM', child: Text('AM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+                DropdownMenuItem(value: 'EN', child: Text('EN', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                DropdownMenuItem(value: 'OM', child: Text('OM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                DropdownMenuItem(value: 'AM', child: Text('AM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
               ],
               onChanged: (lang) {
                 if (lang != null) state.setLanguage(lang);
@@ -122,11 +132,11 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
         // Role Switcher
         if (showRoleSwitcher) ...[
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            margin: EdgeInsets.symmetric(vertical: 12, horizontal: isMobile ? 4 : 8),
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 4),
             decoration: BoxDecoration(
               color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(isMobile ? 12 : 20),
               border: Border.all(color: AppColors.cardBorder),
             ),
             child: PopupMenuButton<UserRole>(
@@ -176,7 +186,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                 }).toList();
               },
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 10, vertical: 6),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -185,21 +195,23 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                       size: 16,
                       color: AppColors.primary,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      currentRole.displayName,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
+                    if (!isMobile) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        currentRole.displayName,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      const Icon(
+                        Icons.arrow_drop_down,
+                        size: 18,
                         color: AppColors.primary,
                       ),
-                    ),
-                    const SizedBox(width: 2),
-                    const Icon(
-                      Icons.arrow_drop_down,
-                      size: 18,
-                      color: AppColors.primary,
-                    ),
+                    ],
                   ],
                 ),
               ),
