@@ -4,6 +4,7 @@ import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
@@ -63,17 +64,13 @@ class AppStateNotifier extends ChangeNotifier {
   List<StaffCredential> _credentials = [];
   List<StaffCredential> get credentials => _credentials;
 
-  /// Authenticate entered PIN for requested role
+  /// Authenticate entered PIN for requested role via deep authenticator module
   bool authenticateRole(UserRole role, String enteredPin) {
-    if (role == UserRole.customer) return true;
-    final match = _credentials.where((c) => c.role == role && c.isActive);
-    if (match.isEmpty) {
-      // Fallback defaults if no credentials populated
-      if (role == UserRole.admin && enteredPin == '1234') return true;
-      if (role == UserRole.cashier && enteredPin == '0000') return true;
-      return false;
-    }
-    return match.any((c) => c.pin.trim() == enteredPin.trim());
+    return StaffAuthenticator.authenticate(
+      role: role,
+      enteredPin: enteredPin,
+      credentials: _credentials,
+    );
   }
 
   // Currently active customer booking (for live tracking in Customer UI)
@@ -222,7 +219,7 @@ class AppStateNotifier extends ChangeNotifier {
 
     final created = await _repository.createBooking(newBooking);
     _activeTrackingBookingId = created.id;
-    await _refreshData();
+    await _refreshBookingsAndBays();
     return created;
   }
 
@@ -267,14 +264,14 @@ class AppStateNotifier extends ChangeNotifier {
     );
 
     final created = await _repository.createBooking(newBooking);
-    await _refreshData();
+    await _refreshBookingsAndBays();
     return created;
   }
 
   /// Cashier updates wash status (e.g. Assigned -> Washing -> Drying -> Completed)
   Future<void> updateWashStatus(String bookingId, WashStatus newStatus) async {
     await _repository.updateWashStatus(bookingId, newStatus);
-    await _refreshData();
+    await _refreshBookingsAndBays();
   }
 
   /// Cashier assigns car to Bay 1, Bay 2 or Mobile Van & selects washer
@@ -290,7 +287,7 @@ class AppStateNotifier extends ChangeNotifier {
       washerId: washerId,
       washerName: washerName,
     );
-    await _refreshData();
+    await _refreshBookingsAndBays();
   }
 
   /// Cashier collects payment (Cash or Digital Money Transfer - Telebirr, CBE Birr)
@@ -308,7 +305,7 @@ class AppStateNotifier extends ChangeNotifier {
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
     );
-    await _refreshData();
+    await _refreshBookingsAndBays();
   }
 
   Future<void> updatePackagePrice({
@@ -358,7 +355,7 @@ class AppStateNotifier extends ChangeNotifier {
     required double newPrice,
   }) async {
     await _repository.updatePackagePrice(packageId, carType, newPrice);
-    await _refreshData();
+    await _refreshPricing();
   }
 
   /// Admin manages staff base salaries and commission rates
@@ -368,7 +365,7 @@ class AppStateNotifier extends ChangeNotifier {
     required double commissionRate,
   }) async {
     await _repository.updateStaffSalary(staffId, baseSalary, commissionRate);
-    await _refreshData();
+    await _refreshStaff();
   }
 
   /// Admin adds a new staff member
@@ -388,7 +385,7 @@ class AppStateNotifier extends ChangeNotifier {
       commissionRate: commissionRate,
     );
     await _repository.addStaffMember(newMember);
-    await _refreshData();
+    await _refreshStaff();
   }
 
   /// Admin updates staff login pin & name
@@ -398,7 +395,7 @@ class AppStateNotifier extends ChangeNotifier {
     required String fullName,
   }) async {
     await _repository.updateStaffCredential(id, pin, fullName);
-    await _refreshData();
+    await _refreshCredentials();
   }
 
   /// Admin creates a new staff login credential
@@ -417,7 +414,29 @@ class AppStateNotifier extends ChangeNotifier {
       isActive: true,
     );
     await _repository.addStaffCredential(cred);
-    await _refreshData();
+    await _refreshCredentials();
+  }
+
+  Future<void> _refreshBookingsAndBays() async {
+    _bays = await _repository.getBays();
+    _bookings = await _repository.getBookings();
+    notifyListeners();
+  }
+
+  Future<void> _refreshPricing() async {
+    _packages = await _repository.getPackages();
+    notifyListeners();
+  }
+
+  Future<void> _refreshStaff() async {
+    _staff = await _repository.getStaffMembers();
+    _commissionLogs = await _repository.getCommissionLogs();
+    notifyListeners();
+  }
+
+  Future<void> _refreshCredentials() async {
+    _credentials = await _repository.getStaffCredentials();
+    notifyListeners();
   }
 
   Future<void> _refreshData() async {

@@ -11,6 +11,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/bay_statio
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
@@ -197,51 +198,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  /// Calculates estimated start time for a newly booked car based on ongoing washes and available 2 station bays
-  int _calculateStationWaitMinutes(dynamic state, List<WashBooking> stationQueue) {
-    final freeStationBays = state.availableBaysCount;
-    if (freeStationBays > 0 && stationQueue.isEmpty) {
-      return 0; // Immediate entry
-    }
-
-    if (stationQueue.isEmpty) {
-      return 0;
-    }
-
-    int totalRemainingMinutes = 0;
-    for (final b in stationQueue) {
-      final elapsed = DateTime.now().difference(b.createdAt).inMinutes;
-      final pkgDuration = b.package.durationMinutes > 0 ? b.package.durationMinutes : 25;
-      final remaining = max(5, pkgDuration - elapsed);
-      totalRemainingMinutes += remaining;
-    }
-
-    // 2 Physical bays handle cars concurrently in parallel
-    final effectiveWait = (totalRemainingMinutes / 2).ceil();
-    return max(5, effectiveWait);
-  }
-
-  /// Calculates estimated start time for a newly booked at-home mobile van wash (1 mobile van unit)
-  int _calculateMobileVanWaitMinutes(dynamic state, List<WashBooking> mobileQueue) {
-    if (state.isMobileVanAvailable && mobileQueue.isEmpty) {
-      return 0; // Mobile van is available immediately
-    }
-
-    if (mobileQueue.isEmpty) {
-      return 0;
-    }
-
-    int totalMinutes = 0;
-    for (final b in mobileQueue) {
-      final elapsed = DateTime.now().difference(b.createdAt).inMinutes;
-      final pkgDuration = b.package.durationMinutes > 0 ? b.package.durationMinutes : 40;
-      final remaining = max(10, pkgDuration - elapsed);
-      totalMinutes += remaining;
-    }
-
-    return max(15, totalMinutes);
-  }
-
   /// Privacy-Safe Queue & Total Estimated Start Time Card
   /// Does NOT expose other customers' license plates, names, or phone numbers.
   Widget _buildPrivacySafeQueueCard(
@@ -255,8 +211,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     final stationBookings = queueAhead.where((b) => b.serviceType == ServiceType.walkInStation).toList();
     final mobileBookings = queueAhead.where((b) => b.serviceType == ServiceType.atHomeMobile).toList();
 
-    final stationWaitMins = _calculateStationWaitMinutes(state, stationBookings);
-    final mobileWaitMins = _calculateMobileVanWaitMinutes(state, mobileBookings);
+    final stationWaitMins = WashDispatcher.estimateStationWaitMinutes(
+      availableBaysCount: state.availableBaysCount,
+      queue: stationBookings,
+    );
+    final mobileWaitMins = WashDispatcher.estimateMobileVanWaitMinutes(
+      isVanAvailable: state.isMobileVanAvailable,
+      queue: mobileBookings,
+    );
 
     final totalCarsAhead = queueAhead.length;
     final totalStationCarsAhead = stationBookings.length;

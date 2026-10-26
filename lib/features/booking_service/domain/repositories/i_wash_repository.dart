@@ -8,7 +8,8 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booki
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 
-abstract class IWashRepository {
+/// Domain port for active bookings, washing bay allocations, and payment processing.
+abstract class IBookingRepository {
   Future<List<WashBooking>> getBookings();
   Future<WashBooking?> getBookingById(String id);
   Future<WashBooking> createBooking(WashBooking booking);
@@ -27,8 +28,16 @@ abstract class IWashRepository {
     String? receiptScreenshot,
   });
   Future<List<StationBay>> getBays();
+}
+
+/// Domain port for wash service catalog and dynamic pricing configuration.
+abstract class IPricingRepository {
   Future<List<WashPackage>> getPackages();
   Future<void> updatePackagePrice(String packageId, CarType carType, double newPrice);
+}
+
+/// Domain port for staff personnel, commission ledgers, and role credentials.
+abstract class IStaffRepository {
   Future<List<StaffMember>> getStaffMembers();
   Future<void> updateStaffSalary(String staffId, double baseSalary, double commissionRate);
   Future<void> addStaffMember(StaffMember staff);
@@ -39,3 +48,6 @@ abstract class IWashRepository {
   Future<void> updateStaffCredential(String id, String pin, String fullName);
   Future<void> addStaffCredential(StaffCredential cred);
 }
+
+/// Unified repository interface combining booking, pricing, and staff domain ports.
+abstract class IWashRepository implements IBookingRepository, IPricingRepository, IStaffRepository {}

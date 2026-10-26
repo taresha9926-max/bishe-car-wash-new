@@ -5,6 +5,7 @@ import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
+import '../../../booking_service/domain/models/wash_dispatcher.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'bay_assignment_modal.dart';
@@ -468,12 +469,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   }
 
   WashStatus? _getBayWashStatus(StationBay bay, List<WashBooking> bookings) {
-    if (bay.activeBookingId == null) return null;
-    try {
-      return bookings.firstWhere((b) => b.id == bay.activeBookingId).status;
-    } catch (_) {
-      return null;
-    }
+    return WashDispatcher.getBayWashStatus(bay, bookings);
   }
 
   void _openAssignModalForBay(BuildContext context, BayType bayType, List<WashBooking> bookings) {
@@ -493,11 +489,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   }
 
   Future<void> _advanceBayStatus(BuildContext context, StationBay bay, List<WashBooking> bookings) async {
-    if (bay.activeBookingId == null) return;
-    try {
-      final booking = bookings.firstWhere((b) => b.id == bay.activeBookingId);
+    final booking = WashDispatcher.findBookingForBay(bay, bookings);
+    if (booking != null) {
       await _advanceBookingStatus(context, booking);
-    } catch (_) {}
+    }
   }
 
   Widget _buildCleanStationCapacityBar(
@@ -580,31 +575,8 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
   Future<void> _advanceBookingStatus(BuildContext context, WashBooking booking) async {
     final state = AppStateProvider.read(context);
-    final current = booking.status;
-    WashStatus next;
-
-    switch (current) {
-      case WashStatus.pending:
-      case WashStatus.confirmed:
-        next = WashStatus.washing;
-        break;
-      case WashStatus.assignedToBay:
-        next = WashStatus.washing;
-        break;
-      case WashStatus.washing:
-        next = WashStatus.drying;
-        break;
-      case WashStatus.drying:
-        next = WashStatus.readyForPickup;
-        break;
-      case WashStatus.readyForPickup:
-        next = WashStatus.completed;
-        break;
-      case WashStatus.completed:
-        return;
-      default:
-        next = WashStatus.washing;
-    }
+    final next = WashDispatcher.nextStatus(booking.status);
+    if (next == null) return;
 
     await state.updateWashStatus(booking.id, next);
 

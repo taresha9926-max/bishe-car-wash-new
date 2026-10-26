@@ -28,7 +28,6 @@ class LiveWashStepper extends StatelessWidget {
         final step = _steps[index];
         final isDone = currentIndex > index || currentStatus == WashStatus.completed;
         final isCurrent = currentIndex == index && currentStatus != WashStatus.completed;
-        final isPending = currentIndex < index;
         final isLast = index == _steps.length - 1;
 
         return Row(

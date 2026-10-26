@@ -1,0 +1,28 @@
+import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
+
+/// Deep authentication module encapsulating staff credential verification,
+/// fallback defaults, and role access policies.
+class StaffAuthenticator {
+  static const String defaultAdminPin = '1234';
+  static const String defaultCashierPin = '0000';
+
+  /// Verifies entered PIN against credentials or built-in defaults.
+  static bool authenticate({
+    required UserRole role,
+    required String enteredPin,
+    required List<StaffCredential> credentials,
+  }) {
+    if (role == UserRole.customer) return true;
+    final pin = enteredPin.trim();
+    if (pin.isEmpty) return false;
+
+    final match = credentials.where((c) => c.role == role && c.isActive);
+    if (match.isEmpty) {
+      if (role == UserRole.admin && pin == defaultAdminPin) return true;
+      if (role == UserRole.cashier && pin == defaultCashierPin) return true;
+      return false;
+    }
+    return match.any((c) => c.pin.trim() == pin);
+  }
+}
