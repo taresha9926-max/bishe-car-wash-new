@@ -20,8 +20,8 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
       ),
-      fontFamily: 'Roboto',
-      fontFamilyFallback: const ['NotoSansEthiopic'],
+      fontFamily: 'NotoSansEthiopic',
+      fontFamilyFallback: const ['NotoSansEthiopic', 'sans-serif'],
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,

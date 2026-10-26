@@ -42,7 +42,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 500.0,
           CarType.minibus: 700.0,
-          CarType.truck: 700.0,
         },
         features: [
           'High Pressure Pre-wash',
@@ -59,7 +58,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 1500.0,
           CarType.minibus: 2100.0,
-          CarType.truck: 2100.0,
         },
         features: [
           'Basic Exterior Wash',
@@ -76,7 +74,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 5000.0,
           CarType.minibus: 8000.0,
-          CarType.truck: 8000.0,
         },
         features: [
           'Seats & Floor Carpet Removed & Washed',
@@ -93,7 +90,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 5600.0,
           CarType.minibus: 9000.0,
-          CarType.truck: 9000.0,
         },
         features: [
           'Hand Wash & Clay Bar Treatment',
@@ -110,7 +106,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 6000.0,
           CarType.minibus: 9500.0,
-          CarType.truck: 9500.0,
         },
         features: [
           'All Platinum Exterior A Services',
@@ -127,7 +122,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 8000.0,
           CarType.minibus: 12500.0,
-          CarType.truck: 12500.0,
         },
         features: [
           'All Platinum Exterior B Services',
@@ -144,7 +138,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 10600.0,
           CarType.minibus: 17000.0,
-          CarType.truck: 17000.0,
         },
         features: [
           'Full Interior Carpet & Seat Detailing',
@@ -161,7 +154,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 11000.0,
           CarType.minibus: 17500.0,
-          CarType.truck: 17500.0,
         },
         features: [
           'All Diamond Package A Services',
@@ -178,7 +170,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 13000.0,
           CarType.minibus: 20500.0,
-          CarType.truck: 20500.0,
         },
         features: [
           'Complete Platinum Interior Detailing',
@@ -195,7 +186,6 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 1700.0,
           CarType.minibus: 2400.0,
-          CarType.truck: 2400.0,
         },
         features: [
           'Basic / Silver Exterior Body Wash',
@@ -376,7 +366,7 @@ class MockWashDataSource {
         customerPhone: '+251 92 777 8899',
         serviceType: ServiceType.atHomeMobile,
         deliveryLocation: 'Kuriftu Resort Villa 12, Bishoftu',
-        carType: CarType.truck,
+        carType: CarType.minibus,
         licensePlate: 'ET-1-A90234',
         package: executivePkg,
         status: WashStatus.drying,
@@ -452,7 +442,7 @@ class MockWashDataSource {
         washerId: 'stf-03',
         washerName: 'Tigist Mengistu',
         carPlate: 'ET-2-C99881',
-        carType: CarType.truck,
+        carType: CarType.minibus,
         servicePackageName: 'Executive Detailing & Wax',
         totalWashPriceETB: 1950.0,
         commissionRate: 0.18,

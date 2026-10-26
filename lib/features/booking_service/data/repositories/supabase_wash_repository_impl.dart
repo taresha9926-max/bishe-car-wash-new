@@ -124,7 +124,6 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           pricingByCarType: {
             CarType.automobile: autoPrice,
             CarType.minibus: minibusPrice,
-            CarType.truck: truckPrice,
           },
           features: features,
         );
@@ -140,7 +139,6 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (_isUuid(packageId)) {
         String colName = 'price_automobile';
         if (carType == CarType.minibus) colName = 'price_minibus';
-        if (carType == CarType.truck) colName = 'price_truck';
         await _patch('wash_packages?id=eq.$packageId', {colName: newPrice});
       }
     } catch (_) {}
@@ -257,8 +255,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       return data.map((json) {
         CarType carType = CarType.automobile;
         final carStr = (json['car_type'] ?? '').toString().toLowerCase();
-        if (carStr.contains('minibus')) carType = CarType.minibus;
-        if (carStr.contains('truck')) carType = CarType.truck;
+        if (carStr.contains('minibus') || carStr.contains('truck') || carStr.contains('large')) {
+          carType = CarType.minibus;
+        }
 
         ServiceType serviceType = ServiceType.walkInStation;
         if ((json['service_type'] ?? '').toString().contains('atHome')) {
@@ -455,8 +454,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       return data.map((json) {
         CarType carType = CarType.automobile;
         final cType = (json['car_type'] ?? '').toString().toLowerCase();
-        if (cType.contains('minibus')) carType = CarType.minibus;
-        if (cType.contains('truck')) carType = CarType.truck;
+        if (cType.contains('minibus') || cType.contains('truck') || cType.contains('large')) {
+          carType = CarType.minibus;
+        }
 
         return CommissionLog(
           id: json['id'].toString(),

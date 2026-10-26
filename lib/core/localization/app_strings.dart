@@ -157,36 +157,26 @@ class AppStrings {
       AppLanguage.am: 'ሙሉ መከታተያውን ክፈት',
     },
 
-    // Vehicle Types (CarType)
+    // Vehicle Types (CarType: Small Car & Large Car)
     'automobile': {
-      AppLanguage.en: 'Automobile',
+      AppLanguage.en: 'Small Car',
       AppLanguage.om: 'Konkolaataa Xiqqaa',
-      AppLanguage.am: 'አውቶሞቢል',
+      AppLanguage.am: 'ትናንሽ መኪና',
     },
     'minibus': {
-      AppLanguage.en: 'Minibus',
-      AppLanguage.om: 'Minibaasii',
-      AppLanguage.am: 'ሚኒባስ',
-    },
-    'truck': {
-      AppLanguage.en: 'Truck / SUV',
-      AppLanguage.om: 'Makiinaa Guddaa',
-      AppLanguage.am: 'ትራክ / ፒክአፕ / ቪ8',
+      AppLanguage.en: 'Large Car',
+      AppLanguage.om: 'Konkolaataa Guddaa',
+      AppLanguage.am: 'ትላልቅ መኪና',
     },
     'automobileSub': {
-      AppLanguage.en: 'Sedan, Hatchback, Compact',
-      AppLanguage.om: 'Sedan, Hatchback, Xiqqaa',
-      AppLanguage.am: 'ሴዳን፣ ሃችባክ፣ አነስተኛ',
+      AppLanguage.en: 'Corolla, Dzire, Yaris, Vitz, BYD',
+      AppLanguage.om: 'Corolla, Dzire, Yaris, Vitz, BYD',
+      AppLanguage.am: 'ኮሮላ፣ ዲዛየር፣ ያሪስ፣ ቪትዝ፣ ቢዋይዲ',
     },
     'minibusSub': {
-      AppLanguage.en: 'Toyota HiAce, Dolphin, 12-16 seats',
-      AppLanguage.om: 'Toyota HiAce, Dolphin, Teessuma 12-16',
-      AppLanguage.am: 'ቶዮታ ሃይአይስ፣ ዶልፊን፣ 12-16 መቀመጫ',
-    },
-    'truckSub': {
-      AppLanguage.en: 'Pickup, Heavy SUV, Light Truck',
-      AppLanguage.om: 'Pikaappi, Makiinaa Guddaa, V8',
-      AppLanguage.am: 'ፒክአፕ፣ ከባድ ቪ8፣ አነስተኛ የጭነት',
+      AppLanguage.en: 'V8, Bigstar, Hilux, Dolphin, Isuzu',
+      AppLanguage.om: 'V8, Bigstar, Hilux, Dolphin, Isuzu',
+      AppLanguage.am: 'ቪ8፣ ቢግስታር፣ ሃይሉክስ፣ ዶልፊን፣ ኢሱዙ',
     },
 
     // Wash Statuses (WashStatus)

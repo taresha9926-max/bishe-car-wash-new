@@ -202,6 +202,10 @@ void main() {
 
   group('Bishe Official Price List & 8-Washer Team Commission', () {
     test('MockWashDataSource contains the 10 official packages from price sheet', () {
+      expect(CarType.values.length, equals(2));
+      expect(CarType.automobile.displayName, equals('Small Car'));
+      expect(CarType.minibus.displayName, equals('Large Car'));
+
       final packages = MockWashDataSource.getInitialPackages();
       expect(packages.length, equals(10));
 
