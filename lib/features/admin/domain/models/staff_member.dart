@@ -33,6 +33,7 @@ class StaffMember {
   final bool isAvailable;
   final int completedWashesCount;
   final double totalCommissionEarnedETB;
+  final int skillSeniorityLevel; // 1: Junior, 2: Standard, 3: Senior, 4: Lead Specialist
 
   const StaffMember({
     required this.id,
@@ -44,7 +45,22 @@ class StaffMember {
     this.isAvailable = true,
     this.completedWashesCount = 0,
     this.totalCommissionEarnedETB = 0.0,
+    this.skillSeniorityLevel = 2,
   });
+
+  String get seniorityTierName {
+    switch (skillSeniorityLevel) {
+      case 4:
+        return 'Lead Specialist (Tier 1)';
+      case 3:
+        return 'Senior Washer (Tier 2)';
+      case 1:
+        return 'Junior Washer (Tier 4)';
+      case 2:
+      default:
+        return 'Washer (Tier 3)';
+    }
+  }
 
   StaffMember copyWith({
     String? id,
@@ -56,6 +72,7 @@ class StaffMember {
     bool? isAvailable,
     int? completedWashesCount,
     double? totalCommissionEarnedETB,
+    int? skillSeniorityLevel,
   }) {
     return StaffMember(
       id: id ?? this.id,
@@ -67,6 +84,7 @@ class StaffMember {
       isAvailable: isAvailable ?? this.isAvailable,
       completedWashesCount: completedWashesCount ?? this.completedWashesCount,
       totalCommissionEarnedETB: totalCommissionEarnedETB ?? this.totalCommissionEarnedETB,
+      skillSeniorityLevel: skillSeniorityLevel ?? this.skillSeniorityLevel,
     );
   }
 }

@@ -66,8 +66,8 @@ class AdminDashboardScreen extends StatelessWidget {
                       ),
                       _buildMetricCard(
                         state.tr('commissionsPaid'),
-                        CurrencyFormatter.formatShort(state.totalCommissionsPaidETB),
-                        '15% washer split',
+                        CurrencyFormatter.formatShort(state.teamCommissionPoolTodayETB),
+                        '${(state.teamCommissionRate * 100).toStringAsFixed(0)}% team pool',
                         Icons.handshake_rounded,
                         AppColors.oromiaGold,
                       ),

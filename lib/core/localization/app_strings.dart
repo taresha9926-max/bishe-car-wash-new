@@ -283,6 +283,106 @@ class AppStrings {
     },
 
     // Database / SQL Packages Localization
+    'pkg_silver_name': {
+      AppLanguage.en: 'Basic / Silver Package',
+      AppLanguage.om: 'Paakeejii Bu\'uuraa / Meetaa',
+      AppLanguage.am: 'ቤሲክ / ሲልቨር ፓኬጅ',
+    },
+    'pkg_silver_desc': {
+      AppLanguage.en: 'Basic wash for exterior body and glass clean.',
+      AppLanguage.om: 'Dhiqannaa bu\'uuraa qaama alaa fi fuula daawwitii.',
+      AppLanguage.am: 'መሰረታዊ የውጭ አካል እና የመስታወት እጥበት።',
+    },
+    'pkg_gold_name': {
+      AppLanguage.en: 'Gold Package (Polish)',
+      AppLanguage.om: 'Paakeejii Warqee (Pooliishii)',
+      AppLanguage.am: 'ጎልድ ፓኬጅ (ፖሊሽ)',
+    },
+    'pkg_gold_desc': {
+      AppLanguage.en: 'Basic wash plus premium protective body polish.',
+      AppLanguage.om: 'Dhiqannaa bu\'uuraa fi pooliishii qulqulluu eegumsa qaamaa.',
+      AppLanguage.am: 'መሰረታዊ እጥበት ከፕሪሚየም የቦዲ ፖሊሽ ማብሪያ ጋር።',
+    },
+    'pkg_plat_interior_name': {
+      AppLanguage.en: 'Platinum Interior Detailing',
+      AppLanguage.om: 'Pulaatiiniyemii Dhiqannaa Keessoo Guutuu',
+      AppLanguage.am: 'ፕላቲነም የውስጥ ሙሉ ዲቴይሊንግ',
+    },
+    'pkg_plat_interior_desc': {
+      AppLanguage.en: 'Seat & floor carpet removed & washing + roof deep cleaning + dashboard detailing.',
+      AppLanguage.om: 'Barcuma & karpeeta lafaa baasanii dhiqquu + baaxii qulqulleessuu + daashboordii.',
+      AppLanguage.am: 'ወንበርና ምንጣፍ ወጥቶ የሚታጠብ + የጣሪያ ጥልቅ ጽዳት + የዳሽቦርድ ዲቴይሊንግ።',
+    },
+    'pkg_plat_ext_a_name': {
+      AppLanguage.en: 'Platinum Exterior - A',
+      AppLanguage.om: 'Pulaatiiniyemii Alaa - Paakeejii A',
+      AppLanguage.am: 'ፕላቲነም የውጭ - ፓኬጅ ኤ',
+    },
+    'pkg_plat_ext_a_desc': {
+      AppLanguage.en: 'Body Polish + Water Spot removal and gloss treatment.',
+      AppLanguage.om: 'Pooliishii qaamaa + bakkoota bishaanii balleessuu fi calaqqisiisuu.',
+      AppLanguage.am: 'የቦዲ ፖሊሽ እና የውሃ ምልክት ማጥፊያ ህክምና።',
+    },
+    'pkg_plat_ext_b_name': {
+      AppLanguage.en: 'Platinum Exterior - B',
+      AppLanguage.om: 'Pulaatiiniyemii Alaa - Paakeejii B',
+      AppLanguage.am: 'ፕላቲነም የውጭ - ፓኬጅ ቢ',
+    },
+    'pkg_plat_ext_b_desc': {
+      AppLanguage.en: 'Body + Water Spot + Tire Detailing & rim protection.',
+      AppLanguage.om: 'Qaama + bakkoota bishaanii + dhiqannaa & eegumsa gommaa.',
+      AppLanguage.am: 'የቦዲ + የውሃ ምልክት ማጥፊያ + የጎማ እና ሪም ዲቴይሊንግ።',
+    },
+    'pkg_plat_ext_c_name': {
+      AppLanguage.en: 'Platinum Exterior - C',
+      AppLanguage.om: 'Pulaatiiniyemii Alaa - Paakeejii C',
+      AppLanguage.am: 'ፕላቲነም የውጭ - ፓኬጅ ሲ',
+    },
+    'pkg_plat_ext_c_desc': {
+      AppLanguage.en: 'Body + Water Spot + Tire Detailing + Headlight restoration.',
+      AppLanguage.om: 'Qaama + bishaan + gommaa + ifa ija konkolaataa haaromsuu.',
+      AppLanguage.am: 'የቦዲ + የውሃ ምልክት + የጎማ ዲቴይሊንግ + የፊት መብራት ማብሪያ።',
+    },
+    'pkg_diamond_a_name': {
+      AppLanguage.en: 'Diamond Package A',
+      AppLanguage.om: 'Paakeejii Daayimandii A',
+      AppLanguage.am: 'ዳይመንድ ፓኬጅ ኤ',
+    },
+    'pkg_diamond_a_desc': {
+      AppLanguage.en: 'Interior Full Detailing & Body Polish + Water Spot treatment.',
+      AppLanguage.om: 'Dhiqannaa keessoo guutuu & pooliishii qaamaa + bishaan dhabamsiisuu.',
+      AppLanguage.am: 'የውስጥ ሙሉ ዲቴይሊንግ እና የቦዲ ፖሊሽ + የውሃ ምልክት ማጥፊያ።',
+    },
+    'pkg_diamond_b_name': {
+      AppLanguage.en: 'Diamond Package B',
+      AppLanguage.om: 'Paakeejii Daayimandii B',
+      AppLanguage.am: 'ዳይመንድ ፓኬጅ ቢ',
+    },
+    'pkg_diamond_b_desc': {
+      AppLanguage.en: 'Interior Full Detailing & Body + Water Spot + Tire Detailing.',
+      AppLanguage.om: 'Dhiqannaa keessoo guutuu & qaama + bishaan + gommaa.',
+      AppLanguage.am: 'የውስጥ ሙሉ ዲቴይሊንግ እና ቦዲ + የውሃ ምልክት + የጎማ ዲቴይሊንግ።',
+    },
+    'pkg_diamond_full_name': {
+      AppLanguage.en: 'Diamond Full Package',
+      AppLanguage.om: 'Paakeejii Daayimandii Guutuu',
+      AppLanguage.am: 'ዳይመንድ ሙሉ ፓኬጅ',
+    },
+    'pkg_diamond_full_desc': {
+      AppLanguage.en: 'Ultimate Interior Detailing + Exterior Comprehensive detailing suite.',
+      AppLanguage.om: 'Dhiqannaa keessaa fi alaa sadarkaa olaanaa guutuu.',
+      AppLanguage.am: 'የላቀ የውስጥ እና የውጭ የተሟላ የዲቴይሊንግ አገልግሎት።',
+    },
+    'pkg_engine_chem_name': {
+      AppLanguage.en: 'Engine Chemical Cleaning',
+      AppLanguage.om: 'Qulqullina Keemikaala Motoraa',
+      AppLanguage.am: 'የሞተር ኬሚካል እጥበት',
+    },
+    'pkg_engine_chem_desc': {
+      AppLanguage.en: 'Basic / Silver package wash + professional engine chemical degrease.',
+      AppLanguage.om: 'Dhiqannaa bu\'uuraa meetaa + dhangala\'aa motoraa keemikaalaan qulqulleessuu.',
+      AppLanguage.am: 'የቤሲክ / ሲልቨር እጥበት + የሞተር ኬሚካል ፍላሽ እና ዲግሪዝ።',
+    },
     'pkg_express_name': {
       AppLanguage.en: 'Express Foam Wash',
       AppLanguage.om: 'Dhiqannaa Hoomaa Saffisaa',
@@ -901,6 +1001,56 @@ class AppStrings {
       AppLanguage.en: 'vehicle(s) currently ahead of you',
       AppLanguage.om: 'konkolaataan dura keessan jiru',
       AppLanguage.am: 'ተሽከርካሪ(ዎች) ከእርስዎ ፊት አሉ',
+    },
+    'bookByPhone': {
+      AppLanguage.en: 'Call Station Gate',
+      AppLanguage.om: 'Balbala Dhiqannaatti Bilbilaa',
+      AppLanguage.am: 'ለጣቢያው በስልክ ይደውሉ',
+    },
+    'bookByPhoneSub': {
+      AppLanguage.en: 'Call +251 91 123 4567 to book your wash instantly by phone',
+      AppLanguage.om: 'Dhiqannaa battalatti qabachuuf +251 91 123 4567 irratti bilbilaa',
+      AppLanguage.am: 'በስልክ ፈጣን ቀጠሮ ለመያዝ ወደ +251 91 123 4567 ይደውሉ',
+    },
+    'phoneCallBooking': {
+      AppLanguage.en: 'Phone Call Booking',
+      AppLanguage.om: 'Galmee Bilbilaan',
+      AppLanguage.am: 'በስልክ የተያዘ ቀጠሮ',
+    },
+    'useGpsLocation': {
+      AppLanguage.en: 'Use Current GPS Location',
+      AppLanguage.om: 'Bakka GPS Ammaa Fayyadami',
+      AppLanguage.am: 'የአሁኑን የጂፒኤስ መገኛ ተጠቀም',
+    },
+    'gpsLocationPinned': {
+      AppLanguage.en: 'GPS Pinned',
+      AppLanguage.om: 'GPS Qabameera',
+      AppLanguage.am: 'ጂፒኤስ ተቀምጧል',
+    },
+    'openInMaps': {
+      AppLanguage.en: 'Open in Maps',
+      AppLanguage.om: 'Kaartaadhaan Bani',
+      AppLanguage.am: 'በካርታ ክፈት',
+    },
+    'teamCommissionPool': {
+      AppLanguage.en: 'Team Commission Pool (15%)',
+      AppLanguage.om: 'Kuusaa Komishiinii Garee (15%)',
+      AppLanguage.am: 'የቡድን አጣቢዎች ኮሚሽን ገንዳ (15%)',
+    },
+    'dividendBySeniority': {
+      AppLanguage.en: 'Dividend by Seniority & Skill',
+      AppLanguage.om: 'Qoodama Muuxannoo fi Ogummaan',
+      AppLanguage.am: 'በልምድና ክህሎት የተከፋፈለ ድርሻ',
+    },
+    'teamRateLabel': {
+      AppLanguage.en: 'Team Commission Rate (%)',
+      AppLanguage.om: 'Hamma Komishiinii Garee (%)',
+      AppLanguage.am: 'የቡድን ኮሚሽን ምጣኔ (%)',
+    },
+    'updateRate': {
+      AppLanguage.en: 'Update Rate',
+      AppLanguage.om: 'Hamma Jijjiiri',
+      AppLanguage.am: 'ምጣኔ ቀይር',
     },
   };
 

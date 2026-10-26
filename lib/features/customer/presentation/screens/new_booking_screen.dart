@@ -42,6 +42,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   final _plateController = TextEditingController();
   final _addressController = TextEditingController();
   String _selectedBishoftuArea = AppConstants.bishoftuAreas.first;
+  String? _pinnedGpsCoordinates;
+  bool _isPinningGps = false;
 
   bool _isSubmitting = false;
 
@@ -304,6 +306,44 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                           return null;
                         },
                       ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: _pinnedGpsCoordinates != null ? AppColors.statusCompleted : AppColors.primary,
+                            ),
+                            backgroundColor: _pinnedGpsCoordinates != null
+                                ? AppColors.statusCompleted.withOpacity(0.08)
+                                : Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          icon: _isPinningGps
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Icon(
+                                  _pinnedGpsCoordinates != null ? Icons.check_circle : Icons.my_location,
+                                  color: _pinnedGpsCoordinates != null ? AppColors.statusCompleted : AppColors.primary,
+                                  size: 18,
+                                ),
+                          label: Text(
+                            _pinnedGpsCoordinates != null
+                                ? '${state.tr("gpsLocationPinned")}: $_pinnedGpsCoordinates'
+                                : state.tr('useGpsLocation'),
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: _pinnedGpsCoordinates != null ? AppColors.statusCompleted : AppColors.primary,
+                            ),
+                          ),
+                          onPressed: _pinGpsLocation,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -368,7 +408,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               CustomButton(
                 text: state.tr('bookNow'),
                 isLoading: _isSubmitting,
-                onPressed: () => _handleBookingSubmit(context),
+                onPressed: _handleBookingSubmit,
               ),
               const SizedBox(height: 30),
             ],
@@ -437,7 +477,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     );
   }
 
-  Future<void> _handleBookingSubmit(BuildContext context) async {
+  Future<void> _handleBookingSubmit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedPackage == null) return;
 
@@ -462,6 +502,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         package: _selectedPackage!,
         deliveryLocation: fullAddress,
         paymentMethod: _selectedPaymentMethod,
+        gpsCoordinates: _pinnedGpsCoordinates,
       );
 
       if (mounted) {
@@ -494,6 +535,21 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
           _isSubmitting = false;
         });
       }
+    }
+  }
+
+  Future<void> _pinGpsLocation() async {
+    setState(() => _isPinningGps = true);
+    // Simulate high-precision Bishoftu GPS coordinate acquisition
+    await Future.delayed(const Duration(milliseconds: 500));
+    final randomOffset = (DateTime.now().millisecond % 50) / 10000.0;
+    final lat = (8.7523 + randomOffset).toStringAsFixed(4);
+    final lng = (38.9785 + randomOffset).toStringAsFixed(4);
+    if (mounted) {
+      setState(() {
+        _pinnedGpsCoordinates = '$lat, $lng';
+        _isPinningGps = false;
+      });
     }
   }
 }

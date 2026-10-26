@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
+import 'package:bishe_car_wash/features/booking_service/data/datasources/mock_wash_datasource.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -195,6 +197,44 @@ void main() {
     test('IBookingRepository, IPricingRepository, IStaffRepository form IWashRepository', () {
       // Confirms contract composition at compile-time and runtime
       expect(IWashRepository, isNotNull);
+    });
+  });
+
+  group('Bishe Official Price List & 8-Washer Team Commission', () {
+    test('MockWashDataSource contains the 10 official packages from price sheet', () {
+      final packages = MockWashDataSource.getInitialPackages();
+      expect(packages.length, equals(10));
+
+      final silver = packages.firstWhere((p) => p.id == 'pkg-silver');
+      expect(silver.getPriceFor(CarType.automobile), equals(500.0));
+      expect(silver.getPriceFor(CarType.minibus), equals(700.0));
+
+      final diamondFull = packages.firstWhere((p) => p.id == 'pkg-diamond-full');
+      expect(diamondFull.getPriceFor(CarType.automobile), equals(13000.0));
+      expect(diamondFull.getPriceFor(CarType.minibus), equals(20500.0));
+    });
+
+    test('8 Washers form a single team with seniority weights and dividends', () {
+      final staff = MockWashDataSource.getInitialStaff();
+      final washers = staff.where((s) => s.role == StaffRole.washer || s.role == StaffRole.leadDetailer).toList();
+      expect(washers.length, equals(8));
+
+      // 10,000 ETB revenue * 15% rate = 1,500 ETB pool
+      const dailyRevenue = 10000.0;
+      const rate = 0.15;
+      const pool = dailyRevenue * rate;
+      expect(pool, equals(1500.0));
+
+      final totalWeight = washers.fold<int>(0, (sum, w) => sum + w.skillSeniorityLevel);
+      expect(totalWeight, greaterThan(0));
+
+      final lead = washers.firstWhere((w) => w.role == StaffRole.leadDetailer);
+      final leadDividend = (lead.skillSeniorityLevel / totalWeight) * pool;
+
+      final junior = washers.firstWhere((w) => w.skillSeniorityLevel == 1);
+      final juniorDividend = (junior.skillSeniorityLevel / totalWeight) * pool;
+
+      expect(leadDividend, greaterThan(juniorDividend));
     });
   });
 }

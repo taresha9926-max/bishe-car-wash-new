@@ -145,6 +145,34 @@ class AppStateNotifier extends ChangeNotifier {
     return _commissionLogs.fold(0.0, (sum, log) => sum + log.commissionEarnedETB);
   }
 
+  // --- Team Commission Pool (Washers work as a single team) ---
+  double _teamCommissionRate = 0.15; // Default 15%, editable by Admin
+  double get teamCommissionRate => _teamCommissionRate;
+
+  void setTeamCommissionRate(double rate) {
+    _teamCommissionRate = rate;
+    notifyListeners();
+  }
+
+  double get teamCommissionPoolTodayETB => totalRevenueTodayETB * _teamCommissionRate;
+
+  /// Calculate individual dividend for each active washer based on skill & seniority level
+  Map<String, double> get washerDividendsToday {
+    final washers = availableWashers;
+    if (washers.isEmpty || teamCommissionPoolTodayETB <= 0) return {};
+
+    final totalWeight = washers.fold<int>(0, (sum, w) => sum + (w.skillSeniorityLevel > 0 ? w.skillSeniorityLevel : 2));
+    if (totalWeight == 0) return {};
+
+    final pool = teamCommissionPoolTodayETB;
+    final Map<String, double> dividends = {};
+    for (final w in washers) {
+      final weight = w.skillSeniorityLevel > 0 ? w.skillSeniorityLevel : 2;
+      dividends[w.id] = (weight / totalWeight) * pool;
+    }
+    return dividends;
+  }
+
   int get availableBaysCount {
     return _bays.where((b) => b.type != BayType.mobileVan && b.isVacant).length;
   }
@@ -194,6 +222,8 @@ class AppStateNotifier extends ChangeNotifier {
     String? deliveryLocation,
     PaymentMethod paymentMethod = PaymentMethod.cash,
     DateTime? scheduledTime,
+    bool isPhoneBooking = false,
+    String? gpsCoordinates,
   }) async {
     final bookingId = 'BSH-${(100 + _bookings.length + 1)}';
     final price = package.getPriceFor(carType);
@@ -215,6 +245,8 @@ class AppStateNotifier extends ChangeNotifier {
       ),
       createdAt: DateTime.now(),
       scheduledTime: scheduledTime,
+      isPhoneBooking: isPhoneBooking,
+      gpsCoordinates: gpsCoordinates,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -225,24 +257,29 @@ class AppStateNotifier extends ChangeNotifier {
 
   /// Cashier registers walk-in gate entry
   Future<WashBooking> registerWalkInGate({
+    String? customerName,
     required String licensePlate,
     required String customerPhone,
     required CarType carType,
     required WashPackage package,
     required BayType assignedBay,
-    required String washerId,
-    required String washerName,
+    String? washerId,
+    String? washerName,
     required PaymentMethod paymentMethod,
     bool markPaid = false,
     String? transactionRef,
     String? receiptScreenshot,
+    bool isPhoneBooking = false,
   }) async {
     final bookingId = 'BSH-${(100 + _bookings.length + 1)}';
     final price = package.getPriceFor(carType);
+    final finalName = (customerName != null && customerName.trim().isNotEmpty)
+        ? customerName.trim()
+        : 'Walk-In (${licensePlate.toUpperCase()})';
 
     final newBooking = WashBooking(
       id: bookingId,
-      customerName: 'Gate Walk-In (${licensePlate.toUpperCase()})',
+      customerName: finalName,
       customerPhone: customerPhone,
       serviceType: assignedBay == BayType.mobileVan ? ServiceType.atHomeMobile : ServiceType.walkInStation,
       carType: carType,
@@ -251,16 +288,17 @@ class AppStateNotifier extends ChangeNotifier {
       status: WashStatus.washing, // Walk-in is immediately stationed to wash
       assignedBay: assignedBay,
       assignedWasherId: washerId,
-      assignedWasherName: washerName,
+      assignedWasherName: washerName ?? 'Team Washers',
       payment: PaymentInfo(
         isPaid: markPaid,
         method: paymentMethod,
         amount: price,
         transactionRef: transactionRef,
-      receiptScreenshot: receiptScreenshot,
+        receiptScreenshot: receiptScreenshot,
         paidAt: markPaid ? DateTime.now() : null,
       ),
       createdAt: DateTime.now(),
+      isPhoneBooking: isPhoneBooking,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -274,18 +312,18 @@ class AppStateNotifier extends ChangeNotifier {
     await _refreshBookingsAndBays();
   }
 
-  /// Cashier assigns car to Bay 1, Bay 2 or Mobile Van & selects washer
+  /// Cashier assigns car to Bay 1, Bay 2 or Mobile Van
   Future<void> assignBayAndWasher({
     required String bookingId,
     required BayType bay,
-    required String washerId,
-    required String washerName,
+    String? washerId,
+    String? washerName,
   }) async {
     await _repository.assignBayAndWasher(
       bookingId: bookingId,
       bay: bay,
-      washerId: washerId,
-      washerName: washerName,
+      washerId: washerId ?? 'stf-01',
+      washerName: washerName ?? 'Team Washers',
     );
     await _refreshBookingsAndBays();
   }
@@ -323,6 +361,7 @@ class AppStateNotifier extends ChangeNotifier {
   }) => addNewStaff(name: name, phone: phone, role: role, baseSalary: baseSalary, commissionRate: commissionRate);
 
   Future<WashBooking> registerWalkIn({
+    String? customerName,
     required String licensePlate,
     required String customerPhone,
     required CarType carType,
@@ -334,18 +373,21 @@ class AppStateNotifier extends ChangeNotifier {
     bool markPaid = false,
     String? transactionRef,
     String? receiptScreenshot,
+    bool isPhoneBooking = false,
   }) => registerWalkInGate(
+    customerName: customerName,
     licensePlate: licensePlate,
     customerPhone: customerPhone,
     carType: carType,
     package: package,
     assignedBay: assignedBay,
-    washerId: assignedWasherId ?? 'stf-01',
-    washerName: assignedWasherName ?? 'Washer',
+    washerId: assignedWasherId,
+    washerName: assignedWasherName ?? 'Team Washers',
     paymentMethod: paymentMethod,
     markPaid: markPaid,
     transactionRef: transactionRef,
     receiptScreenshot: receiptScreenshot,
+    isPhoneBooking: isPhoneBooking,
   );
 
   /// Admin edits service pricing by car type

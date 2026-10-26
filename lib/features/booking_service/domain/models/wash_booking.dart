@@ -23,6 +23,8 @@ class WashBooking {
   final DateTime? scheduledTime;
   final DateTime? completedAt;
   final bool commissionLogged;
+  final bool isPhoneBooking;
+  final String? gpsCoordinates;
 
   const WashBooking({
     required this.id,
@@ -42,6 +44,8 @@ class WashBooking {
     this.scheduledTime,
     this.completedAt,
     this.commissionLogged = false,
+    this.isPhoneBooking = false,
+    this.gpsCoordinates,
   });
 
   double get totalPrice => package.getPriceFor(carType);
@@ -64,6 +68,8 @@ class WashBooking {
     DateTime? scheduledTime,
     DateTime? completedAt,
     bool? commissionLogged,
+    bool? isPhoneBooking,
+    String? gpsCoordinates,
   }) {
     return WashBooking(
       id: id ?? this.id,
@@ -83,6 +89,8 @@ class WashBooking {
       scheduledTime: scheduledTime ?? this.scheduledTime,
       completedAt: completedAt ?? this.completedAt,
       commissionLogged: commissionLogged ?? this.commissionLogged,
+      isPhoneBooking: isPhoneBooking ?? this.isPhoneBooking,
+      gpsCoordinates: gpsCoordinates ?? this.gpsCoordinates,
     );
   }
 }

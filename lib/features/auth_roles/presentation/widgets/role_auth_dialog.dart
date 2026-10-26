@@ -56,7 +56,6 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
     final state = AppStateProvider.of(context);
     final isCashier = widget.targetRole == UserRole.cashier;
     final title = '${widget.targetRole.localizedName(state.currentLang)} - ${state.tr("staffPins")}';
-    final defaultHint = isCashier ? 'Default PIN: 0000' : 'Default PIN: 1234';
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -113,13 +112,6 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
                 errorText: _error,
               ),
               onSubmitted: (_) => _verifyPin(),
-            ),
-            const SizedBox(height: 8),
-            Center(
-              child: Text(
-                defaultHint,
-                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-              ),
             ),
           ],
         ),

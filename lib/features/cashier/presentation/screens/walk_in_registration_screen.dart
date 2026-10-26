@@ -26,6 +26,7 @@ class WalkInRegistrationScreen extends StatefulWidget {
 class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  final _nameController = TextEditingController();
   final _plateController = TextEditingController();
   final _phoneController = TextEditingController(text: '+251 9');
   final _refCodeController = TextEditingController();
@@ -33,7 +34,6 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
   CarType _carType = CarType.automobile;
   late BayType _bayType;
   WashPackage? _package;
-  StaffMember? _washer;
 
   bool _isPaidNow = false;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
@@ -47,6 +47,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _plateController.dispose();
     _phoneController.dispose();
     _refCodeController.dispose();
@@ -57,13 +58,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final packages = state.packages;
-    final washers = state.availableWashers;
 
     if (_package == null && packages.isNotEmpty) {
       _package = packages.first;
-    }
-    if (_washer == null && washers.isNotEmpty) {
-      _washer = washers.first;
     }
 
     final price = _package?.getPriceFor(_carType) ?? 0.0;
@@ -110,12 +107,20 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               ),
               const SizedBox(height: 18),
 
-              // 1. License Plate & Phone
+              // 1. Customer Name, License Plate & Phone
               Text(
                 state.tr('customerRole'),
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 10),
+              CustomTextField(
+                controller: _nameController,
+                label: state.tr('fullName'),
+                hint: 'e.g. Abebe Kebede',
+                prefixIcon: Icons.person_outline_rounded,
+                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterName') : null,
+              ),
+              const SizedBox(height: 12),
               CustomTextField(
                 controller: _plateController,
                 label: state.tr('licensePlate'),
@@ -258,38 +263,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               ),
               const SizedBox(height: 18),
 
-              // 5. Assign Washer
-              Text(
-                state.tr('activeWashers'),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<StaffMember>(
-                    isExpanded: true,
-                    value: _washer,
-                    items: washers.map((w) {
-                      return DropdownMenuItem<StaffMember>(
-                        value: w,
-                        child: Text('${w.name} (${w.role.localizedName(state.currentLang)})', style: const TextStyle(fontSize: 13.5)),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) setState(() => _washer = val);
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // 6. Upfront Payment Option
+              // 5. Upfront Payment Option
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -387,13 +361,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
       final state = AppStateProvider.read(context);
 
       final booking = await state.registerWalkIn(
+        customerName: _nameController.text.trim(),
         licensePlate: _plateController.text.trim().toUpperCase(),
         customerPhone: _phoneController.text.trim(),
         carType: _carType,
         package: _package!,
         assignedBay: _bayType,
-        assignedWasherId: _washer?.id,
-        assignedWasherName: _washer?.name,
         paymentMethod: _paymentMethod,
         markPaid: _isPaidNow,
         transactionRef: _isPaidNow && _paymentMethod.isDigital ? _refCodeController.text.trim() : null,

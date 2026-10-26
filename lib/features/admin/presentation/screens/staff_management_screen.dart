@@ -30,29 +30,8 @@ class StaffManagementScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Salary Overview Banner
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    state.tr('staffPayroll'),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    state.tr('staffPayrollSub'),
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.35),
-                  ),
-                ],
-              ),
-            ),
+            // Team Commission Pooling Banner
+            _buildTeamCommissionCard(context, state),
             const SizedBox(height: 18),
 
             Text(
@@ -136,7 +115,7 @@ class StaffManagementScreen extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       CurrencyFormatter.format(member.baseSalaryMonthlyETB),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                     ),
                   ],
                 ),
@@ -145,11 +124,12 @@ class StaffManagementScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(state.tr('commissionRate'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    const Text('Seniority Tier', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
-                      '${(member.commissionRate * 100).toStringAsFixed(0)}% per car',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
+                      member.seniorityTierName,
+                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.secondary),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -158,16 +138,174 @@ class StaffManagementScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(state.tr('washesToday'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    const Text("Today's Dividend", style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
-                      '${member.completedWashesCount} cars',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primary),
+                      CurrencyFormatter.format(state.washerDividendsToday[member.id] ?? 0.0),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
                     ),
                   ],
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeamCommissionCard(BuildContext context, dynamic state) {
+    final poolETB = state.teamCommissionPoolTodayETB;
+    final ratePercent = (state.teamCommissionRate * 100).toStringAsFixed(0);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusCompleted.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.groups_rounded, color: AppColors.statusCompleted, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${state.tr("teamCommissionPool")} ($ratePercent%)',
+                    style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                  ),
+                ],
+              ),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primary),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                icon: const Icon(Icons.edit, size: 14, color: AppColors.primary),
+                label: Text(state.tr('updateRate'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                onPressed: () => _showEditCommissionRateDialog(context, state),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            state.tr('dividendBySeniority'),
+            style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Today's Revenue", style: TextStyle(fontSize: 10.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(
+                      CurrencyFormatter.format(state.totalRevenueTodayETB),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Total Pooled ($ratePercent%)', style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(
+                      CurrencyFormatter.format(poolETB),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.statusCompleted),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Team Size', style: TextStyle(fontSize: 10.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${state.availableWashers.length} Washers',
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditCommissionRateDialog(BuildContext context, dynamic state) {
+    final controller = TextEditingController(text: (state.teamCommissionRate * 100).toStringAsFixed(0));
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(state.tr('teamRateLabel')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Commission Percentage (%)',
+                hintText: 'e.g. 15',
+                suffixText: '%',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'))),
+          ElevatedButton(
+            onPressed: () {
+              final parsed = double.tryParse(controller.text.trim());
+              if (parsed != null && parsed >= 0 && parsed <= 100) {
+                state.setTeamCommissionRate(parsed / 100.0);
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppColors.statusCompleted,
+                    content: Text('Team Commission Rate set to ${parsed.toStringAsFixed(0)}%'),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(state.tr('updateRate')),
           ),
         ],
       ),

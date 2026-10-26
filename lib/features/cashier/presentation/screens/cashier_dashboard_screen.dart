@@ -1,9 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
+import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_dispatcher.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
@@ -280,41 +284,24 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               color: isOccupied ? AppColors.textPrimary : AppColors.textMuted,
             ),
           ),
-          if (isOccupied && bay.assignedWasherName != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Washers: ${bay.assignedWasherName}',
-              style: const TextStyle(fontSize: 11.5, color: AppColors.primary, fontWeight: FontWeight.w600),
+          if (isOccupied) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 38,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                label: Text(_getAdvanceLabel(state, currentStatus), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                onPressed: () => _advanceBayStatus(context, bay, bookings),
+              ),
             ),
           ],
-          const SizedBox(height: 14),
-
-          // Direct Contextual Action Button
-          SizedBox(
-            width: double.infinity,
-            height: 38,
-            child: isOccupied
-                ? ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                    label: Text(_getAdvanceLabel(state, currentStatus), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                    onPressed: () => _advanceBayStatus(context, bay, bookings),
-                  )
-                : OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    icon: const Icon(Icons.add, size: 16, color: AppColors.primary),
-                    label: Text(state.tr('assignVehicle'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.primary)),
-                    onPressed: () => _openAssignModalForBay(context, bay.type, bookings),
-                  ),
-          ),
         ],
       ),
     );
@@ -380,13 +367,73 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                         style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                       ),
                     ),
+                    if (b.isPhoneBooking) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.phone_in_talk, size: 11, color: AppColors.primary),
+                            const SizedBox(width: 3),
+                            Text(
+                              state.tr('phoneCallBooking'),
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${b.package.name} • ${CurrencyFormatter.format(b.totalPrice)} • ${b.assignedWasherName ?? "Unassigned"}',
+                  '${b.package.name} • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
                   style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                 ),
+                if (b.serviceType == ServiceType.atHomeMobile) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 13, color: AppColors.mobileVanColor),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          b.deliveryLocation ?? b.gpsCoordinates ?? "Bishoftu Mobile Van",
+                          style: const TextStyle(fontSize: 11, color: AppColors.mobileVanColor, fontWeight: FontWeight.w600),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      InkWell(
+                        onTap: () => _openMapLocation(context, b),
+                        borderRadius: BorderRadius.circular(4),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.map, size: 12, color: AppColors.primary),
+                              const SizedBox(width: 3),
+                              Text(
+                                state.tr('openInMaps'),
+                                style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppColors.primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -419,12 +466,33 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
+  void _openMapLocation(BuildContext context, WashBooking b) {
+    final query = b.gpsCoordinates ?? b.deliveryLocation ?? "Bishoftu, Ethiopia";
+    final mapUrl = "https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}";
+    if (kIsWeb) {
+      try {
+        html.window.open(mapUrl, '_blank');
+        return;
+      } catch (_) {}
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('GPS: $query'),
+        action: SnackBarAction(
+          label: 'OK',
+          onPressed: () {},
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilterChips(dynamic state) {
     final filters = [
       state.tr('filterAll'),
       state.tr('filterPending'),
       state.tr('filterInService'),
       state.tr('filterUnpaid'),
+      state.tr('phoneCallBooking'),
     ];
 
     return SingleChildScrollView(
@@ -463,6 +531,8 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         return bookings.where((b) => b.status.isOngoing).toList();
       case 3:
         return bookings.where((b) => !b.payment.isPaid).toList();
+      case 4:
+        return bookings.where((b) => b.isPhoneBooking).toList();
       default:
         return bookings.where((b) => b.status != WashStatus.cancelled).toList();
     }

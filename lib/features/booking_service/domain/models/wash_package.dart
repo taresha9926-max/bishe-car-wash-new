@@ -38,12 +38,23 @@ class WashPackage {
 
   String? _getPkgKey() {
     final lower = ('$id $name').toLowerCase();
-    if (lower.contains('express') || lower.contains('0101')) return 'pkg_express';
-    if (lower.contains('standard') || lower.contains('0102')) return 'pkg_standard';
-    if (lower.contains('executive')) return 'pkg_executive';
-    if (lower.contains('chassis') || lower.contains('engine flush')) return 'pkg_chassis';
-    if (lower.contains('deluxe') || lower.contains('0103') || lower.contains('engine detail') || lower.contains('spa')) return 'pkg_deluxe';
-    if (lower.contains('van') || lower.contains('mobile') || lower.contains('0104')) return 'pkg_mobile';
+    if (lower.contains('silver') || lower.contains('basic')) return 'pkg_silver';
+    if (lower.contains('gold') || lower.contains('polish')) return 'pkg_gold';
+    if (lower.contains('plat_interior') || (lower.contains('platinum') && lower.contains('interior'))) return 'pkg_plat_interior';
+    if (lower.contains('plat_ext_a') || (lower.contains('platinum') && lower.contains('a'))) return 'pkg_plat_ext_a';
+    if (lower.contains('plat_ext_b') || (lower.contains('platinum') && lower.contains('b'))) return 'pkg_plat_ext_b';
+    if (lower.contains('plat_ext_c') || (lower.contains('platinum') && lower.contains('c'))) return 'pkg_plat_ext_c';
+    if (lower.contains('diamond_a') || (lower.contains('diamond') && lower.contains('a'))) return 'pkg_diamond_a';
+    if (lower.contains('diamond_b') || (lower.contains('diamond') && lower.contains('b'))) return 'pkg_diamond_b';
+    if (lower.contains('diamond_full') || (lower.contains('diamond') && lower.contains('full'))) return 'pkg_diamond_full';
+    if (lower.contains('engine') || lower.contains('chemical')) return 'pkg_engine_chem';
+    // Fallback aliases
+    if (lower.contains('express') || lower.contains('0101')) return 'pkg_silver';
+    if (lower.contains('standard') || lower.contains('0102')) return 'pkg_gold';
+    if (lower.contains('executive')) return 'pkg_plat_interior';
+    if (lower.contains('chassis')) return 'pkg_engine_chem';
+    if (lower.contains('deluxe')) return 'pkg_diamond_full';
+    if (lower.contains('van') || lower.contains('mobile')) return 'pkg_mobile';
     return null;
   }
 

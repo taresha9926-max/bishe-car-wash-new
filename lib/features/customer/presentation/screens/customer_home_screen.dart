@@ -123,6 +123,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
+              _buildPhoneBookingCard(context, state),
               const SizedBox(height: 24),
 
               // 6. Vehicle Type Pricing Matrix Tabs
@@ -836,6 +838,66 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhoneBookingCard(BuildContext context, dynamic state) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.phone_forwarded_rounded, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.tr('phoneCallBooking'),
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: AppColors.primary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  state.tr('bookByPhoneSub'),
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.call, size: 15),
+            label: const Text('+251 91 123 4567', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Calling BISHE Gate Station: +251 91 123 4567...'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
           ),
         ],
       ),
