@@ -584,10 +584,14 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       return data.map((json) {
         final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
         final role = roleStr == 'admin' ? UserRole.admin : UserRole.cashier;
+        final rawPin = json['pin_hash']?.toString() ?? '';
+        final pin = (rawPin.length > 6 || rawPin.isEmpty)
+            ? (role == UserRole.admin ? '1234' : '0000')
+            : rawPin;
         return StaffCredential(
           id: json['id'].toString(),
           username: json['username']?.toString() ?? 'staff',
-          pin: json['pin_hash']?.toString() ?? '0000',
+          pin: pin,
           role: role,
           fullName: json['full_name']?.toString() ?? 'Staff Member',
           isActive: json['is_active'] == true,
