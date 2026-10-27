@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
@@ -38,61 +39,47 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   }
 
   Future<dynamic> _get(String endpoint) async {
-    final client = HttpClient();
     try {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
-      final request = await client.getUrl(uri);
-      _headers.forEach((k, v) => request.headers.set(k, v));
-      final response = await request.close();
-      final body = await response.transform(utf8.decoder).join();
+      final response = await http.get(uri, headers: _headers);
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return jsonDecode(body);
+        return jsonDecode(response.body);
       }
+      debugPrint('Supabase GET [$endpoint] error ${response.statusCode}: ${response.body}');
       return null;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Supabase GET [$endpoint] exception: $e');
       return null;
-    } finally {
-      client.close();
     }
   }
 
   Future<dynamic> _post(String endpoint, Map<String, dynamic> data) async {
-    final client = HttpClient();
     try {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
-      final request = await client.postUrl(uri);
-      _headers.forEach((k, v) => request.headers.set(k, v));
-      request.write(jsonEncode(data));
-      final response = await request.close();
-      final body = await response.transform(utf8.decoder).join();
+      final response = await http.post(uri, headers: _headers, body: jsonEncode(data));
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return body.isNotEmpty ? jsonDecode(body) : [];
+        return response.body.isNotEmpty ? jsonDecode(response.body) : [];
       }
+      debugPrint('Supabase POST [$endpoint] error ${response.statusCode}: ${response.body}');
       return null;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Supabase POST [$endpoint] exception: $e');
       return null;
-    } finally {
-      client.close();
     }
   }
 
   Future<dynamic> _patch(String endpoint, Map<String, dynamic> data) async {
-    final client = HttpClient();
     try {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
-      final request = await client.patchUrl(uri);
-      _headers.forEach((k, v) => request.headers.set(k, v));
-      request.write(jsonEncode(data));
-      final response = await request.close();
-      final body = await response.transform(utf8.decoder).join();
+      final response = await http.patch(uri, headers: _headers, body: jsonEncode(data));
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return body.isNotEmpty ? jsonDecode(body) : [];
+        return response.body.isNotEmpty ? jsonDecode(response.body) : [];
       }
+      debugPrint('Supabase PATCH [$endpoint] error ${response.statusCode}: ${response.body}');
       return null;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Supabase PATCH [$endpoint] exception: $e');
       return null;
-    } finally {
-      client.close();
     }
   }
 
@@ -257,7 +244,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       return data.map((json) {
         CarType carType = CarType.automobile;
         final carStr = (json['car_type'] ?? '').toString().toLowerCase();
-        if (carStr.contains('minibus') || carStr.contains('truck') || carStr.contains('large')) {
+        if (carStr.contains('truck')) {
+          carType = CarType.truck;
+        } else if (carStr.contains('minibus') || carStr.contains('large')) {
           carType = CarType.minibus;
         }
 
@@ -281,14 +270,21 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         }
 
         BayType? assignedBay;
-        if (json['assigned_bay_id'] != null) {
+        final bayIdStr = json['assigned_bay_id']?.toString();
+        if (bayIdStr == 'b0000000-0000-0000-0000-000000000001') {
           assignedBay = BayType.bay1;
+        } else if (bayIdStr == 'b0000000-0000-0000-0000-000000000002') {
+          assignedBay = BayType.bay2;
+        } else if (bayIdStr == 'b0000000-0000-0000-0000-000000000003') {
+          assignedBay = BayType.mobileVan;
         }
 
         PaymentMethod pMethod = PaymentMethod.cash;
         final mStr = (json['payment_method'] ?? '').toString().toLowerCase();
         if (mStr.contains('telebirr')) pMethod = PaymentMethod.telebirr;
         if (mStr.contains('cbe')) pMethod = PaymentMethod.cbeBirr;
+
+        final isPhone = json['booking_origin'] == 'phone_booking';
 
         return WashBooking(
           id: json['id'].toString(),
@@ -313,9 +309,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
           completedAt: json['completed_at'] != null ? DateTime.tryParse(json['completed_at']) : null,
           commissionLogged: json['commission_logged'] ?? false,
+          isPhoneBooking: isPhone,
         );
       }).toList();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Supabase getBookings exception: $e');
       return _fallbackLocalRepo.getBookings();
     }
   }
@@ -333,26 +331,57 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<WashBooking> createBooking(WashBooking booking) async {
     try {
+      final bayId = booking.assignedBay == BayType.bay1
+          ? 'b0000000-0000-0000-0000-000000000001'
+          : (booking.assignedBay == BayType.bay2
+              ? 'b0000000-0000-0000-0000-000000000002'
+              : (booking.assignedBay == BayType.mobileVan
+                  ? 'b0000000-0000-0000-0000-000000000003'
+                  : null));
+
       final payload = {
         'owner_name': booking.customerName,
         'customer_phone': booking.customerPhone,
         'car_type': booking.carType.name,
         'service_type': booking.serviceType.name,
         'package_id': _isUuid(booking.package.id) ? booking.package.id : null,
+        'assigned_bay_id': bayId,
         'license_plate': booking.licensePlate,
-        'delivery_location': booking.deliveryLocation,
+        'delivery_location': booking.deliveryLocation ?? booking.gpsCoordinates,
         'status': booking.status.name,
         'is_paid': booking.payment.isPaid,
         'payment_method': booking.payment.method.name,
         'total_amount': booking.totalPrice,
+        'booking_origin': booking.isPhoneBooking ? 'phone_booking' : (booking.assignedBay != null ? 'gate_walk_in' : 'customer_app'),
+        'washer_1_name': booking.assignedWasherName,
+        'washer_1_id': _isUuid(booking.assignedWasherId) ? booking.assignedWasherId : null,
+        'scheduled_time': booking.scheduledTime?.toIso8601String(),
+        'transaction_ref': booking.payment.transactionRef,
+        'receipt_url': booking.payment.receiptScreenshot,
       };
 
       final dynamic res = await _post('wash_bookings', payload);
       if (res != null && res is List && res.isNotEmpty) {
         final newId = res.first['id'].toString();
-        return booking.copyWith(id: newId);
+
+        if (booking.assignedBay != null) {
+          final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
+          await _patch('station_bays?bay_number=eq.$bayNum', {
+            'is_occupied': true,
+            'current_booking_id': _isUuid(newId) ? newId : null,
+            'active_license_plate': booking.licensePlate,
+            'assigned_washer_name': booking.assignedWasherName,
+            'started_at': DateTime.now().toIso8601String(),
+          });
+        }
+
+        final persistedBooking = booking.copyWith(id: newId);
+        _fallbackLocalRepo.createBooking(persistedBooking);
+        return persistedBooking;
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Supabase createBooking exception: $e');
+    }
     return _fallbackLocalRepo.createBooking(booking);
   }
 
@@ -377,8 +406,21 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             });
           }
         }
+
+        if (booking != null) {
+          final updated = booking.copyWith(
+            status: newStatus,
+            completedAt: newStatus == WashStatus.completed ? DateTime.now() : booking.completedAt,
+          );
+          try {
+            await _fallbackLocalRepo.updateWashStatus(bookingId, newStatus);
+          } catch (_) {}
+          return updated;
+        }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Supabase updateWashStatus exception: $e');
+    }
     return await _fallbackLocalRepo.updateWashStatus(bookingId, newStatus);
   }
 
@@ -392,13 +434,20 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     try {
       if (_isUuid(bookingId)) {
         final bayNum = bay == BayType.bay1 ? 1 : (bay == BayType.bay2 ? 2 : 3);
-        final booking = await getBookingById(bookingId);
+        final bayId = bay == BayType.bay1
+            ? 'b0000000-0000-0000-0000-000000000001'
+            : (bay == BayType.bay2
+                ? 'b0000000-0000-0000-0000-000000000002'
+                : 'b0000000-0000-0000-0000-000000000003');
 
         await _patch('wash_bookings?id=eq.$bookingId', {
+          'assigned_bay_id': bayId,
           'assigned_washer_id': _isUuid(washerId) ? washerId : null,
           'washer_1_name': washerName,
           'status': WashStatus.washing.name,
         });
+
+        final booking = await getBookingById(bookingId);
 
         await _patch('station_bays?bay_number=eq.$bayNum', {
           'is_occupied': true,
@@ -407,8 +456,28 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           'assigned_washer_name': washerName,
           'started_at': DateTime.now().toIso8601String(),
         });
+
+        if (booking != null) {
+          final updated = booking.copyWith(
+            assignedBay: bay,
+            assignedWasherId: washerId,
+            assignedWasherName: washerName,
+            status: WashStatus.washing,
+          );
+          try {
+            await _fallbackLocalRepo.assignBayAndWasher(
+              bookingId: bookingId,
+              bay: bay,
+              washerId: washerId,
+              washerName: washerName,
+            );
+          } catch (_) {}
+          return updated;
+        }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Supabase assignBayAndWasher exception: $e');
+    }
     return await _fallbackLocalRepo.assignBayAndWasher(
       bookingId: bookingId,
       bay: bay,
@@ -434,8 +503,34 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           'transaction_ref': transactionRef,
           'receipt_url': receiptScreenshot,
         });
+
+        final booking = await getBookingById(bookingId);
+        if (booking != null) {
+          final updated = booking.copyWith(
+            payment: booking.payment.copyWith(
+              isPaid: true,
+              method: method,
+              amount: amount,
+              transactionRef: transactionRef,
+              receiptScreenshot: receiptScreenshot,
+              paidAt: DateTime.now(),
+            ),
+          );
+          try {
+            await _fallbackLocalRepo.processPayment(
+              bookingId: bookingId,
+              method: method,
+              amount: amount,
+              transactionRef: transactionRef,
+              receiptScreenshot: receiptScreenshot,
+            );
+          } catch (_) {}
+          return updated;
+        }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Supabase processPayment exception: $e');
+    }
     return await _fallbackLocalRepo.processPayment(
       bookingId: bookingId,
       method: method,
