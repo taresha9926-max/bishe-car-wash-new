@@ -233,12 +233,12 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                           ),
                           if (pkg.features.isNotEmpty) ...[
                             const SizedBox(height: 8),
-                            const Text(
-                              'Included Services:',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            Text(
+                              state.tr('includedServices'),
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                             ),
                             const SizedBox(height: 4),
-                            ...pkg.features.map((feature) => Padding(
+                            ...pkg.localizedFeatures(state.currentLang).map((feature) => Padding(
                               padding: const EdgeInsets.only(bottom: 2),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,

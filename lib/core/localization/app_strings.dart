@@ -1052,9 +1052,234 @@ class AppStrings {
       AppLanguage.om: 'Hamma Jijjiiri',
       AppLanguage.am: 'ምጣኔ ቀይር',
     },
+    'includedServices': {
+      AppLanguage.en: 'Included Services:',
+      AppLanguage.om: 'Tajaajiloota Dabalatan:',
+      AppLanguage.am: 'የተካተቱ አገልግሎቶች፡',
+    },
+  };
+
+  static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
+    'pkg_silver': {
+      AppLanguage.en: [
+        'High-pressure undercarriage & wheel arch pre-rinse',
+        'Touchless snow foam body soak',
+        'Hand wash with microfiber mitts',
+        'Rims & tire surface cleaning',
+        'Spot-free rinse & streak-free microfiber hand dry',
+      ],
+      AppLanguage.om: [
+        'Jala makiinaafi naannoo gommaa dhiibbaa bishaaniin dhiqquu',
+        'Hoomaa bishaaniitiin qaama makiinaa jiisuu',
+        'Huccuu maayikiroofaayiberiin harkaan dhiqquu',
+        'Qulqullina riimiifi fuula gommaa',
+        'Bishaaniin dhiqanii haxaa\'uun gogsuu',
+      ],
+      AppLanguage.am: [
+        'ከፍተኛ የውሃ ግፊት የመኪና ስር እና የጎማ ክልል ቅድመ-እጥበት',
+        'የመኪና አካል በሳሙና አረፋ ማራስ',
+        'በማይክሮፋይበር ስፖንጅ በእጅ በጥንቃቄ ማጠብ',
+        'የሪምና የጎማ ውጫዊ ገጽታ ማጽዳት',
+        'ውሃውን በሚገባ አውርዶ በማይክሮፋይበር ፎጣ ማድረቅ',
+      ],
+    },
+    'pkg_gold': {
+      AppLanguage.en: [
+        'Complete Basic / Silver Wash included',
+        'Machine high-gloss body polish application',
+        'Long-lasting silicone tire dressing & shine',
+        'Exterior glass polish & door jamb wipe-down',
+      ],
+      AppLanguage.om: [
+        'Dhiqannaa Bu\'uuraa / Meetaa guutuun dabalameera',
+        'Qaama makiinaa maashiniin pooliishii gochuun calaqqisiisuu',
+        'Gommaa siilikooniin kuulee bareechuu',
+        'Daawwitii alaa fi kutaalee balbalaa haxaa\'uu',
+      ],
+      AppLanguage.am: [
+        'ሙሉ የቤሲክ / ሲልቨር እጥበት ተካቷል',
+        'በማሽን የሚሰራ የቦዲ ፖሊሽ ማብሪያ',
+        'ለረጅም ጊዜ የሚቆይ የጎማ ሲሊኮን ማብሪያ',
+        'የውጭ መስታወት ፖሊሽ እና የበር ክፈፎች ጽዳት',
+      ],
+    },
+    'pkg_plat_interior': {
+      AppLanguage.en: [
+        'All passenger seats removed for extraction',
+        'Floor carpets shampooed & pressure washed',
+        'Roof lining high-heat steam sanitization',
+        'Dashboard, vents, glove box & console detailing',
+        'Air conditioning duct deodorization',
+        'Leather conditioning / upholstery UV shield',
+      ],
+      AppLanguage.om: [
+        'Barcumti hundinuu keessaa baafamee dhiqama',
+        'Karpeetiin lafaa shaampuudhaan dhiqamee miicawa',
+        'Baaxiin makiinaa hurka bishaaniitiin (istiimii) qulqullaa\'a',
+        'Daashboordii, ujummoo qilleensaa fi saanduqa qulqulleessuu',
+        'Fooyya\'iinsa qilleensa koondeeshinara keessoo',
+        'Gogaa barcumaa eeguufi qulqulleessuu',
+      ],
+      AppLanguage.am: [
+        'ሁሉም የመኪናው ወንበሮች ወጥተው በጥልቅ ይታጠባሉ',
+        'የወለል ምንጣፎች በሻምፑ እና በውሃ ግፊት ይታጠባሉ',
+        'የመኪናው ጣሪያ በከፍተኛ የእንፋሎት ሙቀት ማጽዳት',
+        'ዳሽቦርድ፣ የአየር ማስገቢያዎችና የጓንት ሳጥን ዝርዝር ጽዳት',
+        'የአየር ማቀዝቀዣ ቱቦዎች ጀርም ማጥፋትና ሽታ ማስወገድ',
+        'የቆዳ ወንበሮች እንክብካቤ እና የፀሐይ መከላከያ ቅባት',
+      ],
+    },
+    'pkg_plat_ext_a': {
+      AppLanguage.en: [
+        'Full exterior hand wash & clay bar decontamination',
+        'Machine paint correction & gloss enhancement',
+        'Chemical removal of Bishoftu lake water spots',
+        'Hydrophobic paint sealant protection',
+      ],
+      AppLanguage.om: [
+        'Dhiqannaa alaa guutuu fi xurii dhabamsiisuu',
+        'Halluu makiinaa maashiniin haaromsuu fi calaqqisiisuu',
+        'Mallattoo bishaan haroo Bishooftuu keemikaalaan balleessuu',
+        'Eegumsa halluu makiinaa bishaan ittisu',
+      ],
+      AppLanguage.am: [
+        'ሙሉ የውጭ እጥበት እና የቆሻሻ ማጽጃ ህክምና',
+        'በማሽን የቀለም ማስተካከል እና የማብራት ስራ',
+        'የቢሾፍቱ ሀይቅ ውሃ ምልክቶችን በኬሚካል ማስወገድ',
+        'ውሃ የማያሲዝ የቀለም መከላከያ ሽፋን',
+      ],
+    },
+    'pkg_plat_ext_b': {
+      AppLanguage.en: [
+        'All Platinum Exterior Level A services included',
+        'Brake dust removal & wheel well acid wash',
+        'Ceramic rim protective gloss coating',
+        'Exterior plastic trim & bumper restoration',
+      ],
+      AppLanguage.om: [
+        'Tajaajilli Pulaatiiniyemii Alaa Paakeejii A hundi dabalameera',
+        'Xurii biriikii fi naannoo gommaa asidiin qulqulleessuu',
+        'Riimii makiinaa pooliishiidhaan eeguu',
+        'Pilaastikoota alaa fi baamperii haaromsuu',
+      ],
+      AppLanguage.am: [
+        'ሁሉም የፕላቲነም ውጭ ፓኬጅ ኤ አገልግሎቶች ተካተዋል',
+        'የፍሬን አቧራ እና የጎማ ስር በልዩ አሲድ ማጠብ',
+        'የሴራሚክ ሪም መከላከያ እና ማብሪያ ሽፋን',
+        'የውጭ ፕላስቲኮች እና ባምፐር ማደስ',
+      ],
+    },
+    'pkg_plat_ext_c': {
+      AppLanguage.en: [
+        'All Platinum Exterior Level A & B services included',
+        'Dual-stage headlight wet-sanding & UV yellowing removal',
+        'Chrome & metal trim brightening polish',
+        'Hydrophobic rain-repellent windshield treatment',
+      ],
+      AppLanguage.om: [
+        'Tajaajilli Pulaatiiniyemii Alaa Paakeejii A fi B hundi dabalameera',
+        'Ifa fuulduraa (foolii) qulqulleessuu fi keelloo balleessuu',
+        'Sibilaafi kiroomii makiinaa calaqqisiisuu',
+        'Daawwitii fuulduraa bishaan ittisuun yaaluu',
+      ],
+      AppLanguage.am: [
+        'ሁሉም የፕላቲነም ውጭ ፓኬጅ ኤ እና ቢ አገልግሎቶች ተካተዋል',
+        'የፊት መብራት ማጽዳት፣ ማከክ እና ቢጫነትን ማስወገድ',
+        'የክሮም እና የብረት ክፍሎችን የማብራት ፖሊሽ',
+        'ለፊት መስታወት የዝናብ ውሃ መከላከያ ህክምና',
+      ],
+    },
+    'pkg_diamond_a': {
+      AppLanguage.en: [
+        'Full Platinum Interior Detailing (seats & carpets out)',
+        'Machine body polish & paint correction',
+        'Mineral hard water spot removal',
+        'Cabin antibacterial steam sanitization',
+      ],
+      AppLanguage.om: [
+        'Pulaatiiniyemii Keessoo Guutuu (barcumtiifi karpeetiin baafamee)',
+        'Qaama makiinaa maashiniin pooliishii gochuufi halluu haaromsuu',
+        'Mallattoo bishaanii keemikaalaan balleessuu',
+        'Keessa makiinaa hurka bishaaniin baakteeriyaa balleessuu',
+      ],
+      AppLanguage.am: [
+        'ሙሉ የፕላቲነም የውስጥ ዲቴይሊንግ (ወንበርና ምንጣፍ ወጥቶ)',
+        'በማሽን የቦዲ ፖሊሽ እና የቀለም ማስተካከል',
+        'የውሃ እና የጨው ምልክቶችን በኬሚካል ማጥፋት',
+        'የመኪናውን ውስጠኛ ክፍል በእንፋሎት ጀርም ማጽዳት',
+      ],
+    },
+    'pkg_diamond_b': {
+      AppLanguage.en: [
+        'Full Platinum Interior Detailing (seats & carpets out)',
+        'Machine body polish & water spot removal',
+        'Deep wheel arch, rim & tire detailing',
+        'Engine compartment dress & UV interior balm',
+      ],
+      AppLanguage.om: [
+        'Pulaatiiniyemii Keessoo Guutuu (barcumtiifi karpeetiin baafamee)',
+        'Qaama makiinaa pooliishii gochuufi bishaan balleessuu',
+        'Naannoo gommaa, riimiifi gommaa gadi-fageenyaan qulqulleessuu',
+        'Kutaa motoraa bareechuu fi keessoo eeguu',
+      ],
+      AppLanguage.am: [
+        'ሙሉ የፕላቲነም የውስጥ ዲቴይሊንግ (ወንበርና ምንጣፍ ወጥቶ)',
+        'በማሽን የቦዲ ፖሊሽ እና የውሃ ምልክት ማጥፋት',
+        'የጎማ ስር፣ የሪምና የጎማ ጥልቅ ዲቴይሊንግ',
+        'የሞተር ክፍል ማጽዳትና የውስጥ ፕላስቲክ መከላከያ ቅባት',
+      ],
+    },
+    'pkg_diamond_full': {
+      AppLanguage.en: [
+        'Complete Platinum Interior Detailing (seats & carpets out)',
+        'Complete Platinum Exterior Level C Suite',
+        'Dual-stage headlight restoration & ceramic seal',
+        'Complete air conditioning deodorization & engine wipe',
+      ],
+      AppLanguage.om: [
+        'Pulaatiiniyemii Keessoo Guutuu (barcumtiifi karpeetiin baafamee)',
+        'Pulaatiiniyemii Alaa Sadarkaa C guutummaatti',
+        'Ifa fuulduraa haaromsuu fi eegumsa seeraamikii',
+        'Koondeeshinara qulqulleessuu fi motora haxaa\'uu',
+      ],
+      AppLanguage.am: [
+        'የተሟላ የፕላቲነም የውስጥ ዲቴይሊንግ (ወንበርና ምንጣፍ ወጥቶ)',
+        'የተሟላ የፕላቲነም የውጭ ደረጃ ሲ አገልግሎት',
+        'የፊት መብራትን ሙሉ በሙሉ ማደስና ሴራሚክ ማበብ',
+        'ሙሉ የአየር ማቀዝቀዣ ሽታ ማስወገድና የሞተር ጽዳት',
+      ],
+    },
+    'pkg_engine_chem': {
+      AppLanguage.en: [
+        'Basic / Silver exterior body wash included',
+        'Safe chemical degreaser on engine block & firewall',
+        'Low-pressure controlled grime rinse',
+        'Silicone hose & rubber component conditioning',
+      ],
+      AppLanguage.om: [
+        'Dhiqannaa alaa Bu\'uuraa / Meetaa dabalameera',
+        'Motoora keemikaalaan dhiqquu fi zayita dhabamsiisuu',
+        'Bishaaniin to\'atamee gogsuu',
+        'Ujummoolee gommaa fi qodaa motooraa haaromsuu',
+      ],
+      AppLanguage.am: [
+        'የቤሲክ / ሲልቨር የውጭ እጥበት ተካቷል',
+        'የሞተር ብሎክን ደህንነቱ በተጠበቀ ኬሚካል ማጠብና ቅባት ማስወገድ',
+        'በቁጥጥር ስር ባለ ዝቅተኛ የውሃ ግፊት ማጠብ',
+        'የሞተር ቱቦዎችን እና የጎማ ክፍሎችን በሲሊኮን ማደስ',
+      ],
+    },
   };
 
   static String get(String key, AppLanguage lang) {
     return _strings[key]?[lang] ?? _strings[key]?[AppLanguage.en] ?? key;
+  }
+
+  static List<String> getPackageFeatures(String pkgKey, AppLanguage lang) {
+    final pkgMap = _packageFeatures[pkgKey];
+    if (pkgMap != null) {
+      return pkgMap[lang] ?? pkgMap[AppLanguage.en] ?? const [];
+    }
+    return const [];
   }
 }

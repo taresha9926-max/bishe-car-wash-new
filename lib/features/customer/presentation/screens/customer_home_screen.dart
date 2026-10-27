@@ -805,7 +805,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: pkg.features.map((feature) {
+                    children: pkg.localizedFeatures(state.currentLang).map((feature) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.5),
                         child: Row(

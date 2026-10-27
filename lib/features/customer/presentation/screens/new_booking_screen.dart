@@ -198,7 +198,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                               ),
                               if (isSelected && pkg.features.isNotEmpty) ...[
                                 const SizedBox(height: 6),
-                                ...pkg.features.map((f) => Padding(
+                                ...pkg.localizedFeatures(state.currentLang).map((f) => Padding(
                                   padding: const EdgeInsets.only(bottom: 2),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,

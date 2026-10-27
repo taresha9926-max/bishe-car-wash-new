@@ -235,6 +235,20 @@ void main() {
       expect(diamA.localizedName('en'), equals('Diamond Package A'));
       expect(diamB.localizedName('en'), equals('Diamond Package B'));
       expect(diamC.localizedName('en'), equals('Diamond Package C (Full)'));
+
+      // Verify itemized features translation in Afaan Oromoo and Amharic
+      final silverFeaturesEn = silver.localizedFeatures('en');
+      final silverFeaturesOm = silver.localizedFeatures('om');
+      final silverFeaturesAm = silver.localizedFeatures('am');
+      expect(silverFeaturesEn.length, equals(5));
+      expect(silverFeaturesOm.length, equals(5));
+      expect(silverFeaturesAm.length, equals(5));
+      expect(silverFeaturesOm.first, contains('dhiibbaa bishaaniin'));
+      expect(silverFeaturesAm.first, contains('የውሃ ግፊት'));
+
+      final platInt = packages.firstWhere((p) => p.id.endsWith('0103'));
+      expect(platInt.localizedFeatures('om').first, contains('Barcumti'));
+      expect(platInt.localizedFeatures('am').first, contains('ወንበሮች'));
     });
 
     test('8 Washers form a single team with seniority weights and dividends', () {

@@ -210,12 +210,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Included Services Checklist:',
-                              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            Text(
+                              state.tr('includedServices'),
+                              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                             ),
                             const SizedBox(height: 6),
-                            ...pkg.features.map((feature) => Padding(
+                            ...pkg.localizedFeatures(state.currentLang).map((feature) => Padding(
                               padding: const EdgeInsets.only(bottom: 3),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,

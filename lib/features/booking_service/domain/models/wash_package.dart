@@ -36,6 +36,16 @@ class WashPackage {
     return description;
   }
 
+  List<String> localizedFeatures(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
+    final key = _getPkgKey();
+    if (key != null) {
+      final list = AppStrings.getPackageFeatures(key, lang);
+      if (list.isNotEmpty) return list;
+    }
+    return features;
+  }
+
   String? _getPkgKey() {
     // 1. Exact match on known UUID suffix or ID string
     if (id.endsWith('0101') || id == 'pkg-silver') return 'pkg_silver';
