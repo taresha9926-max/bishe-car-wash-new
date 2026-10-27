@@ -242,6 +242,162 @@ class AppStrings {
       AppLanguage.om: 'Tajaajila Makiinaa Socho\'aa',
       AppLanguage.am: 'ተንቀሳቃሽ የቤት ለቤት አገልግሎት',
     },
+    'servicePhoneCall': {
+      AppLanguage.en: 'Phone Reservation',
+      AppLanguage.om: 'Qabannaa Bilbilaa',
+      AppLanguage.am: 'የስልክ ጥሪ ትዕዛዝ',
+    },
+    'servicePhoneCallSub': {
+      AppLanguage.en: 'Pre-booked via Gate Phone Call',
+      AppLanguage.om: 'Bilbilaan duraan qabame',
+      AppLanguage.am: 'በስልክ ጥሪ አስቀድሞ የተያዘ',
+    },
+
+    // Welcome Screen & Portal
+    'welcomeTitle': {
+      AppLanguage.en: 'BISHE Car Wash Hub',
+      AppLanguage.om: 'Giddugala Dhiqannaa BISHE',
+      AppLanguage.am: 'ቢሼ የመኪና ማጠቢያ ማዕከል',
+    },
+    'welcomeSubtitle': {
+      AppLanguage.en: 'Premier Auto Detailing & Care in Bishoftu',
+      AppLanguage.om: 'Dhiqannaafi Kunuunsa Makiinaa Qulqulluu Bishooftuutti',
+      AppLanguage.am: 'በቢሾፍቱ ምርጡ የዲቴይሊንግ እና የመኪና እንክብካቤ ማዕከል',
+    },
+    'openGoogleMaps': {
+      AppLanguage.en: 'Open in Google Maps 📍',
+      AppLanguage.om: 'Kaartaa Google irratti Bani 📍',
+      AppLanguage.am: 'በጉግል ካርታ ክፈት 📍',
+    },
+    'locateBisheStation': {
+      AppLanguage.en: 'Locate BISHE Station',
+      AppLanguage.om: 'Bakka BISHE Argadhaa',
+      AppLanguage.am: 'የቢሼ ማጠቢያን መገኛ አግኝ',
+    },
+    'customerPortal': {
+      AppLanguage.en: 'Customer Portal',
+      AppLanguage.om: 'Balbala Maamiltootaa',
+      AppLanguage.am: 'የደንበኞች መግቢያ',
+    },
+    'customerPortalDesc': {
+      AppLanguage.en: 'Browse 10 packages, book wash & private live wash tracking',
+      AppLanguage.om: 'Gosoota 10 ilaalaa, qabadhaa fi makiinaa keessan hordofaa',
+      AppLanguage.am: '10 ፓኬጆችን ይመልከቱ፣ እጥበት ይዘዙ እና ሁኔታውን ይከታተሉ',
+    },
+    'cashierPortal': {
+      AppLanguage.en: 'Cashier Gate Desk',
+      AppLanguage.om: 'Kaffaltii & Seensa Balbalaa',
+      AppLanguage.am: 'የካሸር በር ዴስክ',
+    },
+    'cashierPortalDesc': {
+      AppLanguage.en: 'Gate walk-in check-in, phone call bookings & post-wash payments',
+      AppLanguage.om: 'Galmee balbalaa, bilbila, adeemsa dhiqannaafi kaffaltii',
+      AppLanguage.am: 'የበር መግቢያ ምዝገባ፣ የስልክ ጥሪ፣ የእጥበት ሂደትና የድህረ-እጥበት ክፍያ',
+    },
+    'adminPortal': {
+      AppLanguage.en: 'Admin Console',
+      AppLanguage.om: 'To\'annoo Bulchiinsaa',
+      AppLanguage.am: 'የአስተዳዳሪ መቆጣጠሪያ',
+    },
+    'adminPortalDesc': {
+      AppLanguage.en: 'Staff control, 15% washer team dividends, PINs & time reports',
+      AppLanguage.om: 'Hojjattoota, komishiinii 15%, koodii duraafi gabaasa yeroo',
+      AppLanguage.am: 'ሰራተኞች፣ የ15% አጣቢዎች ኮሚሽን፣ ሚስጥር ቁጥርና የጊዜ ሪፖርቶች',
+    },
+
+    // Readable Progression & Payment Lock
+    'startWashAction': {
+      AppLanguage.en: 'Start Wash 🚿',
+      AppLanguage.om: 'Dhiqannaa Jalqabi 🚿',
+      AppLanguage.am: 'እጥበት ጀምር 🚿',
+    },
+    'moveToDryingAction': {
+      AppLanguage.en: 'Move to Drying 💨',
+      AppLanguage.om: 'Gogsatti Dabarsi 💨',
+      AppLanguage.am: 'ወደ ማድረቅ አሳልፍ 💨',
+    },
+    'markCompletedAction': {
+      AppLanguage.en: 'Mark Completed 🚗',
+      AppLanguage.om: 'Xumurameera Jedhi 🚗',
+      AppLanguage.am: 'ተጠናቋል በል 🚗',
+    },
+    'collectPaymentAction': {
+      AppLanguage.en: 'Collect Payment 💰',
+      AppLanguage.om: 'Kaffaltii Fudhadhu 💰',
+      AppLanguage.am: 'ክፍያ ተቀበል 💰',
+    },
+    'paymentLockedUntilCompleted': {
+      AppLanguage.en: 'Payment unlocks after vehicle is marked completed',
+      AppLanguage.om: 'Kaffaltiin kan banamu erga dhiqamee xumuramee qofa',
+      AppLanguage.am: 'ክፍያ የሚፈቀደው እጥበቱ ተጠናቋል ተብሎ ከተረጋገጠ በኋላ ብቻ ነው',
+    },
+    'registerPhoneBooking': {
+      AppLanguage.en: 'Register Phone Booking 📞',
+      AppLanguage.om: 'Galmee Bilbilaa 📞',
+      AppLanguage.am: 'የስልክ ጥሪ ትዕዛዝ መዝግብ 📞',
+    },
+    'phoneBookingCallerName': {
+      AppLanguage.en: 'Caller / Customer Name',
+      AppLanguage.om: 'Maqaa Maamilaa',
+      AppLanguage.am: 'የደዋይ / ደንበኛ ስም',
+    },
+    'phoneBookingArrival': {
+      AppLanguage.en: 'Expected Arrival Slot',
+      AppLanguage.om: 'Yeroo Dhufan',
+      AppLanguage.am: 'የሚመጡበት ሰዓት',
+    },
+    'paymentAtGateNote': {
+      AppLanguage.en: 'No advance payment needed. Payment is settled at the gate once your vehicle is washed.',
+      AppLanguage.om: 'Kaffaltii duroo hin barbaachisu. Kaffaltiin kan kaffalamu erga makiinaan dhiqamee booda.',
+      AppLanguage.am: 'ቅድመ ክፍያ አያስፈልግም። ክፍያ የሚፈጸመው መኪናዎ ታጥቦ ሲጠናቀቅ በካሸር ዴስክ ላይ ነው።',
+    },
+
+    // Admin Time Filters & Seniority Commission
+    'filterToday': {
+      AppLanguage.en: 'Today',
+      AppLanguage.om: 'Har\'a',
+      AppLanguage.am: 'ዛሬ',
+    },
+    'filterThisWeek': {
+      AppLanguage.en: 'This Week',
+      AppLanguage.om: 'Torban Kana',
+      AppLanguage.am: 'በዚህ ሳምንት',
+    },
+    'filterThisMonth': {
+      AppLanguage.en: 'This Month',
+      AppLanguage.om: 'Ji\'a Kana',
+      AppLanguage.am: 'በዚህ ወር',
+    },
+    'filterAllTime': {
+      AppLanguage.en: 'All Time',
+      AppLanguage.om: 'Yeroo Hunda',
+      AppLanguage.am: 'ሁሉንም ጊዜ',
+    },
+    'teamCommissionDistribution': {
+      AppLanguage.en: '15% Team Commission Seniority Distribution',
+      AppLanguage.om: 'Qoqqoodama Komishiinii Garee 15% Sadarkaan',
+      AppLanguage.am: 'የ15% የቡድን አጣቢዎች ኮሚሽን በደረጃ ክፍፍል',
+    },
+    'disburseCommission': {
+      AppLanguage.en: 'Disburse Commission Pool',
+      AppLanguage.om: 'Komishiinii Raabsi',
+      AppLanguage.am: 'ኮሚሽን አከፋፍል',
+    },
+    'commissionDisbursedSuccess': {
+      AppLanguage.en: 'Commission dividends successfully approved and logged!',
+      AppLanguage.om: 'Komishiiniin milkaa\'inaan raabsamee galmaa\'eera!',
+      AppLanguage.am: 'የኮሚሽን ክፍፍል በተሳካ ሁኔታ ጸድቆ ተመዝግቧል!',
+    },
+    'seniorityWeight': {
+      AppLanguage.en: 'Seniority Weight',
+      AppLanguage.om: 'Ulfaatina Sadarkaa',
+      AppLanguage.am: 'የደረጃ ክብደት',
+    },
+    'cashVsDigital': {
+      AppLanguage.en: 'Cash vs Digital Settlement',
+      AppLanguage.om: 'Kaffaltii Qarshii fi Dijitaalaa',
+      AppLanguage.am: 'የጥሬ ገንዘብ እና ዲጂታል ክፍያ ንፅፅር',
+    },
 
     // Bay Types (BayType)
     'bay1Name': {

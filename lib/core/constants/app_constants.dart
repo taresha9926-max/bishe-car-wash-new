@@ -17,6 +17,10 @@ class AppConstants {
   // Commission default
   static const double defaultCommissionRate = 0.15; // 15% commission per wash
 
+  // Station GPS & Contact
+  static const String googleMapsLocationUrl = 'https://goo.gl/maps/FStasAgHdHD2RBTWA?g_st=aw';
+  static const String stationPhoneNumber = '+251911234567';
+
   // Live Supabase Backend Configuration (Project: bishe car wash)
   static const String supabaseUrl = 'https://siioobajphmwzwwarlrr.supabase.co';
   static const String supabaseAnonKey =

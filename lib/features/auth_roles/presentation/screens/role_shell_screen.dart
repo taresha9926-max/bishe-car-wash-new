@@ -7,6 +7,7 @@ import 'package:bishe_car_wash/features/auth_roles/presentation/widgets/role_aut
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
+import 'package:bishe_car_wash/features/welcome/presentation/screens/welcome_screen.dart';
 
 class RoleShellScreen extends StatelessWidget {
   const RoleShellScreen({super.key});
@@ -14,6 +15,10 @@ class RoleShellScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
+    if (state.isWelcomeActive) {
+      return const WelcomeScreen();
+    }
+
     final currentRole = state.currentRole;
     final isDesktop = ResponsiveLayout.isDesktop(context);
 
@@ -164,7 +169,18 @@ class RoleShellScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 36),
+          const SizedBox(height: 24),
+          ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            tileColor: AppColors.primary.withOpacity(0.08),
+            leading: const Icon(Icons.home_rounded, color: AppColors.primary, size: 20),
+            title: const Text(
+              'Welcome Hub',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary),
+            ),
+            onTap: () => state.goToWelcome(),
+          ),
+          const SizedBox(height: 16),
           const Text(
             'ROLES',
             style: TextStyle(

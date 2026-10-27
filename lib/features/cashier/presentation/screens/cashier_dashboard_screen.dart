@@ -14,6 +14,7 @@ import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'bay_assignment_modal.dart';
 import 'payment_process_dialog.dart';
+import 'phone_booking_dialog.dart';
 import 'walk_in_registration_screen.dart';
 
 class CashierDashboardScreen extends StatefulWidget {
@@ -44,19 +45,34 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       appBar: AppRoleHeader(
         title: state.tr('cashierTitle'),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_road_rounded),
-        label: Text(state.tr('newWalkIn'), style: const TextStyle(fontWeight: FontWeight.w800)),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const WalkInRegistrationScreen(),
-            ),
-          );
-        },
+      floatingActionButton: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'fab_phone_intake',
+            backgroundColor: AppColors.secondary,
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
+            label: Text(state.tr('registerPhoneBooking'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+            onPressed: () => PhoneBookingDialog.show(context),
+          ),
+          const SizedBox(width: 10),
+          FloatingActionButton.extended(
+            heroTag: 'fab_walk_in',
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.add_road_rounded, size: 18),
+            label: Text(state.tr('newWalkIn'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const WalkInRegistrationScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
@@ -70,63 +86,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               _buildShiftSummaryBanner(state),
               const SizedBox(height: 16),
 
-              // 2. Real-Time Capacity Quick Status Bar
+              // 2. Real-Time Capacity Quick Status Bar (Bay 1, Bay 2, Mobile Van 1)
               _buildCleanStationCapacityBar(context, state, bay1, bay2, van),
               const SizedBox(height: 20),
 
-              // 3. Physical Station Bays & Mobile Van Cards
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    state.tr('activeWashingBays'),
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    '${state.availableBaysCount}/2 ${state.tr("availableNow")}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              // Responsive Bay Cards
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 750;
-                  if (isWide) {
-                    return Row(
-                      children: [
-                        Expanded(child: _buildBayCard(context, state, bay1, allBookings)),
-                        const SizedBox(width: 12),
-                        Expanded(child: _buildBayCard(context, state, bay2, allBookings)),
-                        const SizedBox(width: 12),
-                        Expanded(child: _buildBayCard(context, state, van, allBookings)),
-                      ],
-                    );
-                  }
-                  return Column(
-                    children: [
-                      _buildBayCard(context, state, bay1, allBookings),
-                      const SizedBox(height: 10),
-                      _buildBayCard(context, state, bay2, allBookings),
-                      const SizedBox(height: 10),
-                      _buildBayCard(context, state, van, allBookings),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // 3. Queue Management Section
+              // 3. Queue Management Section (Bay cards removed for cleaner workflow)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -232,97 +196,6 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         Text(sub, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
       ],
     );
-  }
-
-  Widget _buildBayCard(BuildContext context, dynamic state, StationBay bay, List<WashBooking> bookings) {
-    final isOccupied = bay.status == BayStatus.occupied;
-    final currentStatus = _getBayWashStatus(bay, bookings);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isOccupied ? AppColors.bay1Color.withOpacity(0.4) : AppColors.cardBorder,
-          width: isOccupied ? 1.5 : 1.0,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                bay.type.displayName,
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: AppColors.textPrimary),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isOccupied ? AppColors.statusWashing.withOpacity(0.12) : AppColors.statusReady.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  isOccupied ? (currentStatus?.displayName ?? state.tr('filterInService')) : state.tr('availableNow'),
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    color: isOccupied ? AppColors.statusWashing : AppColors.statusReady,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            isOccupied ? 'Vehicle: ${bay.activeLicensePlate ?? "Ongoing"}' : 'Open for next drive-in car',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: isOccupied ? FontWeight.w800 : FontWeight.w500,
-              color: isOccupied ? AppColors.textPrimary : AppColors.textMuted,
-            ),
-          ),
-          if (isOccupied) ...[
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              height: 38,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                label: Text(_getAdvanceLabel(state, currentStatus), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                onPressed: () => _advanceBayStatus(context, bay, bookings),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  String _getAdvanceLabel(dynamic state, WashStatus? status) {
-    if (status == null) return 'Advance Wash';
-    switch (status) {
-      case WashStatus.pending:
-      case WashStatus.confirmed:
-        return state.tr('startWashing');
-      case WashStatus.assignedToBay:
-      case WashStatus.washing:
-        return state.tr('setToDrying');
-      case WashStatus.drying:
-        return state.tr('markReady');
-      case WashStatus.readyForPickup:
-        return state.tr('completeArchive');
-      default:
-        return 'Advance Status';
-    }
   }
 
   Widget _buildCleanQueueRow(BuildContext context, dynamic state, WashBooking b) {
@@ -439,28 +312,88 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           ),
           const SizedBox(width: 8),
 
-          // Payment button if unpaid
-          if (!b.payment.isPaid) ...[
-            ElevatedButton(
+          // 1. Readable Status Advancement Action Button
+          if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay) ...[
+            ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.cashGreen,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
               ),
-              onPressed: () => PaymentProcessDialog.show(context, b),
-              child: Text(state.tr('payButton'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              icon: const Icon(Icons.play_arrow_rounded, size: 14),
+              label: Text(state.tr('startWashAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              onPressed: () => _advanceBookingStatus(context, b),
             ),
-            const SizedBox(width: 6),
+          ] else if (b.status == WashStatus.washing) ...[
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.bay1Color,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.air_rounded, size: 14),
+              label: Text(state.tr('moveToDryingAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              onPressed: () => _advanceBookingStatus(context, b),
+            ),
+          ] else if (b.status == WashStatus.drying) ...[
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.bay2Color,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.check_circle_outline_rounded, size: 14),
+              label: Text(state.tr('markCompletedAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              onPressed: () => _advanceBookingStatus(context, b),
+            ),
           ],
 
-          // Quick advance
-          IconButton(
-            icon: const Icon(Icons.arrow_circle_right_rounded, color: AppColors.primary, size: 28),
-            tooltip: state.tr('advanceStatus'),
-            onPressed: () => _advanceBookingStatus(context, b),
-          ),
+          // 2. Strict Payment Lock: ONLY visible when status == completed AND unpaid!
+          if (b.status == WashStatus.completed && !b.payment.isPaid) ...[
+            const SizedBox(width: 6),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.cashGreen,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.payments_rounded, size: 14),
+              label: Text(
+                '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+              ),
+              onPressed: () => PaymentProcessDialog.show(context, b),
+            ),
+          ] else if (b.payment.isPaid) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.statusCompleted.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: AppColors.statusCompleted.withOpacity(0.4)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.check_circle, size: 12, color: AppColors.statusCompleted),
+                  const SizedBox(width: 4),
+                  Text(
+                    'PAID (${b.payment.method.displayName})',
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -535,33 +468,6 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         return bookings.where((b) => b.isPhoneBooking).toList();
       default:
         return bookings.where((b) => b.status != WashStatus.cancelled).toList();
-    }
-  }
-
-  WashStatus? _getBayWashStatus(StationBay bay, List<WashBooking> bookings) {
-    return WashDispatcher.getBayWashStatus(bay, bookings);
-  }
-
-  void _openAssignModalForBay(BuildContext context, BayType bayType, List<WashBooking> bookings) {
-    try {
-      final unassigned = bookings.firstWhere(
-        (b) => b.assignedBay == null || b.status == WashStatus.pending,
-      );
-      BayAssignmentModal.show(context, unassigned);
-    } catch (_) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => WalkInRegistrationScreen(preselectedBay: bayType),
-        ),
-      );
-    }
-  }
-
-  Future<void> _advanceBayStatus(BuildContext context, StationBay bay, List<WashBooking> bookings) async {
-    final booking = WashDispatcher.findBookingForBay(bay, bookings);
-    if (booking != null) {
-      await _advanceBookingStatus(context, booking);
     }
   }
 

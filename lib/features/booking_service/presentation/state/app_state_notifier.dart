@@ -22,9 +22,17 @@ class AppStateNotifier extends ChangeNotifier {
     loadData();
   }
 
-  // Active Role State
+  // Active Role & Welcome Portal State
   UserRole _currentRole = UserRole.customer;
   UserRole get currentRole => _currentRole;
+
+  bool _isWelcomeActive = true;
+  bool get isWelcomeActive => _isWelcomeActive;
+
+  void goToWelcome() {
+    _isWelcomeActive = true;
+    notifyListeners();
+  }
 
   String _currentLang = 'EN';
   String get currentLang => _currentLang;
@@ -33,10 +41,9 @@ class AppStateNotifier extends ChangeNotifier {
   void setLanguage(String lang) { _currentLang = lang; notifyListeners(); }
 
   void switchRole(UserRole role) {
-    if (_currentRole != role) {
-      _currentRole = role;
-      notifyListeners();
-    }
+    _currentRole = role;
+    _isWelcomeActive = false;
+    notifyListeners();
   }
 
   // Repository Data Caches

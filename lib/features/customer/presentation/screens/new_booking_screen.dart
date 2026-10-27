@@ -35,7 +35,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   late ServiceType _selectedServiceType;
   late CarType _selectedCarType;
   WashPackage? _selectedPackage;
-  PaymentMethod _selectedPaymentMethod = PaymentMethod.telebirr;
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController(text: '+251 9');
@@ -369,20 +368,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 const SizedBox(height: 20),
               ],
 
-              // 5. Payment Selection
-              Text(
-                state.tr('paymentMethod'),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildPaymentSelector(state),
-              const SizedBox(height: 20),
-
-              // Booking Order Summary Box
+              // 5. Booking Order Summary Box (Payment collected at gate)
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -390,19 +376,28 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          _selectedPackage?.localizedName(state.currentLang) ?? '',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                        Expanded(
+                          child: Text(
+                            _selectedPackage?.localizedName(state.currentLang) ?? '',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         Text(
                           CurrencyFormatter.format(currentPrice),
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _selectedCarType.localizedName(state.currentLang),
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     const Divider(color: Colors.white24, height: 20),
                     Row(
@@ -417,6 +412,27 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                           style: const TextStyle(color: AppColors.oromiaGold, fontWeight: FontWeight.w900, fontSize: 20),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white.withOpacity(0.15)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline, color: AppColors.oromiaGold, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.tr('paymentAtGateNote'),
+                              style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.3),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -434,65 +450,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPaymentSelector(dynamic state) {
-    return Column(
-      children: [
-        PaymentMethod.telebirr,
-        PaymentMethod.cbeBirr,
-        PaymentMethod.cash,
-      ].map((method) {
-        final isSelected = method == _selectedPaymentMethod;
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedPaymentMethod = method;
-            });
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? method.color.withOpacity(0.08) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? method.color : AppColors.cardBorder,
-                width: isSelected ? 1.8 : 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(method.icon, color: method.color, size: 22),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    method.localizedName(state.currentLang),
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: isSelected ? method.color : AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                Radio<PaymentMethod>(
-                  value: method,
-                  groupValue: _selectedPaymentMethod,
-                  activeColor: method.color,
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() {
-                        _selectedPaymentMethod = val;
-                      });
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 
@@ -520,7 +477,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         licensePlate: _plateController.text.trim(),
         package: _selectedPackage!,
         deliveryLocation: fullAddress,
-        paymentMethod: _selectedPaymentMethod,
+        paymentMethod: PaymentMethod.cash,
         gpsCoordinates: _pinnedGpsCoordinates,
       );
 

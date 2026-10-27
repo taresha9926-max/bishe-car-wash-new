@@ -104,6 +104,15 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        // Return to Welcome Hub
+        IconButton(
+          icon: const Icon(Icons.home_outlined, color: AppColors.primary, size: 21),
+          tooltip: 'Return to Welcome Hub',
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          onPressed: () => state.goToWelcome(),
+        ),
+
         // Language Switcher Dropdown (EN / OM / AM)
         Container(
           margin: EdgeInsets.symmetric(vertical: isMobile ? 14 : 14, horizontal: 4),

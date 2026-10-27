@@ -284,83 +284,10 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               ),
               const SizedBox(height: 18),
 
-              // 5. Upfront Payment Option
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          state.tr('confirmAndPay'),
-                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
-                        ),
-                        Switch(
-                          value: _isPaidNow,
-                          activeColor: AppColors.cashGreen,
-                          onChanged: (val) => setState(() => _isPaidNow = val),
-                        ),
-                      ],
-                    ),
-                    if (_isPaidNow) ...[
-                      const Divider(height: 16),
-                      Row(
-                        children: [
-                          PaymentMethod.cash,
-                          PaymentMethod.telebirr,
-                          PaymentMethod.cbeBirr,
-                        ].map((m) {
-                          final isSel = m == _paymentMethod;
-                          return Expanded(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _paymentMethod = m),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isSel ? m.color : Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: m.color),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    m.shortName,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: isSel ? Colors.white : m.color,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      if (_paymentMethod.isDigital) ...[
-                        const SizedBox(height: 10),
-                        CustomTextField(
-                          controller: _refCodeController,
-                          label: state.tr('transactionRef'),
-                          hint: 'e.g. TB-9988221',
-                        ),
-                      ],
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Submit
+              // Submit Action
               CustomButton(
-                text: '${state.tr("startWashing")} (${CurrencyFormatter.format(price)})',
-                icon: Icons.check_circle_outline,
+                text: 'Start Wash 🚿 • ${CurrencyFormatter.format(price)}',
+                icon: Icons.local_car_wash_rounded,
                 isLoading: _isSubmitting,
                 onPressed: () => _handleSubmitWalkIn(context),
               ),
@@ -388,9 +315,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
         carType: _carType,
         package: _package!,
         assignedBay: _bayType,
-        paymentMethod: _paymentMethod,
-        markPaid: _isPaidNow,
-        transactionRef: _isPaidNow && _paymentMethod.isDigital ? _refCodeController.text.trim() : null,
+        paymentMethod: PaymentMethod.cash,
+        markPaid: false,
+        transactionRef: null,
       );
 
       if (mounted) {

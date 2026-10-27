@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
+import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/core/widgets/app_role_header.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/core/widgets/service_promo_banner.dart';
@@ -126,6 +127,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
               const SizedBox(height: 12),
               _buildPhoneBookingCard(context, state),
+              const SizedBox(height: 12),
+              _buildStationGpsTrackerCard(context, state),
               const SizedBox(height: 24),
 
               // 6. Vehicle Type Pricing Matrix Tabs
@@ -1002,6 +1005,76 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStationGpsTrackerCard(BuildContext context, dynamic state) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.statusPending.withOpacity(0.4), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.statusPending.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.location_on_rounded, color: AppColors.statusPending, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      state.tr('locateBisheStation'),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(width: 5),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                      child: const Text('GPS', style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.green)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Bishoftu (Debre Zeyit) • Auto Care Station',
+                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.navigation_rounded, size: 14),
+            label: Text(state.tr('openGoogleMaps'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+            onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
           ),
         ],
       ),

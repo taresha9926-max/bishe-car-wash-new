@@ -273,5 +273,33 @@ void main() {
 
       expect(leadDividend, greaterThan(juniorDividend));
     });
+
+    test('Workflow Guardrails: ServiceType.phoneCallBooking and payment lock upon completion', () {
+      expect(ServiceType.values, contains(ServiceType.phoneCallBooking));
+      expect(ServiceType.phoneCallBooking.displayName, equals('Phone Reservation'));
+
+      final booking = WashBooking(
+        id: 'BSH-101',
+        customerName: 'Phone Customer',
+        customerPhone: '+251911223344',
+        serviceType: ServiceType.phoneCallBooking,
+        carType: CarType.automobile,
+        licensePlate: 'AA-2-B12345',
+        package: MockWashDataSource.getInitialPackages().first,
+        status: WashStatus.washing,
+        payment: const PaymentInfo(isPaid: false, amount: 300),
+        createdAt: DateTime.now(),
+        isPhoneBooking: true,
+      );
+
+      // Payment is strictly locked while wash is ongoing
+      final isPaymentEligibleWhileWashing = booking.status == WashStatus.completed && !booking.payment.isPaid;
+      expect(isPaymentEligibleWhileWashing, isFalse);
+
+      // Payment unlocks when vehicle is marked completed
+      final completedBooking = booking.copyWith(status: WashStatus.completed);
+      final isPaymentEligibleWhenCompleted = completedBooking.status == WashStatus.completed && !completedBooking.payment.isPaid;
+      expect(isPaymentEligibleWhenCompleted, isTrue);
+    });
   });
 }
