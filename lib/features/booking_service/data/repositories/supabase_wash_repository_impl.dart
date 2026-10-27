@@ -405,12 +405,35 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               'assigned_washer_name': null,
             });
           }
+
+          final washerName = (booking.assignedWasherName != null && booking.assignedWasherName!.trim().isNotEmpty)
+              ? booking.assignedWasherName!.trim()
+              : 'Team Washers';
+          final commissionEarned = booking.totalPrice * 0.15;
+
+          await _post('commission_logs', {
+            'booking_id': _isUuid(booking.id) ? booking.id : null,
+            'staff_id': _isUuid(booking.assignedWasherId) ? booking.assignedWasherId : null,
+            'staff_name': washerName,
+            'car_type': booking.carType.name,
+            'service_name': booking.package.name,
+            'earned_amount': commissionEarned,
+            'license_plate': booking.licensePlate,
+            'is_settled': false,
+            'logged_at': DateTime.now().toIso8601String(),
+          });
+
+          await _patch('wash_bookings?id=eq.$bookingId', {
+            'commission_logged': true,
+            'commission_amount': commissionEarned,
+          });
         }
 
         if (booking != null) {
           final updated = booking.copyWith(
             status: newStatus,
             completedAt: newStatus == WashStatus.completed ? DateTime.now() : booking.completedAt,
+            commissionLogged: newStatus == WashStatus.completed ? true : booking.commissionLogged,
           );
           try {
             await _fallbackLocalRepo.updateWashStatus(bookingId, newStatus);

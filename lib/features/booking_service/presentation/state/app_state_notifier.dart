@@ -491,6 +491,7 @@ class AppStateNotifier extends ChangeNotifier {
   Future<void> _refreshBookingsAndBays() async {
     _bays = await _repository.getBays();
     _bookings = await _repository.getBookings();
+    _commissionLogs = await _repository.getCommissionLogs();
     notifyListeners();
   }
 

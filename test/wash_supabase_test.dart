@@ -11,8 +11,10 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_packa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 
 void main() {
-  test('SupabaseWashRepositoryImpl loads packages and saves live booking to Supabase', () async {
-    final repo = SupabaseWashRepositoryImpl(
+  test(
+    'SupabaseWashRepositoryImpl loads packages and saves live booking to Supabase',
+    () async {
+      final repo = SupabaseWashRepositoryImpl(
       supabaseUrl: AppConstants.supabaseUrl,
       anonKey: AppConstants.supabaseAnonKey,
     );
@@ -54,5 +56,13 @@ void main() {
     final cashierCred = creds.firstWhere((c) => c.role == UserRole.cashier);
     expect(adminCred.pin, equals('4450'));
     expect(cashierCred.pin, equals('2233'));
-  });
+
+    // 5. Verify live commission log was created upon completion
+    final commLogs = await repo.getCommissionLogs();
+    expect(commLogs, isNotEmpty);
+    final recentLog = commLogs.firstWhere((l) => l.carPlate == 'TEST-9999');
+    expect(recentLog.commissionEarnedETB, equals(75.0)); // 15% of 500
+  },
+  timeout: const Timeout(Duration(minutes: 2)),
+);
 }
