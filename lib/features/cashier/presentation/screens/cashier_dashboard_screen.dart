@@ -416,7 +416,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   }
 
   Widget _buildActionButtonsMobile(BuildContext context, dynamic state, WashBooking b) {
-    if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay) {
+    if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay || b.status == WashStatus.confirmed) {
       return SizedBox(
         width: double.infinity,
         height: 38,
@@ -429,7 +429,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           ),
           icon: const Icon(Icons.play_arrow_rounded, size: 16),
           label: Text(state.tr('startWashAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
-          onPressed: () => _advanceBookingStatus(context, b),
+          onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.washing),
         ),
       );
     } else if (b.status == WashStatus.washing) {
@@ -445,7 +445,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           ),
           icon: const Icon(Icons.air_rounded, size: 16),
           label: Text(state.tr('moveToDryingAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
-          onPressed: () => _advanceBookingStatus(context, b),
+          onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.drying),
         ),
       );
     } else if (b.status == WashStatus.drying) {
@@ -461,10 +461,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           ),
           icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
           label: Text(state.tr('markCompletedAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
-          onPressed: () => _advanceBookingStatus(context, b),
+          onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.completed),
         ),
       );
-    } else if (b.status == WashStatus.completed && !b.payment.isPaid) {
+    } else if ((b.status == WashStatus.completed || b.status == WashStatus.readyForPickup) && !b.payment.isPaid) {
+      final payLabel = state.currentLang == 'EN'
+          ? 'Pay 💰 (${CurrencyFormatter.format(b.totalPrice)})'
+          : '${state.tr("collectPaymentAction")} (${CurrencyFormatter.format(b.totalPrice)})';
+
       return SizedBox(
         width: double.infinity,
         height: 40,
@@ -477,7 +481,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           ),
           icon: const Icon(Icons.payments_rounded, size: 16),
           label: Text(
-            '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
+            payLabel,
             style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5),
           ),
           onPressed: () => PaymentProcessDialog.show(context, b),
@@ -624,7 +628,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           const SizedBox(width: 8),
 
           // 1. Readable Status Advancement Action Button
-          if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay) ...[
+          if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay || b.status == WashStatus.confirmed) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -635,7 +639,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 14),
               label: Text(state.tr('startWashAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-              onPressed: () => _advanceBookingStatus(context, b),
+              onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.washing),
             ),
           ] else if (b.status == WashStatus.washing) ...[
             ElevatedButton.icon(
@@ -648,7 +652,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
               icon: const Icon(Icons.air_rounded, size: 14),
               label: Text(state.tr('moveToDryingAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-              onPressed: () => _advanceBookingStatus(context, b),
+              onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.drying),
             ),
           ] else if (b.status == WashStatus.drying) ...[
             ElevatedButton.icon(
@@ -661,12 +665,12 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
               icon: const Icon(Icons.check_circle_outline_rounded, size: 14),
               label: Text(state.tr('markCompletedAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-              onPressed: () => _advanceBookingStatus(context, b),
+              onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.completed),
             ),
           ],
 
           // 2. Strict Payment Lock: ONLY visible when status == completed AND unpaid!
-          if (b.status == WashStatus.completed && !b.payment.isPaid) ...[
+          if ((b.status == WashStatus.completed || b.status == WashStatus.readyForPickup) && !b.payment.isPaid) ...[
             const SizedBox(width: 6),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -678,7 +682,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
               icon: const Icon(Icons.payments_rounded, size: 14),
               label: Text(
-                '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
+                state.currentLang == 'EN'
+                    ? 'Pay 💰 (${CurrencyFormatter.formatShort(b.totalPrice)})'
+                    : '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
               ),
               onPressed: () => PaymentProcessDialog.show(context, b),
@@ -864,19 +870,31 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  Future<void> _advanceBookingStatus(BuildContext context, WashBooking booking) async {
+  Future<void> _advanceBookingStatus(
+    BuildContext context,
+    WashBooking booking, {
+    WashStatus? targetStatus,
+  }) async {
     final state = AppStateProvider.read(context);
-    final next = WashDispatcher.nextStatus(booking.status);
+    final next = targetStatus ?? (
+      (booking.status == WashStatus.drying || booking.status == WashStatus.readyForPickup)
+          ? WashStatus.completed
+          : WashDispatcher.nextStatus(booking.status)
+    );
     if (next == null) return;
 
     await state.updateWashStatus(booking.id, next);
 
     if (context.mounted) {
+      final msg = next == WashStatus.completed
+          ? '${booking.licensePlate} marked completed! Ready for payment 💰'
+          : '${booking.licensePlate} updated to ${next.displayName}!';
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(seconds: 2),
-          backgroundColor: next.color,
-          content: Text('${booking.licensePlate} updated to ${next.displayName}!'),
+          backgroundColor: next == WashStatus.completed ? AppColors.cashGreen : next.color,
+          content: Text(msg),
         ),
       );
     }
