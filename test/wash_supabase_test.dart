@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/supabase_wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
@@ -45,5 +46,13 @@ void main() {
     // 3. Update status to completed
     final updated = await repo.updateWashStatus(created.id, WashStatus.completed);
     expect(updated.status, WashStatus.completed);
+
+    // 4. Verify live staff credentials loaded from Supabase
+    final creds = await repo.getStaffCredentials();
+    expect(creds, isNotEmpty);
+    final adminCred = creds.firstWhere((c) => c.role == UserRole.admin);
+    final cashierCred = creds.firstWhere((c) => c.role == UserRole.cashier);
+    expect(adminCred.pin, equals('4450'));
+    expect(cashierCred.pin, equals('2233'));
   });
 }

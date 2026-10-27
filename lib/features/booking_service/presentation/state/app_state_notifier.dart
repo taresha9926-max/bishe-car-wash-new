@@ -71,13 +71,27 @@ class AppStateNotifier extends ChangeNotifier {
   List<StaffCredential> _credentials = [];
   List<StaffCredential> get credentials => _credentials;
 
-  /// Authenticate entered PIN for requested role via deep authenticator module
+  /// Authenticate entered PIN for requested role via deep authenticator module (synchronous check)
   bool authenticateRole(UserRole role, String enteredPin) {
     return StaffAuthenticator.authenticate(
       role: role,
       enteredPin: enteredPin,
       credentials: _credentials,
     );
+  }
+
+  /// Live verification: checks cache first, then fetches fresh credentials from Supabase if not matched.
+  Future<bool> authenticateRoleAsync(UserRole role, String enteredPin) async {
+    if (authenticateRole(role, enteredPin)) {
+      return true;
+    }
+    try {
+      _credentials = await _repository.getStaffCredentials();
+      notifyListeners();
+      return authenticateRole(role, enteredPin);
+    } catch (_) {
+      return false;
+    }
   }
 
   // Currently active customer booking (for live tracking in Customer UI)
@@ -204,12 +218,20 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _packages = await _repository.getPackages();
-      _staff = await _repository.getStaffMembers();
-      _bays = await _repository.getBays();
-      _bookings = await _repository.getBookings();
-      _commissionLogs = await _repository.getCommissionLogs();
-      _credentials = await _repository.getStaffCredentials();
+      final results = await Future.wait([
+        _repository.getPackages(),
+        _repository.getStaffMembers(),
+        _repository.getBays(),
+        _repository.getBookings(),
+        _repository.getCommissionLogs(),
+        _repository.getStaffCredentials(),
+      ]);
+      _packages = results[0] as List<WashPackage>;
+      _staff = results[1] as List<StaffMember>;
+      _bays = results[2] as List<StationBay>;
+      _bookings = results[3] as List<WashBooking>;
+      _commissionLogs = results[4] as List<CommissionLog>;
+      _credentials = results[5] as List<StaffCredential>;
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

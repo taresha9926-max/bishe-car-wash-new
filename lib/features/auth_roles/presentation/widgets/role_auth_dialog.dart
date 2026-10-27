@@ -25,6 +25,7 @@ class RoleAuthDialog extends StatefulWidget {
 class _RoleAuthDialogState extends State<RoleAuthDialog> {
   final TextEditingController _pinController = TextEditingController();
   bool _obscurePin = true;
+  bool _isLoading = false;
   String? _error;
 
   @override
@@ -33,7 +34,8 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
     super.dispose();
   }
 
-  void _verifyPin() {
+  Future<void> _verifyPin() async {
+    if (_isLoading) return;
     final state = AppStateProvider.of(context);
     final pin = _pinController.text.trim();
     if (pin.isEmpty) {
@@ -41,11 +43,19 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
       return;
     }
 
-    final isValid = state.authenticateRole(widget.targetRole, pin);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    final isValid = await state.authenticateRoleAsync(widget.targetRole, pin);
+    if (!mounted) return;
+
     if (isValid) {
       Navigator.of(context).pop(true);
     } else {
       setState(() {
+        _isLoading = false;
         _error = state.tr('incorrectPin');
       });
     }
@@ -118,17 +128,23 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
           child: Text(state.tr('cancel')),
         ),
         ElevatedButton(
-          onPressed: _verifyPin,
+          onPressed: _isLoading ? null : _verifyPin,
           style: ElevatedButton.styleFrom(
             backgroundColor: isCashier ? AppColors.secondary : AppColors.primary,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          child: Text(state.tr('unlock')),
+          child: _isLoading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                )
+              : Text(state.tr('unlock')),
         ),
       ],
     );
