@@ -196,6 +196,25 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              if (isSelected && pkg.features.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                ...pkg.features.map((f) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 2),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.check_circle_outline, size: 12, color: AppColors.primary),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          f,
+                                          style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                              ],
                             ],
                           ),
                         ),

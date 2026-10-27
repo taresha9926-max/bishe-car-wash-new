@@ -126,6 +126,25 @@ class PricingManagementScreen extends StatelessWidget {
                   pkg.localizedDescription(state.currentLang),
                   style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.35),
                 ),
+                if (pkg.features.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  ...pkg.features.map((feature) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.check_circle_outline, size: 14, color: AppColors.primary),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            feature,
+                            style: const TextStyle(fontSize: 11.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
                 const SizedBox(height: 14),
 
                 Text(

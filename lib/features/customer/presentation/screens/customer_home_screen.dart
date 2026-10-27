@@ -157,28 +157,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               _buildVehicleSelector(state),
               const SizedBox(height: 14),
 
-              // Packages Grid
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final useGrid = constraints.maxWidth >= 720;
-                  if (useGrid) {
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
-                        childAspectRatio: 1.55,
-                      ),
-                      itemCount: state.packages.length,
-                      itemBuilder: (ctx, i) => _buildPackageCard(context, state, state.packages[i]),
-                    );
-                  }
-                  return Column(
-                    children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
-                  );
-                },
+              // Packages List with Detailed Itemized Services
+              Column(
+                children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
               ),
               const SizedBox(height: 24),
 
@@ -725,6 +706,39 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
             ],
           ),
+          if (pkg.features.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: pkg.features.map((feature) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.check_circle_rounded, size: 14, color: AppColors.statusCompleted),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            feature,
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.25),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,

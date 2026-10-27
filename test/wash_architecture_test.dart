@@ -210,12 +210,12 @@ void main() {
       final packages = MockWashDataSource.getInitialPackages();
       expect(packages.length, equals(10));
 
-      final silver = packages.firstWhere((p) => p.id == 'pkg-silver');
+      final silver = packages.firstWhere((p) => p.id == 'a0000000-0000-0000-0000-000000000101' || p.name.contains('Silver'));
       expect(silver.getPriceFor(CarType.automobile), equals(500.0));
       expect(silver.getPriceFor(CarType.minibus), equals(700.0));
       expect(silver.getPriceFor(CarType.truck), equals(1200.0));
 
-      final diamondFull = packages.firstWhere((p) => p.id == 'pkg-diamond-full');
+      final diamondFull = packages.firstWhere((p) => p.id == 'a0000000-0000-0000-0000-000000000109' || p.name.contains('Diamond Full'));
       expect(diamondFull.getPriceFor(CarType.automobile), equals(13000.0));
       expect(diamondFull.getPriceFor(CarType.minibus), equals(20500.0));
       expect(diamondFull.getPriceFor(CarType.truck), equals(26000.0));

@@ -169,6 +169,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                       ),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Radio<String>(
                           value: pkg.id,
@@ -189,12 +190,32 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                 ),
                               ),
                               Text(
-                                '${pkg.durationMinutes} mins',
+                                '${pkg.durationMinutes} mins • ${pkg.localizedDescription(state.currentLang)}',
                                 style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                               ),
+                              if (isSelected && pkg.features.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                ...pkg.features.map((f) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 2),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.check_circle_outline, size: 12, color: AppColors.primary),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          f,
+                                          style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                              ],
                             ],
                           ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           CurrencyFormatter.format(pkgPrice),
                           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
