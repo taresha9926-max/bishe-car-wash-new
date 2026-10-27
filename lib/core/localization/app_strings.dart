@@ -364,9 +364,9 @@ class AppStrings {
       AppLanguage.am: 'የውስጥ ሙሉ ዲቴይሊንግ እና ቦዲ + የውሃ ምልክት + የጎማ ዲቴይሊንግ።',
     },
     'pkg_diamond_full_name': {
-      AppLanguage.en: 'Diamond Full Package',
-      AppLanguage.om: 'Paakeejii Daayimandii Guutuu',
-      AppLanguage.am: 'ዳይመንድ ሙሉ ፓኬጅ',
+      AppLanguage.en: 'Diamond Package C (Full)',
+      AppLanguage.om: 'Paakeejii Daayimandii C (Guutuu)',
+      AppLanguage.am: 'ዳይመንድ ፓኬጅ ሲ (ሙሉ)',
     },
     'pkg_diamond_full_desc': {
       AppLanguage.en: 'Ultimate Interior Detailing + Exterior Comprehensive detailing suite.',

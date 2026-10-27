@@ -219,6 +219,22 @@ void main() {
       expect(diamondFull.getPriceFor(CarType.automobile), equals(13000.0));
       expect(diamondFull.getPriceFor(CarType.minibus), equals(20500.0));
       expect(diamondFull.getPriceFor(CarType.truck), equals(26000.0));
+
+      // Verify distinct localization for Platinum A, B, C
+      final platA = packages.firstWhere((p) => p.id.endsWith('0104'));
+      final platB = packages.firstWhere((p) => p.id.endsWith('0105'));
+      final platC = packages.firstWhere((p) => p.id.endsWith('0106'));
+      expect(platA.localizedName('en'), equals('Platinum Exterior - A'));
+      expect(platB.localizedName('en'), equals('Platinum Exterior - B'));
+      expect(platC.localizedName('en'), equals('Platinum Exterior - C'));
+
+      // Verify distinct localization for Diamond A, B, C
+      final diamA = packages.firstWhere((p) => p.id.endsWith('0107'));
+      final diamB = packages.firstWhere((p) => p.id.endsWith('0108'));
+      final diamC = packages.firstWhere((p) => p.id.endsWith('0109'));
+      expect(diamA.localizedName('en'), equals('Diamond Package A'));
+      expect(diamB.localizedName('en'), equals('Diamond Package B'));
+      expect(diamC.localizedName('en'), equals('Diamond Package C (Full)'));
     });
 
     test('8 Washers form a single team with seniority weights and dividends', () {
