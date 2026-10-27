@@ -202,9 +202,10 @@ void main() {
 
   group('Bishe Official Price List & 8-Washer Team Commission', () {
     test('MockWashDataSource contains the 10 official packages from price sheet', () {
-      expect(CarType.values.length, equals(2));
-      expect(CarType.automobile.displayName, equals('Small Car'));
-      expect(CarType.minibus.displayName, equals('Large Car'));
+      expect(CarType.values.length, equals(3));
+      expect(CarType.automobile.displayName, equals('Type A (Small)'));
+      expect(CarType.minibus.displayName, equals('Type B (Medium)'));
+      expect(CarType.truck.displayName, equals('Type C (Truck)'));
 
       final packages = MockWashDataSource.getInitialPackages();
       expect(packages.length, equals(10));
@@ -212,10 +213,12 @@ void main() {
       final silver = packages.firstWhere((p) => p.id == 'pkg-silver');
       expect(silver.getPriceFor(CarType.automobile), equals(500.0));
       expect(silver.getPriceFor(CarType.minibus), equals(700.0));
+      expect(silver.getPriceFor(CarType.truck), equals(1200.0));
 
       final diamondFull = packages.firstWhere((p) => p.id == 'pkg-diamond-full');
       expect(diamondFull.getPriceFor(CarType.automobile), equals(13000.0));
       expect(diamondFull.getPriceFor(CarType.minibus), equals(20500.0));
+      expect(diamondFull.getPriceFor(CarType.truck), equals(26000.0));
     });
 
     test('8 Washers form a single team with seniority weights and dividends', () {

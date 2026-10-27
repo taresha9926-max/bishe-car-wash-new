@@ -157,16 +157,21 @@ class AppStrings {
       AppLanguage.am: 'ሙሉ መከታተያውን ክፈት',
     },
 
-    // Vehicle Types (CarType: Small Car & Large Car)
+    // Vehicle Types (CarType: Type A Small, Type B Medium, Type C Large Trucks)
     'automobile': {
-      AppLanguage.en: 'Small Car',
-      AppLanguage.om: 'Konkolaataa Xiqqaa',
-      AppLanguage.am: 'ትናንሽ መኪና',
+      AppLanguage.en: 'Type A (Small)',
+      AppLanguage.om: 'Gosa A (Xiqqaa)',
+      AppLanguage.am: 'ዓይነት ሀ (አነስተኛ)',
     },
     'minibus': {
-      AppLanguage.en: 'Large Car',
-      AppLanguage.om: 'Konkolaataa Guddaa',
-      AppLanguage.am: 'ትላልቅ መኪና',
+      AppLanguage.en: 'Type B (Medium)',
+      AppLanguage.om: 'Gosa B (Giddu-galeessa)',
+      AppLanguage.am: 'ዓይነት ለ (መካከለኛ/ቪ8)',
+    },
+    'truck': {
+      AppLanguage.en: 'Type C (Truck)',
+      AppLanguage.om: 'Gosa C (Fe\'iisaa)',
+      AppLanguage.am: 'ዓይነት ሐ (የጭነት/ኢሱዙ)',
     },
     'automobileSub': {
       AppLanguage.en: 'Corolla, Dzire, Yaris, Vitz, BYD',
@@ -174,9 +179,14 @@ class AppStrings {
       AppLanguage.am: 'ኮሮላ፣ ዲዛየር፣ ያሪስ፣ ቪትዝ፣ ቢዋይዲ',
     },
     'minibusSub': {
-      AppLanguage.en: 'V8, Bigstar, Hilux, Dolphin, Isuzu',
-      AppLanguage.om: 'V8, Bigstar, Hilux, Dolphin, Isuzu',
-      AppLanguage.am: 'ቪ8፣ ቢግስታር፣ ሃይሉክስ፣ ዶልፊን፣ ኢሱዙ',
+      AppLanguage.en: 'V8, Bigstar, Hilux, Dolphin',
+      AppLanguage.om: 'V8, Bigstar, Hilux, Dolphin',
+      AppLanguage.am: 'ቪ8፣ ቢግስታር፣ ሃይሉክስ፣ ዶልፊን',
+    },
+    'truckSub': {
+      AppLanguage.en: 'Isuzu 1200, FSR 1800',
+      AppLanguage.om: 'Isuzu 1200, FSR 1800',
+      AppLanguage.am: 'ኢሱዙ 1200፣ ኤፍኤስአር 1800',
     },
 
     // Wash Statuses (WashStatus)

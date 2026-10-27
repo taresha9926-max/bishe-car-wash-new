@@ -124,6 +124,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           pricingByCarType: {
             CarType.automobile: autoPrice,
             CarType.minibus: minibusPrice,
+            CarType.truck: truckPrice,
           },
           features: features,
         );
@@ -139,6 +140,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (_isUuid(packageId)) {
         String colName = 'price_automobile';
         if (carType == CarType.minibus) colName = 'price_minibus';
+        if (carType == CarType.truck) colName = 'price_truck';
         await _patch('wash_packages?id=eq.$packageId', {colName: newPrice});
       }
     } catch (_) {}

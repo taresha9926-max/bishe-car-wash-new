@@ -42,6 +42,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 500.0,
           CarType.minibus: 700.0,
+          CarType.truck: 1200.0,
         },
         features: [
           'High Pressure Pre-wash',
@@ -58,6 +59,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 1500.0,
           CarType.minibus: 2100.0,
+          CarType.truck: 2800.0,
         },
         features: [
           'Basic Exterior Wash',
@@ -74,6 +76,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 5000.0,
           CarType.minibus: 8000.0,
+          CarType.truck: 10000.0,
         },
         features: [
           'Seats & Floor Carpet Removed & Washed',
@@ -90,6 +93,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 5600.0,
           CarType.minibus: 9000.0,
+          CarType.truck: 12000.0,
         },
         features: [
           'Hand Wash & Clay Bar Treatment',
@@ -106,6 +110,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 6000.0,
           CarType.minibus: 9500.0,
+          CarType.truck: 13000.0,
         },
         features: [
           'All Platinum Exterior A Services',
@@ -122,6 +127,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 8000.0,
           CarType.minibus: 12500.0,
+          CarType.truck: 16000.0,
         },
         features: [
           'All Platinum Exterior B Services',
@@ -138,6 +144,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 10600.0,
           CarType.minibus: 17000.0,
+          CarType.truck: 22000.0,
         },
         features: [
           'Full Interior Carpet & Seat Detailing',
@@ -154,6 +161,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 11000.0,
           CarType.minibus: 17500.0,
+          CarType.truck: 23000.0,
         },
         features: [
           'All Diamond Package A Services',
@@ -170,6 +178,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 13000.0,
           CarType.minibus: 20500.0,
+          CarType.truck: 26000.0,
         },
         features: [
           'Complete Platinum Interior Detailing',
@@ -186,6 +195,7 @@ class MockWashDataSource {
         pricingByCarType: {
           CarType.automobile: 1700.0,
           CarType.minibus: 2400.0,
+          CarType.truck: 3500.0,
         },
         features: [
           'Basic / Silver Exterior Body Wash',

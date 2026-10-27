@@ -3,7 +3,8 @@ import 'package:bishe_car_wash/core/localization/app_strings.dart';
 
 enum CarType {
   automobile,
-  minibus;
+  minibus,
+  truck;
 
   String localizedName(String langCode) {
     final lang = AppLanguage.fromCode(langCode);
@@ -12,6 +13,8 @@ enum CarType {
         return AppStrings.get('automobile', lang);
       case CarType.minibus:
         return AppStrings.get('minibus', lang);
+      case CarType.truck:
+        return AppStrings.get('truck', lang);
     }
   }
 
@@ -22,6 +25,8 @@ enum CarType {
         return AppStrings.get('automobileSub', lang);
       case CarType.minibus:
         return AppStrings.get('minibusSub', lang);
+      case CarType.truck:
+        return AppStrings.get('truckSub', lang);
     }
   }
 
@@ -34,6 +39,8 @@ enum CarType {
         return Icons.directions_car_rounded;
       case CarType.minibus:
         return Icons.directions_bus_rounded;
+      case CarType.truck:
+        return Icons.local_shipping_rounded;
     }
   }
 }
