@@ -36,6 +36,24 @@ enum AdminTimeFilter {
   }
 }
 
+class _OperationItem {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final String? badge;
+  final VoidCallback onTap;
+
+  const _OperationItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    this.badge,
+    required this.onTap,
+  });
+}
+
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
@@ -73,6 +91,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isDesktop = ResponsiveLayout.isDesktop(context);
+    final isMobile = ResponsiveLayout.isMobile(context);
 
     // Time-filtered bookings
     final filteredBookings = _filterBookings(state.bookings, _selectedFilter);
@@ -99,29 +118,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         onRefresh: () => state.loadData(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 28 : (isMobile ? 14 : 20),
+            vertical: isMobile ? 12 : 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Executive Banner
-              _buildExecutiveBanner(state),
-              const SizedBox(height: 16),
+              // 1. Executive Banner (Responsive)
+              _buildExecutiveBanner(state, isMobile),
+              const SizedBox(height: 14),
 
               // 2. Interactive Time Filter Selector
               _buildTimeFilterBar(state),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
-              // 3. Financial & Operational KPIs (Dynamic Grid)
+              // 3. Financial & Operational KPIs (Responsive Grid with no text clipping)
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 750;
+                  final isWide = constraints.maxWidth >= 900;
+                  final isMedium = constraints.maxWidth >= 550 && !isWide;
+                  final crossAxisCount = isWide ? 4 : 2;
+                  final childAspectRatio = isWide
+                      ? 1.6
+                      : (isMedium ? 1.55 : (constraints.maxWidth < 360 ? 1.2 : 1.35));
+
                   return GridView.count(
-                    crossAxisCount: isWide ? 4 : 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: isMobile ? 10 : 12,
+                    mainAxisSpacing: isMobile ? 10 : 12,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    childAspectRatio: isWide ? 1.5 : 1.25,
+                    childAspectRatio: childAspectRatio,
                     children: [
                       _buildMetricCard(
                         state.tr('totalRevenueAdmin'),
@@ -129,6 +157,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         '$completedCars ${state.tr("carsWashed")}',
                         Icons.account_balance_wallet_rounded,
                         AppColors.primary,
+                        isMobile: isMobile,
                       ),
                       _buildMetricCard(
                         state.tr('commissionsPaid'),
@@ -136,6 +165,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         '${(state.teamCommissionRate * 100).toStringAsFixed(0)}% team pool',
                         Icons.handshake_rounded,
                         AppColors.oromiaGold,
+                        isMobile: isMobile,
                       ),
                       _buildMetricCard(
                         state.tr('netStationProfit'),
@@ -143,6 +173,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         state.tr('afterPayrollCuts'),
                         Icons.trending_up_rounded,
                         AppColors.statusReady,
+                        isMobile: isMobile,
                       ),
                       _buildMetricCard(
                         state.tr('activeWashers'),
@@ -150,92 +181,59 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         '${state.staff.length} on team',
                         Icons.groups_rounded,
                         AppColors.secondary,
+                        isMobile: isMobile,
                       ),
                     ],
                   );
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
-              // 4. Cash vs Digital Settlement Bar
+              // 4. Cash vs Digital Settlement Bar (Responsive Wrap)
               _buildCashVsDigitalBar(state, totalRevenue, cashRevenue, digitalRevenue),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
-              // 5. 15% Team Commission Seniority Distribution Section
-              _buildCommissionSenioritySection(context, state, commissionPool),
-              const SizedBox(height: 24),
+              // 5. 15% Team Commission Seniority Distribution Section (Responsive CTA button)
+              _buildCommissionSenioritySection(context, state, commissionPool, isMobile),
+              const SizedBox(height: 22),
 
-              // 6. Operational Management Modules (Pricing, Staff, PINs)
-              Text(
-                state.tr('managementOperations'),
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 12),
-
+              // 6. Operational Management Modules (Responsive: Full-width list on Mobile, Row on Tablet/Desktop)
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: _buildOperationCard(
-                      context,
-                      title: state.tr('pricingMatrix'),
-                      subtitle: state.tr('pricingSubtitle'),
-                      icon: Icons.tune_rounded,
-                      color: AppColors.primary,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const PricingManagementScreen()),
-                        );
-                      },
+                  Text(
+                    state.tr('managementOperations'),
+                    style: TextStyle(
+                      fontSize: isMobile ? 15.5 : 17,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildOperationCard(
-                      context,
-                      title: state.tr('staffPayroll'),
-                      subtitle: state.tr('staffPayrollSub'),
-                      icon: Icons.badge_rounded,
-                      color: AppColors.secondary,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
-                        );
-                      },
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildOperationCard(
-                      context,
-                      title: state.tr('staffPins'),
-                      subtitle: state.tr('staffPinsSub'),
-                      icon: Icons.pin_outlined,
-                      color: AppColors.accent,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CredentialsManagementScreen()),
-                        );
-                      },
+                    child: const Text(
+                      '3 MODULES',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+
+              _buildManagementOperations(context, state, isMobile),
+              const SizedBox(height: 22),
 
               // 7. Digital Payment Receipts Audit Section
-              _buildDigitalReceiptsSection(context, digitalBookings),
-              const SizedBox(height: 24),
+              _buildDigitalReceiptsSection(context, digitalBookings, isMobile),
+              const SizedBox(height: 22),
 
               // 8. Live Pricing Matrix Editor Widget
               PricingMatrixEditor(packages: state.packages),
-              const SizedBox(height: 24),
+              const SizedBox(height: 22),
 
               // 9. Automated Commission Split Ledger
               Row(
@@ -243,8 +241,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 children: [
                   Text(
                     state.tr('recentCommissions'),
-                    style: const TextStyle(
-                      fontSize: 17,
+                    style: TextStyle(
+                      fontSize: isMobile ? 15.5 : 17,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                     ),
@@ -291,6 +289,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildTimeFilterBar(dynamic state) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       child: Row(
         children: AdminTimeFilter.values.map((filter) {
           final isSelected = filter == _selectedFilter;
@@ -300,7 +299,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               label: Text(
                 filter.localizedLabel(state),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11.5,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   color: isSelected ? Colors.white : AppColors.textPrimary,
                 ),
@@ -368,21 +367,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            runSpacing: 4,
+            spacing: 12,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
                   const SizedBox(width: 5),
-                  Text('Cash: ${CurrencyFormatter.format(cash)} (${(cashPercent * 100).toStringAsFixed(0)}%)', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Cash: ${CurrencyFormatter.format(cash)} (${(cashPercent * 100).toStringAsFixed(0)}%)',
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.telebirrBlue, shape: BoxShape.circle)),
                   const SizedBox(width: 5),
-                  Text('Digital: ${CurrencyFormatter.format(digital)} (${(digitalPercent * 100).toStringAsFixed(0)}%)', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                  Text(
+                    'Digital: ${CurrencyFormatter.format(digital)} (${(digitalPercent * 100).toStringAsFixed(0)}%)',
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
             ],
@@ -392,12 +401,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildCommissionSenioritySection(BuildContext context, dynamic state, double pool) {
+  Widget _buildCommissionSenioritySection(
+    BuildContext context,
+    dynamic state,
+    double pool,
+    bool isMobile,
+  ) {
     final washers = state.availableWashers as List<StaffMember>;
     final totalWeight = washers.fold<int>(0, (sum, w) => sum + (w.skillSeniorityLevel > 0 ? w.skillSeniorityLevel : 2));
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isMobile ? 14 : 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -413,58 +427,111 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.oromiaGold.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 20),
+          // Responsive Header
+          if (isMobile) ...[
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.oromiaGold.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(width: 10),
-                  Column(
+                  child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 20),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         state.tr('teamCommissionDistribution'),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                       ),
-                      const SizedBox(height: 1),
+                      const SizedBox(height: 2),
                       Text(
-                        '${washers.length} Washers • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Gross Pool: ${CurrencyFormatter.format(pool)}',
+                        '${washers.length} Washers • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Pool: ${CurrencyFormatter.format(pool)}',
                         style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
-                ],
-              ),
-              // Disburse Action Button
-              ElevatedButton.icon(
-                onPressed: pool > 0
-                    ? () => _showDisburseDialog(context, state, pool, washers.length)
-                    : null,
-                icon: const Icon(Icons.payments_rounded, size: 14),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 38,
+              child: ElevatedButton.icon(
+                onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, washers.length) : null,
+                icon: const Icon(Icons.payments_rounded, size: 15),
                 label: Text(
                   state.tr('disburseCommission'),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 14),
+            ),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.oromiaGold.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.tr('teamCommissionDistribution'),
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              '${washers.length} Washers • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Gross Pool: ${CurrencyFormatter.format(pool)}',
+                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, washers.length) : null,
+                  icon: const Icon(Icons.payments_rounded, size: 14),
+                  label: Text(
+                    state.tr('disburseCommission'),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
           const Divider(height: 1, color: AppColors.cardBorder),
           const SizedBox(height: 10),
 
@@ -517,9 +584,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             const SizedBox(height: 2),
                             Row(
                               children: [
-                                Text(
-                                  w.seniorityTierName,
-                                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                Flexible(
+                                  child: Text(
+                                    w.seniorityTierName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                  ),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(stars, style: const TextStyle(fontSize: 10)),
@@ -528,6 +599,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ],
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -548,6 +620,231 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               },
             ),
         ],
+      ),
+    );
+  }
+
+  /// Responsive Management Operations:
+  /// - Mobile: Generous full-width stacked cards with clear titles, full subtitles, and indicator badges.
+  /// - Tablet / Desktop: 3-column side-by-side row.
+  Widget _buildManagementOperations(BuildContext context, dynamic state, bool isMobile) {
+    final operations = [
+      _OperationItem(
+        title: state.tr('pricingMatrix'),
+        subtitle: state.tr('pricingSubtitle'),
+        icon: Icons.tune_rounded,
+        color: AppColors.primary,
+        badge: '${state.packages.length} Tariffs',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PricingManagementScreen()),
+          );
+        },
+      ),
+      _OperationItem(
+        title: state.tr('staffPayroll'),
+        subtitle: state.tr('staffPayrollSub'),
+        icon: Icons.badge_rounded,
+        color: AppColors.secondary,
+        badge: '${state.staff.length} Crew',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
+          );
+        },
+      ),
+      _OperationItem(
+        title: state.tr('staffPins'),
+        subtitle: state.tr('staffPinsSub'),
+        icon: Icons.pin_outlined,
+        color: AppColors.accent,
+        badge: 'Security',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CredentialsManagementScreen()),
+          );
+        },
+      ),
+    ];
+
+    if (isMobile) {
+      return Column(
+        children: operations.map((op) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: _buildOperationCardMobile(context, op),
+        )).toList(),
+      );
+    }
+
+    return Row(
+      children: operations.map((op) => Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(right: op == operations.last ? 0 : 12),
+          child: _buildOperationCardDesktop(context, op),
+        ),
+      )).toList(),
+    );
+  }
+
+  Widget _buildOperationCardMobile(BuildContext context, _OperationItem op) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: op.onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.cardBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: op.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(op.icon, color: op.color, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            op.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.5,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        if (op.badge != null) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: op.color.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              op.badge!,
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: op.color),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      op.subtitle,
+                      style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.25),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textMuted),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOperationCardDesktop(BuildContext context, _OperationItem op) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: op.onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: op.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(op.icon, color: op.color, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            op.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: AppColors.textPrimary),
+                          ),
+                        ),
+                        if (op.badge != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: op.color.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              op.badge!,
+                              style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: op.color),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      op.subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -596,52 +893,63 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildDigitalReceiptsSection(BuildContext context, List<WashBooking> bookings) {
+  Widget _buildDigitalReceiptsSection(
+    BuildContext context,
+    List<WashBooking> bookings,
+    bool isMobile,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isMobile ? 14 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.telebirrBlue.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.telebirrBlue.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.receipt_long_rounded, color: AppColors.telebirrBlue, size: 19),
                     ),
-                    child: const Icon(Icons.receipt_long_rounded, color: AppColors.telebirrBlue, size: 20),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Digital Receipts & Verification',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                  ),
-                ],
+                    const SizedBox(width: 10),
+                    const Flexible(
+                      child: Text(
+                        'Digital Receipts & Verification',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.background,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
                 child: Text(
                   '${bookings.length} Digital',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           if (bookings.isEmpty)
             Container(
@@ -657,7 +965,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: bookings.take(6).length,
-              separatorBuilder: (_, __) => const Divider(height: 16, color: AppColors.cardBorder),
+              separatorBuilder: (_, __) => const Divider(height: 14, color: AppColors.cardBorder),
               itemBuilder: (context, index) {
                 final b = bookings[index];
                 final hasScreenshot = b.payment.receiptScreenshot != null && b.payment.receiptScreenshot!.isNotEmpty;
@@ -665,15 +973,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 return Row(
                   children: [
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: b.payment.method.color.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(b.payment.method.icon, color: b.payment.method.color, size: 19),
+                      child: Icon(b.payment.method.icon, color: b.payment.method.color, size: 18),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -686,35 +994,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               ),
                               const SizedBox(width: 6),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                 decoration: BoxDecoration(
                                   color: b.payment.method.color.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: Text(
                                   b.payment.method.shortName,
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: b.payment.method.color),
+                                  style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: b.payment.method.color),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 3),
+                          const SizedBox(height: 2),
                           Text(
                             'Ref: ${b.payment.transactionRef ?? 'N/A'} • ${CurrencyFormatter.format(b.payment.amount)}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 6),
                     if (hasScreenshot)
                       ElevatedButton.icon(
                         onPressed: () => _showScreenshotDialog(context, b),
-                        icon: const Icon(Icons.image_rounded, size: 14),
-                        label: const Text('View Receipt', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                        icon: const Icon(Icons.image_rounded, size: 13),
+                        label: const Text('Receipt', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.telebirrBlue,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -723,14 +1034,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       )
                     else
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
                           'No Receipt',
-                          style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 9.5, color: AppColors.textMuted, fontWeight: FontWeight.w600),
                         ),
                       ),
                   ],
@@ -863,10 +1174,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildExecutiveBanner(dynamic state) {
+  Widget _buildExecutiveBanner(dynamic state, bool isMobile) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(isMobile ? 14 : 18),
       decoration: BoxDecoration(
         color: AppColors.primaryDark,
         borderRadius: BorderRadius.circular(18),
@@ -880,24 +1191,47 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 20,
+          CircleAvatar(
+            radius: isMobile ? 18 : 20,
             backgroundColor: AppColors.primary,
-            child: Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 22),
+            child: Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: isMobile ? 20 : 22),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: isMobile ? 10 : 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  state.tr('adminTitle'),
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
+                Row(
+                  children: [
+                    Text(
+                      state.tr('adminTitle'),
+                      style: TextStyle(
+                        fontSize: isMobile ? 14 : 15,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.green.withOpacity(0.4)),
+                      ),
+                      child: const Text(
+                        'SUPER ADMIN',
+                        style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.lightGreenAccent),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${state.tr("bishoftu")} • 15% Seniority Commission & Supabase Cloud Active',
-                  style: const TextStyle(fontSize: 11.5, color: Colors.white70),
+                  '${state.tr("bishoftu")} • 15% Seniority Commission & Live Supabase Cloud',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: isMobile ? 10.5 : 11.5, color: Colors.white70),
                 ),
               ],
             ),
@@ -907,9 +1241,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildMetricCard(String title, String value, String sub, IconData icon, Color color) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    String sub,
+    IconData icon,
+    Color color, {
+    bool isMobile = false,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(isMobile ? 12 : 14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -922,65 +1263,50 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted, fontWeight: FontWeight.w700)),
-              Icon(icon, color: color, size: 20),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: isMobile ? 11 : 11.5,
+                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Icon(icon, color: color, size: isMobile ? 18 : 20),
             ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: color)),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: isMobile ? 16 : 18,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                  ),
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
+              Text(
+                sub,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: isMobile ? 10 : 10.5,
+                  color: AppColors.textSecondary,
+                ),
+              ),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildOperationCard(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
-                  const SizedBox(height: 2),
-                  Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
-          ],
-        ),
       ),
     );
   }
