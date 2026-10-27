@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
@@ -12,7 +10,6 @@ import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_dispatcher.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
-import 'bay_assignment_modal.dart';
 import 'payment_process_dialog.dart';
 import 'phone_booking_dialog.dart';
 import 'walk_in_registration_screen.dart';
@@ -25,7 +22,7 @@ class CashierDashboardScreen extends StatefulWidget {
 }
 
 class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
-  int _selectedFilterIndex = 0; // 0: All, 1: Pending, 2: In Service, 3: Unpaid
+  int _selectedFilterIndex = 0; // 0: All, 1: Pending, 2: In Service, 3: Unpaid, 4: Phone
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +30,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     final bays = state.bays;
     final allBookings = state.bookings;
     final isDesktop = ResponsiveLayout.isDesktop(context);
+    final isMobile = ResponsiveLayout.isMobile(context);
 
     final bay1 = bays.firstWhere((b) => b.type == BayType.bay1, orElse: () => const StationBay(type: BayType.bay1));
     final bay2 = bays.firstWhere((b) => b.type == BayType.bay2, orElse: () => const StationBay(type: BayType.bay2));
@@ -45,59 +43,101 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       appBar: AppRoleHeader(
         title: state.tr('cashierTitle'),
       ),
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.extended(
-            heroTag: 'fab_phone_intake',
-            backgroundColor: AppColors.secondary,
-            foregroundColor: Colors.white,
-            icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
-            label: Text(state.tr('registerPhoneBooking'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
-            onPressed: () => PhoneBookingDialog.show(context),
-          ),
-          const SizedBox(width: 10),
-          FloatingActionButton.extended(
-            heroTag: 'fab_walk_in',
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            icon: const Icon(Icons.add_road_rounded, size: 18),
-            label: Text(state.tr('newWalkIn'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const WalkInRegistrationScreen(),
+      floatingActionButton: isMobile
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.small(
+                  heroTag: 'fab_phone_intake',
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: Colors.white,
+                  tooltip: state.tr('registerPhoneBooking'),
+                  onPressed: () => PhoneBookingDialog.show(context),
+                  child: const Icon(Icons.phone_in_talk_rounded, size: 18),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
+                const SizedBox(width: 8),
+                FloatingActionButton.extended(
+                  heroTag: 'fab_walk_in',
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  icon: const Icon(Icons.add_road_rounded, size: 18),
+                  label: Text(
+                    state.tr('newWalkIn'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const WalkInRegistrationScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.extended(
+                  heroTag: 'fab_phone_intake',
+                  backgroundColor: AppColors.secondary,
+                  foregroundColor: Colors.white,
+                  icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
+                  label: Text(
+                    state.tr('registerPhoneBooking'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                  ),
+                  onPressed: () => PhoneBookingDialog.show(context),
+                ),
+                const SizedBox(width: 10),
+                FloatingActionButton.extended(
+                  heroTag: 'fab_walk_in',
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  icon: const Icon(Icons.add_road_rounded, size: 18),
+                  label: Text(
+                    state.tr('newWalkIn'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const WalkInRegistrationScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 28 : (isMobile ? 14 : 20),
+            vertical: isMobile ? 12 : 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Shift KPI Stats
-              _buildShiftSummaryBanner(state),
-              const SizedBox(height: 16),
+              _buildShiftSummaryBanner(state, isMobile),
+              const SizedBox(height: 14),
 
               // 2. Real-Time Capacity Quick Status Bar (Bay 1, Bay 2, Mobile Van 1)
-              _buildCleanStationCapacityBar(context, state, bay1, bay2, van),
-              const SizedBox(height: 20),
+              _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
+              const SizedBox(height: 18),
 
-              // 3. Queue Management Section (Bay cards removed for cleaner workflow)
+              // 3. Queue Management Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     '${state.tr("queueAndVehicles")} (${filteredBookings.length})',
-                    style: const TextStyle(
-                      fontSize: 17,
+                    style: TextStyle(
+                      fontSize: isMobile ? 15.5 : 17,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
                     ),
@@ -110,7 +150,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               _buildFilterChips(state),
               const SizedBox(height: 12),
 
-              // Queue Items
+              // Queue Items (Responsive Mobile Cards vs Desktop Rows)
               if (filteredBookings.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(28),
@@ -127,9 +167,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   ),
                 )
               else
-                ...filteredBookings.map((b) => _buildCleanQueueRow(context, state, b)),
+                ...filteredBookings.map((b) => isMobile
+                    ? _buildCleanQueueRowMobile(context, state, b)
+                    : _buildCleanQueueRowDesktop(context, state, b)),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 50),
             ],
           ),
         ),
@@ -137,9 +179,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  Widget _buildShiftSummaryBanner(dynamic state) {
+  Widget _buildShiftSummaryBanner(dynamic state, bool isMobile) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(isMobile ? 12 : 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -160,24 +202,27 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
               '${state.totalCompletedCarsToday} ${state.tr("carsWashed")}',
               AppColors.primary,
+              isMobile: isMobile,
             ),
           ),
-          const VerticalDivider(width: 1, thickness: 1, color: AppColors.cardBorder),
+          Container(width: 1, height: 36, color: AppColors.cardBorder),
           Expanded(
             child: _buildKPIColumn(
               state.tr('digitalPay'),
               CurrencyFormatter.formatShort(state.totalDigitalRevenueETB),
               state.tr('digitalPayments'),
               AppColors.telebirrBlue,
+              isMobile: isMobile,
             ),
           ),
-          const VerticalDivider(width: 1, thickness: 1, color: AppColors.cardBorder),
+          Container(width: 1, height: 36, color: AppColors.cardBorder),
           Expanded(
             child: _buildKPIColumn(
               state.tr('cashCollected'),
               CurrencyFormatter.formatShort(state.totalCashRevenueETB),
               state.tr('atFrontDesk'),
               AppColors.cashGreen,
+              isMobile: isMobile,
             ),
           ),
         ],
@@ -185,20 +230,286 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  Widget _buildKPIColumn(String title, String value, String sub, Color color) {
+  Widget _buildKPIColumn(String title, String value, String sub, Color color, {bool isMobile = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(title, style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 3),
-        Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: color)),
+        Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: isMobile ? 10.5 : 11, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 2),
-        Text(sub, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(fontSize: isMobile ? 15 : 17, fontWeight: FontWeight.w900, color: color),
+          ),
+        ),
+        const SizedBox(height: 1),
+        Text(
+          sub,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: isMobile ? 9.5 : 10, color: AppColors.textSecondary),
+        ),
       ],
     );
   }
 
-  Widget _buildCleanQueueRow(BuildContext context, dynamic state, WashBooking b) {
+  /// Mobile Queue Row: Stacked cards with generous touch targets and no horizontal overflows.
+  Widget _buildCleanQueueRowMobile(BuildContext context, dynamic state, WashBooking b) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row: Avatar, License plate, car type pill, phone badge, status pill
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: b.status.color.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.local_car_wash_rounded, color: b.status.color, size: 16),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                b.licensePlate,
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5, color: AppColors.textPrimary),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  b.carType.displayName,
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                ),
+              ),
+              if (b.isPhoneBooking) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.phone_in_talk, size: 10, color: AppColors.primary),
+                      SizedBox(width: 2),
+                      Text('Phone', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                    ],
+                  ),
+                ),
+              ],
+              const Spacer(),
+              // Status Pill
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: b.status.color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  b.status.displayName,
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: b.status.color),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Details Row: Package name, customer & price
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  '${b.package.name}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                CurrencyFormatter.format(b.totalPrice),
+                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppColors.primary),
+              ),
+            ],
+          ),
+
+          // Location / GPS if mobile van
+          if (b.serviceType == ServiceType.atHomeMobile) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.location_on, size: 13, color: AppColors.mobileVanColor),
+                const SizedBox(width: 3),
+                Expanded(
+                  child: Text(
+                    b.deliveryLocation ?? b.gpsCoordinates ?? "Bishoftu Mobile Van",
+                    style: const TextStyle(fontSize: 11, color: AppColors.mobileVanColor, fontWeight: FontWeight.w600),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                InkWell(
+                  onTap: () => _openMapLocation(context, b),
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.map, size: 11, color: AppColors.primary),
+                        const SizedBox(width: 3),
+                        Text(
+                          state.tr('openInMaps'),
+                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: AppColors.cardBorder),
+          const SizedBox(height: 10),
+
+          // Full-width action button
+          _buildActionButtonsMobile(context, state, b),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtonsMobile(BuildContext context, dynamic state, WashBooking b) {
+    if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay) {
+      return SizedBox(
+        width: double.infinity,
+        height: 38,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.play_arrow_rounded, size: 16),
+          label: Text(state.tr('startWashAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+          onPressed: () => _advanceBookingStatus(context, b),
+        ),
+      );
+    } else if (b.status == WashStatus.washing) {
+      return SizedBox(
+        width: double.infinity,
+        height: 38,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.bay1Color,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.air_rounded, size: 16),
+          label: Text(state.tr('moveToDryingAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+          onPressed: () => _advanceBookingStatus(context, b),
+        ),
+      );
+    } else if (b.status == WashStatus.drying) {
+      return SizedBox(
+        width: double.infinity,
+        height: 38,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.bay2Color,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
+          label: Text(state.tr('markCompletedAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+          onPressed: () => _advanceBookingStatus(context, b),
+        ),
+      );
+    } else if (b.status == WashStatus.completed && !b.payment.isPaid) {
+      return SizedBox(
+        width: double.infinity,
+        height: 40,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.cashGreen,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.payments_rounded, size: 16),
+          label: Text(
+            '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5),
+          ),
+          onPressed: () => PaymentProcessDialog.show(context, b),
+        ),
+      );
+    } else if (b.payment.isPaid) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          color: AppColors.statusCompleted.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.statusCompleted.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, size: 14, color: AppColors.statusCompleted),
+            const SizedBox(width: 6),
+            Text(
+              'SETTLED & PAID (${b.payment.method.displayName})',
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
+            ),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  /// Tablet & Desktop Queue Row: Spacious horizontal layout
+  Widget _buildCleanQueueRowDesktop(BuildContext context, dynamic state, WashBooking b) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
@@ -402,21 +713,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   void _openMapLocation(BuildContext context, WashBooking b) {
     final query = b.gpsCoordinates ?? b.deliveryLocation ?? "Bishoftu, Ethiopia";
     final mapUrl = "https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}";
-    if (kIsWeb) {
-      try {
-        html.window.open(mapUrl, '_blank');
-        return;
-      } catch (_) {}
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('GPS: $query'),
-        action: SnackBarAction(
-          label: 'OK',
-          onPressed: () {},
-        ),
-      ),
-    );
+    UrlLauncherHelper.openUrl(mapUrl);
   }
 
   Widget _buildFilterChips(dynamic state) {
@@ -430,6 +727,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       child: Row(
         children: List.generate(filters.length, (index) {
           final isSelected = index == _selectedFilterIndex;
@@ -448,6 +746,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               selectedColor: AppColors.primary,
               backgroundColor: Colors.white,
               showCheckmark: false,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: isSelected ? AppColors.primary : AppColors.cardBorder),
+              ),
               onSelected: (_) => setState(() => _selectedFilterIndex = index),
             ),
           );
@@ -477,9 +779,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     StationBay bay1,
     StationBay bay2,
     StationBay van,
+    bool isMobile,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -495,53 +798,65 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       child: Row(
         children: [
           Expanded(
-            child: _buildBayMiniIndicator(state.tr('bay1'), bay1.isVacant, state),
+            child: _buildBayMiniIndicator(state.tr('bay1'), bay1.isVacant, state, isMobile),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator(state.tr('bay2'), bay2.isVacant, state),
+            child: _buildBayMiniIndicator(state.tr('bay2'), bay2.isVacant, state, isMobile),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator(state.tr('mobileVan'), van.isVacant, state),
+            child: _buildBayMiniIndicator(state.tr('mobileVan'), van.isVacant, state, isMobile),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBayMiniIndicator(String title, bool isFree, dynamic state) {
+  Widget _buildBayMiniIndicator(String title, bool isFree, dynamic state, bool isMobile) {
     final color = isFree ? AppColors.statusReady : AppColors.statusWashing;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 6 : 8, horizontal: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 7,
-                height: 7,
+                width: 6,
+                height: 6,
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
-              const SizedBox(width: 5),
-              Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5, color: AppColors.textPrimary),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: isMobile ? 10.5 : 11.5,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 2),
-          Text(
-            isFree ? state.tr('availableNow') : state.tr('busyWashing'),
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              color: color,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              isFree ? state.tr('availableNow') : state.tr('busyWashing'),
+              style: TextStyle(
+                fontSize: isMobile ? 9.5 : 10.5,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
             ),
           ),
         ],
