@@ -10,7 +10,7 @@ import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/screens/financial_reports_view.dart';
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
-import '../../domain/models/staff_member.dart';
+import '../../domain/models/weekly_commission_report.dart';
 import '../widgets/commission_item_card.dart';
 import '../widgets/pricing_matrix_editor.dart';
 import 'commission_logs_screen.dart';
@@ -207,8 +207,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildCashVsDigitalBar(state, totalRevenue, cashRevenue, digitalRevenue),
               const SizedBox(height: 18),
 
-              // 5. 15% Team Commission Seniority Distribution Section (Responsive CTA button)
-              _buildCommissionSenioritySection(context, state, commissionPool, isMobile),
+              // 5. Weekly Washer Commission Report (Reported by Cashier)
+              _buildWeeklyWasherCommissionReportSection(context, state, isMobile),
               const SizedBox(height: 22),
 
               // 6. Operational Management Modules (Responsive: Full-width list on Mobile, Row on Tablet/Desktop)
@@ -537,14 +537,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildCommissionSenioritySection(
+  Widget _buildWeeklyWasherCommissionReportSection(
     BuildContext context,
     dynamic state,
-    double pool,
     bool isMobile,
   ) {
-    final washers = state.availableWashers as List<StaffMember>;
-    final dividendsMap = state.calculateWasherDividends(pool);
+    final latestReport = state.latestWeeklyCommissionReport as WeeklyCommissionReport?;
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 14 : 16),
@@ -563,266 +561,219 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Responsive Header
-          if (isMobile) ...[
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.oromiaGold.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 20),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        state.tr('teamCommissionDistribution'),
-                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.oromiaGold.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${state.presentWashersCount}/${state.totalWashersCount} Washers on Duty • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Pool: ${CurrencyFormatter.format(pool)}',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
-                      );
-                    },
-                    icon: const Icon(Icons.manage_accounts_rounded, size: 14),
-                    label: const Text('Staff & Salaries', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: const Icon(Icons.receipt_long_rounded, color: AppColors.oromiaGold, size: 20),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, state.presentWashersCount) : null,
-                    icon: const Icon(Icons.payments_rounded, size: 14),
-                    label: Text(state.tr('disburseCommission'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ] else ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.oromiaGold.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 20),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              state.tr('teamCommissionDistribution'),
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            state.tr('weeklyCommissionReport'),
+                            style: TextStyle(
+                              fontSize: isMobile ? 13.5 : 15,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
                             ),
-                            const SizedBox(height: 1),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            state.tr('weeklyCommissionReportSub'),
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
+                  );
+                },
+                icon: const Icon(Icons.manage_accounts_rounded, size: 14),
+                label: Text(
+                  state.tr('staffAndSalaries'),
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: AppColors.cardBorder),
+          const SizedBox(height: 12),
+
+          if (latestReport == null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.event_note_outlined, size: 36, color: Colors.grey.shade400),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.tr('noWeeklyCommissionReports'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Cashier compiles and reports weekly commission payouts from Cashier Dashboard.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else ...[
+            // Report summary card
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.cardBorder),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.statusCompleted.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                state.tr('statusPaid').toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.statusCompleted,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Text(
-                              '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Gross Pool: ${CurrencyFormatter.format(pool)}',
-                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              '${latestReport.weekStartDate.day}/${latestReport.weekStartDate.month} - ${latestReport.weekEndDate.day}/${latestReport.weekEndDate.month}/${latestReport.weekEndDate.year}',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                             ),
                           ],
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${state.tr('reportedByCashier')}: ${latestReport.cashierName}',
+                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        state.tr('totalCommissionDisbursed'),
+                        style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        CurrencyFormatter.format(latestReport.totalWeeklyPool),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 10),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.manage_accounts_rounded, size: 14),
-                  label: const Text('Staff & Salaries', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, state.presentWashersCount) : null,
-                  icon: const Icon(Icons.payments_rounded, size: 14),
-                  label: Text(
-                    state.tr('disburseCommission'),
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: AppColors.cardBorder),
-          const SizedBox(height: 10),
-
-          // Washers dividend cards list
-          if (washers.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Center(
-                child: Text('No active washers on team roster.', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                ],
               ),
-            )
-          else
+            ),
+            const SizedBox(height: 10),
+
+            // Washer breakdown
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: washers.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemCount: latestReport.washerCommissions.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 6),
               itemBuilder: (context, index) {
-                final w = washers[index];
-                final div = dividendsMap[w.id];
-                final isPresent = div?.isPresent ?? state.isWasherPresentToday(w.id);
-                final percent = div?.percentageShare ?? 0.0;
-                final dividendETB = div?.earnedETB ?? 0.0;
-
+                final entry = latestReport.washerCommissions.entries.toList()[index];
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                   decoration: BoxDecoration(
-                    color: isPresent ? AppColors.background : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: isPresent ? AppColors.cardBorder : Colors.grey.shade300),
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: Row(
                     children: [
                       CircleAvatar(
-                        radius: 16,
-                        backgroundColor: isPresent ? AppColors.primary.withOpacity(0.1) : Colors.grey.shade300,
+                        radius: 14,
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
                         child: Text(
-                          w.name.isNotEmpty ? w.name[0] : 'W',
-                          style: TextStyle(
+                          entry.key.isNotEmpty ? entry.key[0] : 'W',
+                          style: const TextStyle(
                             fontWeight: FontWeight.w800,
-                            fontSize: 12,
-                            color: isPresent ? AppColors.primary : Colors.grey.shade600,
+                            fontSize: 11,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    w.name,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                      color: isPresent ? AppColors.textPrimary : Colors.grey.shade600,
-                                      decoration: isPresent ? null : TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                                  decoration: BoxDecoration(
-                                    color: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    isPresent ? 'PRESENT' : 'ABSENT',
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w800,
-                                      color: isPresent ? AppColors.statusCompleted : Colors.red,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% Share',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                            ),
-                          ],
+                        child: Text(
+                          entry.key,
+                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            CurrencyFormatter.format(dividendETB),
-                            style: TextStyle(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w900,
-                              color: isPresent ? AppColors.primary : Colors.grey.shade500,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            isPresent ? '${percent.toStringAsFixed(1)}% Today' : '0.0% (Absent)',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: isPresent ? AppColors.statusCompleted : Colors.red,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        CurrencyFormatter.format(entry.value),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.statusCompleted),
                       ),
                     ],
                   ),
                 );
               },
             ),
+
+            if (latestReport.notes != null && latestReport.notes!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Note: ${latestReport.notes}',
+                style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.textSecondary),
+              ),
+            ],
+          ],
+
           const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.all(8),
@@ -837,7 +788,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    '100% of the commission pool is distributed strictly among washers on duty today (${state.presentWashersCount}/${state.totalWashersCount}). Absent washers receive 0 ETB, and their share is automatically redistributed proportionally to active washers.',
+                    'Washers commission is paid weekly by the Cashier and reported to Admin. Base salaries are paid monthly.',
                     style: const TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -1102,50 +1053,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showDisburseDialog(BuildContext context, dynamic state, double pool, int washerCount) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 24),
-            const SizedBox(width: 8),
-            Text(state.tr('disburseCommission'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-          ],
-        ),
-        content: Text(
-          'Approve distribution of ${CurrencyFormatter.format(pool)} team commission dividends among the $washerCount washer(s) on duty today according to their seniority tier percentage share (summing to 100%)?',
-          style: const TextStyle(fontSize: 13, height: 1.4),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.tr('commissionDisbursedSuccess')),
-                  backgroundColor: AppColors.statusReady,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            child: const Text('Confirm Payout', style: TextStyle(fontWeight: FontWeight.w800)),
-          ),
-        ],
       ),
     );
   }

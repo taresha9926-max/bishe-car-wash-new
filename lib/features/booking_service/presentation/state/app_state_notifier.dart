@@ -8,6 +8,7 @@ import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_req
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/washer_dividend.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/weekly_commission_report.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
@@ -721,6 +722,65 @@ class AppStateNotifier extends ChangeNotifier {
   /// Total monthly base salary obligation for active washers (Salaries are paid monthly)
   double get monthlyTotalBaseSalary {
     return availableWashers.fold<double>(0.0, (sum, w) => sum + w.baseSalaryMonthlyETB);
+  }
+
+  // --- Weekly Washer Commission Reports (Reported by Cashier to Admin) ---
+  final List<WeeklyCommissionReport> _weeklyCommissionReports = _getInitialWeeklyCommissionReports();
+  List<WeeklyCommissionReport> get weeklyCommissionReports => List.unmodifiable(_weeklyCommissionReports);
+  WeeklyCommissionReport? get latestWeeklyCommissionReport =>
+      _weeklyCommissionReports.isNotEmpty ? _weeklyCommissionReports.first : null;
+
+  static List<WeeklyCommissionReport> _getInitialWeeklyCommissionReports() {
+    final now = DateTime.now();
+    final lastSunday = now.subtract(Duration(days: now.weekday));
+    final prevMonday = lastSunday.subtract(const Duration(days: 6));
+
+    return [
+      WeeklyCommissionReport(
+        id: 'wcr-${lastSunday.year}-${lastSunday.month}-${lastSunday.day}',
+        weekStartDate: DateTime(prevMonday.year, prevMonday.month, prevMonday.day),
+        weekEndDate: DateTime(lastSunday.year, lastSunday.month, lastSunday.day, 21, 0),
+        reportedAt: DateTime(lastSunday.year, lastSunday.month, lastSunday.day, 21, 15),
+        cashierName: 'Abebech Tadesse',
+        totalWeeklyPool: 7850.0,
+        washerCommissions: {
+          'Teshale Bekele (Lead)': 2747.5,
+          'Chala Gutu (Senior)': 2355.0,
+          'Dawit Alemu (Standard)': 1570.0,
+          'Yared Haile (Junior)': 1177.5,
+        },
+        notes: 'Official weekly washer commission report disbursed and verified for last week.',
+        isSubmitted: true,
+      ),
+    ];
+  }
+
+  /// Cashier submits weekly washer commission report to Admin
+  Future<WeeklyCommissionReport> submitWeeklyCommissionReportToAdmin({
+    required String cashierName,
+    String? notes,
+  }) async {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final startOfWeek = DateTime(monday.year, monday.month, monday.day);
+    final pool = weeklyTotalCommissionPool;
+    final washerShares = weeklyWasherCommissions;
+
+    final report = WeeklyCommissionReport(
+      id: 'wcr-${now.year}-${now.month}-${now.day}-${now.millisecondsSinceEpoch.toString().substring(7)}',
+      weekStartDate: startOfWeek,
+      weekEndDate: now,
+      reportedAt: now,
+      cashierName: cashierName,
+      totalWeeklyPool: pool,
+      washerCommissions: washerShares,
+      notes: notes,
+      isSubmitted: true,
+    );
+
+    _weeklyCommissionReports.insert(0, report);
+    notifyListeners();
+    return report;
   }
 
   int get availableBaysCount {

@@ -74,9 +74,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Daily Financial Closing',
-                            style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          Text(
+                            state.tr('dailyClosing'),
+                            style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                           ),
                           Text(
                             isAlreadyClosed ? 'Shift Already Closed & Confirmed' : 'End of day transaction reconciliation',
@@ -127,9 +127,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               const SizedBox(height: 16),
 
               // Digital Channels Breakdown
-              const Text(
-                'Digital Channels Received Breakdown:',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              Text(
+                state.tr('moneyReceivedBreakdown'),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               _buildDigitalChannelsGrid(state),
@@ -139,9 +139,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Washer Commission Disbursement (100%):',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  Text(
+                    '${state.tr('teamCommissionDistribution')}:',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                   Text(
                     '${state.presentWashersCount} On Duty',
@@ -234,7 +234,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
 
               // Action Buttons
               CustomButton(
-                text: isAlreadyClosed ? 'Re-confirm / Update Daily Closing' : 'Confirm & Lock Daily Closing',
+                text: state.tr('confirmDailyClosing'),
                 icon: Icons.check_circle_outline_rounded,
                 backgroundColor: AppColors.cashGreen,
                 isLoading: _isSubmitting,
@@ -276,12 +276,12 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
     final methodCounts = state.getTransactionCountByPaymentMethod();
 
     final channels = [
-      (label: 'Telebirr', amt: methodRevenue[PaymentMethod.telebirr] ?? 0.0, cnt: methodCounts[PaymentMethod.telebirr] ?? 0, color: AppColors.telebirrBlue),
-      (label: 'CBE Birr', amt: methodRevenue[PaymentMethod.cbeBirr] ?? 0.0, cnt: methodCounts[PaymentMethod.cbeBirr] ?? 0, color: AppColors.cbeBirrPurple),
-      (label: 'Bank of Abyssinia', amt: methodRevenue[PaymentMethod.bankOfAbyssinia] ?? 0.0, cnt: methodCounts[PaymentMethod.bankOfAbyssinia] ?? 0, color: const Color(0xFFF59E0B)),
-      (label: 'Awash Bank', amt: methodRevenue[PaymentMethod.awashBank] ?? 0.0, cnt: methodCounts[PaymentMethod.awashBank] ?? 0, color: const Color(0xFFEA580C)),
-      (label: 'Dashen Bank', amt: methodRevenue[PaymentMethod.dashenBank] ?? 0.0, cnt: methodCounts[PaymentMethod.dashenBank] ?? 0, color: const Color(0xFF0284C7)),
-      (label: 'Other Banks', amt: methodRevenue[PaymentMethod.otherBankTransfer] ?? 0.0, cnt: methodCounts[PaymentMethod.otherBankTransfer] ?? 0, color: Colors.indigo),
+      (label: PaymentMethod.telebirr.localizedName(state.currentLanguage), amt: methodRevenue[PaymentMethod.telebirr] ?? 0.0, cnt: methodCounts[PaymentMethod.telebirr] ?? 0, color: AppColors.telebirrBlue),
+      (label: PaymentMethod.cbeBirr.localizedName(state.currentLanguage), amt: methodRevenue[PaymentMethod.cbeBirr] ?? 0.0, cnt: methodCounts[PaymentMethod.cbeBirr] ?? 0, color: AppColors.cbeBirrPurple),
+      (label: PaymentMethod.bankOfAbyssinia.localizedName(state.currentLanguage), amt: methodRevenue[PaymentMethod.bankOfAbyssinia] ?? 0.0, cnt: methodCounts[PaymentMethod.bankOfAbyssinia] ?? 0, color: const Color(0xFFF59E0B)),
+      (label: PaymentMethod.awashBank.localizedName(state.currentLanguage), amt: methodRevenue[PaymentMethod.awashBank] ?? 0.0, cnt: methodCounts[PaymentMethod.awashBank] ?? 0, color: const Color(0xFFEA580C)),
+      (label: PaymentMethod.dashenBank.localizedName(state.currentLanguage), amt: methodRevenue[PaymentMethod.dashenBank] ?? 0.0, cnt: methodCounts[PaymentMethod.dashenBank] ?? 0, color: const Color(0xFF0284C7)),
+      (label: PaymentMethod.otherBankTransfer.localizedName(state.currentLanguage), amt: methodRevenue[PaymentMethod.otherBankTransfer] ?? 0.0, cnt: methodCounts[PaymentMethod.otherBankTransfer] ?? 0, color: Colors.indigo),
     ];
 
     return Wrap(

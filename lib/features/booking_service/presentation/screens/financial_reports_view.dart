@@ -15,20 +15,22 @@ enum FinancialReportFilter {
   thisMonth,
   customRange;
 
-  String get displayName {
+  String localizedLabel(dynamic state) {
     switch (this) {
       case FinancialReportFilter.today:
-        return 'Today (Daily)';
+        return state.tr('filterToday');
       case FinancialReportFilter.yesterday:
-        return 'Yesterday';
+        return state.tr('filterYesterday');
       case FinancialReportFilter.thisWeek:
-        return 'This Week (Weekly)';
+        return state.tr('filterThisWeek');
       case FinancialReportFilter.thisMonth:
-        return 'This Month (Monthly)';
+        return state.tr('filterThisMonth');
       case FinancialReportFilter.customRange:
-        return 'Custom Range';
+        return state.tr('filterCustomRange');
     }
   }
+
+  String get displayName => 'Today';
 }
 
 class FinancialReportsView extends StatefulWidget {
@@ -113,11 +115,12 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 1. Time Filter Chips
-        _buildFilterBar(context),
+        _buildFilterBar(context, state),
         const SizedBox(height: 14),
 
         // 2. Financial KPI Grid
         _buildKPIGrid(
+          state: state,
           grossRevenue: grossRevenue,
           cashRevenue: cashRevenue,
           digitalRevenue: digitalRevenue,
@@ -131,7 +134,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         const SizedBox(height: 18),
 
         // 3. Payment Channels Breakdown (Cash, Telebirr, CBE, BoA, Awash, Dashen, Other)
-        _buildPaymentMethodBreakdownCard(periodBookings, isMobile),
+        _buildPaymentMethodBreakdownCard(periodBookings, isMobile, state),
         const SizedBox(height: 18),
 
         // 4. Daily Closing Summaries Table
@@ -139,7 +142,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         const SizedBox(height: 18),
 
         // 5. Cash Bank Deposits Log (Owner Accounts A & B)
-        _buildBankDepositsSection(context, periodDeposits, isMobile),
+        _buildBankDepositsSection(context, periodDeposits, isMobile, state),
         const SizedBox(height: 18),
 
         // 6. Washer Payroll Policy (Weekly Commission + Monthly Salary)
@@ -170,7 +173,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     );
   }
 
-  Widget _buildFilterBar(BuildContext context) {
+  Widget _buildFilterBar(BuildContext context, dynamic state) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -183,7 +186,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
               label: Text(
                 filter == FinancialReportFilter.customRange && _customRange != null
                     ? '${_customRange!.start.month}/${_customRange!.start.day} - ${_customRange!.end.month}/${_customRange!.end.day}'
-                    : filter.displayName,
+                    : filter.localizedLabel(state),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -230,6 +233,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   }
 
   Widget _buildKPIGrid({
+    required dynamic state,
     required double grossRevenue,
     required double cashRevenue,
     required double digitalRevenue,
@@ -242,44 +246,44 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   }) {
     final items = [
       (
-        title: 'Gross Revenue',
+        title: state.tr('totalRevenue'),
         value: CurrencyFormatter.format(grossRevenue),
-        sub: '$completedCars Cars Washed',
+        sub: '$completedCars ${state.tr('carsWashed')}',
         icon: Icons.account_balance_wallet_rounded,
         color: AppColors.primary,
       ),
       (
-        title: 'Washer Commission (15%)',
+        title: state.tr('washerCommissionDeducted'),
         value: CurrencyFormatter.format(commissionDeducted),
-        sub: 'Disbursed to Washers',
+        sub: state.tr('disburseCommission'),
         icon: Icons.stars_rounded,
         color: AppColors.oromiaGold,
       ),
       (
-        title: 'Net Station Profit',
+        title: state.tr('netStationProfit'),
         value: CurrencyFormatter.format(netStationProfit),
-        sub: 'After Washer Commission',
+        sub: state.tr('netStationProfit'),
         icon: Icons.verified_rounded,
         color: AppColors.statusCompleted,
       ),
       (
-        title: 'Cash at Gate',
+        title: state.tr('cashCollected'),
         value: CurrencyFormatter.format(cashRevenue),
-        sub: 'Physical Handover',
+        sub: state.tr('cashCollected'),
         icon: Icons.payments_rounded,
         color: AppColors.cashGreen,
       ),
       (
-        title: 'Digital Channels',
+        title: state.tr('digitalPay'),
         value: CurrencyFormatter.format(digitalRevenue),
         sub: 'Telebirr, CBE, BoA, Awash...',
         icon: Icons.phone_android_rounded,
         color: AppColors.telebirrBlue,
       ),
       (
-        title: 'Deposited to Owner Bank',
+        title: state.tr('bankDepositsLog'),
         value: CurrencyFormatter.format(totalCashDeposited),
-        sub: 'Transferred to Acc A/B',
+        sub: state.tr('bankDepositsLog'),
         icon: Icons.account_balance_rounded,
         color: Colors.indigo,
       ),
@@ -356,7 +360,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     );
   }
 
-  Widget _buildPaymentMethodBreakdownCard(List<WashBooking> bookings, bool isMobile) {
+  Widget _buildPaymentMethodBreakdownCard(List<WashBooking> bookings, bool isMobile, dynamic state) {
     final methodMap = <PaymentMethod, double>{
       for (final m in PaymentMethod.values) m: 0.0,
     };
@@ -384,13 +388,13 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.pie_chart_rounded, color: AppColors.primary, size: 18),
-                  SizedBox(width: 8),
+                  const Icon(Icons.pie_chart_rounded, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8),
                   Text(
-                    'Money Received Breakdown by Provider',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    state.tr('moneyReceivedBreakdown'),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -435,7 +439,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            method.shortName,
+                            method.localizedName(state.currentLanguage),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -479,13 +483,13 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.fact_check_rounded, color: AppColors.statusCompleted, size: 18),
-                  SizedBox(width: 8),
+                  const Icon(Icons.fact_check_rounded, color: AppColors.statusCompleted, size: 18),
+                  const SizedBox(width: 8),
                   Text(
-                    'Daily Financial Closing Summaries Table',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    state.tr('closingAndFinancialReports'),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -704,7 +708,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     );
   }
 
-  Widget _buildBankDepositsSection(BuildContext context, List<BankDepositRecord> deposits, bool isMobile) {
+  Widget _buildBankDepositsSection(BuildContext context, List<BankDepositRecord> deposits, bool isMobile, dynamic state) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -718,13 +722,13 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.account_balance_rounded, color: Colors.indigo, size: 18),
-                  SizedBox(width: 8),
+                  const Icon(Icons.account_balance_rounded, color: Colors.indigo, size: 18),
+                  const SizedBox(width: 8),
                   Text(
-                    'Cash Bank Deposits (Owner Accounts A & B)',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    state.tr('bankDepositsLog'),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -752,14 +756,14 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
             )
           else
             Column(
-              children: deposits.map((d) => _buildDepositItemCard(context, d, isMobile)).toList(),
+              children: deposits.map((d) => _buildDepositItemCard(context, d, isMobile, state)).toList(),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildDepositItemCard(BuildContext context, BankDepositRecord d, bool isMobile) {
+  Widget _buildDepositItemCard(BuildContext context, BankDepositRecord d, bool isMobile, dynamic state) {
     final isAccountB = d.accountKey == 'account_b';
     final accountColor = isAccountB ? const Color(0xFFEA580C) : AppColors.cbeBirrPurple;
 
@@ -836,12 +840,12 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: Colors.indigo),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.image_outlined, size: 12, color: Colors.indigo),
-                      SizedBox(width: 4),
-                      Text('View Receipt', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Colors.indigo)),
+                      const Icon(Icons.image_outlined, size: 12, color: Colors.indigo),
+                      const SizedBox(width: 4),
+                      Text(state.tr('viewDepositReceipt'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Colors.indigo)),
                     ],
                   ),
                 ),

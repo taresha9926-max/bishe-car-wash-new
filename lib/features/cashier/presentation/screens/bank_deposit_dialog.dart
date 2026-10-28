@@ -103,16 +103,16 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                         child: const Icon(Icons.account_balance_rounded, color: AppColors.primary, size: 24),
                       ),
                       const SizedBox(width: 12),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Deposit Cash to Owner Bank',
-                            style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                            state.tr('depositCashToBank'),
+                            style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                           ),
                           Text(
-                            'Deposit collected cash into Bank Account A or B',
-                            style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                            state.tr('depositToOwnerAccounts'),
+                            style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -137,13 +137,13 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.point_of_sale_rounded, color: AppColors.cashGreen, size: 20),
-                        SizedBox(width: 8),
+                        const Icon(Icons.point_of_sale_rounded, color: AppColors.cashGreen, size: 20),
+                        const SizedBox(width: 8),
                         Text(
-                          'Cash Awaiting Deposit:',
-                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          state.tr('cashAwaitingDeposit'),
+                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                         ),
                       ],
                     ),
@@ -157,16 +157,16 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               const SizedBox(height: 16),
 
               // Select Target Account A or B
-              const Text(
-                'Select Destination Owner Bank Account:',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              Text(
+                state.tr('selectTargetBankAccount'),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
 
               // Account A
               _buildAccountSelectorCard(
                 accountKey: 'account_a',
-                title: 'Account A - Commercial Bank of Ethiopia (CBE)',
+                title: state.tr('ownerAccountA'),
                 accountNumber: AppStateNotifier.ownerAccountANumber,
                 bankName: 'Commercial Bank of Ethiopia',
                 color: AppColors.cbeBirrPurple,
@@ -177,7 +177,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               // Account B
               _buildAccountSelectorCard(
                 accountKey: 'account_b',
-                title: 'Account B - Awash Bank',
+                title: state.tr('ownerAccountB'),
                 accountNumber: AppStateNotifier.ownerAccountBNumber,
                 bankName: 'Awash Bank',
                 color: const Color(0xFFEA580C),
@@ -189,9 +189,9 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Deposit Amount (ETB):',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  Text(
+                    '${state.tr('depositAmount')}:',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                   if (availableCash > 0)
                     TextButton.icon(
@@ -201,7 +201,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       icon: const Icon(Icons.flash_on_rounded, size: 14, color: AppColors.primary),
-                      label: const Text('Deposit All Cash', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                      label: Text(state.tr('depositAllCash'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
                       onPressed: () {
                         _amountController.text = availableCash.toStringAsFixed(0);
                       },
@@ -221,16 +221,16 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               // Slip / Transaction Ref Number
               CustomTextField(
                 controller: _slipController,
-                label: 'Bank Deposit Slip / Ref Number',
+                label: state.tr('bankSlipNumber'),
                 hint: 'e.g. CBE-SLIP-984210 or AW-DEP-4491',
                 prefixIcon: Icons.receipt_long_rounded,
               ),
               const SizedBox(height: 12),
 
               // Receipt Screenshot Upload
-              const Text(
-                'Bank Receipt Photo / Screenshot:',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              Text(
+                state.tr('uploadDepositSlip'),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 6),
               InkWell(
@@ -258,7 +258,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          _uploadedReceiptName ?? 'Click to attach deposit receipt picture / slip',
+                          _uploadedReceiptName ?? state.tr('uploadDepositSlip'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -292,7 +292,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
 
               // Submit Button
               CustomButton(
-                text: 'Confirm & Record Bank Deposit',
+                text: state.tr('confirmBankDeposit'),
                 icon: Icons.check_circle_rounded,
                 backgroundColor: AppColors.primary,
                 isLoading: _isSubmitting,

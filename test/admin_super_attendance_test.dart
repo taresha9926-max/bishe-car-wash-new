@@ -242,5 +242,21 @@ void main() {
       final weeklyCommissions = state.weeklyWasherCommissions;
       expect(weeklyCommissions, isNotEmpty);
     });
+
+    test('Cashier submits weekly commission report to admin and persists it', () async {
+      final initialCount = state.weeklyCommissionReports.length;
+
+      final report = await state.submitWeeklyCommissionReportToAdmin(
+        cashierName: 'Abebech Cashier',
+        notes: 'Official week 43 payout report for admin',
+      );
+
+      expect(state.weeklyCommissionReports.length, equals(initialCount + 1));
+      expect(state.latestWeeklyCommissionReport, isNotNull);
+      expect(state.latestWeeklyCommissionReport!.cashierName, equals('Abebech Cashier'));
+      expect(state.latestWeeklyCommissionReport!.totalWeeklyPool, equals(report.totalWeeklyPool));
+      expect(state.latestWeeklyCommissionReport!.washerCommissions, isNotEmpty);
+      expect(state.latestWeeklyCommissionReport!.notes, equals('Official week 43 payout report for admin'));
+    });
   });
 }

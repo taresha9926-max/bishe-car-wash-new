@@ -21,11 +21,11 @@ enum PaymentMethod {
       case PaymentMethod.cbeBirr:
         return AppStrings.get('payCbeBirr', lang);
       case PaymentMethod.bankOfAbyssinia:
-        return 'Bank of Abyssinia (BoA)';
+        return AppStrings.get('payBankOfAbyssinia', lang);
       case PaymentMethod.awashBank:
-        return 'Awash Bank';
+        return AppStrings.get('payAwashBank', lang);
       case PaymentMethod.dashenBank:
-        return 'Dashen Bank (Amole)';
+        return AppStrings.get('payDashenBank', lang);
       case PaymentMethod.otherBankTransfer:
         return AppStrings.get('payBank', lang);
     }

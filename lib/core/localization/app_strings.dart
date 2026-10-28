@@ -354,19 +354,29 @@ class AppStrings {
 
     // Admin Time Filters & Seniority Commission
     'filterToday': {
-      AppLanguage.en: 'Today',
-      AppLanguage.om: 'Har\'a',
-      AppLanguage.am: 'ዛሬ',
+      AppLanguage.en: 'Today (Daily)',
+      AppLanguage.om: 'Har\'a (Guyyaa)',
+      AppLanguage.am: 'ዛሬ (ዕለታዊ)',
+    },
+    'filterYesterday': {
+      AppLanguage.en: 'Yesterday',
+      AppLanguage.om: 'Kaleessa',
+      AppLanguage.am: 'ትናንት',
     },
     'filterThisWeek': {
-      AppLanguage.en: 'This Week',
-      AppLanguage.om: 'Torban Kana',
-      AppLanguage.am: 'በዚህ ሳምንት',
+      AppLanguage.en: 'This Week (Weekly)',
+      AppLanguage.om: 'Torban Kana (Torban)',
+      AppLanguage.am: 'በዚህ ሳምንት (ሳምንታዊ)',
     },
     'filterThisMonth': {
-      AppLanguage.en: 'This Month',
-      AppLanguage.om: 'Ji\'a Kana',
-      AppLanguage.am: 'በዚህ ወር',
+      AppLanguage.en: 'This Month (Monthly)',
+      AppLanguage.om: 'Ji\'a Kana (Ji\'a)',
+      AppLanguage.am: 'በዚህ ወር (ወርሃዊ)',
+    },
+    'filterCustomRange': {
+      AppLanguage.en: 'Custom Range',
+      AppLanguage.om: 'Yeroo Filatame',
+      AppLanguage.am: 'የተመረጠ የጊዜ ክልል',
     },
     'filterAllTime': {
       AppLanguage.en: 'All Time',
@@ -724,6 +734,16 @@ class AppStrings {
       AppLanguage.en: 'Total Revenue',
       AppLanguage.om: 'Galii Waliigalaa',
       AppLanguage.am: 'አጠቃላይ ገቢ',
+    },
+    'totalRevenue': {
+      AppLanguage.en: 'Total Revenue',
+      AppLanguage.om: 'Galii Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ ገቢ',
+    },
+    'washAndVehicleHistory': {
+      AppLanguage.en: 'Wash & Vehicle History',
+      AppLanguage.om: 'Seenaa Dhiqannaa & Konkolaataa',
+      AppLanguage.am: 'የመኪና እጥበት እና ተሽከርካሪ ታሪክ',
     },
     'commissionsPaid': {
       AppLanguage.en: 'Commissions',
@@ -1212,6 +1232,269 @@ class AppStrings {
       AppLanguage.en: 'Included Services:',
       AppLanguage.om: 'Tajaajiloota Dabalatan:',
       AppLanguage.am: 'የተካተቱ አገልግሎቶች፡',
+    },
+
+    // Financial Reports & Closing
+    'financialReportsTitle': {
+      AppLanguage.en: 'Financial Transactions & Closing Reports',
+      AppLanguage.om: 'Gabaasa Faayinaansii fi Cufiinsa Herregaa',
+      AppLanguage.am: 'የፋይናንስ ዝውውርና የሂሳብ መዝጊያ ሪፖርቶች',
+    },
+    'dailyFinancialClosing': {
+      AppLanguage.en: 'Daily Financial Closing',
+      AppLanguage.om: 'Cufiinsa Faayinaansii Guyyaa',
+      AppLanguage.am: 'ዕለታዊ የፋይናንስ ሂሳብ መዝጊያ',
+    },
+    'confirmDailyClosing': {
+      AppLanguage.en: 'Confirm Daily Closing',
+      AppLanguage.om: 'Cufiinsa Guyyaa Mirkaneessi',
+      AppLanguage.am: 'ዕለታዊ ሂሳብ መዝጊያን አረጋግጥ',
+    },
+    'dailyClosingConfirmed': {
+      AppLanguage.en: 'Daily Closing Confirmed',
+      AppLanguage.om: 'Cufiinsi Guyyaa Mirkanaa\'eera',
+      AppLanguage.am: 'ዕለታዊ ሂሳብ ተዘግቷል',
+    },
+    'grossRevenue': {
+      AppLanguage.en: 'Daily Gross Revenue',
+      AppLanguage.om: 'Galii Dimshaashaa Guyyaa',
+      AppLanguage.am: 'ዕለታዊ ጠቅላላ ገቢ',
+    },
+    'washerCommissionDeducted': {
+      AppLanguage.en: 'Washer Commission Deducted (15%)',
+      AppLanguage.om: 'Komishiinii Dhiqaa Hir\'ifame (15%)',
+      AppLanguage.am: 'የተቆረጠ የአጣቢዎች ኮሚሽን (15%)',
+    },
+    'cashAtGate': {
+      AppLanguage.en: 'Cash Handover at Gate',
+      AppLanguage.om: 'Qarshii Harkaa Balbalaa',
+      AppLanguage.am: 'በር ላይ የተሰበሰበ ካሽ',
+    },
+    'digitalChannels': {
+      AppLanguage.en: 'Digital Channels Total',
+      AppLanguage.om: 'Waliigala Karaalee Dijitaalaa',
+      AppLanguage.am: 'ጠቅላላ የዲጂታል ክፍያዎች',
+    },
+    'cashInDrawer': {
+      AppLanguage.en: 'Cash in Register Drawer',
+      AppLanguage.om: 'Qarshii Saanduqa Keessaa',
+      AppLanguage.am: 'በካዝና ውስጥ ያለ ጥሬ ገንዘብ',
+    },
+    'awaitingDeposit': {
+      AppLanguage.en: 'Awaiting Bank Deposit',
+      AppLanguage.om: 'Baankiitti Galchuuf Kan Eegu',
+      AppLanguage.am: 'ወደ ባንክ ለመግባት የሚጠብቅ',
+    },
+    'closingRemarks': {
+      AppLanguage.en: 'Closing Remarks / Notes',
+      AppLanguage.om: 'Yaada Cufiinsaa / Qabxii',
+      AppLanguage.am: 'የመዝጊያ አስተያየት / ማስታወሻ',
+    },
+    'closingCashierName': {
+      AppLanguage.en: 'Closing Cashier Name',
+      AppLanguage.om: 'Maqaa Qabaa Qarshii Cufuu',
+      AppLanguage.am: 'ሂሳብ የዘጋችው ገንዘብ ያዥ ስም',
+    },
+
+    // Cash Bank Deposits
+    'depositCashToBank': {
+      AppLanguage.en: 'Deposit Cash to Owner Bank',
+      AppLanguage.om: 'Qarshii Baankii Abbaa Qabeenyaatti Galchi',
+      AppLanguage.am: 'ጥሬ ገንዘብ ለባለቤቱ ባንክ ገቢ አድርግ',
+    },
+    'ownerAccountA': {
+      AppLanguage.en: 'Account A - Commercial Bank of Ethiopia (CBE)',
+      AppLanguage.om: 'Herrega A - Baankii Daldala Itoophiyaa (CBE)',
+      AppLanguage.am: 'አካውንት ኤ - የኢትዮጵያ ንግድ ባንክ (CBE)',
+    },
+    'ownerAccountB': {
+      AppLanguage.en: 'Account B - Awash Bank',
+      AppLanguage.om: 'Herrega B - Baankii Hawaash',
+      AppLanguage.am: 'አካውንት ቢ - አዋሽ ባንክ',
+    },
+    'depositAmount': {
+      AppLanguage.en: 'Deposit Amount (ETB)',
+      AppLanguage.om: 'Hamma Qarshii Galfamu (ETB)',
+      AppLanguage.am: 'የገቢ ገንዘብ መጠን (ብር)',
+    },
+    'depositAllCash': {
+      AppLanguage.en: 'Deposit All Cash',
+      AppLanguage.om: 'Qarshii Hunda Galchi',
+      AppLanguage.am: 'ሁሉንም ካሽ ገቢ አድርግ',
+    },
+    'bankSlipNumber': {
+      AppLanguage.en: 'Bank Deposit Slip / Ref Number',
+      AppLanguage.om: 'Lakkoofsa Nagahee Baankii',
+      AppLanguage.am: 'የባንክ ደረሰኝ / ማረጋገጫ ቁጥር',
+    },
+    'uploadDepositSlip': {
+      AppLanguage.en: 'Bank Receipt Photo / Screenshot',
+      AppLanguage.om: 'Suuraa Nagahee Baankii Qabsiisi',
+      AppLanguage.am: 'የባንክ ደረሰኝ ፎቶ / ስክሪንሽት ጫን',
+    },
+    'confirmBankDeposit': {
+      AppLanguage.en: 'Confirm & Record Bank Deposit',
+      AppLanguage.om: 'Galii Baankii Mirkaneessi',
+      AppLanguage.am: 'የባንክ ገቢውን አረጋግጥ',
+    },
+    'bankDepositsLog': {
+      AppLanguage.en: 'Cash Bank Deposits (Owner Accounts A & B)',
+      AppLanguage.om: 'Galmee Kaffaltii Baankii (Herrega A & B)',
+      AppLanguage.am: 'የባንክ ገቢዎች መዝገብ (የባለቤቱ አካውንት ኤ እና ቢ)',
+    },
+    'viewDepositReceipt': {
+      AppLanguage.en: 'View Receipt Slip',
+      AppLanguage.om: 'Nagahee Ilaali',
+      AppLanguage.am: 'ደረሰኝ ተመልከት',
+    },
+
+    // Weekly Commission & Washer Payroll
+    'weeklyCommissionReportTitle': {
+      AppLanguage.en: 'Weekly Washer Commission Report',
+      AppLanguage.om: 'Gabaasa Komishiinii Torbanii Dhiqitootaa',
+      AppLanguage.am: 'ሳምንታዊ የአጣቢዎች ኮሚሽን ሪፖርት',
+    },
+    'reportWeeklyCommissionToAdmin': {
+      AppLanguage.en: 'Submit Weekly Commission Report to Admin',
+      AppLanguage.om: 'Gabaasa Torbanii Bulchaatti Ergi',
+      AppLanguage.am: 'ሳምንታዊ የኮሚሽን ሪፖርት ለአስተዳዳሪ ላክ',
+    },
+    'weeklyCommissionAccrual': {
+      AppLanguage.en: 'Current Week Commission Accrual',
+      AppLanguage.om: 'Kuusaa Komishiinii Torban Kanaa',
+      AppLanguage.am: 'በዚህ ሳምንት የተጠራቀመ ኮሚሽን',
+    },
+    'monthlyBaseSalaryPool': {
+      AppLanguage.en: 'Total Monthly Base Salary Pool',
+      AppLanguage.om: 'Miindaa Bu\'uuraa Ji\'a Guutuu',
+      AppLanguage.am: 'ጠቅላላ ወርሃዊ ቋሚ ደመወዝ',
+    },
+    'reportedByCashier': {
+      AppLanguage.en: 'Reported by Cashier',
+      AppLanguage.om: 'Qabaa Qarshiin Kan Gabaafame',
+      AppLanguage.am: 'በገንዘብ ያዥ የቀረበ',
+    },
+    'disburseWeeklyCommission': {
+      AppLanguage.en: 'Disburse & Report Weekly Commission',
+      AppLanguage.om: 'Komishiinii Torbanii Kaffaliifi Gabaasi',
+      AppLanguage.am: 'ሳምንታዊ ኮሚሽን ክፈልና ሪፖርት አድርግ',
+    },
+    'weeklyReportSuccess': {
+      AppLanguage.en: 'Weekly washer commission report submitted successfully!',
+      AppLanguage.om: 'Gabaasni komishiinii torbanii milkaa\'inaan ergameera!',
+      AppLanguage.am: 'ሳምንታዊ የአጣቢዎች ኮሚሽን ሪፖርት በተሳካ ሁኔታ ተልኳል!',
+    },
+    'cashierCommissionNotice': {
+      AppLanguage.en: 'Daily commission pool disbursement and cash reconciliation are managed directly from the Cashier Dashboard. Weekly amounts are verified and reported here for executive oversight.',
+      AppLanguage.om: 'Kaffaltiin komishiinii guyyaa fi qorannoon qarshii kallattiin gabatee kaffaltii irraa gaggeeffama. Hammi torbanii to\'annoof asitti dhiyaata.',
+      AppLanguage.am: 'ዕለታዊ የኮሚሽን ክፍፍልና የጥሬ ገንዘብ ቁጥጥር በቀጥታ በገንዘብ ያዥ ሰሌዳ ላይ ይከናወናል። ሳምንታዊ መጠኖች ለክትትል እዚህ ይቀርባሉ።',
+    },
+
+    // Tabs & Filters
+    'attendanceAndCommission': {
+      AppLanguage.en: 'Attendance & Commission Desk',
+      AppLanguage.om: 'Galmee Hojii fi Komishiinii',
+      AppLanguage.am: 'የሰራተኞች ገጽና የኮሚሽን ዴስክ',
+    },
+    'washHistory': {
+      AppLanguage.en: 'Vehicle Wash History',
+      AppLanguage.om: 'Seenaa Dhiqannaa Konkolaattotaa',
+      AppLanguage.am: 'የታጠቡ መኪኖች ታሪክ',
+    },
+    'closingAndFinancialReports': {
+      AppLanguage.en: 'Closing & Financial Reports',
+      AppLanguage.om: 'Cufiinsa Faayinaansiifi Gabaasa',
+      AppLanguage.am: 'የሂሳብ መዝጊያና የፋይናንስ ሪፖርቶች',
+    },
+    'searchPlateOrPhone': {
+      AppLanguage.en: 'Search plate, customer name, or phone...',
+      AppLanguage.om: 'Gabatee, maqaa maamilaa, ykn bilbila barbaadi...',
+      AppLanguage.am: 'በሰሌዳ፣ በደንበኛ ስም ወይም በስልክ ቁጥር ፈልግ...',
+    },
+    'noVehiclesFound': {
+      AppLanguage.en: 'No washed vehicles found for this period.',
+      AppLanguage.om: 'Konkolaataan dhiqame yeroo kana keessatti hin argamne.',
+      AppLanguage.am: 'በዚህ የጊዜ ክልል ውስጥ የታጠበ መኪና አልተገኘም።',
+    },
+    'markAllPresent': {
+      AppLanguage.en: 'Mark All Present',
+      AppLanguage.om: 'Hunda Hojirra Jedhi',
+      AppLanguage.am: 'ሁሉንም አሉ በል',
+    },
+    'assignedCommissionShare': {
+      AppLanguage.en: 'Assigned Commission Share',
+      AppLanguage.om: 'Qooda Komishiinii Ramadame',
+      AppLanguage.am: 'የተመደበ የኮሚሽን ድርሻ',
+    },
+    'totalCommissionAllocation': {
+      AppLanguage.en: 'Total Commission Allocation',
+      AppLanguage.om: 'Qooda Komishiinii Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ የኮሚሽን ድልድል',
+    },
+    'moneyReceivedBreakdown': {
+      AppLanguage.en: 'Money Received Breakdown by Provider',
+      AppLanguage.om: 'Gabaasa Qarshii Karaalee Kaffaltiitiin',
+      AppLanguage.am: 'የገቢ ገንዘብ ዝርዝር በከፋይ ድርጅቶች',
+    },
+    'payBankOfAbyssinia': {
+      AppLanguage.en: 'Bank of Abyssinia (BoA)',
+      AppLanguage.om: 'Baankii Habashaa (BoA)',
+      AppLanguage.am: 'አቢሲኒያ ባንክ (ቦአ)',
+    },
+    'payAwashBank': {
+      AppLanguage.en: 'Awash Bank',
+      AppLanguage.om: 'Baankii Hawaash',
+      AppLanguage.am: 'አዋሽ ባንክ',
+    },
+    'payDashenBank': {
+      AppLanguage.en: 'Dashen Bank (Amole)',
+      AppLanguage.om: 'Baankii Daashen (Amoolee)',
+      AppLanguage.am: 'ዳሽን ባንክ (አሞሌ)',
+    },
+    'weeklyCommissionReport': {
+      AppLanguage.en: 'Weekly Washer Commission Report',
+      AppLanguage.om: 'Gabaasa Komishiinii Hojjettoota Dhiqaa Torbaanii',
+      AppLanguage.am: 'ሳምንታዊ የአጣቢዎች ኮሚሽን ሪፖርት',
+    },
+    'weeklyCommissionReportSub': {
+      AppLanguage.en: 'Disbursed and reported weekly by cashier',
+      AppLanguage.om: 'Qophaa\'ee fi kan gabaafame kaashiyariin torbaaniin',
+      AppLanguage.am: 'በካሽየር የተዘጋጀ እና በየሳምንቱ የተላከ',
+    },
+    'noWeeklyCommissionReports': {
+      AppLanguage.en: 'No weekly commission reports filed yet by cashier.',
+      AppLanguage.om: 'Gabaasni komishiinii torbaanii kaashiyariin hin dhiyaanne.',
+      AppLanguage.am: 'እስካሁን በገንዘብ ያዥ የቀረበ ሳምንታዊ የኮሚሽን ሪፖርት የለም።',
+    },
+    'totalCommissionDisbursed': {
+      AppLanguage.en: 'Total Disbursed',
+      AppLanguage.om: 'Waliigala Kan Kaffalame',
+      AppLanguage.am: 'ጠቅላላ የተከፈለ',
+    },
+    'daysPresent': {
+      AppLanguage.en: 'Days Present',
+      AppLanguage.om: 'Guyyoota Argaman',
+      AppLanguage.am: 'የተገኙባቸው ቀናት',
+    },
+    'staffAndSalaries': {
+      AppLanguage.en: 'Staff & Salaries',
+      AppLanguage.om: 'Hojjettoota & Miindaa',
+      AppLanguage.am: 'ሰራተኞች እና ደመወዝ',
+    },
+    'dailyWasherCommissionPool': {
+      AppLanguage.en: 'Daily Washer Commission Pool',
+      AppLanguage.om: 'Kuusaa Komishiinii Dhiqitootaa Guyyaa',
+      AppLanguage.am: 'ዕለታዊ የአጣቢዎች ኮሚሽን ገቢ',
+    },
+    'reportWeeklyCommission': {
+      AppLanguage.en: 'Report Weekly Commission',
+      AppLanguage.om: 'Komishiinii Torbanii Gabaasi',
+      AppLanguage.am: 'ሳምንታዊ ኮሚሽን ሪፖርት አድርግ',
+    },
+    'attendanceDesk': {
+      AppLanguage.en: 'Attendance & Commission',
+      AppLanguage.om: 'Argama & Komishiinii',
+      AppLanguage.am: 'የመገኘትና ኮሚሽን መዝገብ',
     },
   };
 

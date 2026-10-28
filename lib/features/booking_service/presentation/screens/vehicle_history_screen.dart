@@ -16,18 +16,18 @@ enum HistoryDateFilter {
   thisMonth,
   customRange;
 
-  String get label {
+  String localizedLabel(dynamic state) {
     switch (this) {
       case HistoryDateFilter.today:
-        return 'Today';
+        return state.tr('filterToday');
       case HistoryDateFilter.yesterday:
-        return 'Yesterday';
+        return state.tr('filterYesterday');
       case HistoryDateFilter.thisWeek:
-        return 'This Week';
+        return state.tr('filterThisWeek');
       case HistoryDateFilter.thisMonth:
-        return 'This Month';
+        return state.tr('filterThisMonth');
       case HistoryDateFilter.customRange:
-        return 'Custom Range';
+        return state.tr('filterCustomRange');
     }
   }
 }
@@ -113,7 +113,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           child: Row(
             children: HistoryDateFilter.values.map((filter) {
               final isSelected = filter == _dateFilter;
-              String chipLabel = filter.label;
+              String chipLabel = filter.localizedLabel(state);
               if (filter == HistoryDateFilter.customRange && _customDateRange != null) {
                 final s = _customDateRange!.start;
                 final e = _customDateRange!.end;
@@ -192,10 +192,10 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Cars Washed', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    Text(state.tr('carsWashed'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
-                      '$totalCars Vehicles',
+                      '$totalCars',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary),
                     ),
                   ],
@@ -207,7 +207,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Total Revenue', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    Text(state.tr('totalRevenue'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
                       CurrencyFormatter.formatShort(totalRevenue),
@@ -222,7 +222,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Cash / Digital', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    Text(state.tr('cashVsDigital'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
                       '${CurrencyFormatter.formatShort(cashTotal)} / ${CurrencyFormatter.formatShort(digitalTotal)}',
@@ -240,7 +240,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: 'Search by plate, phone, or name...',
+            hintText: state.tr('searchPlateOrPhone'),
             prefixIcon: const Icon(Icons.search, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
@@ -276,10 +276,10 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.cardBorder),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
-                'No paid vehicle records found for this period.',
-                style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                state.tr('noVehiclesFound'),
+                style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
               ),
             ),
           )
@@ -291,7 +291,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final b = historyList[index];
-              return _buildHistoryCard(context, b);
+              return _buildHistoryCard(context, b, state);
             },
           ),
       ],
@@ -304,7 +304,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Wash & Vehicle History', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: Text(state.tr('washAndVehicleHistory'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -316,7 +316,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
     );
   }
 
-  Widget _buildHistoryCard(BuildContext context, WashBooking b) {
+  Widget _buildHistoryCard(BuildContext context, WashBooking b, dynamic state) {
     final method = b.payment.method;
     final isDigital = method.isDigital;
 
@@ -390,7 +390,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'PAID • ${method.displayName.toUpperCase()}',
+                  '${state.tr('statusPaid').toUpperCase()} • ${method.localizedName(state.currentLanguage).toUpperCase()}',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,

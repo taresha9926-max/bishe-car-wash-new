@@ -18,6 +18,7 @@ import 'daily_closing_dialog.dart';
 import 'payment_process_dialog.dart';
 import 'phone_booking_dialog.dart';
 import 'walk_in_registration_screen.dart';
+import 'weekly_commission_report_dialog.dart';
 
 class CashierDashboardScreen extends StatefulWidget {
   const CashierDashboardScreen({super.key});
@@ -145,11 +146,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 children: [
                   Text(
                     _selectedFilterIndex == 5
-                        ? 'Washer Attendance & Commission Desk (${state.presentWashersCount}/${state.totalWashersCount} Present)'
+                        ? '${state.tr("attendanceAndCommission")} (${state.presentWashersCount}/${state.totalWashersCount})'
                         : (_selectedFilterIndex == 6
-                            ? 'Vehicle Wash History (Completed & Paid)'
+                            ? state.tr("washHistory")
                             : (_selectedFilterIndex == 7
-                                ? 'Daily Financial Closing & Reports'
+                                ? state.tr("closingAndFinancialReports")
                                 : '${state.tr("queueAndVehicles")} (${filteredBookings.length})')),
                     style: TextStyle(
                       fontSize: isMobile ? 15.5 : 17,
@@ -900,9 +901,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       state.tr('filterInService'),
       state.tr('filterUnpaid'),
       state.tr('phoneCallBooking'),
-      'Attendance & Commission (${state.presentWashersCount}/${state.totalWashersCount})',
-      'Wash History',
-      'Closing & Financial Reports',
+      '${state.tr("attendanceDesk")} (${state.presentWashersCount}/${state.totalWashersCount})',
+      state.tr('washHistory'),
+      state.tr('closingAndFinancialReports'),
     ];
 
     return SingleChildScrollView(
@@ -987,26 +988,25 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.oromiaGold.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 22),
+              if (isMobile) ...[
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.oromiaGold.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      const SizedBox(width: 10),
-                      Column(
+                      child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 22),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Daily Washer Commission Pool',
-                            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          Text(
+                            state.tr('dailyWasherCommissionPool'),
+                            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                           ),
                           Text(
                             '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • 15% Gross Pool',
@@ -1014,24 +1014,113 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: pool > 0
-                        ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
-                        : null,
-                    icon: const Icon(Icons.payments_rounded, size: 14),
-                    label: const Text('Disburse Commission', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      elevation: 0,
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => WeeklyCommissionReportDialog.show(context),
+                        icon: const Icon(Icons.assignment_turned_in_rounded, size: 14),
+                        label: Text(
+                          state.tr('reportWeeklyCommission'),
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: pool > 0
+                            ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
+                            : null,
+                        icon: const Icon(Icons.payments_rounded, size: 14),
+                        label: Text(state.tr('disburseCommission'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.oromiaGold.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 22),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.tr('dailyWasherCommissionPool'),
+                              style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                            ),
+                            Text(
+                              '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • 15% Gross Pool',
+                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => WeeklyCommissionReportDialog.show(context),
+                          icon: const Icon(Icons.assignment_turned_in_rounded, size: 14),
+                          label: Text(
+                            state.tr('reportWeeklyCommission'),
+                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(color: AppColors.primary),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          onPressed: pool > 0
+                              ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
+                              : null,
+                          icon: const Icon(Icons.payments_rounded, size: 14),
+                          label: Text(state.tr('disburseCommission'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            elevation: 0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 12),
 
               // Pool ETB Banner
