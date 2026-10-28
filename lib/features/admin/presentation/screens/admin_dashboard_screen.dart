@@ -7,6 +7,7 @@ import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
+import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/staff_member.dart';
 import '../widgets/commission_item_card.dart';
@@ -228,7 +229,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
-                      '3 MODULES',
+                      '4 MODULES',
                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
                     ),
                   ),
@@ -535,116 +536,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  void _showEditSenioritySharesDialog(BuildContext context, dynamic state) {
-    final t4Ctrl = TextEditingController(text: (state.seniorityTierPercentages[4] ?? 35.0).toStringAsFixed(0));
-    final t3Ctrl = TextEditingController(text: (state.seniorityTierPercentages[3] ?? 30.0).toStringAsFixed(0));
-    final t2Ctrl = TextEditingController(text: (state.seniorityTierPercentages[2] ?? 20.0).toStringAsFixed(0));
-    final t1Ctrl = TextEditingController(text: (state.seniorityTierPercentages[1] ?? 15.0).toStringAsFixed(0));
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          final t4 = double.tryParse(t4Ctrl.text.trim()) ?? 0;
-          final t3 = double.tryParse(t3Ctrl.text.trim()) ?? 0;
-          final t2 = double.tryParse(t2Ctrl.text.trim()) ?? 0;
-          final t1 = double.tryParse(t1Ctrl.text.trim()) ?? 0;
-          final total = t4 + t3 + t2 + t1;
-          final isValid = (total - 100.0).abs() < 0.01;
-
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('Edit Seniority Commission Weights', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Set the percentage distribution per tier. The sum must equal 100%. If any washer is absent, the present washers divide 100% proportionally.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 14),
-                  TextField(
-                    controller: t4Ctrl,
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setDialogState(() {}),
-                    decoration: const InputDecoration(labelText: 'Tier 4: Master Detailer (%)', suffixText: '%', border: OutlineInputBorder()),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: t3Ctrl,
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setDialogState(() {}),
-                    decoration: const InputDecoration(labelText: 'Tier 3: Senior Washer (%)', suffixText: '%', border: OutlineInputBorder()),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: t2Ctrl,
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setDialogState(() {}),
-                    decoration: const InputDecoration(labelText: 'Tier 2: Standard Washer (%)', suffixText: '%', border: OutlineInputBorder()),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: t1Ctrl,
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setDialogState(() {}),
-                    decoration: const InputDecoration(labelText: 'Tier 1: Junior Washer (%)', suffixText: '%', border: OutlineInputBorder()),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isValid ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: isValid ? Colors.green : Colors.red),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Weight:', style: TextStyle(fontWeight: FontWeight.bold, color: isValid ? Colors.green : Colors.red)),
-                        Text('${total.toStringAsFixed(1)}% / 100%', style: TextStyle(fontWeight: FontWeight.bold, color: isValid ? Colors.green : Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-              ElevatedButton(
-                onPressed: isValid
-                    ? () {
-                        Navigator.pop(ctx);
-                        state.updateSeniorityTierPercentages({
-                          4: t4,
-                          3: t3,
-                          2: t2,
-                          1: t1,
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              state.isSuperAdmin
-                                  ? 'Updated Seniority Tier Commission Distribution (100% total).'
-                                  : 'Seniority share change submitted for Super Admin approval.',
-                            ),
-                            backgroundColor: state.isSuperAdmin ? AppColors.statusCompleted : AppColors.secondary,
-                          ),
-                        );
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-                child: const Text('Save Weights'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildCommissionSenioritySection(
     BuildContext context,
     dynamic state,
@@ -707,9 +598,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _showEditSenioritySharesDialog(context, state),
-                    icon: const Icon(Icons.tune, size: 14),
-                    label: const Text('Edit % Shares', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
+                      );
+                    },
+                    icon: const Icon(Icons.manage_accounts_rounded, size: 14),
+                    label: const Text('Staff & Salaries', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: const BorderSide(color: AppColors.primary),
@@ -772,9 +668,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 const SizedBox(width: 10),
                 OutlinedButton.icon(
-                  onPressed: () => _showEditSenioritySharesDialog(context, state),
-                  icon: const Icon(Icons.tune, size: 14),
-                  label: const Text('Edit Seniority %', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.manage_accounts_rounded, size: 14),
+                  label: const Text('Staff & Salaries', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(color: AppColors.primary),
@@ -885,7 +786,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              w.seniorityTierName,
+                              'Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% Share',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
@@ -907,7 +808,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            isPresent ? '${percent.toStringAsFixed(1)}% of Pool' : '0.0% (Absent)',
+                            isPresent ? '${percent.toStringAsFixed(1)}% Today' : '0.0% (Absent)',
                             style: TextStyle(
                               fontSize: 10,
                               color: isPresent ? AppColors.statusCompleted : Colors.red,
@@ -935,7 +836,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    '100% of the commission pool is distributed strictly among washers on duty today (${state.presentWashersCount}/${state.totalWashersCount}). Absent washers receive 0 ETB.',
+                    '100% of the commission pool is distributed strictly among washers on duty today (${state.presentWashersCount}/${state.totalWashersCount}). Absent washers receive 0 ETB, and their share is automatically redistributed proportionally to active washers.',
                     style: const TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -988,6 +889,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CredentialsManagementScreen()),
+          );
+        },
+      ),
+      _OperationItem(
+        title: 'Vehicle History',
+        subtitle: 'Audit paid & completed washes by date range',
+        icon: Icons.history_edu_rounded,
+        color: AppColors.telebirrBlue,
+        badge: 'History',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const VehicleHistoryScreen()),
           );
         },
       ),

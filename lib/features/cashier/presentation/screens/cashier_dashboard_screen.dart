@@ -9,6 +9,7 @@ import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_dispatcher.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
+import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'payment_process_dialog.dart';
 import 'phone_booking_dialog.dart';
@@ -130,14 +131,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
               const SizedBox(height: 18),
 
-              // 3. Queue Management Section OR Attendance Desk
+              // 3. Queue Management Section OR Attendance Desk OR Wash History
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     _selectedFilterIndex == 5
                         ? 'Washer Attendance (${state.presentWashersCount}/${state.totalWashersCount} Present)'
-                        : '${state.tr("queueAndVehicles")} (${filteredBookings.length})',
+                        : (_selectedFilterIndex == 6
+                            ? 'Vehicle Wash History (Completed & Paid)'
+                            : '${state.tr("queueAndVehicles")} (${filteredBookings.length})'),
                     style: TextStyle(
                       fontSize: isMobile ? 15.5 : 17,
                       fontWeight: FontWeight.w800,
@@ -148,13 +151,15 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Queue Filter Tabs (including Washer Attendance)
+              // Queue Filter Tabs (including Washer Attendance & Wash History)
               _buildFilterChips(state),
               const SizedBox(height: 12),
 
-              // Queue Items OR Washer Attendance Desk
+              // Queue Items OR Washer Attendance Desk OR Wash History
               if (_selectedFilterIndex == 5)
                 _buildWasherAttendanceSection(context, state, isMobile)
+              else if (_selectedFilterIndex == 6)
+                const VehicleHistoryScreen(isEmbedded: true)
               else if (filteredBookings.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(28),
@@ -734,6 +739,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       state.tr('filterUnpaid'),
       state.tr('phoneCallBooking'),
       'Attendance (${state.presentWashersCount}/${state.totalWashersCount})',
+      'Wash History',
     ];
 
     return SingleChildScrollView(
@@ -742,16 +748,25 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       child: Row(
         children: List.generate(filters.length, (index) {
           final isSelected = index == _selectedFilterIndex;
+          Widget? avatar;
+          if (index == 5) {
+            avatar = Icon(
+              Icons.how_to_reg_rounded,
+              size: 15,
+              color: isSelected ? Colors.white : AppColors.primary,
+            );
+          } else if (index == 6) {
+            avatar = Icon(
+              Icons.history_rounded,
+              size: 15,
+              color: isSelected ? Colors.white : AppColors.telebirrBlue,
+            );
+          }
+
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
-              avatar: index == 5
-                  ? Icon(
-                      Icons.how_to_reg_rounded,
-                      size: 15,
-                      color: isSelected ? Colors.white : AppColors.primary,
-                    )
-                  : null,
+              avatar: avatar,
               label: Text(
                 filters[index],
                 style: TextStyle(
@@ -1020,17 +1035,21 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   }
 
   List<WashBooking> _getFilteredBookings(List<WashBooking> bookings) {
+    // Only vehicles that are NOT yet paid belong in the active station queue.
+    // As soon as payment is confirmed, the vehicle vanishes from the queue and moves to Wash History.
+    final activeQueue = bookings.where((b) => !b.payment.isPaid && b.status != WashStatus.cancelled).toList();
+
     switch (_selectedFilterIndex) {
       case 1:
-        return bookings.where((b) => b.status == WashStatus.pending || b.assignedBay == null).toList();
+        return activeQueue.where((b) => b.status == WashStatus.pending || b.assignedBay == null).toList();
       case 2:
-        return bookings.where((b) => b.status.isOngoing).toList();
+        return activeQueue.where((b) => b.status.isOngoing).toList();
       case 3:
-        return bookings.where((b) => !b.payment.isPaid).toList();
+        return activeQueue.where((b) => !b.payment.isPaid).toList();
       case 4:
-        return bookings.where((b) => b.isPhoneBooking).toList();
+        return activeQueue.where((b) => b.isPhoneBooking).toList();
       default:
-        return bookings.where((b) => b.status != WashStatus.cancelled).toList();
+        return activeQueue;
     }
   }
 

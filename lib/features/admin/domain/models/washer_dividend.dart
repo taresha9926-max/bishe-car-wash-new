@@ -5,6 +5,7 @@ class WasherDividend {
   final bool isPresent;
   final double percentageShare; // Percentage of the 100% pool (e.g. 25.0)
   final double earnedETB;
+  final String? customTierName;
 
   const WasherDividend({
     required this.washerId,
@@ -13,9 +14,13 @@ class WasherDividend {
     required this.isPresent,
     required this.percentageShare,
     required this.earnedETB,
+    this.customTierName,
   });
 
   String get tierName {
+    if (customTierName != null && customTierName!.isNotEmpty) {
+      return customTierName!;
+    }
     switch (skillLevel) {
       case 4:
         return 'Lead Specialist (Tier 1)';

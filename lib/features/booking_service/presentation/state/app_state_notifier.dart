@@ -168,15 +168,37 @@ class AppStateNotifier extends ChangeNotifier {
     );
   }
 
+  /// Retrieves the matched credential if PIN and role match an active record.
+  StaffCredential? getMatchedCredential(UserRole role, String enteredPin) {
+    final pin = enteredPin.trim();
+    final roleCredentials = _credentials.where((c) => c.role == role && c.isActive).toList();
+    try {
+      return roleCredentials.firstWhere((c) => c.pin.trim() == pin);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Live verification: checks cache first, then fetches fresh credentials from Supabase if not matched.
   Future<bool> authenticateRoleAsync(UserRole role, String enteredPin) async {
     if (authenticateRole(role, enteredPin)) {
+      if (role == UserRole.admin) {
+        final cred = getMatchedCredential(role, enteredPin);
+        final isSuper = cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin');
+        setSuperAdminStatus(isSuper);
+      }
       return true;
     }
     try {
       _credentials = await _repository.getStaffCredentials();
       notifyListeners();
-      return authenticateRole(role, enteredPin);
+      final ok = authenticateRole(role, enteredPin);
+      if (ok && role == UserRole.admin) {
+        final cred = getMatchedCredential(role, enteredPin);
+        final isSuper = cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin');
+        setSuperAdminStatus(isSuper);
+      }
+      return ok;
     } catch (_) {
       return false;
     }
@@ -313,14 +335,17 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Calculates individual dividend for each active washer based on skill & seniority level
+  /// Calculates individual dividend for each active washer based on their assigned commission percentage
   /// and today's attendance. Only washers PRESENT today divide the 100% commission pool.
+  /// If some washers are absent, their assigned percentage is automatically redistributed
+  /// proportionally across present washers.
   /// Sum of percentage shares for present washers is mathematically GUARANTEED to sum to 100.0%.
   Map<String, WasherDividend> calculateWasherDividends(double pool) {
-    final present = presentWashersToday;
-    if (present.isEmpty || pool <= 0) {
+    final washers = availableWashers;
+    if (washers.isEmpty || pool <= 0) {
       final Map<String, WasherDividend> emptyResult = {};
-      for (final w in availableWashers) {
+      for (final w in washers) {
+        final basePct = (w.commissionRate > 0 ? w.commissionRate : (1.0 / (washers.isEmpty ? 1 : washers.length))) * 100.0;
         emptyResult[w.id] = WasherDividend(
           washerId: w.id,
           washerName: w.name,
@@ -328,23 +353,46 @@ class AppStateNotifier extends ChangeNotifier {
           isPresent: isWasherPresentToday(w.id),
           percentageShare: 0.0,
           earnedETB: 0.0,
+          customTierName: '${basePct.toStringAsFixed(1)}% Base',
         );
       }
       return emptyResult;
     }
 
+    final present = presentWashersToday;
+    if (present.isEmpty) {
+      final Map<String, WasherDividend> allAbsent = {};
+      for (final w in washers) {
+        final basePct = (w.commissionRate > 0 ? w.commissionRate : (1.0 / washers.length)) * 100.0;
+        allAbsent[w.id] = WasherDividend(
+          washerId: w.id,
+          washerName: w.name,
+          skillLevel: w.skillSeniorityLevel,
+          isPresent: false,
+          percentageShare: 0.0,
+          earnedETB: 0.0,
+          customTierName: '${basePct.toStringAsFixed(1)}% Base',
+        );
+      }
+      return allAbsent;
+    }
+
+    // Sum of assigned commission rates among PRESENT washers
     double totalPresentWeight = 0.0;
     for (final w in present) {
-      final tierShare = _seniorityTierPercentages[w.skillSeniorityLevel] ?? 20.0;
-      totalPresentWeight += tierShare;
+      final rate = (w.commissionRate > 0 ? w.commissionRate : (1.0 / washers.length));
+      totalPresentWeight += rate;
     }
 
     if (totalPresentWeight <= 0) return {};
 
     final Map<String, WasherDividend> result = {};
 
-    for (final w in availableWashers) {
+    for (final w in washers) {
       final isPresent = isWasherPresentToday(w.id);
+      final baseRate = (w.commissionRate > 0 ? w.commissionRate : (1.0 / washers.length));
+      final basePct = baseRate * 100.0;
+
       if (!isPresent) {
         result[w.id] = WasherDividend(
           washerId: w.id,
@@ -353,10 +401,11 @@ class AppStateNotifier extends ChangeNotifier {
           isPresent: false,
           percentageShare: 0.0,
           earnedETB: 0.0,
+          customTierName: '${basePct.toStringAsFixed(1)}% Base',
         );
       } else {
-        final tierShare = _seniorityTierPercentages[w.skillSeniorityLevel] ?? 20.0;
-        final shareFraction = tierShare / totalPresentWeight;
+        // Relative Proportional Redistribution:
+        final shareFraction = baseRate / totalPresentWeight;
         final percent = shareFraction * 100.0;
         final amount = shareFraction * pool;
 
@@ -367,6 +416,7 @@ class AppStateNotifier extends ChangeNotifier {
           isPresent: true,
           percentageShare: percent,
           earnedETB: amount,
+          customTierName: '${basePct.toStringAsFixed(1)}% Base',
         );
       }
     }

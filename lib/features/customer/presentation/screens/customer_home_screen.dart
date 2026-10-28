@@ -16,7 +16,6 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
-import 'package:bishe_car_wash/features/customer/presentation/screens/booking_history_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
 
@@ -132,28 +131,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               const SizedBox(height: 24),
 
               // 6. Vehicle Type Pricing Matrix Tabs
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    state.tr('servicePackages'),
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const BookingHistoryScreen()),
-                      );
-                    },
-                    icon: const Icon(Icons.receipt_long_rounded, size: 16),
-                    label: Text(state.tr('myHistory'), style: const TextStyle(fontWeight: FontWeight.w700)),
-                  ),
-                ],
+              Text(
+                state.tr('servicePackages'),
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 8),
 

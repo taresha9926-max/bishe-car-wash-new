@@ -54,7 +54,9 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
 
     if (isValid) {
       if (widget.targetRole == UserRole.admin) {
-        state.setSuperAdminStatus(pin == StaffAuthenticator.defaultAdminPin);
+        final cred = state.getMatchedCredential(UserRole.admin, pin);
+        final isSuper = cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin');
+        state.setSuperAdminStatus(isSuper);
       }
       Navigator.of(context).pop(true);
     } else {

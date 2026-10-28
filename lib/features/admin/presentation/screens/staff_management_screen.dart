@@ -32,7 +32,59 @@ class StaffManagementScreen extends StatelessWidget {
           children: [
             // Team Commission Pooling Banner
             _buildTeamCommissionCard(context, state),
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
+
+            // Washers Commission 100% Allocation Status Banner
+            Builder(builder: (context) {
+              final washers = staffList.where((s) => s.role == StaffRole.washer).toList();
+              final totalWasherCommission = washers.fold<double>(0.0, (sum, w) => sum + (w.commissionRate * 100));
+              final is100Percent = (totalWasherCommission - 100.0).abs() < 0.05;
+
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: is100Percent ? Colors.green.withOpacity(0.08) : Colors.amber.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: is100Percent ? Colors.green.withOpacity(0.4) : Colors.amber.shade700,
+                    width: 1.2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      is100Percent ? Icons.check_circle_rounded : Icons.info_rounded,
+                      color: is100Percent ? Colors.green : Colors.amber.shade800,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Total Commission Allocation: ${totalWasherCommission.toStringAsFixed(1)}% / 100.0%',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                              color: is100Percent ? Colors.green.shade900 : Colors.brown,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            is100Percent
+                                ? 'Full 100% of the team commission pool is distributed across ${washers.length} active washers.'
+                                : 'Assigned commission shares should sum to 100.0%. Edit individual washer percentages below.',
+                            style: TextStyle(fontSize: 11, color: is100Percent ? Colors.green.shade800 : Colors.brown),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 14),
 
             Text(
               state.tr('activeWashers'),
@@ -134,11 +186,11 @@ class StaffManagementScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Seniority Tier', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    const Text('Commission Share', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
-                      member.seniorityTierName,
-                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.secondary),
+                      '${(member.commissionRate * 100).toStringAsFixed(1)}%',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.secondary),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -345,7 +397,9 @@ class StaffManagementScreen extends StatelessWidget {
             const SizedBox(height: 12),
             CustomTextField(
               controller: commissionCtrl,
-              label: '${state.tr("commissionRate")} (%)',
+              label: member.role == StaffRole.washer
+                  ? 'Washer Commission Share (%)'
+                  : '${state.tr("commissionRate")} (%)',
               hint: 'e.g. 15',
               keyboardType: TextInputType.number,
               prefixIcon: Icons.percent,
@@ -474,27 +528,6 @@ class StaffManagementScreen extends StatelessWidget {
                     if (val != null) setDialogState(() => selectedRole = val);
                   },
                 ),
-                if (selectedRole == StaffRole.washer) ...[
-                  const SizedBox(height: 10),
-                  const Text('Seniority Tier (Commission Weight)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 4),
-                  DropdownButtonFormField<int>(
-                    value: selectedSeniority,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('Tier 1: Junior (15%)')),
-                      DropdownMenuItem(value: 2, child: Text('Tier 2: Standard (20%)')),
-                      DropdownMenuItem(value: 3, child: Text('Tier 3: Senior (30%)')),
-                      DropdownMenuItem(value: 4, child: Text('Tier 4: Master Detailer (35%)')),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) setDialogState(() => selectedSeniority = val);
-                    },
-                  ),
-                ],
                 const SizedBox(height: 10),
                 CustomTextField(
                   controller: phoneCtrl,
@@ -514,7 +547,9 @@ class StaffManagementScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 CustomTextField(
                   controller: commissionCtrl,
-                  label: '${state.tr("commissionRate")} (%)',
+                  label: selectedRole == StaffRole.washer
+                      ? 'Assigned Commission Share (%)'
+                      : '${state.tr("commissionRate")} (%)',
                   hint: '15',
                   keyboardType: TextInputType.number,
                   prefixIcon: Icons.percent,

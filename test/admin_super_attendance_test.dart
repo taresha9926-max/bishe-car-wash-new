@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
-import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 
 void main() {
@@ -129,6 +129,44 @@ void main() {
 
       expect((presentTotalPercentage - 100.0).abs(), lessThan(0.01));
       expect((presentTotalETB - testPool).abs(), lessThan(0.01));
+    });
+
+    test('Strict PIN authentication: edited PIN is the ONLY valid entry PIN', () async {
+      // Super Admin edits their PIN from 1234 to 4450
+      state.setSuperAdminStatus(true);
+      await state.updateStaffCredential(
+        id: 'cred-admin',
+        pin: '4450',
+        fullName: 'Super Admin',
+      );
+
+      // Verify old hardcoded PIN 1234 fails
+      final oldAuth = await state.authenticateRoleAsync(UserRole.admin, '1234');
+      expect(oldAuth, isFalse);
+
+      // Verify newly edited PIN 4450 succeeds and sets Super Admin status
+      final newAuth = await state.authenticateRoleAsync(UserRole.admin, '4450');
+      expect(newAuth, isTrue);
+      expect(state.isSuperAdmin, isTrue);
+    });
+
+    test('Paid vehicle lifecycle: vanishes from active queue and is in history', () async {
+      final initialQueue = state.bookings.where((b) => !b.payment.isPaid).toList();
+      expect(initialQueue.length, greaterThan(0));
+
+      final targetBooking = initialQueue.first;
+      // Mark as paid
+      await state.processPayment(
+        bookingId: targetBooking.id,
+        method: PaymentMethod.cash,
+        amount: targetBooking.totalPrice,
+      );
+
+      final updatedQueue = state.bookings.where((b) => !b.payment.isPaid).toList();
+      expect(updatedQueue.any((b) => b.id == targetBooking.id), isFalse);
+
+      final paidHistory = state.bookings.where((b) => b.payment.isPaid).toList();
+      expect(paidHistory.any((b) => b.id == targetBooking.id), isTrue);
     });
   });
 }
