@@ -316,68 +316,126 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. Fast Action Buttons: Deposit Cash & Confirm Daily Closing
-          Row(
-            children: [
-              // Deposit Cash Button
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => BankDepositDialog.show(context),
-                  icon: const Icon(Icons.account_balance_rounded, size: 16),
-                  label: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Deposit Cash to Bank',
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                      ),
-                      Text(
-                        '${CurrencyFormatter.formatShort(undepositedCash)} awaiting deposit',
-                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
-                  ),
+          if (isMobile) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => BankDepositDialog.show(context),
+                icon: const Icon(Icons.account_balance_rounded, size: 16),
+                label: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      state.tr('depositCashToBank'),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                    ),
+                    Text(
+                      '${CurrencyFormatter.formatShort(undepositedCash)} awaiting deposit',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
+                    ),
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
                 ),
               ),
-              const SizedBox(width: 8),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => DailyClosingDialog.show(context),
+                icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
+                label: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      isClosed ? 'Daily Closing Confirmed ✓' : state.tr('confirmDailyClosing'),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                    ),
+                    Text(
+                      isClosed ? 'Shift locked ✓' : 'Reconcile register',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
+                    ),
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isClosed ? AppColors.statusCompleted : AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ] else ...[
+            Row(
+              children: [
+                // Deposit Cash Button
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => BankDepositDialog.show(context),
+                    icon: const Icon(Icons.account_balance_rounded, size: 16),
+                    label: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          state.tr('depositCashToBank'),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                        ),
+                        Text(
+                          '${CurrencyFormatter.formatShort(undepositedCash)} awaiting deposit',
+                          style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
 
-              // Confirm Daily Closing Button
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => DailyClosingDialog.show(context),
-                  icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
-                  label: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        isClosed ? 'Daily Closing Confirmed' : 'Confirm Daily Closing',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                      ),
-                      Text(
-                        isClosed ? 'Shift locked ✓' : 'Reconcile register & commission',
-                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isClosed ? AppColors.statusCompleted : AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
+                // Confirm Daily Closing Button
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => DailyClosingDialog.show(context),
+                    icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
+                    label: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isClosed ? 'Daily Closing Confirmed' : state.tr('confirmDailyClosing'),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                        ),
+                        Text(
+                          isClosed ? 'Shift locked ✓' : 'Reconcile register & commission',
+                          style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isClosed ? AppColors.statusCompleted : AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
           const SizedBox(height: 10),
 
           // 2. Clear breakdown pills of money received by each provider

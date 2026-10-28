@@ -127,6 +127,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   String _currentLang = 'EN';
   String get currentLang => _currentLang;
+  String get currentLanguage => _currentLang;
 
   String tr(String key) => AppStrings.get(key, AppLanguage.fromCode(_currentLang));
   void setLanguage(String lang) { _currentLang = lang; notifyListeners(); }

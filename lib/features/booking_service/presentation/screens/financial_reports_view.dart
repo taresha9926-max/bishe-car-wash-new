@@ -158,17 +158,22 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Financial Transactions & Closing Reports', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5)),
+        title: Text(state.tr('financialReports'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: isDesktop ? 28 : (isMobile ? 14 : 20),
-          vertical: 16,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 28 : (isMobile ? 14 : 20),
+              vertical: 16,
+            ),
+            child: bodyContent,
+          ),
         ),
-        child: bodyContent,
       ),
     );
   }

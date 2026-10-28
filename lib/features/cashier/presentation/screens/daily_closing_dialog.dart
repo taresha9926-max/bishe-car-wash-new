@@ -45,13 +45,15 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
     final remainingCash = state.undepositedCashTodayETB;
     final dividends = state.washerDividendsToday;
     final isAlreadyClosed = state.isTodayClosed;
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 580),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(22),
+          padding: EdgeInsets.all(isMobile ? 14 : 22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

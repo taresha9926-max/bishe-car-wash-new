@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
+import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../domain/models/payment_info.dart';
 import '../../domain/models/wash_booking.dart';
@@ -301,6 +302,9 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
       return content;
     }
 
+    final isMobile = ResponsiveLayout.isMobile(context);
+    final isDesktop = ResponsiveLayout.isDesktop(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -309,9 +313,17 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: content,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1100),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 24 : (isMobile ? 12 : 18),
+              vertical: 16,
+            ),
+            child: content,
+          ),
+        ),
       ),
     );
   }

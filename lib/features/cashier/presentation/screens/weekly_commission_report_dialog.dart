@@ -37,13 +37,15 @@ class _WeeklyCommissionReportDialogState extends State<WeeklyCommissionReportDia
     final state = AppStateProvider.of(context);
     final weeklyPool = state.weeklyTotalCommissionPool;
     final washerCommissions = state.weeklyWasherCommissions;
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 540),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(22),
+          padding: EdgeInsets.all(isMobile ? 14 : 22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
