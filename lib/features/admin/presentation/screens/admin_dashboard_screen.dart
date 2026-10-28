@@ -7,6 +7,7 @@ import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
+import '../../../booking_service/presentation/screens/financial_reports_view.dart';
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/staff_member.dart';
@@ -229,7 +230,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
-                      '4 MODULES',
+                      '5 MODULES',
                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
                     ),
                   ),
@@ -905,6 +906,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           );
         },
       ),
+      _OperationItem(
+        title: 'Closing & Financial Reports',
+        subtitle: 'Audit daily closings, bank deposits & payment channels',
+        icon: Icons.fact_check_rounded,
+        color: AppColors.cashGreen,
+        badge: 'Reports',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const FinancialReportsView()),
+          );
+        },
+      ),
     ];
 
     if (isMobile) {
@@ -916,13 +930,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       );
     }
 
-    return Row(
-      children: operations.map((op) => Expanded(
-        child: Padding(
-          padding: EdgeInsets.only(right: op == operations.last ? 0 : 12),
-          child: _buildOperationCardDesktop(context, op),
-        ),
-      )).toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth >= 1000 ? 5 : (constraints.maxWidth >= 650 ? 3 : 2);
+        final itemWidth = (constraints.maxWidth - (crossAxisCount - 1) * 10) / crossAxisCount;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: operations.map((op) => SizedBox(
+            width: itemWidth,
+            child: _buildOperationCardDesktop(context, op),
+          )).toList(),
+        );
+      },
     );
   }
 

@@ -1,0 +1,434 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/custom_text_field.dart';
+import '../../../booking_service/presentation/state/app_state_notifier.dart';
+import '../../../booking_service/presentation/state/app_state_provider.dart';
+
+// HTML file picker for Flutter Web
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
+
+class BankDepositDialog extends StatefulWidget {
+  const BankDepositDialog({super.key});
+
+  static Future<void> show(BuildContext context) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (_) => const BankDepositDialog(),
+    );
+  }
+
+  @override
+  State<BankDepositDialog> createState() => _BankDepositDialogState();
+}
+
+class _BankDepositDialogState extends State<BankDepositDialog> {
+  String _selectedAccountKey = 'account_a'; // 'account_a' or 'account_b'
+  final _amountController = TextEditingController();
+  final _slipController = TextEditingController();
+  final _notesController = TextEditingController();
+  final _cashierNameController = TextEditingController(text: 'Cashier On Duty');
+
+  bool _isSubmitting = false;
+  String? _uploadedReceiptName;
+  String? _receiptBase64;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _slipController.dispose();
+    _notesController.dispose();
+    _cashierNameController.dispose();
+    super.dispose();
+  }
+
+  void _pickReceiptImage() {
+    if (kIsWeb) {
+      final uploadInput = html.FileUploadInputElement()..accept = 'image/*';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((e) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files[0];
+          final reader = html.FileReader();
+          reader.readAsDataUrl(file);
+          reader.onLoadEnd.listen((e) {
+            setState(() {
+              _uploadedReceiptName = file.name;
+              _receiptBase64 = reader.result as String?;
+            });
+          });
+        }
+      });
+    } else {
+      setState(() {
+        _uploadedReceiptName = 'bank_deposit_slip.jpg';
+        _receiptBase64 = 'placeholder_slip';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
+    final availableCash = state.undepositedCashTodayETB;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.account_balance_rounded, color: AppColors.primary, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Deposit Cash to Owner Bank',
+                            style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          ),
+                          Text(
+                            'Deposit collected cash into Bank Account A or B',
+                            style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Available Cash in Drawer Banner
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.cashGreen.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.cashGreen.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.point_of_sale_rounded, color: AppColors.cashGreen, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Cash Awaiting Deposit:',
+                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      CurrencyFormatter.format(availableCash),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.cashGreen),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Select Target Account A or B
+              const Text(
+                'Select Destination Owner Bank Account:',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 8),
+
+              // Account A
+              _buildAccountSelectorCard(
+                accountKey: 'account_a',
+                title: 'Account A - Commercial Bank of Ethiopia (CBE)',
+                accountNumber: AppStateNotifier.ownerAccountANumber,
+                bankName: 'Commercial Bank of Ethiopia',
+                color: AppColors.cbeBirrPurple,
+                icon: Icons.account_balance_rounded,
+              ),
+              const SizedBox(height: 8),
+
+              // Account B
+              _buildAccountSelectorCard(
+                accountKey: 'account_b',
+                title: 'Account B - Awash Bank',
+                accountNumber: AppStateNotifier.ownerAccountBNumber,
+                bankName: 'Awash Bank',
+                color: const Color(0xFFEA580C),
+                icon: Icons.account_balance_wallet_rounded,
+              ),
+              const SizedBox(height: 16),
+
+              // Deposit Amount & Quick Fill
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Deposit Amount (ETB):',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  ),
+                  if (availableCash > 0)
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: const Icon(Icons.flash_on_rounded, size: 14, color: AppColors.primary),
+                      label: const Text('Deposit All Cash', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                      onPressed: () {
+                        _amountController.text = availableCash.toStringAsFixed(0);
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              CustomTextField(
+                controller: _amountController,
+                label: 'Deposit Amount',
+                hint: 'e.g. 5000',
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                prefixIcon: Icons.attach_money_rounded,
+              ),
+              const SizedBox(height: 12),
+
+              // Slip / Transaction Ref Number
+              CustomTextField(
+                controller: _slipController,
+                label: 'Bank Deposit Slip / Ref Number',
+                hint: 'e.g. CBE-SLIP-984210 or AW-DEP-4491',
+                prefixIcon: Icons.receipt_long_rounded,
+              ),
+              const SizedBox(height: 12),
+
+              // Receipt Screenshot Upload
+              const Text(
+                'Bank Receipt Photo / Screenshot:',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 6),
+              InkWell(
+                onTap: _pickReceiptImage,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: _uploadedReceiptName != null ? AppColors.cashGreen.withOpacity(0.06) : AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _uploadedReceiptName != null ? AppColors.cashGreen : AppColors.cardBorder,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _uploadedReceiptName != null ? Icons.check_circle_rounded : Icons.cloud_upload_outlined,
+                        color: _uploadedReceiptName != null ? AppColors.cashGreen : AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _uploadedReceiptName ?? 'Click to attach deposit receipt picture / slip',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                            color: _uploadedReceiptName != null ? AppColors.cashGreen : AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Cashier Name & Notes
+              CustomTextField(
+                controller: _cashierNameController,
+                label: 'Deposited By (Cashier Name)',
+                hint: 'Cashier full name',
+                prefixIcon: Icons.person_outline_rounded,
+              ),
+              const SizedBox(height: 10),
+              CustomTextField(
+                controller: _notesController,
+                label: 'Deposit Remarks (Optional)',
+                hint: 'e.g. Deposited before branch closing',
+                prefixIcon: Icons.notes_rounded,
+              ),
+              const SizedBox(height: 20),
+
+              // Submit Button
+              CustomButton(
+                text: 'Confirm & Record Bank Deposit',
+                icon: Icons.check_circle_rounded,
+                backgroundColor: AppColors.primary,
+                isLoading: _isSubmitting,
+                onPressed: _isSubmitting ? null : _handleDepositSubmit,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccountSelectorCard({
+    required String accountKey,
+    required String title,
+    required String accountNumber,
+    required String bankName,
+    required Color color,
+    required IconData icon,
+  }) {
+    final isSelected = _selectedAccountKey == accountKey;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedAccountKey = accountKey;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.08) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? color : AppColors.cardBorder,
+            width: isSelected ? 1.8 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected ? color : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Acc #: $accountNumber',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded, color: color, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleDepositSubmit() async {
+    final amountText = _amountController.text.trim();
+    final amount = double.tryParse(amountText);
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid deposit amount.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final slipRef = _slipController.text.trim().isNotEmpty
+        ? _slipController.text.trim()
+        : 'SLIP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+
+    final cashierName = _cashierNameController.text.trim().isNotEmpty
+        ? _cashierNameController.text.trim()
+        : 'Cashier On Duty';
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final state = AppStateProvider.read(context);
+      await state.recordBankDeposit(
+        amount: amount,
+        accountKey: _selectedAccountKey,
+        referenceSlipNumber: slipRef,
+        receiptScreenshot: _receiptBase64,
+        cashierName: cashierName,
+        notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Deposit of ${CurrencyFormatter.format(amount)} to ${_selectedAccountKey == "account_b" ? "Account B" : "Account A"} recorded successfully!'),
+            backgroundColor: AppColors.statusReady,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error recording deposit: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+}

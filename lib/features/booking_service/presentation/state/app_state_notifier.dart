@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/bank_deposit_record.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
@@ -425,6 +427,301 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   Map<String, WasherDividend> get washerDividendsToday => calculateWasherDividends(teamCommissionPoolTodayETB);
+
+  // --- Owner Bank Accounts for Cash Deposits ---
+  static const String ownerAccountAName = 'Commercial Bank of Ethiopia (CBE)';
+  static const String ownerAccountANumber = '1000 4829 1048 2';
+  static const String ownerAccountBName = 'Awash Bank';
+  static const String ownerAccountBNumber = '0142 5930 1823 4';
+
+  // Bank Deposits List (Cash deposits confirmed by Cashier to Owner Bank)
+  final List<BankDepositRecord> _bankDeposits = _getInitialBankDeposits();
+  List<BankDepositRecord> get bankDeposits => List.unmodifiable(_bankDeposits);
+
+  // Daily Financial Closings (Confirmed shift reports by Cashier)
+  final List<DailyFinancialClosing> _dailyFinancialClosings = _getInitialDailyClosings();
+  List<DailyFinancialClosing> get dailyFinancialClosings => List.unmodifiable(_dailyFinancialClosings);
+
+  static List<BankDepositRecord> _getInitialBankDeposits() {
+    final now = DateTime.now();
+    return [
+      BankDepositRecord(
+        id: 'dep-1',
+        amount: 5200.0,
+        accountKey: 'account_a',
+        accountName: 'Account A (CBE)',
+        accountNumber: ownerAccountANumber,
+        bankName: 'Commercial Bank of Ethiopia',
+        referenceSlipNumber: 'CBE-DEP-849201',
+        depositedAt: now.subtract(const Duration(days: 1, hours: 2)),
+        cashierName: 'Abebech T.',
+        notes: 'Yesterday evening cash collection deposit',
+      ),
+      BankDepositRecord(
+        id: 'dep-2',
+        amount: 4800.0,
+        accountKey: 'account_b',
+        accountName: 'Account B (Awash Bank)',
+        accountNumber: ownerAccountBNumber,
+        bankName: 'Awash Bank',
+        referenceSlipNumber: 'AW-SLIP-773192',
+        depositedAt: now.subtract(const Duration(days: 3, hours: 3)),
+        cashierName: 'Abebech T.',
+        notes: 'Mid-week cash handover deposit',
+      ),
+    ];
+  }
+
+  static List<DailyFinancialClosing> _getInitialDailyClosings() {
+    final now = DateTime.now();
+    final yesterday = now.subtract(const Duration(days: 1));
+    final twoDaysAgo = now.subtract(const Duration(days: 2));
+
+    return [
+      DailyFinancialClosing(
+        id: 'closing-${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}',
+        closingDate: yesterday,
+        closedAt: DateTime(yesterday.year, yesterday.month, yesterday.day, 20, 30),
+        cashierName: 'Abebech Tadesse',
+        grossRevenue: 8600.0,
+        cashRevenue: 5200.0,
+        digitalRevenue: 3400.0,
+        providerBreakdown: {
+          'Cash': 5200.0,
+          'Telebirr': 1800.0,
+          'CBE Birr': 1100.0,
+          'Awash Bank': 500.0,
+        },
+        carsWashedCount: 16,
+        commissionPool: 1290.0,
+        netStationProfit: 7310.0,
+        cashDeposited: 5200.0,
+        cashRemaining: 0.0,
+        washerDividends: {
+          'Teshale Bekele (Lead)': 451.5,
+          'Chala Gutu (Senior)': 387.0,
+          'Dawit Alemu (Standard)': 258.0,
+          'Yared Haile (Junior)': 193.5,
+        },
+        notes: 'Full shift settled smoothly. All cash deposited to CBE.',
+        isConfirmed: true,
+      ),
+      DailyFinancialClosing(
+        id: 'closing-${twoDaysAgo.year}-${twoDaysAgo.month.toString().padLeft(2, '0')}-${twoDaysAgo.day.toString().padLeft(2, '0')}',
+        closingDate: twoDaysAgo,
+        closedAt: DateTime(twoDaysAgo.year, twoDaysAgo.month, twoDaysAgo.day, 20, 15),
+        cashierName: 'Abebech Tadesse',
+        grossRevenue: 7400.0,
+        cashRevenue: 4800.0,
+        digitalRevenue: 2600.0,
+        providerBreakdown: {
+          'Cash': 4800.0,
+          'Telebirr': 1400.0,
+          'CBE Birr': 1200.0,
+        },
+        carsWashedCount: 14,
+        commissionPool: 1110.0,
+        netStationProfit: 6290.0,
+        cashDeposited: 4800.0,
+        cashRemaining: 0.0,
+        washerDividends: {
+          'Teshale Bekele (Lead)': 388.5,
+          'Chala Gutu (Senior)': 333.0,
+          'Dawit Alemu (Standard)': 222.0,
+          'Yared Haile (Junior)': 166.5,
+        },
+        notes: 'Shift completed without incident.',
+        isConfirmed: true,
+      ),
+    ];
+  }
+
+  /// Calculates breakdown of money received by each PaymentMethod
+  Map<PaymentMethod, double> getRevenueByPaymentMethod({DateTime? start, DateTime? end}) {
+    final result = <PaymentMethod, double>{
+      for (final m in PaymentMethod.values) m: 0.0,
+    };
+    for (final b in _bookings) {
+      if (!b.payment.isPaid) continue;
+      if (start != null && b.createdAt.isBefore(start)) continue;
+      if (end != null && b.createdAt.isAfter(end)) continue;
+      result[b.payment.method] = (result[b.payment.method] ?? 0.0) + b.totalPrice;
+    }
+    return result;
+  }
+
+  /// Calculates count of transactions per PaymentMethod
+  Map<PaymentMethod, int> getTransactionCountByPaymentMethod({DateTime? start, DateTime? end}) {
+    final result = <PaymentMethod, int>{
+      for (final m in PaymentMethod.values) m: 0,
+    };
+    for (final b in _bookings) {
+      if (!b.payment.isPaid) continue;
+      if (start != null && b.createdAt.isBefore(start)) continue;
+      if (end != null && b.createdAt.isAfter(end)) continue;
+      result[b.payment.method] = (result[b.payment.method] ?? 0) + 1;
+    }
+    return result;
+  }
+
+  /// Total cash deposited into owner bank accounts today
+  double get totalCashDepositedTodayETB {
+    final now = DateTime.now();
+    return _bankDeposits
+        .where((d) => d.depositedAt.year == now.year && d.depositedAt.month == now.month && d.depositedAt.day == now.day)
+        .fold(0.0, (sum, d) => sum + d.amount);
+  }
+
+  /// Total cash currently sitting in the cashier drawer awaiting bank deposit
+  double get undepositedCashTodayETB {
+    final diff = totalCashRevenueETB - totalCashDepositedTodayETB;
+    return diff < 0 ? 0.0 : diff;
+  }
+
+  /// Checks if a given date has an approved daily closing report
+  bool isDateClosed(DateTime date) {
+    return _dailyFinancialClosings.any((c) =>
+        c.closingDate.year == date.year &&
+        c.closingDate.month == date.month &&
+        c.closingDate.day == date.day &&
+        c.isConfirmed);
+  }
+
+  bool get isTodayClosed => isDateClosed(DateTime.now());
+
+  /// Cashier records cash deposit to Owner Bank Account A or B
+  Future<void> recordBankDeposit({
+    required double amount,
+    required String accountKey,
+    required String referenceSlipNumber,
+    String? receiptScreenshot,
+    required String cashierName,
+    String? notes,
+  }) async {
+    final accountName = accountKey == 'account_b' ? ownerAccountBName : ownerAccountAName;
+    final accountNumber = accountKey == 'account_b' ? ownerAccountBNumber : ownerAccountANumber;
+    final bankName = accountKey == 'account_b' ? 'Awash Bank' : 'Commercial Bank of Ethiopia (CBE)';
+
+    final deposit = BankDepositRecord(
+      id: 'dep-${DateTime.now().millisecondsSinceEpoch}',
+      amount: amount,
+      accountKey: accountKey,
+      accountName: accountName,
+      accountNumber: accountNumber,
+      bankName: bankName,
+      referenceSlipNumber: referenceSlipNumber,
+      receiptScreenshot: receiptScreenshot,
+      depositedAt: DateTime.now(),
+      cashierName: cashierName,
+      notes: notes,
+    );
+
+    _bankDeposits.insert(0, deposit);
+    notifyListeners();
+  }
+
+  /// Cashier confirms daily financial transactions closing summary
+  Future<DailyFinancialClosing> confirmDailyClosing({
+    required String cashierName,
+    String? notes,
+  }) async {
+    final now = DateTime.now();
+    final paidToday = _bookings.where((b) {
+      final d = b.createdAt;
+      return b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).toList();
+
+    final gross = paidToday.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final cash = paidToday.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final digital = gross - cash;
+    final comm = gross * teamCommissionRate;
+    final net = gross - comm;
+    final deposited = totalCashDepositedTodayETB;
+    final remainingCash = cash > deposited ? cash - deposited : 0.0;
+
+    final breakdown = <String, double>{};
+    for (final m in PaymentMethod.values) {
+      final amt = paidToday.where((b) => b.payment.method == m).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+      if (amt > 0) {
+        breakdown[m.shortName] = amt;
+      }
+    }
+
+    final divMap = calculateWasherDividends(comm);
+    final divSummary = <String, double>{};
+    divMap.forEach((id, div) {
+      if (div.isPresent && div.earnedETB > 0) {
+        divSummary[div.washerName] = div.earnedETB;
+      }
+    });
+
+    final closing = DailyFinancialClosing(
+      id: 'closing-${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
+      closingDate: now,
+      closedAt: now,
+      cashierName: cashierName,
+      grossRevenue: gross,
+      cashRevenue: cash,
+      digitalRevenue: digital,
+      providerBreakdown: breakdown,
+      carsWashedCount: paidToday.length,
+      commissionPool: comm,
+      netStationProfit: net,
+      cashDeposited: deposited,
+      cashRemaining: remainingCash,
+      washerDividends: divSummary,
+      notes: notes,
+      isConfirmed: true,
+    );
+
+    _dailyFinancialClosings.removeWhere((c) =>
+        c.closingDate.year == now.year &&
+        c.closingDate.month == now.month &&
+        c.closingDate.day == now.day);
+    _dailyFinancialClosings.insert(0, closing);
+
+    notifyListeners();
+    return closing;
+  }
+
+  /// Weekly commission accumulation per washer (Washers are paid weekly)
+  Map<String, double> get weeklyWasherCommissions {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final startOfWeek = DateTime(monday.year, monday.month, monday.day);
+
+    final weeklyPaid = _bookings.where((b) {
+      return b.payment.isPaid && (b.createdAt.isAfter(startOfWeek) || b.createdAt.isAtSameMomentAs(startOfWeek));
+    }).toList();
+
+    final weeklyGross = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final weeklyPool = weeklyGross * teamCommissionRate;
+
+    final dividends = calculateWasherDividends(weeklyPool);
+    final result = <String, double>{};
+    for (final entry in dividends.entries) {
+      result[entry.value.washerName] = entry.value.earnedETB;
+    }
+    return result;
+  }
+
+  /// Total weekly accumulated washer commission pool
+  double get weeklyTotalCommissionPool {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final startOfWeek = DateTime(monday.year, monday.month, monday.day);
+
+    final weeklyPaid = _bookings.where((b) {
+      return b.payment.isPaid && (b.createdAt.isAfter(startOfWeek) || b.createdAt.isAtSameMomentAs(startOfWeek));
+    }).toList();
+
+    return weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice) * teamCommissionRate;
+  }
+
+  /// Total monthly base salary obligation for active washers (Salaries are paid monthly)
+  double get monthlyTotalBaseSalary {
+    return availableWashers.fold<double>(0.0, (sum, w) => sum + w.baseSalaryMonthlyETB);
+  }
 
   int get availableBaysCount {
     return _bays.where((b) => b.type != BayType.mobileVan && b.isVacant).length;

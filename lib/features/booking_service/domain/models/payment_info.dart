@@ -6,6 +6,9 @@ enum PaymentMethod {
   cash,
   telebirr,
   cbeBirr,
+  bankOfAbyssinia,
+  awashBank,
+  dashenBank,
   otherBankTransfer;
 
   String localizedName(String langCode) {
@@ -17,6 +20,12 @@ enum PaymentMethod {
         return AppStrings.get('payTelebirr', lang);
       case PaymentMethod.cbeBirr:
         return AppStrings.get('payCbeBirr', lang);
+      case PaymentMethod.bankOfAbyssinia:
+        return 'Bank of Abyssinia (BoA)';
+      case PaymentMethod.awashBank:
+        return 'Awash Bank';
+      case PaymentMethod.dashenBank:
+        return 'Dashen Bank (Amole)';
       case PaymentMethod.otherBankTransfer:
         return AppStrings.get('payBank', lang);
     }
@@ -32,8 +41,14 @@ enum PaymentMethod {
         return 'Telebirr';
       case PaymentMethod.cbeBirr:
         return 'CBE Birr';
+      case PaymentMethod.bankOfAbyssinia:
+        return 'Bank of Abyssinia';
+      case PaymentMethod.awashBank:
+        return 'Awash Bank';
+      case PaymentMethod.dashenBank:
+        return 'Dashen Bank';
       case PaymentMethod.otherBankTransfer:
-        return 'Bank Transfer';
+        return 'Other Bank';
     }
   }
 
@@ -45,6 +60,12 @@ enum PaymentMethod {
         return AppColors.telebirrBlue;
       case PaymentMethod.cbeBirr:
         return AppColors.cbeBirrPurple;
+      case PaymentMethod.bankOfAbyssinia:
+        return const Color(0xFFF59E0B); // Amber / Gold for BoA
+      case PaymentMethod.awashBank:
+        return const Color(0xFFEA580C); // Warm Orange for Awash
+      case PaymentMethod.dashenBank:
+        return const Color(0xFF0284C7); // Deep Blue for Dashen
       case PaymentMethod.otherBankTransfer:
         return Colors.indigo;
     }
@@ -58,8 +79,14 @@ enum PaymentMethod {
         return Icons.phone_android_rounded;
       case PaymentMethod.cbeBirr:
         return Icons.account_balance_rounded;
-      case PaymentMethod.otherBankTransfer:
+      case PaymentMethod.bankOfAbyssinia:
+        return Icons.account_balance_wallet_rounded;
+      case PaymentMethod.awashBank:
+        return Icons.account_balance_rounded;
+      case PaymentMethod.dashenBank:
         return Icons.credit_card_rounded;
+      case PaymentMethod.otherBankTransfer:
+        return Icons.sync_alt_rounded;
     }
   }
 

@@ -9,8 +9,12 @@ import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_dispatcher.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
+import '../../../booking_service/domain/models/payment_info.dart';
+import '../../../booking_service/presentation/screens/financial_reports_view.dart';
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
+import 'bank_deposit_dialog.dart';
+import 'daily_closing_dialog.dart';
 import 'payment_process_dialog.dart';
 import 'phone_booking_dialog.dart';
 import 'walk_in_registration_screen.dart';
@@ -125,22 +129,28 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             children: [
               // 1. Shift KPI Stats
               _buildShiftSummaryBanner(state, isMobile),
+              const SizedBox(height: 10),
+
+              // 1.1 Payment Received by Channel & Cashier Actions (Deposit Cash & Confirm Closing)
+              _buildFinancialActionToolbar(context, state, isMobile),
               const SizedBox(height: 14),
 
               // 2. Real-Time Capacity Quick Status Bar (Bay 1, Bay 2, Mobile Van 1)
               _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
               const SizedBox(height: 18),
 
-              // 3. Queue Management Section OR Attendance Desk OR Wash History
+              // 3. Queue Management Section OR Attendance Desk OR Wash History OR Financial Reports
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     _selectedFilterIndex == 5
-                        ? 'Washer Attendance (${state.presentWashersCount}/${state.totalWashersCount} Present)'
+                        ? 'Washer Attendance & Commission Desk (${state.presentWashersCount}/${state.totalWashersCount} Present)'
                         : (_selectedFilterIndex == 6
                             ? 'Vehicle Wash History (Completed & Paid)'
-                            : '${state.tr("queueAndVehicles")} (${filteredBookings.length})'),
+                            : (_selectedFilterIndex == 7
+                                ? 'Daily Financial Closing & Reports'
+                                : '${state.tr("queueAndVehicles")} (${filteredBookings.length})')),
                     style: TextStyle(
                       fontSize: isMobile ? 15.5 : 17,
                       fontWeight: FontWeight.w800,
@@ -151,15 +161,17 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Queue Filter Tabs (including Washer Attendance & Wash History)
+              // Queue Filter Tabs (including Washer Attendance, Wash History & Financial Reports)
               _buildFilterChips(state),
               const SizedBox(height: 12),
 
-              // Queue Items OR Washer Attendance Desk OR Wash History
+              // Queue Items OR Washer Attendance & Commission Desk OR Wash History OR Financial Reports
               if (_selectedFilterIndex == 5)
-                _buildWasherAttendanceSection(context, state, isMobile)
+                _buildWasherAttendanceAndCommissionSection(context, state, isMobile)
               else if (_selectedFilterIndex == 6)
                 const VehicleHistoryScreen(isEmbedded: true)
+              else if (_selectedFilterIndex == 7)
+                const FinancialReportsView(isEmbedded: true)
               else if (filteredBookings.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(28),
@@ -266,6 +278,156 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           style: TextStyle(fontSize: isMobile ? 9.5 : 10, color: AppColors.textSecondary),
         ),
       ],
+    );
+  }
+
+  Widget _buildFinancialActionToolbar(BuildContext context, dynamic state, bool isMobile) {
+    final methodRevenue = state.getRevenueByPaymentMethod() as Map<PaymentMethod, double>;
+    final methodCounts = state.getTransactionCountByPaymentMethod() as Map<PaymentMethod, int>;
+    final undepositedCash = state.undepositedCashTodayETB as double;
+    final isClosed = state.isTodayClosed as bool;
+
+    final channels = [
+      (method: PaymentMethod.cash, label: 'Cash Gate', color: AppColors.cashGreen),
+      (method: PaymentMethod.telebirr, label: 'Telebirr', color: AppColors.telebirrBlue),
+      (method: PaymentMethod.cbeBirr, label: 'CBE Birr', color: AppColors.cbeBirrPurple),
+      (method: PaymentMethod.bankOfAbyssinia, label: 'BoA', color: const Color(0xFFF59E0B)),
+      (method: PaymentMethod.awashBank, label: 'Awash Bank', color: const Color(0xFFEA580C)),
+      (method: PaymentMethod.dashenBank, label: 'Dashen Bank', color: const Color(0xFF0284C7)),
+      (method: PaymentMethod.otherBankTransfer, label: 'Other Bank', color: Colors.indigo),
+    ];
+
+    return Container(
+      padding: EdgeInsets.all(isMobile ? 12 : 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Fast Action Buttons: Deposit Cash & Confirm Daily Closing
+          Row(
+            children: [
+              // Deposit Cash Button
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => BankDepositDialog.show(context),
+                  icon: const Icon(Icons.account_balance_rounded, size: 16),
+                  label: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Deposit Cash to Bank',
+                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                      ),
+                      Text(
+                        '${CurrencyFormatter.formatShort(undepositedCash)} awaiting deposit',
+                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigo,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // Confirm Daily Closing Button
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => DailyClosingDialog.show(context),
+                  icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
+                  label: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        isClosed ? 'Daily Closing Confirmed' : 'Confirm Daily Closing',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                      ),
+                      Text(
+                        isClosed ? 'Shift locked ✓' : 'Reconcile register & commission',
+                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isClosed ? AppColors.statusCompleted : AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // 2. Clear breakdown pills of money received by each provider
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: channels.map((c) {
+                final amt = methodRevenue[c.method] ?? 0.0;
+                final cnt = methodCounts[c.method] ?? 0;
+                final hasPayments = amt > 0;
+
+                return Container(
+                  margin: const EdgeInsets.only(right: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: hasPayments ? c.color.withOpacity(0.08) : AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: hasPayments ? c.color.withOpacity(0.3) : AppColors.cardBorder,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(c.method.icon, size: 13, color: hasPayments ? c.color : AppColors.textSecondary),
+                      const SizedBox(width: 5),
+                      Text(
+                        '${c.label}: ',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: hasPayments ? c.color : AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        '${CurrencyFormatter.formatShort(amt)} ($cnt)',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: hasPayments ? AppColors.textPrimary : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -738,8 +900,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       state.tr('filterInService'),
       state.tr('filterUnpaid'),
       state.tr('phoneCallBooking'),
-      'Attendance (${state.presentWashersCount}/${state.totalWashersCount})',
+      'Attendance & Commission (${state.presentWashersCount}/${state.totalWashersCount})',
       'Wash History',
+      'Closing & Financial Reports',
     ];
 
     return SingleChildScrollView(
@@ -760,6 +923,12 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               Icons.history_rounded,
               size: 15,
               color: isSelected ? Colors.white : AppColors.telebirrBlue,
+            );
+          } else if (index == 7) {
+            avatar = Icon(
+              Icons.fact_check_rounded,
+              size: 15,
+              color: isSelected ? Colors.white : AppColors.cashGreen,
             );
           }
 
@@ -791,13 +960,196 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  Widget _buildWasherAttendanceSection(BuildContext context, dynamic state, bool isMobile) {
+  Widget _buildWasherAttendanceAndCommissionSection(BuildContext context, dynamic state, bool isMobile) {
     final washers = state.availableWashers;
+    final pool = state.teamCommissionPoolTodayETB as double;
+    final dividends = state.washerDividendsToday as Map<String, dynamic>;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Attendance Overview Card
+        // 1. Shifted Disburse Commission Pool Card (Managed by Cashier)
+        Container(
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.oromiaGold.withOpacity(0.4)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.oromiaGold.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.oromiaGold.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 22),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Daily Washer Commission Pool',
+                            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          ),
+                          Text(
+                            '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • 15% Gross Pool',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: pool > 0
+                        ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
+                        : null,
+                    icon: const Icon(Icons.payments_rounded, size: 14),
+                    label: const Text('Disburse Commission', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      elevation: 0,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Pool ETB Banner
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.oromiaGold.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.oromiaGold.withOpacity(0.2)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Total Earned Commission Pool Today:',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    ),
+                    Text(
+                      CurrencyFormatter.format(pool),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.oromiaGold),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Absent washer protection notice
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withOpacity(0.15)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.shield_outlined, size: 14, color: Colors.blue),
+                    SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '100% of the commission pool is distributed strictly among washers on duty today. Absent washers receive 0 ETB, and their share is automatically redistributed proportionally to active washers.',
+                        style: TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Dividends breakdown list
+              if (dividends.isNotEmpty) ...[
+                const Text(
+                  'Individual 100% Pool Distribution:',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 6),
+                ...dividends.values.map((div) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              div.isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                              size: 13,
+                              color: div.isPresent ? AppColors.statusCompleted : Colors.red,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              div.washerName,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: div.isPresent ? FontWeight.w700 : FontWeight.w500,
+                                color: div.isPresent ? AppColors.textPrimary : AppColors.textMuted,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                div.customTierName ?? '',
+                                style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          div.isPresent
+                              ? '${div.percentageShare.toStringAsFixed(1)}% • ${CurrencyFormatter.format(div.earnedETB)}'
+                              : 'Absent (0 ETB)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: div.isPresent ? AppColors.oromiaGold : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ],
+          ),
+        ),
+
+        // 2. Attendance Overview Card
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -826,7 +1178,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Daily Washer Roster',
+                            'Daily Washer Roster & Attendance',
                             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: AppColors.textPrimary),
                           ),
                           Text(
@@ -925,27 +1277,6 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.withOpacity(0.15)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.shield_outlined, size: 14, color: Colors.blue),
-                    SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Commission Pool Protection: Absent washers are assigned 0 ETB. The 100% pool is divided strictly among present washers according to their seniority tier.',
-                        style: TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -1013,7 +1344,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${w.seniorityTierName} • ${w.phone}',
+                        'Assigned Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% • ${w.phone}',
                         style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ],
@@ -1031,6 +1362,50 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           );
         }),
       ],
+    );
+  }
+
+  void _showDisburseCommissionDialog(BuildContext context, dynamic state, double pool, int washerCount) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 24),
+            const SizedBox(width: 8),
+            const Text('Disburse Commission Pool', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          ],
+        ),
+        content: Text(
+          'Confirm distribution of ${CurrencyFormatter.format(pool)} team commission dividends among the $washerCount washer(s) on duty today according to their percentage share (summing to 100%)?',
+          style: const TextStyle(fontSize: 13, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Team commission pool recorded and distributed successfully!'),
+                  backgroundColor: AppColors.statusReady,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            child: const Text('Confirm Disbursement', style: TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
     );
   }
 

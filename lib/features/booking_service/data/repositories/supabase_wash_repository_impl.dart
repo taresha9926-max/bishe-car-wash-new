@@ -308,8 +308,19 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
         PaymentMethod pMethod = PaymentMethod.cash;
         final mStr = (json['payment_method'] ?? '').toString().toLowerCase();
-        if (mStr.contains('telebirr')) pMethod = PaymentMethod.telebirr;
-        if (mStr.contains('cbe')) pMethod = PaymentMethod.cbeBirr;
+        if (mStr.contains('telebirr')) {
+          pMethod = PaymentMethod.telebirr;
+        } else if (mStr.contains('cbe')) {
+          pMethod = PaymentMethod.cbeBirr;
+        } else if (mStr.contains('abyssinia') || mStr.contains('boa')) {
+          pMethod = PaymentMethod.bankOfAbyssinia;
+        } else if (mStr.contains('awash')) {
+          pMethod = PaymentMethod.awashBank;
+        } else if (mStr.contains('dashen') || mStr.contains('amole')) {
+          pMethod = PaymentMethod.dashenBank;
+        } else if (mStr.contains('bank')) {
+          pMethod = PaymentMethod.otherBankTransfer;
+        }
 
         final isPhone = json['booking_origin'] == 'phone_booking';
 

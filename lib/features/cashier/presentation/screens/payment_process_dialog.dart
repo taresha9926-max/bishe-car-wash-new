@@ -157,6 +157,9 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               _buildOption(PaymentMethod.cash, state.tr('payCash')),
               _buildOption(PaymentMethod.telebirr, state.tr('payTelebirr')),
               _buildOption(PaymentMethod.cbeBirr, state.tr('payCbeBirr')),
+              _buildOption(PaymentMethod.bankOfAbyssinia, 'Bank of Abyssinia (BoA)'),
+              _buildOption(PaymentMethod.awashBank, 'Awash Bank'),
+              _buildOption(PaymentMethod.dashenBank, 'Dashen Bank (Amole)'),
               _buildOption(PaymentMethod.otherBankTransfer, state.tr('payBank')),
 
               // Digital Payment Fields

@@ -168,5 +168,79 @@ void main() {
       final paidHistory = state.bookings.where((b) => b.payment.isPaid).toList();
       expect(paidHistory.any((b) => b.id == targetBooking.id), isTrue);
     });
+
+    test('Multi-channel payment breakdown and bank deposits (Account A & B)', () async {
+      // Process a payment with Bank of Abyssinia and one with Awash Bank
+      final unpaid = state.bookings.where((b) => !b.payment.isPaid).take(2).toList();
+      if (unpaid.length >= 2) {
+        await state.processPayment(
+          bookingId: unpaid[0].id,
+          method: PaymentMethod.bankOfAbyssinia,
+          amount: unpaid[0].totalPrice,
+          transactionRef: 'BOA-TX-10029',
+        );
+        await state.processPayment(
+          bookingId: unpaid[1].id,
+          method: PaymentMethod.awashBank,
+          amount: unpaid[1].totalPrice,
+          transactionRef: 'AW-TX-88201',
+        );
+      }
+
+      final revenueByMethod = state.getRevenueByPaymentMethod();
+      expect(revenueByMethod.containsKey(PaymentMethod.bankOfAbyssinia), isTrue);
+      expect(revenueByMethod.containsKey(PaymentMethod.awashBank), isTrue);
+
+      // Record bank deposit to Account A (CBE)
+      final initialDepositsCount = state.bankDeposits.length;
+      await state.recordBankDeposit(
+        amount: 2500.0,
+        accountKey: 'account_a',
+        referenceSlipNumber: 'CBE-SLIP-TEST-001',
+        cashierName: 'Test Cashier',
+      );
+
+      expect(state.bankDeposits.length, equals(initialDepositsCount + 1));
+      final latestDeposit = state.bankDeposits.first;
+      expect(latestDeposit.accountKey, equals('account_a'));
+      expect(latestDeposit.amount, equals(2500.0));
+      expect(latestDeposit.bankName, contains('Commercial Bank of Ethiopia'));
+
+      // Record bank deposit to Account B (Awash Bank)
+      await state.recordBankDeposit(
+        amount: 1800.0,
+        accountKey: 'account_b',
+        referenceSlipNumber: 'AW-SLIP-TEST-002',
+        cashierName: 'Test Cashier',
+      );
+      final latestDepositB = state.bankDeposits.first;
+      expect(latestDepositB.accountKey, equals('account_b'));
+      expect(latestDepositB.bankName, contains('Awash Bank'));
+    });
+
+    test('Daily financial closing confirmation and washer payroll cycles', () async {
+      final initialClosingCount = state.dailyFinancialClosings.length;
+
+      // Confirm daily closing by Cashier
+      final closing = await state.confirmDailyClosing(
+        cashierName: 'Abebech Cashier',
+        notes: 'End of shift closing test',
+      );
+
+      expect(state.dailyFinancialClosings.length, equals(initialClosingCount + 1));
+      expect(closing.isConfirmed, isTrue);
+      expect(closing.cashierName, equals('Abebech Cashier'));
+      expect(state.isTodayClosed, isTrue);
+
+      // Verify Weekly commission accumulation and monthly salary
+      final weeklyPool = state.weeklyTotalCommissionPool;
+      expect(weeklyPool, greaterThanOrEqualTo(0));
+
+      final monthlyBase = state.monthlyTotalBaseSalary;
+      expect(monthlyBase, greaterThan(0));
+
+      final weeklyCommissions = state.weeklyWasherCommissions;
+      expect(weeklyCommissions, isNotEmpty);
+    });
   });
 }
