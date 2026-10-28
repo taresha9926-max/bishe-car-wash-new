@@ -189,6 +189,11 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<void> deleteStaffMember(String staffId) async {
+    _staff.removeWhere((s) => s.id == staffId);
+  }
+
+  @override
   Future<List<CommissionLog>> getCommissionLogs() async {
     return List.unmodifiable(_commissionLogs);
   }
@@ -212,6 +217,11 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<void> addStaffCredential(StaffCredential cred) async {
     _credentials.add(cred);
+  }
+
+  @override
+  Future<void> deleteStaffCredential(String id) async {
+    _credentials.removeWhere((c) => c.id == id);
   }
 
   // --- Helper state management methods ---

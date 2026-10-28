@@ -41,12 +41,14 @@ abstract class IStaffRepository {
   Future<List<StaffMember>> getStaffMembers();
   Future<void> updateStaffSalary(String staffId, double baseSalary, double commissionRate);
   Future<void> addStaffMember(StaffMember staff);
+  Future<void> deleteStaffMember(String staffId);
   Future<List<CommissionLog>> getCommissionLogs();
 
   // Staff Credentials & Authentication
   Future<List<StaffCredential>> getStaffCredentials();
   Future<void> updateStaffCredential(String id, String pin, String fullName);
   Future<void> addStaffCredential(StaffCredential cred);
+  Future<void> deleteStaffCredential(String id);
 }
 
 /// Unified repository interface combining booking, pricing, and staff domain ports.

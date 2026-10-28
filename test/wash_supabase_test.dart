@@ -7,7 +7,6 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.d
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
-import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 
 void main() {

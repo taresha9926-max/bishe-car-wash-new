@@ -95,10 +95,20 @@ class StaffManagementScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
-                tooltip: 'Edit Salary & Commission',
-                onPressed: () => _showEditSalaryDialog(context, member),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                    tooltip: 'Edit Salary & Commission',
+                    onPressed: () => _showEditSalaryDialog(context, member),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                    tooltip: 'Delete Staff Member',
+                    onPressed: () => _showDeleteStaffDialog(context, member),
+                  ),
+                ],
               ),
             ],
           ),
@@ -141,7 +151,7 @@ class StaffManagementScreen extends StatelessWidget {
                     const Text("Today's Dividend", style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
                     const SizedBox(height: 2),
                     Text(
-                      CurrencyFormatter.format(state.washerDividendsToday[member.id] ?? 0.0),
+                      CurrencyFormatter.format(state.washerDividendsToday[member.id]?.earnedETB ?? 0.0),
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
                     ),
                   ],
@@ -380,6 +390,48 @@ class StaffManagementScreen extends StatelessWidget {
     );
   }
 
+  void _showDeleteStaffDialog(BuildContext context, StaffMember member) {
+    final state = AppStateProvider.read(context);
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Delete ${member.name}?'),
+        content: Text(
+          state.isSuperAdmin
+              ? 'Are you sure you want to remove this staff member (${member.role.name}) from the system?'
+              : 'As a secondary admin, this deletion request will be submitted to the Super Admin for confirmation.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              await state.deleteStaffMember(member.id);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      state.isSuperAdmin
+                          ? 'Staff member ${member.name} deleted.'
+                          : 'Deletion request for ${member.name} submitted for Super Admin approval.',
+                    ),
+                    backgroundColor: state.isSuperAdmin ? AppColors.statusCompleted : AppColors.secondary,
+                  ),
+                );
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAddStaffDialog(BuildContext context) {
     final state = AppStateProvider.read(context);
     final nameCtrl = TextEditingController();
@@ -387,6 +439,7 @@ class StaffManagementScreen extends StatelessWidget {
     final salaryCtrl = TextEditingController(text: '4200');
     final commissionCtrl = TextEditingController(text: '15');
     StaffRole selectedRole = StaffRole.washer;
+    int selectedSeniority = 2;
 
     showDialog(
       context: context,
@@ -421,6 +474,27 @@ class StaffManagementScreen extends StatelessWidget {
                     if (val != null) setDialogState(() => selectedRole = val);
                   },
                 ),
+                if (selectedRole == StaffRole.washer) ...[
+                  const SizedBox(height: 10),
+                  const Text('Seniority Tier (Commission Weight)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 4),
+                  DropdownButtonFormField<int>(
+                    value: selectedSeniority,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 1, child: Text('Tier 1: Junior (15%)')),
+                      DropdownMenuItem(value: 2, child: Text('Tier 2: Standard (20%)')),
+                      DropdownMenuItem(value: 3, child: Text('Tier 3: Senior (30%)')),
+                      DropdownMenuItem(value: 4, child: Text('Tier 4: Master Detailer (35%)')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setDialogState(() => selectedSeniority = val);
+                    },
+                  ),
+                ],
                 const SizedBox(height: 10),
                 CustomTextField(
                   controller: phoneCtrl,
@@ -470,13 +544,18 @@ class StaffManagementScreen extends StatelessWidget {
                   role: selectedRole,
                   baseSalary: salary,
                   commissionRate: comm,
+                  skillSeniorityLevel: selectedSeniority,
                 );
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('New staff member added: $name'),
-                      backgroundColor: AppColors.statusCompleted,
+                      content: Text(
+                        state.isSuperAdmin
+                            ? 'New staff member added: $name'
+                            : 'Staff addition request for $name submitted for Super Admin approval.',
+                      ),
+                      backgroundColor: state.isSuperAdmin ? AppColors.statusCompleted : AppColors.secondary,
                     ),
                   );
                 }

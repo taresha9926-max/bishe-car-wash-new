@@ -83,6 +83,21 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     }
   }
 
+  Future<bool> _delete(String endpoint) async {
+    try {
+      final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
+      final response = await http.delete(uri, headers: _headers);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return true;
+      }
+      debugPrint('Supabase DELETE [$endpoint] error ${response.statusCode}: ${response.body}');
+      return false;
+    } catch (e) {
+      debugPrint('Supabase DELETE [$endpoint] exception: $e');
+      return false;
+    }
+  }
+
   @override
   Future<List<WashPackage>> getPackages() async {
     try {
@@ -196,6 +211,18 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       });
     } catch (_) {}
     await _fallbackLocalRepo.addStaffMember(staff);
+  }
+
+  @override
+  Future<void> deleteStaffMember(String staffId) async {
+    try {
+      if (_isUuid(staffId)) {
+        await _delete('staff_members?id=eq.$staffId');
+      }
+    } catch (e) {
+      debugPrint('Supabase deleteStaffMember exception: $e');
+    }
+    await _fallbackLocalRepo.deleteStaffMember(staffId);
   }
 
   @override
@@ -648,5 +675,17 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       });
     } catch (_) {}
     await _fallbackLocalRepo.addStaffCredential(cred);
+  }
+
+  @override
+  Future<void> deleteStaffCredential(String id) async {
+    try {
+      if (_isUuid(id)) {
+        await _delete('staff_credentials?id=eq.$id');
+      }
+    } catch (e) {
+      debugPrint('Supabase deleteStaffCredential exception: $e');
+    }
+    await _fallbackLocalRepo.deleteStaffCredential(id);
   }
 }

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/washer_dividend.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
@@ -28,6 +30,92 @@ class AppStateNotifier extends ChangeNotifier {
 
   bool _isWelcomeActive = true;
   bool get isWelcomeActive => _isWelcomeActive;
+
+  // Super Admin vs Secondary Admin Role Tracking
+  bool _isSuperAdmin = false;
+  bool get isSuperAdmin => _isSuperAdmin;
+
+  void setSuperAdminStatus(bool value) {
+    _isSuperAdmin = value;
+    notifyListeners();
+  }
+
+  // Pending Approvals Queue (Secondary Admin -> Super Admin confirmation)
+  final List<PendingApprovalRequest> _pendingApprovals = [];
+  List<PendingApprovalRequest> get pendingApprovals => List.unmodifiable(_pendingApprovals);
+
+  void submitPendingApproval({
+    required ApprovalActionType actionType,
+    required String title,
+    required String description,
+    required Map<String, dynamic> payload,
+  }) {
+    final req = PendingApprovalRequest(
+      id: 'REQ-${DateTime.now().millisecondsSinceEpoch}',
+      actionType: actionType,
+      title: title,
+      description: description,
+      payload: payload,
+      requestedAt: DateTime.now(),
+      requestedBy: 'Secondary Admin',
+    );
+    _pendingApprovals.insert(0, req);
+    notifyListeners();
+  }
+
+  Future<void> approveRequest(String requestId) async {
+    final index = _pendingApprovals.indexWhere((r) => r.id == requestId);
+    if (index == -1) return;
+    final req = _pendingApprovals.removeAt(index);
+
+    switch (req.actionType) {
+      case ApprovalActionType.changePin:
+        if (req.payload['action'] == 'delete') {
+          await _repository.deleteStaffCredential(req.payload['id']);
+        } else {
+          await _repository.updateStaffCredential(
+            req.payload['id'],
+            req.payload['pin'],
+            req.payload['fullName'],
+          );
+        }
+        await _refreshCredentials();
+        break;
+      case ApprovalActionType.addStaff:
+        await _repository.addStaffMember(req.payload['staff'] as StaffMember);
+        await _refreshStaff();
+        break;
+      case ApprovalActionType.deleteStaff:
+        await _repository.deleteStaffMember(req.payload['staffId']);
+        await _refreshStaff();
+        break;
+      case ApprovalActionType.updateSalary:
+        await _repository.updateStaffSalary(
+          req.payload['staffId'],
+          req.payload['baseSalary'],
+          req.payload['commissionRate'],
+        );
+        await _refreshStaff();
+        break;
+      case ApprovalActionType.updatePrice:
+        await _repository.updatePackagePrice(
+          req.payload['packageId'],
+          req.payload['carType'] as CarType,
+          req.payload['newPrice'],
+        );
+        await _refreshPricing();
+        break;
+      case ApprovalActionType.updateSeniorityShare:
+        _seniorityTierPercentages = Map<int, double>.from(req.payload['shares']);
+        break;
+    }
+    notifyListeners();
+  }
+
+  void rejectRequest(String requestId) {
+    _pendingApprovals.removeWhere((r) => r.id == requestId);
+    notifyListeners();
+  }
 
   void goToWelcome() {
     _isWelcomeActive = true;
@@ -166,7 +254,7 @@ class AppStateNotifier extends ChangeNotifier {
     return _commissionLogs.fold(0.0, (sum, log) => sum + log.commissionEarnedETB);
   }
 
-  // --- Team Commission Pool (Washers work as a single team) ---
+  // --- Team Commission Pool & Daily Washer Attendance ---
   double _teamCommissionRate = 0.15; // Default 15%, editable by Admin
   double get teamCommissionRate => _teamCommissionRate;
 
@@ -177,22 +265,116 @@ class AppStateNotifier extends ChangeNotifier {
 
   double get teamCommissionPoolTodayETB => totalRevenueTodayETB * _teamCommissionRate;
 
-  /// Calculate individual dividend for each active washer based on skill & seniority level
-  Map<String, double> get washerDividendsToday {
-    final washers = availableWashers;
-    if (washers.isEmpty || teamCommissionPoolTodayETB <= 0) return {};
+  // Daily Washer Attendance: washerId -> isPresent (defaults to true)
+  final Map<String, bool> _washerAttendanceToday = {};
+  Map<String, bool> get washerAttendanceToday => Map.unmodifiable(_washerAttendanceToday);
 
-    final totalWeight = washers.fold<int>(0, (sum, w) => sum + (w.skillSeniorityLevel > 0 ? w.skillSeniorityLevel : 2));
-    if (totalWeight == 0) return {};
+  bool isWasherPresentToday(String washerId) => _washerAttendanceToday[washerId] ?? true;
 
-    final pool = teamCommissionPoolTodayETB;
-    final Map<String, double> dividends = {};
-    for (final w in washers) {
-      final weight = w.skillSeniorityLevel > 0 ? w.skillSeniorityLevel : 2;
-      dividends[w.id] = (weight / totalWeight) * pool;
-    }
-    return dividends;
+  void setWasherAttendance(String washerId, bool isPresent) {
+    _washerAttendanceToday[washerId] = isPresent;
+    notifyListeners();
   }
+
+  void markAllWashersPresent() {
+    for (final w in availableWashers) {
+      _washerAttendanceToday[w.id] = true;
+    }
+    notifyListeners();
+  }
+
+  List<StaffMember> get presentWashersToday =>
+      availableWashers.where((w) => isWasherPresentToday(w.id)).toList();
+
+  int get presentWashersCount => presentWashersToday.length;
+  int get totalWashersCount => availableWashers.length;
+
+  // Seniority Tier % Share (Editable by Super Admin, sums to 100%)
+  // Level 4 (Lead Specialist): 35%, Level 3 (Senior): 30%, Level 2 (Standard): 20%, Level 1 (Junior): 15%
+  Map<int, double> _seniorityTierPercentages = {
+    4: 35.0,
+    3: 30.0,
+    2: 20.0,
+    1: 15.0,
+  };
+  Map<int, double> get seniorityTierPercentages => Map.unmodifiable(_seniorityTierPercentages);
+
+  void updateSeniorityTierPercentages(Map<int, double> newPercentages) {
+    if (!_isSuperAdmin) {
+      submitPendingApproval(
+        actionType: ApprovalActionType.updateSeniorityShare,
+        title: 'Update Seniority Commission Shares',
+        description: 'T4: ${newPercentages[4]}%, T3: ${newPercentages[3]}%, T2: ${newPercentages[2]}%, T1: ${newPercentages[1]}%',
+        payload: {'shares': newPercentages},
+      );
+      return;
+    }
+    _seniorityTierPercentages = Map.from(newPercentages);
+    notifyListeners();
+  }
+
+  /// Calculates individual dividend for each active washer based on skill & seniority level
+  /// and today's attendance. Only washers PRESENT today divide the 100% commission pool.
+  /// Sum of percentage shares for present washers is mathematically GUARANTEED to sum to 100.0%.
+  Map<String, WasherDividend> calculateWasherDividends(double pool) {
+    final present = presentWashersToday;
+    if (present.isEmpty || pool <= 0) {
+      final Map<String, WasherDividend> emptyResult = {};
+      for (final w in availableWashers) {
+        emptyResult[w.id] = WasherDividend(
+          washerId: w.id,
+          washerName: w.name,
+          skillLevel: w.skillSeniorityLevel,
+          isPresent: isWasherPresentToday(w.id),
+          percentageShare: 0.0,
+          earnedETB: 0.0,
+        );
+      }
+      return emptyResult;
+    }
+
+    double totalPresentWeight = 0.0;
+    for (final w in present) {
+      final tierShare = _seniorityTierPercentages[w.skillSeniorityLevel] ?? 20.0;
+      totalPresentWeight += tierShare;
+    }
+
+    if (totalPresentWeight <= 0) return {};
+
+    final Map<String, WasherDividend> result = {};
+
+    for (final w in availableWashers) {
+      final isPresent = isWasherPresentToday(w.id);
+      if (!isPresent) {
+        result[w.id] = WasherDividend(
+          washerId: w.id,
+          washerName: w.name,
+          skillLevel: w.skillSeniorityLevel,
+          isPresent: false,
+          percentageShare: 0.0,
+          earnedETB: 0.0,
+        );
+      } else {
+        final tierShare = _seniorityTierPercentages[w.skillSeniorityLevel] ?? 20.0;
+        final shareFraction = tierShare / totalPresentWeight;
+        final percent = shareFraction * 100.0;
+        final amount = shareFraction * pool;
+
+        result[w.id] = WasherDividend(
+          washerId: w.id,
+          washerName: w.name,
+          skillLevel: w.skillSeniorityLevel,
+          isPresent: true,
+          percentageShare: percent,
+          earnedETB: amount,
+        );
+      }
+    }
+
+    return result;
+  }
+
+  Map<String, WasherDividend> get washerDividendsToday => calculateWasherDividends(teamCommissionPoolTodayETB);
 
   int get availableBaysCount {
     return _bays.where((b) => b.type != BayType.mobileVan && b.isVacant).length;
@@ -387,7 +569,15 @@ class AppStateNotifier extends ChangeNotifier {
     required StaffRole role,
     required double baseSalary,
     double commissionRate = AppConstants.defaultCommissionRate,
-  }) => addNewStaff(name: name, phone: phone, role: role, baseSalary: baseSalary, commissionRate: commissionRate);
+    int skillSeniorityLevel = 2,
+  }) => addNewStaff(
+    name: name,
+    phone: phone,
+    role: role,
+    baseSalary: baseSalary,
+    commissionRate: commissionRate,
+    skillSeniorityLevel: skillSeniorityLevel,
+  );
 
   Future<WashBooking> registerWalkIn({
     String? customerName,
@@ -425,6 +615,19 @@ class AppStateNotifier extends ChangeNotifier {
     required CarType carType,
     required double newPrice,
   }) async {
+    if (!_isSuperAdmin) {
+      submitPendingApproval(
+        actionType: ApprovalActionType.updatePrice,
+        title: 'Price Update for ${carType.displayName}',
+        description: 'Update price of package $packageId to $newPrice ETB',
+        payload: {
+          'packageId': packageId,
+          'carType': carType,
+          'newPrice': newPrice,
+        },
+      );
+      return;
+    }
     await _repository.updatePackagePrice(packageId, carType, newPrice);
     await _refreshPricing();
   }
@@ -435,17 +638,32 @@ class AppStateNotifier extends ChangeNotifier {
     required double baseSalary,
     required double commissionRate,
   }) async {
+    if (!_isSuperAdmin) {
+      final staff = _staff.firstWhere((s) => s.id == staffId, orElse: () => StaffMember(id: staffId, name: 'Staff', phone: '', role: StaffRole.washer, baseSalaryMonthlyETB: baseSalary));
+      submitPendingApproval(
+        actionType: ApprovalActionType.updateSalary,
+        title: 'Update Salary for ${staff.name}',
+        description: 'Base: $baseSalary ETB, Commission: ${(commissionRate * 100).toInt()}%',
+        payload: {
+          'staffId': staffId,
+          'baseSalary': baseSalary,
+          'commissionRate': commissionRate,
+        },
+      );
+      return;
+    }
     await _repository.updateStaffSalary(staffId, baseSalary, commissionRate);
     await _refreshStaff();
   }
 
-  /// Admin adds a new staff member
+  /// Admin adds a new staff member (washer, cashier, or secondary admin)
   Future<void> addNewStaff({
     required String name,
     required String phone,
     required StaffRole role,
     required double baseSalary,
     double commissionRate = AppConstants.defaultCommissionRate,
+    int skillSeniorityLevel = 2,
   }) async {
     final newMember = StaffMember(
       id: 'stf-${(_staff.length + 1).toString().padLeft(2, '0')}',
@@ -454,8 +672,35 @@ class AppStateNotifier extends ChangeNotifier {
       role: role,
       baseSalaryMonthlyETB: baseSalary,
       commissionRate: commissionRate,
+      skillSeniorityLevel: skillSeniorityLevel,
     );
+
+    if (!_isSuperAdmin) {
+      submitPendingApproval(
+        actionType: ApprovalActionType.addStaff,
+        title: 'Add ${role.name.toUpperCase()}: $name',
+        description: 'Phone: $phone, Salary: $baseSalary ETB',
+        payload: {'staff': newMember},
+      );
+      return;
+    }
     await _repository.addStaffMember(newMember);
+    await _refreshStaff();
+  }
+
+  /// Delete a staff member (washer, cashier, or secondary admin)
+  Future<void> deleteStaffMember(String staffId) async {
+    final staff = _staff.firstWhere((s) => s.id == staffId, orElse: () => StaffMember(id: staffId, name: 'Staff', phone: '', role: StaffRole.washer, baseSalaryMonthlyETB: 0));
+    if (!_isSuperAdmin) {
+      submitPendingApproval(
+        actionType: ApprovalActionType.deleteStaff,
+        title: 'Delete ${staff.role.name.toUpperCase()}: ${staff.name}',
+        description: 'Remove staff member from station personnel',
+        payload: {'staffId': staffId},
+      );
+      return;
+    }
+    await _repository.deleteStaffMember(staffId);
     await _refreshStaff();
   }
 
@@ -465,11 +710,24 @@ class AppStateNotifier extends ChangeNotifier {
     required String pin,
     required String fullName,
   }) async {
+    if (!_isSuperAdmin) {
+      submitPendingApproval(
+        actionType: ApprovalActionType.changePin,
+        title: 'Change PIN for $fullName',
+        description: 'Set new PIN: $pin',
+        payload: {
+          'id': id,
+          'pin': pin,
+          'fullName': fullName,
+        },
+      );
+      return;
+    }
     await _repository.updateStaffCredential(id, pin, fullName);
     await _refreshCredentials();
   }
 
-  /// Admin creates a new staff login credential
+  /// Admin creates a new staff login credential (cashier or secondary admin)
   Future<void> addStaffCredential({
     required String username,
     required String pin,
@@ -484,7 +742,32 @@ class AppStateNotifier extends ChangeNotifier {
       fullName: fullName,
       isActive: true,
     );
+    if (!_isSuperAdmin) {
+      submitPendingApproval(
+        actionType: ApprovalActionType.changePin,
+        title: 'Create ${role.name.toUpperCase()} PIN: $fullName',
+        description: 'Username: @$username',
+        payload: {'cred': cred},
+      );
+      return;
+    }
     await _repository.addStaffCredential(cred);
+    await _refreshCredentials();
+  }
+
+  /// Delete staff credential (PIN)
+  Future<void> deleteStaffCredential(String id) async {
+    final cred = _credentials.firstWhere((c) => c.id == id, orElse: () => StaffCredential(id: id, username: '', pin: '', role: UserRole.cashier, fullName: 'Staff', isActive: true));
+    if (!_isSuperAdmin) {
+      submitPendingApproval(
+        actionType: ApprovalActionType.changePin,
+        title: 'Delete PIN for ${cred.fullName}',
+        description: 'Remove login access for @${cred.username}',
+        payload: {'id': id, 'action': 'delete'},
+      );
+      return;
+    }
+    await _repository.deleteStaffCredential(id);
     await _refreshCredentials();
   }
 

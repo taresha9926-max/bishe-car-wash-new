@@ -130,12 +130,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
               const SizedBox(height: 18),
 
-              // 3. Queue Management Section
+              // 3. Queue Management Section OR Attendance Desk
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${state.tr("queueAndVehicles")} (${filteredBookings.length})',
+                    _selectedFilterIndex == 5
+                        ? 'Washer Attendance (${state.presentWashersCount}/${state.totalWashersCount} Present)'
+                        : '${state.tr("queueAndVehicles")} (${filteredBookings.length})',
                     style: TextStyle(
                       fontSize: isMobile ? 15.5 : 17,
                       fontWeight: FontWeight.w800,
@@ -146,12 +148,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
               const SizedBox(height: 10),
 
-              // Queue Filter Tabs
+              // Queue Filter Tabs (including Washer Attendance)
               _buildFilterChips(state),
               const SizedBox(height: 12),
 
-              // Queue Items (Responsive Mobile Cards vs Desktop Rows)
-              if (filteredBookings.isEmpty)
+              // Queue Items OR Washer Attendance Desk
+              if (_selectedFilterIndex == 5)
+                _buildWasherAttendanceSection(context, state, isMobile)
+              else if (filteredBookings.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
@@ -729,6 +733,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       state.tr('filterInService'),
       state.tr('filterUnpaid'),
       state.tr('phoneCallBooking'),
+      'Attendance (${state.presentWashersCount}/${state.totalWashersCount})',
     ];
 
     return SingleChildScrollView(
@@ -740,6 +745,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
+              avatar: index == 5
+                  ? Icon(
+                      Icons.how_to_reg_rounded,
+                      size: 15,
+                      color: isSelected ? Colors.white : AppColors.primary,
+                    )
+                  : null,
               label: Text(
                 filters[index],
                 style: TextStyle(
@@ -761,6 +773,249 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           );
         }),
       ),
+    );
+  }
+
+  Widget _buildWasherAttendanceSection(BuildContext context, dynamic state, bool isMobile) {
+    final washers = state.availableWashers;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Attendance Overview Card
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.assignment_ind_rounded, color: AppColors.primary, size: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Daily Washer Roster',
+                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: AppColors.textPrimary),
+                          ),
+                          Text(
+                            'Shift: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.statusCompleted,
+                      side: const BorderSide(color: AppColors.statusCompleted),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    icon: const Icon(Icons.done_all_rounded, size: 16),
+                    label: const Text('Mark All Present', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5)),
+                    onPressed: () {
+                      state.markAllWashersPresent();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('All washers marked present for today.'),
+                          backgroundColor: AppColors.statusCompleted,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.statusCompleted.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.statusCompleted.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: AppColors.statusCompleted, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${state.presentWashersCount} Present',
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.statusCompleted),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.red.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${state.totalWashersCount - state.presentWashersCount} Absent',
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.redAccent),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceVariant,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.cardBorder),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.groups_rounded, color: AppColors.textSecondary, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${state.totalWashersCount} Total',
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.textPrimary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withOpacity(0.15)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.shield_outlined, size: 14, color: Colors.blue),
+                    SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Commission Pool Protection: Absent washers are assigned 0 ETB. The 100% pool is divided strictly among present washers according to their seniority tier.',
+                        style: TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // List of Washers
+        ...washers.map((w) {
+          final isPresent = state.isWasherPresentToday(w.id);
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isPresent ? AppColors.statusCompleted.withOpacity(0.4) : Colors.red.withOpacity(0.3),
+                width: 1.2,
+              ),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
+                  child: Text(
+                    w.name.isNotEmpty ? w.name[0] : 'W',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      color: isPresent ? AppColors.statusCompleted : Colors.red,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              w.name,
+                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              isPresent ? 'ON DUTY' : 'ABSENT',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                color: isPresent ? AppColors.statusCompleted : Colors.red,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${w.seniorityTierName} • ${w.phone}',
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  value: isPresent,
+                  activeColor: AppColors.statusCompleted,
+                  onChanged: (val) {
+                    state.setWasherAttendance(w.id, val);
+                  },
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
     );
   }
 

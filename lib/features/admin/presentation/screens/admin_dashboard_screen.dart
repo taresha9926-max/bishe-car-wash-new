@@ -20,9 +20,9 @@ enum AdminTimeFilter {
   today,
   thisWeek,
   thisMonth,
-  allTime;
+  customDate;
 
-  String localizedLabel(dynamic state) {
+  String localizedLabel(dynamic state, [DateTime? selectedCustomDate]) {
     switch (this) {
       case AdminTimeFilter.today:
         return state.tr('filterToday');
@@ -30,8 +30,11 @@ enum AdminTimeFilter {
         return state.tr('filterThisWeek');
       case AdminTimeFilter.thisMonth:
         return state.tr('filterThisMonth');
-      case AdminTimeFilter.allTime:
-        return state.tr('filterAllTime');
+      case AdminTimeFilter.customDate:
+        if (selectedCustomDate != null) {
+          return '${selectedCustomDate.day}/${selectedCustomDate.month}/${selectedCustomDate.year}';
+        }
+        return 'Filter by Date';
     }
   }
 }
@@ -63,8 +66,9 @@ class AdminDashboardScreen extends StatefulWidget {
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   AdminTimeFilter _selectedFilter = AdminTimeFilter.today;
+  DateTime? _selectedCustomDate;
 
-  List<WashBooking> _filterBookings(List<WashBooking> bookings, AdminTimeFilter filter) {
+  List<WashBooking> _filterBookings(List<WashBooking> bookings, AdminTimeFilter filter, DateTime? customDate) {
     final now = DateTime.now();
     switch (filter) {
       case AdminTimeFilter.today:
@@ -82,8 +86,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           b.createdAt.year == now.year &&
           b.createdAt.month == now.month,
         ).toList();
-      case AdminTimeFilter.allTime:
-        return bookings;
+      case AdminTimeFilter.customDate:
+        final target = customDate ?? now;
+        return bookings.where((b) =>
+          b.createdAt.year == target.year &&
+          b.createdAt.month == target.month &&
+          b.createdAt.day == target.day,
+        ).toList();
     }
   }
 
@@ -94,7 +103,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final isMobile = ResponsiveLayout.isMobile(context);
 
     // Time-filtered bookings
-    final filteredBookings = _filterBookings(state.bookings, _selectedFilter);
+    final filteredBookings = _filterBookings(state.bookings, _selectedFilter, _selectedCustomDate);
     final paidBookings = filteredBookings.where((b) => b.payment.isPaid).toList();
     final completedCars = filteredBookings.where((b) => b.status == WashStatus.completed).length;
 
@@ -125,6 +134,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Pending Approval Queue (from Secondary Admin actions)
+              _buildPendingApprovalsBanner(context, state),
+
               // 1. Executive Banner (Responsive)
               _buildExecutiveBanner(state, isMobile),
               const SizedBox(height: 14),
@@ -177,8 +189,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                       _buildMetricCard(
                         state.tr('activeWashers'),
-                        '${state.availableWashers.length} Active',
-                        '${state.staff.length} on team',
+                        '${state.presentWashersCount} On Duty',
+                        '${state.totalWashersCount} total washers',
                         Icons.groups_rounded,
                         AppColors.secondary,
                         isMobile: isMobile,
@@ -296,8 +308,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
+              avatar: filter == AdminTimeFilter.customDate
+                  ? Icon(Icons.calendar_month_rounded, size: 16, color: isSelected ? Colors.white : AppColors.primary)
+                  : null,
               label: Text(
-                filter.localizedLabel(state),
+                filter.localizedLabel(state, _selectedCustomDate),
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -312,7 +327,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 borderRadius: BorderRadius.circular(10),
                 side: BorderSide(color: isSelected ? AppColors.primary : AppColors.cardBorder),
               ),
-              onSelected: (_) => setState(() => _selectedFilter = filter),
+              onSelected: (_) async {
+                if (filter == AdminTimeFilter.customDate) {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedCustomDate ?? DateTime.now(),
+                    firstDate: DateTime(2022),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _selectedCustomDate = picked;
+                      _selectedFilter = AdminTimeFilter.customDate;
+                    });
+                  }
+                } else {
+                  setState(() => _selectedFilter = filter);
+                }
+              },
             ),
           );
         }).toList(),
@@ -401,6 +433,218 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  Widget _buildPendingApprovalsBanner(BuildContext context, dynamic state) {
+    if (state.pendingApprovals.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.amber.shade400, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.pending_actions_rounded, color: Colors.orange, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.isSuperAdmin
+                      ? '${state.pendingApprovals.length} Secondary Admin Action(s) Awaiting Approval'
+                      : '${state.pendingApprovals.length} Action(s) Submitted for Super Admin Approval',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Colors.brown),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ...state.pendingApprovals.map((req) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(req.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        const SizedBox(height: 2),
+                        Text(req.description, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  if (state.isSuperAdmin) ...[
+                    TextButton(
+                      onPressed: () async {
+                        await state.rejectRequest(req.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Rejected request: ${req.title}'), backgroundColor: Colors.redAccent),
+                          );
+                        }
+                      },
+                      child: const Text('Reject', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                    const SizedBox(width: 4),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.statusCompleted,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () async {
+                        await state.approveRequest(req.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Approved: ${req.title}'), backgroundColor: AppColors.statusCompleted),
+                          );
+                        }
+                      },
+                      child: const Text('Approve', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                  ] else ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'Pending Review',
+                        style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Colors.brown),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  void _showEditSenioritySharesDialog(BuildContext context, dynamic state) {
+    final t4Ctrl = TextEditingController(text: (state.seniorityTierPercentages[4] ?? 35.0).toStringAsFixed(0));
+    final t3Ctrl = TextEditingController(text: (state.seniorityTierPercentages[3] ?? 30.0).toStringAsFixed(0));
+    final t2Ctrl = TextEditingController(text: (state.seniorityTierPercentages[2] ?? 20.0).toStringAsFixed(0));
+    final t1Ctrl = TextEditingController(text: (state.seniorityTierPercentages[1] ?? 15.0).toStringAsFixed(0));
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final t4 = double.tryParse(t4Ctrl.text.trim()) ?? 0;
+          final t3 = double.tryParse(t3Ctrl.text.trim()) ?? 0;
+          final t2 = double.tryParse(t2Ctrl.text.trim()) ?? 0;
+          final t1 = double.tryParse(t1Ctrl.text.trim()) ?? 0;
+          final total = t4 + t3 + t2 + t1;
+          final isValid = (total - 100.0).abs() < 0.01;
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('Edit Seniority Commission Weights', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Set the percentage distribution per tier. The sum must equal 100%. If any washer is absent, the present washers divide 100% proportionally.',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: t4Ctrl,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: const InputDecoration(labelText: 'Tier 4: Master Detailer (%)', suffixText: '%', border: OutlineInputBorder()),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: t3Ctrl,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: const InputDecoration(labelText: 'Tier 3: Senior Washer (%)', suffixText: '%', border: OutlineInputBorder()),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: t2Ctrl,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: const InputDecoration(labelText: 'Tier 2: Standard Washer (%)', suffixText: '%', border: OutlineInputBorder()),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: t1Ctrl,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: const InputDecoration(labelText: 'Tier 1: Junior Washer (%)', suffixText: '%', border: OutlineInputBorder()),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isValid ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: isValid ? Colors.green : Colors.red),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total Weight:', style: TextStyle(fontWeight: FontWeight.bold, color: isValid ? Colors.green : Colors.red)),
+                        Text('${total.toStringAsFixed(1)}% / 100%', style: TextStyle(fontWeight: FontWeight.bold, color: isValid ? Colors.green : Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: isValid
+                    ? () {
+                        Navigator.pop(ctx);
+                        state.updateSeniorityTierPercentages({
+                          4: t4,
+                          3: t3,
+                          2: t2,
+                          1: t1,
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              state.isSuperAdmin
+                                  ? 'Updated Seniority Tier Commission Distribution (100% total).'
+                                  : 'Seniority share change submitted for Super Admin approval.',
+                            ),
+                            backgroundColor: state.isSuperAdmin ? AppColors.statusCompleted : AppColors.secondary,
+                          ),
+                        );
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                child: const Text('Save Weights'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildCommissionSenioritySection(
     BuildContext context,
     dynamic state,
@@ -408,7 +652,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     bool isMobile,
   ) {
     final washers = state.availableWashers as List<StaffMember>;
-    final totalWeight = washers.fold<int>(0, (sum, w) => sum + (w.skillSeniorityLevel > 0 ? w.skillSeniorityLevel : 2));
+    final dividendsMap = state.calculateWasherDividends(pool);
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 14 : 16),
@@ -450,7 +694,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${washers.length} Washers • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Pool: ${CurrencyFormatter.format(pool)}',
+                        '${state.presentWashersCount}/${state.totalWashersCount} Washers on Duty • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Pool: ${CurrencyFormatter.format(pool)}',
                         style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ],
@@ -459,23 +703,37 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ],
             ),
             const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              height: 38,
-              child: ElevatedButton.icon(
-                onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, washers.length) : null,
-                icon: const Icon(Icons.payments_rounded, size: 15),
-                label: Text(
-                  state.tr('disburseCommission'),
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showEditSenioritySharesDialog(context, state),
+                    icon: const Icon(Icons.tune, size: 14),
+                    label: const Text('Edit % Shares', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  elevation: 0,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, state.presentWashersCount) : null,
+                    icon: const Icon(Icons.payments_rounded, size: 14),
+                    label: Text(state.tr('disburseCommission'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      elevation: 0,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ] else ...[
             Row(
@@ -503,7 +761,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             ),
                             const SizedBox(height: 1),
                             Text(
-                              '${washers.length} Washers • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Gross Pool: ${CurrencyFormatter.format(pool)}',
+                              '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • ${(state.teamCommissionRate * 100).toStringAsFixed(0)}% Gross Pool: ${CurrencyFormatter.format(pool)}',
                               style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                             ),
                           ],
@@ -512,9 +770,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
+                OutlinedButton.icon(
+                  onPressed: () => _showEditSenioritySharesDialog(context, state),
+                  icon: const Icon(Icons.tune, size: 14),
+                  label: const Text('Edit Seniority %', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 ElevatedButton.icon(
-                  onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, washers.length) : null,
+                  onPressed: pool > 0 ? () => _showDisburseDialog(context, state, pool, state.presentWashersCount) : null,
                   icon: const Icon(Icons.payments_rounded, size: 14),
                   label: Text(
                     state.tr('disburseCommission'),
@@ -551,25 +821,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final w = washers[index];
-                final weight = w.skillSeniorityLevel > 0 ? w.skillSeniorityLevel : 2;
-                final dividend = (totalWeight > 0 && pool > 0) ? (weight / totalWeight) * pool : 0.0;
-                final stars = '⭐' * weight.clamp(1, 5);
+                final div = dividendsMap[w.id];
+                final isPresent = div?.isPresent ?? state.isWasherPresentToday(w.id);
+                final percent = div?.percentageShare ?? 0.0;
+                final dividendETB = div?.earnedETB ?? 0.0;
 
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.background,
+                    color: isPresent ? AppColors.background : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.cardBorder),
+                    border: Border.all(color: isPresent ? AppColors.cardBorder : Colors.grey.shade300),
                   ),
                   child: Row(
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        backgroundColor: isPresent ? AppColors.primary.withOpacity(0.1) : Colors.grey.shade300,
                         child: Text(
                           w.name.isNotEmpty ? w.name[0] : 'W',
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.primary),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                            color: isPresent ? AppColors.primary : Colors.grey.shade600,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -577,24 +852,43 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              w.name,
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                            ),
-                            const SizedBox(height: 2),
                             Row(
                               children: [
                                 Flexible(
                                   child: Text(
-                                    w.seniorityTierName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                    w.name,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      color: isPresent ? AppColors.textPrimary : Colors.grey.shade600,
+                                      decoration: isPresent ? null : TextDecoration.lineThrough,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 4),
-                                Text(stars, style: const TextStyle(fontSize: 10)),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                  decoration: BoxDecoration(
+                                    color: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    isPresent ? 'PRESENT' : 'ABSENT',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                      color: isPresent ? AppColors.statusCompleted : Colors.red,
+                                    ),
+                                  ),
+                                ),
                               ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              w.seniorityTierName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -604,13 +898,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            CurrencyFormatter.format(dividend),
-                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppColors.primary),
+                            CurrencyFormatter.format(dividendETB),
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w900,
+                              color: isPresent ? AppColors.primary : Colors.grey.shade500,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Weight ${weight}x (${((weight / (totalWeight > 0 ? totalWeight : 1)) * 100).toStringAsFixed(1)}%)',
-                            style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                            isPresent ? '${percent.toStringAsFixed(1)}% of Pool' : '0.0% (Absent)',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isPresent ? AppColors.statusCompleted : Colors.red,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ],
                       ),
@@ -619,6 +921,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 );
               },
             ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, size: 14, color: Colors.blue),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    '100% of the commission pool is distributed strictly among washers on duty today (${state.presentWashersCount}/${state.totalWashersCount}). Absent washers receive 0 ETB.',
+                    style: const TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -862,7 +1185,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ],
         ),
         content: Text(
-          'Approve distribution of ${CurrencyFormatter.format(pool)} team commission dividends among all $washerCount active washers according to their seniority tier weights?',
+          'Approve distribution of ${CurrencyFormatter.format(pool)} team commission dividends among the $washerCount washer(s) on duty today according to their seniority tier percentage share (summing to 100%)?',
           style: const TextStyle(fontSize: 13, height: 1.4),
         ),
         actions: [

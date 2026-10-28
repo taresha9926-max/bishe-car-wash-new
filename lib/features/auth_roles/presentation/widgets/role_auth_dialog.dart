@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 
@@ -52,6 +53,9 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
     if (!mounted) return;
 
     if (isValid) {
+      if (widget.targetRole == UserRole.admin) {
+        state.setSuperAdminStatus(pin == StaffAuthenticator.defaultAdminPin);
+      }
       Navigator.of(context).pop(true);
     } else {
       setState(() {
