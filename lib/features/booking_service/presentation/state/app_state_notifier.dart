@@ -147,6 +147,14 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Welcome Advertising Video Reel
+  String _adVideoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+  String get adVideoUrl => _adVideoUrl;
+  void setAdVideoUrl(String url) {
+    _adVideoUrl = url.trim();
+    notifyListeners();
+  }
+
   // Repository Data Caches
   bool _isLoading = false;
   bool get isLoading => _isLoading;

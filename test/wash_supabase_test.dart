@@ -60,7 +60,7 @@ void main() {
     final commLogs = await repo.getCommissionLogs();
     expect(commLogs, isNotEmpty);
     final recentLog = commLogs.firstWhere((l) => l.carPlate == 'TEST-9999');
-    expect(recentLog.commissionEarnedETB, equals(75.0)); // 15% of 500
+    expect(recentLog.commissionEarnedETB, equals(packages.first.getPriceFor(CarType.automobile) * 0.15)); // 15% commission of package price
   },
   timeout: const Timeout(Duration(minutes: 2)),
 );
