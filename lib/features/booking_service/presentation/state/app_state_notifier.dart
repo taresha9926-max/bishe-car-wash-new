@@ -934,25 +934,30 @@ class AppStateNotifier extends ChangeNotifier {
     return created;
   }
 
-  /// Dispatches completion SMS to customer using cashier's personal device SIM / SMS app
-  Future<bool> sendCustomerCompletionSms(WashBooking booking) async {
-    final customerPhone = booking.customerPhone.trim();
+  String getCustomerCompletionSmsText(WashBooking booking) {
     final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
     final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
     final pkgName = booking.package.name;
     final plate = booking.licensePlate;
 
-    final message = 'Dear $customerName, your car washing service ($pkgName) for vehicle $plate is completed and ready to pickup. Please pay $amountStr and pick up your vehicle. Thank you for choosing Bishe Car Wash Service!';
+    return 'Dear $customerName, your car washing service ($pkgName) for vehicle $plate is completed and ready to pickup. Please pay $amountStr and pick up your vehicle. Thank you for choosing Bishe Car Wash Service!';
+  }
+
+  /// Dispatches completion SMS to customer using cashier's personal device SIM / SMS app
+  Future<bool> sendCustomerCompletionSms(WashBooking booking) async {
+    final rawPhone = booking.customerPhone.trim();
+    final cleanPhone = rawPhone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    final message = getCustomerCompletionSmsText(booking);
 
     debugPrint('--- [SMS DISPATCH GATEWAY] ---');
     debugPrint('From Cashier: $_cashierSmsPhone');
-    debugPrint('To Customer: $customerPhone');
+    debugPrint('To Customer: $cleanPhone');
     debugPrint('Message: $message');
     debugPrint('------------------------------');
 
-    if (customerPhone.isNotEmpty) {
+    if (cleanPhone.isNotEmpty) {
       try {
-        final uriStr = 'sms:$customerPhone?body=${Uri.encodeComponent(message)}';
+        final uriStr = 'sms:$cleanPhone?body=${Uri.encodeComponent(message)}';
         UrlLauncherHelper.openUrl(uriStr);
         return true;
       } catch (e) {

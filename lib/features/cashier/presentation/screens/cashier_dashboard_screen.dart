@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
@@ -1898,8 +1899,24 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 5),
           backgroundColor: next == WashStatus.completed ? AppColors.cashGreen : next.color,
+          action: next == WashStatus.completed
+              ? SnackBarAction(
+                  label: 'Copy SMS 📋',
+                  textColor: Colors.amberAccent,
+                  onPressed: () {
+                    final sms = state.getCustomerCompletionSmsText(booking);
+                    Clipboard.setData(ClipboardData(text: sms));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Customer SMS message copied to clipboard! 📋'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                )
+              : null,
           content: Row(
             children: [
               Icon(
