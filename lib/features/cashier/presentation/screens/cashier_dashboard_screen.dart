@@ -28,7 +28,8 @@ class CashierDashboardScreen extends StatefulWidget {
 }
 
 class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
-  int _selectedFilterIndex = 0; // 0: All, 1: Pending, 2: In Service, 3: Unpaid, 4: Phone
+  int _selectedFilterIndex = 0; // 0: All, 1: Unpaid, 2: Phone, 3: Attendance, 4: History, 5: Reports
+  bool _isDigitalBreakdownExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -145,11 +146,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _selectedFilterIndex == 5
+                    _selectedFilterIndex == 3
                         ? '${state.tr("attendanceAndCommission")} (${state.presentWashersCount}/${state.totalWashersCount})'
-                        : (_selectedFilterIndex == 6
+                        : (_selectedFilterIndex == 4
                             ? state.tr("washHistory")
-                            : (_selectedFilterIndex == 7
+                            : (_selectedFilterIndex == 5
                                 ? state.tr("closingAndFinancialReports")
                                 : '${state.tr("queueAndVehicles")} (${filteredBookings.length})')),
                     style: TextStyle(
@@ -163,15 +164,15 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               const SizedBox(height: 10),
 
               // Queue Filter Tabs (including Washer Attendance, Wash History & Financial Reports)
-              _buildFilterChips(state),
+              _buildFilterChips(state, isMobile),
               const SizedBox(height: 12),
 
               // Queue Items OR Washer Attendance & Commission Desk OR Wash History OR Financial Reports
-              if (_selectedFilterIndex == 5)
+              if (_selectedFilterIndex == 3)
                 _buildWasherAttendanceAndCommissionSection(context, state, isMobile)
-              else if (_selectedFilterIndex == 6)
+              else if (_selectedFilterIndex == 4)
                 const VehicleHistoryScreen(isEmbedded: true)
-              else if (_selectedFilterIndex == 7)
+              else if (_selectedFilterIndex == 5)
                 const FinancialReportsView(isEmbedded: true)
               else if (filteredBookings.isEmpty)
                 Container(
@@ -288,8 +289,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     final undepositedCash = state.undepositedCashTodayETB as double;
     final isClosed = state.isTodayClosed as bool;
 
-    final channels = [
-      (method: PaymentMethod.cash, label: 'Cash Gate', color: AppColors.cashGreen),
+    final cashRevenue = methodRevenue[PaymentMethod.cash] ?? 0.0;
+    final cashCount = methodCounts[PaymentMethod.cash] ?? 0;
+
+    final digitalProviders = [
       (method: PaymentMethod.telebirr, label: 'Telebirr', color: AppColors.telebirrBlue),
       (method: PaymentMethod.cbeBirr, label: 'CBE Birr', color: AppColors.cbeBirrPurple),
       (method: PaymentMethod.bankOfAbyssinia, label: 'BoA', color: const Color(0xFFF59E0B)),
@@ -297,6 +300,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       (method: PaymentMethod.dashenBank, label: 'Dashen Bank', color: const Color(0xFF0284C7)),
       (method: PaymentMethod.otherBankTransfer, label: 'Other Bank', color: Colors.indigo),
     ];
+
+    double digitalRevenue = 0.0;
+    int digitalCount = 0;
+    for (final p in digitalProviders) {
+      digitalRevenue += methodRevenue[p.method] ?? 0.0;
+      digitalCount += methodCounts[p.method] ?? 0;
+    }
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 12 : 14),
@@ -315,7 +325,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Fast Action Buttons: Deposit Cash & Confirm Daily Closing
+          // 1. Fast Action Buttons: Deposit Cash & Confirm Daily Closing (Disabled once confirmed)
           if (isMobile) ...[
             SizedBox(
               width: double.infinity,
@@ -348,7 +358,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => DailyClosingDialog.show(context),
+                onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
                 icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
                 label: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -364,8 +374,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   ],
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isClosed ? AppColors.statusCompleted : AppColors.primary,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: AppColors.statusCompleted,
+                  disabledForegroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
@@ -405,10 +417,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 ),
                 const SizedBox(width: 8),
 
-                // Confirm Daily Closing Button
+                // Confirm Daily Closing Button (Disabled once confirmed)
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => DailyClosingDialog.show(context),
+                    onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
                     icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
                     label: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,8 +437,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       ],
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isClosed ? AppColors.statusCompleted : AppColors.primary,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
+                      disabledBackgroundColor: AppColors.statusCompleted,
+                      disabledForegroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       elevation: 0,
@@ -438,53 +452,175 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           ],
           const SizedBox(height: 10),
 
-          // 2. Clear breakdown pills of money received by each provider
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: channels.map((c) {
-                final amt = methodRevenue[c.method] ?? 0.0;
-                final cnt = methodCounts[c.method] ?? 0;
-                final hasPayments = amt > 0;
-
-                return Container(
-                  margin: const EdgeInsets.only(right: 6),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          // 2. Clear Categorized Breakdown: Cash Collected vs Digital Money Transfer
+          Row(
+            children: [
+              // Category A: Cash Collected (Gate)
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
-                    color: hasPayments ? c.color.withOpacity(0.08) : AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: hasPayments ? c.color.withOpacity(0.3) : AppColors.cardBorder,
-                    ),
+                    color: AppColors.cashGreen.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.cashGreen.withOpacity(0.3)),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(c.method.icon, size: 13, color: hasPayments ? c.color : AppColors.textSecondary),
-                      const SizedBox(width: 5),
-                      Text(
-                        '${c.label}: ',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: hasPayments ? c.color : AppColors.textSecondary,
-                        ),
-                      ),
-                      Text(
-                        '${CurrencyFormatter.formatShort(amt)} ($cnt)',
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w800,
-                          color: hasPayments ? AppColors.textPrimary : AppColors.textMuted,
+                      const Icon(Icons.payments_rounded, size: 18, color: AppColors.cashGreen),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              state.tr('cashCollected'),
+                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.cashGreen),
+                            ),
+                            Text(
+                              '${CurrencyFormatter.formatShort(cashRevenue)} ($cashCount)',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // Category B: Digital Money Transfer (Dropdown Trigger)
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isDigitalBreakdownExpanded = !_isDigitalBreakdownExpanded;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.telebirrBlue.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _isDigitalBreakdownExpanded
+                            ? AppColors.telebirrBlue
+                            : AppColors.telebirrBlue.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.phonelink_ring_rounded, size: 18, color: AppColors.telebirrBlue),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                state.tr('digitalMoneyTransfer'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.telebirrBlue),
+                              ),
+                              Text(
+                                '${CurrencyFormatter.formatShort(digitalRevenue)} ($digitalCount)',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          _isDigitalBreakdownExpanded
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                          color: AppColors.telebirrBlue,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
+
+          // 2.1 Expandable Digital Providers Dropdown List
+          if (_isDigitalBreakdownExpanded) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.cardBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${state.tr("digitalMoneyTransfer")} Channels:',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+                      ),
+                      Text(
+                        'Total: ${CurrencyFormatter.format(digitalRevenue)}',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.telebirrBlue),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: digitalProviders.map((c) {
+                      final amt = methodRevenue[c.method] ?? 0.0;
+                      final cnt = methodCounts[c.method] ?? 0;
+                      final hasPayments = amt > 0;
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: hasPayments ? c.color.withOpacity(0.1) : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: hasPayments ? c.color.withOpacity(0.35) : AppColors.cardBorder,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(c.method.icon, size: 12, color: hasPayments ? c.color : AppColors.textSecondary),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${c.label}: ',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: hasPayments ? c.color : AppColors.textSecondary,
+                              ),
+                            ),
+                            Text(
+                              '${CurrencyFormatter.formatShort(amt)} ($cnt)',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                color: hasPayments ? AppColors.textPrimary : AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -952,69 +1088,110 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     UrlLauncherHelper.openUrl(mapUrl);
   }
 
-  Widget _buildFilterChips(dynamic state) {
-    final filters = [
-      state.tr('filterAll'),
-      state.tr('filterPending'),
-      state.tr('filterInService'),
-      state.tr('filterUnpaid'),
-      state.tr('phoneCallBooking'),
-      '${state.tr("attendanceDesk")} (${state.presentWashersCount}/${state.totalWashersCount})',
-      state.tr('washHistory'),
-      state.tr('closingAndFinancialReports'),
+  Widget _buildFilterChips(dynamic state, bool isMobile) {
+    final tabs = [
+      (index: 0, title: state.tr('filterAll') as String, icon: Icons.view_list_rounded),
+      (index: 1, title: state.tr('filterUnpaid') as String, icon: Icons.money_off_csred_rounded),
+      (index: 2, title: state.tr('phoneCallBooking') as String, icon: Icons.phone_in_talk_rounded),
+      (index: 3, title: '${state.tr("attendanceDesk")} (${state.presentWashersCount})', icon: Icons.how_to_reg_rounded),
+      (index: 4, title: state.tr('washHistory') as String, icon: Icons.history_rounded),
+      (index: 5, title: state.tr('closingAndFinancialReports') as String, icon: Icons.fact_check_rounded),
     ];
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: List.generate(filters.length, (index) {
-          final isSelected = index == _selectedFilterIndex;
-          Widget? avatar;
-          if (index == 5) {
-            avatar = Icon(
-              Icons.how_to_reg_rounded,
-              size: 15,
-              color: isSelected ? Colors.white : AppColors.primary,
-            );
-          } else if (index == 6) {
-            avatar = Icon(
-              Icons.history_rounded,
-              size: 15,
-              color: isSelected ? Colors.white : AppColors.telebirrBlue,
-            );
-          } else if (index == 7) {
-            avatar = Icon(
-              Icons.fact_check_rounded,
-              size: 15,
-              color: isSelected ? Colors.white : AppColors.cashGreen,
-            );
-          }
+    if (isMobile) {
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: _buildFilterTabButton(tabs[0].index, tabs[0].title, tabs[0].icon, _selectedFilterIndex == 0)),
+              const SizedBox(width: 6),
+              Expanded(child: _buildFilterTabButton(tabs[1].index, tabs[1].title, tabs[1].icon, _selectedFilterIndex == 1)),
+              const SizedBox(width: 6),
+              Expanded(child: _buildFilterTabButton(tabs[2].index, tabs[2].title, tabs[2].icon, _selectedFilterIndex == 2)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(child: _buildFilterTabButton(tabs[3].index, tabs[3].title, tabs[3].icon, _selectedFilterIndex == 3)),
+              const SizedBox(width: 6),
+              Expanded(child: _buildFilterTabButton(tabs[4].index, tabs[4].title, tabs[4].icon, _selectedFilterIndex == 4)),
+              const SizedBox(width: 6),
+              Expanded(child: _buildFilterTabButton(tabs[5].index, tabs[5].title, tabs[5].icon, _selectedFilterIndex == 5)),
+            ],
+          ),
+        ],
+      );
+    }
 
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
-              avatar: avatar,
-              label: Text(
-                filters[index],
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
+    return Row(
+      children: tabs.map((tab) {
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: _buildFilterTabButton(tab.index, tab.title, tab.icon, _selectedFilterIndex == tab.index),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildFilterTabButton(int index, String title, IconData icon, bool isSelected) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() => _selectedFilterIndex = index),
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.cardBorder,
+              width: isSelected ? 1.5 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.25),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.015),
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    )
+                  ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? Colors.white : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                  ),
                 ),
               ),
-              selected: isSelected,
-              selectedColor: AppColors.primary,
-              backgroundColor: Colors.white,
-              showCheckmark: false,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(color: isSelected ? AppColors.primary : AppColors.cardBorder),
-              ),
-              onSelected: (_) => setState(() => _selectedFilterIndex = index),
-            ),
-          );
-        }),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1563,12 +1740,8 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
     switch (_selectedFilterIndex) {
       case 1:
-        return activeQueue.where((b) => b.status == WashStatus.pending || b.assignedBay == null).toList();
-      case 2:
-        return activeQueue.where((b) => b.status.isOngoing).toList();
-      case 3:
         return activeQueue.where((b) => !b.payment.isPaid).toList();
-      case 4:
+      case 2:
         return activeQueue.where((b) => b.isPhoneBooking).toList();
       default:
         return activeQueue;
@@ -1583,6 +1756,34 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     StationBay van,
     bool isMobile,
   ) {
+    final bookings = state.bookings as List<WashBooking>;
+
+    // Real-time busy detection from active queue in washing/drying/assigned
+    WashBooking? active1;
+    WashBooking? active2;
+    WashBooking? activeVan;
+
+    for (final b in bookings) {
+      if (b.status == WashStatus.washing || b.status == WashStatus.drying || b.status == WashStatus.assignedToBay) {
+        if (b.assignedBay == BayType.bay1 && active1 == null) {
+          active1 = b;
+        } else if (b.assignedBay == BayType.bay2 && active2 == null) {
+          active2 = b;
+        } else if ((b.assignedBay == BayType.mobileVan || b.serviceType == ServiceType.atHomeMobile) && activeVan == null) {
+          activeVan = b;
+        }
+      }
+    }
+
+    final isBay1Busy = active1 != null || !bay1.isVacant;
+    final plate1 = active1?.licensePlate ?? bay1.activeLicensePlate;
+
+    final isBay2Busy = active2 != null || !bay2.isVacant;
+    final plate2 = active2?.licensePlate ?? bay2.activeLicensePlate;
+
+    final isVanBusy = activeVan != null || !van.isVacant;
+    final plateVan = activeVan?.licensePlate ?? van.activeLicensePlate;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: 12),
       decoration: BoxDecoration(
@@ -1600,28 +1801,33 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       child: Row(
         children: [
           Expanded(
-            child: _buildBayMiniIndicator(state.tr('bay1'), bay1.isVacant, state, isMobile),
+            child: _buildBayMiniIndicator(state.tr('bay1'), !isBay1Busy, plate1, state, isMobile),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator(state.tr('bay2'), bay2.isVacant, state, isMobile),
+            child: _buildBayMiniIndicator(state.tr('bay2'), !isBay2Busy, plate2, state, isMobile),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildBayMiniIndicator(state.tr('mobileVan'), van.isVacant, state, isMobile),
+            child: _buildBayMiniIndicator(state.tr('mobileVan'), !isVanBusy, plateVan, state, isMobile),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBayMiniIndicator(String title, bool isFree, dynamic state, bool isMobile) {
+  Widget _buildBayMiniIndicator(String title, bool isFree, String? activePlate, dynamic state, bool isMobile) {
     final color = isFree ? AppColors.statusReady : AppColors.statusWashing;
+    final statusText = isFree
+        ? state.tr('availableNow')
+        : (activePlate != null && activePlate.isNotEmpty ? 'Busy ($activePlate)' : state.tr('busyWashing'));
+
     return Container(
       padding: EdgeInsets.symmetric(vertical: isMobile ? 6 : 8, horizontal: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1630,8 +1836,8 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 6,
-                height: 6,
+                width: 7,
+                height: 7,
                 decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: 4),
@@ -1649,14 +1855,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              isFree ? state.tr('availableNow') : state.tr('busyWashing'),
+              statusText,
               style: TextStyle(
                 fontSize: isMobile ? 9.5 : 10.5,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
                 color: color,
               ),
             ),
@@ -1681,16 +1887,32 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
     await state.updateWashStatus(booking.id, next);
 
+    if (next == WashStatus.completed) {
+      await state.sendCustomerCompletionSms(booking);
+    }
+
     if (context.mounted) {
       final msg = next == WashStatus.completed
-          ? '${booking.licensePlate} marked completed! Ready for payment 💰'
+          ? '${booking.licensePlate} completed! Ready for payment 💰 • SMS ready for ${booking.customerPhone}'
           : '${booking.licensePlate} updated to ${next.displayName}!';
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
           backgroundColor: next == WashStatus.completed ? AppColors.cashGreen : next.color,
-          content: Text(msg),
+          content: Row(
+            children: [
+              Icon(
+                next == WashStatus.completed ? Icons.sms_rounded : Icons.check_circle_outline_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(msg, style: const TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
         ),
       );
     }

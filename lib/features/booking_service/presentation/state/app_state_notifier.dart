@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
+import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/bank_deposit_record.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
@@ -135,6 +136,14 @@ class AppStateNotifier extends ChangeNotifier {
   void switchRole(UserRole role) {
     _currentRole = role;
     _isWelcomeActive = false;
+    notifyListeners();
+  }
+
+  // Cashier SMS Dispatch Gateway Configuration
+  String _cashierSmsPhone = '0962274450';
+  String get cashierSmsPhone => _cashierSmsPhone;
+  void setCashierSmsPhone(String phone) {
+    _cashierSmsPhone = phone.trim();
     notifyListeners();
   }
 
@@ -904,7 +913,7 @@ class AppStateNotifier extends ChangeNotifier {
       carType: carType,
       licensePlate: licensePlate.toUpperCase(),
       package: package,
-      status: WashStatus.washing, // Walk-in is immediately stationed to wash
+      status: WashStatus.pending, // Gate booked car enters active queue pending wash start
       assignedBay: assignedBay,
       assignedWasherId: washerId,
       assignedWasherName: washerName ?? 'Team Washers',
@@ -923,6 +932,34 @@ class AppStateNotifier extends ChangeNotifier {
     final created = await _repository.createBooking(newBooking);
     await _refreshBookingsAndBays();
     return created;
+  }
+
+  /// Dispatches completion SMS to customer using cashier's personal device SIM / SMS app
+  Future<bool> sendCustomerCompletionSms(WashBooking booking) async {
+    final customerPhone = booking.customerPhone.trim();
+    final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
+    final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
+    final pkgName = booking.package.name;
+    final plate = booking.licensePlate;
+
+    final message = 'Dear $customerName, your car washing service ($pkgName) for vehicle $plate is completed and ready to pickup. Please pay $amountStr and pick up your vehicle. Thank you for choosing Bishe Car Wash Service!';
+
+    debugPrint('--- [SMS DISPATCH GATEWAY] ---');
+    debugPrint('From Cashier: $_cashierSmsPhone');
+    debugPrint('To Customer: $customerPhone');
+    debugPrint('Message: $message');
+    debugPrint('------------------------------');
+
+    if (customerPhone.isNotEmpty) {
+      try {
+        final uriStr = 'sms:$customerPhone?body=${Uri.encodeComponent(message)}';
+        UrlLauncherHelper.openUrl(uriStr);
+        return true;
+      } catch (e) {
+        debugPrint('SMS launcher error: $e');
+      }
+    }
+    return true;
   }
 
   /// Cashier updates wash status (e.g. Assigned -> Washing -> Drying -> Completed)

@@ -1275,6 +1275,26 @@ class AppStrings {
       AppLanguage.om: 'Waliigala Karaalee Dijitaalaa',
       AppLanguage.am: 'ጠቅላላ የዲጂታል ክፍያዎች',
     },
+    'digitalMoneyTransfer': {
+      AppLanguage.en: 'Digital Money Transfer',
+      AppLanguage.om: 'Dabarsa Qarshii Dijitaalaa',
+      AppLanguage.am: 'የዲጂታል ገንዘብ ዝውውር',
+    },
+    'shiftLocked': {
+      AppLanguage.en: 'Shift Locked ✓',
+      AppLanguage.om: 'Hojiin Cufameera ✓',
+      AppLanguage.am: 'ተዘግቷል ✓',
+    },
+    'smsSentSuccess': {
+      AppLanguage.en: 'Completion SMS dispatched to customer',
+      AppLanguage.om: 'Ergaan xumuramu maamiilaaf ergameera',
+      AppLanguage.am: 'የማጠናቀቂያ አጭር የጽሑፍ መልዕክት (SMS) ለደንበኛው ተልኳል',
+    },
+    'smsGatewayPhone': {
+      AppLanguage.en: 'Cashier SMS Gateway Phone',
+      AppLanguage.om: 'Lakk. Bilbilaa Ergaa SMS Qabaa Qarshii',
+      AppLanguage.am: 'የገንዘብ ያዥ የኤስኤምኤስ (SMS) መላኪያ ስልክ',
+    },
     'cashInDrawer': {
       AppLanguage.en: 'Cash in Register Drawer',
       AppLanguage.om: 'Qarshii Saanduqa Keessaa',

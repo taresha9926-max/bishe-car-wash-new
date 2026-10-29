@@ -133,11 +133,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         ),
         const SizedBox(height: 18),
 
-        // 3. Payment Channels Breakdown (Cash, Telebirr, CBE, BoA, Awash, Dashen, Other)
-        _buildPaymentMethodBreakdownCard(periodBookings, isMobile, state),
-        const SizedBox(height: 18),
-
-        // 4. Daily Closing Summaries Table
+        // 3. Daily Closing Summaries Table
         _buildDailyClosingsSection(context, state, periodClosings, isMobile),
         const SizedBox(height: 18),
 
@@ -362,110 +358,6 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildPaymentMethodBreakdownCard(List<WashBooking> bookings, bool isMobile, dynamic state) {
-    final methodMap = <PaymentMethod, double>{
-      for (final m in PaymentMethod.values) m: 0.0,
-    };
-    final countMap = <PaymentMethod, int>{
-      for (final m in PaymentMethod.values) m: 0,
-    };
-
-    for (final b in bookings) {
-      methodMap[b.payment.method] = (methodMap[b.payment.method] ?? 0.0) + b.totalPrice;
-      countMap[b.payment.method] = (countMap[b.payment.method] ?? 0) + 1;
-    }
-
-    final total = bookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.pie_chart_rounded, color: AppColors.primary, size: 18),
-                  const SizedBox(width: 8),
-                  Text(
-                    state.tr('moneyReceivedBreakdown'),
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                  ),
-                ],
-              ),
-              Text(
-                'Total: ${CurrencyFormatter.format(total)}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: PaymentMethod.values.map((method) {
-              final amount = methodMap[method] ?? 0.0;
-              final count = countMap[method] ?? 0;
-              final percent = total > 0 ? (amount / total * 100) : 0.0;
-
-              return Container(
-                width: isMobile ? double.infinity : 220,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: amount > 0 ? method.color.withOpacity(0.06) : AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: amount > 0 ? method.color.withOpacity(0.25) : AppColors.cardBorder,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: method.color.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(method.icon, color: method.color, size: 18),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            method.localizedName(state.currentLanguage),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: amount > 0 ? method.color : AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 1),
-                          Text(
-                            '${CurrencyFormatter.formatShort(amount)} • $count tx (${percent.toStringAsFixed(0)}%)',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
     );
   }
 

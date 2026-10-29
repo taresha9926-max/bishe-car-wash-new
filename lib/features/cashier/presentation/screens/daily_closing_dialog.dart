@@ -235,13 +235,22 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               const SizedBox(height: 20),
 
               // Action Buttons
-              CustomButton(
-                text: state.tr('confirmDailyClosing'),
-                icon: Icons.check_circle_outline_rounded,
-                backgroundColor: AppColors.cashGreen,
-                isLoading: _isSubmitting,
-                onPressed: _isSubmitting ? null : _handleClosingConfirm,
-              ),
+              if (isAlreadyClosed)
+                CustomButton(
+                  text: 'Daily Closing Confirmed ✓ (Shift Locked)',
+                  icon: Icons.lock_outline_rounded,
+                  backgroundColor: Colors.grey.shade600,
+                  isLoading: false,
+                  onPressed: null,
+                )
+              else
+                CustomButton(
+                  text: state.tr('confirmDailyClosing'),
+                  icon: Icons.check_circle_outline_rounded,
+                  backgroundColor: AppColors.cashGreen,
+                  isLoading: _isSubmitting,
+                  onPressed: _isSubmitting ? null : _handleClosingConfirm,
+                ),
             ],
           ),
         ),

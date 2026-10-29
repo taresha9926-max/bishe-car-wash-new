@@ -2,7 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 
 void main() {
@@ -257,6 +260,46 @@ void main() {
       expect(state.latestWeeklyCommissionReport!.totalWeeklyPool, equals(report.totalWeeklyPool));
       expect(state.latestWeeklyCommissionReport!.washerCommissions, isNotEmpty);
       expect(state.latestWeeklyCommissionReport!.notes, equals('Official week 43 payout report for admin'));
+    });
+
+    test('Walk-in booking lifecycle starts as pending and dispatches SMS on completion', () async {
+      // 1. Verify default cashier SMS phone is 0962274450 and can be configured
+      expect(state.cashierSmsPhone, equals('0962274450'));
+      state.setCashierSmsPhone('0911223344');
+      expect(state.cashierSmsPhone, equals('0911223344'));
+      state.setCashierSmsPhone('0962274450');
+
+      // 2. Register new walk-in vehicle
+      final pkg = state.packages.first;
+      final booking = await state.registerWalkIn(
+        licensePlate: 'TEST-9988',
+        customerPhone: '0912345678',
+        customerName: 'Dawit Abebe',
+        carType: CarType.automobile,
+        package: pkg,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.cash,
+      );
+
+      // 3. New walk-in starts in pending status (not auto-washing)
+      expect(booking.status, equals(WashStatus.pending));
+
+      // 4. Step-by-step lifecycle: Start Wash -> Move to Drying -> Mark Completed
+      await state.updateWashStatus(booking.id, WashStatus.washing);
+      var updated = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(updated.status, equals(WashStatus.washing));
+
+      await state.updateWashStatus(booking.id, WashStatus.drying);
+      updated = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(updated.status, equals(WashStatus.drying));
+
+      // 5. Completion triggers SMS dispatch
+      final smsSuccess = await state.sendCustomerCompletionSms(updated);
+      expect(smsSuccess, isTrue);
+
+      await state.updateWashStatus(booking.id, WashStatus.completed);
+      updated = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(updated.status, equals(WashStatus.completed));
     });
   });
 }

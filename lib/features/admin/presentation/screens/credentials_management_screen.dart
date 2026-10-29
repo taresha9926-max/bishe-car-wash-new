@@ -12,6 +12,72 @@ class CredentialsManagementScreen extends StatefulWidget {
 }
 
 class _CredentialsManagementScreenState extends State<CredentialsManagementScreen> {
+  void _showEditCashierPhoneDialog(BuildContext context) {
+    final state = AppStateProvider.read(context);
+    final phoneController = TextEditingController(text: state.cashierSmsPhone);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.sms_rounded, color: AppColors.primary, size: 22),
+            SizedBox(width: 8),
+            Text('Cashier SMS Phone Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This phone number is used to dispatch automated completion SMS messages to customers when their wash is finished.',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                labelText: 'Cashier Phone Number',
+                prefixIcon: const Icon(Icons.phone_android_rounded),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              final newPhone = phoneController.text.trim();
+              if (newPhone.isNotEmpty) {
+                state.setCashierSmsPhone(newPhone);
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Cashier SMS Gateway Phone updated to $newPhone'),
+                    backgroundColor: AppColors.statusReady,
+                  ),
+                );
+              }
+            },
+            child: const Text('Save Phone'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showEditPinDialog(BuildContext context, StaffCredential cred) {
     final state = AppStateProvider.read(context);
     final pinController = TextEditingController(text: cred.pin);
@@ -294,6 +360,55 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Cashier SMS Dispatch Gateway Phone Configuration
+                Card(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.sms_rounded, color: AppColors.primary, size: 24),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('smsGatewayPhone'),
+                                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                state.cashierSmsPhone,
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Personal phone package used to dispatch customer completion SMS',
+                                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_rounded, color: AppColors.primary),
+                          tooltip: 'Edit SMS Phone',
+                          onPressed: () => _showEditCashierPhoneDialog(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 ...credentials.map((cred) {
                   final isAdmin = cred.role == UserRole.admin;
                   final color = isAdmin ? AppColors.primary : AppColors.secondary;
