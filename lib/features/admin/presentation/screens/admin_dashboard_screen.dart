@@ -69,6 +69,20 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   AdminTimeFilter _selectedFilter = AdminTimeFilter.today;
   DateTime? _selectedCustomDate;
+  late final TextEditingController _cashierPhoneController;
+  bool _phoneControllerInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _cashierPhoneController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _cashierPhoneController.dispose();
+    super.dispose();
+  }
 
   List<WashBooking> _filterBookings(List<WashBooking> bookings, AdminTimeFilter filter, DateTime? customDate) {
     final now = DateTime.now();
@@ -103,6 +117,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final state = AppStateProvider.of(context);
     final isDesktop = ResponsiveLayout.isDesktop(context);
     final isMobile = ResponsiveLayout.isMobile(context);
+
+    if (!_phoneControllerInitialized) {
+      _cashierPhoneController.text = state.cashierSmsPhone;
+      _phoneControllerInitialized = true;
+    }
 
     // Time-filtered bookings
     final filteredBookings = _filterBookings(state.bookings, _selectedFilter, _selectedCustomDate);
@@ -205,6 +224,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
               // 4. Cash vs Digital Settlement Bar (Responsive Wrap)
               _buildCashVsDigitalBar(state, totalRevenue, cashRevenue, digitalRevenue),
+              const SizedBox(height: 18),
+
+              // Cashier Phone Number Field for Automated Customer SMS (Admin Dashboard)
+              _buildCashierSmsConfigCard(context, state, isMobile),
               const SizedBox(height: 18),
 
               // 5. Weekly Washer Commission Report (Reported by Cashier)
@@ -1526,6 +1549,137 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   fontSize: isMobile ? 10 : 10.5,
                   color: AppColors.textSecondary,
                 ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCashierSmsConfigCard(BuildContext context, dynamic state, bool isMobile) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 14 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.sms_rounded, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.tr('smsGatewayPhone'),
+                      style: TextStyle(
+                        fontSize: isMobile ? 14 : 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'Cashier phone number used to send automated wash completion SMS to customers',
+                      style: TextStyle(
+                        fontSize: isMobile ? 11 : 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.cashGreen.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.cashGreen.withOpacity(0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: AppColors.cashGreen,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'SMS Active',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.cashGreen),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _cashierPhoneController,
+                  keyboardType: TextInputType.phone,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.phone_android_rounded, size: 18, color: AppColors.primary),
+                    labelText: 'Cashier Phone Number',
+                    hintText: 'e.g. 0962274450',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: 11),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+                icon: const Icon(Icons.check_rounded, size: 16),
+                label: const Text('Update', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+                onPressed: () {
+                  final newPhone = _cashierPhoneController.text.trim();
+                  if (newPhone.isNotEmpty) {
+                    state.setCashierSmsPhone(newPhone);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Cashier SMS Phone Number updated to $newPhone'),
+                        backgroundColor: AppColors.statusReady,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
               ),
             ],
           ),
