@@ -2,14 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/presentation/state/app_state_notifier.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
-
-// HTML file picker for Flutter Web
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 
 class BankDepositDialog extends StatefulWidget {
   const BankDepositDialog({super.key});
@@ -47,30 +44,12 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
   }
 
   void _pickReceiptImage() {
-    if (kIsWeb) {
-      final uploadInput = html.FileUploadInputElement()..accept = 'image/*';
-      uploadInput.click();
-
-      uploadInput.onChange.listen((e) {
-        final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files[0];
-          final reader = html.FileReader();
-          reader.readAsDataUrl(file);
-          reader.onLoadEnd.listen((e) {
-            setState(() {
-              _uploadedReceiptName = file.name;
-              _receiptBase64 = reader.result as String?;
-            });
-          });
-        }
-      });
-    } else {
+    ImagePickerHelper.pickImage(onPicked: (img) {
       setState(() {
-        _uploadedReceiptName = 'bank_deposit_slip.jpg';
-        _receiptBase64 = 'placeholder_slip';
+        _uploadedReceiptName = img.name;
+        _receiptBase64 = img.base64Data;
       });
-    }
+    });
   }
 
   @override

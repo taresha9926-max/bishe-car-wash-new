@@ -3,15 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
-
-// HTML file picker for Flutter Web
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 
 class PaymentProcessDialog extends StatefulWidget {
   final WashBooking booking;
@@ -53,29 +50,12 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   }
 
   void _pickScreenshot() {
-    if (kIsWeb) {
-      final uploadInput = html.FileUploadInputElement()..accept = 'image/*';
-      uploadInput.click();
-
-      uploadInput.onChange.listen((e) {
-        final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files[0];
-          final reader = html.FileReader();
-          reader.readAsDataUrl(file);
-          reader.onLoadEnd.listen((e) {
-            setState(() {
-              _uploadedScreenshotName = file.name;
-              _screenshotBase64 = reader.result as String?;
-            });
-          });
-        }
-      });
-    } else {
+    ImagePickerHelper.pickImage(onPicked: (img) {
       setState(() {
-        _uploadedScreenshotName = 'telebirr_transfer_receipt.jpg';
+        _uploadedScreenshotName = img.name;
+        _screenshotBase64 = img.base64Data;
       });
-    }
+    });
   }
 
   @override
