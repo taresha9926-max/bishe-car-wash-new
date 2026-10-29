@@ -148,7 +148,7 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   // Welcome Advertising Video Reel
-  String _adVideoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+  String _adVideoUrl = 'assets/videos/ad_video.mp4';
   String get adVideoUrl => _adVideoUrl;
   void setAdVideoUrl(String url) {
     _adVideoUrl = url.trim();
