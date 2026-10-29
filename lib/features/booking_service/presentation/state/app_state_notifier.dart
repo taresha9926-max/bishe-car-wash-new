@@ -147,11 +147,25 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Welcome Advertising Video Reel
+  // Welcome Advertising Video Reel & TikTok Showcase
   String _adVideoUrl = 'assets/videos/ad_video.mp4';
   String get adVideoUrl => _adVideoUrl;
   void setAdVideoUrl(String url) {
     _adVideoUrl = url.trim();
+    notifyListeners();
+  }
+
+  String _tiktokUrl = 'https://www.tiktok.com/@bishe_car_wash';
+  String get tiktokUrl => _tiktokUrl;
+  void setTikTokUrl(String url) {
+    _tiktokUrl = url.trim();
+    notifyListeners();
+  }
+
+  String _tiktokThumbnailUrl = '';
+  String get tiktokThumbnailUrl => _tiktokThumbnailUrl;
+  void setTikTokThumbnailUrl(String url) {
+    _tiktokThumbnailUrl = url.trim();
     notifyListeners();
   }
 
