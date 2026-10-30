@@ -1,6 +1,7 @@
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -51,6 +52,7 @@ abstract class IStaffRepository {
 
   // Staff Credentials & Authentication
   Future<List<StaffCredential>> getStaffCredentials();
+  Future<bool> verifyStaffPin(UserRole role, String enteredPin);
   Future<void> updateStaffCredential(String id, String pin, String fullName);
   Future<void> addStaffCredential(StaffCredential cred);
   Future<void> deleteStaffCredential(String id);

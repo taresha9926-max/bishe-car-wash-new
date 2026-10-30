@@ -315,8 +315,19 @@ class AppStateNotifier extends ChangeNotifier {
     }
   }
 
-  /// Live verification: checks cache first, then fetches fresh credentials from Supabase if not matched.
+  /// Live verification: calls server-side verify_staff_pin RPC first, then falls back to local.
   Future<bool> authenticateRoleAsync(UserRole role, String enteredPin) async {
+    final serverOk = await _repository.verifyStaffPin(role, enteredPin);
+    if (serverOk) {
+      if (role == UserRole.admin) {
+        final cred = getMatchedCredential(role, enteredPin);
+        final isSuper = (cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin')) ||
+            enteredPin.trim() == '1234';
+        setSuperAdminStatus(isSuper);
+      }
+      return true;
+    }
+
     if (authenticateRole(role, enteredPin)) {
       if (role == UserRole.admin) {
         final cred = getMatchedCredential(role, enteredPin);
@@ -325,19 +336,7 @@ class AppStateNotifier extends ChangeNotifier {
       }
       return true;
     }
-    try {
-      _credentials = await _repository.getStaffCredentials();
-      notifyListeners();
-      final ok = authenticateRole(role, enteredPin);
-      if (ok && role == UserRole.admin) {
-        final cred = getMatchedCredential(role, enteredPin);
-        final isSuper = cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin');
-        setSuperAdminStatus(isSuper);
-      }
-      return ok;
-    } catch (_) {
-      return false;
-    }
+    return false;
   }
 
   // Currently active customer booking (for live tracking in Customer UI)

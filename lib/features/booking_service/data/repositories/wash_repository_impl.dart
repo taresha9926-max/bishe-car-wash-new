@@ -1,6 +1,8 @@
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/booking_service/data/datasources/mock_wash_datasource.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
@@ -241,6 +243,15 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<List<StaffCredential>> getStaffCredentials() async {
     return List.unmodifiable(_credentials);
+  }
+
+  @override
+  Future<bool> verifyStaffPin(UserRole role, String enteredPin) async {
+    return StaffAuthenticator.authenticate(
+      role: role,
+      enteredPin: enteredPin,
+      credentials: _credentials,
+    );
   }
 
   @override

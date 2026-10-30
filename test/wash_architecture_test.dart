@@ -13,6 +13,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
+import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 
 void main() {
@@ -191,6 +192,15 @@ void main() {
         ),
         isFalse,
       );
+    });
+
+    test('Repository verifyStaffPin delegates verification securely', () async {
+      final repo = WashRepositoryImpl();
+      expect(await repo.verifyStaffPin(UserRole.admin, '1234'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.cashier, '0000'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.storekeeper, '3344'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.accountant, '5566'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.admin, 'wrong_pin'), isFalse);
     });
   });
 
