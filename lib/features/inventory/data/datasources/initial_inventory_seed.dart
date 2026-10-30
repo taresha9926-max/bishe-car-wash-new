@@ -259,8 +259,8 @@ class InitialInventorySeed {
       ),
       FixedAsset(
         id: 'FA-024',
-        name: 'Try Square (ስኩዌር)',
-        nameAmharic: 'ስኩዌር / ካሬ (Try Square)',
+        name: 'Try Square (ማእዘን)',
+        nameAmharic: 'ማእዘን / Try Square',
         category: 'Workshop Tools',
         serialNumber: 'TS-BISHE-01',
         assignedLocation: 'Workshop Bench',
@@ -319,8 +319,8 @@ class InitialInventorySeed {
       ),
       ConsumableItem(
         id: 'CS-004',
-        name: 'የጎማ መውፈሪያ Spray (Foaming Tire Cleaner)',
-        nameAmharic: 'የጎማ መውፈሪያ Spray (Foaming Tire Cleaner)',
+        name: 'የጎማ ማፅጃ ፈሳሽ Spray (Foaming Tire Cleaner)',
+        nameAmharic: 'የጎማ ማፅጃ ፈሳሽ Spray (Foaming Tire Cleaner)',
         category: 'Tire & Exterior',
         unit: 'Spray Cans',
         currentStock: 24.0,
@@ -418,7 +418,7 @@ class InitialInventorySeed {
       ),
       ConsumableItem(
         id: 'CS-011',
-        name: 'Ultra-Cutting Compound (Glass & Body)',
+        name: 'Ultra-Cutting Compound (for glass & body)',
         nameAmharic: 'Ultra-Cutting Compound (ለብርጭቆ እና ቦዲ)',
         category: 'Paint Correction',
         unit: 'Bottles',
