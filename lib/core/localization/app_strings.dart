@@ -315,14 +315,14 @@ class AppStrings {
       AppLanguage.am: 'የሰራተኞች እና የአስተዳዳሪ ብቻ',
     },
     'cashierPinBadge': {
-      AppLanguage.en: 'Gate Desk • PIN: 2233',
-      AppLanguage.om: 'Balbala Seensaa • PIN: 2233',
-      AppLanguage.am: 'የመግቢያ በር • ሚስጥር: 2233',
+      AppLanguage.en: 'Gate Desk',
+      AppLanguage.om: 'Balbala Seensaa',
+      AppLanguage.am: 'የመግቢያ በር',
     },
     'adminPinBadge': {
-      AppLanguage.en: 'Super Admin Hub • PIN: 4450',
-      AppLanguage.om: 'Giddugala Bulchiinsaa • PIN: 4450',
-      AppLanguage.am: 'ዋና አስተዳዳሪ ማዕከል • ሚስጥር: 4450',
+      AppLanguage.en: 'Super Admin Hub',
+      AppLanguage.om: 'Giddugala Bulchiinsaa',
+      AppLanguage.am: 'ዋና አስተዳዳሪ ማዕከል',
     },
     'enterCustomerPortal': {
       AppLanguage.en: 'Enter Customer Portal',
