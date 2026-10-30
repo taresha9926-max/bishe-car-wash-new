@@ -20,6 +20,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booki
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 
 class AppStateNotifier extends ChangeNotifier {
   final IWashRepository _repository;
@@ -167,6 +168,63 @@ class AppStateNotifier extends ChangeNotifier {
   void setTikTokThumbnailUrl(String url) {
     _tiktokThumbnailUrl = url.trim();
     notifyListeners();
+  }
+
+  // Super Admin Configured TikTok Rolling Reels (At least 4 items)
+  List<TikTokAdVideo> _tiktokReels = [
+    const TikTokAdVideo(
+      id: 'reel-1',
+      title: 'Active Snow Foam Cannon & Pre-Wash',
+      subtitle: 'Triple-action foaming & streak-free dirt lift • Watch Reel',
+      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
+    ),
+    const TikTokAdVideo(
+      id: 'reel-2',
+      title: 'High-Pressure Steam Bay & Undercarriage',
+      subtitle: 'Deep wheel-well & engine chassis steam care • Watch Reel',
+      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&auto=format&fit=crop&q=80',
+    ),
+    const TikTokAdVideo(
+      id: 'reel-3',
+      title: 'Diamond Ceramic Coating & Mirror Polish',
+      subtitle: 'Hydrophobic ceramic shield & ultimate gloss • Watch Reel',
+      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&auto=format&fit=crop&q=80',
+    ),
+    const TikTokAdVideo(
+      id: 'reel-4',
+      title: 'Interior Deep Steam & Leather Conditioning',
+      subtitle: 'Odor eradication & luxury cabin detailing • Watch Reel',
+      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&auto=format&fit=crop&q=80',
+    ),
+  ];
+  List<TikTokAdVideo> get tiktokReels => List.unmodifiable(_tiktokReels);
+
+  void setTikTokReels(List<TikTokAdVideo> reels) {
+    _tiktokReels = List.from(reels);
+    notifyListeners();
+  }
+
+  void addTikTokReel(TikTokAdVideo reel) {
+    _tiktokReels.add(reel);
+    notifyListeners();
+  }
+
+  void updateTikTokReel(int index, TikTokAdVideo reel) {
+    if (index >= 0 && index < _tiktokReels.length) {
+      _tiktokReels[index] = reel;
+      notifyListeners();
+    }
+  }
+
+  void removeTikTokReel(int index) {
+    if (index >= 0 && index < _tiktokReels.length && _tiktokReels.length > 1) {
+      _tiktokReels.removeAt(index);
+      notifyListeners();
+    }
   }
 
   // Repository Data Caches
