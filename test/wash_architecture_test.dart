@@ -13,6 +13,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
+import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 
 void main() {
   group('WashDispatcher (Deep Dispatch Module)', () {
@@ -301,6 +302,28 @@ void main() {
       final completedBooking = booking.copyWith(status: WashStatus.completed);
       final isPaymentEligibleWhenCompleted = completedBooking.status == WashStatus.completed && !completedBooking.payment.isPaid;
       expect(isPaymentEligibleWhenCompleted, isTrue);
+    });
+  });
+
+  group('UrlLauncherHelper Sanitization & Multi-Format TikTok Links', () {
+    test('extracts clean URL from TikTok mobile share sheet text', () {
+      const shareSheetText = 'Check out this car detailing video on TikTok! https://vt.tiktok.com/ZSgWCxdWL/ #bishe';
+      expect(UrlLauncherHelper.cleanUrl(shareSheetText), equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+    });
+
+    test('strips invisible unicode control and bidi characters from mobile clipboards', () {
+      const bidiUrl = '\u200Ehttps://vt.tiktok.com/ZSgWCxdWL/\u202C';
+      expect(UrlLauncherHelper.cleanUrl(bidiUrl), equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+    });
+
+    test('prepends https scheme if omitted by user', () {
+      const rawDomain = 'vt.tiktok.com/ZSgWCxdWL/';
+      expect(UrlLauncherHelper.cleanUrl(rawDomain), equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+    });
+
+    test('trims trailing punctuation and whitespace', () {
+      const punctUrl = '  https://www.tiktok.com/@bishe_car_wash/video/123456789.,;)  ';
+      expect(UrlLauncherHelper.cleanUrl(punctUrl), equals('https://www.tiktok.com/@bishe_car_wash/video/123456789'));
     });
   });
 }

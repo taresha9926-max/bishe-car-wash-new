@@ -18,6 +18,7 @@ import 'credentials_management_screen.dart';
 import 'pricing_management_screen.dart';
 import 'staff_management_screen.dart';
 import '../../../welcome/domain/models/tiktok_ad_video.dart';
+import '../../../../core/utils/url_launcher_helper.dart';
 
 enum AdminTimeFilter {
   today,
@@ -1976,15 +1977,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: () {
-                  state.setTikTokReels(reels);
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('TikTok rolling reels updated successfully!'),
-                      backgroundColor: AppColors.statusReady,
-                    ),
-                  );
+                onPressed: () async {
+                  await state.setTikTokReels(reels);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('TikTok rolling reels updated & synced to cloud!'),
+                        backgroundColor: AppColors.statusReady,
+                      ),
+                    );
+                  }
                 },
                 child: const Text('Save All Reels'),
               ),
@@ -2022,14 +2025,35 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   decoration: const InputDecoration(labelText: 'Subtitle / Description', border: OutlineInputBorder()),
                 ),
                 const SizedBox(height: 10),
-                TextField(
-                  controller: linkCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'TikTok Video Link',
-                    hintText: 'https://www.tiktok.com/@bishe_car_wash/video/...',
-                    prefixIcon: Icon(Icons.link_rounded),
-                    border: OutlineInputBorder(),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: linkCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'TikTok Video Link',
+                          hintText: 'https://vt.tiktok.com/... or https://www.tiktok.com/...',
+                          prefixIcon: Icon(Icons.link_rounded),
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      tooltip: 'Test Link in TikTok',
+                      icon: const Icon(Icons.open_in_new_rounded, size: 20),
+                      onPressed: () {
+                        final testUrl = UrlLauncherHelper.cleanUrl(linkCtrl.text);
+                        if (testUrl.isNotEmpty) {
+                          UrlLauncherHelper.openUrl(testUrl);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please paste a valid TikTok link first')),
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 TextField(
@@ -2050,16 +2074,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
             onPressed: () {
-              if (linkCtrl.text.trim().isNotEmpty) {
+              final cleaned = UrlLauncherHelper.cleanUrl(linkCtrl.text);
+              if (cleaned.isNotEmpty) {
                 onSaved(
                   reel.copyWith(
                     title: titleCtrl.text.trim().isNotEmpty ? titleCtrl.text.trim() : reel.title,
                     subtitle: subCtrl.text.trim().isNotEmpty ? subCtrl.text.trim() : reel.subtitle,
-                    tiktokUrl: linkCtrl.text.trim(),
+                    tiktokUrl: cleaned,
                     thumbnailUrl: thumbCtrl.text.trim(),
                   ),
                 );
                 Navigator.pop(ctx);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a valid TikTok video URL')),
+                );
               }
             },
             child: const Text('Save Reel'),

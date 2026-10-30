@@ -63,9 +63,20 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
   }
 
   void _launchTikTok(BuildContext context, String url) {
+    final cleanUrl = UrlLauncherHelper.cleanUrl(url);
+    if (cleanUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('TikTok link is not configured yet'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     // 1. Immediately trigger URL opening synchronously within the tap callback
     // to preserve transient user activation gesture on mobile WebKit (iOS Safari) and Chrome
-    UrlLauncherHelper.openUrl(url);
+    UrlLauncherHelper.openUrl(cleanUrl);
 
     // 2. Display smooth notification feedback toast to user
     final state = AppStateProvider.read(context);
@@ -209,25 +220,48 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
           // 2. Auto-Rolling Swipable 16:9 Banner (Touch & Swipe Optimized)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: MouseRegion(
-              onEnter: (_) => setState(() => _isUserInteracting = true),
-              onExit: (_) => setState(() => _isUserInteracting = false),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: reels.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentPage = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      final reel = reels[index];
-                      return _buildSlideCard(context, state, reel);
-                    },
+            child: Listener(
+              onPointerDown: (_) {
+                _autoScrollTimer?.cancel();
+                _isUserInteracting = true;
+              },
+              onPointerUp: (_) {
+                _isUserInteracting = false;
+                _startAutoScroll();
+              },
+              child: MouseRegion(
+                onEnter: (_) => setState(() => _isUserInteracting = true),
+                onExit: (_) => setState(() => _isUserInteracting = false),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (notification is ScrollEndNotification) {
+                          final page = _pageController.page?.round();
+                          if (page != null && page != _currentPage && page >= 0 && page < reels.length) {
+                            setState(() {
+                              _currentPage = page;
+                            });
+                          }
+                        }
+                        return false;
+                      },
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: reels.length,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentPage = index;
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          final reel = reels[index];
+                          return _buildSlideCard(context, state, reel);
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -239,19 +273,32 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
             child: Row(
               children: [
-                // Slide Dot Indicators
+                // Interactive Slide Dot Indicators
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(reels.length, (i) {
                     final isActive = i == _currentPage;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 240),
-                      margin: const EdgeInsets.only(right: 5),
-                      width: isActive ? 18 : 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: isActive ? const Color(0xFFFE2C55) : Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(3),
+                    return GestureDetector(
+                      onTap: () {
+                        if (_pageController.hasClients) {
+                          _pageController.animateToPage(
+                            i,
+                            duration: const Duration(milliseconds: 350),
+                            curve: Curves.easeInOutCubic,
+                          );
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 4),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 240),
+                          width: isActive ? 18 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: isActive ? const Color(0xFFFE2C55) : Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
                       ),
                     );
                   }),
@@ -297,7 +344,8 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
     final title = reel.localizedTitle(state.currentLang);
     final subtitle = reel.localizedSubtitle(state.currentLang);
 
-    return InkWell(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () => _launchTikTok(context, reel.tiktokUrl),
       child: Stack(
         fit: StackFit.expand,

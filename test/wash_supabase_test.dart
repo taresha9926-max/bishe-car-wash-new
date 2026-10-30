@@ -8,6 +8,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/payment_in
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 
 void main() {
   test(
@@ -66,18 +67,28 @@ void main() {
     final initialReels = await repo.getTikTokReels();
     expect(initialReels, isNotEmpty);
 
-    // Save custom reels including the exact user video URL
-    final customReels = [
-      ...initialReels,
-    ];
-    customReels[0] = customReels[0].copyWith(
-      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
-    );
+    // Save custom reels including the exact user video URL across all 4 slots
+    final customReels = List<TikTokAdVideo>.from(initialReels);
+    while (customReels.length < 4) {
+      customReels.add(TikTokAdVideo(
+        id: 'reel-${customReels.length + 1}',
+        title: 'Detailing Reel #${customReels.length + 1}',
+        subtitle: 'Watch on TikTok',
+        tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+        thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
+      ));
+    }
+    for (int i = 0; i < customReels.length; i++) {
+      customReels[i] = customReels[i].copyWith(
+        tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+      );
+    }
     await repo.saveTikTokReels(customReels);
 
     // Fetch again from Supabase to verify all customer phones will load this cloud update
     final persistedReels = await repo.getTikTokReels();
-    expect(persistedReels.first.tiktokUrl, equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+    expect(persistedReels.length, greaterThanOrEqualTo(4));
+    expect(persistedReels.every((r) => r.tiktokUrl == 'https://vt.tiktok.com/ZSgWCxdWL/'), isTrue);
 
     // Verify staff credentials never expose the system config row
     final filteredCreds = await repo.getStaffCredentials();
