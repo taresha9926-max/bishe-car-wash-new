@@ -103,25 +103,29 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isDesktop = ResponsiveLayout.isDesktop(context);
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 48 : 18, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 14 : (isDesktop ? 48 : 24),
+            vertical: isMobile ? 12 : 20,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 920),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. Top Bar: Language & Staff Portals Sandwich Menu (Top Right)
+                  // 1. Top Bar: Language Selector & Staff Portals Sandwich Menu (Top Right)
                   FadeTransition(
                     opacity: _topBarFade,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Left: Language Switcher Dropdown
+                        // Left: Language Switcher Dropdown (EN, OM, AM)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                           decoration: BoxDecoration(
@@ -161,9 +165,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           ),
                         ),
 
-                        // Right: Relocated Cashier & Admin Entry (Sandwich Button)
+                        // Right: Relocated Cashier & Admin Entry (Top-Right Sandwich Menu)
                         PopupMenuButton<String>(
-                          tooltip: 'Staff Portals (Cashier & Admin)',
+                          tooltip: state.tr('staffPortals'),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           elevation: 6,
                           color: Colors.white,
@@ -176,7 +180,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                             }
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 12, vertical: 7),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(14),
@@ -189,22 +193,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                 ),
                               ],
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.menu_rounded, size: 18, color: AppColors.primary),
-                                SizedBox(width: 7),
+                                const Icon(Icons.menu_rounded, size: 18, color: AppColors.primary),
+                                const SizedBox(width: 6),
                                 Text(
-                                  'Staff Portals',
-                                  style: TextStyle(
+                                  state.tr('staffPortals'),
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.textPrimary,
                                     letterSpacing: 0.2,
                                   ),
                                 ),
-                                SizedBox(width: 4),
-                                Icon(Icons.lock_outline_rounded, size: 13, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.lock_outline_rounded, size: 13, color: AppColors.textSecondary),
                               ],
                             ),
                           ),
@@ -231,9 +235,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                           state.tr('cashierPortal'),
                                           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                                         ),
-                                        const Text(
-                                          'Gate Desk • PIN: 2233',
-                                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        Text(
+                                          state.tr('cashierPinBadge'),
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                         ),
                                       ],
                                     ),
@@ -264,9 +268,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                           state.tr('adminPortal'),
                                           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                                         ),
-                                        const Text(
-                                          'Super Admin Hub • PIN: 4450',
-                                          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        Text(
+                                          state.tr('adminPinBadge'),
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                         ),
                                       ],
                                     ),
@@ -279,13 +283,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ],
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
 
-                  // 2. Minimized, Space-Saving Brand Header
+                  // 2. Minimized, Space-Saving Brand Header (Optimized for Mobile)
                   FadeTransition(
                     opacity: _topBarFade,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                      padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: isMobile ? 10 : 12),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [AppColors.primaryDark, Color(0xFF1E3A8A), AppColors.primary],
@@ -301,62 +305,66 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           ),
                         ],
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Minimized Logo Icon
-                          Container(
-                            padding: const EdgeInsets.all(9),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.18),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.5),
-                            ),
-                            child: const Icon(Icons.local_car_wash_rounded, size: 24, color: Colors.white),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  state.tr('welcomeTitle'),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                    letterSpacing: -0.3,
-                                  ),
+                          Row(
+                            children: [
+                              // Minimized Logo Icon (22-24px space saver)
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.18),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.5),
                                 ),
-                                Text(
-                                  state.tr('welcomeSubtitle'),
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: Colors.white.withOpacity(0.9),
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                child: const Icon(Icons.local_car_wash_rounded, size: 22, color: Colors.white),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      state.tr('welcomeTitle'),
+                                      style: TextStyle(
+                                        fontSize: isMobile ? 16.5 : 18,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        letterSpacing: -0.3,
+                                      ),
+                                    ),
+                                    Text(
+                                      state.tr('welcomeSubtitle'),
+                                      style: TextStyle(
+                                        fontSize: isMobile ? 11 : 12,
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          // Compact Capacity Chips
-                          if (isDesktop)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _buildMiniChip('2 Bays'),
-                                const SizedBox(width: 6),
-                                _buildMiniChip('1 Mobile Van'),
-                                const SizedBox(width: 6),
-                                _buildMiniChip('10 Packages'),
-                              ],
-                            ),
+                          const SizedBox(height: 8),
+                          // Responsive Capacity Chips Row
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: [
+                              _buildMiniChip(state.tr('stationCapBays')),
+                              _buildMiniChip(state.tr('stationCapVan')),
+                              _buildMiniChip(state.tr('stationCapPackages')),
+                            ],
+                          ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
 
-                  // 3. Customer Portal Positioned at the Top (Easily Found)
+                  // 3. Customer Portal Positioned at the Top (Easily Found & Mobile-Thumb Friendly)
                   SlideTransition(
                     position: _customerSlide,
                     child: FadeTransition(
@@ -372,12 +380,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                               state.switchRole(UserRole.customer);
                               widget.onEnterCustomer?.call();
                             },
-                            borderRadius: BorderRadius.circular(22),
+                            borderRadius: BorderRadius.circular(20),
                             child: Container(
-                              padding: const EdgeInsets.all(20),
+                              padding: EdgeInsets.all(isMobile ? 15 : 20),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(22),
+                                borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: _isCustomerHovered ? AppColors.primary : AppColors.cardBorder,
                                   width: _isCustomerHovered ? 2.0 : 1.2,
@@ -390,121 +398,242 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                   ),
                                 ],
                               ),
-                              child: Row(
-                                children: [
-                                  // Glowing Vehicle Portal Icon
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [AppColors.primaryDark, AppColors.primary],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(18),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.primary.withOpacity(0.3),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.directions_car_filled_rounded,
-                                      size: 32,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
+                              child: isMobile
+                                  ? Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
-                                            Text(
-                                              state.tr('customerPortal'),
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w900,
-                                                color: AppColors.textPrimary,
+                                            Container(
+                                              padding: const EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [AppColors.primaryDark, AppColors.primary],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius: BorderRadius.circular(14),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: AppColors.primary.withOpacity(0.3),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 3),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: const Icon(
+                                                Icons.directions_car_filled_rounded,
+                                                size: 26,
+                                                color: Colors.white,
                                               ),
                                             ),
-                                            const SizedBox(width: 8),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF2563EB).withOpacity(0.12),
-                                                borderRadius: BorderRadius.circular(6),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        state.tr('customerPortal'),
+                                                        style: const TextStyle(
+                                                          fontSize: 16.5,
+                                                          fontWeight: FontWeight.w900,
+                                                          color: AppColors.textPrimary,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 6),
+                                                      Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                                        decoration: BoxDecoration(
+                                                          color: const Color(0xFF2563EB).withOpacity(0.12),
+                                                          borderRadius: BorderRadius.circular(6),
+                                                        ),
+                                                        child: Text(
+                                                          state.tr('publicAccess'),
+                                                          style: const TextStyle(
+                                                            fontSize: 8.5,
+                                                            fontWeight: FontWeight.w900,
+                                                            color: Color(0xFF2563EB),
+                                                            letterSpacing: 0.4,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    state.tr('customerPortalDesc'),
+                                                    style: const TextStyle(
+                                                      fontSize: 11.5,
+                                                      color: AppColors.textSecondary,
+                                                      height: 1.25,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              child: const Text(
-                                                'PUBLIC ACCESS',
-                                                style: TextStyle(
-                                                  fontSize: 9.5,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Color(0xFF2563EB),
-                                                  letterSpacing: 0.5,
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.check_circle_rounded, size: 13, color: AppColors.statusReady),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                state.tr('customerTrustPill'),
+                                                style: const TextStyle(
+                                                  fontSize: 10.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: AppColors.primary,
                                                 ),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          state.tr('customerPortalDesc'),
-                                          style: const TextStyle(
-                                            fontSize: 12.5,
-                                            color: AppColors.textSecondary,
-                                            height: 1.3,
+                                        const SizedBox(height: 12),
+                                        // Full-width mobile tap button
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              state.switchRole(UserRole.customer);
+                                              widget.onEnterCustomer?.call();
+                                            },
+                                            icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                                            label: Text(
+                                              state.tr('enterCustomerPortal'),
+                                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.primary,
+                                              foregroundColor: Colors.white,
+                                              padding: const EdgeInsets.symmetric(vertical: 12),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                              elevation: 0,
+                                            ),
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
-                                        const Row(
-                                          children: [
-                                            Icon(Icons.check_circle_rounded, size: 13, color: AppColors.statusReady),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              'Instant Wash Booking • Private Live Queue Tracker',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppColors.primary,
-                                              ),
+                                      ],
+                                    )
+                                  : Row(
+                                      children: [
+                                        // Desktop View Layout
+                                        Container(
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            gradient: const LinearGradient(
+                                              colors: [AppColors.primaryDark, AppColors.primary],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
                                             ),
-                                          ],
+                                            borderRadius: BorderRadius.circular(18),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: AppColors.primary.withOpacity(0.3),
+                                                blurRadius: 10,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Icon(
+                                            Icons.directions_car_filled_rounded,
+                                            size: 32,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    state.tr('customerPortal'),
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w900,
+                                                      color: AppColors.textPrimary,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: const Color(0xFF2563EB).withOpacity(0.12),
+                                                      borderRadius: BorderRadius.circular(6),
+                                                    ),
+                                                    child: Text(
+                                                      state.tr('publicAccess'),
+                                                      style: const TextStyle(
+                                                        fontSize: 9.5,
+                                                        fontWeight: FontWeight.w900,
+                                                        color: Color(0xFF2563EB),
+                                                        letterSpacing: 0.5,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Text(
+                                                state.tr('customerPortalDesc'),
+                                                style: const TextStyle(
+                                                  fontSize: 12.5,
+                                                  color: AppColors.textSecondary,
+                                                  height: 1.3,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                children: [
+                                                  const Icon(Icons.check_circle_rounded, size: 13, color: AppColors.statusReady),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    state.tr('customerTrustPill'),
+                                                    style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: AppColors.primary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            state.switchRole(UserRole.customer);
+                                            widget.onEnterCustomer?.call();
+                                          },
+                                          icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                                          label: Text(
+                                            state.tr('enterCustomerPortal'),
+                                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            elevation: 0,
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  // Enter Button
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      state.switchRole(UserRole.customer);
-                                      widget.onEnterCustomer?.call();
-                                    },
-                                    icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                                    label: const Text('Enter Portal', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      elevation: 0,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
 
-                  // 4. Auto-Rolling TikTok Video Reels Carousel
+                  // 4. Auto-Rolling TikTok Video Reels Carousel (100% Read-Only, Localized)
                   SlideTransition(
                     position: _reelsSlide,
                     child: FadeTransition(
@@ -512,15 +641,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       child: const AdVideoShowcaseCard(),
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
 
-                  // 5. Clean Google Maps Bar (Coordinates & Copy Removed)
+                  // 5. Clean Google Maps Bar (Coordinates & Copy Removed, Localized)
                   SlideTransition(
                     position: _mapsSlide,
                     child: FadeTransition(
                       opacity: _mapsFade,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                        padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: isMobile ? 12 : 14),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
@@ -536,43 +665,52 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(9),
                               decoration: BoxDecoration(
                                 color: AppColors.statusPending.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(Icons.location_on_rounded, size: 24, color: AppColors.statusPending),
+                              child: const Icon(Icons.location_on_rounded, size: 22, color: AppColors.statusPending),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Text(
-                                        AppConstants.stationName,
-                                        style: const TextStyle(
-                                          fontSize: 14.5,
-                                          fontWeight: FontWeight.w900,
-                                          color: AppColors.textPrimary,
+                                      Flexible(
+                                        child: Text(
+                                          AppConstants.stationName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: isMobile ? 13.5 : 14.5,
+                                            fontWeight: FontWeight.w900,
+                                            color: AppColors.textPrimary,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 6),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                                         decoration: BoxDecoration(
                                           color: Colors.green.withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(6),
                                         ),
-                                        child: const Text('OPEN', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green)),
+                                        child: Text(
+                                          state.tr('openBadge'),
+                                          style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.green),
+                                        ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 2),
-                                  const Text(
-                                    'Bishoftu (Debre Zeyit), Oromia, Ethiopia',
-                                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                  Text(
+                                    state.tr('stationBishoftuLocation'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                                   ),
                                 ],
                               ),
@@ -580,15 +718,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                             const SizedBox(width: 8),
                             ElevatedButton.icon(
                               onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                              icon: const Icon(Icons.navigation_rounded, size: 15),
+                              icon: const Icon(Icons.navigation_rounded, size: 14),
                               label: Text(
                                 state.tr('openGoogleMaps'),
-                                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                                style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 11.5 : 12.5),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                                padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 15, vertical: isMobile ? 10 : 12),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 elevation: 0,
                               ),
@@ -598,13 +736,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
-                  // Footer
+                  // 6. Footer (Localized)
                   FadeTransition(
                     opacity: _mapsFade,
                     child: Text(
-                      '© ${DateTime.now().year} BISHE Car Wash Services • Bishoftu, Oromia',
+                      '© ${DateTime.now().year} BISHE Car Wash Services • ${state.tr('bishoftu')}',
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w500),
                     ),
@@ -627,7 +765,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
       ),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Colors.white),
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
       ),
     );
   }

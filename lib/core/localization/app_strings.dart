@@ -304,6 +304,96 @@ class AppStrings {
       AppLanguage.om: 'Hojjattoota, komishiinii 15%, koodii duraafi gabaasa yeroo',
       AppLanguage.am: 'ሰራተኞች፣ የ15% አጣቢዎች ኮሚሽን፣ ሚስጥር ቁጥርና የጊዜ ሪፖርቶች',
     },
+    'staffPortals': {
+      AppLanguage.en: 'Staff Portals',
+      AppLanguage.om: 'Balbala Hojjettootaa',
+      AppLanguage.am: 'የሰራተኞች መግቢያ',
+    },
+    'staffMenuDesc': {
+      AppLanguage.en: 'Staff & Admin Access Only',
+      AppLanguage.om: 'Seensa Hojjettootaafi Bulchiinsaa Qofa',
+      AppLanguage.am: 'የሰራተኞች እና የአስተዳዳሪ ብቻ',
+    },
+    'cashierPinBadge': {
+      AppLanguage.en: 'Gate Desk • PIN: 2233',
+      AppLanguage.om: 'Balbala Seensaa • PIN: 2233',
+      AppLanguage.am: 'የመግቢያ በር • ሚስጥር: 2233',
+    },
+    'adminPinBadge': {
+      AppLanguage.en: 'Super Admin Hub • PIN: 4450',
+      AppLanguage.om: 'Giddugala Bulchiinsaa • PIN: 4450',
+      AppLanguage.am: 'ዋና አስተዳዳሪ ማዕከል • ሚስጥር: 4450',
+    },
+    'enterCustomerPortal': {
+      AppLanguage.en: 'Enter Customer Portal',
+      AppLanguage.om: 'Gara Balbala Maamilaa Seenaa',
+      AppLanguage.am: 'ወደ ደንበኛ መግቢያ ይግቡ',
+    },
+    'customerTrustPill': {
+      AppLanguage.en: 'Instant Wash Booking • Live Queue Tracker',
+      AppLanguage.om: 'Dhiqannaa Battalaa • Hordoffii Qophii Kallattii',
+      AppLanguage.am: 'ፈጣን የእጥበት ትዕዛዝ • የቀጥታ የሰልፍ መከታተያ',
+    },
+    'tiktokReelsTitle': {
+      AppLanguage.en: 'OFFICIAL TIKTOK REELS',
+      AppLanguage.om: 'REEL TIKTOOKII OFFICIAL',
+      AppLanguage.am: 'ይፋዊ የቲክቶክ ቪዲዮዎች',
+    },
+    'tapToWatchInTikTok': {
+      AppLanguage.en: 'Tap to Watch in TikTok App',
+      AppLanguage.om: 'App TikTok irratti daawwadhaa',
+      AppLanguage.am: 'በቲክቶክ አፕ ይመልከቱ',
+    },
+    'openInTikTok': {
+      AppLanguage.en: 'Open in TikTok 🎵',
+      AppLanguage.om: 'TikTok irratti Bani 🎵',
+      AppLanguage.am: 'በቲክቶክ ክፈት 🎵',
+    },
+    'redirectingToTikTok': {
+      AppLanguage.en: 'Redirecting to TikTok app... 🎵',
+      AppLanguage.om: 'Gara App TikToktti dabarsaa jira... 🎵',
+      AppLanguage.am: 'ወደ ቲክቶክ አፕ በመሄድ ላይ... 🎵',
+    },
+    'stationBishoftuLocation': {
+      AppLanguage.en: 'Bishoftu (Debre Zeyit), Oromia, Ethiopia',
+      AppLanguage.om: 'Bishoftuu (Dabrazayiti), Oromiyaa, Itoophiyaa',
+      AppLanguage.am: 'ቢሾፍቱ (ደብረ ዘይት)፣ ኦሮሚያ፣ ኢትዮጵያ',
+    },
+    'reelCounter': {
+      AppLanguage.en: 'REEL',
+      AppLanguage.om: 'REEL',
+      AppLanguage.am: 'ቪዲዮ',
+    },
+    'ofWord': {
+      AppLanguage.en: 'OF',
+      AppLanguage.om: 'IRRAA',
+      AppLanguage.am: 'ከ',
+    },
+    'publicAccess': {
+      AppLanguage.en: 'PUBLIC ACCESS',
+      AppLanguage.om: 'HUNDAAF BANAA',
+      AppLanguage.am: 'ለሁሉም ክፍት',
+    },
+    'openBadge': {
+      AppLanguage.en: 'OPEN NOW',
+      AppLanguage.om: 'BANAA DA',
+      AppLanguage.am: 'ክፍት ነው',
+    },
+    'stationCapBays': {
+      AppLanguage.en: '2 Pressure Bays',
+      AppLanguage.om: 'Iddoo Dhiqannaa 2',
+      AppLanguage.am: '2 የማጠቢያ ክፍሎች',
+    },
+    'stationCapVan': {
+      AppLanguage.en: '1 At-Home Van',
+      AppLanguage.om: 'Makiinaa Manaa 1',
+      AppLanguage.am: '1 የሞባይል ቫን',
+    },
+    'stationCapPackages': {
+      AppLanguage.en: '10 Detailing Packages',
+      AppLanguage.om: 'Paakeejii 10',
+      AppLanguage.am: '10 ፓኬጆች',
+    },
 
     // Readable Progression & Payment Lock
     'startWashAction': {

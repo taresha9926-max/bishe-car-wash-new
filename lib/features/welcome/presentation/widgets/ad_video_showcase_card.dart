@@ -63,16 +63,17 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
   }
 
   void _launchTikTok(BuildContext context, String url) {
+    final state = AppStateProvider.read(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           children: [
-            Icon(Icons.open_in_new_rounded, color: Colors.white, size: 18),
-            SizedBox(width: 10),
+            const Icon(Icons.open_in_new_rounded, color: Colors.white, size: 18),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Redirecting to TikTok app... 🎵',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                state.tr('redirectingToTikTok'),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
               ),
             ),
           ],
@@ -103,31 +104,32 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
           ];
 
     final currentReel = reels[_currentPage.clamp(0, reels.length - 1)];
+    final localizedCurrentTitle = currentReel.localizedTitle(state.currentLang);
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A), // Luxury dark slate
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFFE2C55).withOpacity(0.4), width: 1.5),
+        color: const Color(0xFF0B132B), // Luxury deep obsidian navy
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFFE2C55).withOpacity(0.35), width: 1.4),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFFE2C55).withOpacity(0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
           ),
           BoxShadow(
             color: const Color(0xFF00F2FE).withOpacity(0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 4),
+            blurRadius: 16,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Bar with TikTok Branding & Super Admin Controls
+          // 1. Header Bar: TikTok Branding + Verified Account Badge (100% Read-only)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -142,18 +144,18 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                       child: const Icon(Icons.music_note_rounded, size: 14, color: Color(0xFF00F2FE)),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'OFFICIAL TIKTOK REELS',
-                      style: TextStyle(
+                    Text(
+                      state.tr('tiktokReelsTitle'),
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        letterSpacing: 1.1,
+                        letterSpacing: 0.8,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF00F2FE), Color(0xFFFE2C55)],
@@ -161,20 +163,20 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        'REEL ${_currentPage + 1} OF ${reels.length}',
+                        '${state.tr('reelCounter')} ${_currentPage + 1} ${state.tr('ofWord')} ${reels.length}',
                         style: const TextStyle(
-                          fontSize: 9,
+                          fontSize: 8.5,
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
-                          letterSpacing: 0.5,
+                          letterSpacing: 0.3,
                         ),
                       ),
                     ),
                   ],
                 ),
-                // Official Verified TikTok Account Badge (Read-only for public visitors)
+                // Official TikTok Handle Pill (Read-only)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -188,8 +190,8 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                       Text(
                         '@bishe_car_wash',
                         style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
                           color: Colors.white,
                           letterSpacing: 0.2,
                         ),
@@ -201,14 +203,14 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
             ),
           ),
 
-          // Auto-Rolling Swipable 16:9 Banner
+          // 2. Auto-Rolling Swipable 16:9 Banner (Touch & Swipe Optimized)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: MouseRegion(
               onEnter: (_) => setState(() => _isUserInteracting = true),
               onExit: (_) => setState(() => _isUserInteracting = false),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(16),
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
                   child: PageView.builder(
@@ -221,7 +223,7 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                     },
                     itemBuilder: (context, index) {
                       final reel = reels[index];
-                      return _buildSlideCard(context, reel);
+                      return _buildSlideCard(context, state, reel);
                     },
                   ),
                 ),
@@ -229,9 +231,9 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
             ),
           ),
 
-          // Bottom Slide Indicators & Direct TikTok App Button
+          // 3. Bottom Slide Indicators & Direct TikTok App Button
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
             child: Row(
               children: [
                 // Slide Dot Indicators
@@ -240,25 +242,25 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                   children: List.generate(reels.length, (i) {
                     final isActive = i == _currentPage;
                     return AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.only(right: 6),
-                      width: isActive ? 22 : 7,
-                      height: 7,
+                      duration: const Duration(milliseconds: 240),
+                      margin: const EdgeInsets.only(right: 5),
+                      width: isActive ? 18 : 6,
+                      height: 6,
                       decoration: BoxDecoration(
                         color: isActive ? const Color(0xFFFE2C55) : Colors.white.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     );
                   }),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    currentReel.title,
+                    localizedCurrentTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),
@@ -267,12 +269,15 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () => _launchTikTok(context, currentReel.tiktokUrl),
-                  icon: const Icon(Icons.music_note_rounded, size: 15),
-                  label: const Text('Open in TikTok 🎵', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5)),
+                  icon: const Icon(Icons.music_note_rounded, size: 14),
+                  label: Text(
+                    state.tr('openInTikTok'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFE2C55),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 0,
                   ),
@@ -285,7 +290,10 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
     );
   }
 
-  Widget _buildSlideCard(BuildContext context, TikTokAdVideo reel) {
+  Widget _buildSlideCard(BuildContext context, dynamic state, TikTokAdVideo reel) {
+    final title = reel.localizedTitle(state.currentLang);
+    final subtitle = reel.localizedSubtitle(state.currentLang);
+
     return InkWell(
       onTap: () => _launchTikTok(context, reel.tiktokUrl),
       child: Stack(
@@ -307,7 +315,7 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
               gradient: LinearGradient(
                 colors: [
                   Colors.black.withOpacity(0.35),
-                  Colors.black.withOpacity(0.72),
+                  Colors.black.withOpacity(0.75),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -323,8 +331,8 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                 return Transform.scale(
                   scale: _pulseAnimation.value,
                   child: Container(
-                    width: 64,
-                    height: 64,
+                    width: 58,
+                    height: 58,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Color(0xFFFE2C55), Color(0xFF00F2FE)],
@@ -335,13 +343,13 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFFFE2C55).withOpacity(0.45),
-                          blurRadius: 18,
+                          blurRadius: 16,
                           spreadRadius: 2,
                         ),
                       ],
                     ),
                     child: const Center(
-                      child: Icon(Icons.play_arrow_rounded, size: 38, color: Colors.white),
+                      child: Icon(Icons.play_arrow_rounded, size: 34, color: Colors.white),
                     ),
                   ),
                 );
@@ -349,24 +357,24 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
             ),
           ),
 
-          // Top Badge
+          // Top Floating Badge
           Positioned(
-            top: 12,
-            left: 12,
+            top: 10,
+            left: 10,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(20),
+                color: Colors.black.withOpacity(0.72),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white.withOpacity(0.2)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.touch_app_rounded, size: 13, color: Colors.white70),
-                  SizedBox(width: 5),
+                  const Icon(Icons.touch_app_rounded, size: 12, color: Colors.white70),
+                  const SizedBox(width: 4),
                   Text(
-                    'Tap to Watch in TikTok App',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                    state.tr('tapToWatchInTikTok'),
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                 ],
               ),
@@ -375,35 +383,35 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
 
           // Bottom Music Track & Title Overlay
           Positioned(
-            bottom: 12,
-            left: 14,
-            right: 14,
+            bottom: 10,
+            left: 12,
+            right: 12,
             child: Row(
               children: [
-                const Icon(Icons.graphic_eq_rounded, size: 16, color: Color(0xFF00F2FE)),
-                const SizedBox(width: 8),
+                const Icon(Icons.graphic_eq_rounded, size: 15, color: Color(0xFF00F2FE)),
+                const SizedBox(width: 7),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        reel.title,
+                        title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                       Text(
-                        '🎵 ${reel.subtitle}',
+                        '🎵 $subtitle',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 10.5,
+                          color: Colors.white.withOpacity(0.82),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -436,7 +444,7 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
         children: [
           Opacity(
             opacity: 0.08,
-            child: const Icon(Icons.local_car_wash_rounded, size: 180, color: Colors.white),
+            child: const Icon(Icons.local_car_wash_rounded, size: 160, color: Colors.white),
           ),
         ],
       ),

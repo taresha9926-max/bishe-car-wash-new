@@ -29,6 +29,42 @@ class TikTokAdVideo {
     );
   }
 
+  String localizedTitle(String langCode) {
+    final code = langCode.toUpperCase();
+    if (id == 'reel-1') {
+      if (code == 'OM') return 'Dhiqannaa Hoomacha Qulqulluu';
+      if (code == 'AM') return 'የአረፋ እና የቅድመ-እጥበት ሂደት';
+    } else if (id == 'reel-2') {
+      if (code == 'OM') return 'Dhiqannaa Dhiibbaa Ol\'aanaa & Isxiimii';
+      if (code == 'AM') return 'ከፍተኛ ግፊት ያለው የእንፋሎት እጥበት';
+    } else if (id == 'reel-3') {
+      if (code == 'OM') return 'Kootingii Saaraamiikii Daayimondii';
+      if (code == 'AM') return 'የዳይመንድ ሴራሚክ ኮቲንግ እና ፖሊሽ';
+    } else if (id == 'reel-4') {
+      if (code == 'OM') return 'Qulqullina Keessaa & Kunuunsa Qodaa';
+      if (code == 'AM') return 'የውስጥ ክፍል ጥልቅ እንፋሎት እና ሌዘር እንክብካቤ';
+    }
+    return title;
+  }
+
+  String localizedSubtitle(String langCode) {
+    final code = langCode.toUpperCase();
+    if (id == 'reel-1') {
+      if (code == 'OM') return 'Hoomacha dhangala\'aa fi qulqullina saffisaa • Daawwadhaa';
+      if (code == 'AM') return 'ሙሉ አረፋ እና ከቆሻሻ የጸዳ ንጽህና • ይመልከቱ';
+    } else if (id == 'reel-2') {
+      if (code == 'OM') return 'Kunuunsa injiiniifi gommaa jalaatiin • Daawwadhaa';
+      if (code == 'AM') return 'የሞተር እና የታችኛው ክፍል ጥልቅ እጥበት • ይመልከቱ';
+    } else if (id == 'reel-3') {
+      if (code == 'OM') return 'Calaqqisa addaafi eegumsa makiinaa • Daawwadhaa';
+      if (code == 'AM') return 'ልዩ ወዝ እና የመኪና ቀለም ጥበቃ • ይመልከቱ';
+    } else if (id == 'reel-4') {
+      if (code == 'OM') return 'Qulqullina teessoo gogaafi sagalee dhabamsiisuu • Daawwadhaa';
+      if (code == 'AM') return 'የመቀመጫ እና የውስጥ ሽታ ማስወገጃ • ይመልከቱ';
+    }
+    return subtitle;
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
