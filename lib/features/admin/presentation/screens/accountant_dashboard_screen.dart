@@ -198,18 +198,18 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     );
   }
 
-  Widget _buildDepositCard(BuildContext context, dynamic state, dynamic d, bool isMobile) {
+  Widget _buildDepositCard(BuildContext context, dynamic state, BankDepositRecord d, bool isMobile) {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Colors.blue.shade50,
-          child: Icon(Icons.account_balance, color: AppColors.primary, size: 20),
+          child: const Icon(Icons.account_balance, color: AppColors.primary, size: 20),
         ),
-        title: Text('ETB ${(d.amount as double).toStringAsFixed(0)} ➔ ${d.targetAccount}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
-        subtitle: Text('Slip #: ${d.bankSlipNumber} • Cashier: ${d.cashierName}', style: const TextStyle(fontSize: 11.5)),
-        trailing: d.receiptImageUrl != null && d.receiptImageUrl.isNotEmpty
+        title: Text('ETB ${d.amount.toStringAsFixed(0)} ➔ ${d.targetAccount}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+        subtitle: Text('Slip #: ${d.referenceSlipNumber} • Cashier: ${d.cashierName}', style: const TextStyle(fontSize: 11.5)),
+        trailing: d.receiptScreenshot != null && d.receiptScreenshot!.isNotEmpty
             ? TextButton.icon(
                 icon: const Icon(Icons.visibility, size: 14),
                 label: const Text('View Slip', style: TextStyle(fontSize: 11)),
@@ -217,8 +217,8 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                   showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Bank Deposit Slip'),
-                      content: Image.network(d.receiptImageUrl, errorBuilder: (c, e, s) => const Text('Could not load slip image')),
+                      title: Text('Bank Deposit Slip: ${d.referenceSlipNumber}'),
+                      content: Image.network(d.receiptScreenshot!, errorBuilder: (c, e, s) => const Text('Could not load slip image')),
                     ),
                   );
                 },

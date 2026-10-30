@@ -25,6 +25,10 @@ class BankDepositRecord {
     this.notes,
   });
 
+  String get targetAccount => '$bankName ($accountName)';
+  String get bankSlipNumber => referenceSlipNumber;
+  String? get receiptImageUrl => receiptScreenshot;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

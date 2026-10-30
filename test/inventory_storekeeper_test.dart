@@ -139,6 +139,13 @@ void main() {
       expect(notifier.dailyFinancialClosings, isNotNull);
       expect(notifier.weeklyCommissionReports, isNotNull);
       expect(notifier.stockTransactions, isNotNull);
+
+      // Verify BankDepositRecord convenience getters
+      for (final d in notifier.bankDeposits) {
+        expect(d.targetAccount, contains(d.bankName));
+        expect(d.bankSlipNumber, equals(d.referenceSlipNumber));
+        expect(d.receiptImageUrl, equals(d.receiptScreenshot));
+      }
     });
   });
 }
