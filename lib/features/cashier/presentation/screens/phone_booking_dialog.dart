@@ -259,7 +259,10 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                             onChanged: (id) {
                               if (id != null) {
                                 setState(() {
-                                  _selectedPackage = packages.firstWhere((p) => p.id == id);
+                                  _selectedPackage = packages.firstWhere(
+                                    (p) => p.id == id,
+                                    orElse: () => packages.first,
+                                  );
                                 });
                               }
                             },
