@@ -194,9 +194,10 @@ void main() {
   });
 
   group('Repository Seams (Domain Ports)', () {
-    test('IBookingRepository, IPricingRepository, IStaffRepository form IWashRepository', () {
+    test('IBookingRepository, IPricingRepository, IStaffRepository, IMarketingRepository form IWashRepository', () {
       // Confirms contract composition at compile-time and runtime
       expect(IWashRepository, isNotNull);
+      expect(IMarketingRepository, isNotNull);
     });
   });
 

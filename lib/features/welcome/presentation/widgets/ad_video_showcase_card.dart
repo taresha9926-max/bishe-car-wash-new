@@ -63,6 +63,11 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
   }
 
   void _launchTikTok(BuildContext context, String url) {
+    // 1. Immediately trigger URL opening synchronously within the tap callback
+    // to preserve transient user activation gesture on mobile WebKit (iOS Safari) and Chrome
+    UrlLauncherHelper.openUrl(url);
+
+    // 2. Display smooth notification feedback toast to user
     final state = AppStateProvider.read(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -84,8 +89,6 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
-
-    UrlLauncherHelper.openUrl(url);
   }
 
   @override
@@ -98,7 +101,7 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
               id: 'fallback-1',
               title: 'BISHE Detailing Reel',
               subtitle: 'Tap to Watch on TikTok',
-              tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+              tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
               thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
             ),
           ];

@@ -176,54 +176,74 @@ class AppStateNotifier extends ChangeNotifier {
       id: 'reel-1',
       title: 'Active Snow Foam Cannon & Pre-Wash',
       subtitle: 'Triple-action foaming & streak-free dirt lift • Watch Reel',
-      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
       thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
     ),
     const TikTokAdVideo(
       id: 'reel-2',
       title: 'High-Pressure Steam Bay & Undercarriage',
       subtitle: 'Deep wheel-well & engine chassis steam care • Watch Reel',
-      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
       thumbnailUrl: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&auto=format&fit=crop&q=80',
     ),
     const TikTokAdVideo(
       id: 'reel-3',
       title: 'Diamond Ceramic Coating & Mirror Polish',
       subtitle: 'Hydrophobic ceramic shield & ultimate gloss • Watch Reel',
-      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
       thumbnailUrl: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&auto=format&fit=crop&q=80',
     ),
     const TikTokAdVideo(
       id: 'reel-4',
       title: 'Interior Deep Steam & Leather Conditioning',
       subtitle: 'Odor eradication & luxury cabin detailing • Watch Reel',
-      tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
       thumbnailUrl: 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&auto=format&fit=crop&q=80',
     ),
   ];
   List<TikTokAdVideo> get tiktokReels => List.unmodifiable(_tiktokReels);
 
-  void setTikTokReels(List<TikTokAdVideo> reels) {
+  Future<void> setTikTokReels(List<TikTokAdVideo> reels) async {
     _tiktokReels = List.from(reels);
     notifyListeners();
-  }
-
-  void addTikTokReel(TikTokAdVideo reel) {
-    _tiktokReels.add(reel);
-    notifyListeners();
-  }
-
-  void updateTikTokReel(int index, TikTokAdVideo reel) {
-    if (index >= 0 && index < _tiktokReels.length) {
-      _tiktokReels[index] = reel;
-      notifyListeners();
+    try {
+      await _repository.saveTikTokReels(_tiktokReels);
+    } catch (e) {
+      debugPrint('Failed to save TikTok reels to repository: $e');
     }
   }
 
-  void removeTikTokReel(int index) {
+  Future<void> addTikTokReel(TikTokAdVideo reel) async {
+    _tiktokReels.add(reel);
+    notifyListeners();
+    try {
+      await _repository.saveTikTokReels(_tiktokReels);
+    } catch (e) {
+      debugPrint('Failed to save TikTok reels to repository: $e');
+    }
+  }
+
+  Future<void> updateTikTokReel(int index, TikTokAdVideo reel) async {
+    if (index >= 0 && index < _tiktokReels.length) {
+      _tiktokReels[index] = reel;
+      notifyListeners();
+      try {
+        await _repository.saveTikTokReels(_tiktokReels);
+      } catch (e) {
+        debugPrint('Failed to save TikTok reels to repository: $e');
+      }
+    }
+  }
+
+  Future<void> removeTikTokReel(int index) async {
     if (index >= 0 && index < _tiktokReels.length && _tiktokReels.length > 1) {
       _tiktokReels.removeAt(index);
       notifyListeners();
+      try {
+        await _repository.saveTikTokReels(_tiktokReels);
+      } catch (e) {
+        debugPrint('Failed to save TikTok reels to repository: $e');
+      }
     }
   }
 
@@ -904,6 +924,7 @@ class AppStateNotifier extends ChangeNotifier {
         _repository.getBookings(),
         _repository.getCommissionLogs(),
         _repository.getStaffCredentials(),
+        _repository.getTikTokReels(),
       ]);
       _packages = results[0] as List<WashPackage>;
       _staff = results[1] as List<StaffMember>;
@@ -911,6 +932,10 @@ class AppStateNotifier extends ChangeNotifier {
       _bookings = results[3] as List<WashBooking>;
       _commissionLogs = results[4] as List<CommissionLog>;
       _credentials = results[5] as List<StaffCredential>;
+      final reels = results[6] as List<TikTokAdVideo>;
+      if (reels.isNotEmpty) {
+        _tiktokReels = List.from(reels);
+      }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

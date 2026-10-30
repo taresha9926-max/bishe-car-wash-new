@@ -7,6 +7,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/payment_in
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 
 /// Domain port for active bookings, washing bay allocations, and payment processing.
 abstract class IBookingRepository {
@@ -51,5 +52,12 @@ abstract class IStaffRepository {
   Future<void> deleteStaffCredential(String id);
 }
 
-/// Unified repository interface combining booking, pricing, and staff domain ports.
-abstract class IWashRepository implements IBookingRepository, IPricingRepository, IStaffRepository {}
+/// Domain port for commercial marketing assets and TikTok reel configurations.
+abstract class IMarketingRepository {
+  Future<List<TikTokAdVideo>> getTikTokReels();
+  Future<void> saveTikTokReels(List<TikTokAdVideo> reels);
+}
+
+/// Unified repository interface combining booking, pricing, staff, and marketing domain ports.
+abstract class IWashRepository
+    implements IBookingRepository, IPricingRepository, IStaffRepository, IMarketingRepository {}

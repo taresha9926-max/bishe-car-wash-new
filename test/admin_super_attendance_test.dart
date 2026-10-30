@@ -301,5 +301,27 @@ void main() {
       updated = state.bookings.firstWhere((b) => b.id == booking.id);
       expect(updated.status, equals(WashStatus.completed));
     });
+
+    test('Super Admin configures TikTok commercial reels and persists across devices', () async {
+      expect(state.tiktokReels, isNotEmpty);
+      expect(state.tiktokReels.first.tiktokUrl, equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+
+      final modified = [
+        ...state.tiktokReels,
+      ];
+      modified[0] = modified[0].copyWith(
+        title: 'Updated Detailing Highlight',
+        tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+      );
+
+      await state.setTikTokReels(modified);
+      expect(state.tiktokReels.first.title, equals('Updated Detailing Highlight'));
+
+      // Simulate a customer phone launching app: fresh state loads from repository
+      final customerState = AppStateNotifier(repository: repo);
+      await customerState.loadData();
+      expect(customerState.tiktokReels.first.title, equals('Updated Detailing Highlight'));
+      expect(customerState.tiktokReels.first.tiktokUrl, equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+    });
   });
 }

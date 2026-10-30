@@ -1950,7 +1950,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         id: 'reel-${DateTime.now().millisecondsSinceEpoch}',
                         title: 'New Detailing Reel #${reels.length + 1}',
                         subtitle: 'Watch on TikTok',
-                        tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
+                        tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
                         thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
                       );
                       _editReelPopup(context, newReel, (created) {

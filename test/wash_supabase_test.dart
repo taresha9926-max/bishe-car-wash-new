@@ -61,6 +61,27 @@ void main() {
     expect(commLogs, isNotEmpty);
     final recentLog = commLogs.firstWhere((l) => l.carPlate == 'TEST-9999');
     expect(recentLog.commissionEarnedETB, equals(packages.first.getPriceFor(CarType.automobile) * 0.15)); // 15% commission of package price
+
+    // 6. Test TikTok Reels cloud persistence across devices
+    final initialReels = await repo.getTikTokReels();
+    expect(initialReels, isNotEmpty);
+
+    // Save custom reels including the exact user video URL
+    final customReels = [
+      ...initialReels,
+    ];
+    customReels[0] = customReels[0].copyWith(
+      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+    );
+    await repo.saveTikTokReels(customReels);
+
+    // Fetch again from Supabase to verify all customer phones will load this cloud update
+    final persistedReels = await repo.getTikTokReels();
+    expect(persistedReels.first.tiktokUrl, equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+
+    // Verify staff credentials never expose the system config row
+    final filteredCreds = await repo.getStaffCredentials();
+    expect(filteredCreds.any((c) => c.username == 'app_config_tiktok_reels'), isFalse);
   },
   timeout: const Timeout(Duration(minutes: 2)),
 );

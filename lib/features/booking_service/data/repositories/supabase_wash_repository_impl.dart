@@ -14,6 +14,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_packa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 
 class SupabaseWashRepositoryImpl implements IWashRepository {
   final String supabaseUrl;
@@ -642,22 +643,25 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (data == null || data is! List || data.isEmpty) {
         return _fallbackLocalRepo.getStaffCredentials();
       }
-      return data.map((json) {
-        final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
-        final role = roleStr == 'admin' ? UserRole.admin : UserRole.cashier;
-        final rawPin = json['pin_hash']?.toString() ?? '';
-        final pin = (rawPin.length > 6 || rawPin.isEmpty)
-            ? (role == UserRole.admin ? '1234' : '0000')
-            : rawPin;
-        return StaffCredential(
-          id: json['id'].toString(),
-          username: json['username']?.toString() ?? 'staff',
-          pin: pin,
-          role: role,
-          fullName: json['full_name']?.toString() ?? 'Staff Member',
-          isActive: json['is_active'] == true,
-        );
-      }).toList();
+      return data
+          .map((json) {
+            final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
+            final role = roleStr == 'admin' ? UserRole.admin : UserRole.cashier;
+            final rawPin = json['pin_hash']?.toString() ?? '';
+            final pin = (rawPin.length > 6 || rawPin.isEmpty)
+                ? (role == UserRole.admin ? '1234' : '0000')
+                : rawPin;
+            return StaffCredential(
+              id: json['id'].toString(),
+              username: json['username']?.toString() ?? 'staff',
+              pin: pin,
+              role: role,
+              fullName: json['full_name']?.toString() ?? 'Staff Member',
+              isActive: json['is_active'] == true,
+            );
+          })
+          .where((cred) => cred.username != 'app_config_tiktok_reels')
+          .toList();
     } catch (_) {
       return _fallbackLocalRepo.getStaffCredentials();
     }
@@ -698,5 +702,51 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       debugPrint('Supabase deleteStaffCredential exception: $e');
     }
     await _fallbackLocalRepo.deleteStaffCredential(id);
+  }
+
+  @override
+  Future<List<TikTokAdVideo>> getTikTokReels() async {
+    try {
+      final dynamic data = await _get('staff_credentials?username=eq.app_config_tiktok_reels&select=*');
+      if (data is List && data.isNotEmpty) {
+        final rawJson = data.first['full_name']?.toString() ?? '';
+        if (rawJson.isNotEmpty) {
+          final dynamic decoded = jsonDecode(rawJson);
+          if (decoded is List && decoded.isNotEmpty) {
+            return decoded
+                .map((e) => TikTokAdVideo.fromMap(Map<String, dynamic>.from(e as Map)))
+                .toList();
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Supabase getTikTokReels exception: $e');
+    }
+    return _fallbackLocalRepo.getTikTokReels();
+  }
+
+  @override
+  Future<void> saveTikTokReels(List<TikTokAdVideo> reels) async {
+    final jsonPayload = jsonEncode(reels.map((r) => r.toMap()).toList());
+    try {
+      final dynamic existing = await _get('staff_credentials?username=eq.app_config_tiktok_reels&select=id');
+      if (existing is List && existing.isNotEmpty) {
+        await _patch('staff_credentials?username=eq.app_config_tiktok_reels', {
+          'full_name': jsonPayload,
+          'is_active': true,
+        });
+      } else {
+        await _post('staff_credentials', {
+          'username': 'app_config_tiktok_reels',
+          'pin_hash': '4450',
+          'role': 'admin',
+          'full_name': jsonPayload,
+          'is_active': true,
+        });
+      }
+    } catch (e) {
+      debugPrint('Supabase saveTikTokReels exception: $e');
+    }
+    await _fallbackLocalRepo.saveTikTokReels(reels);
   }
 }
