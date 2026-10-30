@@ -68,6 +68,9 @@ DROP POLICY IF EXISTS "Allow anon read credentials" ON public.staff_credentials;
 DROP POLICY IF EXISTS "No public access to credentials" ON public.staff_credentials;
 
 -- 8. PostgreSQL RPC function for Server-Side PIN Verification
+DROP FUNCTION IF EXISTS public.verify_staff_pin;
+DROP FUNCTION IF EXISTS public.verify_staff_pin(text, text);
+
 CREATE OR REPLACE FUNCTION public.verify_staff_pin(p_role TEXT, p_pin TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
