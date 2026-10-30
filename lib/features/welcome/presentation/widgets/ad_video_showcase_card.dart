@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/tiktok_ad_video.dart';
@@ -88,247 +87,6 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
     UrlLauncherHelper.openUrl(url);
   }
 
-  void _showManageReelsDialog(BuildContext context) {
-    final state = AppStateProvider.read(context);
-    final reels = List<TikTokAdVideo>.from(state.tiktokReels);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Row(
-              children: [
-                Icon(Icons.video_library_rounded, color: Color(0xFFFE2C55), size: 24),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Super Admin: TikTok Rolling Reels',
-                    style: TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 580, maxHeight: 460),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Manage the commercial TikTok video links & preview thumbnails displayed on the Welcome Screen rolling banner (at least 4 reels recommended):',
-                    style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 14),
-                  Expanded(
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: reels.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final reel = reels[index];
-                        return Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.cardBorder),
-                          ),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  color: Colors.black12,
-                                  child: reel.thumbnailUrl.isNotEmpty
-                                      ? Image.network(
-                                          reel.thumbnailUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.grey),
-                                        )
-                                      : const Icon(Icons.music_note, color: Colors.grey),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${index + 1}. ${reel.title}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      reel.tiktokUrl,
-                                      style: const TextStyle(fontSize: 11, color: Color(0xFFFE2C55)),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.edit_rounded, size: 18, color: AppColors.primary),
-                                tooltip: 'Edit Reel',
-                                onPressed: () => _editSingleReelDialog(context, reel, (updated) {
-                                  setDialogState(() {
-                                    reels[index] = updated;
-                                  });
-                                }),
-                              ),
-                              if (reels.length > 1)
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
-                                  tooltip: 'Delete Reel',
-                                  onPressed: () {
-                                    setDialogState(() {
-                                      reels.removeAt(index);
-                                    });
-                                  },
-                                ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    onPressed: () {
-                      final newReel = TikTokAdVideo(
-                        id: 'reel-${DateTime.now().millisecondsSinceEpoch}',
-                        title: 'New Detailing Reel #${reels.length + 1}',
-                        subtitle: 'Watch on TikTok',
-                        tiktokUrl: 'https://www.tiktok.com/@bishe_car_wash',
-                        thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
-                      );
-                      _editSingleReelDialog(context, newReel, (created) {
-                        setDialogState(() {
-                          reels.add(created);
-                        });
-                      });
-                    },
-                    icon: const Icon(Icons.add_rounded, size: 16),
-                    label: const Text('Add Another TikTok Reel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFE2C55),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: () {
-                  state.setTikTokReels(reels);
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('TikTok rolling reels updated successfully!'),
-                      backgroundColor: AppColors.statusReady,
-                    ),
-                  );
-                },
-                child: const Text('Save All Reels'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _editSingleReelDialog(BuildContext context, TikTokAdVideo reel, void Function(TikTokAdVideo) onSaved) {
-    final titleCtrl = TextEditingController(text: reel.title);
-    final subCtrl = TextEditingController(text: reel.subtitle);
-    final linkCtrl = TextEditingController(text: reel.tiktokUrl);
-    final thumbCtrl = TextEditingController(text: reel.thumbnailUrl);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Edit TikTok Reel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleCtrl,
-                  decoration: const InputDecoration(labelText: 'Title / Highlight', border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: subCtrl,
-                  decoration: const InputDecoration(labelText: 'Subtitle / Description', border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: linkCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'TikTok Video Link',
-                    hintText: 'https://www.tiktok.com/@bishe_car_wash/video/...',
-                    prefixIcon: Icon(Icons.link_rounded),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: thumbCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Thumbnail Image URL',
-                    hintText: 'https://images.unsplash.com/...',
-                    prefixIcon: Icon(Icons.image_rounded),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
-            onPressed: () {
-              if (linkCtrl.text.trim().isNotEmpty) {
-                onSaved(
-                  reel.copyWith(
-                    title: titleCtrl.text.trim().isNotEmpty ? titleCtrl.text.trim() : reel.title,
-                    subtitle: subCtrl.text.trim().isNotEmpty ? subCtrl.text.trim() : reel.subtitle,
-                    tiktokUrl: linkCtrl.text.trim(),
-                    thumbnailUrl: thumbCtrl.text.trim(),
-                  ),
-                );
-                Navigator.pop(ctx);
-              }
-            },
-            child: const Text('Save Reel'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
@@ -414,27 +172,29 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                     ),
                   ],
                 ),
-                // Super Admin Edit Reels Button
-                InkWell(
-                  onTap: () => _showManageReelsDialog(context),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.tune_rounded, size: 13, color: Colors.white),
-                        SizedBox(width: 4),
-                        Text(
-                          'Manage Reels',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+                // Official Verified TikTok Account Badge (Read-only for public visitors)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white.withOpacity(0.15)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.verified_rounded, size: 12, color: Color(0xFF00F2FE)),
+                      SizedBox(width: 4),
+                      Text(
+                        '@bishe_car_wash',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 0.2,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
