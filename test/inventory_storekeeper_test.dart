@@ -3,7 +3,6 @@ import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart'
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inventory_seed.dart';
-import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
 
@@ -131,6 +130,15 @@ void main() {
 
       expect(notifier.authenticateRole(UserRole.accountant, '5566'), isTrue);
       expect(notifier.authenticateRole(UserRole.accountant, 'wrong'), isFalse);
+    });
+
+    test('Accountant screen getters: bankDeposits and bankDepositRecords alias are available and non-null', () {
+      expect(notifier.bankDeposits, isNotNull);
+      expect(notifier.bankDepositRecords, isNotNull);
+      expect(notifier.bankDepositRecords.length, equals(notifier.bankDeposits.length));
+      expect(notifier.dailyFinancialClosings, isNotNull);
+      expect(notifier.weeklyCommissionReports, isNotNull);
+      expect(notifier.stockTransactions, isNotNull);
     });
   });
 }

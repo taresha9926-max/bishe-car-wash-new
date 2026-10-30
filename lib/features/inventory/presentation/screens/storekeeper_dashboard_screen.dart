@@ -245,7 +245,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             spacing: 8,
             runSpacing: 6,
             children: active.issuedQuantities.entries.map((e) {
-              final item = state.consumables.firstWhere((c) => c.id == e.key, orElse: () => null);
+              final item = state.consumables.cast<ConsumableItem?>().firstWhere((c) => c?.id == e.key, orElse: () => null);
               final name = item != null ? item.name : e.key;
               final unit = item != null ? item.unit : '';
               return Container(
@@ -318,7 +318,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               spacing: 6,
               runSpacing: 4,
               children: h.consumedQuantities.entries.map((e) {
-                final item = state.consumables.firstWhere((c) => c.id == e.key, orElse: () => null);
+                final item = state.consumables.cast<ConsumableItem?>().firstWhere((c) => c?.id == e.key, orElse: () => null);
                 final name = item != null ? item.name : e.key;
                 final unit = item != null ? item.unit : '';
                 return Container(
@@ -805,7 +805,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 const Text('Enter Remaining Supplies Returned to Store:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5)),
                 const SizedBox(height: 8),
                 ...active.issuedQuantities.entries.map((e) {
-                  final item = state.consumables.firstWhere((c) => c.id == e.key, orElse: () => null);
+                  final item = state.consumables.cast<ConsumableItem?>().firstWhere((c) => c?.id == e.key, orElse: () => null);
                   final name = item != null ? item.name : e.key;
                   final unit = item != null ? item.unit : '';
                   return Padding(

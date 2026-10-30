@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
+import '../../domain/models/bank_deposit_record.dart';
 import '../../domain/models/commission_log.dart';
 import '../../domain/models/daily_financial_closing.dart';
 import '../../domain/models/weekly_commission_report.dart';
@@ -83,7 +84,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
   Widget _buildCashierAuditsTab(BuildContext context, dynamic state, bool isMobile) {
     final closings = state.dailyFinancialClosings as List<DailyFinancialClosing>;
-    final deposits = state.bankDepositRecords;
+    final deposits = state.bankDeposits as List<BankDepositRecord>;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),

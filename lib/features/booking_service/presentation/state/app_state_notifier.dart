@@ -571,6 +571,7 @@ class AppStateNotifier extends ChangeNotifier {
   // Bank Deposits List (Cash deposits confirmed by Cashier to Owner Bank)
   final List<BankDepositRecord> _bankDeposits = _getInitialBankDeposits();
   List<BankDepositRecord> get bankDeposits => List.unmodifiable(_bankDeposits);
+  List<BankDepositRecord> get bankDepositRecords => List.unmodifiable(_bankDeposits);
 
   // Daily Financial Closings (Confirmed shift reports by Cashier)
   final List<DailyFinancialClosing> _dailyFinancialClosings = _getInitialDailyClosings();
