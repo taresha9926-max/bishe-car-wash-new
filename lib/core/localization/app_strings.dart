@@ -49,6 +49,16 @@ class AppStrings {
       AppLanguage.om: 'Qabaa Qarshii',
       AppLanguage.am: 'ገንዘብ ያዥ',
     },
+    'storekeeperRole': {
+      AppLanguage.en: 'Storekeeper Desk',
+      AppLanguage.om: 'Kuusaa Qulqullinaa',
+      AppLanguage.am: 'ዕቃ ግምጃ ቤት',
+    },
+    'accountantRole': {
+      AppLanguage.en: 'Accountant Hub',
+      AppLanguage.om: 'Herrega & Faayinaansii',
+      AppLanguage.am: 'ሂሳብ እና ኦዲት',
+    },
     'adminRole': {
       AppLanguage.en: 'Admin Hub',
       AppLanguage.om: 'Bulchiinsa',
@@ -358,6 +368,26 @@ class AppStrings {
       AppLanguage.en: 'Gate Desk',
       AppLanguage.om: 'Balbala Seensaa',
       AppLanguage.am: 'የመግቢያ በር',
+    },
+    'storekeeperPortal': {
+      AppLanguage.en: 'Storekeeper Inventory',
+      AppLanguage.om: 'Kuusaa Qulqullinaa',
+      AppLanguage.am: 'የዕቃ ግምጃ ቤት',
+    },
+    'storekeeperPinBadge': {
+      AppLanguage.en: 'Supplies & Assets',
+      AppLanguage.om: 'Meeshaalee & Qabeenya',
+      AppLanguage.am: 'እቃዎች እና ቋሚ ንብረቶች',
+    },
+    'accountantPortal': {
+      AppLanguage.en: 'Accountant Hub',
+      AppLanguage.om: 'Herrega & Faayinaansii',
+      AppLanguage.am: 'የሂሳብ እና ፋይናንስ ማዕከል',
+    },
+    'accountantPinBadge': {
+      AppLanguage.en: 'Audits & P&L',
+      AppLanguage.om: 'Herrega & Bu\'aa',
+      AppLanguage.am: 'ኦዲት እና ትርፍ/ኪሳራ',
     },
     'adminPinBadge': {
       AppLanguage.en: 'Super Admin Hub',

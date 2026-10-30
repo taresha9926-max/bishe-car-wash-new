@@ -91,6 +91,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     }
   }
 
+  void _openStorekeeperPortal() async {
+    final state = AppStateProvider.read(context);
+    final auth = await RoleAuthDialog.show(context, UserRole.storekeeper);
+    if (auth) {
+      state.switchRole(UserRole.storekeeper);
+    }
+  }
+
+  void _openAccountantPortal() async {
+    final state = AppStateProvider.read(context);
+    final auth = await RoleAuthDialog.show(context, UserRole.accountant);
+    if (auth) {
+      state.switchRole(UserRole.accountant);
+    }
+  }
+
   void _openAdminPortal() async {
     final state = AppStateProvider.read(context);
     final auth = await RoleAuthDialog.show(context, UserRole.admin);
@@ -176,6 +192,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           onSelected: (value) {
                             if (value == 'cashier') {
                               _openCashierPortal();
+                            } else if (value == 'storekeeper') {
+                              _openStorekeeperPortal();
+                            } else if (value == 'accountant') {
+                              _openAccountantPortal();
                             } else if (value == 'admin') {
                               _openAdminPortal();
                             }
@@ -238,6 +258,72 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                         ),
                                         Text(
                                           state.tr('cashierPinBadge'),
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            PopupMenuItem(
+                              value: 'storekeeper',
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: Colors.teal.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(Icons.inventory_2_rounded, color: Colors.teal, size: 18),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          state.tr('storekeeperPortal'),
+                                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                                        ),
+                                        Text(
+                                          state.tr('storekeeperPinBadge'),
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            PopupMenuItem(
+                              value: 'accountant',
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: Colors.indigo.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.indigo, size: 18),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          state.tr('accountantPortal'),
+                                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                                        ),
+                                        Text(
+                                          state.tr('accountantPinBadge'),
                                           style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                         ),
                                       ],

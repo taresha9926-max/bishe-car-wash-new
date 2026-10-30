@@ -8,6 +8,8 @@ import 'package:bishe_car_wash/features/booking_service/presentation/state/app_s
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
 import 'package:bishe_car_wash/features/welcome/presentation/screens/welcome_screen.dart';
+import 'package:bishe_car_wash/features/inventory/presentation/screens/storekeeper_dashboard_screen.dart';
+import 'package:bishe_car_wash/features/admin/presentation/screens/accountant_dashboard_screen.dart';
 
 class RoleShellScreen extends StatelessWidget {
   const RoleShellScreen({super.key});
@@ -32,6 +34,12 @@ class RoleShellScreen extends StatelessWidget {
         break;
       case UserRole.admin:
         body = const AdminDashboardScreen();
+        break;
+      case UserRole.storekeeper:
+        body = const StorekeeperDashboardScreen();
+        break;
+      case UserRole.accountant:
+        body = const AccountantDashboardScreen();
         break;
     }
 

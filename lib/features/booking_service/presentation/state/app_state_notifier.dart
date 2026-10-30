@@ -21,6 +21,11 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_packa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
+import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inventory_seed.dart';
 
 class AppStateNotifier extends ChangeNotifier {
   final IWashRepository _repository;
@@ -202,6 +207,24 @@ class AppStateNotifier extends ChangeNotifier {
     ),
   ];
   List<TikTokAdVideo> get tiktokReels => List.unmodifiable(_tiktokReels);
+
+  // Inventory: Fixed Assets & Consumables
+  List<FixedAsset> _fixedAssets = List.from(InitialInventorySeed.getFixedAssets());
+  List<FixedAsset> get fixedAssets => _fixedAssets;
+
+  List<ConsumableItem> _consumables = List.from(InitialInventorySeed.getConsumables());
+  List<ConsumableItem> get consumables => _consumables;
+
+  List<DailyHandover> _dailyHandovers = [];
+  List<DailyHandover> get dailyHandovers => _dailyHandovers;
+
+  List<StockTransaction> _stockTransactions = [];
+  List<StockTransaction> get stockTransactions => _stockTransactions;
+
+  DailyHandover? get activeHandover => _dailyHandovers.cast<DailyHandover?>().firstWhere(
+    (h) => h?.status == HandoverStatus.active,
+    orElse: () => null,
+  );
 
   Future<void> setTikTokReels(List<TikTokAdVideo> reels) async {
     _tiktokReels = List.from(reels);
@@ -925,6 +948,10 @@ class AppStateNotifier extends ChangeNotifier {
         _repository.getCommissionLogs(),
         _repository.getStaffCredentials(),
         _repository.getTikTokReels(),
+        _repository.getFixedAssets(),
+        _repository.getConsumables(),
+        _repository.getDailyHandovers(),
+        _repository.getStockTransactions(),
       ]);
       _packages = results[0] as List<WashPackage>;
       _staff = results[1] as List<StaffMember>;
@@ -936,6 +963,16 @@ class AppStateNotifier extends ChangeNotifier {
       if (reels.isNotEmpty) {
         _tiktokReels = List.from(reels);
       }
+      final assets = results[7] as List<FixedAsset>;
+      if (assets.isNotEmpty) {
+        _fixedAssets = List.from(assets);
+      }
+      final consumables = results[8] as List<ConsumableItem>;
+      if (consumables.isNotEmpty) {
+        _consumables = List.from(consumables);
+      }
+      _dailyHandovers = List.from(results[9] as List<DailyHandover>);
+      _stockTransactions = List.from(results[10] as List<StockTransaction>);
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -1331,6 +1368,191 @@ class AppStateNotifier extends ChangeNotifier {
     _bookings = await _repository.getBookings();
     _commissionLogs = await _repository.getCommissionLogs();
     notifyListeners();
+  }
+
+  // --- Inventory & Stock Management (Option B Audited) ---
+
+  Future<void> saveFixedAsset(FixedAsset asset) async {
+    final idx = _fixedAssets.indexWhere((a) => a.id == asset.id);
+    if (idx != -1) {
+      _fixedAssets[idx] = asset;
+    } else {
+      _fixedAssets.add(asset);
+    }
+    notifyListeners();
+    await _repository.saveFixedAsset(asset);
+  }
+
+  Future<void> decommissionFixedAsset(String id, String reason) async {
+    final idx = _fixedAssets.indexWhere((a) => a.id == id);
+    if (idx != -1) {
+      final updated = _fixedAssets[idx].copyWith(
+        condition: AssetCondition.decommissioned,
+        decommissionReason: reason,
+      );
+      _fixedAssets[idx] = updated;
+      notifyListeners();
+      await _repository.saveFixedAsset(updated);
+    }
+  }
+
+  Future<bool> deleteFixedAsset(String id) async {
+    if (!isSuperAdmin) {
+      return false; // Option B: Only Super Admin can permanently delete
+    }
+    _fixedAssets.removeWhere((a) => a.id == id);
+    notifyListeners();
+    await _repository.deleteFixedAsset(id);
+    return true;
+  }
+
+  Future<void> saveConsumable(ConsumableItem item) async {
+    final idx = _consumables.indexWhere((c) => c.id == item.id);
+    if (idx != -1) {
+      _consumables[idx] = item;
+    } else {
+      _consumables.add(item);
+    }
+    notifyListeners();
+    await _repository.saveConsumable(item);
+  }
+
+  Future<void> receiveStock({
+    required String itemId,
+    required double quantity,
+    required double unitCostEtb,
+    required String supplier,
+    String notes = '',
+  }) async {
+    final idx = _consumables.indexWhere((c) => c.id == itemId);
+    if (idx != -1) {
+      final item = _consumables[idx];
+      final newStock = item.currentStock + quantity;
+      final updated = item.copyWith(
+        currentStock: newStock,
+        unitCostEtb: unitCostEtb > 0 ? unitCostEtb : item.unitCostEtb,
+      );
+      _consumables[idx] = updated;
+
+      final tx = StockTransaction(
+        id: 'STX-${DateTime.now().millisecondsSinceEpoch}',
+        date: DateTime.now(),
+        itemId: item.id,
+        itemName: item.name,
+        type: 'receiveStock',
+        quantity: quantity,
+        unitCostEtb: unitCostEtb,
+        totalCostEtb: quantity * unitCostEtb,
+        supplier: supplier,
+        notes: notes,
+      );
+      _stockTransactions.insert(0, tx);
+      notifyListeners();
+
+      await _repository.saveConsumable(updated);
+      await _repository.recordStockTransaction(tx);
+    }
+  }
+
+  Future<void> decommissionConsumable(String id, String reason) async {
+    final idx = _consumables.indexWhere((c) => c.id == id);
+    if (idx != -1) {
+      final updated = _consumables[idx].copyWith(
+        isDecommissioned: true,
+        decommissionReason: reason,
+      );
+      _consumables[idx] = updated;
+      notifyListeners();
+      await _repository.saveConsumable(updated);
+    }
+  }
+
+  Future<bool> deleteConsumable(String id) async {
+    if (!isSuperAdmin) {
+      return false; // Option B: Only Super Admin can permanently delete
+    }
+    _consumables.removeWhere((c) => c.id == id);
+    notifyListeners();
+    await _repository.deleteConsumable(id);
+    return true;
+  }
+
+  Future<void> startDailyHandover({
+    required String washerTeamLeaderName,
+    required Map<String, double> issuedQuantities,
+    String notes = '',
+  }) async {
+    final handover = DailyHandover(
+      id: 'DHO-${DateTime.now().millisecondsSinceEpoch}',
+      date: DateTime.now(),
+      washerTeamLeaderName: washerTeamLeaderName,
+      issuedQuantities: issuedQuantities,
+      status: HandoverStatus.active,
+      checkedOutAt: DateTime.now(),
+      notes: notes,
+    );
+    _dailyHandovers.insert(0, handover);
+    notifyListeners();
+    await _repository.saveDailyHandover(handover);
+  }
+
+  Future<void> completeDailyHandover({
+    required String handoverId,
+    required Map<String, double> returnedQuantities,
+    String notes = '',
+  }) async {
+    final idx = _dailyHandovers.indexWhere((h) => h.id == handoverId);
+    if (idx != -1) {
+      final active = _dailyHandovers[idx];
+      final consumed = <String, double>{};
+
+      active.issuedQuantities.forEach((itemId, issued) {
+        final returned = returnedQuantities[itemId] ?? 0.0;
+        final netConsumed = (issued - returned).clamp(0.0, double.infinity);
+        consumed[itemId] = netConsumed;
+
+        // Decrement consumable stock
+        final cIdx = _consumables.indexWhere((c) => c.id == itemId);
+        if (cIdx != -1) {
+          final cItem = _consumables[cIdx];
+          final updatedStock = (cItem.currentStock - netConsumed).clamp(0.0, double.infinity);
+          final updatedItem = cItem.copyWith(currentStock: updatedStock);
+          _consumables[cIdx] = updatedItem;
+          _repository.saveConsumable(updatedItem);
+
+          if (netConsumed > 0) {
+            final tx = StockTransaction(
+              id: 'STX-${DateTime.now().millisecondsSinceEpoch}-$itemId',
+              date: DateTime.now(),
+              itemId: itemId,
+              itemName: cItem.name,
+              type: 'dailyConsumption',
+              quantity: netConsumed,
+              unitCostEtb: cItem.unitCostEtb,
+              totalCostEtb: netConsumed * cItem.unitCostEtb,
+              notes: 'Daily Handover consumed by ${active.washerTeamLeaderName} team',
+            );
+            _stockTransactions.insert(0, tx);
+            _repository.recordStockTransaction(tx);
+          }
+        }
+      });
+
+      final todayWashes = _bookings.where((b) => b.status == WashStatus.completed).length;
+
+      final completed = active.copyWith(
+        returnedQuantities: returnedQuantities,
+        consumedQuantities: consumed,
+        status: HandoverStatus.completed,
+        checkedInAt: DateTime.now(),
+        carsWashedDuringShift: todayWashes,
+        notes: notes.isNotEmpty ? notes : active.notes,
+      );
+
+      _dailyHandovers[idx] = completed;
+      notifyListeners();
+      await _repository.saveDailyHandover(completed);
+    }
   }
 
   Future<void> _refreshPricing() async {

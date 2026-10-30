@@ -10,6 +10,11 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_packa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
+import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inventory_seed.dart';
 
 class WashRepositoryImpl implements IWashRepository {
   List<WashPackage> _packages = [];
@@ -18,6 +23,10 @@ class WashRepositoryImpl implements IWashRepository {
   List<WashBooking> _bookings = [];
   List<CommissionLog> _commissionLogs = [];
   List<StaffCredential> _credentials = [];
+  List<FixedAsset> _fixedAssets = List.from(InitialInventorySeed.getFixedAssets());
+  List<ConsumableItem> _consumables = List.from(InitialInventorySeed.getConsumables());
+  List<DailyHandover> _dailyHandovers = [];
+  List<StockTransaction> _stockTransactions = [];
   List<TikTokAdVideo> _tiktokReels = [
     const TikTokAdVideo(
       id: 'reel-1',
@@ -329,5 +338,70 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<void> saveTikTokReels(List<TikTokAdVideo> reels) async {
     _tiktokReels = List.from(reels);
+  }
+
+  @override
+  Future<List<FixedAsset>> getFixedAssets() async {
+    return List.unmodifiable(_fixedAssets);
+  }
+
+  @override
+  Future<void> saveFixedAsset(FixedAsset asset) async {
+    final idx = _fixedAssets.indexWhere((a) => a.id == asset.id);
+    if (idx != -1) {
+      _fixedAssets[idx] = asset;
+    } else {
+      _fixedAssets.add(asset);
+    }
+  }
+
+  @override
+  Future<void> deleteFixedAsset(String id) async {
+    _fixedAssets.removeWhere((a) => a.id == id);
+  }
+
+  @override
+  Future<List<ConsumableItem>> getConsumables() async {
+    return List.unmodifiable(_consumables);
+  }
+
+  @override
+  Future<void> saveConsumable(ConsumableItem item) async {
+    final idx = _consumables.indexWhere((c) => c.id == item.id);
+    if (idx != -1) {
+      _consumables[idx] = item;
+    } else {
+      _consumables.add(item);
+    }
+  }
+
+  @override
+  Future<void> deleteConsumable(String id) async {
+    _consumables.removeWhere((c) => c.id == id);
+  }
+
+  @override
+  Future<List<DailyHandover>> getDailyHandovers() async {
+    return List.unmodifiable(_dailyHandovers);
+  }
+
+  @override
+  Future<void> saveDailyHandover(DailyHandover handover) async {
+    final idx = _dailyHandovers.indexWhere((h) => h.id == handover.id);
+    if (idx != -1) {
+      _dailyHandovers[idx] = handover;
+    } else {
+      _dailyHandovers.insert(0, handover);
+    }
+  }
+
+  @override
+  Future<List<StockTransaction>> getStockTransactions() async {
+    return List.unmodifiable(_stockTransactions);
+  }
+
+  @override
+  Future<void> recordStockTransaction(StockTransaction tx) async {
+    _stockTransactions.insert(0, tx);
   }
 }

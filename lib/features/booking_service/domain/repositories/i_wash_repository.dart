@@ -8,6 +8,10 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booki
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
 
 /// Domain port for active bookings, washing bay allocations, and payment processing.
 abstract class IBookingRepository {
@@ -58,6 +62,20 @@ abstract class IMarketingRepository {
   Future<void> saveTikTokReels(List<TikTokAdVideo> reels);
 }
 
-/// Unified repository interface combining booking, pricing, staff, and marketing domain ports.
+/// Domain port for fixed assets, consumables stock, and washer team daily handovers.
+abstract class IInventoryRepository {
+  Future<List<FixedAsset>> getFixedAssets();
+  Future<void> saveFixedAsset(FixedAsset asset);
+  Future<void> deleteFixedAsset(String id);
+  Future<List<ConsumableItem>> getConsumables();
+  Future<void> saveConsumable(ConsumableItem item);
+  Future<void> deleteConsumable(String id);
+  Future<List<DailyHandover>> getDailyHandovers();
+  Future<void> saveDailyHandover(DailyHandover handover);
+  Future<List<StockTransaction>> getStockTransactions();
+  Future<void> recordStockTransaction(StockTransaction tx);
+}
+
+/// Unified repository interface combining booking, pricing, staff, marketing, and inventory domain ports.
 abstract class IWashRepository
-    implements IBookingRepository, IPricingRepository, IStaffRepository, IMarketingRepository {}
+    implements IBookingRepository, IPricingRepository, IStaffRepository, IMarketingRepository, IInventoryRepository {}

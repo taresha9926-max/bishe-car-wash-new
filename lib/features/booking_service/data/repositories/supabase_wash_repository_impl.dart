@@ -15,6 +15,10 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_statu
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
 
 class SupabaseWashRepositoryImpl implements IWashRepository {
   final String supabaseUrl;
@@ -646,11 +650,18 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       return data
           .map((json) {
             final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
-            final role = roleStr == 'admin' ? UserRole.admin : UserRole.cashier;
+            final role = roleStr == 'admin'
+                ? UserRole.admin
+                : (roleStr == 'storekeeper'
+                    ? UserRole.storekeeper
+                    : (roleStr == 'accountant' ? UserRole.accountant : UserRole.cashier));
             final rawPin = json['pin_hash']?.toString() ?? '';
-            final pin = (rawPin.length > 6 || rawPin.isEmpty)
-                ? (role == UserRole.admin ? '1234' : '0000')
-                : rawPin;
+            final defaultPin = role == UserRole.admin
+                ? '1234'
+                : (role == UserRole.storekeeper
+                    ? '3344'
+                    : (role == UserRole.accountant ? '5566' : '0000'));
+            final pin = (rawPin.length > 6 || rawPin.isEmpty) ? defaultPin : rawPin;
             return StaffCredential(
               id: json['id'].toString(),
               username: json['username']?.toString() ?? 'staff',
@@ -749,4 +760,34 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     }
     await _fallbackLocalRepo.saveTikTokReels(reels);
   }
+
+  @override
+  Future<List<FixedAsset>> getFixedAssets() => _fallbackLocalRepo.getFixedAssets();
+
+  @override
+  Future<void> saveFixedAsset(FixedAsset asset) => _fallbackLocalRepo.saveFixedAsset(asset);
+
+  @override
+  Future<void> deleteFixedAsset(String id) => _fallbackLocalRepo.deleteFixedAsset(id);
+
+  @override
+  Future<List<ConsumableItem>> getConsumables() => _fallbackLocalRepo.getConsumables();
+
+  @override
+  Future<void> saveConsumable(ConsumableItem item) => _fallbackLocalRepo.saveConsumable(item);
+
+  @override
+  Future<void> deleteConsumable(String id) => _fallbackLocalRepo.deleteConsumable(id);
+
+  @override
+  Future<List<DailyHandover>> getDailyHandovers() => _fallbackLocalRepo.getDailyHandovers();
+
+  @override
+  Future<void> saveDailyHandover(DailyHandover handover) => _fallbackLocalRepo.saveDailyHandover(handover);
+
+  @override
+  Future<List<StockTransaction>> getStockTransactions() => _fallbackLocalRepo.getStockTransactions();
+
+  @override
+  Future<void> recordStockTransaction(StockTransaction tx) => _fallbackLocalRepo.recordStockTransaction(tx);
 }

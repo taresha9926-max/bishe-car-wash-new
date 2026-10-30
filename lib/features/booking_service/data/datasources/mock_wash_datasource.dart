@@ -29,6 +29,22 @@ class MockWashDataSource {
         fullName: 'Station Gate Cashier',
         isActive: true,
       ),
+      const StaffCredential(
+        id: 'cred-storekeeper',
+        username: 'storekeeper',
+        pin: '3344',
+        role: UserRole.storekeeper,
+        fullName: 'Inventory Storekeeper',
+        isActive: true,
+      ),
+      const StaffCredential(
+        id: 'cred-accountant',
+        username: 'accountant',
+        pin: '5566',
+        role: UserRole.accountant,
+        fullName: 'Finance Accountant',
+        isActive: true,
+      ),
     ];
   }
 
