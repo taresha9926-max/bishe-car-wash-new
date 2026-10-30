@@ -1443,10 +1443,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: isMobile ? 18 : 20,
-            backgroundColor: AppColors.primary,
-            child: Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: isMobile ? 20 : 22),
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.amber.shade300, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: CircleAvatar(
+              radius: isMobile ? 19 : 22,
+              backgroundColor: AppColors.primary,
+              backgroundImage: const AssetImage('assets/images/admin_profile.jpg'),
+            ),
           ),
           SizedBox(width: isMobile ? 10 : 14),
           Expanded(

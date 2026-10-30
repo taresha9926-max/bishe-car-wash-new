@@ -264,6 +264,46 @@ class AppStrings {
       AppLanguage.om: 'Dhiqannaafi Kunuunsa Makiinaa Qulqulluu Bishooftuutti',
       AppLanguage.am: 'በቢሾፍቱ ምርጡ የዲቴይሊንግ እና የመኪና እንክብካቤ ማዕከል',
     },
+    'carouselSlide1Title': {
+      AppLanguage.en: 'Active Snow Foam Pre-Soak',
+      AppLanguage.om: 'Dhiqannaa Hoomaa Qulqulluu',
+      AppLanguage.am: 'ንክኪ-አልባ የሆም አረፋ እጥበት',
+    },
+    'carouselSlide1Desc': {
+      AppLanguage.en: 'Scratch-free dirt breakdown with pH-neutral active shampoo',
+      AppLanguage.om: 'Qulqullina olaanaa fi eegumsa rifeensa konkolaataa',
+      AppLanguage.am: 'የመኪናውን ቀለም የማይጎዳ ጥልቅ ቆሻሻ ማስወገጃ',
+    },
+    'carouselSlide2Title': {
+      AppLanguage.en: 'High-Pressure Chassis & Jet Steam',
+      AppLanguage.om: 'Bishaan Dhiibbaa Ol-aanaa & Shassii',
+      AppLanguage.am: 'ከፍተኛ ግፊት የታችኛው አካል እጥበት',
+    },
+    'carouselSlide2Desc': {
+      AppLanguage.en: 'Deep wheel-well cleaning & high-power underside rinse',
+      AppLanguage.om: 'Qulqullina gommaa fi jala konkolaataa cimaa',
+      AppLanguage.am: 'የጎማ እና የታችኛው ክፍል ከባድ የጭቃ እጥበት',
+    },
+    'carouselSlide3Title': {
+      AppLanguage.en: 'Diamond Polish & Ceramic Shield',
+      AppLanguage.om: 'Poolishii Daayimandii & Eegumsa',
+      AppLanguage.am: 'ዳይመንድ ፖሊሽ እና ሴራሚክ ከለላ',
+    },
+    'carouselSlide3Desc': {
+      AppLanguage.en: 'Hydrophobic ceramic protection & showroom mirror gloss',
+      AppLanguage.om: 'Calaqqisa addaa fi eegumsa aduu fi bishaanii',
+      AppLanguage.am: 'የመስታወት ነፀብራቅ ወዝ እና የውሃ መከላከያ ከለላ',
+    },
+    'carouselSlide4Title': {
+      AppLanguage.en: 'Rapid Express Bay Wash',
+      AppLanguage.om: 'Tajaajila Dafee Qophaa\'u (Daqiiqaa 15)',
+      AppLanguage.am: 'ፈጣን የ15 ደቂቃ ኤክስፕረስ እጥበት',
+    },
+    'carouselSlide4Desc': {
+      AppLanguage.en: 'Fast automated rinse & wax with zero wait time',
+      AppLanguage.om: 'Turtii malee tajaajila saffisaa fi ammayyaa',
+      AppLanguage.am: 'ያለ ምንም ሰልፍ ፈጣን እና ዘመናዊ የእጥበት አገልግሎት',
+    },
     'openGoogleMaps': {
       AppLanguage.en: 'Open in Google Maps 📍',
       AppLanguage.om: 'Kaartaa Google irratti Bani 📍',

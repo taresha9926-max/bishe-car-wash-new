@@ -7,6 +7,7 @@ import '../../../auth_roles/domain/models/user_role.dart';
 import '../../../auth_roles/presentation/widgets/role_auth_dialog.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../widgets/ad_video_showcase_card.dart';
+import '../widgets/welcome_service_carousel_banner.dart';
 
 class WelcomeScreen extends StatefulWidget {
   final VoidCallback? onEnterCustomer;
@@ -285,82 +286,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   ),
                   const SizedBox(height: 12),
 
-                  // 2. Minimized, Space-Saving Brand Header (Optimized for Mobile)
+                  // 2. Horizontally Rolling 4-Slide Service Carousel Banner
                   FadeTransition(
                     opacity: _topBarFade,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: isMobile ? 10 : 12),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.primaryDark, Color(0xFF1E3A8A), AppColors.primary],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.22),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              // Minimized Logo Icon (22-24px space saver)
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.18),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.5),
-                                ),
-                                child: const Icon(Icons.local_car_wash_rounded, size: 22, color: Colors.white),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      state.tr('welcomeTitle'),
-                                      style: TextStyle(
-                                        fontSize: isMobile ? 16.5 : 18,
-                                        fontWeight: FontWeight.w900,
-                                        color: Colors.white,
-                                        letterSpacing: -0.3,
-                                      ),
-                                    ),
-                                    Text(
-                                      state.tr('welcomeSubtitle'),
-                                      style: TextStyle(
-                                        fontSize: isMobile ? 11 : 12,
-                                        color: Colors.white.withOpacity(0.9),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // Responsive Capacity Chips Row
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: [
-                              _buildMiniChip(state.tr('stationCapBays')),
-                              _buildMiniChip(state.tr('stationCapVan')),
-                              _buildMiniChip(state.tr('stationCapPackages')),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    child: WelcomeServiceCarouselBanner(isMobile: isMobile),
                   ),
                   const SizedBox(height: 14),
 
@@ -756,17 +685,5 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildMiniChip(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
-      ),
-    );
-  }
+
 }
