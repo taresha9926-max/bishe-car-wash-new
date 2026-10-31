@@ -152,5 +152,22 @@ void main() {
       expect(state.weeklyCommissionReports.first.isDisbursed, isTrue);
       expect(state.weeklyCommissionReports.first.disbursedAt, isNotNull);
     });
+
+    test('clearAllBookings wipes queue, history, and resets bays to vacant', () async {
+      await state.registerWalkIn(
+        licensePlate: 'CLEAR-1234',
+        customerName: 'Test Clear',
+        customerPhone: '0911002233',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.cash,
+      );
+      expect(state.bookings.isNotEmpty, isTrue);
+
+      await state.clearAllBookings();
+      expect(state.bookings.isEmpty, isTrue);
+      expect(state.bays.every((b) => b.isVacant), isTrue);
+    });
   });
 }

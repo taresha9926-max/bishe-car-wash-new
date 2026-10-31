@@ -33,6 +33,7 @@ abstract class IBookingRepository {
     String? transactionRef,
     String? receiptScreenshot,
   });
+  Future<void> clearAllBookings();
   Future<List<StationBay>> getBays();
 }
 

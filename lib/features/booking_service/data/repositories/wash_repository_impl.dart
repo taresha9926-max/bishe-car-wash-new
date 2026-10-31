@@ -192,6 +192,18 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<void> clearAllBookings() async {
+    _bookings.clear();
+    _commissionLogs.clear();
+    _bays = _bays.map((b) => b.copyWith(
+      status: BayStatus.vacant,
+      activeBookingId: null,
+      activeLicensePlate: null,
+      assignedWasherName: null,
+    )).toList();
+  }
+
+  @override
   Future<List<StationBay>> getBays() async {
     return List.unmodifiable(_bays);
   }

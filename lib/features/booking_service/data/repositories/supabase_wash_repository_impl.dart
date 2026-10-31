@@ -608,6 +608,21 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<void> clearAllBookings() async {
+    try {
+      await _post('rpc/clear_all_bookings', {});
+    } catch (_) {
+      try {
+        await _delete('wash_bookings?id=neq.00000000-0000-0000-0000-000000000000');
+        await _delete('commission_logs?id=neq.00000000-0000-0000-0000-000000000000');
+      } catch (e) {
+        debugPrint('Supabase clearAllBookings direct delete error: $e');
+      }
+    }
+    await _fallbackLocalRepo.clearAllBookings();
+  }
+
+  @override
   Future<List<CommissionLog>> getCommissionLogs() async {
     try {
       final dynamic data = await _get('commission_logs?select=*&order=logged_at.desc');

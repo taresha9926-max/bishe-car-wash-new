@@ -364,6 +364,21 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears all booked vehicles from queue, history, and bays
+  Future<void> clearAllBookings() async {
+    _bookings = [];
+    _commissionLogs = [];
+    _activeTrackingBookingId = null;
+    _bays = _bays.map((b) => b.copyWith(
+      status: BayStatus.vacant,
+      activeBookingId: null,
+      activeLicensePlate: null,
+      assignedWasherName: null,
+    )).toList();
+    notifyListeners();
+    await _repository.clearAllBookings();
+  }
+
   /// Privacy-safe lookup for a customer's specific vehicle
   WashBooking? findBookingByPhoneOrPlate(String query) {
     final clean = query.trim().toUpperCase().replaceAll(' ', '').replaceAll('-', '');
@@ -932,12 +947,12 @@ class AppStateNotifier extends ChangeNotifier {
         _repository.getDailyHandovers(),
         _repository.getStockTransactions(),
       ]);
-      _packages = results[0] as List<WashPackage>;
-      _staff = results[1] as List<StaffMember>;
-      _bays = results[2] as List<StationBay>;
-      _bookings = results[3] as List<WashBooking>;
-      _commissionLogs = results[4] as List<CommissionLog>;
-      _credentials = results[5] as List<StaffCredential>;
+      _packages = List.from(results[0] as List<WashPackage>);
+      _staff = List.from(results[1] as List<StaffMember>);
+      _bays = List.from(results[2] as List<StationBay>);
+      _bookings = List.from(results[3] as List<WashBooking>);
+      _commissionLogs = List.from(results[4] as List<CommissionLog>);
+      _credentials = List.from(results[5] as List<StaffCredential>);
       final reels = results[6] as List<TikTokAdVideo>;
       if (reels.isNotEmpty) {
         _tiktokReels = List.from(reels);

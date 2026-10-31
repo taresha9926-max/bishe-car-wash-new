@@ -958,6 +958,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           );
         },
       ),
+      if (state.isSuperAdmin)
+        _OperationItem(
+          title: 'Clear All Bookings',
+          subtitle: 'Reset active queue & history to a fresh slate',
+          icon: Icons.delete_sweep_rounded,
+          color: Colors.red.shade700,
+          badge: '${state.bookings.length} Booked',
+          onTap: () => _confirmClearAllBookings(context, state),
+        ),
     ];
 
     if (isMobile) {
@@ -1141,6 +1150,45 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _confirmClearAllBookings(BuildContext context, dynamic state) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 24),
+            const SizedBox(width: 8),
+            const Text('Clear All Bookings?', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+          ],
+        ),
+        content: const Text(
+          'This will permanently remove all active and historical bookings and reset washing bays to vacant for fresh testing. Permanent master fixtures (tariffs, staff, inventory catalog) will NOT be affected.\n\nAre you sure you want to proceed?',
+          style: TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade700, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await state.clearAllBookings();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('All booked vehicles have been cleared successfully!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            child: const Text('Clear All Bookings'),
+          ),
+        ],
       ),
     );
   }

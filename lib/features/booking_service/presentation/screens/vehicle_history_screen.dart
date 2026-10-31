@@ -266,7 +266,25 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           ),
           onChanged: (val) => setState(() => _searchQuery = val),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+
+        if (state.bookings.isNotEmpty) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${state.bookings.length} Total Bookings Recorded',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.delete_sweep_rounded, size: 16, color: Colors.red),
+                label: const Text('Clear All Bookings', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red)),
+                onPressed: () => _confirmClearAllBookings(context, state),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
 
         // History Records List
         if (historyList.isEmpty)
@@ -433,6 +451,45 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
               style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  void _confirmClearAllBookings(BuildContext context, dynamic state) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 24),
+            const SizedBox(width: 8),
+            const Text('Clear All Bookings?', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+          ],
+        ),
+        content: const Text(
+          'This will permanently clear all booked vehicles from the active queue and history, and reset washing bays to vacant for fresh testing.\n\nAre you sure you want to proceed?',
+          style: TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade700, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await state.clearAllBookings();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('All booked vehicles have been cleared successfully!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            child: const Text('Clear All Bookings'),
+          ),
         ],
       ),
     );
