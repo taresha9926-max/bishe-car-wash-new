@@ -88,10 +88,7 @@ BEGIN
     FROM public.staff_credentials
     WHERE lower(trim(role)) = role_norm
       AND is_active = TRUE
-      AND (
-          pin_hash = trim(p_pin)
-          OR crypt(trim(p_pin), pin_hash) = pin_hash
-      );
+      AND pin_hash = trim(p_pin);
       
     IF matched_count > 0 THEN
         RETURN TRUE;
