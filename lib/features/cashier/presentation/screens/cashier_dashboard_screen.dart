@@ -1159,28 +1159,22 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     ];
 
     if (isMobile) {
-      return Column(
-        children: [
-          Row(
-            children: [
-              Expanded(child: _buildFilterTabButton(tabs[0].index, tabs[0].title, tabs[0].icon, _selectedFilterIndex == 0)),
-              const SizedBox(width: 6),
-              Expanded(child: _buildFilterTabButton(tabs[1].index, tabs[1].title, tabs[1].icon, _selectedFilterIndex == 1)),
-              const SizedBox(width: 6),
-              Expanded(child: _buildFilterTabButton(tabs[2].index, tabs[2].title, tabs[2].icon, _selectedFilterIndex == 2)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(child: _buildFilterTabButton(tabs[3].index, tabs[3].title, tabs[3].icon, _selectedFilterIndex == 3)),
-              const SizedBox(width: 6),
-              Expanded(child: _buildFilterTabButton(tabs[4].index, tabs[4].title, tabs[4].icon, _selectedFilterIndex == 4)),
-              const SizedBox(width: 6),
-              Expanded(child: _buildFilterTabButton(tabs[5].index, tabs[5].title, tabs[5].icon, _selectedFilterIndex == 5)),
-            ],
-          ),
-        ],
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: tabs.map((tab) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _buildFilterTabButton(
+                tab.index,
+                tab.title,
+                tab.icon,
+                _selectedFilterIndex == tab.index,
+              ),
+            );
+          }).toList(),
+        ),
       );
     }
 

@@ -143,13 +143,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
               // Vehicle Category Selector Segment
               _buildVehicleSelector(state),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
-              // Quick Package Dropdown
-              _buildPackageDropdown(state),
-              const SizedBox(height: 12),
-
-              // Packages List with Detailed Itemized Services (expand on selection)
+              // Packages List with Itemized Services
               Column(
                 children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
               ),
@@ -699,44 +695,80 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     final isSelected = pkg.id == activeId;
     final price = pkg.getPriceFor(_previewCarType);
 
+    // Dynamic auto-care thumbnail styling based on package tier
+    IconData thumbIcon = Icons.local_car_wash_rounded;
+    Color gradientStart = AppColors.primary;
+    Color gradientEnd = AppColors.primaryDark;
+    final pName = pkg.name.toLowerCase();
+    if (pName.contains('foam') || pName.contains('express')) {
+      thumbIcon = Icons.waves_rounded;
+      gradientStart = const Color(0xFF06B6D4);
+      gradientEnd = const Color(0xFF0284C7);
+    } else if (pName.contains('vacuum') || pName.contains('standard')) {
+      thumbIcon = Icons.cleaning_services_rounded;
+      gradientStart = const Color(0xFF0D9488);
+      gradientEnd = const Color(0xFF047857);
+    } else if (pName.contains('spa') || pName.contains('deluxe') || pName.contains('steam')) {
+      thumbIcon = Icons.auto_awesome_rounded;
+      gradientStart = const Color(0xFFD97706);
+      gradientEnd = const Color(0xFFB45309);
+    } else if (pName.contains('mobile') || pName.contains('van')) {
+      thumbIcon = Icons.rv_hookup_rounded;
+      gradientStart = const Color(0xFF4F46E5);
+      gradientEnd = const Color(0xFF3730A3);
+    }
+
     return GestureDetector(
       onTap: () => setState(() => _selectedPackageId = pkg.id),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary.withOpacity(0.04) : Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.cardBorder,
             width: isSelected ? 1.8 : 1.0,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
+          boxShadow: [
+            BoxShadow(
+              color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Radio<String>(
-                  value: pkg.id,
-                  groupValue: activeId,
-                  activeColor: AppColors.primary,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-                  onChanged: (_) => setState(() => _selectedPackageId = pkg.id),
+                // High-Gloss Auto-Care Photographic Thumbnail Box
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [gradientStart, gradientEnd],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: gradientStart.withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(thumbIcon, color: Colors.white, size: 22),
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -744,15 +776,27 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       Text(
                         pkg.localizedName(state.currentLang),
                         style: TextStyle(
-                          fontSize: 14.5,
+                          fontSize: 14,
                           fontWeight: FontWeight.w800,
                           color: isSelected ? AppColors.primary : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        '~${pkg.durationMinutes} ${state.tr("minWait")}',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: AppColors.cardBorder),
+                            ),
+                            child: Text(
+                              '~${pkg.durationMinutes} ${state.tr("minWait")}',
+                              style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -763,7 +807,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   children: [
                     Text(
                       CurrencyFormatter.format(price),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                      style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
                     ),
                     Icon(
                       isSelected ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
@@ -895,6 +939,21 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           Text(
             '${wash.package.localizedName(state.currentLang)} • ${wash.carType.localizedName(state.currentLang)} • ${wash.assignedWasherName != null ? "${state.tr('washer')}: ${wash.assignedWasherName}" : state.tr("pending")}',
             style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          // Animated Wash Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: wash.status == WashStatus.completed || wash.status == WashStatus.readyForPickup
+                  ? 1.0
+                  : (wash.status == WashStatus.drying
+                      ? 0.85
+                      : (wash.status == WashStatus.washing ? 0.60 : 0.25)),
+              backgroundColor: AppColors.background,
+              valueColor: AlwaysStoppedAnimation<Color>(wash.status.color),
+              minHeight: 5,
+            ),
           ),
           const SizedBox(height: 10),
           Row(

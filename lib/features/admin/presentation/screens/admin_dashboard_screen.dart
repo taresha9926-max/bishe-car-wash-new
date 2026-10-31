@@ -970,11 +970,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     ];
 
     if (isMobile) {
-      return Column(
-        children: operations.map((op) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: _buildOperationCardMobile(context, op),
-        )).toList(),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final itemWidth = (constraints.maxWidth - 10) / 2;
+          return Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: operations.map((op) => SizedBox(
+              width: itemWidth,
+              child: _buildOperationCardGrid(context, op),
+            )).toList(),
+          );
+        },
       );
     }
 
@@ -991,6 +998,80 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           )).toList(),
         );
       },
+    );
+  }
+
+  Widget _buildOperationCardGrid(BuildContext context, _OperationItem op) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: op.onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: op.color.withOpacity(0.25)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: op.color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(op.icon, color: op.color, size: 20),
+                  ),
+                  if (op.badge != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: op.color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        op.badge!,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: op.color,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                op.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                op.subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted, height: 1.2),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
