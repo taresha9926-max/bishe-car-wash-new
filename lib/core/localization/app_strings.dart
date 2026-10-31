@@ -925,6 +925,31 @@ class AppStrings {
       AppLanguage.om: 'Hojiiwwan Bulchiinsaa',
       AppLanguage.am: 'የአስተዳደር ስራዎች',
     },
+    'clearAllBookings': {
+      AppLanguage.en: 'Clear All Bookings',
+      AppLanguage.om: 'Galmee Hundumaa Haqi',
+      AppLanguage.am: 'ሁሉንም መዝገቦች አጽዳ',
+    },
+    'clearAllBookingsSubtitle': {
+      AppLanguage.en: 'Reset active queue, history & relative data across the database',
+      AppLanguage.om: 'Galmeewwan, seenaa fi database qulqulleessi',
+      AppLanguage.am: 'የነቃ ወረፋ፣ ታሪክ እና መረጃዎችን ከዳታቤዝ አጽዳ',
+    },
+    'clearAllBookingsConfirm': {
+      AppLanguage.en: 'Clear All Bookings & History?',
+      AppLanguage.om: 'Galmeewwan fi Seenaa Hundumaa Haquu Barbaadduu?',
+      AppLanguage.am: 'ሁሉንም መዝገቦች እና ታሪክ ማጽዳት ይፈልጋሉ?',
+    },
+    'clearAllBookingsDesc': {
+      AppLanguage.en: 'This will permanently delete all active and historical bookings, commission logs, bank deposits, expenses, and handovers from the SQL database and reset washing bays to vacant for fresh testing. Master fixtures (tariffs, staff, inventory catalog) will NOT be affected.\n\nAre you sure you want to proceed?',
+      AppLanguage.om: 'Kun galmeewwan dhiqannaa, komishiinii, baankii, baasii fi dabarsaa meeshaalee database SQL keessaa guutummaatti haqa. Tajaajilootaa fi miseensota hojii hin tuqu.\n\nDhuguma itti fufuu barbaadduu?',
+      AppLanguage.am: 'ይህ ሁሉንም የቦታ ማስያዣዎች፣ የኮሚሽን መዝገቦች፣ የባንክ ገቢዎች፣ ወጪዎች እና የዕቃ ርክክቦችን ከ SQL ዳታቤዝ ሙሉ በሙሉ ያጠፋል፤ ማጠቢያ ክፍሎችንም ባዶ ያደርጋል። ዋና መረጃዎች (የአገልግሎት ዋጋ፣ ሠራተኞች፣ ዕቃዎች) አይነኩም።\n\nበእርግጥ መቀጠል ይፈልጋሉ?',
+    },
+    'clearAllBookingsSuccess': {
+      AppLanguage.en: 'All bookings and operational history have been purged from the database and app screens!',
+      AppLanguage.om: 'Galmeewwan dhiqannaa fi seenaan hundi database fi iskiriinii hunda irraa haqamaniiru!',
+      AppLanguage.am: 'ሁሉም የቦታ ማስያዣዎች እና የሥራ ታሪኮች ከዳታቤዝ እና ከሁሉም ስክሪኖች ሙሉ በሙሉ ጸድተዋል!',
+    },
     'pricingMatrix': {
       AppLanguage.en: 'Pricing Matrix',
       AppLanguage.om: 'Gatii Tajaajilaa',

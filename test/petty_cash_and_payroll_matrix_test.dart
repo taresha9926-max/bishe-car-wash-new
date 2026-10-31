@@ -163,10 +163,26 @@ void main() {
         assignedBay: BayType.bay1,
         paymentMethod: PaymentMethod.cash,
       );
+      await state.recordPettyCashExpense(
+        amount: 150.0,
+        category: 'Emergency Soap Refill',
+        reason: 'Immediate foam shortage',
+        cashierName: 'Cashier Hawi',
+      );
       expect(state.bookings.isNotEmpty, isTrue);
+      expect(state.pettyCashExpenses.isNotEmpty, isTrue);
 
       await state.clearAllBookings();
       expect(state.bookings.isEmpty, isTrue);
+      expect(state.commissionLogs.isEmpty, isTrue);
+      expect(state.pettyCashExpenses.isEmpty, isTrue);
+      expect(state.bankDeposits.isEmpty, isTrue);
+      expect(state.dailyFinancialClosings.isEmpty, isTrue);
+      expect(state.washerAttendances.isEmpty, isTrue);
+      expect(state.weeklyCommissionReports.isEmpty, isTrue);
+      expect(state.dailyHandovers.isEmpty, isTrue);
+      expect(state.stockTransactions.isEmpty, isTrue);
+      expect(state.pendingApprovals.isEmpty, isTrue);
       expect(state.bays.every((b) => b.isVacant), isTrue);
     });
   });

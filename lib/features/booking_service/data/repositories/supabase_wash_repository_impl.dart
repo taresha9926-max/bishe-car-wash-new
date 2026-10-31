@@ -610,15 +610,31 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<void> clearAllBookings() async {
     try {
+      // 1. Invoke server-side RPC function (truncates bookings, logs, sms, and resets bays)
       await _post('rpc/clear_all_bookings', {});
-    } catch (_) {
-      try {
-        await _delete('wash_bookings?id=neq.00000000-0000-0000-0000-000000000000');
-        await _delete('commission_logs?id=neq.00000000-0000-0000-0000-000000000000');
-      } catch (e) {
-        debugPrint('Supabase clearAllBookings direct delete error: $e');
-      }
+    } catch (e) {
+      debugPrint('Supabase clearAllBookings RPC call error: $e');
     }
+
+    try {
+      // 2. Direct REST deletes to guarantee complete purge
+      await _delete('wash_bookings?id=neq.00000000-0000-0000-0000-000000000000');
+      await _delete('commission_logs?id=neq.00000000-0000-0000-0000-000000000000');
+      await _delete('sms_outbox?id=neq.00000000-0000-0000-0000-000000000000');
+      
+      // 3. Reset station bays to vacant
+      await _patch('station_bays?id=neq.00000000-0000-0000-0000-000000000000', {
+        'is_occupied': false,
+        'current_booking_id': null,
+        'active_license_plate': null,
+        'assigned_washer_name': null,
+        'started_at': null,
+      });
+    } catch (e) {
+      debugPrint('Supabase clearAllBookings direct REST error: $e');
+    }
+
+    // 4. Wipe in-memory fallback repository
     await _fallbackLocalRepo.clearAllBookings();
   }
 

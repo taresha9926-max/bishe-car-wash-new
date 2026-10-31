@@ -195,6 +195,9 @@ class WashRepositoryImpl implements IWashRepository {
   Future<void> clearAllBookings() async {
     _bookings.clear();
     _commissionLogs.clear();
+    _dailyHandovers.clear();
+    _stockTransactions.clear();
+    _consumables = List.from(InitialInventorySeed.getConsumables());
     _bays = _bays.map((b) => b.copyWith(
       status: BayStatus.vacant,
       activeBookingId: null,

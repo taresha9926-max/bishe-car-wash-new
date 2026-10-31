@@ -278,7 +278,10 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
               ),
               TextButton.icon(
                 icon: const Icon(Icons.delete_sweep_rounded, size: 16, color: Colors.red),
-                label: const Text('Clear All Bookings', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red)),
+                label: Text(
+                  state.tr('clearAllBookings'),
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red),
+                ),
                 onPressed: () => _confirmClearAllBookings(context, state),
               ),
             ],
@@ -465,30 +468,41 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 24),
             const SizedBox(width: 8),
-            const Text('Clear All Bookings?', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+            Expanded(
+              child: Text(
+                state.tr('clearAllBookingsConfirm'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+            ),
           ],
         ),
-        content: const Text(
-          'This will permanently clear all booked vehicles from the active queue and history, and reset washing bays to vacant for fresh testing.\n\nAre you sure you want to proceed?',
-          style: TextStyle(fontSize: 13),
+        content: Text(
+          state.tr('clearAllBookingsDesc'),
+          style: const TextStyle(fontSize: 13, height: 1.4),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(state.tr('cancel')),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade700, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               Navigator.pop(ctx);
               await state.clearAllBookings();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All booked vehicles have been cleared successfully!'),
-                    backgroundColor: Colors.green,
+                  SnackBar(
+                    content: Text(state.tr('clearAllBookingsSuccess')),
+                    backgroundColor: Colors.green.shade700,
                   ),
                 );
               }
             },
-            child: const Text('Clear All Bookings'),
+            child: Text(state.tr('clearAllBookings')),
           ),
         ],
       ),

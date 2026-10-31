@@ -364,7 +364,7 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Clears all booked vehicles from queue, history, and bays
+  /// Clears all booked vehicles from queue, history, and bays, along with all operational history across the app
   Future<void> clearAllBookings() async {
     _bookings = [];
     _commissionLogs = [];
@@ -375,8 +375,24 @@ class AppStateNotifier extends ChangeNotifier {
       activeLicensePlate: null,
       assignedWasherName: null,
     )).toList();
+    _bankDeposits.clear();
+    _dailyFinancialClosings.clear();
+    _pettyCashExpenses.clear();
+    _washerAttendances.clear();
+    _weeklyCommissionReports.clear();
+    _dailyHandovers.clear();
+    _stockTransactions.clear();
+    _pendingApprovals.clear();
+    _consumables = List.from(InitialInventorySeed.getConsumables());
     notifyListeners();
     await _repository.clearAllBookings();
+    try {
+      final freshBays = await _repository.getBays();
+      if (freshBays.isNotEmpty) {
+        _bays = List.from(freshBays);
+      }
+    } catch (_) {}
+    notifyListeners();
   }
 
   /// Privacy-safe lookup for a customer's specific vehicle
