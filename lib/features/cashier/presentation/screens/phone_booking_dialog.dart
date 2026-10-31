@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -241,6 +242,13 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                 value: pkg.id,
                                 child: Row(
                                   children: [
+                                    AutoCareAssets.buildPhotoThumbnail(
+                                      imageUrl: AutoCareAssets.getPackageImage(pkg),
+                                      width: 28,
+                                      height: 28,
+                                      borderRadius: 6,
+                                    ),
+                                    const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         pkg.localizedName(state.currentLang),

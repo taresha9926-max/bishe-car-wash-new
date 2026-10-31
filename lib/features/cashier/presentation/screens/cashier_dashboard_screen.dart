@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
@@ -709,13 +710,12 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           // Header Row: Avatar, License plate, car type pill, phone badge, status pill
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: b.status.color.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.local_car_wash_rounded, color: b.status.color, size: 16),
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: AutoCareAssets.getPackageImage(b.package),
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                fallbackIcon: Icons.local_car_wash_rounded,
               ),
               const SizedBox(width: 8),
               Text(
@@ -950,13 +950,12 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: b.status.color.withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.local_car_wash_rounded, color: b.status.color, size: 18),
+          AutoCareAssets.buildPhotoThumbnail(
+            imageUrl: AutoCareAssets.getPackageImage(b.package),
+            width: 48,
+            height: 48,
+            borderRadius: 10,
+            fallbackIcon: Icons.local_car_wash_rounded,
           ),
           const SizedBox(width: 12),
           Expanded(
