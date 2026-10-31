@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../auth_roles/domain/models/user_role.dart';
@@ -419,28 +420,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                       children: [
                                         Row(
                                           children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(12),
-                                              decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                  colors: [AppColors.primaryDark, AppColors.primary],
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                ),
-                                                borderRadius: BorderRadius.circular(14),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: AppColors.primary.withOpacity(0.3),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 3),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: const Icon(
-                                                Icons.directions_car_filled_rounded,
-                                                size: 26,
-                                                color: Colors.white,
-                                              ),
+                                            AutoCareAssets.buildPhotoThumbnail(
+                                              imageUrl: AutoCareAssets.welcomeHeroUrl,
+                                              width: 54,
+                                              height: 54,
+                                              borderRadius: 14,
+                                              fallbackIcon: Icons.directions_car_filled_rounded,
                                             ),
                                             const SizedBox(width: 12),
                                             Expanded(
@@ -535,28 +520,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                   : Row(
                                       children: [
                                         // Desktop View Layout
-                                        Container(
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [AppColors.primaryDark, AppColors.primary],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
-                                            borderRadius: BorderRadius.circular(18),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: AppColors.primary.withOpacity(0.3),
-                                                blurRadius: 10,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
-                                          ),
-                                          child: const Icon(
-                                            Icons.directions_car_filled_rounded,
-                                            size: 32,
-                                            color: Colors.white,
-                                          ),
+                                        AutoCareAssets.buildPhotoThumbnail(
+                                          imageUrl: AutoCareAssets.welcomeHeroUrl,
+                                          width: 68,
+                                          height: 68,
+                                          borderRadius: 16,
+                                          fallbackIcon: Icons.directions_car_filled_rounded,
                                         ),
                                         const SizedBox(width: 16),
                                         Expanded(

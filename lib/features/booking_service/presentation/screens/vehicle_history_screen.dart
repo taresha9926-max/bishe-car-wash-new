@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
@@ -375,13 +376,11 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.statusCompleted.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check_circle_rounded, color: AppColors.statusCompleted, size: 16),
+                  AutoCareAssets.buildPhotoThumbnail(
+                    imageUrl: AutoCareAssets.getCarTypeImage(b.carType),
+                    width: 38,
+                    height: 38,
+                    borderRadius: 8,
                   ),
                   const SizedBox(width: 8),
                   Text(

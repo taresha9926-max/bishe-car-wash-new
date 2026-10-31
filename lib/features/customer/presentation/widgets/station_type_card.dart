@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
@@ -50,17 +51,13 @@ class StationTypeCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: primaryAccent.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                serviceType.icon,
-                color: primaryAccent,
-                size: 28,
-              ),
+            AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: isStation ? AutoCareAssets.stationBayUrl : AutoCareAssets.mobileVanUrl,
+              width: 54,
+              height: 54,
+              borderRadius: 14,
+              fallbackIcon: serviceType.icon,
+              fallbackColor: primaryAccent,
             ),
             const SizedBox(width: 14),
             Expanded(

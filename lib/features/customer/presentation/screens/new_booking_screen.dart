@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
+import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/widgets/custom_button.dart';
 import 'package:bishe_car_wash/core/widgets/custom_text_field.dart';
@@ -173,6 +174,14 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                             });
                           },
                         ),
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.getPackageImage(pkg),
+                          width: 52,
+                          height: 52,
+                          borderRadius: 10,
+                          durationBadge: '${pkg.durationMinutes}m',
+                        ),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

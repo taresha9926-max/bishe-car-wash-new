@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
+import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/core/widgets/app_role_header.dart';
@@ -505,34 +506,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     }
   }
 
-  String _getPackageImageUrl(WashPackage pkg) {
-    final pName = pkg.name.toLowerCase();
-    if (pName.contains('foam') || pName.contains('express')) {
-      return 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&auto=format&fit=crop&q=80';
-    } else if (pName.contains('vacuum') || pName.contains('standard') || pName.contains('interior')) {
-      return 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=600&auto=format&fit=crop&q=80';
-    } else if (pName.contains('spa') || pName.contains('deluxe') || pName.contains('ceramic') || pName.contains('polish')) {
-      return 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=600&auto=format&fit=crop&q=80';
-    } else if (pName.contains('mobile') || pName.contains('van')) {
-      return 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&auto=format&fit=crop&q=80';
-    } else if (pName.contains('engine') || pName.contains('steam')) {
-      return 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=600&auto=format&fit=crop&q=80';
-    } else if (pName.contains('wheel') || pName.contains('tire') || pName.contains('rim')) {
-      return 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=600&auto=format&fit=crop&q=80';
-    }
-    return 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&auto=format&fit=crop&q=80';
-  }
+  String _getPackageImageUrl(WashPackage pkg) => AutoCareAssets.getPackageImage(pkg);
 
-  String _getCarTypeImageUrl(CarType type) {
-    switch (type) {
-      case CarType.automobile:
-        return 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=400&auto=format&fit=crop&q=80';
-      case CarType.minibus:
-        return 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&auto=format&fit=crop&q=80';
-      case CarType.truck:
-        return 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&auto=format&fit=crop&q=80';
-    }
-  }
+  String _getCarTypeImageUrl(CarType type) => AutoCareAssets.getCarTypeImage(type);
 
   Widget _buildServiceActionCard(
     BuildContext context, {

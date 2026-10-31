@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/domain/models/car_type.dart';
@@ -157,6 +158,13 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
                     onChanged: (_) => setState(() => _selectedPackageId = pkg.id),
                   ),
+                  const SizedBox(width: 6),
+                  AutoCareAssets.buildPhotoThumbnail(
+                    imageUrl: AutoCareAssets.getPackageImage(pkg),
+                    width: 44,
+                    height: 44,
+                    borderRadius: 8,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -261,7 +269,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                               ),
                               child: Column(
                                 children: [
-                                  Icon(type.icon, size: 20, color: AppColors.primary),
+                                  AutoCareAssets.buildPhotoThumbnail(
+                                    imageUrl: AutoCareAssets.getCarTypeImage(type),
+                                    width: 38,
+                                    height: 28,
+                                    borderRadius: 6,
+                                  ),
                                   const SizedBox(height: 4),
                                   Text(
                                     type.localizedName(state.currentLang).split(' ').first,

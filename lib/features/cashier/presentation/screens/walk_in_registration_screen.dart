@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -177,6 +178,14 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           activeColor: AppColors.primary,
                           onChanged: (_) => setState(() => _package = pkg),
                         ),
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.getPackageImage(pkg),
+                          width: 48,
+                          height: 48,
+                          borderRadius: 8,
+                          durationBadge: '${pkg.durationMinutes}m',
+                        ),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

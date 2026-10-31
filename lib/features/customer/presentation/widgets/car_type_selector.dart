@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../booking_service/domain/models/car_type.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
@@ -55,11 +56,7 @@ class CarTypeSelector extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
-                          type == CarType.automobile
-                              ? 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=400&auto=format&fit=crop&q=80'
-                              : (type == CarType.minibus
-                                  ? 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&auto=format&fit=crop&q=80'
-                                  : 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&auto=format&fit=crop&q=80'),
+                          AutoCareAssets.getCarTypeImage(type),
                           width: 44,
                           height: 36,
                           fit: BoxFit.cover,

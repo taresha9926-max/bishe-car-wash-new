@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
@@ -386,13 +387,13 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(booking.carType.icon, size: 28, color: AppColors.primary),
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: AutoCareAssets.getCarTypeImage(booking.carType),
+                width: 58,
+                height: 58,
+                borderRadius: 14,
+                fallbackIcon: booking.carType.icon,
+                fallbackColor: AppColors.primary,
               ),
               const SizedBox(width: 14),
               Expanded(
