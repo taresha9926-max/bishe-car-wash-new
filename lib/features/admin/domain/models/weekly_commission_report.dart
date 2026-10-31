@@ -8,6 +8,8 @@ class WeeklyCommissionReport {
   final Map<String, double> washerCommissions; // washer name -> ETB
   final String? notes;
   final bool isSubmitted;
+  final bool isDisbursed;
+  final DateTime? disbursedAt;
 
   const WeeklyCommissionReport({
     required this.id,
@@ -19,7 +21,37 @@ class WeeklyCommissionReport {
     required this.washerCommissions,
     this.notes,
     this.isSubmitted = true,
+    this.isDisbursed = false,
+    this.disbursedAt,
   });
+
+  WeeklyCommissionReport copyWith({
+    String? id,
+    DateTime? weekStartDate,
+    DateTime? weekEndDate,
+    DateTime? reportedAt,
+    String? cashierName,
+    double? totalWeeklyPool,
+    Map<String, double>? washerCommissions,
+    String? notes,
+    bool? isSubmitted,
+    bool? isDisbursed,
+    DateTime? disbursedAt,
+  }) {
+    return WeeklyCommissionReport(
+      id: id ?? this.id,
+      weekStartDate: weekStartDate ?? this.weekStartDate,
+      weekEndDate: weekEndDate ?? this.weekEndDate,
+      reportedAt: reportedAt ?? this.reportedAt,
+      cashierName: cashierName ?? this.cashierName,
+      totalWeeklyPool: totalWeeklyPool ?? this.totalWeeklyPool,
+      washerCommissions: washerCommissions ?? this.washerCommissions,
+      notes: notes ?? this.notes,
+      isSubmitted: isSubmitted ?? this.isSubmitted,
+      isDisbursed: isDisbursed ?? this.isDisbursed,
+      disbursedAt: disbursedAt ?? this.disbursedAt,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -32,6 +64,8 @@ class WeeklyCommissionReport {
       'washerCommissions': washerCommissions,
       'notes': notes,
       'isSubmitted': isSubmitted,
+      'isDisbursed': isDisbursed,
+      'disbursedAt': disbursedAt?.toIso8601String(),
     };
   }
 
@@ -46,6 +80,8 @@ class WeeklyCommissionReport {
       washerCommissions: Map<String, double>.from(map['washerCommissions'] ?? {}),
       notes: map['notes'],
       isSubmitted: map['isSubmitted'] ?? true,
+      isDisbursed: map['isDisbursed'] ?? false,
+      disbursedAt: map['disbursedAt'] != null ? DateTime.tryParse(map['disbursedAt']) : null,
     );
   }
 }

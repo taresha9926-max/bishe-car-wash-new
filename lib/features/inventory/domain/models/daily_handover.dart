@@ -12,6 +12,8 @@ class DailyHandover {
   final Map<String, double> issuedQuantities; // itemId -> issued
   final Map<String, double> returnedQuantities; // itemId -> returned
   final Map<String, double> consumedQuantities; // itemId -> net consumed
+  final Map<String, double> missingQuantities; // itemId -> missing/lost
+  final Map<String, double> damagedQuantities; // itemId -> damaged/scrapped
   final HandoverStatus status;
   final DateTime checkedOutAt;
   final DateTime? checkedInAt;
@@ -25,6 +27,8 @@ class DailyHandover {
     required this.issuedQuantities,
     this.returnedQuantities = const {},
     this.consumedQuantities = const {},
+    this.missingQuantities = const {},
+    this.damagedQuantities = const {},
     this.status = HandoverStatus.active,
     required this.checkedOutAt,
     this.checkedInAt,
@@ -39,6 +43,8 @@ class DailyHandover {
     Map<String, double>? issuedQuantities,
     Map<String, double>? returnedQuantities,
     Map<String, double>? consumedQuantities,
+    Map<String, double>? missingQuantities,
+    Map<String, double>? damagedQuantities,
     HandoverStatus? status,
     DateTime? checkedOutAt,
     DateTime? checkedInAt,
@@ -52,6 +58,8 @@ class DailyHandover {
       issuedQuantities: issuedQuantities ?? this.issuedQuantities,
       returnedQuantities: returnedQuantities ?? this.returnedQuantities,
       consumedQuantities: consumedQuantities ?? this.consumedQuantities,
+      missingQuantities: missingQuantities ?? this.missingQuantities,
+      damagedQuantities: damagedQuantities ?? this.damagedQuantities,
       status: status ?? this.status,
       checkedOutAt: checkedOutAt ?? this.checkedOutAt,
       checkedInAt: checkedInAt ?? this.checkedInAt,
@@ -67,6 +75,8 @@ class DailyHandover {
     'issuedQuantities': issuedQuantities,
     'returnedQuantities': returnedQuantities,
     'consumedQuantities': consumedQuantities,
+    'missingQuantities': missingQuantities,
+    'damagedQuantities': damagedQuantities,
     'status': status.name,
     'checkedOutAt': checkedOutAt.toIso8601String(),
     'checkedInAt': checkedInAt?.toIso8601String(),
@@ -87,6 +97,8 @@ class DailyHandover {
       issuedQuantities: parseMap(json['issuedQuantities']),
       returnedQuantities: parseMap(json['returnedQuantities']),
       consumedQuantities: parseMap(json['consumedQuantities']),
+      missingQuantities: parseMap(json['missingQuantities']),
+      damagedQuantities: parseMap(json['damagedQuantities']),
       status: HandoverStatus.values.firstWhere(
         (s) => s.name == (json['status'] as String?),
         orElse: () => HandoverStatus.active,

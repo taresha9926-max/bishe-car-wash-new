@@ -67,10 +67,10 @@ class WashRepositoryImpl implements IWashRepository {
   void _initData() {
     _packages = MockWashDataSource.getInitialPackages();
     _staff = MockWashDataSource.getInitialStaff();
-    _bays = MockWashDataSource.getInitialBays();
-    _bookings = MockWashDataSource.getInitialBookings(_packages);
-    _commissionLogs = MockWashDataSource.getInitialCommissionLogs();
-    _credentials = MockWashDataSource.getInitialCredentials();
+    _bays = List.from(MockWashDataSource.getInitialBays());
+    _bookings = List.from(MockWashDataSource.getInitialBookings(_packages));
+    _commissionLogs = List.from(MockWashDataSource.getInitialCommissionLogs());
+    _credentials = List.from(MockWashDataSource.getInitialCredentials());
   }
 
   @override

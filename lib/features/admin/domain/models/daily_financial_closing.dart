@@ -11,6 +11,7 @@ class DailyFinancialClosing {
   final double commissionPool;
   final double netStationProfit;
   final double cashDeposited;
+  final double pettyCashExpenses;
   final double cashRemaining;
   final Map<String, double> washerDividends;
   final String? notes;
@@ -29,6 +30,7 @@ class DailyFinancialClosing {
     required this.commissionPool,
     required this.netStationProfit,
     required this.cashDeposited,
+    this.pettyCashExpenses = 0.0,
     required this.cashRemaining,
     required this.washerDividends,
     this.notes,
@@ -49,6 +51,7 @@ class DailyFinancialClosing {
       'commissionPool': commissionPool,
       'netStationProfit': netStationProfit,
       'cashDeposited': cashDeposited,
+      'pettyCashExpenses': pettyCashExpenses,
       'cashRemaining': cashRemaining,
       'washerDividends': washerDividends,
       'notes': notes,
@@ -70,6 +73,7 @@ class DailyFinancialClosing {
       commissionPool: (map['commissionPool'] as num?)?.toDouble() ?? 0.0,
       netStationProfit: (map['netStationProfit'] as num?)?.toDouble() ?? 0.0,
       cashDeposited: (map['cashDeposited'] as num?)?.toDouble() ?? 0.0,
+      pettyCashExpenses: (map['pettyCashExpenses'] as num?)?.toDouble() ?? 0.0,
       cashRemaining: (map['cashRemaining'] as num?)?.toDouble() ?? 0.0,
       washerDividends: Map<String, double>.from(map['washerDividends'] ?? {}),
       notes: map['notes'],

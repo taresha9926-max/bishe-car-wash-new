@@ -6,9 +6,11 @@ import 'package:bishe_car_wash/features/admin/domain/models/bank_deposit_record.
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/petty_cash_expense.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/washer_dividend.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/washer_daily_attendance.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/weekly_commission_report.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
@@ -576,98 +578,81 @@ class AppStateNotifier extends ChangeNotifier {
   final List<DailyFinancialClosing> _dailyFinancialClosings = _getInitialDailyClosings();
   List<DailyFinancialClosing> get dailyFinancialClosings => List.unmodifiable(_dailyFinancialClosings);
 
-  static List<BankDepositRecord> _getInitialBankDeposits() {
+  // Petty Cash Expenses (Cashier emergency operational spends)
+  final List<PettyCashExpense> _pettyCashExpenses = [];
+  List<PettyCashExpense> get pettyCashExpenses => List.unmodifiable(_pettyCashExpenses);
+
+  double get todayPettyCashExpensesETB {
     final now = DateTime.now();
-    return [
-      BankDepositRecord(
-        id: 'dep-1',
-        amount: 5200.0,
-        accountKey: 'account_a',
-        accountName: 'Account A (CBE)',
-        accountNumber: ownerAccountANumber,
-        bankName: 'Commercial Bank of Ethiopia',
-        referenceSlipNumber: 'CBE-DEP-849201',
-        depositedAt: now.subtract(const Duration(days: 1, hours: 2)),
-        cashierName: 'Abebech T.',
-        notes: 'Yesterday evening cash collection deposit',
-      ),
-      BankDepositRecord(
-        id: 'dep-2',
-        amount: 4800.0,
-        accountKey: 'account_b',
-        accountName: 'Account B (Awash Bank)',
-        accountNumber: ownerAccountBNumber,
-        bankName: 'Awash Bank',
-        referenceSlipNumber: 'AW-SLIP-773192',
-        depositedAt: now.subtract(const Duration(days: 3, hours: 3)),
-        cashierName: 'Abebech T.',
-        notes: 'Mid-week cash handover deposit',
-      ),
-    ];
+    return _pettyCashExpenses
+        .where((e) => e.loggedAt.year == now.year && e.loggedAt.month == now.month && e.loggedAt.day == now.day)
+        .fold(0.0, (sum, e) => sum + e.amount);
+  }
+
+  Future<void> recordPettyCashExpense({
+    required double amount,
+    required String category,
+    required String reason,
+    String? receiptScreenshot,
+    String? voucherScreenshot,
+    required String cashierName,
+  }) async {
+    final screenshot = voucherScreenshot ?? receiptScreenshot;
+    final expense = PettyCashExpense(
+      id: 'PCE-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
+      amount: amount,
+      category: category,
+      reason: reason,
+      receiptScreenshot: screenshot,
+      loggedByCashier: cashierName,
+      loggedAt: DateTime.now(),
+    );
+    _pettyCashExpenses.insert(0, expense);
+    notifyListeners();
+  }
+
+  // Washer Daily Attendance Records
+  final List<WasherDailyAttendance> _washerAttendances = [];
+  List<WasherDailyAttendance> get washerAttendances => List.unmodifiable(_washerAttendances);
+
+  Future<void> recordWasherDailyAttendance({
+    required String washerId,
+    required String washerName,
+    required DateTime date,
+    required bool isPresent,
+    bool isExcused = false,
+    String? notes,
+  }) async {
+    final existingIdx = _washerAttendances.indexWhere((a) =>
+        a.washerId == washerId &&
+        a.date.year == date.year &&
+        a.date.month == date.month &&
+        a.date.day == date.day);
+
+    final record = WasherDailyAttendance(
+      id: 'ATT-$washerId-${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}',
+      washerId: washerId,
+      washerName: washerName,
+      date: date,
+      isPresent: isPresent,
+      isExcused: isExcused,
+      notes: notes,
+    );
+
+    if (existingIdx != -1) {
+      _washerAttendances[existingIdx] = record;
+    } else {
+      _washerAttendances.add(record);
+    }
+    notifyListeners();
+  }
+
+  static List<BankDepositRecord> _getInitialBankDeposits() {
+    return [];
   }
 
   static List<DailyFinancialClosing> _getInitialDailyClosings() {
-    final now = DateTime.now();
-    final yesterday = now.subtract(const Duration(days: 1));
-    final twoDaysAgo = now.subtract(const Duration(days: 2));
-
-    return [
-      DailyFinancialClosing(
-        id: 'closing-${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}',
-        closingDate: yesterday,
-        closedAt: DateTime(yesterday.year, yesterday.month, yesterday.day, 20, 30),
-        cashierName: 'Abebech Tadesse',
-        grossRevenue: 8600.0,
-        cashRevenue: 5200.0,
-        digitalRevenue: 3400.0,
-        providerBreakdown: {
-          'Cash': 5200.0,
-          'Telebirr': 1800.0,
-          'CBE Birr': 1100.0,
-          'Awash Bank': 500.0,
-        },
-        carsWashedCount: 16,
-        commissionPool: 1290.0,
-        netStationProfit: 7310.0,
-        cashDeposited: 5200.0,
-        cashRemaining: 0.0,
-        washerDividends: {
-          'Teshale Bekele (Lead)': 451.5,
-          'Chala Gutu (Senior)': 387.0,
-          'Dawit Alemu (Standard)': 258.0,
-          'Yared Haile (Junior)': 193.5,
-        },
-        notes: 'Full shift settled smoothly. All cash deposited to CBE.',
-        isConfirmed: true,
-      ),
-      DailyFinancialClosing(
-        id: 'closing-${twoDaysAgo.year}-${twoDaysAgo.month.toString().padLeft(2, '0')}-${twoDaysAgo.day.toString().padLeft(2, '0')}',
-        closingDate: twoDaysAgo,
-        closedAt: DateTime(twoDaysAgo.year, twoDaysAgo.month, twoDaysAgo.day, 20, 15),
-        cashierName: 'Abebech Tadesse',
-        grossRevenue: 7400.0,
-        cashRevenue: 4800.0,
-        digitalRevenue: 2600.0,
-        providerBreakdown: {
-          'Cash': 4800.0,
-          'Telebirr': 1400.0,
-          'CBE Birr': 1200.0,
-        },
-        carsWashedCount: 14,
-        commissionPool: 1110.0,
-        netStationProfit: 6290.0,
-        cashDeposited: 4800.0,
-        cashRemaining: 0.0,
-        washerDividends: {
-          'Teshale Bekele (Lead)': 388.5,
-          'Chala Gutu (Senior)': 333.0,
-          'Dawit Alemu (Standard)': 222.0,
-          'Yared Haile (Junior)': 166.5,
-        },
-        notes: 'Shift completed without incident.',
-        isConfirmed: true,
-      ),
-    ];
+    return [];
   }
 
   /// Calculates breakdown of money received by each PaymentMethod
@@ -708,7 +693,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   /// Total cash currently sitting in the cashier drawer awaiting bank deposit
   double get undepositedCashTodayETB {
-    final diff = totalCashRevenueETB - totalCashDepositedTodayETB;
+    final diff = totalCashRevenueETB - totalCashDepositedTodayETB - todayPettyCashExpensesETB;
     return diff < 0 ? 0.0 : diff;
   }
 
@@ -771,7 +756,8 @@ class AppStateNotifier extends ChangeNotifier {
     final comm = gross * teamCommissionRate;
     final net = gross - comm;
     final deposited = totalCashDepositedTodayETB;
-    final remainingCash = cash > deposited ? cash - deposited : 0.0;
+    final petty = todayPettyCashExpensesETB;
+    final remainingCash = cash > (deposited + petty) ? cash - (deposited + petty) : 0.0;
 
     final breakdown = <String, double>{};
     for (final m in PaymentMethod.values) {
@@ -802,6 +788,7 @@ class AppStateNotifier extends ChangeNotifier {
       commissionPool: comm,
       netStationProfit: net,
       cashDeposited: deposited,
+      pettyCashExpenses: petty,
       cashRemaining: remainingCash,
       washerDividends: divSummary,
       notes: notes,
@@ -864,28 +851,7 @@ class AppStateNotifier extends ChangeNotifier {
       _weeklyCommissionReports.isNotEmpty ? _weeklyCommissionReports.first : null;
 
   static List<WeeklyCommissionReport> _getInitialWeeklyCommissionReports() {
-    final now = DateTime.now();
-    final lastSunday = now.subtract(Duration(days: now.weekday));
-    final prevMonday = lastSunday.subtract(const Duration(days: 6));
-
-    return [
-      WeeklyCommissionReport(
-        id: 'wcr-${lastSunday.year}-${lastSunday.month}-${lastSunday.day}',
-        weekStartDate: DateTime(prevMonday.year, prevMonday.month, prevMonday.day),
-        weekEndDate: DateTime(lastSunday.year, lastSunday.month, lastSunday.day, 21, 0),
-        reportedAt: DateTime(lastSunday.year, lastSunday.month, lastSunday.day, 21, 15),
-        cashierName: 'Abebech Tadesse',
-        totalWeeklyPool: 7850.0,
-        washerCommissions: {
-          'Teshale Bekele (Lead)': 2747.5,
-          'Chala Gutu (Senior)': 2355.0,
-          'Dawit Alemu (Standard)': 1570.0,
-          'Yared Haile (Junior)': 1177.5,
-        },
-        notes: 'Official weekly washer commission report disbursed and verified for last week.',
-        isSubmitted: true,
-      ),
-    ];
+    return [];
   }
 
   /// Cashier submits weekly washer commission report to Admin
@@ -914,6 +880,19 @@ class AppStateNotifier extends ChangeNotifier {
     _weeklyCommissionReports.insert(0, report);
     notifyListeners();
     return report;
+  }
+
+  /// Accountant or Admin disburses the weekly commission report
+  Future<void> disburseWeeklyCommission(String reportId) async {
+    final idx = _weeklyCommissionReports.indexWhere((r) => r.id == reportId);
+    if (idx != -1) {
+      final existing = _weeklyCommissionReports[idx];
+      _weeklyCommissionReports[idx] = existing.copyWith(
+        isDisbursed: true,
+        disbursedAt: DateTime.now(),
+      );
+      notifyListeners();
+    }
   }
 
   int get availableBaysCount {
@@ -1422,6 +1401,8 @@ class AppStateNotifier extends ChangeNotifier {
     required double quantity,
     required double unitCostEtb,
     required String supplier,
+    String? unit,
+    String? invoiceScreenshot,
     String notes = '',
   }) async {
     final idx = _consumables.indexWhere((c) => c.id == itemId);
@@ -1430,6 +1411,7 @@ class AppStateNotifier extends ChangeNotifier {
       final newStock = item.currentStock + quantity;
       final updated = item.copyWith(
         currentStock: newStock,
+        unit: (unit != null && unit.isNotEmpty) ? unit : item.unit,
         unitCostEtb: unitCostEtb > 0 ? unitCostEtb : item.unitCostEtb,
       );
       _consumables[idx] = updated;
@@ -1441,9 +1423,11 @@ class AppStateNotifier extends ChangeNotifier {
         itemName: item.name,
         type: 'receiveStock',
         quantity: quantity,
+        unit: unit ?? item.unit,
         unitCostEtb: unitCostEtb,
         totalCostEtb: quantity * unitCostEtb,
         supplier: supplier,
+        invoiceScreenshot: invoiceScreenshot,
         notes: notes,
       );
       _stockTransactions.insert(0, tx);

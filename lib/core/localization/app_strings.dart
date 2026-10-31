@@ -1570,6 +1570,229 @@ class AppStrings {
       AppLanguage.am: 'ዕለታዊ የኮሚሽን ክፍፍልና የጥሬ ገንዘብ ቁጥጥር በቀጥታ በገንዘብ ያዥ ሰሌዳ ላይ ይከናወናል። ሳምንታዊ መጠኖች ለክትትል እዚህ ይቀርባሉ።',
     },
 
+    // Petty Cash & Emergency
+    'pettyCashExpense': {
+      AppLanguage.en: 'Petty Cash & Emergency Spend',
+      AppLanguage.om: 'Baasii Ariifachiisaa & Qusannaa',
+      AppLanguage.am: 'አነስተኛ ወጪ እና ድንገተኛ ወጪዎች',
+    },
+    'logPettyCash': {
+      AppLanguage.en: 'Log Petty Cash / Emergency',
+      AppLanguage.om: 'Baasii Ariifachiisaa Galmeessi',
+      AppLanguage.am: 'አነስተኛ ወጪ መዝግብ',
+    },
+    'pettyCashToday': {
+      AppLanguage.en: 'Today Petty Cash Expenses',
+      AppLanguage.om: 'Baasii Ariifachiisaa Har\'aa',
+      AppLanguage.am: 'የዛሬ አነስተኛ ወጪዎች',
+    },
+    'pettyCashReason': {
+      AppLanguage.en: 'Reason / Item Description',
+      AppLanguage.om: 'Sababa / Ibsa Meeshaa',
+      AppLanguage.am: 'ምክንያት / የዕቃው ማብራሪያ',
+    },
+    'pettyCategory': {
+      AppLanguage.en: 'Expense Category',
+      AppLanguage.om: 'Kutaalee Baasii',
+      AppLanguage.am: 'የወጪ ዓይነት',
+    },
+    'pettyCategoryFuel': {
+      AppLanguage.en: 'Fuel / Generator',
+      AppLanguage.om: 'Bobaa / Jenereetara',
+      AppLanguage.am: 'ነዳጅ / ጄኔሬተር',
+    },
+    'pettyCategoryPlumbing': {
+      AppLanguage.en: 'Plumbing & Hardware Repair',
+      AppLanguage.om: 'Ujummoo & Suphaa',
+      AppLanguage.am: 'ቧንቧ እና ጥገና',
+    },
+    'pettyCategorySupplies': {
+      AppLanguage.en: 'Urgent Consumables',
+      AppLanguage.om: 'Meeshaalee Ariifachiisaa',
+      AppLanguage.am: 'አስቸኳይ መገልገያ ዕቃዎች',
+    },
+    'pettyCategoryStaffLunch': {
+      AppLanguage.en: 'Staff Welfare / Meals',
+      AppLanguage.om: 'Nyaata Hojjattootaa',
+      AppLanguage.am: 'የሰራተኞች ምግብ',
+    },
+    'pettyCategoryOther': {
+      AppLanguage.en: 'Other Operational Emergency',
+      AppLanguage.om: 'Baasii Biroo',
+      AppLanguage.am: 'ሌሎች ድንገተኛ ወጪዎች',
+    },
+    'pettyCashSuccess': {
+      AppLanguage.en: 'Petty cash expense recorded successfully!',
+      AppLanguage.om: 'Baasiin ariifachiisaan galmaa\'eera!',
+      AppLanguage.am: 'አነስተኛ ወጪ በተሳካ ሁኔታ ተመዝግቧል!',
+    },
+    'pettyCashScreenshotRequired': {
+      AppLanguage.en: 'Physical receipt / voucher photo is required!',
+      AppLanguage.om: 'Suuraan nagahee dirqama!',
+      AppLanguage.am: 'የወጪ ደረሰኝ ፎቶ ግዴታ ነው!',
+    },
+
+    // Mandatory Proof
+    'proofMandatoryNotice': {
+      AppLanguage.en: 'Payment screenshot & reference number are mandatory for digital payments.',
+      AppLanguage.om: 'Kaffaltii dijitaalaaf suuraan nagahee fi lakkoofsi mirkaneessaa dirqama.',
+      AppLanguage.am: 'ለዲጂታል ክፍያዎች የደረሰኝ ስክሪንሾት እና የማረጋገጫ ቁጥር ግዴታ ነው።',
+    },
+    'depositSlipMandatoryNotice': {
+      AppLanguage.en: 'Stamped bank deposit teller slip photo and reference number are strictly mandatory.',
+      AppLanguage.om: 'Suuraan nagahee baankii mallatteeffamee fi lakkoofsi nagahee dirqama.',
+      AppLanguage.am: 'የማህተም ያለበት የባንክ ደረሰኝ ፎቶና ቁጥር ግዴታ ነው።',
+    },
+    'pleaseUploadProof': {
+      AppLanguage.en: 'Please attach receipt screenshot before proceeding',
+      AppLanguage.om: 'Mee dura suuraa nagahee galchaa',
+      AppLanguage.am: 'እባክዎ ከመቀጠልዎ በፊት የደረሰኝ ስክሪንሾት ያያይዙ',
+    },
+    'pleaseUploadDepositSlip': {
+      AppLanguage.en: 'Please upload stamped bank deposit slip photo',
+      AppLanguage.om: 'Mee suuraa nagahee baankii asitti fe\'aa',
+      AppLanguage.am: 'እባክዎ የማህተም ያለበትን የባንክ ደረሰኝ ፎቶ ያያይዙ',
+    },
+
+    // Units of Measurement
+    'unitOfMeasurement': {
+      AppLanguage.en: 'Unit of Measurement',
+      AppLanguage.om: 'Safartuu Meeshaa',
+      AppLanguage.am: 'የመለኪያ አሃድ',
+    },
+    'totalCalculatedCost': {
+      AppLanguage.en: 'Total Calculated Cost',
+      AppLanguage.om: 'Waliigala Gatii Shallagame',
+      AppLanguage.am: 'ጠቅላላ የተሰላ ዋጋ',
+    },
+    'unitLiters': {
+      AppLanguage.en: 'Liters (L)',
+      AppLanguage.om: 'Liitira (L)',
+      AppLanguage.am: 'ሊትር (L)',
+    },
+    'unitPieces': {
+      AppLanguage.en: 'Pieces (Pcs)',
+      AppLanguage.om: 'Qodaa (Pcs)',
+      AppLanguage.am: 'ፍሬ (Pcs)',
+    },
+    'unitCans': {
+      AppLanguage.en: 'Cans / Tins',
+      AppLanguage.om: 'Qorqoorroo',
+      AppLanguage.am: 'ቆርቆሮ / ጣሳ',
+    },
+    'unitBottles': {
+      AppLanguage.en: 'Bottles',
+      AppLanguage.om: 'Qaruuraa',
+      AppLanguage.am: 'ጠርሙስ',
+    },
+    'unitKg': {
+      AppLanguage.en: 'Kilograms (Kg)',
+      AppLanguage.om: 'Kiiloo (Kg)',
+      AppLanguage.am: 'ኪሎግራም (Kg)',
+    },
+    'unitPacks': {
+      AppLanguage.en: 'Packs / Boxes',
+      AppLanguage.om: 'Saanduqa',
+      AppLanguage.am: 'ፓኮ / ካርቶን',
+    },
+    'unitBars': {
+      AppLanguage.en: 'Bars',
+      AppLanguage.om: 'Kutaalee',
+      AppLanguage.am: 'ሙልጭ / አሞሌ',
+    },
+    'categoryExchangeNote': {
+      AppLanguage.en: 'Category A (Sealed Sprays): Empty-can exchange required',
+      AppLanguage.om: 'Kutaa A (Farra Folii): Qorqoorroo duwwaa deebisuun dirqama',
+      AppLanguage.am: 'ክፍል ሀ (ስፕሬዮች)፡ ባዶ ቆርቆሮ ሲመለስ ብቻ የሚተካ',
+    },
+    'categoryCountNote': {
+      AppLanguage.en: 'Category B (Reusable Tools): Exact piece count in & out',
+      AppLanguage.om: 'Kutaa B (Meeshaalee Hojii): Lakkoofsa qoodamee fi deebi\'e to\'adhu',
+      AppLanguage.am: 'ክፍል ለ (የሚደገሙ ዕቃዎች)፡ የገቡና የወጡ ፍሬዎችን በትክክል መቁጠር',
+    },
+    'categoryLiquidNote': {
+      AppLanguage.en: 'Category C (Bulk Liquids): 1L dispensers with car usage check',
+      AppLanguage.om: 'Kutaa C (Dhangala\'aa): Qodaa 1L konkolaataa dhiqame wajjin madaali',
+      AppLanguage.am: 'ክፍል ሐ (ፈሳሾች)፡ 1 ሊትር ዲስፔንሰር ከመኪኖች ብዛት ጋር ማነጻጸር',
+    },
+
+    // Tabular Mon-Sun Payroll Matrix
+    'weeklyPayrollMatrix': {
+      AppLanguage.en: 'Weekly Payroll & Attendance Matrix',
+      AppLanguage.om: 'Gabatee Hojii fi Miindaa Torbanii',
+      AppLanguage.am: 'ሳምንታዊ የደመወዝ እና የቅጥር ሰንጠረዥ',
+    },
+    'monShort': {
+      AppLanguage.en: 'Mon',
+      AppLanguage.om: 'Wix',
+      AppLanguage.am: 'ሰኞ',
+    },
+    'tueShort': {
+      AppLanguage.en: 'Tue',
+      AppLanguage.om: 'Kib',
+      AppLanguage.am: 'ማክ',
+    },
+    'wedShort': {
+      AppLanguage.en: 'Wed',
+      AppLanguage.om: 'Rob',
+      AppLanguage.am: 'ረቡዕ',
+    },
+    'thuShort': {
+      AppLanguage.en: 'Thu',
+      AppLanguage.om: 'Kam',
+      AppLanguage.am: 'ሐሙስ',
+    },
+    'friShort': {
+      AppLanguage.en: 'Fri',
+      AppLanguage.om: 'Jim',
+      AppLanguage.am: 'አርብ',
+    },
+    'satShort': {
+      AppLanguage.en: 'Sat',
+      AppLanguage.om: 'San',
+      AppLanguage.am: 'ቅዳሜ',
+    },
+    'sunShort': {
+      AppLanguage.en: 'Sun',
+      AppLanguage.om: 'Dil',
+      AppLanguage.am: 'እሑድ',
+    },
+    'presentShort': {
+      AppLanguage.en: 'P',
+      AppLanguage.om: 'H',
+      AppLanguage.am: 'ተገኝቷል',
+    },
+    'absentShort': {
+      AppLanguage.en: 'A',
+      AppLanguage.om: 'D',
+      AppLanguage.am: 'ቀሪ',
+    },
+    'weeklyCommEarned': {
+      AppLanguage.en: 'Weekly Commission',
+      AppLanguage.om: 'Komishiinii Torbanii',
+      AppLanguage.am: 'ሳምንታዊ ኮሚሽን',
+    },
+    'monthlySalary': {
+      AppLanguage.en: 'Monthly Base Salary',
+      AppLanguage.om: 'Miindaa Ji\'aa',
+      AppLanguage.am: 'ወርሃዊ ቋሚ ደመወዝ',
+    },
+    'disburseWeeklyAction': {
+      AppLanguage.en: 'Disburse Commission',
+      AppLanguage.om: 'Komishiinii Kaffali',
+      AppLanguage.am: 'ኮሚሽን ክፈል',
+    },
+    'disbursedStatus': {
+      AppLanguage.en: 'Paid / Disbursed',
+      AppLanguage.om: 'Kaffalameera',
+      AppLanguage.am: 'ተከፍሏል',
+    },
+    'pendingDisbursal': {
+      AppLanguage.en: 'Ready for Disbursal',
+      AppLanguage.om: 'Kaffaltii Eegaa Jira',
+      AppLanguage.am: 'ክፍያ ዝግጁ ነው',
+    },
+
     // Tabs & Filters
     'attendanceAndCommission': {
       AppLanguage.en: 'Attendance & Commission Desk',

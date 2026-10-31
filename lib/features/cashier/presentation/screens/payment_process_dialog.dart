@@ -145,9 +145,30 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               // Digital Payment Fields
               if (_selectedMethod.isDigital) ...[
                 const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.amber.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.shield_rounded, size: 18, color: Colors.amber.shade900),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          state.tr('proofMandatoryNotice'),
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade900),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
                 CustomTextField(
                   controller: _refCodeController,
-                  label: state.tr('transactionRef'),
+                  label: '${state.tr('transactionRef')} *',
                   hint: 'e.g. TB-8932014 or CBE-9923184',
                   prefixIcon: Icons.confirmation_number_outlined,
                 ),
@@ -161,18 +182,18 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
+                      color: _uploadedScreenshotName != null ? AppColors.cashGreen.withOpacity(0.06) : Colors.red.withOpacity(0.04),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: _uploadedScreenshotName != null ? AppColors.cashGreen : AppColors.cardBorder,
+                        color: _uploadedScreenshotName != null ? AppColors.cashGreen : Colors.red.shade300,
                         width: _uploadedScreenshotName != null ? 1.5 : 1,
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
-                          _uploadedScreenshotName != null ? Icons.image_rounded : Icons.upload_file_rounded,
-                          color: _uploadedScreenshotName != null ? AppColors.cashGreen : AppColors.primary,
+                          _uploadedScreenshotName != null ? Icons.image_rounded : Icons.camera_alt_outlined,
+                          color: _uploadedScreenshotName != null ? AppColors.cashGreen : Colors.red.shade700,
                           size: 24,
                         ),
                         const SizedBox(width: 10),
@@ -180,21 +201,29 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                _uploadedScreenshotName != null
-                                    ? 'Attached: $_uploadedScreenshotName'
-                                    : state.tr('uploadReceipt'),
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: _uploadedScreenshotName != null ? AppColors.cashGreen : AppColors.textPrimary,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    _uploadedScreenshotName != null
+                                        ? 'Attached: $_uploadedScreenshotName'
+                                        : state.tr('uploadReceipt'),
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: _uploadedScreenshotName != null ? AppColors.cashGreen : Colors.red.shade800,
+                                    ),
+                                  ),
+                                  const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                ],
                               ),
                               Text(
                                 _uploadedScreenshotName != null
                                     ? state.tr('receiptUploaded')
-                                    : state.tr('uploadReceipt'),
-                                style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+                                    : state.tr('pleaseUploadProof'),
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: _uploadedScreenshotName != null ? AppColors.textMuted : Colors.red.shade700,
+                                ),
                               ),
                             ],
                           ),
@@ -267,6 +296,27 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   Future<void> _handlePaymentConfirm(BuildContext context, double amount) async {
     final state = AppStateProvider.read(context);
     final navigator = Navigator.of(context, rootNavigator: true);
+
+    if (_selectedMethod != PaymentMethod.cash) {
+      if (_refCodeController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.tr('proofMandatoryNotice')),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+        return;
+      }
+      if (_screenshotBase64 == null || _screenshotBase64!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.tr('pleaseUploadProof')),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+        return;
+      }
+    }
 
     setState(() {
       _isProcessing = true;

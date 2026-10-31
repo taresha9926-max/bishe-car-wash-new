@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -159,7 +161,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      '☀️ Morning Shift Handover',
+                      'Morning Shift Handover',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
                     ),
                     Text(
@@ -171,7 +173,29 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+
+          // 3-Category Handling Protocol Badges
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCategoryProtocolRow(Icons.published_with_changes_rounded, state.tr('categoryExchangeNote')),
+                const SizedBox(height: 4),
+                _buildCategoryProtocolRow(Icons.format_list_numbered_rounded, state.tr('categoryCountNote')),
+                const SizedBox(height: 4),
+                _buildCategoryProtocolRow(Icons.opacity_rounded, state.tr('categoryLiquidNote')),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
           ElevatedButton.icon(
             onPressed: () => _showStartHandoverDialog(context, state),
             style: ElevatedButton.styleFrom(
@@ -185,6 +209,21 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCategoryProtocolRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: Colors.amberAccent),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
     );
   }
 
@@ -788,11 +827,21 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       returnedCtrls[id] = TextEditingController(text: '0.0');
     });
 
+    final carsWashed = state.totalCompletedCarsToday as int;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Evening Return & Reconcile', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+        title: Row(
+          children: [
+            const Icon(Icons.assignment_turned_in_rounded, color: Colors.green, size: 22),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text('Evening Return & Reconcile', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+            ),
+          ],
+        ),
         content: SizedBox(
           width: 480,
           child: SingleChildScrollView(
@@ -800,7 +849,37 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Team Leader: ${active.washerTeamLeaderName}', style: const TextStyle(fontWeight: FontWeight.w700)),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Leader: ${active.washerTeamLeaderName}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+                          const Text('Benchmark: ~12–15 cars/L shampoo', style: TextStyle(fontSize: 10.5, color: Colors.blueGrey)),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade700,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '$carsWashed Cars Washed',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 12),
                 const Text('Enter Remaining Supplies Returned to Store:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5)),
                 const SizedBox(height: 8),
@@ -862,62 +941,211 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     final qtyCtrl = TextEditingController();
     final costCtrl = TextEditingController(text: item.unitCostEtb > 0 ? item.unitCostEtb.toStringAsFixed(0) : '');
     final supplierCtrl = TextEditingController();
+    String selectedUnit = item.unit.isNotEmpty ? item.unit : 'Liters';
+    String? invoiceName;
+    String? invoiceBase64;
+
+    const availableUnits = [
+      'Liters',
+      'Pieces',
+      'Cans/Tins',
+      'Bottles',
+      'Kg',
+      'Packs/Boxes',
+      'Bars',
+    ];
+
+    if (!availableUnits.contains(selectedUnit)) {
+      selectedUnit = 'Pieces';
+    }
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Receive New Stock: ${item.name}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: qtyCtrl,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Quantity to Add (${item.unit})',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
+          final unitCost = double.tryParse(costCtrl.text.trim()) ?? (item.unitCostEtb > 0 ? item.unitCostEtb : 0.0);
+          final totalCost = qty * unitCost;
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                const Icon(Icons.add_shopping_cart_rounded, color: Colors.green, size: 22),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Receive: ${item.name}',
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: 440,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Unit of measurement dropdown
+                    Text(state.tr('unitOfMeasurement'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    DropdownButtonFormField<String>(
+                      value: selectedUnit,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      ),
+                      items: availableUnits.map((u) {
+                        return DropdownMenuItem<String>(
+                          value: u,
+                          child: Text(u, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) setDialogState(() => selectedUnit = val);
+                      },
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Quantity
+                    TextField(
+                      controller: qtyCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => setDialogState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Quantity to Add ($selectedUnit) *',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Unit Cost
+                    TextField(
+                      controller: costCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => setDialogState(() {}),
+                      decoration: InputDecoration(
+                        labelText: 'Unit Cost (ETB) *',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Total Calculated Price Live Display Box
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            state.tr('totalCalculatedCost'),
+                            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.green),
+                          ),
+                          Text(
+                            CurrencyFormatter.format(totalCost),
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.green),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Supplier Name
+                    TextField(
+                      controller: supplierCtrl,
+                      decoration: InputDecoration(
+                        labelText: 'Supplier Name / Vendor',
+                        hintText: 'e.g. TotalEnergies Bishoftu / National Chemical',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Invoice Screenshot / Delivery Note
+                    InkWell(
+                      onTap: () {
+                        ImagePickerHelper.pickImage(onPicked: (img) {
+                          setDialogState(() {
+                            invoiceName = img.name;
+                            invoiceBase64 = img.base64Data;
+                          });
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.08) : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: invoiceName != null ? Colors.green : Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              invoiceName != null ? Icons.check_circle_rounded : Icons.camera_alt_outlined,
+                              size: 18,
+                              color: invoiceName != null ? Colors.green : AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                invoiceName ?? 'Attach Invoice / Delivery Note Photo',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: invoiceName != null ? Colors.green : AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: costCtrl,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Unit Cost (ETB)',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: () async {
+                  final validQty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
+                  final validCost = double.tryParse(costCtrl.text.trim()) ?? item.unitCostEtb;
+                  if (validQty <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid quantity greater than 0')),
+                    );
+                    return;
+                  }
+                  await state.receiveStock(
+                    itemId: item.id,
+                    quantity: validQty,
+                    unitCostEtb: validCost,
+                    supplier: supplierCtrl.text.trim().isNotEmpty ? supplierCtrl.text.trim() : 'Local Bishoftu Supplier',
+                    unit: selectedUnit,
+                    invoiceScreenshot: invoiceBase64,
+                  );
+                  Navigator.pop(ctx);
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                child: const Text('Confirm Receive'),
               ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: supplierCtrl,
-              decoration: InputDecoration(
-                labelText: 'Supplier Name',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
-              final cost = double.tryParse(costCtrl.text.trim()) ?? item.unitCostEtb;
-              if (qty > 0) {
-                await state.receiveStock(
-                  itemId: item.id,
-                  quantity: qty,
-                  unitCostEtb: cost,
-                  supplier: supplierCtrl.text.trim(),
-                );
-              }
-              Navigator.pop(ctx);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-            child: const Text('Confirm Receive'),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

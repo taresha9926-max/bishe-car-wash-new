@@ -17,6 +17,7 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'bank_deposit_dialog.dart';
 import 'daily_closing_dialog.dart';
 import 'payment_process_dialog.dart';
+import 'petty_cash_dialog.dart';
 import 'phone_booking_dialog.dart';
 import 'walk_in_registration_screen.dart';
 import 'weekly_commission_report_dialog.dart';
@@ -326,7 +327,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Fast Action Buttons: Deposit Cash & Confirm Daily Closing (Disabled once confirmed)
+          // 1. Fast Action Buttons: Deposit Cash, Log Petty Cash, & Confirm Daily Closing
           if (isMobile) ...[
             SizedBox(
               width: double.infinity,
@@ -348,6 +349,34 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.indigo,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => PettyCashDialog.show(context),
+                icon: const Icon(Icons.outbox_rounded, size: 16),
+                label: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      state.tr('logPettyCash'),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                    ),
+                    Text(
+                      '${CurrencyFormatter.formatShort(state.todayPettyCashExpensesETB as double)} logged',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
+                    ),
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -409,6 +438,36 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.indigo,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Log Petty Cash Button
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => PettyCashDialog.show(context),
+                    icon: const Icon(Icons.outbox_rounded, size: 16),
+                    label: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          state.tr('logPettyCash'),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                        ),
+                        Text(
+                          '${CurrencyFormatter.formatShort(state.todayPettyCashExpensesETB as double)} recorded',
+                          style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

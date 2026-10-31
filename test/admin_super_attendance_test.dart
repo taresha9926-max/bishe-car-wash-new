@@ -154,6 +154,16 @@ void main() {
     });
 
     test('Paid vehicle lifecycle: vanishes from active queue and is in history', () async {
+      await state.registerWalkIn(
+        licensePlate: 'AA-2-B44810',
+        customerName: 'Abebe Test',
+        customerPhone: '0911223344',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.cash,
+      );
+
       final initialQueue = state.bookings.where((b) => !b.payment.isPaid).toList();
       expect(initialQueue.length, greaterThan(0));
 

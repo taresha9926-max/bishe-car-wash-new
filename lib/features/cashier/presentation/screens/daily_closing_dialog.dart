@@ -42,6 +42,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
     final comm = state.teamCommissionPoolTodayETB;
     final net = gross - comm;
     final deposited = state.totalCashDepositedTodayETB;
+    final petty = state.todayPettyCashExpensesETB;
     final remainingCash = state.undepositedCashTodayETB;
     final dividends = state.washerDividendsToday;
     final isAlreadyClosed = state.isTodayClosed;
@@ -121,6 +122,8 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                     _buildClosingRow('Remaining Station Net Profit:', CurrencyFormatter.format(net), isBold: true, valueColor: AppColors.statusCompleted),
                     const Divider(height: 16),
                     _buildClosingRow('Cash Deposited to Bank (A/B):', CurrencyFormatter.format(deposited), valueColor: Colors.indigo),
+                    const SizedBox(height: 4),
+                    _buildClosingRow('Petty Cash / Emergency Outflow:', CurrencyFormatter.format(petty), valueColor: Colors.deepOrange),
                     const SizedBox(height: 4),
                     _buildClosingRow('Cash Balance in Drawer:', CurrencyFormatter.format(remainingCash), isBold: true, valueColor: remainingCash > 0 ? AppColors.primary : AppColors.textSecondary),
                   ],

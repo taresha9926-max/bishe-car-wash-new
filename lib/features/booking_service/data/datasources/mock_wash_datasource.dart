@@ -236,8 +236,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 5800.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 22,
-        totalCommissionEarnedETB: 2450.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 4,
       ),
       const StaffMember(
@@ -248,8 +248,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 5000.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 19,
-        totalCommissionEarnedETB: 1950.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 3,
       ),
       const StaffMember(
@@ -260,8 +260,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 5800.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 21,
-        totalCommissionEarnedETB: 2200.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 4,
       ),
       const StaffMember(
@@ -272,8 +272,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 4800.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 17,
-        totalCommissionEarnedETB: 1750.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 3,
       ),
       const StaffMember(
@@ -284,8 +284,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 4600.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 15,
-        totalCommissionEarnedETB: 1550.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 2,
       ),
       const StaffMember(
@@ -296,8 +296,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 4600.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 14,
-        totalCommissionEarnedETB: 1400.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 2,
       ),
       const StaffMember(
@@ -308,8 +308,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 4200.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 12,
-        totalCommissionEarnedETB: 1200.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 1,
       ),
       const StaffMember(
@@ -320,8 +320,8 @@ class MockWashDataSource {
         baseSalaryMonthlyETB: 4200.0,
         commissionRate: 0.15,
         isAvailable: true,
-        completedWashesCount: 11,
-        totalCommissionEarnedETB: 1100.0,
+        completedWashesCount: 0,
+        totalCommissionEarnedETB: 0.0,
         skillSeniorityLevel: 1,
       ),
       const StaffMember(
@@ -340,157 +340,26 @@ class MockWashDataSource {
 
   static List<StationBay> getInitialBays() {
     return [
-      StationBay(
+      const StationBay(
         type: BayType.bay1,
-        status: BayStatus.occupied,
-        activeBookingId: 'BSH-101',
-        activeLicensePlate: 'ET-3-B48210',
-        assignedWasherName: 'Abebe Chala',
-        startedAt: DateTime.now().subtract(const Duration(minutes: 15)),
+        status: BayStatus.vacant,
       ),
       const StationBay(
         type: BayType.bay2,
         status: BayStatus.vacant,
       ),
-      StationBay(
+      const StationBay(
         type: BayType.mobileVan,
-        status: BayStatus.occupied,
-        activeBookingId: 'BSH-102',
-        activeLicensePlate: 'ET-1-A90234',
-        assignedWasherName: 'Gemechu Desta',
-        startedAt: DateTime.now().subtract(const Duration(minutes: 35)),
+        status: BayStatus.vacant,
       ),
     ];
   }
 
   static List<WashBooking> getInitialBookings(List<WashPackage> packages) {
-    final standardPkg = packages[1]; // Standard Clean
-    final expressPkg = packages[0];  // Express
-    final executivePkg = packages[2];// Executive
-
-    return [
-      WashBooking(
-        id: 'BSH-101',
-        customerName: 'Dawit Yohannes',
-        customerPhone: '+251 91 222 3344',
-        serviceType: ServiceType.walkInStation,
-        carType: CarType.automobile,
-        licensePlate: 'ET-3-B48210',
-        package: standardPkg,
-        status: WashStatus.washing,
-        assignedBay: BayType.bay1,
-        assignedWasherId: 'stf-01',
-        assignedWasherName: 'Abebe Chala',
-        payment: const PaymentInfo(
-          isPaid: true,
-          method: PaymentMethod.telebirr,
-          amount: 500.0,
-          transactionRef: 'TB-98321045',
-        ),
-        createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
-      ),
-      WashBooking(
-        id: 'BSH-102',
-        customerName: 'Saba Tadesse',
-        customerPhone: '+251 92 777 8899',
-        serviceType: ServiceType.atHomeMobile,
-        deliveryLocation: 'Kuriftu Resort Villa 12, Bishoftu',
-        carType: CarType.minibus,
-        licensePlate: 'ET-1-A90234',
-        package: executivePkg,
-        status: WashStatus.drying,
-        assignedBay: BayType.mobileVan,
-        assignedWasherId: 'stf-04',
-        assignedWasherName: 'Gemechu Desta',
-        payment: const PaymentInfo(
-          isPaid: false,
-          method: PaymentMethod.cash,
-          amount: 1950.0,
-        ),
-        createdAt: DateTime.now().subtract(const Duration(minutes: 50)),
-      ),
-      WashBooking(
-        id: 'BSH-103',
-        customerName: 'Biruk Bekele',
-        customerPhone: '+251 93 111 4455',
-        serviceType: ServiceType.walkInStation,
-        carType: CarType.minibus,
-        licensePlate: 'ET-3-M54321',
-        package: expressPkg,
-        status: WashStatus.pending,
-        payment: const PaymentInfo(
-          isPaid: false,
-          method: PaymentMethod.cbeBirr,
-          amount: 450.0,
-        ),
-        createdAt: DateTime.now().subtract(const Duration(minutes: 10)),
-      ),
-      WashBooking(
-        id: 'BSH-100',
-        customerName: 'Rahel Girma',
-        customerPhone: '+251 91 666 5544',
-        serviceType: ServiceType.walkInStation,
-        carType: CarType.automobile,
-        licensePlate: 'ET-3-A11223',
-        package: expressPkg,
-        status: WashStatus.completed,
-        assignedBay: BayType.bay2,
-        assignedWasherId: 'stf-02',
-        assignedWasherName: 'Kedir Tolosa',
-        payment: const PaymentInfo(
-          isPaid: true,
-          method: PaymentMethod.cash,
-          amount: 300.0,
-          paidAt: null,
-        ),
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        completedAt: DateTime.now().subtract(const Duration(hours: 1)),
-        commissionLogged: true,
-      ),
-    ];
+    return [];
   }
 
   static List<CommissionLog> getInitialCommissionLogs() {
-    return [
-      CommissionLog(
-        id: 'COM-001',
-        bookingId: 'BSH-100',
-        washerId: 'stf-02',
-        washerName: 'Kedir Tolosa',
-        carPlate: 'ET-3-A11223',
-        carType: CarType.automobile,
-        servicePackageName: 'Express Foam Wash',
-        totalWashPriceETB: 300.0,
-        commissionRate: 0.15,
-        commissionEarnedETB: 45.0,
-        completedAt: DateTime.now().subtract(const Duration(hours: 1)),
-      ),
-      CommissionLog(
-        id: 'COM-000',
-        bookingId: 'BSH-099',
-        washerId: 'stf-03',
-        washerName: 'Tigist Mengistu',
-        carPlate: 'ET-2-C99881',
-        carType: CarType.minibus,
-        servicePackageName: 'Executive Detailing & Wax',
-        totalWashPriceETB: 1950.0,
-        commissionRate: 0.18,
-        commissionEarnedETB: 351.0,
-        completedAt: DateTime.now().subtract(const Duration(hours: 4)),
-      ),
-      CommissionLog(
-        id: 'COM-000b',
-        bookingId: 'BSH-098',
-        washerId: 'stf-01',
-        washerName: 'Abebe Chala',
-        carPlate: 'ET-3-M77889',
-        carType: CarType.minibus,
-        servicePackageName: 'Standard Clean & Vacuum',
-        totalWashPriceETB: 750.0,
-        commissionRate: 0.15,
-        commissionEarnedETB: 112.5,
-        completedAt: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-    ];
+    return [];
   }
 }

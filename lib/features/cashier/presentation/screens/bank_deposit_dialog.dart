@@ -199,19 +199,47 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               ),
               const SizedBox(height: 12),
 
+              // Stamped Slip Mandatory Notice
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.amber.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.shield_rounded, size: 18, color: Colors.amber.shade900),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.tr('depositSlipMandatoryNotice'),
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade900),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               // Slip / Transaction Ref Number
               CustomTextField(
                 controller: _slipController,
-                label: state.tr('bankSlipNumber'),
+                label: '${state.tr('bankSlipNumber')} *',
                 hint: 'e.g. CBE-SLIP-984210 or AW-DEP-4491',
                 prefixIcon: Icons.receipt_long_rounded,
               ),
               const SizedBox(height: 12),
 
               // Receipt Screenshot Upload
-              Text(
-                state.tr('uploadDepositSlip'),
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              Row(
+                children: [
+                  Text(
+                    state.tr('uploadDepositSlip'),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  ),
+                  const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                ],
               ),
               const SizedBox(height: 6),
               InkWell(
@@ -221,31 +249,31 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
                   decoration: BoxDecoration(
-                    color: _uploadedReceiptName != null ? AppColors.cashGreen.withOpacity(0.06) : AppColors.surfaceVariant,
+                    color: _uploadedReceiptName != null ? AppColors.cashGreen.withOpacity(0.06) : Colors.red.withOpacity(0.04),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _uploadedReceiptName != null ? AppColors.cashGreen : AppColors.cardBorder,
-                      style: BorderStyle.solid,
+                      color: _uploadedReceiptName != null ? AppColors.cashGreen : Colors.red.shade300,
+                      width: _uploadedReceiptName != null ? 1.5 : 1,
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        _uploadedReceiptName != null ? Icons.check_circle_rounded : Icons.cloud_upload_outlined,
-                        color: _uploadedReceiptName != null ? AppColors.cashGreen : AppColors.primary,
+                        _uploadedReceiptName != null ? Icons.check_circle_rounded : Icons.camera_alt_outlined,
+                        color: _uploadedReceiptName != null ? AppColors.cashGreen : Colors.red.shade700,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          _uploadedReceiptName ?? state.tr('uploadDepositSlip'),
+                          _uploadedReceiptName ?? state.tr('pleaseUploadDepositSlip'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: _uploadedReceiptName != null ? AppColors.cashGreen : AppColors.textPrimary,
+                            color: _uploadedReceiptName != null ? AppColors.cashGreen : Colors.red.shade700,
                           ),
                         ),
                       ),
@@ -357,6 +385,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
   }
 
   Future<void> _handleDepositSubmit() async {
+    final state = AppStateProvider.read(context);
     final amountText = _amountController.text.trim();
     final amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) {
@@ -369,9 +398,26 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
       return;
     }
 
-    final slipRef = _slipController.text.trim().isNotEmpty
-        ? _slipController.text.trim()
-        : 'SLIP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    final slipRef = _slipController.text.trim();
+    if (slipRef.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('depositSlipMandatoryNotice')),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+      return;
+    }
+
+    if (_receiptBase64 == null || _receiptBase64!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('pleaseUploadDepositSlip')),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+      return;
+    }
 
     final cashierName = _cashierNameController.text.trim().isNotEmpty
         ? _cashierNameController.text.trim()
