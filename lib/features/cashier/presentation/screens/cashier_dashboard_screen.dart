@@ -394,11 +394,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isClosed ? 'Daily Closing Confirmed ✓' : state.tr('confirmDailyClosing'),
+                      isClosed ? 'Daily Closing Confirmed' : state.tr('confirmDailyClosing'),
                       style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
                     ),
                     Text(
-                      isClosed ? 'Shift locked ✓' : 'Reconcile register',
+                      isClosed ? 'Shift locked' : 'Reconcile register',
                       style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
                     ),
                   ],
@@ -491,7 +491,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
                         ),
                         Text(
-                          isClosed ? 'Shift locked ✓' : 'Reconcile register & commission',
+                          isClosed ? 'Shift locked' : 'Reconcile register & commission',
                           style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
                         ),
                       ],
@@ -892,7 +892,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       );
     } else if ((b.status == WashStatus.completed || b.status == WashStatus.readyForPickup) && !b.payment.isPaid) {
       final payLabel = state.currentLang == 'EN'
-          ? 'Pay 💰 (${CurrencyFormatter.format(b.totalPrice)})'
+          ? 'Pay (${CurrencyFormatter.format(b.totalPrice)})'
           : '${state.tr("collectPaymentAction")} (${CurrencyFormatter.format(b.totalPrice)})';
 
       return SizedBox(
@@ -1109,7 +1109,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               icon: const Icon(Icons.payments_rounded, size: 14),
               label: Text(
                 state.currentLang == 'EN'
-                    ? 'Pay 💰 (${CurrencyFormatter.formatShort(b.totalPrice)})'
+                    ? 'Pay (${CurrencyFormatter.formatShort(b.totalPrice)})'
                     : '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
               ),
@@ -1947,7 +1947,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
     if (context.mounted) {
       final msg = next == WashStatus.completed
-          ? '${booking.licensePlate} completed! Ready for payment 💰 • SMS ready for ${booking.customerPhone}'
+          ? '${booking.licensePlate} completed! Ready for payment • SMS ready for ${booking.customerPhone}'
           : '${booking.licensePlate} updated to ${next.displayName}!';
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1956,14 +1956,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           backgroundColor: next == WashStatus.completed ? AppColors.cashGreen : next.color,
           action: next == WashStatus.completed
               ? SnackBarAction(
-                  label: 'Copy SMS 📋',
+                  label: 'Copy SMS',
                   textColor: Colors.amberAccent,
                   onPressed: () {
                     final sms = state.getCustomerCompletionSmsText(booking);
                     Clipboard.setData(ClipboardData(text: sms));
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Customer SMS message copied to clipboard! 📋'),
+                        content: Text('Customer SMS message copied to clipboard!'),
                         duration: Duration(seconds: 2),
                       ),
                     );

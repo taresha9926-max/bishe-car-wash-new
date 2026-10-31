@@ -199,7 +199,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                                         ),
                                       ),
                                       const Text(
-                                        'edit ✏️',
+                                        'edit',
                                         style: TextStyle(fontSize: 9, color: AppColors.textMuted),
                                       ),
                                     ],

@@ -286,7 +286,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
 
               // Submit Action
               CustomButton(
-                text: 'Book Now 🚗 • ${CurrencyFormatter.format(price)}',
+                text: 'Book Now • ${CurrencyFormatter.format(price)}',
                 icon: Icons.bookmark_added_rounded,
                 isLoading: _isSubmitting,
                 onPressed: () => _handleSubmitWalkIn(context),

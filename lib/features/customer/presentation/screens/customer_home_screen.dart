@@ -102,7 +102,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       subtitle: state.tr('driveInSub'),
                       badge: '${state.availableBaysCount} ${state.tr('availableNow')}',
                       isAvailable: state.availableBaysCount > 0,
-                      icon: Icons.local_car_wash_rounded,
+                      imageUrl: 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&auto=format&fit=crop&q=80',
+                      fallbackIcon: Icons.local_car_wash_rounded,
                       color: AppColors.bay1Color,
                       actionLabel: state.tr('bookNow'),
                       onTap: () => _openBookingFlow(context, ServiceType.walkInStation),
@@ -116,7 +117,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       subtitle: state.tr('atHomeSub'),
                       badge: state.isMobileVanAvailable ? state.tr('availableNow') : state.tr('busyWashing'),
                       isAvailable: state.isMobileVanAvailable,
-                      icon: Icons.rv_hookup_rounded,
+                      imageUrl: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&auto=format&fit=crop&q=80',
+                      fallbackIcon: Icons.rv_hookup_rounded,
                       color: AppColors.mobileVanColor,
                       actionLabel: state.tr('bookNow'),
                       onTap: () => _openBookingFlow(context, ServiceType.atHomeMobile),
@@ -503,13 +505,43 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     }
   }
 
+  String _getPackageImageUrl(WashPackage pkg) {
+    final pName = pkg.name.toLowerCase();
+    if (pName.contains('foam') || pName.contains('express')) {
+      return 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&auto=format&fit=crop&q=80';
+    } else if (pName.contains('vacuum') || pName.contains('standard') || pName.contains('interior')) {
+      return 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=600&auto=format&fit=crop&q=80';
+    } else if (pName.contains('spa') || pName.contains('deluxe') || pName.contains('ceramic') || pName.contains('polish')) {
+      return 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=600&auto=format&fit=crop&q=80';
+    } else if (pName.contains('mobile') || pName.contains('van')) {
+      return 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&auto=format&fit=crop&q=80';
+    } else if (pName.contains('engine') || pName.contains('steam')) {
+      return 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=600&auto=format&fit=crop&q=80';
+    } else if (pName.contains('wheel') || pName.contains('tire') || pName.contains('rim')) {
+      return 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=600&auto=format&fit=crop&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&auto=format&fit=crop&q=80';
+  }
+
+  String _getCarTypeImageUrl(CarType type) {
+    switch (type) {
+      case CarType.automobile:
+        return 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=400&auto=format&fit=crop&q=80';
+      case CarType.minibus:
+        return 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&auto=format&fit=crop&q=80';
+      case CarType.truck:
+        return 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&auto=format&fit=crop&q=80';
+    }
+  }
+
   Widget _buildServiceActionCard(
     BuildContext context, {
     required String title,
     required String subtitle,
     required String badge,
     required bool isAvailable,
-    required IconData icon,
+    required String imageUrl,
+    required IconData fallbackIcon,
     required Color color,
     required String actionLabel,
     required VoidCallback onTap,
@@ -518,11 +550,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isAvailable ? color.withOpacity(0.3) : AppColors.cardBorder, width: 1.5),
+          border: Border.all(color: isAvailable ? color.withOpacity(0.35) : AppColors.cardBorder, width: 1.5),
           boxShadow: [
             BoxShadow(
               color: color.withOpacity(0.06),
@@ -534,54 +565,90 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 24),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: isAvailable ? AppColors.statusReady.withOpacity(0.12) : AppColors.statusWashing.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    badge,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w800,
-                      color: isAvailable ? AppColors.statusReady : AppColors.statusWashing,
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+              child: Stack(
+                children: [
+                  Image.network(
+                    imageUrl,
+                    height: 80,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 80,
+                      color: color.withOpacity(0.12),
+                      child: Center(child: Icon(fallbackIcon, color: color, size: 28)),
                     ),
                   ),
-                ),
-              ],
+                  Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.black.withOpacity(0.1), Colors.black.withOpacity(0.65)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: isAvailable ? AppColors.statusReady : AppColors.statusWashing,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        badge,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.textPrimary),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              subtitle,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Text(
-                  actionLabel,
-                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: color),
-                ),
-                const SizedBox(width: 4),
-                Icon(Icons.arrow_forward_rounded, size: 14, color: color),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        actionLabel,
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_rounded, size: 14, color: color),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -607,26 +674,41 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               borderRadius: BorderRadius.circular(10),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(vertical: 9),
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary : Colors.transparent,
+                    width: 1.5,
+                  ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      type.icon,
-                      size: 16,
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        _getCarTypeImageUrl(type),
+                        width: 44,
+                        height: 32,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          type.icon,
+                          size: 20,
+                          color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                        ),
+                      ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(height: 4),
                     Text(
                       type.localizedName(state.currentLang),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        fontSize: 11.5,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: isSelected ? AppColors.primary : AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -639,84 +721,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildPackageDropdown(dynamic state) {
-    final packages = state.packages as List<WashPackage>;
-    if (packages.isEmpty) return const SizedBox.shrink();
-
-    final activeId = _selectedPackageId ?? packages.first.id;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.35)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          isExpanded: true,
-          value: packages.any((p) => p.id == activeId) ? activeId : packages.first.id,
-          icon: const Icon(Icons.arrow_drop_down_circle_outlined, color: AppColors.primary, size: 20),
-          items: packages.map((pkg) {
-            final price = pkg.getPriceFor(_previewCarType);
-            return DropdownMenuItem<String>(
-              value: pkg.id,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      pkg.localizedName(state.currentLang),
-                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    CurrencyFormatter.format(price),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: (val) {
-            if (val != null) {
-              setState(() => _selectedPackageId = val);
-            }
-          },
-        ),
-      ),
-    );
-  }
-
   Widget _buildPackageCard(BuildContext context, dynamic state, WashPackage pkg) {
     final packages = state.packages as List<WashPackage>;
     final activeId = _selectedPackageId ?? (packages.isNotEmpty ? packages.first.id : null);
     final isSelected = pkg.id == activeId;
     final price = pkg.getPriceFor(_previewCarType);
-
-    // Dynamic auto-care thumbnail styling based on package tier
-    IconData thumbIcon = Icons.local_car_wash_rounded;
-    Color gradientStart = AppColors.primary;
-    Color gradientEnd = AppColors.primaryDark;
-    final pName = pkg.name.toLowerCase();
-    if (pName.contains('foam') || pName.contains('express')) {
-      thumbIcon = Icons.waves_rounded;
-      gradientStart = const Color(0xFF06B6D4);
-      gradientEnd = const Color(0xFF0284C7);
-    } else if (pName.contains('vacuum') || pName.contains('standard')) {
-      thumbIcon = Icons.cleaning_services_rounded;
-      gradientStart = const Color(0xFF0D9488);
-      gradientEnd = const Color(0xFF047857);
-    } else if (pName.contains('spa') || pName.contains('deluxe') || pName.contains('steam')) {
-      thumbIcon = Icons.auto_awesome_rounded;
-      gradientStart = const Color(0xFFD97706);
-      gradientEnd = const Color(0xFFB45309);
-    } else if (pName.contains('mobile') || pName.contains('van')) {
-      thumbIcon = Icons.rv_hookup_rounded;
-      gradientStart = const Color(0xFF4F46E5);
-      gradientEnd = const Color(0xFF3730A3);
-    }
+    final photoUrl = _getPackageImageUrl(pkg);
 
     return GestureDetector(
       onTap: () => setState(() => _selectedPackageId = pkg.id),
@@ -745,27 +755,49 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // High-Gloss Auto-Care Photographic Thumbnail Box
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [gradientStart, gradientEnd],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                // Real AI Photographic Thumbnail with Duration Pill
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 58,
+                    height: 58,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          photoUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: AppColors.primary.withOpacity(0.12),
+                            child: const Icon(Icons.local_car_wash_rounded, color: AppColors.primary, size: 24),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.transparent, Colors.black.withOpacity(0.55)],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 3,
+                          left: 3,
+                          right: 3,
+                          child: Text(
+                            '${pkg.durationMinutes}m',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              shadows: [Shadow(color: Colors.black, blurRadius: 3)],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: gradientStart.withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(thumbIcon, color: Colors.white, size: 22),
                   ),
                 ),
                 const SizedBox(width: 10),

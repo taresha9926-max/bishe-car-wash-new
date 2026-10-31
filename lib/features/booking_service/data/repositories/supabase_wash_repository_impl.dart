@@ -679,7 +679,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (data == null || data is! List || data.isEmpty) {
         return _fallbackLocalRepo.getStaffCredentials();
       }
-      return data
+      final creds = data
           .map((json) {
             final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
             final role = roleStr == 'admin'
@@ -705,6 +705,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           })
           .where((cred) => cred.username != 'app_config_tiktok_reels')
           .toList();
+
+      if (creds.isEmpty) {
+        return _fallbackLocalRepo.getStaffCredentials();
+      }
+      return creds;
     } catch (_) {
       return _fallbackLocalRepo.getStaffCredentials();
     }

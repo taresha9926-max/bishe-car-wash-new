@@ -457,7 +457,7 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                         ),
                       ),
                       Text(
-                        '🎵 $subtitle',
+                        subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

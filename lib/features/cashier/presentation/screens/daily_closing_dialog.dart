@@ -240,7 +240,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               // Action Buttons
               if (isAlreadyClosed)
                 CustomButton(
-                  text: 'Daily Closing Confirmed ✓ (Shift Locked)',
+                  text: 'Daily Closing Confirmed (Shift Locked)',
                   icon: Icons.lock_outline_rounded,
                   backgroundColor: Colors.grey.shade600,
                   isLoading: false,

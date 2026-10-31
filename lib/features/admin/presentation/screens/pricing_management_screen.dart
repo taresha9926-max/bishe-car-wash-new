@@ -276,7 +276,14 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                                       color: AppColors.primaryDark,
                                     ),
                                   ),
-                                  const Text('edit ✏️', style: TextStyle(fontSize: 9, color: AppColors.textMuted)),
+                                  const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('edit', style: TextStyle(fontSize: 9, color: AppColors.textMuted)),
+                                      SizedBox(width: 2),
+                                      Icon(Icons.edit_outlined, size: 9, color: AppColors.textMuted),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

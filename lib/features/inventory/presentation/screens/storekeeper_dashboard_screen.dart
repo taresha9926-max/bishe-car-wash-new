@@ -350,9 +350,15 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             ),
             const SizedBox(height: 8),
             if (h.carsWashedDuringShift > 0)
-              Text(
-                '🚗 Cars Washed During Shift: ${h.carsWashedDuringShift}',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+              Row(
+                children: [
+                  const Icon(Icons.directions_car_rounded, size: 14, color: AppColors.primary),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Cars Washed During Shift: ${h.carsWashedDuringShift}',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+                  ),
+                ],
               ),
             const SizedBox(height: 6),
             Wrap(
@@ -399,12 +405,24 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                   if (lowStockCount > 0)
-                    Text(
-                      '⚠️ $lowStockCount item(s) below reorder threshold',
-                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red.shade700),
+                    Row(
+                      children: [
+                        Icon(Icons.warning_amber_rounded, size: 14, color: Colors.red.shade700),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$lowStockCount item(s) below reorder threshold',
+                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red.shade700),
+                        ),
+                      ],
                     )
                   else
-                    const Text('🟢 All stock levels healthy', style: TextStyle(fontSize: 11.5, color: Colors.green)),
+                    const Row(
+                      children: [
+                        Icon(Icons.check_circle_rounded, size: 14, color: Colors.green),
+                        SizedBox(width: 4),
+                        Text('All stock levels healthy', style: TextStyle(fontSize: 11.5, color: Colors.green)),
+                      ],
+                    ),
                 ],
               ),
               const Spacer(),

@@ -315,9 +315,9 @@ class AppStrings {
       AppLanguage.am: 'ያለ ምንም ሰልፍ ፈጣን እና ዘመናዊ የእጥበት አገልግሎት',
     },
     'openGoogleMaps': {
-      AppLanguage.en: 'Open in Google Maps 📍',
-      AppLanguage.om: 'Kaartaa Google irratti Bani 📍',
-      AppLanguage.am: 'በጉግል ካርታ ክፈት 📍',
+      AppLanguage.en: 'Open in Google Maps',
+      AppLanguage.om: 'Kaartaa Google irratti Bani',
+      AppLanguage.am: 'በጉግል ካርታ ክፈት',
     },
     'locateBisheStation': {
       AppLanguage.en: 'Locate BISHE Station',
@@ -415,14 +415,14 @@ class AppStrings {
       AppLanguage.am: 'በቲክቶክ አፕ ይመልከቱ',
     },
     'openInTikTok': {
-      AppLanguage.en: 'Open in TikTok 🎵',
-      AppLanguage.om: 'TikTok irratti Bani 🎵',
-      AppLanguage.am: 'በቲክቶክ ክፈት 🎵',
+      AppLanguage.en: 'Open in TikTok',
+      AppLanguage.om: 'TikTok irratti Bani',
+      AppLanguage.am: 'በቲክቶክ ክፈት',
     },
     'redirectingToTikTok': {
-      AppLanguage.en: 'Redirecting to TikTok app... 🎵',
-      AppLanguage.om: 'Gara App TikToktti dabarsaa jira... 🎵',
-      AppLanguage.am: 'ወደ ቲክቶክ አፕ በመሄድ ላይ... 🎵',
+      AppLanguage.en: 'Redirecting to TikTok app...',
+      AppLanguage.om: 'Gara App TikToktti dabarsaa jira...',
+      AppLanguage.am: 'ወደ ቲክቶክ አፕ በመሄድ ላይ...',
     },
     'stationBishoftuLocation': {
       AppLanguage.en: 'Bishoftu (Debre Zeyit), Oromia, Ethiopia',
@@ -467,24 +467,24 @@ class AppStrings {
 
     // Readable Progression & Payment Lock
     'startWashAction': {
-      AppLanguage.en: 'Start Wash 🚿',
-      AppLanguage.om: 'Dhiqannaa Jalqabi 🚿',
-      AppLanguage.am: 'እጥበት ጀምር 🚿',
+      AppLanguage.en: 'Start Wash',
+      AppLanguage.om: 'Dhiqannaa Jalqabi',
+      AppLanguage.am: 'እጥበት ጀምር',
     },
     'moveToDryingAction': {
-      AppLanguage.en: 'Move to Drying 💨',
-      AppLanguage.om: 'Gogsatti Dabarsi 💨',
-      AppLanguage.am: 'ወደ ማድረቅ አሳልፍ 💨',
+      AppLanguage.en: 'Move to Drying',
+      AppLanguage.om: 'Gogsatti Dabarsi',
+      AppLanguage.am: 'ወደ ማድረቅ አሳልፍ',
     },
     'markCompletedAction': {
-      AppLanguage.en: 'Mark Completed 🚗',
-      AppLanguage.om: 'Xumurameera Jedhi 🚗',
-      AppLanguage.am: 'ተጠናቋል በል 🚗',
+      AppLanguage.en: 'Mark Completed',
+      AppLanguage.om: 'Xumurameera Jedhi',
+      AppLanguage.am: 'ተጠናቋል በል',
     },
     'collectPaymentAction': {
-      AppLanguage.en: 'Collect Payment 💰',
-      AppLanguage.om: 'Kaffaltii Fudhadhu 💰',
-      AppLanguage.am: 'ክፍያ ተቀበል 💰',
+      AppLanguage.en: 'Collect Payment',
+      AppLanguage.om: 'Kaffaltii Fudhadhu',
+      AppLanguage.am: 'ክፍያ ተቀበል',
     },
     'paymentLockedUntilCompleted': {
       AppLanguage.en: 'Payment unlocks after vehicle is marked completed',
@@ -492,9 +492,9 @@ class AppStrings {
       AppLanguage.am: 'ክፍያ የሚፈቀደው እጥበቱ ተጠናቋል ተብሎ ከተረጋገጠ በኋላ ብቻ ነው',
     },
     'registerPhoneBooking': {
-      AppLanguage.en: 'Register Phone Booking 📞',
-      AppLanguage.om: 'Galmee Bilbilaa 📞',
-      AppLanguage.am: 'የስልክ ጥሪ ትዕዛዝ መዝግብ 📞',
+      AppLanguage.en: 'Register Phone Booking',
+      AppLanguage.om: 'Galmee Bilbilaa',
+      AppLanguage.am: 'የስልክ ጥሪ ትዕዛዝ መዝግብ',
     },
     'phoneBookingCallerName': {
       AppLanguage.en: 'Caller / Customer Name',
@@ -1466,9 +1466,9 @@ class AppStrings {
       AppLanguage.am: 'የዲጂታል ገንዘብ ዝውውር',
     },
     'shiftLocked': {
-      AppLanguage.en: 'Shift Locked ✓',
-      AppLanguage.om: 'Hojiin Cufameera ✓',
-      AppLanguage.am: 'ተዘግቷል ✓',
+      AppLanguage.en: 'Shift Locked',
+      AppLanguage.om: 'Hojiin Cufameera',
+      AppLanguage.am: 'ተዘግቷል',
     },
     'smsSentSuccess': {
       AppLanguage.en: 'Completion SMS dispatched to customer',

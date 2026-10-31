@@ -310,7 +310,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
 
               // Confirm Action
               CustomButton(
-                text: 'Confirm Phone Reservation 📞',
+                text: 'Confirm Phone Reservation',
                 isLoading: _isSubmitting,
                 onPressed: () => _submitPhoneBooking(context, state),
               ),
@@ -334,7 +334,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
       }
 
       await state.bookNewWash(
-        customerName: '${_callerNameController.text.trim()} [Phone 📞]',
+        customerName: '${_callerNameController.text.trim()} [Phone]',
         customerPhone: _phoneController.text.trim(),
         serviceType: _serviceType,
         carType: _carType,

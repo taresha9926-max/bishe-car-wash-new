@@ -228,7 +228,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           backgroundColor: Colors.blue.shade50,
           child: const Icon(Icons.account_balance, color: AppColors.primary, size: 20),
         ),
-        title: Text('${CurrencyFormatter.format(d.amount)} ➔ ${d.targetAccount}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+        title: Text('${CurrencyFormatter.format(d.amount)} → ${d.targetAccount}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
         subtitle: Text('Slip #: ${d.referenceSlipNumber} • Cashier: ${d.cashierName}', style: const TextStyle(fontSize: 11.5)),
         trailing: d.receiptScreenshot != null && d.receiptScreenshot!.isNotEmpty
             ? TextButton.icon(
@@ -856,13 +856,10 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                         border: Border.all(color: isPresent ? Colors.green.shade400 : Colors.red.shade400),
                       ),
                       child: Center(
-                        child: Text(
-                          isPresent ? '✓' : '✗',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: isPresent ? Colors.green.shade900 : Colors.red.shade900,
-                          ),
+                        child: Icon(
+                          isPresent ? Icons.check_rounded : Icons.close_rounded,
+                          size: 12,
+                          color: isPresent ? Colors.green.shade900 : Colors.red.shade900,
                         ),
                       ),
                     ),
