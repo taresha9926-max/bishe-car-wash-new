@@ -47,6 +47,49 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       ),
       body: Column(
         children: [
+          if (state.hasNewCashierClosingAlert && state.latestClosingAlert != null)
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF115E59)]),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(color: Colors.teal.withOpacity(0.2), blurRadius: 6, offset: const Offset(0, 2)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.notifications_active_rounded, color: Colors.greenAccent, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'New Cashier Daily Closing Submitted',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13),
+                        ),
+                        Text(
+                          'Cashier: ${state.latestClosingAlert!.cashierName} • Gross: ${CurrencyFormatter.format(state.latestClosingAlert!.grossRevenue)} (${state.latestClosingAlert!.carsWashedCount} cars washed)',
+                          style: const TextStyle(color: Colors.white70, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _tabController.animateTo(0),
+                    icon: const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 15),
+                    label: const Text('View Audit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
+                  IconButton(
+                    onPressed: () => state.dismissCashierClosingAlert(),
+                    icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 18),
+                    tooltip: 'Dismiss',
+                  ),
+                ],
+              ),
+            ),
           Container(
             color: Colors.white,
             child: TabBar(

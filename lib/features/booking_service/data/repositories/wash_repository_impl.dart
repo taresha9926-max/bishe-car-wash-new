@@ -1,4 +1,5 @@
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
@@ -288,6 +289,19 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<void> deleteStaffCredential(String id) async {
     _credentials.removeWhere((c) => c.id == id);
+  }
+
+  final List<DailyFinancialClosing> _dailyClosings = [];
+
+  @override
+  Future<List<DailyFinancialClosing>> getDailyFinancialClosings() async {
+    return List.unmodifiable(_dailyClosings);
+  }
+
+  @override
+  Future<void> saveDailyFinancialClosing(DailyFinancialClosing closing) async {
+    _dailyClosings.removeWhere((c) => c.id == closing.id);
+    _dailyClosings.insert(0, closing);
   }
 
   // --- Helper state management methods ---

@@ -36,6 +36,24 @@ class AutoCareAssets {
   static const String packageTireRimUrl =
       'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=600&auto=format&fit=crop&q=80';
 
+  // Inventory & Consumable Supplies
+  static const String assetShampooUrl =
+      'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=400&auto=format&fit=crop&q=80';
+  static const String assetEquipmentUrl =
+      'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=400&auto=format&fit=crop&q=80';
+  static const String assetTowelsUrl =
+      'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=400&auto=format&fit=crop&q=80';
+
+  static String getInventoryImage(String itemName) {
+    final lower = itemName.toLowerCase();
+    if (lower.contains('shampoo') || lower.contains('foam') || lower.contains('wax') || lower.contains('chemical') || lower.contains('liquid')) {
+      return assetShampooUrl;
+    } else if (lower.contains('towel') || lower.contains('cloth') || lower.contains('sponge') || lower.contains('brush')) {
+      return assetTowelsUrl;
+    }
+    return assetEquipmentUrl;
+  }
+
   static String getCarTypeImage(CarType type) {
     switch (type) {
       case CarType.automobile:

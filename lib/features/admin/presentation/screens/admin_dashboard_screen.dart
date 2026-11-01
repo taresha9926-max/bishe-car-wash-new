@@ -157,6 +157,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (state.hasNewCashierClosingAlert && state.latestClosingAlert != null) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF115E59)]),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(color: Colors.teal.withOpacity(0.25), blurRadius: 8, offset: const Offset(0, 3)),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.verified_rounded, color: Colors.greenAccent, size: 24),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Cashier Shift Closing Confirmed',
+                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.5),
+                            ),
+                            Text(
+                              'Cashier: ${state.latestClosingAlert!.cashierName} • Revenue: ${CurrencyFormatter.format(state.latestClosingAlert!.grossRevenue)} (${state.latestClosingAlert!.carsWashedCount} cars washed)',
+                              style: const TextStyle(color: Colors.white70, fontSize: 11.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => state.dismissCashierClosingAlert(),
+                        icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 18),
+                        tooltip: 'Dismiss Alert',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               // Pending Approval Queue (from Secondary Admin actions)
               _buildPendingApprovalsBanner(context, state),
 

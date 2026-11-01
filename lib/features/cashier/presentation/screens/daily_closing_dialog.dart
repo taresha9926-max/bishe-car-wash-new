@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -65,13 +66,12 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.fact_check_rounded, color: AppColors.primary, size: 24),
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: AutoCareAssets.welcomeHeroUrl,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 12,
+                        fallbackIcon: Icons.fact_check_rounded,
                       ),
                       const SizedBox(width: 12),
                       Column(

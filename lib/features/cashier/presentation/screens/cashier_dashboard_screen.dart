@@ -1875,49 +1875,65 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         ? state.tr('availableNow')
         : (activePlate != null && activePlate.isNotEmpty ? 'Busy ($activePlate)' : state.tr('busyWashing'));
 
+    final isVan = title.toLowerCase().contains('van');
+    final bayImageUrl = isVan ? AutoCareAssets.mobileVanUrl : AutoCareAssets.packageFoamUrl;
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: isMobile ? 6 : 8, horizontal: 6),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 6 : 8, horizontal: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: color.withOpacity(0.2)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  title,
+          AutoCareAssets.buildPhotoThumbnail(
+            imageUrl: bayImageUrl,
+            width: isMobile ? 32 : 36,
+            height: isMobile ? 32 : 36,
+            borderRadius: 8,
+            fallbackIcon: isVan ? Icons.airport_shuttle_rounded : Icons.local_car_wash_rounded,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: isMobile ? 10.5 : 11.5,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  statusText,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: isMobile ? 10.5 : 11.5,
-                    color: AppColors.textPrimary,
+                    fontSize: isMobile ? 9.5 : 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: color,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 3),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              statusText,
-              style: TextStyle(
-                fontSize: isMobile ? 9.5 : 10.5,
-                fontWeight: FontWeight.w800,
-                color: color,
-              ),
+              ],
             ),
           ),
         ],

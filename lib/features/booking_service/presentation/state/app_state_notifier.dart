@@ -609,6 +609,16 @@ class AppStateNotifier extends ChangeNotifier {
   final List<DailyFinancialClosing> _dailyFinancialClosings = _getInitialDailyClosings();
   List<DailyFinancialClosing> get dailyFinancialClosings => List.unmodifiable(_dailyFinancialClosings);
 
+  bool _hasNewCashierClosingAlert = false;
+  bool get hasNewCashierClosingAlert => _hasNewCashierClosingAlert;
+  DailyFinancialClosing? _latestClosingAlert;
+  DailyFinancialClosing? get latestClosingAlert => _latestClosingAlert;
+
+  void dismissCashierClosingAlert() {
+    _hasNewCashierClosingAlert = false;
+    notifyListeners();
+  }
+
   // Petty Cash Expenses (Cashier emergency operational spends)
   final List<PettyCashExpense> _pettyCashExpenses = [];
   List<PettyCashExpense> get pettyCashExpenses => List.unmodifiable(_pettyCashExpenses);
@@ -832,6 +842,15 @@ class AppStateNotifier extends ChangeNotifier {
         c.closingDate.day == now.day);
     _dailyFinancialClosings.insert(0, closing);
 
+    try {
+      await _repository.saveDailyFinancialClosing(closing);
+    } catch (e) {
+      debugPrint('Failed to persist daily closing to repository: $e');
+    }
+
+    _hasNewCashierClosingAlert = true;
+    _latestClosingAlert = closing;
+
     notifyListeners();
     return closing;
   }
@@ -983,6 +1002,14 @@ class AppStateNotifier extends ChangeNotifier {
       }
       _dailyHandovers = List.from(results[9] as List<DailyHandover>);
       _stockTransactions = List.from(results[10] as List<StockTransaction>);
+
+      try {
+        final closings = await _repository.getDailyFinancialClosings();
+        if (closings.isNotEmpty) {
+          _dailyFinancialClosings.clear();
+          _dailyFinancialClosings.addAll(closings);
+        }
+      } catch (_) {}
     } catch (e) {
       _errorMessage = e.toString();
     } finally {

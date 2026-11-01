@@ -1,4 +1,5 @@
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
@@ -57,6 +58,10 @@ abstract class IStaffRepository {
   Future<void> updateStaffCredential(String id, String pin, String fullName);
   Future<void> addStaffCredential(StaffCredential cred);
   Future<void> deleteStaffCredential(String id);
+
+  // Daily Financial Closings & Audit Broadcast
+  Future<List<DailyFinancialClosing>> getDailyFinancialClosings();
+  Future<void> saveDailyFinancialClosing(DailyFinancialClosing closing);
 }
 
 /// Domain port for commercial marketing assets and TikTok reel configurations.

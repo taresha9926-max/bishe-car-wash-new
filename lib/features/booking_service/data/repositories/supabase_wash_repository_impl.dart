@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
@@ -739,11 +740,34 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<void> updateStaffCredential(String id, String pin, String fullName) async {
     try {
-      await _patch('staff_credentials?id=eq.$id', {
-        'pin_hash': pin,
-        'full_name': fullName,
+      String roleName = 'admin';
+      final localCreds = await _fallbackLocalRepo.getStaffCredentials();
+      final cred = localCreds.where((c) => c.id == id).firstOrNull;
+      if (cred != null) {
+        roleName = cred.role.name;
+      } else if (id.toLowerCase().contains('cashier')) {
+        roleName = 'cashier';
+      } else if (id.toLowerCase().contains('storekeeper')) {
+        roleName = 'storekeeper';
+      } else if (id.toLowerCase().contains('accountant')) {
+        roleName = 'accountant';
+      }
+
+      await _post('rpc/update_staff_pin', {
+        'p_role': roleName,
+        'p_new_pin': pin.trim(),
+        'p_full_name': fullName.trim(),
       });
-    } catch (_) {}
+
+      if (_isUuid(id)) {
+        await _patch('staff_credentials?id=eq.$id', {
+          'pin_hash': pin,
+          'full_name': fullName,
+        });
+      }
+    } catch (e) {
+      debugPrint('Supabase updateStaffCredential exception: $e');
+    }
     await _fallbackLocalRepo.updateStaffCredential(id, pin, fullName);
   }
 
@@ -771,6 +795,72 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       debugPrint('Supabase deleteStaffCredential exception: $e');
     }
     await _fallbackLocalRepo.deleteStaffCredential(id);
+  }
+
+  @override
+  Future<List<DailyFinancialClosing>> getDailyFinancialClosings() async {
+    try {
+      final res = await _get('daily_closings?order=closing_date.desc&limit=30');
+      if (res is List && res.isNotEmpty) {
+        return res.map((item) {
+          final map = item as Map<String, dynamic>;
+          return DailyFinancialClosing(
+            id: map['id']?.toString() ?? '',
+            closingDate: DateTime.tryParse(map['closing_date']?.toString() ?? '') ?? DateTime.now(),
+            closedAt: DateTime.tryParse(map['closed_at']?.toString() ?? '') ?? DateTime.now(),
+            cashierName: map['cashier_name']?.toString() ?? 'Cashier',
+            grossRevenue: (map['gross_revenue'] as num?)?.toDouble() ?? 0.0,
+            cashRevenue: (map['cash_revenue'] as num?)?.toDouble() ?? 0.0,
+            digitalRevenue: (map['digital_revenue'] as num?)?.toDouble() ?? 0.0,
+            providerBreakdown: map['provider_breakdown'] is Map
+                ? Map<String, double>.from((map['provider_breakdown'] as Map).map((k, v) => MapEntry(k.toString(), (v as num).toDouble())))
+                : {},
+            carsWashedCount: (map['cars_washed_count'] as num?)?.toInt() ?? 0,
+            commissionPool: (map['commission_pool'] as num?)?.toDouble() ?? 0.0,
+            netStationProfit: (map['net_station_profit'] as num?)?.toDouble() ?? 0.0,
+            cashDeposited: (map['cash_deposited'] as num?)?.toDouble() ?? 0.0,
+            pettyCashExpenses: (map['petty_cash_expenses'] as num?)?.toDouble() ?? 0.0,
+            cashRemaining: (map['cash_remaining'] as num?)?.toDouble() ?? 0.0,
+            washerDividends: map['washer_dividends'] is Map
+                ? Map<String, double>.from((map['washer_dividends'] as Map).map((k, v) => MapEntry(k.toString(), (v as num).toDouble())))
+                : {},
+            notes: map['notes']?.toString(),
+            isConfirmed: map['is_confirmed'] == true,
+          );
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('Supabase getDailyFinancialClosings exception: $e');
+    }
+    return _fallbackLocalRepo.getDailyFinancialClosings();
+  }
+
+  @override
+  Future<void> saveDailyFinancialClosing(DailyFinancialClosing closing) async {
+    try {
+      await _post('daily_closings', {
+        'id': closing.id,
+        'closing_date': closing.closingDate.toIso8601String(),
+        'closed_at': closing.closedAt.toIso8601String(),
+        'cashier_name': closing.cashierName,
+        'gross_revenue': closing.grossRevenue,
+        'cash_revenue': closing.cashRevenue,
+        'digital_revenue': closing.digitalRevenue,
+        'cars_washed_count': closing.carsWashedCount,
+        'commission_pool': closing.commissionPool,
+        'net_station_profit': closing.netStationProfit,
+        'cash_deposited': closing.cashDeposited,
+        'petty_cash_expenses': closing.pettyCashExpenses,
+        'cash_remaining': closing.cashRemaining,
+        'provider_breakdown': closing.providerBreakdown,
+        'washer_dividends': closing.washerDividends,
+        'notes': closing.notes,
+        'is_confirmed': closing.isConfirmed,
+      });
+    } catch (e) {
+      debugPrint('Supabase saveDailyFinancialClosing exception: $e');
+    }
+    await _fallbackLocalRepo.saveDailyFinancialClosing(closing);
   }
 
   @override

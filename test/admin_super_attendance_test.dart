@@ -244,6 +244,10 @@ void main() {
       expect(closing.isConfirmed, isTrue);
       expect(closing.cashierName, equals('Abebech Cashier'));
       expect(state.isTodayClosed, isTrue);
+      expect(state.hasNewCashierClosingAlert, isTrue);
+      expect(state.latestClosingAlert?.cashierName, equals('Abebech Cashier'));
+      state.dismissCashierClosingAlert();
+      expect(state.hasNewCashierClosingAlert, isFalse);
 
       // Verify Weekly commission accumulation and monthly salary
       final weeklyPool = state.weeklyTotalCommissionPool;

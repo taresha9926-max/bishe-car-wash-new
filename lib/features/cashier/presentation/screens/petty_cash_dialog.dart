@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
@@ -79,13 +80,12 @@ class _PettyCashDialogState extends State<PettyCashDialog> {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.deepOrange.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.outbox_rounded, color: Colors.deepOrange, size: 24),
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: AutoCareAssets.packageSteamEngineUrl,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 12,
+                        fallbackIcon: Icons.outbox_rounded,
                       ),
                       const SizedBox(width: 12),
                       Column(

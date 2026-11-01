@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
@@ -473,6 +474,14 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           children: [
             Row(
               children: [
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.getInventoryImage(item.name),
+                  width: 42,
+                  height: 42,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.inventory_2_rounded,
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -669,6 +678,14 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           children: [
             Row(
               children: [
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.getInventoryImage(asset.name),
+                  width: 42,
+                  height: 42,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.precision_manufacturing_rounded,
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
