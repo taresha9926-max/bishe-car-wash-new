@@ -252,6 +252,16 @@ class AppStrings {
       AppLanguage.om: 'Tajaajila Makiinaa Socho\'aa',
       AppLanguage.am: 'ተንቀሳቃሽ የቤት ለቤት አገልግሎት',
     },
+    'serviceValetPickUp': {
+      AppLanguage.en: 'Driver Pick-up & Return',
+      AppLanguage.om: 'Konkolaachisaan Fuudhuu & Deebisuu',
+      AppLanguage.am: 'በአሽከርካሪ መኪናን መውሰድና ማድረስ',
+    },
+    'serviceValetPickUpSub': {
+      AppLanguage.en: 'Driver picks up your car, washes at station, and returns it safely to your door.',
+      AppLanguage.om: 'Konkolaachisaan makiinaa keessan dhufee fuudhee, dhiqee mana keessanitti deebisa.',
+      AppLanguage.am: 'አሽከርካሪ መጥቶ መኪናዎን ተረክቦ ካጠበ በኋላ በታማኝነት ደጃፍዎ ይመልሳል።',
+    },
     'servicePhoneCall': {
       AppLanguage.en: 'Phone Reservation',
       AppLanguage.om: 'Qabannaa Bilbilaa',

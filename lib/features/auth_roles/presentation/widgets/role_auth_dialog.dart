@@ -53,8 +53,13 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
     if (!mounted) return;
 
     if (isValid) {
+      final cred = state.getMatchedCredential(widget.targetRole, pin);
+      if (cred != null) {
+        state.setActiveStaff(cred.fullName, cred.username);
+      } else {
+        state.setActiveStaff(widget.targetRole.name, widget.targetRole.name);
+      }
       if (widget.targetRole == UserRole.admin) {
-        final cred = state.getMatchedCredential(UserRole.admin, pin);
         final isSuper = cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin');
         state.setSuperAdminStatus(isSuper);
       }

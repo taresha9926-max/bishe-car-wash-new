@@ -90,9 +90,11 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                   ],
                 ),
                 if (!isMobile)
-                  const Text(
-                    'Bishoftu • Oromia, Ethiopia',
-                    style: TextStyle(
+                  Text(
+                    (state.activeStaffFullName != null && state.activeStaffFullName!.isNotEmpty && currentRole != UserRole.customer)
+                        ? 'Staff: ${state.activeStaffFullName} • Bishoftu Station'
+                        : 'Bishoftu • Oromia, Ethiopia',
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textSecondary,
@@ -207,7 +209,9 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                     if (!isMobile) ...[
                       const SizedBox(width: 6),
                       Text(
-                        currentRole.displayName,
+                        (state.activeStaffFullName != null && state.activeStaffFullName!.isNotEmpty && currentRole != UserRole.customer)
+                            ? state.activeStaffFullName!
+                            : currentRole.displayName,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,

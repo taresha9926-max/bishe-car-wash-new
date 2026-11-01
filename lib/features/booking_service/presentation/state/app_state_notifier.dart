@@ -619,6 +619,90 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Logged-in Staff Context
+  String? _activeStaffFullName;
+  String? get activeStaffFullName => _activeStaffFullName;
+  String? _activeStaffUsername;
+  String? get activeStaffUsername => _activeStaffUsername;
+
+  void setActiveStaff(String fullName, String username) {
+    _activeStaffFullName = fullName;
+    _activeStaffUsername = username;
+    notifyListeners();
+  }
+
+  void clearActiveStaff() {
+    _activeStaffFullName = null;
+    _activeStaffUsername = null;
+    notifyListeners();
+  }
+
+  // Daily Commission Disbursement Idempotency Lock
+  bool _isDailyCommissionDisbursedToday = false;
+  bool get isDailyCommissionDisbursedToday => _isDailyCommissionDisbursedToday;
+
+  void markDailyCommissionDisbursed() {
+    _isDailyCommissionDisbursedToday = true;
+    final now = DateTime.now();
+    final dividends = washerDividendsToday;
+    final carsCount = bookings.where((b) => b.payment.isPaid).length;
+
+    for (final w in availableWashers) {
+      final isPres = isWasherPresentToday(w.id);
+      final div = dividends[w.id];
+      final earned = (isPres && div != null) ? div.earnedETB : 0.0;
+      recordWasherDailyAttendance(
+        washerId: w.id,
+        washerName: w.name,
+        date: now,
+        isPresent: isPres,
+        carsWashedCount: isPres ? carsCount : 0,
+        commissionEarnedETB: earned,
+      );
+    }
+    notifyListeners();
+  }
+
+  WasherDailyAttendance? getWasherAttendanceForDate(String washerId, DateTime date) {
+    for (final a in _washerAttendances) {
+      if (a.washerId == washerId &&
+          a.date.year == date.year &&
+          a.date.month == date.month &&
+          a.date.day == date.day) {
+        return a;
+      }
+    }
+    return null;
+  }
+
+  double getDailyCommissionTotalForDate(DateTime date) {
+    final now = DateTime.now();
+    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+      if (_isDailyCommissionDisbursedToday) {
+        return teamCommissionPoolTodayETB;
+      }
+      return 0.0;
+    }
+    return _washerAttendances
+        .where((a) =>
+            a.date.year == date.year &&
+            a.date.month == date.month &&
+            a.date.day == date.day)
+        .fold(0.0, (sum, a) => sum + a.commissionEarnedETB);
+  }
+
+  double getWasherCommissionForDate(String washerId, DateTime date) {
+    final now = DateTime.now();
+    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+      if (_isDailyCommissionDisbursedToday) {
+        return washerDividendsToday[washerId]?.earnedETB ?? 0.0;
+      }
+      return 0.0;
+    }
+    final record = getWasherAttendanceForDate(washerId, date);
+    return record?.commissionEarnedETB ?? 0.0;
+  }
+
   // Petty Cash Expenses (Cashier emergency operational spends)
   final List<PettyCashExpense> _pettyCashExpenses = [];
   List<PettyCashExpense> get pettyCashExpenses => List.unmodifiable(_pettyCashExpenses);
@@ -662,6 +746,8 @@ class AppStateNotifier extends ChangeNotifier {
     required DateTime date,
     required bool isPresent,
     bool isExcused = false,
+    int carsWashedCount = 0,
+    double commissionEarnedETB = 0.0,
     String? notes,
   }) async {
     final existingIdx = _washerAttendances.indexWhere((a) =>
@@ -677,6 +763,8 @@ class AppStateNotifier extends ChangeNotifier {
       date: date,
       isPresent: isPresent,
       isExcused: isExcused,
+      carsWashedCount: carsWashedCount,
+      commissionEarnedETB: commissionEarnedETB,
       notes: notes,
     );
 
@@ -1487,6 +1575,42 @@ class AppStateNotifier extends ChangeNotifier {
         supplier: supplier,
         invoiceScreenshot: invoiceScreenshot,
         notes: notes,
+      );
+      _stockTransactions.insert(0, tx);
+      notifyListeners();
+
+      await _repository.saveConsumable(updated);
+      await _repository.recordStockTransaction(tx);
+    }
+  }
+
+  Future<void> exchangeConsumableEmptyForNew({
+    required String itemId,
+    required double quantity,
+    required String washerTeamLeaderName,
+    String? notes,
+  }) async {
+    final idx = _consumables.indexWhere((c) => c.id == itemId);
+    if (idx != -1) {
+      final item = _consumables[idx];
+      final newStock = (item.currentStock - quantity).clamp(0.0, double.infinity);
+      final updated = item.copyWith(currentStock: newStock);
+      _consumables[idx] = updated;
+
+      final tx = StockTransaction(
+        id: 'EXCH-${DateTime.now().millisecondsSinceEpoch}',
+        date: DateTime.now(),
+        itemId: item.id,
+        itemName: item.name,
+        type: 'emptyExchangeConsumption',
+        quantity: quantity,
+        unit: item.unit,
+        unitCostEtb: item.unitCostEtb,
+        totalCostEtb: quantity * item.unitCostEtb,
+        supplier: washerTeamLeaderName,
+        notes: (notes != null && notes.isNotEmpty)
+            ? '$washerTeamLeaderName returned $quantity empty ${item.unit} & received fresh full container(s). $notes'
+            : '$washerTeamLeaderName returned $quantity empty ${item.unit} & received fresh full container(s).',
       );
       _stockTransactions.insert(0, tx);
       notifyListeners();

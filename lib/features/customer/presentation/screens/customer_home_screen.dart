@@ -94,38 +94,71 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildServiceActionCard(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth >= 780;
+                  final cards = [
+                    _buildServiceActionCard(
                       context,
                       title: state.tr('driveInStation'),
                       subtitle: state.tr('driveInSub'),
                       badge: '${state.availableBaysCount} ${state.tr('availableNow')}',
                       isAvailable: state.availableBaysCount > 0,
-                      imageUrl: 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&auto=format&fit=crop&q=80',
+                      imageUrl: AutoCareAssets.stationBayUrl,
                       fallbackIcon: Icons.local_car_wash_rounded,
                       color: AppColors.bay1Color,
                       actionLabel: state.tr('bookNow'),
                       onTap: () => _openBookingFlow(context, ServiceType.walkInStation),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildServiceActionCard(
+                    _buildServiceActionCard(
+                      context,
+                      title: 'Driver Pick-up & Return',
+                      subtitle: 'Driver collects your vehicle, washes at station, and returns it to your door.',
+                      badge: 'Valet Service Available',
+                      isAvailable: true,
+                      imageUrl: AutoCareAssets.valetDriverUrl,
+                      fallbackIcon: Icons.car_rental_rounded,
+                      color: const Color(0xFF7C3AED),
+                      actionLabel: state.tr('bookNow'),
+                      onTap: () => _openBookingFlow(context, ServiceType.valetPickUp),
+                    ),
+                    _buildServiceActionCard(
                       context,
                       title: state.tr('atHomeMobile'),
                       subtitle: state.tr('atHomeSub'),
                       badge: state.isMobileVanAvailable ? state.tr('availableNow') : state.tr('busyWashing'),
                       isAvailable: state.isMobileVanAvailable,
-                      imageUrl: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&auto=format&fit=crop&q=80',
+                      imageUrl: AutoCareAssets.mobileVanUrl,
                       fallbackIcon: Icons.rv_hookup_rounded,
                       color: AppColors.mobileVanColor,
                       actionLabel: state.tr('bookNow'),
                       onTap: () => _openBookingFlow(context, ServiceType.atHomeMobile),
                     ),
-                  ),
-                ],
+                  ];
+
+                  if (isWide) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: cards
+                          .map((c) => Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                                  child: c,
+                                ),
+                              ))
+                          .toList(),
+                    );
+                  } else {
+                    return Column(
+                      children: cards
+                          .map((c) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: c,
+                              ))
+                          .toList(),
+                    );
+                  }
+                },
               ),
               const SizedBox(height: 12),
               _buildPhoneBookingCard(context, state),

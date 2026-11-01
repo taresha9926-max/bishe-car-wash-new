@@ -151,41 +151,49 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 6),
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
                         children: [
-                          Expanded(
-                            child: ChoiceChip(
-                              label: const Text('Drive-in Station (Bays)'),
-                              selected: _serviceType == ServiceType.walkInStation,
-                              selectedColor: AppColors.primary,
-                              labelStyle: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: _serviceType == ServiceType.walkInStation ? Colors.white : AppColors.textPrimary,
-                              ),
-                              onSelected: (_) => setState(() => _serviceType = ServiceType.walkInStation),
+                          ChoiceChip(
+                            label: const Text('Drive-in Station (Bays)'),
+                            selected: _serviceType == ServiceType.walkInStation,
+                            selectedColor: AppColors.primary,
+                            labelStyle: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: _serviceType == ServiceType.walkInStation ? Colors.white : AppColors.textPrimary,
                             ),
+                            onSelected: (_) => setState(() => _serviceType = ServiceType.walkInStation),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ChoiceChip(
-                              label: const Text('At-Home Mobile Van'),
-                              selected: _serviceType == ServiceType.atHomeMobile,
-                              selectedColor: AppColors.mobileVanColor,
-                              labelStyle: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: _serviceType == ServiceType.atHomeMobile ? Colors.white : AppColors.textPrimary,
-                              ),
-                              onSelected: (_) => setState(() => _serviceType = ServiceType.atHomeMobile),
+                          ChoiceChip(
+                            label: const Text('Driver Pick-up & Return'),
+                            selected: _serviceType == ServiceType.valetPickUp,
+                            selectedColor: const Color(0xFF7C3AED),
+                            labelStyle: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: _serviceType == ServiceType.valetPickUp ? Colors.white : AppColors.textPrimary,
                             ),
+                            onSelected: (_) => setState(() => _serviceType = ServiceType.valetPickUp),
+                          ),
+                          ChoiceChip(
+                            label: const Text('At-Home Mobile Van'),
+                            selected: _serviceType == ServiceType.atHomeMobile,
+                            selectedColor: AppColors.mobileVanColor,
+                            labelStyle: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: _serviceType == ServiceType.atHomeMobile ? Colors.white : AppColors.textPrimary,
+                            ),
+                            onSelected: (_) => setState(() => _serviceType = ServiceType.atHomeMobile),
                           ),
                         ],
                       ),
                       const SizedBox(height: 14),
 
-                      // Address if Mobile Van
-                      if (_serviceType == ServiceType.atHomeMobile) ...[
+                      // Address if Mobile Van or Valet Pick-up
+                      if (_serviceType.requiresLocation) ...[
                         DropdownButtonFormField<String>(
                           value: _selectedBishoftuArea,
                           decoration: InputDecoration(
@@ -337,7 +345,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
 
     try {
       String? deliveryLoc;
-      if (_serviceType == ServiceType.atHomeMobile) {
+      if (_serviceType.requiresLocation) {
         deliveryLoc = '$_selectedBishoftuArea - ${_addressController.text.trim()}';
       }
 

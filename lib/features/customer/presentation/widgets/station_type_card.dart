@@ -22,10 +22,19 @@ class StationTypeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isStation = serviceType == ServiceType.walkInStation;
-    final primaryAccent = isStation ? AppColors.bay1Color : AppColors.mobileVanColor;
+    final isValet = serviceType == ServiceType.valetPickUp;
+    final primaryAccent = isStation
+        ? AppColors.bay1Color
+        : (isValet ? const Color(0xFF7C3AED) : AppColors.mobileVanColor);
 
-    final title = isStation ? state.tr('driveInStation') : state.tr('atHomeMobile');
-    final subtitle = isStation ? state.tr('driveInSub') : state.tr('atHomeSub');
+    final title = isStation
+        ? state.tr('driveInStation')
+        : (isValet ? 'Driver Pick-up & Return' : state.tr('atHomeMobile'));
+    final subtitle = isStation
+        ? state.tr('driveInSub')
+        : (isValet
+            ? 'Dedicated driver picks up your car in Bishoftu, washes it at our station, and returns it clean to your doorstep.'
+            : state.tr('atHomeSub'));
     final badgeText = availableCapacity > 0 ? state.tr('availableNow') : state.tr('busyWashing');
 
     return GestureDetector(
@@ -52,7 +61,9 @@ class StationTypeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AutoCareAssets.buildPhotoThumbnail(
-              imageUrl: isStation ? AutoCareAssets.stationBayUrl : AutoCareAssets.mobileVanUrl,
+              imageUrl: isStation
+                  ? AutoCareAssets.stationBayUrl
+                  : (isValet ? AutoCareAssets.valetDriverUrl : AutoCareAssets.mobileVanUrl),
               width: 54,
               height: 54,
               borderRadius: 14,

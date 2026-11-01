@@ -23,9 +23,18 @@ class DailyClosingDialog extends StatefulWidget {
 }
 
 class _DailyClosingDialogState extends State<DailyClosingDialog> {
-  final _cashierNameController = TextEditingController(text: 'Abebech Tadesse');
+  final _cashierNameController = TextEditingController(text: 'Cashier On Duty');
   final _notesController = TextEditingController();
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final active = AppStateProvider.read(context).activeStaffFullName;
+    if (active != null && active.isNotEmpty) {
+      _cashierNameController.text = active;
+    }
+  }
 
   @override
   void dispose() {

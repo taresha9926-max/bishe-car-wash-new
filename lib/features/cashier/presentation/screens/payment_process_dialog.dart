@@ -168,7 +168,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 const SizedBox(height: 10),
                 CustomTextField(
                   controller: _refCodeController,
-                  label: '${state.tr('transactionRef')} *',
+                  label: '${state.tr('transactionRef')} (Optional)',
                   hint: 'e.g. TB-8932014 or CBE-9923184',
                   prefixIcon: Icons.confirmation_number_outlined,
                 ),
@@ -298,15 +298,6 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
     final navigator = Navigator.of(context, rootNavigator: true);
 
     if (_selectedMethod != PaymentMethod.cash) {
-      if (_refCodeController.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(state.tr('proofMandatoryNotice')),
-            backgroundColor: Colors.red.shade700,
-          ),
-        );
-        return;
-      }
       if (_screenshotBase64 == null || _screenshotBase64!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

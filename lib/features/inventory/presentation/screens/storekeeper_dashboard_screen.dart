@@ -9,6 +9,7 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/consumable_item.dart';
 import '../../domain/models/daily_handover.dart';
 import '../../domain/models/fixed_asset.dart';
+import '../../domain/models/stock_transaction.dart';
 
 class StorekeeperDashboardScreen extends StatefulWidget {
   const StorekeeperDashboardScreen({super.key});
@@ -60,7 +61,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               indicatorWeight: 3,
               labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
               tabs: const [
-                Tab(icon: Icon(Icons.sync_alt_rounded, size: 18), text: 'Daily Handover'),
+                Tab(icon: Icon(Icons.autorenew_rounded, size: 18), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
                 Tab(icon: Icon(Icons.inventory_2_rounded, size: 18), text: 'Consumables (አላቂ)'),
                 Tab(icon: Icon(Icons.build_circle_rounded, size: 18), text: 'Fixed Assets (ቋሚ)'),
               ],
@@ -88,13 +89,67 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   Widget _buildHandoverTab(BuildContext context, dynamic state, bool isMobile) {
     final active = state.activeHandover;
     final handovers = state.dailyHandovers as List<DailyHandover>;
+    final transactions = state.stockTransactions as List<StockTransaction>;
+    final exchanges = transactions.where((t) => t.type == 'emptyExchangeConsumption').toList();
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Active Handover Banner
+          // 1. Primary Empty-for-Full Refill Exchange Desk
+          _buildEmptyRefillExchangeCard(context, state, isMobile),
+          const SizedBox(height: 20),
+
+          // 2. Recent Empty-for-Full Refill Exchange Logs
+          Row(
+            children: [
+              const Icon(Icons.autorenew_rounded, size: 20, color: Color(0xFF0D9488)),
+              const SizedBox(width: 8),
+              const Text(
+                'Recent Empty-for-Full Refill Exchanges',
+                style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              ),
+              const Spacer(),
+              Text(
+                '${exchanges.length} Exchanges Logged',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (exchanges.isEmpty)
+            _buildEmptyState('No empty container refill exchanges logged yet. When the washer leader returns finished bottles, log them here.', Icons.autorenew_rounded)
+          else
+            ...exchanges.map((ex) => Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.getInventoryImage(ex.itemName),
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  fallbackIcon: Icons.water_drop_rounded,
+                  fallbackColor: Colors.teal,
+                ),
+                title: Text(ex.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                subtitle: Text(
+                  '${ex.quantity} ${ex.unit} • Team Leader: ${ex.supplier} (${ex.date.day}/${ex.date.month})\n${ex.notes}',
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+                trailing: Text(
+                  CurrencyFormatter.format(ex.totalCostEtb),
+                  style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange, fontSize: 13),
+                ),
+              ),
+            )),
+
+          const SizedBox(height: 24),
+          const Divider(height: 1, color: AppColors.cardBorder),
+          const SizedBox(height: 20),
+
+          // 3. Optional Bulk Shift Handover Desk
           if (active != null)
             _buildActiveHandoverCard(context, state, active, isMobile)
           else
@@ -107,7 +162,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               const SizedBox(width: 8),
               const Text(
                 'Shift Handover Audit Logs',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
               const Spacer(),
               Text(
@@ -122,6 +177,250 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           else
             ...handovers.map((h) => _buildHandoverHistoryCard(context, state, h, isMobile)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyRefillExchangeCard(BuildContext context, dynamic state, bool isMobile) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isMobile ? 14 : 18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.tealAccent.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.autorenew_rounded, color: Colors.tealAccent, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Empty Return & Refill Exchange Desk',
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'ዕቃ በዕቃ መመለሻና መተኪያ • Washer leader returns empty containers to take fresh full ones',
+                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11.5),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.verified_outlined, color: Colors.tealAccent, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'No rigid daily return needed. Leader keeps working until containers empty, then brings back empty shampoo/wax containers to receive fresh replacements.',
+                    style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 11),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _showEmptyRefillExchangeDialog(context, state),
+              icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+              label: const Text('Log Empty Return & Issue New Refill', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0D9488),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEmptyRefillExchangeDialog(BuildContext context, dynamic state) {
+    final activeConsumables = (state.consumables as List<ConsumableItem>)
+        .where((c) => !c.isDecommissioned)
+        .toList();
+    if (activeConsumables.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No active consumable items available in inventory.')),
+      );
+      return;
+    }
+
+    String selectedItemId = activeConsumables.first.id;
+    final qtyController = TextEditingController(text: '1.0');
+    final leaderController = TextEditingController(text: 'Washer Team Leader');
+    final notesController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final item = activeConsumables.firstWhere((c) => c.id == selectedItemId);
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                const Icon(Icons.autorenew_rounded, color: Color(0xFF0D9488), size: 22),
+                const SizedBox(width: 8),
+                const Text('Refill Exchange (ዕቃ በዕቃ)', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+              ],
+            ),
+            content: SizedBox(
+              width: 440,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Select Consumable Item to Refill:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
+                    DropdownButtonFormField<String>(
+                      value: selectedItemId,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppColors.surfaceVariant,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      items: activeConsumables.map((c) {
+                        return DropdownMenuItem(
+                          value: c.id,
+                          child: Text('${c.name} (${c.currentStock.toStringAsFixed(1)} ${c.unit} in store)', style: const TextStyle(fontSize: 12)),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() => selectedItemId = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: qtyController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: 'Empties Returned / Fresh Issued',
+                              hintText: 'e.g. 2',
+                              suffixText: item.unit,
+                              filled: true,
+                              fillColor: AppColors.surfaceVariant,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: leaderController,
+                      decoration: InputDecoration(
+                        labelText: 'Washer Team Leader Name',
+                        hintText: 'e.g. Abebe / Leader on duty',
+                        filled: true,
+                        fillColor: AppColors.surfaceVariant,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: notesController,
+                      decoration: InputDecoration(
+                        labelText: 'Notes / Remarks (Optional)',
+                        hintText: 'e.g. Returned empty 5L drum, took full drum',
+                        filled: true,
+                        fillColor: AppColors.surfaceVariant,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final qty = double.tryParse(qtyController.text.trim()) ?? 0.0;
+                  if (qty <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid quantity.')),
+                    );
+                    return;
+                  }
+                  await state.exchangeConsumableEmptyForNew(
+                    itemId: selectedItemId,
+                    quantity: qty,
+                    washerTeamLeaderName: leaderController.text.trim().isNotEmpty ? leaderController.text.trim() : 'Washer Team Leader',
+                    notes: notesController.text.trim(),
+                  );
+                  if (context.mounted) {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Successfully logged exchange of $qty ${item.unit} for ${item.name}!'),
+                        backgroundColor: AppColors.statusCompleted,
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0D9488),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Confirm Refill Exchange', style: TextStyle(fontWeight: FontWeight.w800)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

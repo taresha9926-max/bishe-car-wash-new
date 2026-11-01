@@ -51,7 +51,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
-        title: state.tr('cashierTitle'),
+        title: state.activeStaffFullName != null && state.activeStaffFullName!.isNotEmpty
+            ? '${state.tr("cashierTitle")} • ${state.activeStaffFullName}'
+            : state.tr('cashierTitle'),
       ),
       floatingActionButton: isMobile
           ? Row(
@@ -752,6 +754,24 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   ),
                 ),
               ],
+              if (b.serviceType == ServiceType.valetPickUp) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7C3AED).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.car_rental_rounded, size: 10, color: Color(0xFF7C3AED)),
+                      SizedBox(width: 2),
+                      Text('Valet Pick-up', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFF7C3AED))),
+                    ],
+                  ),
+                ),
+              ],
               const Spacer(),
               // Status Pill
               Container(
@@ -789,17 +809,25 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             ],
           ),
 
-          // Location / GPS if mobile van
-          if (b.serviceType == ServiceType.atHomeMobile) ...[
+          // Location / GPS if mobile van or valet driver pick-up
+          if (b.serviceType.requiresLocation) ...[
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.location_on, size: 13, color: AppColors.mobileVanColor),
+                Icon(
+                  Icons.location_on,
+                  size: 13,
+                  color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+                ),
                 const SizedBox(width: 3),
                 Expanded(
                   child: Text(
-                    b.deliveryLocation ?? b.gpsCoordinates ?? "Bishoftu Mobile Van",
-                    style: const TextStyle(fontSize: 11, color: AppColors.mobileVanColor, fontWeight: FontWeight.w600),
+                    b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? "Valet Pick-up in Bishoftu" : "Bishoftu Mobile Van"),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+                      fontWeight: FontWeight.w600,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -1008,16 +1036,24 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   '${b.package.name} • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
                   style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                 ),
-                if (b.serviceType == ServiceType.atHomeMobile) ...[
+                if (b.serviceType.requiresLocation) ...[
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 13, color: AppColors.mobileVanColor),
+                      Icon(
+                        Icons.location_on,
+                        size: 13,
+                        color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+                      ),
                       const SizedBox(width: 3),
                       Expanded(
                         child: Text(
-                          b.deliveryLocation ?? b.gpsCoordinates ?? "Bishoftu Mobile Van",
-                          style: const TextStyle(fontSize: 11, color: AppColors.mobileVanColor, fontWeight: FontWeight.w600),
+                          b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? "Valet Pick-up in Bishoftu" : "Bishoftu Mobile Van"),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+                            fontWeight: FontWeight.w600,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1327,13 +1363,21 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: pool > 0
+                        onPressed: (pool > 0 && !state.isDailyCommissionDisbursedToday)
                             ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
                             : null,
-                        icon: const Icon(Icons.payments_rounded, size: 14),
-                        label: Text(state.tr('disburseCommission'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                        icon: Icon(
+                          state.isDailyCommissionDisbursedToday ? Icons.check_circle_rounded : Icons.payments_rounded,
+                          size: 14,
+                        ),
+                        label: Text(
+                          state.isDailyCommissionDisbursedToday
+                              ? 'Disbursed'
+                              : state.tr('disburseCommission'),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                        ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: state.isDailyCommissionDisbursedToday ? Colors.grey.shade400 : AppColors.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1391,13 +1435,21 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton.icon(
-                          onPressed: pool > 0
+                          onPressed: (pool > 0 && !state.isDailyCommissionDisbursedToday)
                               ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
                               : null,
-                          icon: const Icon(Icons.payments_rounded, size: 14),
-                          label: Text(state.tr('disburseCommission'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                          icon: Icon(
+                            state.isDailyCommissionDisbursedToday ? Icons.check_circle_rounded : Icons.payments_rounded,
+                            size: 14,
+                          ),
+                          label: Text(
+                            state.isDailyCommissionDisbursedToday
+                                ? 'Disbursed Today (${CurrencyFormatter.format(pool)})'
+                                : state.tr('disburseCommission'),
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                          ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: state.isDailyCommissionDisbursedToday ? Colors.grey.shade400 : AppColors.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1770,6 +1822,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
+              state.markDailyCommissionDisbursed();
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

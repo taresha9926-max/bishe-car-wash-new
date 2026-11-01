@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
@@ -11,6 +12,7 @@ import '../../../booking_service/presentation/screens/financial_reports_view.dar
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/weekly_commission_report.dart';
+import '../../../inventory/domain/models/stock_transaction.dart';
 import '../widgets/commission_item_card.dart';
 import '../widgets/pricing_matrix_editor.dart';
 import 'commission_logs_screen.dart';
@@ -71,6 +73,7 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   AdminTimeFilter _selectedFilter = AdminTimeFilter.today;
   DateTime? _selectedCustomDate;
+  String _washerCommissionFilter = 'Weekly'; // Daily, Weekly, Date Range
   late final TextEditingController _cashierPhoneController;
   bool _phoneControllerInitialized = false;
 
@@ -134,8 +137,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final totalRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final cashRevenue = paidBookings.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final digitalRevenue = paidBookings.where((b) => b.payment.method != PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final totalPettyCash = state.pettyCashExpenses.fold<double>(0.0, (sum, p) => sum + p.amount);
+    final totalSupplies = (state.stockTransactions as List<StockTransaction>)
+        .where((t) => t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption')
+        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
+    final totalFixedAssets = 0.0;
     final commissionPool = totalRevenue * state.teamCommissionRate;
-    final netProfit = totalRevenue - commissionPool;
+    final netProfit = totalRevenue - commissionPool - totalPettyCash;
 
     // Digital receipts for the period
     final digitalBookings = paidBookings.where((b) => b.payment.method.isDigital).toList();
@@ -274,6 +282,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
               // Super Admin: Welcome Screen TikTok Commercial Reels Manager
               _buildTikTokCommercialReelsManagerCard(context, state, isMobile),
+              const SizedBox(height: 18),
+
+              // Executive Standard Financial Statement (P&L: Revenue, COGS, OpEx, Net Profit)
+              _buildStandardFinancialStatementCard(context, state, isMobile, totalRevenue, commissionPool, totalPettyCash, totalSupplies, totalFixedAssets),
               const SizedBox(height: 18),
 
               // 5. Weekly Washer Commission Report (Reported by Cashier)
@@ -606,6 +618,159 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  Widget _buildStandardFinancialStatementCard(
+    BuildContext context,
+    dynamic state,
+    bool isMobile,
+    double totalRevenue,
+    double commissionPool,
+    double totalPettyCash,
+    double totalSupplies,
+    double totalFixedAssets,
+  ) {
+    final cogs = commissionPool + totalSupplies;
+    final grossProfit = totalRevenue - cogs;
+    final opex = totalPettyCash + totalFixedAssets;
+    final netOperatingProfit = grossProfit - opex;
+    final monthlySalaryObligation = state.monthlyTotalBaseSalary as double;
+    final netRetainedProfit = netOperatingProfit - monthlySalaryObligation;
+
+    return Container(
+      padding: EdgeInsets.all(isMobile ? 14 : 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: AutoCareAssets.cashMoneyUrl,
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                fallbackIcon: Icons.account_balance_wallet_rounded,
+                fallbackColor: AppColors.primary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Executive Financial Statement (P&L)',
+                      style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                    Text(
+                      'Revenue, COGS, Consumables & OpEx Breakdown',
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: (netOperatingProfit >= 0 ? AppColors.statusReady : AppColors.statusCancelled).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  netOperatingProfit >= 0 ? 'PROFITABLE' : 'DEFICIT',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: netOperatingProfit >= 0 ? AppColors.statusReady : AppColors.statusCancelled,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const Divider(height: 1, color: AppColors.cardBorder),
+          const SizedBox(height: 12),
+
+          // Section 1: Revenue
+          _buildStatementRow('I. Gross Wash Revenue', CurrencyFormatter.format(totalRevenue), Colors.green.shade800, isHeader: true),
+          const SizedBox(height: 6),
+
+          // Section 2: COGS
+          _buildStatementRow('II. Cost of Goods Sold (COGS)', '- ${CurrencyFormatter.format(cogs)}', Colors.orange.shade900, isHeader: true),
+          _buildStatementSubRow('• Washer Team 15% Commission Pool', '- ${CurrencyFormatter.format(commissionPool)}'),
+          _buildStatementSubRow('• Consumables Used & Soap Restocks', '- ${CurrencyFormatter.format(totalSupplies)}'),
+          const Divider(height: 12),
+          _buildStatementRow('GROSS OPERATING PROFIT', CurrencyFormatter.format(grossProfit), grossProfit >= 0 ? Colors.green.shade700 : Colors.red, isBold: true),
+          const SizedBox(height: 8),
+
+          // Section 3: OpEx
+          _buildStatementRow('III. Operating Expenses (OpEx)', '- ${CurrencyFormatter.format(opex)}', Colors.deepOrange.shade900, isHeader: true),
+          _buildStatementSubRow('• Cashier Petty Cash Emergency Spends', '- ${CurrencyFormatter.format(totalPettyCash)}'),
+          _buildStatementSubRow('• Fixed Assets & Equipment Purchases', '- ${CurrencyFormatter.format(totalFixedAssets)}'),
+          const Divider(thickness: 1.5, height: 16),
+
+          // Section 4: Net Operating Profit
+          _buildStatementRow('NET OPERATING PROFIT (EBITDA)', CurrencyFormatter.format(netOperatingProfit), netOperatingProfit >= 0 ? Colors.teal.shade800 : Colors.red, isBold: true, isLarge: true),
+          const Divider(height: 16),
+
+          // Section 5: Base Salary Reserve
+          _buildStatementRow('IV. Guaranteed Monthly Base Salaries Reserve', CurrencyFormatter.format(monthlySalaryObligation), Colors.blueGrey, isHeader: true),
+          _buildStatementSubRow('• 8 Washers Monthly Guaranteed Wage', CurrencyFormatter.format(monthlySalaryObligation)),
+          const SizedBox(height: 4),
+          _buildStatementRow('Net Retained Cash Profit', CurrencyFormatter.format(netRetainedProfit), netRetainedProfit >= 0 ? Colors.indigo.shade800 : Colors.red, isBold: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatementRow(String label, String value, Color color, {bool isHeader = false, bool isBold = false, bool isLarge = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isLarge ? 13.5 : (isHeader ? 12.5 : 12),
+              fontWeight: (isHeader || isBold || isLarge) ? FontWeight.w900 : FontWeight.w600,
+              color: isHeader ? color : AppColors.textPrimary,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: isLarge ? 14.5 : (isBold ? 13 : 12),
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatementSubRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 12, top: 2, bottom: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+          Text(value, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWeeklyWasherCommissionReportSection(
     BuildContext context,
     dynamic state,
@@ -751,112 +916,89 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ],
           const SizedBox(height: 12),
+          // Filter Chips (Daily, Weekly, Selected Date Range)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ChoiceChip(
+                  label: const Text('Daily Today'),
+                  selected: _washerCommissionFilter == 'Daily',
+                  selectedColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: _washerCommissionFilter == 'Daily' ? Colors.white : AppColors.textPrimary,
+                  ),
+                  onSelected: (_) => setState(() => _washerCommissionFilter = 'Daily'),
+                ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('Weekly Report'),
+                  selected: _washerCommissionFilter == 'Weekly',
+                  selectedColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: _washerCommissionFilter == 'Weekly' ? Colors.white : AppColors.textPrimary,
+                  ),
+                  onSelected: (_) => setState(() => _washerCommissionFilter = 'Weekly'),
+                ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('Selected Date Range'),
+                  selected: _washerCommissionFilter == 'Date Range',
+                  selectedColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    color: _washerCommissionFilter == 'Date Range' ? Colors.white : AppColors.textPrimary,
+                  ),
+                  onSelected: (_) => setState(() => _washerCommissionFilter = 'Date Range'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
           const Divider(height: 1, color: AppColors.cardBorder),
           const SizedBox(height: 12),
 
-          if (latestReport == null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(Icons.event_note_outlined, size: 36, color: Colors.grey.shade400),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.tr('noWeeklyCommissionReports'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Cashier compiles and reports weekly commission payouts from Cashier Dashboard.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else ...[
-            // Report summary card
+          // View 1: Daily Today
+          if (_washerCommissionFilter == 'Daily') ...[
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: AppColors.surfaceVariant,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.cardBorder),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.statusCompleted.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                state.tr('statusPaid').toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.statusCompleted,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${latestReport.weekStartDate.day}/${latestReport.weekStartDate.month} - ${latestReport.weekEndDate.day}/${latestReport.weekEndDate.month}/${latestReport.weekEndDate.year}',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${state.tr('reportedByCashier')}: ${latestReport.cashierName}',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
+                  Text(
+                    'Today: ${state.presentWashersCount} of ${state.totalWashersCount} On Duty',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        state.tr('totalCommissionDisbursed'),
-                        style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        CurrencyFormatter.format(latestReport.totalWeeklyPool),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'Pool: ${CurrencyFormatter.format(state.teamCommissionPoolTodayETB)}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.green),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 10),
-
-            // Washer breakdown
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: latestReport.washerCommissions.length,
+              itemCount: (state.availableWashers as List).length,
               separatorBuilder: (_, __) => const SizedBox(height: 6),
               itemBuilder: (context, index) {
-                final entry = latestReport.washerCommissions.entries.toList()[index];
+                final w = (state.availableWashers as List)[index];
+                final isPresent = state.isWasherPresentToday(w.id);
+                final div = state.washerDividendsToday[w.id];
+                final earned = (isPresent && div != null) ? div.earnedETB : 0.0;
+
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(8),
@@ -864,27 +1006,234 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
-                        child: Text(
-                          entry.key.isNotEmpty ? entry.key[0] : 'W',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 11,
-                            color: AppColors.primary,
-                          ),
-                        ),
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: AutoCareAssets.spongeBucketUrl,
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        fallbackIcon: Icons.badge_rounded,
+                        fallbackColor: AppColors.primary,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(
-                          entry.key,
-                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(w.name, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
+                            Text(
+                              isPresent ? 'Present • On Duty' : 'Absent Today',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: isPresent ? Colors.green.shade800 : Colors.red.shade800,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Text(
-                        CurrencyFormatter.format(entry.value),
+                        CurrencyFormatter.format(earned),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          color: isPresent ? AppColors.statusCompleted : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ]
+          // View 2: Weekly Report
+          else if (_washerCommissionFilter == 'Weekly') ...[
+            if (latestReport == null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.event_note_outlined, size: 36, color: Colors.grey.shade400),
+                      const SizedBox(height: 8),
+                      Text(
+                        state.tr('noWeeklyCommissionReports'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Cashier compiles and reports weekly commission payouts from Cashier Dashboard.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.statusCompleted.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  state.tr('statusPaid').toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.statusCompleted,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${latestReport.weekStartDate.day}/${latestReport.weekStartDate.month} - ${latestReport.weekEndDate.day}/${latestReport.weekEndDate.month}/${latestReport.weekEndDate.year}',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${state.tr('reportedByCashier')}: ${latestReport.cashierName}',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          state.tr('totalCommissionDisbursed'),
+                          style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          CurrencyFormatter.format(latestReport.totalWeeklyPool),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: latestReport.washerCommissions.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 6),
+                itemBuilder: (context, index) {
+                  final entry = latestReport.washerCommissions.entries.toList()[index];
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.spongeBucketUrl,
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          fallbackIcon: Icons.badge_rounded,
+                          fallbackColor: AppColors.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            entry.key,
+                            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          ),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(entry.value),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.statusCompleted),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ]
+          // View 3: Date Range Filter
+          else ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Filter: ${_selectedFilter.localizedLabel(state, _selectedCustomDate)}',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                  ),
+                  Text(
+                    'Pool: ${CurrencyFormatter.format(state.weeklyTotalCommissionPool)}',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Colors.green),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: (state.availableWashers as List).length,
+              separatorBuilder: (_, __) => const SizedBox(height: 6),
+              itemBuilder: (context, index) {
+                final w = (state.availableWashers as List)[index];
+                final earned = (state.weeklyWasherCommissions as Map<String, double>)[w.name] ?? 0.0;
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: AutoCareAssets.spongeBucketUrl,
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        fallbackIcon: Icons.badge_rounded,
+                        fallbackColor: AppColors.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(w.name, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
+                      ),
+                      Text(
+                        CurrencyFormatter.format(earned),
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.statusCompleted),
                       ),
                     ],
@@ -892,14 +1241,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 );
               },
             ),
-
-            if (latestReport.notes != null && latestReport.notes!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Note: ${latestReport.notes}',
-                style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.textSecondary),
-              ),
-            ],
           ],
 
           const SizedBox(height: 10),
@@ -914,10 +1255,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               children: [
                 const Icon(Icons.info_outline, size: 14, color: Colors.blue),
                 const SizedBox(width: 6),
-                Expanded(
+                const Expanded(
                   child: Text(
                     'Washers commission is paid weekly by the Cashier and reported to Admin. Base salaries are paid monthly.',
-                    style: const TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],

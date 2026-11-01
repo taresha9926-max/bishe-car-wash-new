@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
@@ -22,6 +23,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   int _selectedWeekOffset = 0; // 0 = current week, 1 = prev week
+  String _auditDateRange = 'All'; // All, Today, This Week, This Month
 
   @override
   void initState() {
@@ -134,6 +136,28 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final deposits = state.bankDeposits as List<BankDepositRecord>;
     final pettyExpenses = state.pettyCashExpenses as List<PettyCashExpense>;
 
+    final now = DateTime.now();
+    bool Function(DateTime) predicate;
+    switch (_auditDateRange) {
+      case 'Today':
+        predicate = (d) => d.year == now.year && d.month == now.month && d.day == now.day;
+        break;
+      case 'This Week':
+        final monday = now.subtract(Duration(days: now.weekday - 1));
+        final startMonday = DateTime(monday.year, monday.month, monday.day);
+        predicate = (d) => d.isAfter(startMonday) || d.isAtSameMomentAs(startMonday);
+        break;
+      case 'This Month':
+        predicate = (d) => d.year == now.year && d.month == now.month;
+        break;
+      default:
+        predicate = (d) => true;
+    }
+
+    final filteredClosings = closings.where((c) => predicate(c.closingDate)).toList();
+    final filteredDeposits = deposits.where((d) => predicate(d.depositedAt)).toList();
+    final filteredPetty = pettyExpenses.where((p) => predicate(p.loggedAt)).toList();
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
       child: Column(
@@ -166,29 +190,64 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               ],
             ),
           ),
-          const SizedBox(height: 18),
-          const Text('Submitted Daily Closings:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          const SizedBox(height: 14),
+
+          // Date Filter Toolbar
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: ['All', 'Today', 'This Week', 'This Month'].map((range) {
+                final isSel = _auditDateRange == range;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(range == 'All' ? 'All Time' : range),
+                    selected: isSel,
+                    selectedColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: isSel ? Colors.white : AppColors.textPrimary,
+                    ),
+                    onSelected: (_) => setState(() => _auditDateRange = range),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Text(
+            'Submitted Daily Closings (${filteredClosings.length}):',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 10),
-          if (closings.isEmpty)
-            _buildEmptyState('No daily shift closings submitted by cashier yet.', Icons.point_of_sale)
+          if (filteredClosings.isEmpty)
+            _buildEmptyState('No daily shift closings found for $_auditDateRange.', Icons.point_of_sale)
           else
-            ...closings.map((c) => _buildClosingAuditCard(context, state, c, isMobile)),
+            ...filteredClosings.map((c) => _buildClosingAuditCard(context, state, c, isMobile)),
 
           const SizedBox(height: 20),
-          const Text('Bank Deposit Slips Log:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text(
+            'Bank Deposit Slips Log (${filteredDeposits.length}):',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 10),
-          if (deposits.isEmpty)
-            _buildEmptyState('No bank deposit slips logged yet.', Icons.receipt_outlined)
+          if (filteredDeposits.isEmpty)
+            _buildEmptyState('No bank deposit slips found for $_auditDateRange.', Icons.receipt_outlined)
           else
-            ...deposits.map((d) => _buildDepositCard(context, state, d, isMobile)),
+            ...filteredDeposits.map((d) => _buildDepositCard(context, state, d, isMobile)),
 
           const SizedBox(height: 20),
-          const Text('Petty Cash & Emergency Spend Log:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text(
+            'Petty Cash & Emergency Spend Log (${filteredPetty.length}):',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 10),
-          if (pettyExpenses.isEmpty)
-            _buildEmptyState('No petty cash expenses logged today.', Icons.outbox_rounded)
+          if (filteredPetty.isEmpty)
+            _buildEmptyState('No petty cash expenses found for $_auditDateRange.', Icons.outbox_rounded)
           else
-            ...pettyExpenses.map((p) => _buildPettyCashCard(context, state, p, isMobile)),
+            ...filteredPetty.map((p) => _buildPettyCashCard(context, state, p, isMobile)),
         ],
       ),
     );
@@ -267,9 +326,13 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue.shade50,
-          child: const Icon(Icons.account_balance, color: AppColors.primary, size: 20),
+        leading: AutoCareAssets.buildPhotoThumbnail(
+          imageUrl: d.targetAccount.toLowerCase().contains('awash') ? AutoCareAssets.cbeLogoUrl : AutoCareAssets.cbeLogoUrl,
+          width: 38,
+          height: 38,
+          borderRadius: 8,
+          fallbackIcon: Icons.account_balance,
+          fallbackColor: AppColors.primary,
         ),
         title: Text('${CurrencyFormatter.format(d.amount)} → ${d.targetAccount}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
         subtitle: Text('Slip #: ${d.referenceSlipNumber} • Cashier: ${d.cashierName}', style: const TextStyle(fontSize: 11.5)),
@@ -289,9 +352,13 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.deepOrange.shade50,
-          child: const Icon(Icons.outbox_rounded, color: Colors.deepOrange, size: 20),
+        leading: AutoCareAssets.buildPhotoThumbnail(
+          imageUrl: AutoCareAssets.cashMoneyUrl,
+          width: 38,
+          height: 38,
+          borderRadius: 8,
+          fallbackIcon: Icons.receipt_long_rounded,
+          fallbackColor: Colors.deepOrange,
         ),
         title: Text('${CurrencyFormatter.format(p.amount)} • ${p.category.toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
         subtitle: Text('${p.reason} • By: ${p.cashierName}', style: const TextStyle(fontSize: 11.5)),
@@ -481,8 +548,28 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                         ),
                         // 7 days (Mon-Sun)
                         ...List.generate(7, (dayIdx) {
-                          final isTodayCol = weekDays[dayIdx].day == DateTime.now().day && _selectedWeekOffset == 0;
-                          final isPresent = isTodayCol ? isPresentToday : true;
+                          final dayDate = weekDays[dayIdx];
+                          final isTodayCol = dayDate.day == DateTime.now().day &&
+                              dayDate.month == DateTime.now().month &&
+                              _selectedWeekOffset == 0;
+                          final att = state.getWasherAttendanceForDate(w.id, dayDate);
+                          final isPresent = isTodayCol ? isPresentToday : (att?.isPresent ?? true);
+                          final earned = isTodayCol
+                              ? (state.isDailyCommissionDisbursedToday
+                                  ? (state.washerDividendsToday[w.id]?.earnedETB ?? 0.0)
+                                  : 0.0)
+                              : (att?.commissionEarnedETB ?? 0.0);
+                          final hasDisbursed = (isTodayCol && state.isDailyCommissionDisbursedToday) ||
+                              (att != null && att.commissionEarnedETB > 0);
+
+                          String label;
+                          if (!isPresent) {
+                            label = 'A';
+                          } else if (hasDisbursed && earned > 0) {
+                            label = 'P • Br ${earned.toStringAsFixed(0)}';
+                          } else {
+                            label = 'P';
+                          }
 
                           return DataCell(
                             Center(
@@ -491,11 +578,15 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                                 decoration: BoxDecoration(
                                   color: isPresent ? Colors.green.shade50 : Colors.red.shade50,
                                   borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: isPresent ? Colors.green.shade200 : Colors.red.shade200,
+                                    width: 0.8,
+                                  ),
                                 ),
                                 child: Text(
-                                  isPresent ? state.tr('presentShort') : state.tr('absentShort'),
+                                  label,
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 9.5,
                                     fontWeight: FontWeight.w900,
                                     color: isPresent ? Colors.green.shade800 : Colors.red.shade800,
                                   ),
@@ -509,7 +600,54 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                         DataCell(Text(CurrencyFormatter.format(w.baseSalaryMonthlyETB), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.textSecondary))),
                       ],
                     );
-                  }).toList(),
+                  }).toList()
+                    ..add(
+                      DataRow(
+                        color: WidgetStateProperty.all(AppColors.surfaceVariant),
+                        cells: [
+                          const DataCell(
+                            Text(
+                              'Daily Total Pool',
+                              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: AppColors.primary),
+                            ),
+                          ),
+                          const DataCell(
+                            Text('TOTAL', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 10, color: AppColors.primary)),
+                          ),
+                          ...List.generate(7, (dayIdx) {
+                            final dayDate = weekDays[dayIdx];
+                            final isTodayCol = dayDate.day == DateTime.now().day &&
+                                dayDate.month == DateTime.now().month &&
+                                _selectedWeekOffset == 0;
+                            final dailyTotal = (isTodayCol && state.isDailyCommissionDisbursedToday)
+                                ? state.teamCommissionPoolTodayETB
+                                : state.getDailyCommissionTotalForDate(dayDate);
+
+                            return DataCell(
+                              Center(
+                                child: Text(
+                                  dailyTotal > 0 ? CurrencyFormatter.format(dailyTotal) : '-',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: dailyTotal > 0 ? Colors.green.shade800 : AppColors.textMuted,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                          const DataCell(Center(child: Text('—', style: TextStyle(color: AppColors.textMuted)))),
+                          DataCell(Text(
+                            CurrencyFormatter.format(weeklyPool),
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.green),
+                          )),
+                          DataCell(Text(
+                            CurrencyFormatter.format(monthlySalary),
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: AppColors.textSecondary),
+                          )),
+                        ],
+                      ),
+                    ),
                 ),
               ),
             ),
@@ -589,7 +727,9 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   Widget _buildExpensesTab(BuildContext context, dynamic state, bool isMobile) {
     final transactions = state.stockTransactions as List<StockTransaction>;
     final restocks = transactions.where((t) => t.type == 'receiveStock').toList();
+    final consumed = transactions.where((t) => t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption').toList();
     final totalSpent = restocks.fold(0.0, (sum, t) => sum + t.totalCostEtb);
+    final totalConsumed = consumed.fold(0.0, (sum, t) => sum + t.totalCostEtb);
     final pettyExpenses = state.pettyCashExpenses as List<PettyCashExpense>;
     final totalPetty = pettyExpenses.fold(0.0, (sum, p) => sum + p.amount);
 
@@ -610,21 +750,33 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Store Consumables Restock Spend', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                      const Text('Restock Spend (GRN)', style: TextStyle(color: Colors.white70, fontSize: 11)),
                       const SizedBox(height: 2),
-                      Text(CurrencyFormatter.format(totalSpent), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+                      Text(CurrencyFormatter.format(totalSpent), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900)),
                     ],
                   ),
                 ),
                 Container(width: 1, height: 32, color: Colors.white24),
-                const SizedBox(width: 14),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Petty Cash / Emergency Outflow', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                      const Text('Supplies Consumed', style: TextStyle(color: Colors.white70, fontSize: 11)),
                       const SizedBox(height: 2),
-                      Text(CurrencyFormatter.format(totalPetty), style: const TextStyle(color: Colors.deepOrangeAccent, fontSize: 18, fontWeight: FontWeight.w900)),
+                      Text(CurrencyFormatter.format(totalConsumed), style: const TextStyle(color: Colors.cyanAccent, fontSize: 16, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+                Container(width: 1, height: 32, color: Colors.white24),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Petty Cash Outflow', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                      const SizedBox(height: 2),
+                      Text(CurrencyFormatter.format(totalPetty), style: const TextStyle(color: Colors.deepOrangeAccent, fontSize: 16, fontWeight: FontWeight.w900)),
                     ],
                   ),
                 ),
@@ -632,7 +784,47 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             ),
           ),
           const SizedBox(height: 18),
-          const Text('Inventory Goods Received Notes (GRN):', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+
+          // 1. Daily Consumed Supplies (Empty-for-Full Exchanges)
+          const Text(
+            'Daily Consumed Supplies Reported by Storekeeper (Empty-for-Full):',
+            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 10),
+          if (consumed.isEmpty)
+            _buildEmptyState('No daily consumable usage reported by storekeeper yet.', Icons.autorenew_rounded)
+          else
+            ...consumed.map((t) => Card(
+              margin: const EdgeInsets.only(bottom: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                leading: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.getInventoryImage(t.itemName),
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  fallbackIcon: Icons.water_drop_rounded,
+                  fallbackColor: Colors.teal,
+                ),
+                title: Text(t.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                subtitle: Text(
+                  '${t.quantity} ${t.unit} consumed • ${t.supplier} (${t.date.day}/${t.date.month})\n${t.notes}',
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+                trailing: Text(
+                  CurrencyFormatter.format(t.totalCostEtb),
+                  style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange, fontSize: 13),
+                ),
+              ),
+            )),
+
+          const SizedBox(height: 20),
+
+          // 2. Inventory Goods Received Notes (GRN - Supplier Purchases)
+          const Text(
+            'Inventory Goods Received Notes (GRN - Purchases):',
+            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 10),
           if (restocks.isEmpty)
             _buildEmptyState('No inventory purchases logged by storekeeper yet.', Icons.shopping_bag_outlined)
@@ -646,13 +838,23 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(t.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.getInventoryImage(t.itemName),
+                          width: 36,
+                          height: 36,
+                          borderRadius: 8,
+                          fallbackIcon: Icons.inventory_2_rounded,
+                          fallbackColor: AppColors.primary,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(t.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                        ),
                         Text(CurrencyFormatter.format(t.totalCostEtb), style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.red, fontSize: 13.5)),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       '${t.quantity} ${t.unit.isNotEmpty ? t.unit : "units"} @ ${CurrencyFormatter.format(t.unitCostEtb)} / ${t.unit.isNotEmpty ? t.unit : "unit"} • Supplier: ${t.supplier}',
                       style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
@@ -683,13 +885,18 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final grossRevenue = paidBookings.fold(0.0, (sum, b) => sum + b.totalPrice);
     final commissionPaid = state.commissionLogs.fold(0.0, (sum, l) => sum + l.commissionEarnedETB);
     final suppliesCost = (state.stockTransactions as List<StockTransaction>)
-        .where((t) => t.type == 'receiveStock')
+        .where((t) => t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption')
         .fold(0.0, (sum, t) => sum + t.totalCostEtb);
     final pettyCost = (state.pettyCashExpenses as List<PettyCashExpense>)
         .fold(0.0, (sum, p) => sum + p.amount);
+    final fixedAssetsCost = 0.0;
     final monthlySalaryObligation = state.monthlyTotalBaseSalary as double;
 
-    final netProfit = grossRevenue - commissionPaid - suppliesCost - pettyCost;
+    final cogs = commissionPaid + suppliesCost;
+    final grossProfit = grossRevenue - cogs;
+    final opex = pettyCost + fixedAssetsCost;
+    final netOperatingProfit = grossProfit - opex;
+    final netRetainedProfit = netOperatingProfit - monthlySalaryObligation;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
@@ -700,7 +907,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: netProfit >= 0 ? [const Color(0xFF065F46), const Color(0xFF047857)] : [Colors.red.shade900, Colors.red.shade700],
+                colors: netOperatingProfit >= 0 ? [const Color(0xFF065F46), const Color(0xFF047857)] : [Colors.red.shade900, Colors.red.shade700],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -712,23 +919,45 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               children: [
                 const Text('NET STATION OPERATING PROFIT', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                 const SizedBox(height: 6),
-                Text(CurrencyFormatter.format(netProfit), style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
+                Text(CurrencyFormatter.format(netOperatingProfit), style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
                 const SizedBox(height: 4),
-                const Text('Gross Revenue − Commissions − Supplies − Petty Cash', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                const Text('Gross Revenue − COGS (Commissions + Consumables) − OpEx (Petty Cash + Equipment)', style: TextStyle(color: Colors.white60, fontSize: 11)),
               ],
             ),
           ),
           const SizedBox(height: 18),
-          const Text('Executive Financial Summary:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          const Text('Standard Income & Financial Statement:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           const SizedBox(height: 12),
-          _buildPnLLine('1. Total Gross Wash Revenue', CurrencyFormatter.format(grossRevenue), Colors.green.shade700, false),
-          _buildPnLLine('2. Washer Team 15% Commissions', '- ${CurrencyFormatter.format(commissionPaid)}', Colors.orange.shade800, false),
-          _buildPnLLine('3. Consumables & Soap Restock Cost', '- ${CurrencyFormatter.format(suppliesCost)}', Colors.red.shade700, false),
-          _buildPnLLine('4. Petty Cash / Emergency Outflow', '- ${CurrencyFormatter.format(pettyCost)}', Colors.deepOrange.shade700, false),
-          const Divider(thickness: 1.5, height: 24),
-          _buildPnLLine('Net Profit After Direct Wash Costs', CurrencyFormatter.format(netProfit), netProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
-          const Divider(thickness: 1, height: 24),
-          _buildPnLLine('Monthly Guaranteed Base Salary Obligation', CurrencyFormatter.format(monthlySalaryObligation), Colors.blueGrey, false),
+
+          // Section 1: Revenue
+          const Text('I. OPERATING REVENUE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary)),
+          _buildPnLLine('Gross Vehicle Wash Services Revenue', CurrencyFormatter.format(grossRevenue), Colors.green.shade700, false),
+          const SizedBox(height: 8),
+
+          // Section 2: COGS
+          const Text('II. COST OF GOODS SOLD (COGS)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.orange)),
+          _buildPnLLine('Washer Team 15% Commissions', '- ${CurrencyFormatter.format(commissionPaid)}', Colors.orange.shade800, false),
+          _buildPnLLine('Consumables Used & Soap Restocks', '- ${CurrencyFormatter.format(suppliesCost)}', Colors.orange.shade800, false),
+          _buildPnLLine('Total Cost of Goods Sold', '- ${CurrencyFormatter.format(cogs)}', Colors.orange.shade900, true),
+          const Divider(thickness: 1, height: 16),
+          _buildPnLLine('GROSS PROFIT', CurrencyFormatter.format(grossProfit), grossProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
+          const SizedBox(height: 8),
+
+          // Section 3: OpEx
+          const Text('III. OPERATING EXPENSES (OPEX)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.deepOrange)),
+          _buildPnLLine('Cashier Petty Cash / Emergency Spends', '- ${CurrencyFormatter.format(pettyCost)}', Colors.deepOrange.shade700, false),
+          _buildPnLLine('Fixed Assets & Machinery Purchases', '- ${CurrencyFormatter.format(fixedAssetsCost)}', Colors.deepOrange.shade700, false),
+          _buildPnLLine('Total Operating Expenses', '- ${CurrencyFormatter.format(opex)}', Colors.deepOrange.shade900, true),
+          const Divider(thickness: 1.5, height: 20),
+
+          // Section 4: Net Operating Profit
+          _buildPnLLine('NET OPERATING PROFIT (EBITDA)', CurrencyFormatter.format(netOperatingProfit), netOperatingProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
+          const Divider(thickness: 1, height: 20),
+
+          // Section 5: Base Salary Reserve
+          const Text('IV. GUARANTEED MONTHLY PAYROLL RESERVE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.blueGrey)),
+          _buildPnLLine('Guaranteed Monthly Base Salary Reserve', CurrencyFormatter.format(monthlySalaryObligation), Colors.blueGrey, false),
+          _buildPnLLine('Net Retained Cash Profit', CurrencyFormatter.format(netRetainedProfit), netRetainedProfit >= 0 ? Colors.teal.shade800 : Colors.red, true),
         ],
       ),
     );

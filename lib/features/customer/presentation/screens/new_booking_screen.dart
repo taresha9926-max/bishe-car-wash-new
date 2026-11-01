@@ -109,6 +109,17 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               ),
               const SizedBox(height: 10),
               StationTypeCard(
+                serviceType: ServiceType.valetPickUp,
+                isSelected: _selectedServiceType == ServiceType.valetPickUp,
+                availableCapacity: 1,
+                onTap: () {
+                  setState(() {
+                    _selectedServiceType = ServiceType.valetPickUp;
+                  });
+                },
+              ),
+              const SizedBox(height: 10),
+              StationTypeCard(
                 serviceType: ServiceType.atHomeMobile,
                 isSelected: _selectedServiceType == ServiceType.atHomeMobile,
                 availableCapacity: state.isMobileVanAvailable ? 1 : 0,
@@ -278,24 +289,24 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Address field if At-Home Mobile Van
-              if (_selectedServiceType == ServiceType.atHomeMobile) ...[
+              // Address field if At-Home Mobile Van or Valet Driver Pick-up
+              if (_selectedServiceType.requiresLocation) ...[
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.mobileVanColor.withOpacity(0.06),
+                    color: (_selectedServiceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor).withOpacity(0.06),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.mobileVanColor.withOpacity(0.3)),
+                    border: Border.all(color: (_selectedServiceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor).withOpacity(0.3)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.location_on, color: AppColors.mobileVanColor, size: 20),
+                          Icon(Icons.location_on, color: _selectedServiceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            state.tr('locationArea'),
+                            _selectedServiceType == ServiceType.valetPickUp ? 'Driver Pick-up Location' : state.tr('locationArea'),
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                           ),
                         ],
@@ -327,7 +338,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                         hint: 'e.g. Near Asham Africa Resort, House 420',
                         prefixIcon: Icons.home,
                         validator: (val) {
-                          if (_selectedServiceType == ServiceType.atHomeMobile && (val == null || val.trim().isEmpty)) {
+                          if (_selectedServiceType.requiresLocation && (val == null || val.trim().isEmpty)) {
                             return 'Please provide street / residence landmark in Bishoftu';
                           }
                           return null;
@@ -474,7 +485,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       final state = AppStateProvider.read(context);
 
       String? fullAddress;
-      if (_selectedServiceType == ServiceType.atHomeMobile) {
+      if (_selectedServiceType.requiresLocation) {
         fullAddress = '$_selectedBishoftuArea - ${_addressController.text.trim()}';
       }
 

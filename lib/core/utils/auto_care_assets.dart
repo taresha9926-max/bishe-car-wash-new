@@ -11,6 +11,8 @@ class AutoCareAssets {
       'https://images.unsplash.com/photo-1563720223185-11003d516935?w=600&auto=format&fit=crop&q=80';
   static const String mobileVanUrl =
       'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&auto=format&fit=crop&q=80';
+  static const String valetDriverUrl =
+      'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&auto=format&fit=crop&q=80';
   static const String welcomeHeroUrl =
       'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&auto=format&fit=crop&q=80';
 
@@ -43,6 +45,12 @@ class AutoCareAssets {
       'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=400&auto=format&fit=crop&q=80';
   static const String assetTowelsUrl =
       'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=400&auto=format&fit=crop&q=80';
+  static const String cashMoneyUrl =
+      'https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=400&auto=format&fit=crop&q=80';
+  static const String cbeLogoUrl =
+      'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&auto=format&fit=crop&q=80';
+  static const String spongeBucketUrl =
+      'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=400&auto=format&fit=crop&q=80';
 
   static String getInventoryImage(String itemName) {
     final lower = itemName.toLowerCase();

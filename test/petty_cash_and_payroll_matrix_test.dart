@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bishe_car_wash/features/admin/domain/models/petty_cash_expense.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 
 void main() {
@@ -184,6 +184,84 @@ void main() {
       expect(state.stockTransactions.isEmpty, isTrue);
       expect(state.pendingApprovals.isEmpty, isTrue);
       expect(state.bays.every((b) => b.isVacant), isTrue);
+    });
+
+    test('ServiceType.valetPickUp supports GPS coordinates and driver dispatch', () async {
+      expect(ServiceType.valetPickUp.requiresLocation, isTrue);
+
+      final booking = await state.bookNewWash(
+        customerName: 'Ato Solomon [Valet]',
+        customerPhone: '0911556677',
+        serviceType: ServiceType.valetPickUp,
+        carType: CarType.automobile,
+        licensePlate: 'VALET-001',
+        package: state.packages.first,
+        deliveryLocation: 'Bishoftu Kebele 02 - Near Kuriftu Resort',
+        gpsCoordinates: '8.7523, 38.9812',
+        paymentMethod: PaymentMethod.telebirr,
+      );
+
+      expect(booking.serviceType, ServiceType.valetPickUp);
+      expect(booking.deliveryLocation, contains('Kuriftu'));
+      expect(booking.gpsCoordinates, '8.7523, 38.9812');
+    });
+
+    test('Storekeeper empty-for-full exchange decrements warehouse stock and logs consumption', () async {
+      final initialShampoo = state.consumables.firstWhere((c) => c.name.toLowerCase().contains('shampoo'));
+      final initialStock = initialShampoo.currentStock;
+
+      await state.exchangeConsumableEmptyForNew(
+        itemId: initialShampoo.id,
+        quantity: 2.0,
+        washerTeamLeaderName: 'Abebe Leader',
+        notes: 'Returned 2 empty 5L canisters, issued 2 fresh containers',
+      );
+
+      final updatedShampoo = state.consumables.firstWhere((c) => c.id == initialShampoo.id);
+      expect(updatedShampoo.currentStock, initialStock - 2.0);
+
+      final latestTx = state.stockTransactions.first;
+      expect(latestTx.type, 'emptyExchangeConsumption');
+      expect(latestTx.quantity, 2.0);
+      expect(latestTx.supplier, 'Abebe Leader');
+      expect(latestTx.totalCostEtb, 2.0 * initialShampoo.unitCostEtb);
+    });
+
+    test('Cashier daily commission disbursement idempotency lock and washer dividends', () async {
+      expect(state.isDailyCommissionDisbursedToday, isFalse);
+
+      await state.registerWalkIn(
+        licensePlate: 'COMM-9999',
+        customerName: 'Test Comm Customer',
+        customerPhone: '0911223344',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.cash,
+      );
+
+      // Process payment so revenue exists
+      await state.processPayment(
+        bookingId: state.bookings.first.id,
+        method: PaymentMethod.cash,
+        amount: state.packages.first.getPriceFor(CarType.automobile),
+      );
+
+      final pool = state.teamCommissionPoolTodayETB;
+      expect(pool, greaterThan(0));
+
+      state.markDailyCommissionDisbursed();
+      expect(state.isDailyCommissionDisbursedToday, isTrue);
+
+      final todayTotal = state.getDailyCommissionTotalForDate(DateTime.now());
+      expect(todayTotal, pool);
+
+      // Active washers attendance records should reflect disbursed dividends
+      final washer1 = state.availableWashers.first;
+      final att = state.getWasherAttendanceForDate(washer1.id, DateTime.now());
+      expect(att, isNotNull);
+      expect(att!.isPresent, isTrue);
+      expect(att.commissionEarnedETB, greaterThan(0));
     });
   });
 }

@@ -13,6 +13,7 @@ import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.da
 void main() {
   test(
     'SupabaseWashRepositoryImpl loads packages and saves live booking to Supabase',
+    timeout: const Timeout(Duration(minutes: 5)),
     () async {
       final repo = SupabaseWashRepositoryImpl(
       supabaseUrl: AppConstants.supabaseUrl,

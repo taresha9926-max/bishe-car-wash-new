@@ -285,8 +285,13 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         }
 
         ServiceType serviceType = ServiceType.walkInStation;
-        if ((json['service_type'] ?? '').toString().contains('atHome')) {
+        final stStr = (json['service_type'] ?? '').toString();
+        if (stStr.contains('atHome')) {
           serviceType = ServiceType.atHomeMobile;
+        } else if (stStr.contains('valet') || stStr.contains('pickUp')) {
+          serviceType = ServiceType.valetPickUp;
+        } else if (stStr.contains('phone')) {
+          serviceType = ServiceType.phoneCallBooking;
         }
 
         WashStatus status = WashStatus.pending;

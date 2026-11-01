@@ -36,6 +36,15 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
   String? _receiptBase64;
 
   @override
+  void initState() {
+    super.initState();
+    final active = AppStateProvider.read(context).activeStaffFullName;
+    if (active != null && active.isNotEmpty) {
+      _cashierNameController.text = active;
+    }
+  }
+
+  @override
   void dispose() {
     _amountController.dispose();
     _slipController.dispose();
