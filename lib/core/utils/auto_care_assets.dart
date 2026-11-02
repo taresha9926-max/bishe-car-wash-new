@@ -52,6 +52,66 @@ class AutoCareAssets {
   static const String spongeBucketUrl =
       'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=400&auto=format&fit=crop&q=80';
 
+  // Curated 8-Reel Commercial Detailing Photography Pool
+  static const List<Map<String, String>> curatedReelsPool = [
+    {
+      'id': 'reel-1',
+      'label': 'Reel 1: Active Snow Foam',
+      'title': 'Active Snow Foam Cannon & Pre-Wash',
+      'subtitle': 'Triple-action foaming & streak-free dirt lift • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
+    },
+    {
+      'id': 'reel-2',
+      'label': 'Reel 2: Chassis Steam',
+      'title': 'High-Pressure Chassis Steam Bay',
+      'subtitle': 'Deep wheel-well & engine chassis steam care • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&auto=format&fit=crop&q=80',
+    },
+    {
+      'id': 'reel-3',
+      'label': 'Reel 3: Ceramic Shield',
+      'title': 'Ceramic Shield & Paint Polish',
+      'subtitle': 'Hydrophobic ceramic shield & ultimate gloss • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&auto=format&fit=crop&q=80',
+    },
+    {
+      'id': 'reel-4',
+      'label': 'Reel 4: Interior Care',
+      'title': 'Deep Interior & Leather Care',
+      'subtitle': 'Anti-bacterial steam & luxury cabin detailing • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&auto=format&fit=crop&q=80',
+    },
+    {
+      'id': 'reel-5',
+      'label': 'Reel 5: Tire Gloss',
+      'title': 'Wheel-Well & Tire Gloss Treatment',
+      'subtitle': 'Brake-dust dissolve & deep satin tire dressing • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&auto=format&fit=crop&q=80',
+    },
+    {
+      'id': 'reel-6',
+      'label': 'Reel 6: Engine Bay',
+      'title': 'Engine Bay Detailing & Degrease',
+      'subtitle': 'Precision dry-steam grease wipe & harness coat • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&auto=format&fit=crop&q=80',
+    },
+    {
+      'id': 'reel-7',
+      'label': 'Reel 7: Water Beading',
+      'title': 'Water-Beading Hydrophobic Rinse',
+      'subtitle': 'Extreme water repelling & fast crystal dry coat • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=800&auto=format&fit=crop&q=80',
+    },
+    {
+      'id': 'reel-8',
+      'label': 'Reel 8: Mobile Van',
+      'title': 'Mobile Van At-Home Service',
+      'subtitle': 'Equipped generator & tank van right to your door • Watch Reel',
+      'url': 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&auto=format&fit=crop&q=80',
+    },
+  ];
+
   static String getInventoryImage(String itemName) {
     final lower = itemName.toLowerCase();
     if (lower.contains('shampoo') || lower.contains('foam') || lower.contains('wax') || lower.contains('chemical') || lower.contains('liquid')) {

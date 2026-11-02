@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
@@ -7,6 +8,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.d
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 
 void main() {
   group('Super Admin vs Secondary Admin & Commission Attendance Tests', () {
@@ -319,6 +321,19 @@ void main() {
     test('Super Admin configures TikTok commercial reels and persists across devices', () async {
       expect(state.tiktokReels, isNotEmpty);
       expect(state.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash'));
+
+      // Verify curated 8-reel photography pool
+      expect(AutoCareAssets.curatedReelsPool.length, equals(8));
+      expect(AutoCareAssets.curatedReelsPool.every((r) => r['url']!.isNotEmpty), isTrue);
+
+      // Verify reels 5 to 8 localization
+      const reel5 = TikTokAdVideo(id: 'reel-5', title: 'Tire Gloss', subtitle: 'Tire care', tiktokUrl: '', thumbnailUrl: '');
+      expect(reel5.localizedTitle('OM'), contains('Gommaa'));
+      expect(reel5.localizedTitle('AM'), contains('የጎማ'));
+
+      const reel8 = TikTokAdVideo(id: 'reel-8', title: 'Mobile Van', subtitle: 'Van care', tiktokUrl: '', thumbnailUrl: '');
+      expect(reel8.localizedTitle('OM'), contains('Makiinaa Socho\'aa'));
+      expect(reel8.localizedTitle('AM'), contains('ተንቀሳቃሽ'));
 
       final modified = [
         ...state.tiktokReels,

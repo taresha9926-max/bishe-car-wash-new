@@ -43,6 +43,18 @@ class TikTokAdVideo {
     } else if (id == 'reel-4') {
       if (code == 'OM') return 'Qulqullina Keessaa & Kunuunsa Qodaa';
       if (code == 'AM') return 'የውስጥ ክፍል ጥልቅ እንፋሎት እና ሌዘር እንክብካቤ';
+    } else if (id == 'reel-5') {
+      if (code == 'OM') return 'Kunuunsa Gommaa & Qulqullina Rims';
+      if (code == 'AM') return 'የጎማ እና የሪም ልዩ ጽዳትና ወዝ';
+    } else if (id == 'reel-6') {
+      if (code == 'OM') return 'Qulqullina Injiinii & Dhiibbaa Zayitii';
+      if (code == 'AM') return 'የሞተር ክፍል ጥልቅ የእንፋሎት እጥበት';
+    } else if (id == 'reel-7') {
+      if (code == 'OM') return 'Dhiqannaa Bishaaniifi Calaqa Saaraamiikii';
+      if (code == 'AM') return 'የውሃ መከላከያና የሃይድሮፎቢክ ከለላ';
+    } else if (id == 'reel-8') {
+      if (code == 'OM') return 'Tajaajila Makiinaa Socho\'aa Manaatti';
+      if (code == 'AM') return 'ተንቀሳቃሽ የቤት ለቤት የእጥበት ቫን';
     }
     return title;
   }
@@ -61,6 +73,18 @@ class TikTokAdVideo {
     } else if (id == 'reel-4') {
       if (code == 'OM') return 'Qulqullina teessoo gogaafi sagalee dhabamsiisuu • Daawwadhaa';
       if (code == 'AM') return 'የመቀመጫ እና የውስጥ ሽታ ማስወገጃ • ይመልከቱ';
+    } else if (id == 'reel-5') {
+      if (code == 'OM') return 'Qulqullina gommaa fi calaqqisa cimaa • Daawwadhaa';
+      if (code == 'AM') return 'የጎማ ጥልቅ ጥቁረት እና የብሬክ አቧራ ማጽጃ • ይመልከቱ';
+    } else if (id == 'reel-6') {
+      if (code == 'OM') return 'Dhiqannaa injiinii fi eegumsa shiboo • Daawwadhaa';
+      if (code == 'AM') return 'የሞተር ዘይትና ቆሻሻ ማስወገጃ • ይመልከቱ';
+    } else if (id == 'reel-7') {
+      if (code == 'OM') return 'Eegumsa bishaanii daddafaa calaqqisiisu • Daawwadhaa';
+      if (code == 'AM') return 'የውሃ ነጠብጣብ መከላከያና ፈጣን ማድረቂያ • ይመልከቱ';
+    } else if (id == 'reel-8') {
+      if (code == 'OM') return 'Makiinaa dhufee mana keessanitti dhiqu • Daawwadhaa';
+      if (code == 'AM') return 'ቫኑ ደጃፍዎ መጥቶ የሚሰጠው ፈጣን አገልግሎት • ይመልከቱ';
     }
     return subtitle;
   }

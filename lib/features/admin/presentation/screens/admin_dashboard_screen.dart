@@ -2502,28 +2502,71 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    onPressed: () {
-                      final newReel = TikTokAdVideo(
-                        id: 'reel-${DateTime.now().millisecondsSinceEpoch}',
-                        title: 'New Detailing Reel #${reels.length + 1}',
-                        subtitle: 'Watch on TikTok',
-                        tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
-                        thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
-                      );
-                      _editReelPopup(context, newReel, (created) {
-                        setDialogState(() {
-                          reels.add(created);
-                        });
-                      });
-                    },
-                    icon: const Icon(Icons.add_rounded, size: 16),
-                    label: const Text('Add Another TikTok Reel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFE2C55),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          elevation: 0,
+                        ),
+                        icon: const Icon(Icons.sync_rounded, size: 16),
+                        label: const Text('🔄 1-Click Sync All to @bishecarwash', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        onPressed: () async {
+                          final synced = <TikTokAdVideo>[];
+                          for (int i = 0; i < reels.length; i++) {
+                            final poolItem = AutoCareAssets.curatedReelsPool[i % AutoCareAssets.curatedReelsPool.length];
+                            synced.add(reels[i].copyWith(
+                              tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
+                              thumbnailUrl: reels[i].thumbnailUrl.isNotEmpty ? reels[i].thumbnailUrl : poolItem['url']!,
+                            ));
+                          }
+                          setDialogState(() {
+                            reels.clear();
+                            reels.addAll(synced);
+                          });
+                          await state.setTikTokReels(reels);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('All reels successfully synced to @bishecarwash! Thumbnails preserved.'),
+                                backgroundColor: AppColors.statusReady,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        onPressed: () {
+                          final nextIndex = reels.length;
+                          final poolItem = AutoCareAssets.curatedReelsPool[nextIndex % AutoCareAssets.curatedReelsPool.length];
+                          final newReel = TikTokAdVideo(
+                            id: 'reel-${nextIndex + 1}',
+                            title: poolItem['title']!,
+                            subtitle: poolItem['subtitle']!,
+                            tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
+                            thumbnailUrl: poolItem['url']!,
+                          );
+                          _editReelPopup(context, newReel, (created) {
+                            setDialogState(() {
+                              reels.add(created);
+                            });
+                          });
+                        },
+                        icon: const Icon(Icons.add_rounded, size: 16),
+                        label: const Text('Add Another Reel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -2649,6 +2692,64 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     prefixIcon: Icon(Icons.image_rounded),
                     border: OutlineInputBorder(),
                   ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Curated Detailing Photo Pool (Tap to Apply):',
+                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: AutoCareAssets.curatedReelsPool.map((p) {
+                    final isSel = thumbCtrl.text == p['url'];
+                    return InkWell(
+                      onTap: () {
+                        thumbCtrl.text = p['url']!;
+                        if (titleCtrl.text.isEmpty || titleCtrl.text.startsWith('New Detailing')) {
+                          titleCtrl.text = p['title']!;
+                          subCtrl.text = p['subtitle']!;
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isSel ? const Color(0xFFFE2C55).withOpacity(0.12) : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSel ? const Color(0xFFFE2C55) : AppColors.cardBorder,
+                            width: isSel ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Image.network(
+                                p['url']!,
+                                width: 22,
+                                height: 22,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              p['label']!,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: isSel ? FontWeight.bold : FontWeight.w600,
+                                color: isSel ? const Color(0xFFFE2C55) : AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
