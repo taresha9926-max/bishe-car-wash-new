@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/localization/app_strings.dart';
 
 enum ServiceType {
   walkInStation,
@@ -6,44 +7,51 @@ enum ServiceType {
   valetPickUp,
   phoneCallBooking;
 
-  String get displayName {
+  String localizedName(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case ServiceType.walkInStation:
-        return 'Walk-in Station';
+        return AppStrings.get('serviceWalkIn', lang);
       case ServiceType.atHomeMobile:
-        return 'At-Home Mobile Service';
+        return AppStrings.get('serviceAtHome', lang);
       case ServiceType.valetPickUp:
-        return 'Driver Pick-up & Return';
+        return AppStrings.get('serviceValetPickUp', lang);
       case ServiceType.phoneCallBooking:
-        return 'Phone Reservation';
+        return AppStrings.get('servicePhoneCall', lang);
     }
   }
 
-  String get capacityNotice {
+  String localizedCapacity(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case ServiceType.walkInStation:
-        return '2 Bays Available at Bishoftu Station';
+        return AppStrings.get('serviceWalkInCapacity', lang);
       case ServiceType.atHomeMobile:
-        return '1 Mobile Van Available (Bishoftu Area)';
+        return AppStrings.get('serviceAtHomeCapacity', lang);
       case ServiceType.valetPickUp:
-        return 'Driver Dispatched to Your GPS Location';
+        return AppStrings.get('serviceValetCapacity', lang);
       case ServiceType.phoneCallBooking:
-        return 'Call-in Booking via Gate Reception';
+        return AppStrings.get('servicePhoneCapacity', lang);
     }
   }
 
-  String get description {
+  String localizedDescription(String langCode) {
+    final lang = AppLanguage.fromCode(langCode);
     switch (this) {
       case ServiceType.walkInStation:
-        return 'Drive in to our Bishoftu main facility with dedicated pressure washing bays.';
+        return AppStrings.get('serviceWalkInDesc', lang);
       case ServiceType.atHomeMobile:
-        return 'Our fully equipped water-tank & power generator van comes right to your doorstep.';
+        return AppStrings.get('serviceAtHomeDesc', lang);
       case ServiceType.valetPickUp:
-        return 'A dedicated driver picks up your vehicle from your location, brings it to the station for wash, and returns it safely to your doorstep.';
+        return AppStrings.get('serviceValetDesc', lang);
       case ServiceType.phoneCallBooking:
-        return 'Pre-booked reservation received via station phone call.';
+        return AppStrings.get('servicePhoneDesc', lang);
     }
   }
+
+  String get displayName => localizedName('EN');
+  String get capacityNotice => localizedCapacity('EN');
+  String get description => localizedDescription('EN');
 
   IconData get icon {
     switch (this) {

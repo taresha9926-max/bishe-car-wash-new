@@ -186,8 +186,16 @@ void main() {
       expect(state.bays.every((b) => b.isVacant), isTrue);
     });
 
-    test('ServiceType.valetPickUp supports GPS coordinates and driver dispatch', () async {
+    test('ServiceType.valetPickUp supports GPS coordinates and driver dispatch with multilingual translations', () async {
       expect(ServiceType.valetPickUp.requiresLocation, isTrue);
+
+      // Verify Afaan Oromo and Amharic localizations
+      expect(ServiceType.valetPickUp.localizedName('OM'), 'Konkolaachisaan Fuudhuu & Deebisuu');
+      expect(ServiceType.valetPickUp.localizedName('AM'), 'በአሽከርካሪ መኪናን መውሰድና ማድረስ');
+      expect(ServiceType.valetPickUp.localizedCapacity('OM'), contains('Konkolaachisaan'));
+      expect(ServiceType.valetPickUp.localizedCapacity('AM'), contains('አሽከርካሪ'));
+      expect(ServiceType.valetPickUp.localizedDescription('OM'), contains('mana keessanitti'));
+      expect(ServiceType.valetPickUp.localizedDescription('AM'), contains('ደጃፍዎ'));
 
       final booking = await state.bookNewWash(
         customerName: 'Ato Solomon [Valet]',

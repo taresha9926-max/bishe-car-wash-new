@@ -762,12 +762,12 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     color: const Color(0xFF7C3AED).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.car_rental_rounded, size: 10, color: Color(0xFF7C3AED)),
-                      SizedBox(width: 2),
-                      Text('Valet Pick-up', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFF7C3AED))),
+                      const Icon(Icons.car_rental_rounded, size: 10, color: Color(0xFF7C3AED)),
+                      const SizedBox(width: 2),
+                      Text(state.tr('valetBadge'), style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFF7C3AED))),
                     ],
                   ),
                 ),
@@ -822,7 +822,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 const SizedBox(width: 3),
                 Expanded(
                   child: Text(
-                    b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? "Valet Pick-up in Bishoftu" : "Bishoftu Mobile Van"),
+                    b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? state.tr("valetPickupInBishoftu") : state.tr("bishoftuMobileVan")),
                     style: TextStyle(
                       fontSize: 11,
                       color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
@@ -1048,7 +1048,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       const SizedBox(width: 3),
                       Expanded(
                         child: Text(
-                          b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? "Valet Pick-up in Bishoftu" : "Bishoftu Mobile Van"),
+                          b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? state.tr("valetPickupInBishoftu") : state.tr("bishoftuMobileVan")),
                           style: TextStyle(
                             fontSize: 11,
                             color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,

@@ -6,6 +6,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/status_badge.dart';
+import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -451,11 +452,15 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.location_on, size: 16, color: AppColors.mobileVanColor),
+                Icon(
+                  Icons.location_on,
+                  size: 16,
+                  color: booking.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${state.tr("locationArea")}: ${booking.deliveryLocation}',
+                    '${booking.serviceType == ServiceType.valetPickUp ? state.tr("driverPickUpLocation") : state.tr("locationArea")}: ${booking.deliveryLocation}',
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                 ),

@@ -29,11 +29,11 @@ class StationTypeCard extends StatelessWidget {
 
     final title = isStation
         ? state.tr('driveInStation')
-        : (isValet ? 'Driver Pick-up & Return' : state.tr('atHomeMobile'));
+        : (isValet ? state.tr('serviceValetPickUp') : state.tr('atHomeMobile'));
     final subtitle = isStation
         ? state.tr('driveInSub')
         : (isValet
-            ? 'Dedicated driver picks up your car in Bishoftu, washes it at our station, and returns it clean to your doorstep.'
+            ? state.tr('serviceValetPickUpSub')
             : state.tr('atHomeSub'));
     final badgeText = availableCapacity > 0 ? state.tr('availableNow') : state.tr('busyWashing');
 

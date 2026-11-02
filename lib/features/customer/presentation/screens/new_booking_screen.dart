@@ -306,7 +306,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                           Icon(Icons.location_on, color: _selectedServiceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            _selectedServiceType == ServiceType.valetPickUp ? 'Driver Pick-up Location' : state.tr('locationArea'),
+                            _selectedServiceType == ServiceType.valetPickUp ? state.tr('driverPickUpLocation') : state.tr('locationArea'),
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                           ),
                         ],
@@ -334,12 +334,12 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                       const SizedBox(height: 12),
                       CustomTextField(
                         controller: _addressController,
-                        label: 'Street / Landmark',
-                        hint: 'e.g. Near Asham Africa Resort, House 420',
+                        label: state.tr('streetLandmark'),
+                        hint: state.tr('streetLandmarkHint'),
                         prefixIcon: Icons.home,
                         validator: (val) {
                           if (_selectedServiceType.requiresLocation && (val == null || val.trim().isEmpty)) {
-                            return 'Please provide street / residence landmark in Bishoftu';
+                            return state.tr('streetLandmarkRequired');
                           }
                           return null;
                         },

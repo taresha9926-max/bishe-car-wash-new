@@ -119,9 +119,9 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                       CustomTextField(
                         controller: _callerNameController,
                         label: state.tr('phoneBookingCallerName'),
-                        hint: 'e.g. Almaz Bekele',
+                        hint: state.tr('callerNameHint'),
                         prefixIcon: Icons.person_outline,
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Please enter caller name' : null,
+                        validator: (v) => v == null || v.trim().isEmpty ? state.tr('enterCallerName') : null,
                       ),
                       const SizedBox(height: 12),
 
@@ -131,7 +131,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         hint: '+251 91 234 5678',
                         keyboardType: TextInputType.phone,
                         prefixIcon: Icons.phone_android,
-                        validator: (v) => v == null || v.length < 9 ? 'Please enter valid phone' : null,
+                        validator: (v) => v == null || v.length < 9 ? state.tr('enterValidPhone') : null,
                       ),
                       const SizedBox(height: 12),
 
@@ -146,9 +146,9 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                       const SizedBox(height: 14),
 
                       // 3. Service Mode (Station Bay vs Mobile Van)
-                      const Text(
-                        'Service Mode',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      Text(
+                        state.tr('serviceMode'),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 6),
                       Wrap(
@@ -156,7 +156,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         runSpacing: 6,
                         children: [
                           ChoiceChip(
-                            label: const Text('Drive-in Station (Bays)'),
+                            label: Text(state.tr('driveInStationBays')),
                             selected: _serviceType == ServiceType.walkInStation,
                             selectedColor: AppColors.primary,
                             labelStyle: TextStyle(
@@ -167,7 +167,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                             onSelected: (_) => setState(() => _serviceType = ServiceType.walkInStation),
                           ),
                           ChoiceChip(
-                            label: const Text('Driver Pick-up & Return'),
+                            label: Text(state.tr('serviceValetPickUp')),
                             selected: _serviceType == ServiceType.valetPickUp,
                             selectedColor: const Color(0xFF7C3AED),
                             labelStyle: TextStyle(
@@ -178,7 +178,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                             onSelected: (_) => setState(() => _serviceType = ServiceType.valetPickUp),
                           ),
                           ChoiceChip(
-                            label: const Text('At-Home Mobile Van'),
+                            label: Text(state.tr('atHomeMobileVan')),
                             selected: _serviceType == ServiceType.atHomeMobile,
                             selectedColor: AppColors.mobileVanColor,
                             labelStyle: TextStyle(
@@ -213,8 +213,8 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         const SizedBox(height: 10),
                         CustomTextField(
                           controller: _addressController,
-                          label: 'House / Landmark',
-                          hint: 'e.g. Near Babogaya Resort',
+                          label: state.tr('houseOrLandmark'),
+                          hint: state.tr('landmarkHintExample'),
                           prefixIcon: Icons.home,
                         ),
                         const SizedBox(height: 14),
@@ -228,9 +228,9 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                       const SizedBox(height: 14),
 
                       // 5. Package Selection Dropdown
-                      const Text(
-                        'Selected Wash Package',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      Text(
+                        state.tr('selectedWashPackage'),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 6),
                       Container(
@@ -326,7 +326,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
 
               // Confirm Action
               CustomButton(
-                text: 'Confirm Phone Reservation',
+                text: state.tr('confirmPhoneReservation'),
                 isLoading: _isSubmitting,
                 onPressed: () => _submitPhoneBooking(context, state),
               ),

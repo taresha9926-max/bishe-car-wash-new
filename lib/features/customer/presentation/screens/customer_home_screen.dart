@@ -112,9 +112,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     ),
                     _buildServiceActionCard(
                       context,
-                      title: 'Driver Pick-up & Return',
-                      subtitle: 'Driver collects your vehicle, washes at station, and returns it to your door.',
-                      badge: 'Valet Service Available',
+                      title: state.tr('serviceValetPickUp'),
+                      subtitle: state.tr('serviceValetPickUpSub'),
+                      badge: state.tr('valetServiceAvailable'),
                       isAvailable: true,
                       imageUrl: AutoCareAssets.valetDriverUrl,
                       fallbackIcon: Icons.car_rental_rounded,

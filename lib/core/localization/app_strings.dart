@@ -272,6 +272,136 @@ class AppStrings {
       AppLanguage.om: 'Bilbilaan duraan qabame',
       AppLanguage.am: 'በስልክ ጥሪ አስቀድሞ የተያዘ',
     },
+    'serviceWalkInCapacity': {
+      AppLanguage.en: '2 Bays Available at Bishoftu Station',
+      AppLanguage.om: 'Kutaalee Dhiqannaa 2 Bishooftuutti Qophii',
+      AppLanguage.am: 'በቢሾፍቱ ጣቢያ 2 የማጠቢያ ክፍሎች ዝግጁ ናቸው',
+    },
+    'serviceAtHomeCapacity': {
+      AppLanguage.en: '1 Mobile Van Available (Bishoftu Area)',
+      AppLanguage.om: 'Makiinaa Socho\'aa 1 Qophii (Bishooftuu)',
+      AppLanguage.am: '1 ተንቀሳቃሽ ቫን ዝግጁ ነው (ቢሾፍቱ)',
+    },
+    'serviceValetCapacity': {
+      AppLanguage.en: 'Driver Dispatched to Your GPS Location',
+      AppLanguage.om: 'Konkolaachisaan Bakka GPS Keessanitti Ergame',
+      AppLanguage.am: 'አሽከርካሪ ወደ ጂፒኤስ መገኛዎ ይላካል',
+    },
+    'servicePhoneCapacity': {
+      AppLanguage.en: 'Call-in Booking via Gate Reception',
+      AppLanguage.om: 'Galmee Bilbilaan Balbala Seensaatti',
+      AppLanguage.am: 'የስልክ ጥሪ ምዝገባ በበሩ ዴስክ',
+    },
+    'serviceWalkInDesc': {
+      AppLanguage.en: 'Drive in to our Bishoftu main facility with dedicated pressure washing bays.',
+      AppLanguage.om: 'Kutaa dhiqannaa keenya Bishooftuutti qophaa\'etti dhuftanii dhiqadhaa.',
+      AppLanguage.am: 'በቢሾፍቱ ዋና ማዕከላችን ባሉ ዘመናዊ የማጠቢያ ክፍሎች መኪናዎን ያጥቡ።',
+    },
+    'serviceAtHomeDesc': {
+      AppLanguage.en: 'Our fully equipped water-tank & power generator van comes right to your doorstep.',
+      AppLanguage.om: 'Makiinaan keenya bishaaniifi jeneretara guutuu qabate mana keessanitti dhufa.',
+      AppLanguage.am: 'የውሃ ታንከርና ጄነሬተር የታጠቀው ተንቀሳቃሽ ቫን እርስዎ ደጃፍ ድረስ ይመጣል።',
+    },
+    'serviceValetDesc': {
+      AppLanguage.en: 'A dedicated driver picks up your vehicle from your location, brings it to the station for wash, and returns it safely to your doorstep.',
+      AppLanguage.om: 'Konkolaachisaan keenya makiinaa keessan bakka jirtanirraa fuudhee, dhiqee qulqullinaan mana keessanitti deebisa.',
+      AppLanguage.am: 'አሽከርካሪ መጥቶ መኪናዎን ካሉበት ተረክቦ፣ ወደ ማጠቢያ ጣቢያ ወስዶ ካጠበ በኋላ በታማኝነት ደጃፍዎ ድረስ ይመልሳል።',
+    },
+    'servicePhoneDesc': {
+      AppLanguage.en: 'Pre-booked reservation received via station phone call.',
+      AppLanguage.om: 'Qabannaa bilbilaan duraan qabame.',
+      AppLanguage.am: 'በስልክ ጥሪ አስቀድሞ የተያዘ ቦታ።',
+    },
+    'valetServiceAvailable': {
+      AppLanguage.en: 'Valet Service Available',
+      AppLanguage.om: 'Tajaajilli Konkolaachisaa Qophiidha',
+      AppLanguage.am: 'የአሽከርካሪ አገልግሎት ዝግጁ ነው',
+    },
+    'valetBadge': {
+      AppLanguage.en: 'Valet Pick-up',
+      AppLanguage.om: 'Fuudhuu & Deebisuu',
+      AppLanguage.am: 'የአሽከርካሪ አገልግሎት',
+    },
+    'driverPickUpLocation': {
+      AppLanguage.en: 'Driver Pick-up Location',
+      AppLanguage.om: 'Iddoo Konkolaachisaan Itti Fudhatu',
+      AppLanguage.am: 'አሽከርካሪ መኪናውን የሚረከብበት ቦታ',
+    },
+    'streetLandmark': {
+      AppLanguage.en: 'Street / Landmark',
+      AppLanguage.om: 'Daandii / Mallattoo Iddoo',
+      AppLanguage.am: 'ጎዳና / መለያ ምልክት',
+    },
+    'streetLandmarkHint': {
+      AppLanguage.en: 'e.g. Near Asham Africa Resort, House 420',
+      AppLanguage.om: 'Fkn. Gammoojjii Asham Africa Resort bira, Mana 420',
+      AppLanguage.am: 'ምሳሌ፡ አሻም አፍሪካ ሪዞርት አጠገብ፣ የቤት ቁጥር 420',
+    },
+    'streetLandmarkRequired': {
+      AppLanguage.en: 'Please provide street / residence landmark in Bishoftu',
+      AppLanguage.om: 'Mee daandii ykn mallattoo iddoo Bishooftuu galchaa',
+      AppLanguage.am: 'እባክዎ በቢሾፍቱ ያለውን ጎዳና ወይም የመኖሪያ መለያ ምልክት ያስገቡ',
+    },
+    'valetPickupInBishoftu': {
+      AppLanguage.en: 'Valet Pick-up in Bishoftu',
+      AppLanguage.om: 'Bishooftuutti Konkolaachisaan Fuudhuu',
+      AppLanguage.am: 'በቢሾፍቱ በአሽከርካሪ መኪና መረከብ',
+    },
+    'bishoftuMobileVan': {
+      AppLanguage.en: 'Bishoftu Mobile Van',
+      AppLanguage.om: 'Makiinaa Socho\'aa Bishooftuu',
+      AppLanguage.am: 'የቢሾፍቱ ተንቀሳቃሽ ቫን',
+    },
+    'serviceMode': {
+      AppLanguage.en: 'Service Mode',
+      AppLanguage.om: 'Haala Tajaajilaa',
+      AppLanguage.am: 'የአገልግሎት ዓይነት',
+    },
+    'driveInStationBays': {
+      AppLanguage.en: 'Drive-in Station (Bays)',
+      AppLanguage.om: 'Kutaa Dhiqannaa (Bay)',
+      AppLanguage.am: 'የጣቢያ እጥበት (ቤይ)',
+    },
+    'atHomeMobileVan': {
+      AppLanguage.en: 'At-Home Mobile Van',
+      AppLanguage.om: 'Makiinaa Socho\'aa (Mana)',
+      AppLanguage.am: 'ተንቀሳቃሽ የቤት ለቤት ቫን',
+    },
+    'houseOrLandmark': {
+      AppLanguage.en: 'House / Landmark',
+      AppLanguage.om: 'Mana / Mallattoo Iddoo',
+      AppLanguage.am: 'የቤት ቁጥር / መለያ ምልክት',
+    },
+    'landmarkHintExample': {
+      AppLanguage.en: 'e.g. Near Babogaya Resort',
+      AppLanguage.om: 'Fkn. Haroo Baabogayyaa bira',
+      AppLanguage.am: 'ምሳሌ፡ ባቦጋያ ሪዞርት አጠገብ',
+    },
+    'selectedWashPackage': {
+      AppLanguage.en: 'Selected Wash Package',
+      AppLanguage.om: 'Pakeejii Dhiqannaa Filatame',
+      AppLanguage.am: 'የተመረጠ የእጥበት ፓኬጅ',
+    },
+    'confirmPhoneReservation': {
+      AppLanguage.en: 'Confirm Phone Reservation',
+      AppLanguage.om: 'Qabannaa Bilbilaa Mirkaneessi',
+      AppLanguage.am: 'የስልክ ቀጠሮውን አረጋግጥ',
+    },
+    'arrivalSlotHint': {
+      AppLanguage.en: 'e.g. Today 3:00 PM',
+      AppLanguage.om: 'Fkn. Har\'a Sa\'aatii 9:00',
+      AppLanguage.am: 'ምሳሌ፡ ዛሬ ከሰዓት 9:00',
+    },
+    'callerNameHint': {
+      AppLanguage.en: 'e.g. Almaz Bekele',
+      AppLanguage.om: 'Fkn. Almaz Baqqalaa',
+      AppLanguage.am: 'ምሳሌ፡ አልማዝ በቀለ',
+    },
+    'enterCallerName': {
+      AppLanguage.en: 'Please enter caller name',
+      AppLanguage.om: 'Mee maqaa bilbilaa galchaa',
+      AppLanguage.am: 'እባክዎ የደዋዩን ስም ያስገቡ',
+    },
 
     // Welcome Screen & Portal
     'welcomeTitle': {
