@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -5,6 +6,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../domain/models/staff_member.dart';
+import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/bank_deposit_record.dart';
 import '../../domain/models/daily_financial_closing.dart';
@@ -135,6 +137,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final closings = state.dailyFinancialClosings as List<DailyFinancialClosing>;
     final deposits = state.bankDeposits as List<BankDepositRecord>;
     final pettyExpenses = state.pettyCashExpenses as List<PettyCashExpense>;
+    final allBookings = state.bookings as List<WashBooking>;
 
     final now = DateTime.now();
     bool Function(DateTime) predicate;
@@ -157,6 +160,11 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final filteredClosings = closings.where((c) => predicate(c.closingDate)).toList();
     final filteredDeposits = deposits.where((d) => predicate(d.depositedAt)).toList();
     final filteredPetty = pettyExpenses.where((p) => predicate(p.loggedAt)).toList();
+    final filteredDigitalBookings = allBookings.where((b) {
+      if (!b.payment.isPaid || !b.payment.method.isDigital) return false;
+      final d = b.payment.paidAt ?? b.createdAt;
+      return predicate(d);
+    }).toList();
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
@@ -229,6 +237,17 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           const SizedBox(height: 20),
           Text(
+            'Digital Payment Receipts & Verification (${filteredDigitalBookings.length}):',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 10),
+          if (filteredDigitalBookings.isEmpty)
+            _buildEmptyState('No digital payment receipts found for $_auditDateRange.', Icons.qr_code_scanner_rounded)
+          else
+            ...filteredDigitalBookings.map((b) => _buildDigitalPaymentCard(context, state, b, isMobile)),
+
+          const SizedBox(height: 20),
+          Text(
             'Bank Deposit Slips Log (${filteredDeposits.length}):',
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
@@ -291,7 +310,41 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             ),
             if (c.providerBreakdown.isNotEmpty) ...[
               const SizedBox(height: 10),
-              const Text('Digital Money Breakdown:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Digital Money Breakdown:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                  Builder(
+                    builder: (context) {
+                      final closingDigital = (state.bookings as List<WashBooking>).where((b) {
+                        if (!b.payment.isPaid || !b.payment.method.isDigital) return false;
+                        final d = b.payment.paidAt ?? b.createdAt;
+                        return d.year == c.closingDate.year && d.month == c.closingDate.month && d.day == c.closingDate.day;
+                      }).toList();
+                      final receiptsCount = closingDigital.where((b) => b.payment.receiptScreenshot != null && b.payment.receiptScreenshot!.isNotEmpty).length;
+                      if (receiptsCount == 0) return const SizedBox.shrink();
+                      return InkWell(
+                        onTap: () => _showDigitalReceiptsDialog(context, c.closingDate, closingDigital),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.receipt_long_rounded, size: 12, color: AppColors.primary),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$receiptsCount Receipts Available',
+                                style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 4),
               Wrap(
                 spacing: 8,
@@ -369,6 +422,119 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 onPressed: () => _viewImageDialog(context, 'Petty Cash Voucher: ${p.reason}', p.voucherScreenshot!),
               )
             : const Text('No photo', style: TextStyle(fontSize: 11, color: Colors.grey)),
+      ),
+    );
+  }
+
+  Widget _buildDigitalPaymentCard(BuildContext context, dynamic state, WashBooking b, bool isMobile) {
+    final method = b.payment.method;
+    final hasScreenshot = b.payment.receiptScreenshot != null && b.payment.receiptScreenshot!.isNotEmpty;
+    final date = b.payment.paidAt ?? b.createdAt;
+    final dateStr = '${date.day}/${date.month} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: method.color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(method.icon, color: method.color, size: 20),
+        ),
+        title: Row(
+          children: [
+            Text(b.licensePlate, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+              decoration: BoxDecoration(
+                color: method.color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                method.shortName,
+                style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: method.color),
+              ),
+            ),
+            const Spacer(),
+            Text(
+              CurrencyFormatter.format(b.payment.amount),
+              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: AppColors.primary),
+            ),
+          ],
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            'Ref: ${b.payment.transactionRef ?? 'N/A'} • $dateStr • ${b.package.name}',
+            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+          ),
+        ),
+        trailing: hasScreenshot
+            ? TextButton.icon(
+                icon: const Icon(Icons.image_outlined, size: 14),
+                label: const Text('View Receipt', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                style: TextButton.styleFrom(
+                  foregroundColor: method.color,
+                ),
+                onPressed: () => _viewImageDialog(
+                  context,
+                  'Digital Receipt: ${b.licensePlate} (${method.displayName})',
+                  b.payment.receiptScreenshot!,
+                ),
+              )
+            : Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text('No photo', style: TextStyle(fontSize: 10, color: Colors.grey)),
+              ),
+      ),
+    );
+  }
+
+  void _showDigitalReceiptsDialog(BuildContext context, DateTime date, List<WashBooking> bookings) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Digital Receipts (${date.day}/${date.month}/${date.year})', style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800)),
+        content: SizedBox(
+          width: 450,
+          child: bookings.isEmpty
+              ? const Padding(padding: EdgeInsets.all(16), child: Text('No digital payments recorded for this date.'))
+              : ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: bookings.length,
+                  separatorBuilder: (_, __) => const Divider(height: 10),
+                  itemBuilder: (c, i) {
+                    final b = bookings[i];
+                    final hasShot = b.payment.receiptScreenshot != null && b.payment.receiptScreenshot!.isNotEmpty;
+                    return ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(b.payment.method.icon, color: b.payment.method.color, size: 20),
+                      title: Text('${b.licensePlate} • ${CurrencyFormatter.format(b.payment.amount)}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                      subtitle: Text('${b.payment.method.displayName} • Ref: ${b.payment.transactionRef ?? "N/A"}', style: const TextStyle(fontSize: 11)),
+                      trailing: hasShot
+                          ? TextButton.icon(
+                              icon: const Icon(Icons.image_outlined, size: 14),
+                              label: const Text('View', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                              onPressed: () => _viewImageDialog(context, 'Receipt: ${b.licensePlate} (${b.payment.method.displayName})', b.payment.receiptScreenshot!),
+                            )
+                          : const Text('No photo', style: TextStyle(fontSize: 10.5, color: Colors.grey)),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
+        ],
       ),
     );
   }
@@ -1007,23 +1173,120 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   }
 
   void _viewImageDialog(BuildContext context, String title, String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
-        content: SizedBox(
-          width: 400,
-          child: Image.network(
-            imageUrl,
-            errorBuilder: (c, e, s) => const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Unable to preview image data.'),
+    Widget imageWidget;
+    try {
+      if (imageUrl.startsWith('data:image')) {
+        final commaIdx = imageUrl.indexOf(',');
+        final base64Data = commaIdx != -1 ? imageUrl.substring(commaIdx + 1) : imageUrl;
+        final bytes = base64Decode(base64Data);
+        imageWidget = Image.memory(
+          bytes,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('Unable to preview image data.', style: TextStyle(color: AppColors.textMuted)),
             ),
           ),
+        );
+      } else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        imageWidget = Image.network(
+          imageUrl,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('Unable to load receipt image from web.', style: TextStyle(color: AppColors.textMuted)),
+            ),
+          ),
+        );
+      } else {
+        final bytes = base64Decode(imageUrl);
+        imageWidget = Image.memory(
+          bytes,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('Unable to preview image data.', style: TextStyle(color: AppColors.textMuted)),
+            ),
+          ),
+        );
+      }
+    } catch (_) {
+      imageWidget = const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Text('Invalid or corrupted image format.', style: TextStyle(color: AppColors.textMuted)),
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
-        ],
+      );
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryDark,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13.5),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: imageWidget,
+                  ),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: const BoxDecoration(
+                  border: Border(top: BorderSide(color: AppColors.cardBorder)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

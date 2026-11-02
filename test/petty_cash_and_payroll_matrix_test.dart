@@ -322,5 +322,35 @@ void main() {
       expect(totalDistributed, closeTo(state.teamCommissionPoolTodayETB, 0.01));
       expect(state.getDailyCommissionTotalForDate(DateTime.now()), equals(state.teamCommissionPoolTodayETB));
     });
+
+    test('Digital transactions store uploaded receipt screenshot and are linked with payment details', () async {
+      await state.registerWalkIn(
+        licensePlate: 'DIGI-7788',
+        customerName: 'Abebe Bikila',
+        customerPhone: '0922334455',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.telebirr,
+      );
+
+      final booking = state.bookings.firstWhere((b) => b.licensePlate == 'DIGI-7788');
+      const testScreenshot = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+
+      await state.processPayment(
+        bookingId: booking.id,
+        method: PaymentMethod.telebirr,
+        amount: 500.0,
+        transactionRef: 'TB-99887766',
+        receiptScreenshot: testScreenshot,
+      );
+
+      final updated = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(updated.payment.isPaid, isTrue);
+      expect(updated.payment.method, equals(PaymentMethod.telebirr));
+      expect(updated.payment.method.isDigital, isTrue);
+      expect(updated.payment.transactionRef, equals('TB-99887766'));
+      expect(updated.payment.receiptScreenshot, equals(testScreenshot));
+    });
   });
 }
