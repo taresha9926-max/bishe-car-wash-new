@@ -52,6 +52,17 @@ class AutoCareAssets {
   static const String spongeBucketUrl =
       'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=400&auto=format&fit=crop&q=80';
 
+  // Official @bishecarwash Published TikTok Video URLs (Latest 7 Videos)
+  static const List<String> officialTikTokVideos = [
+    'https://www.tiktok.com/@bishecarwash/video/7703232736168791303',
+    'https://www.tiktok.com/@bishecarwash/video/7703201662713728274',
+    'https://www.tiktok.com/@bishecarwash/video/7701736769619905799',
+    'https://www.tiktok.com/@bishecarwash/video/7700597195816357127',
+    'https://www.tiktok.com/@bishecarwash/video/7699125432259464455',
+    'https://www.tiktok.com/@bishecarwash/video/7698005404336573703',
+    'https://www.tiktok.com/@bishecarwash/video/7696533703924682002',
+  ];
+
   // Curated 8-Reel Commercial Detailing Photography Pool
   static const List<Map<String, String>> curatedReelsPool = [
     {
@@ -60,6 +71,7 @@ class AutoCareAssets {
       'title': 'Active Snow Foam Cannon & Pre-Wash',
       'subtitle': 'Triple-action foaming & streak-free dirt lift • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7703232736168791303',
     },
     {
       'id': 'reel-2',
@@ -67,6 +79,7 @@ class AutoCareAssets {
       'title': 'High-Pressure Chassis Steam Bay',
       'subtitle': 'Deep wheel-well & engine chassis steam care • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7703201662713728274',
     },
     {
       'id': 'reel-3',
@@ -74,6 +87,7 @@ class AutoCareAssets {
       'title': 'Ceramic Shield & Paint Polish',
       'subtitle': 'Hydrophobic ceramic shield & ultimate gloss • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7701736769619905799',
     },
     {
       'id': 'reel-4',
@@ -81,6 +95,7 @@ class AutoCareAssets {
       'title': 'Deep Interior & Leather Care',
       'subtitle': 'Anti-bacterial steam & luxury cabin detailing • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7700597195816357127',
     },
     {
       'id': 'reel-5',
@@ -88,6 +103,7 @@ class AutoCareAssets {
       'title': 'Wheel-Well & Tire Gloss Treatment',
       'subtitle': 'Brake-dust dissolve & deep satin tire dressing • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7699125432259464455',
     },
     {
       'id': 'reel-6',
@@ -95,6 +111,7 @@ class AutoCareAssets {
       'title': 'Engine Bay Detailing & Degrease',
       'subtitle': 'Precision dry-steam grease wipe & harness coat • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7698005404336573703',
     },
     {
       'id': 'reel-7',
@@ -102,6 +119,7 @@ class AutoCareAssets {
       'title': 'Water-Beading Hydrophobic Rinse',
       'subtitle': 'Extreme water repelling & fast crystal dry coat • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7696533703924682002',
     },
     {
       'id': 'reel-8',
@@ -109,6 +127,7 @@ class AutoCareAssets {
       'title': 'Mobile Van At-Home Service',
       'subtitle': 'Equipped generator & tank van right to your door • Watch Reel',
       'url': 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&auto=format&fit=crop&q=80',
+      'videoUrl': 'https://www.tiktok.com/@bishecarwash',
     },
   ];
 

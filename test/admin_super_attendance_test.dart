@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
+import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
@@ -319,8 +320,21 @@ void main() {
     });
 
     test('Super Admin configures TikTok commercial reels and persists across devices', () async {
-      expect(state.tiktokReels, isNotEmpty);
-      expect(state.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash'));
+      expect(state.tiktokReels.length, equals(7));
+      expect(state.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash/video/7703232736168791303'));
+
+      // Verify URL Sanitization & Batch Extraction
+      const rawUrlWithTracking = 'https://www.tiktok.com/@bishecarwash/video/7703232736168791303?is_from_webapp=1&sender_device=pc&web_id=7703571366952338977';
+      expect(UrlLauncherHelper.sanitizeTikTokUrl(rawUrlWithTracking), equals('https://www.tiktok.com/@bishecarwash/video/7703232736168791303'));
+
+      const rawBatch = '''
+https://www.tiktok.com/@bishecarwash/video/7703232736168791303?is_from_webapp=1
+https://www.tiktok.com/@bishecarwash/video/7703201662713728274?sender_device=pc
+''';
+      final extracted = UrlLauncherHelper.extractUrls(rawBatch);
+      expect(extracted.length, equals(2));
+      expect(extracted[0], equals('https://www.tiktok.com/@bishecarwash/video/7703232736168791303'));
+      expect(extracted[1], equals('https://www.tiktok.com/@bishecarwash/video/7703201662713728274'));
 
       // Verify curated 8-reel photography pool
       expect(AutoCareAssets.curatedReelsPool.length, equals(8));
@@ -340,7 +354,7 @@ void main() {
       ];
       modified[0] = modified[0].copyWith(
         title: 'Updated Detailing Highlight',
-        tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
+        tiktokUrl: 'https://www.tiktok.com/@bishecarwash/video/7703232736168791303',
       );
 
       await state.setTikTokReels(modified);
@@ -350,7 +364,7 @@ void main() {
       final customerState = AppStateNotifier(repository: repo);
       await customerState.loadData();
       expect(customerState.tiktokReels.first.title, equals('Updated Detailing Highlight'));
-      expect(customerState.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash'));
+      expect(customerState.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash/video/7703232736168791303'));
     });
   });
 }

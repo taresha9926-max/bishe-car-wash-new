@@ -2518,11 +2518,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         label: const Text('🔄 1-Click Sync All to @bishecarwash', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                         onPressed: () async {
                           final synced = <TikTokAdVideo>[];
-                          for (int i = 0; i < reels.length; i++) {
+                          final count = AutoCareAssets.officialTikTokVideos.length;
+                          for (int i = 0; i < count; i++) {
                             final poolItem = AutoCareAssets.curatedReelsPool[i % AutoCareAssets.curatedReelsPool.length];
-                            synced.add(reels[i].copyWith(
-                              tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
-                              thumbnailUrl: reels[i].thumbnailUrl.isNotEmpty ? reels[i].thumbnailUrl : poolItem['url']!,
+                            synced.add(TikTokAdVideo(
+                              id: 'reel-${i + 1}',
+                              title: poolItem['title']!,
+                              subtitle: poolItem['subtitle']!,
+                              tiktokUrl: AutoCareAssets.officialTikTokVideos[i],
+                              thumbnailUrl: poolItem['url']!,
                             ));
                           }
                           setDialogState(() {
@@ -2532,13 +2536,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           await state.setTikTokReels(reels);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('All reels successfully synced to @bishecarwash! Thumbnails preserved.'),
+                              SnackBar(
+                                content: Text('All ${synced.length} official @bishecarwash videos synced with direct links & HD photos!'),
                                 backgroundColor: AppColors.statusReady,
                               ),
                             );
                           }
                         },
+                      ),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFFE2C55),
+                          side: const BorderSide(color: Color(0xFFFE2C55)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        onPressed: () => _showBatchImportDialog(context, reels, setDialogState, state),
+                        icon: const Icon(Icons.playlist_add_rounded, size: 16),
+                        label: const Text('📋 Batch Paste Links', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
@@ -2760,7 +2775,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
             onPressed: () {
-              final cleaned = UrlLauncherHelper.cleanUrl(linkCtrl.text);
+              final cleaned = UrlLauncherHelper.sanitizeTikTokUrl(linkCtrl.text);
               if (cleaned.isNotEmpty) {
                 onSaved(
                   reel.copyWith(
@@ -2778,6 +2793,110 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               }
             },
             child: const Text('Save Reel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBatchImportDialog(BuildContext context, List<TikTokAdVideo> reels, StateSetter setDialogState, dynamic state) {
+    final batchCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (batchCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Row(
+          children: [
+            Icon(Icons.playlist_add_rounded, color: Color(0xFFFE2C55)),
+            SizedBox(width: 8),
+            Text('Batch Paste TikTok Links', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          ],
+        ),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Paste multiple TikTok video URLs below (one link per line or separated by spaces/commas). They will be automatically linked to showcase reels with matching HD photography.',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: batchCtrl,
+                minLines: 5,
+                maxLines: 8,
+                decoration: InputDecoration(
+                  hintText: 'https://www.tiktok.com/@bishecarwash/video/7703232736168791303\nhttps://www.tiktok.com/@bishecarwash/video/7703201662713728274\n...',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(batchCtx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFE2C55),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            icon: const Icon(Icons.download_done_rounded, size: 16),
+            label: const Text('Import Links', style: TextStyle(fontWeight: FontWeight.bold)),
+            onPressed: () async {
+              final urls = UrlLauncherHelper.extractUrls(batchCtrl.text);
+              if (urls.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No valid TikTok URLs detected in pasted text.')),
+                );
+                return;
+              }
+              final pool = AutoCareAssets.curatedReelsPool;
+              final imported = <TikTokAdVideo>[];
+              for (int i = 0; i < urls.length; i++) {
+                final poolItem = pool[i % pool.length];
+                if (i < reels.length) {
+                  imported.add(reels[i].copyWith(
+                    tiktokUrl: urls[i],
+                    thumbnailUrl: reels[i].thumbnailUrl.isNotEmpty ? reels[i].thumbnailUrl : poolItem['url']!,
+                  ));
+                } else {
+                  imported.add(TikTokAdVideo(
+                    id: 'reel-${i + 1}',
+                    title: poolItem['title']!,
+                    subtitle: poolItem['subtitle']!,
+                    tiktokUrl: urls[i],
+                    thumbnailUrl: poolItem['url']!,
+                  ));
+                }
+              }
+              if (reels.length > urls.length) {
+                for (int i = urls.length; i < reels.length; i++) {
+                  imported.add(reels[i]);
+                }
+              }
+              setDialogState(() {
+                reels.clear();
+                reels.addAll(imported);
+              });
+              await state.setTikTokReels(reels);
+              if (batchCtx.mounted) Navigator.pop(batchCtx);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Successfully imported ${urls.length} video links! Thumbnails preserved.'),
+                    backgroundColor: AppColors.statusReady,
+                  ),
+                );
+              }
+            },
           ),
         ],
       ),

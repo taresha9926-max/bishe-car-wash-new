@@ -34,6 +34,29 @@ class UrlLauncherHelper {
     return text;
   }
 
+  /// Sanitizes TikTok video URLs to remove query tracking parameters
+  static String sanitizeTikTokUrl(String url) {
+    final clean = cleanUrl(url);
+    final uri = Uri.tryParse(clean);
+    if (uri != null && uri.host.contains('tiktok.com') && uri.path.contains('/video/')) {
+      return '${uri.scheme}://${uri.host}${uri.path}';
+    }
+    return clean;
+  }
+
+  /// Extracts multiple URLs from multiline or comma/space-delimited text
+  static List<String> extractUrls(String text) {
+    final matches = RegExp(r'https?://[^\s<>",]+').allMatches(text);
+    final urls = <String>[];
+    for (final m in matches) {
+      final sanitized = sanitizeTikTokUrl(m.group(0)!);
+      if (sanitized.isNotEmpty && !urls.contains(sanitized)) {
+        urls.add(sanitized);
+      }
+    }
+    return urls;
+  }
+
   static Future<bool> openUrl(String url) async {
     WidgetsFlutterBinding.ensureInitialized();
     final target = cleanUrl(url);
