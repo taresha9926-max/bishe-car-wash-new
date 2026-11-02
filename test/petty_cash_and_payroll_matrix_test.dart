@@ -4,6 +4,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.d
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 
 void main() {
@@ -270,6 +271,56 @@ void main() {
       expect(att, isNotNull);
       expect(att!.isPresent, isTrue);
       expect(att.commissionEarnedETB, greaterThan(0));
+    });
+
+    test('Cashier payment for completed vehicle automatically updates commission pool and matches real earned commission', () async {
+      await state.clearAllBookings();
+      expect(state.teamCommissionPoolTodayETB, equals(0.0));
+      expect(state.commissionLogs.isEmpty, isTrue);
+
+      // Register walk-in and complete the wash
+      final booking = await state.registerWalkIn(
+        licensePlate: 'COMM-MATCH-1',
+        customerName: 'Abebe Comm',
+        customerPhone: '0912345678',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.cash,
+        markPaid: false,
+      );
+
+      // Advance through wash cycle to completed
+      await state.updateWashStatus(booking.id, WashStatus.washing);
+      await state.updateWashStatus(booking.id, WashStatus.drying);
+      await state.updateWashStatus(booking.id, WashStatus.completed);
+
+      // Vehicle is completed but unpaid: commission pool is 0 ETB
+      expect(state.teamCommissionPoolTodayETB, equals(0.0));
+
+      // Cashier collects payment for the completed vehicle
+      final price = state.packages.first.getPriceFor(CarType.automobile);
+      await state.processPayment(
+        bookingId: booking.id,
+        method: PaymentMethod.cash,
+        amount: price,
+      );
+
+      // 1. Total commission pool automatically updates (15% of price)
+      final expectedCommission = price * 0.15;
+      expect(state.teamCommissionPoolTodayETB, equals(expectedCommission));
+
+      // 2. Commission log is automatically recorded
+      expect(state.commissionLogs.length, equals(1));
+      expect(state.commissionLogs.first.commissionEarnedETB, equals(expectedCommission));
+
+      // 3. Real amount of commission earned across active washers matches total earned pool
+      final dividends = state.washerDividendsToday;
+      final totalDistributed = dividends.values
+          .where((d) => d.isPresent)
+          .fold<double>(0.0, (sum, d) => sum + d.earnedETB);
+      expect(totalDistributed, closeTo(state.teamCommissionPoolTodayETB, 0.01));
+      expect(state.getDailyCommissionTotalForDate(DateTime.now()), equals(state.teamCommissionPoolTodayETB));
     });
   });
 }

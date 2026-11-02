@@ -699,10 +699,7 @@ class AppStateNotifier extends ChangeNotifier {
   double getDailyCommissionTotalForDate(DateTime date) {
     final now = DateTime.now();
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      if (_isDailyCommissionDisbursedToday) {
-        return teamCommissionPoolTodayETB;
-      }
-      return 0.0;
+      return teamCommissionPoolTodayETB;
     }
     return _washerAttendances
         .where((a) =>
@@ -715,10 +712,7 @@ class AppStateNotifier extends ChangeNotifier {
   double getWasherCommissionForDate(String washerId, DateTime date) {
     final now = DateTime.now();
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      if (_isDailyCommissionDisbursedToday) {
-        return washerDividendsToday[washerId]?.earnedETB ?? 0.0;
-      }
-      return 0.0;
+      return washerDividendsToday[washerId]?.earnedETB ?? 0.0;
     }
     final record = getWasherAttendanceForDate(washerId, date);
     return record?.commissionEarnedETB ?? 0.0;

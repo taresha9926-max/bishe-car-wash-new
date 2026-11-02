@@ -445,7 +445,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         });
 
         final booking = await getBookingById(bookingId);
-        if (booking != null && newStatus == WashStatus.completed && !booking.commissionLogged) {
+        if (booking != null && newStatus == WashStatus.completed && !booking.commissionLogged && booking.payment.isPaid) {
           if (booking.assignedBay != null) {
             final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
             await _patch('station_bays?bay_number=eq.$bayNum', {
@@ -579,6 +579,32 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
         final booking = await getBookingById(bookingId);
         if (booking != null) {
+          if (booking.status == WashStatus.completed && !booking.commissionLogged) {
+            final washerName = (booking.assignedWasherName != null && booking.assignedWasherName!.trim().isNotEmpty)
+                ? booking.assignedWasherName!.trim()
+                : 'Team Washers';
+            final commissionEarned = amount * 0.15;
+
+            try {
+              await _post('commission_logs', {
+                'booking_id': _isUuid(booking.id) ? booking.id : null,
+                'staff_id': _isUuid(booking.assignedWasherId) ? booking.assignedWasherId : null,
+                'staff_name': washerName,
+                'car_type': booking.carType.name,
+                'service_name': booking.package.name,
+                'earned_amount': commissionEarned,
+                'license_plate': booking.licensePlate,
+                'is_settled': false,
+                'logged_at': DateTime.now().toIso8601String(),
+              });
+
+              await _patch('wash_bookings?id=eq.$bookingId', {
+                'commission_logged': true,
+                'commission_amount': commissionEarned,
+              });
+            } catch (_) {}
+          }
+
           final updated = booking.copyWith(
             payment: booking.payment.copyWith(
               isPaid: true,

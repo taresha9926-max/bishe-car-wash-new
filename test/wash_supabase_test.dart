@@ -95,6 +95,5 @@ void main() {
     final filteredCreds = await repo.getStaffCredentials();
     expect(filteredCreds.any((c) => c.username == 'app_config_tiktok_reels'), isFalse);
   },
-  timeout: const Timeout(Duration(minutes: 2)),
 );
 }

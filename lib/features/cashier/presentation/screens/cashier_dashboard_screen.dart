@@ -253,6 +253,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               isMobile: isMobile,
             ),
           ),
+          Container(width: 1, height: 36, color: AppColors.cardBorder),
+          Expanded(
+            child: _buildKPIColumn(
+              state.currentLang == 'OM' ? 'Komishiinii' : (state.currentLang == 'AM' ? 'ኮሚሽን' : 'Commission'),
+              CurrencyFormatter.formatShort(state.teamCommissionPoolTodayETB as double),
+              '${(state.teamCommissionRate * 100).toInt()}% Pool (${state.presentWashersCount} Duty)',
+              AppColors.oromiaGold,
+              isMobile: isMobile,
+            ),
+          ),
         ],
       ),
     );
@@ -1465,22 +1475,40 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
               // Pool ETB Banner
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color: AppColors.oromiaGold.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.oromiaGold.withOpacity(0.2)),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.oromiaGold.withOpacity(0.25)),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    const Text(
-                      'Total Earned Commission Pool Today:',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total Earned Commission Pool Today:',
+                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(pool),
+                          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w900, color: AppColors.oromiaGold),
+                        ),
+                      ],
                     ),
-                    Text(
-                      CurrencyFormatter.format(pool),
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.oromiaGold),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Real Amount of Commission Earned:',
+                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(pool),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -1773,7 +1801,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Assigned Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% • ${w.phone}',
+                        'Assigned Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% • Earned: ${isPresent && dividends[w.id] != null ? CurrencyFormatter.format(dividends[w.id]!.earnedETB) : "0 ETB"} • ${w.phone}',
                         style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                       ),
                     ],

@@ -141,8 +141,8 @@ class WashRepositoryImpl implements IWashRepository {
         _freeBay(booking.assignedBay!);
       }
 
-      // Automatic washer commission logging
-      if (!booking.commissionLogged && booking.assignedWasherId != null) {
+      // Automatic washer commission logging if already paid
+      if (!booking.commissionLogged && booking.payment.isPaid) {
         _triggerCommissionLog(booking);
         booking = booking.copyWith(commissionLogged: true);
       }
@@ -208,7 +208,14 @@ class WashRepositoryImpl implements IWashRepository {
       paidAt: DateTime.now(),
     );
 
-    final updatedBooking = booking.copyWith(payment: updatedPayment);
+    var updatedBooking = booking.copyWith(payment: updatedPayment);
+
+    // Automatic washer commission logging upon payment for completed vehicle
+    if (updatedBooking.status == WashStatus.completed && !updatedBooking.commissionLogged) {
+      _triggerCommissionLog(updatedBooking);
+      updatedBooking = updatedBooking.copyWith(commissionLogged: true);
+    }
+
     _bookings[index] = updatedBooking;
     return updatedBooking;
   }
@@ -358,17 +365,21 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   void _triggerCommissionLog(WashBooking booking) {
-    if (booking.assignedWasherId == null) return;
-
-    final staffIndex = _staff.indexWhere((s) => s.id == booking.assignedWasherId);
+    final staffIndex = booking.assignedWasherId != null
+        ? _staff.indexWhere((s) => s.id == booking.assignedWasherId)
+        : -1;
+    final washerId = booking.assignedWasherId ?? 'team-pool';
+    final washerName = (booking.assignedWasherName != null && booking.assignedWasherName!.trim().isNotEmpty)
+        ? booking.assignedWasherName!.trim()
+        : (staffIndex != -1 ? _staff[staffIndex].name : 'Washer Team Pool');
     final commissionRate = staffIndex != -1 ? _staff[staffIndex].commissionRate : 0.15;
     final commissionEarned = booking.totalPrice * commissionRate;
 
     final log = CommissionLog(
       id: 'COM-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
       bookingId: booking.id,
-      washerId: booking.assignedWasherId!,
-      washerName: booking.assignedWasherName ?? 'Washer',
+      washerId: washerId,
+      washerName: washerName,
       carPlate: booking.licensePlate,
       carType: booking.carType,
       servicePackageName: booking.package.name,
