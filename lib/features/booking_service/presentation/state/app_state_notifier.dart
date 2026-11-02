@@ -163,7 +163,7 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  String _tiktokUrl = 'https://www.tiktok.com/@bishe_car_wash';
+  String _tiktokUrl = 'https://www.tiktok.com/@bishecarwash';
   String get tiktokUrl => _tiktokUrl;
   void setTikTokUrl(String url) {
     _tiktokUrl = url.trim();
@@ -177,34 +177,34 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Super Admin Configured TikTok Rolling Reels (At least 4 items)
+  // Super Admin Configured TikTok Rolling Reels (Linked to @bishecarwash)
   List<TikTokAdVideo> _tiktokReels = [
     const TikTokAdVideo(
       id: 'reel-1',
       title: 'Active Snow Foam Cannon & Pre-Wash',
       subtitle: 'Triple-action foaming & streak-free dirt lift • Watch Reel',
-      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+      tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
       thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
     ),
     const TikTokAdVideo(
       id: 'reel-2',
       title: 'High-Pressure Steam Bay & Undercarriage',
       subtitle: 'Deep wheel-well & engine chassis steam care • Watch Reel',
-      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+      tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
       thumbnailUrl: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&auto=format&fit=crop&q=80',
     ),
     const TikTokAdVideo(
       id: 'reel-3',
       title: 'Diamond Ceramic Coating & Mirror Polish',
       subtitle: 'Hydrophobic ceramic shield & ultimate gloss • Watch Reel',
-      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+      tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
       thumbnailUrl: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&auto=format&fit=crop&q=80',
     ),
     const TikTokAdVideo(
       id: 'reel-4',
       title: 'Interior Deep Steam & Leather Conditioning',
       subtitle: 'Odor eradication & luxury cabin detailing • Watch Reel',
-      tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+      tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
       thumbnailUrl: 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&auto=format&fit=crop&q=80',
     ),
   ];

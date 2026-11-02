@@ -112,7 +112,7 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
               id: 'fallback-1',
               title: 'BISHE Detailing Reel',
               subtitle: 'Tap to Watch on TikTok',
-              tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+              tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
               thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
             ),
           ];
@@ -188,29 +188,33 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
                     ),
                   ],
                 ),
-                // Official TikTok Handle Pill (Read-only)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withOpacity(0.15)),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.verified_rounded, size: 12, color: Color(0xFF00F2FE)),
-                      SizedBox(width: 4),
-                      Text(
-                        '@bishe_car_wash',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: 0.2,
+                // Official TikTok Handle Pill (Interactive, Opens @bishecarwash)
+                InkWell(
+                  onTap: () => _launchTikTok(context, 'https://www.tiktok.com/@bishecarwash'),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withOpacity(0.15)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.verified_rounded, size: 12, color: Color(0xFF00F2FE)),
+                        SizedBox(width: 4),
+                        Text(
+                          '@bishecarwash',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.2,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],

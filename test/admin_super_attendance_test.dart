@@ -318,14 +318,14 @@ void main() {
 
     test('Super Admin configures TikTok commercial reels and persists across devices', () async {
       expect(state.tiktokReels, isNotEmpty);
-      expect(state.tiktokReels.first.tiktokUrl, equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+      expect(state.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash'));
 
       final modified = [
         ...state.tiktokReels,
       ];
       modified[0] = modified[0].copyWith(
         title: 'Updated Detailing Highlight',
-        tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+        tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
       );
 
       await state.setTikTokReels(modified);
@@ -335,7 +335,7 @@ void main() {
       final customerState = AppStateNotifier(repository: repo);
       await customerState.loadData();
       expect(customerState.tiktokReels.first.title, equals('Updated Detailing Highlight'));
-      expect(customerState.tiktokReels.first.tiktokUrl, equals('https://vt.tiktok.com/ZSgWCxdWL/'));
+      expect(customerState.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash'));
     });
   });
 }

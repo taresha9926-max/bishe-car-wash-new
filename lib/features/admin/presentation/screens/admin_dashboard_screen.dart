@@ -2390,11 +2390,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Manage commercial TikTok video links & preview thumbnails displayed on the Welcome Screen rolling banner:',
-                    style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Official Account: @bishecarwash • Manage commercial TikTok video links displayed on Welcome Screen:',
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => UrlLauncherHelper.openUrl('https://www.tiktok.com/@bishecarwash'),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFE2C55).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFFE2C55).withOpacity(0.3)),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.open_in_new_rounded, size: 12, color: Color(0xFFFE2C55)),
+                              SizedBox(width: 4),
+                              Text('View @bishecarwash', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFFE2C55))),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   Expanded(
                     child: ListView.separated(
                       shrinkWrap: true,
@@ -2486,7 +2513,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         id: 'reel-${DateTime.now().millisecondsSinceEpoch}',
                         title: 'New Detailing Reel #${reels.length + 1}',
                         subtitle: 'Watch on TikTok',
-                        tiktokUrl: 'https://vt.tiktok.com/ZSgWCxdWL/',
+                        tiktokUrl: 'https://www.tiktok.com/@bishecarwash',
                         thumbnailUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
                       );
                       _editReelPopup(context, newReel, (created) {
@@ -2561,13 +2588,36 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
                 const SizedBox(height: 10),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Video Source', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                    InkWell(
+                      onTap: () {
+                        if (linkCtrl.text.isEmpty || !linkCtrl.text.contains('@bishecarwash')) {
+                          linkCtrl.text = 'https://www.tiktok.com/@bishecarwash';
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFE2C55).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('Use @bishecarwash', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFE2C55))),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: linkCtrl,
                         decoration: const InputDecoration(
                           labelText: 'TikTok Video Link',
-                          hintText: 'https://vt.tiktok.com/... or https://www.tiktok.com/...',
+                          hintText: 'https://www.tiktok.com/@bishecarwash/... or https://vt.tiktok.com/...',
                           prefixIcon: Icon(Icons.link_rounded),
                           border: OutlineInputBorder(),
                         ),

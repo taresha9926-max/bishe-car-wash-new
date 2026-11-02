@@ -82,7 +82,7 @@ class TikTokAdVideo {
       subtitle: map['subtitle']?.toString() ?? 'Watch on TikTok',
       tiktokUrl: (map['tiktokUrl']?.toString().isNotEmpty ?? false)
           ? map['tiktokUrl'].toString()
-          : 'https://vt.tiktok.com/ZSgWCxdWL/',
+          : 'https://www.tiktok.com/@bishecarwash',
       thumbnailUrl: map['thumbnailUrl']?.toString() ?? '',
     );
   }
