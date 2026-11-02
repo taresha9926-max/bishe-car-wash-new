@@ -1036,6 +1036,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Widget _buildPhoneBookingCard(BuildContext context, dynamic state) {
+    final phone = state.customerPhoneBookingNumber as String;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -1064,7 +1065,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  state.tr('bookByPhoneSub'),
+                  '${state.tr('bookByPhoneSub')} ($phone)',
                   style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
@@ -1080,14 +1081,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               elevation: 0,
             ),
             icon: const Icon(Icons.call, size: 15),
-            label: const Text('+251 91 123 4567', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+            label: Text(phone, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Calling BISHE Gate Station: +251 91 123 4567...'),
-                  duration: Duration(seconds: 3),
+                SnackBar(
+                  content: Text('Calling BISHE Gate Station: $phone...'),
+                  duration: const Duration(seconds: 3),
                 ),
               );
+              UrlLauncherHelper.openUrl('tel:$phone');
             },
           ),
         ],
@@ -1194,7 +1196,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           Text(
             'Location: ${state.tr("bishoftu")}\n'
             'Mobile Coverage: Lake Babogaya, Kuriftu, Kebele 01-05\n'
-            'Phone: +251 91 123 4567 • Working Hours: 7:00 AM - 8:00 PM',
+            'Phone: ${state.customerPhoneBookingNumber} • Working Hours: 7:00 AM - 8:00 PM',
             style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.4),
           ),
         ],

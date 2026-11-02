@@ -366,5 +366,19 @@ https://www.tiktok.com/@bishecarwash/video/7703201662713728274?sender_device=pc
       expect(customerState.tiktokReels.first.title, equals('Updated Detailing Highlight'));
       expect(customerState.tiktokReels.first.tiktokUrl, equals('https://www.tiktok.com/@bishecarwash/video/7703232736168791303'));
     });
+
+    test('Customer phone call booking defaults to 0910046553 and is editable by admin anytime', () async {
+      // 1. Initial default hotline
+      expect(state.customerPhoneBookingNumber, equals('0910046553'));
+
+      // 2. Admin edits the phone booking hotline
+      await state.setCustomerPhoneBookingNumber('0911223344');
+      expect(state.customerPhoneBookingNumber, equals('0911223344'));
+
+      // 3. New state or customer launch reflects the edited phone booking number
+      final freshState = AppStateNotifier(repository: repo);
+      await freshState.loadData();
+      expect(freshState.customerPhoneBookingNumber, equals('0911223344'));
+    });
   });
 }

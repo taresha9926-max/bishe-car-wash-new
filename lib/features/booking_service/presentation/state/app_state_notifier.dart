@@ -155,6 +155,19 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Customer Phone Call Booking Configuration (Hotline)
+  String _customerPhoneBookingNumber = '0910046553';
+  String get customerPhoneBookingNumber => _customerPhoneBookingNumber;
+  Future<void> setCustomerPhoneBookingNumber(String phone) async {
+    _customerPhoneBookingNumber = phone.trim();
+    notifyListeners();
+    try {
+      await _repository.saveCustomerPhoneBookingNumber(_customerPhoneBookingNumber);
+    } catch (e) {
+      debugPrint('Failed to save customer phone booking number to repository: $e');
+    }
+  }
+
   // Welcome Advertising Video Reel & TikTok Showcase
   String _adVideoUrl = 'assets/videos/ad_video.mp4';
   String get adVideoUrl => _adVideoUrl;
@@ -1111,6 +1124,13 @@ class AppStateNotifier extends ChangeNotifier {
         if (closings.isNotEmpty) {
           _dailyFinancialClosings.clear();
           _dailyFinancialClosings.addAll(closings);
+        }
+      } catch (_) {}
+
+      try {
+        final hotline = await _repository.getCustomerPhoneBookingNumber();
+        if (hotline.isNotEmpty) {
+          _customerPhoneBookingNumber = hotline;
         }
       } catch (_) {}
     } catch (e) {

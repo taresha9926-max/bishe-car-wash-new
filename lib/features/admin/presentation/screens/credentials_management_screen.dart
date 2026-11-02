@@ -12,6 +12,74 @@ class CredentialsManagementScreen extends StatefulWidget {
 }
 
 class _CredentialsManagementScreenState extends State<CredentialsManagementScreen> {
+  void _showEditCustomerPhoneBookingDialog(BuildContext context) {
+    final state = AppStateProvider.read(context);
+    final phoneController = TextEditingController(text: state.customerPhoneBookingNumber);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.phone_forwarded_rounded, color: AppColors.primary, size: 22),
+            SizedBox(width: 8),
+            Text('Customer Booking Hotline', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This phone number is displayed to customers on the Customer Dashboard to book vehicle washes by direct phone call.',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                labelText: 'Customer Hotline Number',
+                prefixIcon: const Icon(Icons.call_rounded),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              final newPhone = phoneController.text.trim();
+              if (newPhone.isNotEmpty) {
+                await state.setCustomerPhoneBookingNumber(newPhone);
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Customer Phone Call Booking Hotline updated to $newPhone'),
+                      backgroundColor: AppColors.statusCompleted,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Save Hotline'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showEditCashierPhoneDialog(BuildContext context) {
     final state = AppStateProvider.read(context);
     final phoneController = TextEditingController(text: state.cashierSmsPhone);
@@ -362,6 +430,55 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Customer Phone Call Booking Hotline Configuration
+                Card(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.phone_forwarded_rounded, color: AppColors.primary, size: 24),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Customer Booking Hotline',
+                                style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                state.customerPhoneBookingNumber,
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Hotline displayed on Customer Dashboard for direct phone bookings',
+                                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit_rounded, color: AppColors.primary),
+                          tooltip: 'Edit Booking Hotline',
+                          onPressed: () => _showEditCustomerPhoneBookingDialog(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
                 // Cashier SMS Dispatch Gateway Phone Configuration
                 Card(

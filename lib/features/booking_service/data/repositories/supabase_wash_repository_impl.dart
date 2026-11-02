@@ -735,7 +735,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               isActive: json['is_active'] == true,
             );
           })
-          .where((cred) => cred.username != 'app_config_tiktok_reels')
+          .where((cred) => !cred.username.startsWith('app_config_'))
           .toList();
 
       if (creds.isEmpty) {
@@ -938,6 +938,44 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       debugPrint('Supabase saveTikTokReels exception: $e');
     }
     await _fallbackLocalRepo.saveTikTokReels(reels);
+  }
+
+  @override
+  Future<String> getCustomerPhoneBookingNumber() async {
+    try {
+      final dynamic data = await _get('staff_credentials?username=eq.app_config_phone_booking&select=*');
+      if (data is List && data.isNotEmpty) {
+        final phone = data.first['full_name']?.toString() ?? '';
+        if (phone.isNotEmpty) return phone;
+      }
+    } catch (e) {
+      debugPrint('Supabase getCustomerPhoneBookingNumber exception: $e');
+    }
+    return _fallbackLocalRepo.getCustomerPhoneBookingNumber();
+  }
+
+  @override
+  Future<void> saveCustomerPhoneBookingNumber(String phone) async {
+    try {
+      final dynamic existing = await _get('staff_credentials?username=eq.app_config_phone_booking&select=id');
+      if (existing is List && existing.isNotEmpty) {
+        await _patch('staff_credentials?username=eq.app_config_phone_booking', {
+          'full_name': phone.trim(),
+          'is_active': true,
+        });
+      } else {
+        await _post('staff_credentials', {
+          'username': 'app_config_phone_booking',
+          'pin_hash': '4450',
+          'role': 'admin',
+          'full_name': phone.trim(),
+          'is_active': true,
+        });
+      }
+    } catch (e) {
+      debugPrint('Supabase saveCustomerPhoneBookingNumber exception: $e');
+    }
+    await _fallbackLocalRepo.saveCustomerPhoneBookingNumber(phone);
   }
 
   @override

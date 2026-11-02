@@ -1509,9 +1509,9 @@ class AppStrings {
       AppLanguage.am: 'ለጣቢያው በስልክ ይደውሉ',
     },
     'bookByPhoneSub': {
-      AppLanguage.en: 'Call +251 91 123 4567 to book your wash instantly by phone',
-      AppLanguage.om: 'Dhiqannaa battalatti qabachuuf +251 91 123 4567 irratti bilbilaa',
-      AppLanguage.am: 'በስልክ ፈጣን ቀጠሮ ለመያዝ ወደ +251 91 123 4567 ይደውሉ',
+      AppLanguage.en: 'Call hotline to book your wash instantly by phone',
+      AppLanguage.om: 'Dhiqannaa battalatti qabachuuf sarara bilbilaa fayyadamaa',
+      AppLanguage.am: 'በስልክ ፈጣን ቀጠሮ ለመያዝ ወደ ሆትላይን ቁጥር ይደውሉ',
     },
     'phoneCallBooking': {
       AppLanguage.en: 'Phone Call Booking',

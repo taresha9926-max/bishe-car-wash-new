@@ -68,6 +68,8 @@ abstract class IStaffRepository {
 abstract class IMarketingRepository {
   Future<List<TikTokAdVideo>> getTikTokReels();
   Future<void> saveTikTokReels(List<TikTokAdVideo> reels);
+  Future<String> getCustomerPhoneBookingNumber();
+  Future<void> saveCustomerPhoneBookingNumber(String phone);
 }
 
 /// Domain port for fixed assets, consumables stock, and washer team daily handovers.

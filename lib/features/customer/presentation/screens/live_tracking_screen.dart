@@ -4,6 +4,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../booking_service/domain/models/service_type.dart';
@@ -257,15 +258,15 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 children: [
                   const Icon(Icons.support_agent_rounded, size: 28, color: AppColors.primary),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Bishoftu Station Desk: +251 91 123 4567',
-                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                          'Bishoftu Station Desk: ${state.customerPhoneBookingNumber}',
+                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
                         ),
-                        Text(
+                        const Text(
                           'Open daily 7:00 AM - 8:00 PM',
                           style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                         ),
@@ -274,7 +275,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.phone, color: AppColors.primary),
-                    onPressed: () {},
+                    onPressed: () {
+                      final phone = state.customerPhoneBookingNumber as String;
+                      UrlLauncherHelper.openUrl('tel:$phone');
+                    },
                   ),
                 ],
               ),

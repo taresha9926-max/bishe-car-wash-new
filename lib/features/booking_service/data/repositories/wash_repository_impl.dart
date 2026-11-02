@@ -402,6 +402,8 @@ class WashRepositoryImpl implements IWashRepository {
     }
   }
 
+  String _customerPhoneBookingNumber = '0910046553';
+
   @override
   Future<List<TikTokAdVideo>> getTikTokReels() async {
     return List.unmodifiable(_tiktokReels);
@@ -410,6 +412,16 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<void> saveTikTokReels(List<TikTokAdVideo> reels) async {
     _tiktokReels = List.from(reels);
+  }
+
+  @override
+  Future<String> getCustomerPhoneBookingNumber() async {
+    return _customerPhoneBookingNumber;
+  }
+
+  @override
+  Future<void> saveCustomerPhoneBookingNumber(String phone) async {
+    _customerPhoneBookingNumber = phone.trim();
   }
 
   @override

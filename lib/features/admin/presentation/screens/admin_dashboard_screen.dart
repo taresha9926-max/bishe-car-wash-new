@@ -75,17 +75,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   DateTime? _selectedCustomDate;
   String _washerCommissionFilter = 'Weekly'; // Daily, Weekly, Date Range
   late final TextEditingController _cashierPhoneController;
+  late final TextEditingController _customerPhoneController;
   bool _phoneControllerInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _cashierPhoneController = TextEditingController();
+    _customerPhoneController = TextEditingController();
   }
 
   @override
   void dispose() {
     _cashierPhoneController.dispose();
+    _customerPhoneController.dispose();
     super.dispose();
   }
 
@@ -125,6 +128,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     if (!_phoneControllerInitialized) {
       _cashierPhoneController.text = state.cashierSmsPhone;
+      _customerPhoneController.text = state.customerPhoneBookingNumber;
       _phoneControllerInitialized = true;
     }
 
@@ -2117,6 +2121,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 1. Customer Phone Call Booking Hotline
           Row(
             children: [
               Container(
@@ -2125,7 +2130,108 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.sms_rounded, color: AppColors.primary, size: 20),
+                child: const Icon(Icons.phone_forwarded_rounded, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Customer Phone Call Booking Hotline',
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'Hotline displayed on Customer Dashboard for customers to book washes by direct phone call',
+                      style: TextStyle(
+                        fontSize: isMobile ? 11 : 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: const Text(
+                  'Hotline Active',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _customerPhoneController,
+                  keyboardType: TextInputType.phone,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.call_rounded, size: 18, color: AppColors.primary),
+                    labelText: 'Customer Hotline Booking Number',
+                    hintText: 'e.g. 0910046553',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: 11),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+                icon: const Icon(Icons.check_rounded, size: 16),
+                label: const Text('Save', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5)),
+                onPressed: () async {
+                  final newPhone = _customerPhoneController.text.trim();
+                  if (newPhone.isNotEmpty) {
+                    await state.setCustomerPhoneBookingNumber(newPhone);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Customer Phone Call Booking Hotline updated to $newPhone'),
+                          backgroundColor: AppColors.statusCompleted,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Divider(height: 1),
+          ),
+
+          // 2. Cashier SMS Gateway Configuration
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.cashGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.sms_rounded, color: AppColors.cashGreen, size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -2179,7 +2285,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -2188,7 +2294,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   keyboardType: TextInputType.phone,
                   style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.phone_android_rounded, size: 18, color: AppColors.primary),
+                    prefixIcon: const Icon(Icons.phone_android_rounded, size: 18, color: AppColors.cashGreen),
                     labelText: 'Cashier Phone Number',
                     hintText: 'e.g. 0962274450',
                     isDense: true,
@@ -2200,7 +2306,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               const SizedBox(width: 10),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.cashGreen,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: 11),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
