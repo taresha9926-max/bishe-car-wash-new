@@ -172,20 +172,28 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
 
           // Sub-header tabs
           Container(
-            color: Colors.white,
+            margin: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 18, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: TabBar(
               controller: _tabController,
               isScrollable: isMobile,
               tabAlignment: isMobile ? TabAlignment.start : TabAlignment.fill,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textSecondary,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFF0D9488),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white60,
+              labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
               tabs: const [
-                Tab(icon: Icon(Icons.autorenew_rounded, size: 18), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
-                Tab(icon: Icon(Icons.inventory_2_rounded, size: 18), text: 'Consumables (አላቂ)'),
-                Tab(icon: Icon(Icons.build_circle_rounded, size: 18), text: 'Fixed Assets (ቋሚ)'),
+                Tab(icon: Icon(Icons.autorenew_rounded, size: 16), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
+                Tab(icon: Icon(Icons.inventory_2_rounded, size: 16), text: 'Consumables (አላቂ)'),
+                Tab(icon: Icon(Icons.build_circle_rounded, size: 16), text: 'Fixed Assets (ቋሚ)'),
               ],
             ),
           ),

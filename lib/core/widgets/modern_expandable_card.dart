@@ -85,14 +85,12 @@ class _ModernExpandableCardState extends State<ModernExpandableCard>
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _isExpanded
-              ? widget.gradientColors.first.withValues(alpha: 0.35)
-              : AppColors.cardBorder,
-          width: _isExpanded ? 1.5 : 1.0,
+          color: widget.gradientColors.first.withValues(alpha: _isExpanded ? 0.40 : 0.22),
+          width: _isExpanded ? 1.5 : 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: widget.gradientColors.first.withValues(alpha: _isExpanded ? 0.08 : 0.03),
+            color: widget.gradientColors.first.withValues(alpha: _isExpanded ? 0.10 : 0.05),
             blurRadius: _isExpanded ? 12 : 6,
             offset: const Offset(0, 3),
           ),
@@ -110,13 +108,11 @@ class _ModernExpandableCardState extends State<ModernExpandableCard>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: _isExpanded
-                    ? widget.gradientColors.first.withValues(alpha: 0.04)
-                    : Colors.white,
+                color: widget.gradientColors.first.withValues(alpha: _isExpanded ? 0.07 : 0.025),
                 border: Border(
                   bottom: BorderSide(
                     color: _isExpanded
-                        ? AppColors.cardBorder.withValues(alpha: 0.6)
+                        ? widget.gradientColors.first.withValues(alpha: 0.2)
                         : Colors.transparent,
                     width: 1,
                   ),
