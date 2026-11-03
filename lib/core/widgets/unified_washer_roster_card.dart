@@ -1,19 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
-import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/weekly_commission_report_dialog.dart';
 
 /// Unified washer roster and commission pool section shared between
 /// Cashier and Accountant dashboards.
-class UnifiedWasherRosterCard extends StatelessWidget {
+/// Built with colorful gradients and mobile expandable animations.
+class UnifiedWasherRosterCard extends StatefulWidget {
   final bool isMobile;
+  final bool initiallyExpanded;
 
   const UnifiedWasherRosterCard({
     super.key,
     required this.isMobile,
+    this.initiallyExpanded = true,
   });
+
+  @override
+  State<UnifiedWasherRosterCard> createState() => _UnifiedWasherRosterCardState();
+}
+
+class _UnifiedWasherRosterCardState extends State<UnifiedWasherRosterCard> {
+  late bool _isRosterExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isRosterExpanded = widget.initiallyExpanded;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,17 +38,17 @@ class UnifiedWasherRosterCard extends StatelessWidget {
     final dividends = state.washerDividendsToday;
 
     return Container(
-      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      padding: EdgeInsets.all(widget.isMobile ? 12 : 16),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.oromiaGold.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.oromiaGold.withValues(alpha: 0.45)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.oromiaGold.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: AppColors.oromiaGold.withValues(alpha: 0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -52,141 +67,205 @@ class UnifiedWasherRosterCard extends StatelessWidget {
           _buildSafeguardNotice(),
           const SizedBox(height: 12),
 
-          // 4. Roster List with Live Dividend Calculation & Attendance Switches
-          const Text(
-            'Washer Crew Attendance & Live Dividend Share:',
-            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 8),
-          ...washers.map((w) {
-            final isPresent = state.isWasherPresentToday(w.id);
-            final div = dividends[w.id];
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
+          // 4. Roster List Expand/Collapse Bar on Mobile
+          InkWell(
+            onTap: () => setState(() => _isRosterExpanded = !_isRosterExpanded),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: isPresent
-                      ? AppColors.statusCompleted.withValues(alpha: 0.4)
-                      : Colors.red.withValues(alpha: 0.3),
-                  width: 1.2,
-                ),
+                color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: isPresent
-                        ? AppColors.statusCompleted.withValues(alpha: 0.12)
-                        : Colors.red.withValues(alpha: 0.12),
-                    child: Text(
-                      w.name.isNotEmpty ? w.name[0] : 'W',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                        color: isPresent ? AppColors.statusCompleted : Colors.red,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.people_alt_rounded, size: 15, color: AppColors.primary),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Washer Crew (${washers.length} Washers)',
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                w.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                div?.customTierName ?? 'Tier ${w.skillSeniorityLevel}',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.blue.shade900,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: isPresent
-                                    ? AppColors.statusCompleted.withValues(alpha: 0.12)
-                                    : Colors.red.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                isPresent ? 'ON DUTY' : 'ABSENT',
-                                style: TextStyle(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: isPresent ? AppColors.statusCompleted : Colors.red,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 6,
-                          children: [
-                            Text(
-                              'Base: ${(w.commissionRate * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                            ),
-                            const Text('•', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                            Text(
-                              isPresent && div != null
-                                  ? '${div.percentageShare.toStringAsFixed(1)}% Share • ${CurrencyFormatter.format(div.earnedETB)}'
-                                  : 'Absent (0 ETB)',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: isPresent ? AppColors.oromiaGold : Colors.red,
-                              ),
-                            ),
-                            if (w.phone.isNotEmpty) ...[
-                              const Text('•', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                              Text(
-                                w.phone,
-                                style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch.adaptive(
-                    value: isPresent,
-                    activeThumbColor: AppColors.statusCompleted,
-                    onChanged: (val) {
-                      state.setWasherAttendance(w.id, val);
-                    },
+                  Row(
+                    children: [
+                      Text(
+                        _isRosterExpanded ? 'Collapse' : 'Expand Roster',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        _isRosterExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
+                    ],
                   ),
                 ],
               ),
-            );
-          }),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Expandable Roster List
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity, height: 0),
+            secondChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: washers.map((w) {
+                final isPresent = state.isWasherPresentToday(w.id);
+                final div = dividends[w.id];
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isPresent
+                        ? Colors.white
+                        : Colors.red.shade50.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isPresent
+                          ? AppColors.statusCompleted.withValues(alpha: 0.45)
+                          : Colors.red.withValues(alpha: 0.3),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isPresent ? AppColors.statusCompleted : Colors.red)
+                            .withValues(alpha: 0.04),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: isPresent
+                            ? AppColors.statusCompleted.withValues(alpha: 0.15)
+                            : Colors.red.withValues(alpha: 0.12),
+                        child: Text(
+                          w.name.isNotEmpty ? w.name[0] : 'W',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                            color: isPresent ? AppColors.statusCompleted : Colors.red,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    w.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: Colors.blue.shade200, width: 0.8),
+                                  ),
+                                  child: Text(
+                                    div?.customTierName ?? 'Tier ${w.skillSeniorityLevel}',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.blue.shade900,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: isPresent
+                                        ? AppColors.statusCompleted.withValues(alpha: 0.12)
+                                        : Colors.red.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    isPresent ? 'ON DUTY' : 'ABSENT',
+                                    style: TextStyle(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: isPresent ? AppColors.statusCompleted : Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 6,
+                              children: [
+                                Text(
+                                  'Base: ${(w.commissionRate * 100).toStringAsFixed(1)}%',
+                                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                ),
+                                const Text('•', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                                Text(
+                                  isPresent && div != null
+                                      ? '${div.percentageShare.toStringAsFixed(1)}% Share • ${CurrencyFormatter.format(div.earnedETB)}'
+                                      : 'Absent (0 ETB)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: isPresent ? AppColors.oromiaGold : Colors.red,
+                                  ),
+                                ),
+                                if (w.phone.isNotEmpty) ...[
+                                  const Text('•', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                                  Text(
+                                    w.phone,
+                                    style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch.adaptive(
+                        value: isPresent,
+                        activeThumbColor: AppColors.statusCompleted,
+                        onChanged: (val) {
+                          state.setWasherAttendance(w.id, val);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+            crossFadeState: _isRosterExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 250),
+          ),
         ],
       ),
     );
@@ -198,10 +277,21 @@ class UnifiedWasherRosterCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.oromiaGold.withValues(alpha: 0.12),
+            gradient: const LinearGradient(
+              colors: [AppColors.oromiaGold, Color(0xFFEAB308)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.oromiaGold.withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 22),
+          child: const Icon(Icons.stars_rounded, color: Colors.white, size: 22),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -268,7 +358,7 @@ class UnifiedWasherRosterCard extends StatelessWidget {
         ),
         label: Text(
           state.isDailyCommissionDisbursedToday
-              ? (isMobile ? 'Disbursed' : 'Disbursed Today (${CurrencyFormatter.format(pool)})')
+              ? (widget.isMobile ? 'Disbursed' : 'Disbursed Today (${CurrencyFormatter.format(pool)})')
               : state.tr('disburseCommission'),
           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
         ),
@@ -282,7 +372,7 @@ class UnifiedWasherRosterCard extends StatelessWidget {
       ),
     ];
 
-    if (isMobile) {
+    if (widget.isMobile) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -311,9 +401,16 @@ class UnifiedWasherRosterCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.oromiaGold.withValues(alpha: 0.08),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.oromiaGold.withValues(alpha: 0.12),
+            AppColors.oromiaGold.withValues(alpha: 0.04),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.oromiaGold.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.oromiaGold.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -351,7 +448,7 @@ class UnifiedWasherRosterCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.statusCompleted.withValues(alpha: 0.1),
+                    color: AppColors.statusCompleted.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppColors.statusCompleted.withValues(alpha: 0.25)),
                   ),

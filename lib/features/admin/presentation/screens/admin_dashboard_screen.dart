@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/modern_expandable_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
@@ -142,7 +143,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final cashRevenue = paidBookings.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final digitalRevenue = paidBookings.where((b) => b.payment.method != PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final totalPettyCash = state.pettyCashExpenses.fold<double>(0.0, (sum, p) => sum + p.amount);
-    final totalSupplies = (state.stockTransactions as List<StockTransaction>)
+    final totalSupplies = state.stockTransactions
         .where((t) => t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption')
         .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
     final totalFixedAssets = 0.0;
@@ -280,23 +281,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildCashVsDigitalBar(state, totalRevenue, cashRevenue, digitalRevenue),
               const SizedBox(height: 18),
 
-              // Cashier Phone Number Field for Automated Customer SMS (Admin Dashboard)
-              _buildCashierSmsConfigCard(context, state, isMobile),
-              const SizedBox(height: 18),
-
-              // Super Admin: Welcome Screen TikTok Commercial Reels Manager
-              _buildTikTokCommercialReelsManagerCard(context, state, isMobile),
-              const SizedBox(height: 18),
-
-              // Executive Standard Financial Statement (P&L: Revenue, COGS, OpEx, Net Profit)
-              _buildStandardFinancialStatementCard(context, state, isMobile, totalRevenue, commissionPool, totalPettyCash, totalSupplies, totalFixedAssets),
-              const SizedBox(height: 18),
-
-              // 5. Weekly Washer Commission Report (Reported by Cashier)
-              _buildWeeklyWasherCommissionReportSection(context, state, isMobile),
-              const SizedBox(height: 22),
-
-              // 6. Operational Management Modules (Responsive: Full-width list on Mobile, Row on Tablet/Desktop)
+              // 5. Operational Management Modules (High priority quick actions)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -311,7 +296,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.08),
+                      color: AppColors.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
@@ -322,60 +307,121 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-
               _buildManagementOperations(context, state, isMobile),
-              const SizedBox(height: 22),
+              const SizedBox(height: 18),
 
-              // 7. Digital Payment Receipts Audit Section
-              _buildDigitalReceiptsSection(context, digitalBookings, isMobile),
-              const SizedBox(height: 22),
-
-              // 8. Live Pricing Matrix Editor Widget
-              PricingMatrixEditor(packages: state.packages),
-              const SizedBox(height: 22),
-
-              // 9. Automated Commission Split Ledger
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    state.tr('recentCommissions'),
-                    style: TextStyle(
-                      fontSize: isMobile ? 15.5 : 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const CommissionLogsScreen()),
-                      );
-                    },
-                    child: Text(state.tr('viewAll'), style: const TextStyle(fontWeight: FontWeight.w800)),
-                  ),
-                ],
+              // 6. Deep Operations & Audits (Expandable Cards on Mobile)
+              // A. Automated Customer SMS & Hotline Gateway
+              ModernExpandableCard(
+                title: 'Automated Customer SMS & Hotline',
+                subtitle: 'Customer vehicle completion SMS dispatch & hotline numbers',
+                icon: Icons.sms_rounded,
+                gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
+                badgeText: 'Active Gateway',
+                badgeColor: const Color(0xFF4F46E5),
+                initiallyExpanded: false,
+                padding: EdgeInsets.zero,
+                child: _buildCashierSmsConfigCard(context, state, isMobile),
               ),
-              const SizedBox(height: 8),
 
-              if (recentLogs.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.cardBorder),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'No commission logs recorded yet today.',
-                      style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                    ),
-                  ),
-                )
-              else
-                ...recentLogs.map((log) => CommissionItemCard(log: log)),
+              // B. Welcome Screen TikTok Commercial Reels Manager
+              ModernExpandableCard(
+                title: 'Welcome Screen TikTok Commercial Reels',
+                subtitle: 'Video showcase on app launch for customer engagement',
+                icon: Icons.video_library_rounded,
+                gradientColors: const [Color(0xFFEC4899), Color(0xFFBE185D)],
+                badgeText: '${(state.tiktokReels as List).length} Reels',
+                badgeColor: const Color(0xFFEC4899),
+                initiallyExpanded: false,
+                padding: EdgeInsets.zero,
+                child: _buildTikTokCommercialReelsManagerCard(context, state, isMobile),
+              ),
+
+              // C. Executive P&L Financial Statement
+              ModernExpandableCard(
+                title: 'Executive Financial Statement (P&L)',
+                subtitle: 'Gross revenue, COGS, operating expenses & net station profit',
+                icon: Icons.analytics_rounded,
+                gradientColors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
+                badgeText: 'P&L Ledger',
+                badgeColor: const Color(0xFF0F766E),
+                initiallyExpanded: false,
+                padding: EdgeInsets.zero,
+                child: _buildStandardFinancialStatementCard(context, state, isMobile, totalRevenue, commissionPool, totalPettyCash, totalSupplies, totalFixedAssets),
+              ),
+
+              // D. Weekly Washer Commission Reports
+              ModernExpandableCard(
+                title: 'Weekly Washer Commission Reports',
+                subtitle: 'Cashier-submitted weekly payout ledgers and audits',
+                icon: Icons.assignment_turned_in_rounded,
+                gradientColors: const [AppColors.oromiaGold, Color(0xFFD97706)],
+                badgeText: '${(state.weeklyCommissionReports as List).length} Reports',
+                badgeColor: AppColors.oromiaGold,
+                initiallyExpanded: false,
+                padding: EdgeInsets.zero,
+                child: _buildWeeklyWasherCommissionReportSection(context, state, isMobile),
+              ),
+
+              // E. Digital Payment Receipts Audit
+              ModernExpandableCard(
+                title: 'Digital Payment Receipts Audit',
+                subtitle: 'Telebirr, CBE Birr & Awash transaction verification',
+                icon: Icons.receipt_long_rounded,
+                gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
+                badgeText: '${digitalBookings.length} Receipts',
+                badgeColor: AppColors.telebirrBlue,
+                initiallyExpanded: false,
+                padding: EdgeInsets.zero,
+                child: _buildDigitalReceiptsSection(context, digitalBookings, isMobile),
+              ),
+
+              // F. Live Pricing Matrix Editor
+              ModernExpandableCard(
+                title: 'Live Pricing Matrix Editor',
+                subtitle: 'Adjust tariff rates for sedan, SUV, minivan & heavy vehicles',
+                icon: Icons.tune_rounded,
+                gradientColors: const [AppColors.primary, AppColors.secondary],
+                badgeText: '${state.packages.length} Tariffs',
+                badgeColor: AppColors.primary,
+                initiallyExpanded: false,
+                padding: EdgeInsets.zero,
+                child: PricingMatrixEditor(packages: state.packages),
+              ),
+
+              // G. Automated Commission Split Ledger
+              ModernExpandableCard(
+                title: state.tr('recentCommissions'),
+                subtitle: 'Automated 15% dividend distribution log per wash',
+                icon: Icons.stars_rounded,
+                gradientColors: const [AppColors.oromiaGold, Color(0xFFB45309)],
+                badgeText: '${recentLogs.length} Records',
+                badgeColor: AppColors.oromiaGold,
+                initiallyExpanded: false,
+                padding: EdgeInsets.zero,
+                headerAction: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CommissionLogsScreen()),
+                    );
+                  },
+                  child: Text(state.tr('viewAll'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                ),
+                child: recentLogs.isEmpty
+                    ? Container(
+                        padding: const EdgeInsets.all(24),
+                        child: const Center(
+                          child: Text(
+                            'No commission logs recorded yet today.',
+                            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                          ),
+                        ),
+                      )
+                    : Column(
+                        children: recentLogs.map((log) => CommissionItemCard(log: log)).toList(),
+                      ),
+              ),
 
               const SizedBox(height: 40),
             ],
@@ -1452,93 +1498,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted, height: 1.2),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOperationCardMobile(BuildContext context, _OperationItem op) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: op.onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: op.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(op.icon, color: op.color, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            op.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14.5,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        if (op.badge != null) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: op.color.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              op.badge!,
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: op.color),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      op.subtitle,
-                      style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.25),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textMuted),
               ),
             ],
           ),

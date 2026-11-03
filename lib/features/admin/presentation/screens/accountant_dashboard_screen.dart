@@ -4,9 +4,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/modern_expandable_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/unified_washer_roster_card.dart';
-import '../../domain/models/staff_member.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/bank_deposit_record.dart';
@@ -225,48 +225,73 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           const SizedBox(height: 16),
 
-          Text(
-            'Submitted Daily Closings (${filteredClosings.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 1. Submitted Daily Closings (Expandable)
+          ModernExpandableCard(
+            title: 'Submitted Daily Closings',
+            subtitle: 'Reconcile net drawer cash, gross revenue & discrepancy notes',
+            icon: Icons.point_of_sale_rounded,
+            gradientColors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
+            badgeText: '${filteredClosings.length} Reports',
+            badgeColor: const Color(0xFF0F766E),
+            initiallyExpanded: true,
+            padding: EdgeInsets.zero,
+            child: filteredClosings.isEmpty
+                ? _buildEmptyState('No daily shift closings found for $_auditDateRange.', Icons.point_of_sale)
+                : Column(
+                    children: filteredClosings.map((c) => _buildClosingAuditCard(context, state, c, isMobile)).toList(),
+                  ),
           ),
-          const SizedBox(height: 10),
-          if (filteredClosings.isEmpty)
-            _buildEmptyState('No daily shift closings found for $_auditDateRange.', Icons.point_of_sale)
-          else
-            ...filteredClosings.map((c) => _buildClosingAuditCard(context, state, c, isMobile)),
 
-          const SizedBox(height: 20),
-          Text(
-            'Digital Payment Receipts & Verification (${filteredDigitalBookings.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 2. Digital Payment Receipts (Expandable)
+          ModernExpandableCard(
+            title: 'Digital Payment Receipts & Verification',
+            subtitle: 'Telebirr, CBE Birr, Awash, BoA screenshot audits',
+            icon: Icons.qr_code_scanner_rounded,
+            gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
+            badgeText: '${filteredDigitalBookings.length} Receipts',
+            badgeColor: AppColors.telebirrBlue,
+            initiallyExpanded: false,
+            padding: EdgeInsets.zero,
+            child: filteredDigitalBookings.isEmpty
+                ? _buildEmptyState('No digital payment receipts found for $_auditDateRange.', Icons.qr_code_scanner_rounded)
+                : Column(
+                    children: filteredDigitalBookings.map((b) => _buildDigitalPaymentCard(context, state, b, isMobile)).toList(),
+                  ),
           ),
-          const SizedBox(height: 10),
-          if (filteredDigitalBookings.isEmpty)
-            _buildEmptyState('No digital payment receipts found for $_auditDateRange.', Icons.qr_code_scanner_rounded)
-          else
-            ...filteredDigitalBookings.map((b) => _buildDigitalPaymentCard(context, state, b, isMobile)),
 
-          const SizedBox(height: 20),
-          Text(
-            'Cash Recieved by Cashier Deposited to Bank Log (${filteredDeposits.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 3. Bank Deposits Log (Expandable)
+          ModernExpandableCard(
+            title: 'Cash Recieved by Cashier Deposited to Bank Log',
+            subtitle: 'Stamped bank deposit slips (Account A CBE & Account B Awash)',
+            icon: Icons.account_balance_rounded,
+            gradientColors: const [Colors.indigo, Color(0xFF4F46E5)],
+            badgeText: '${filteredDeposits.length} Slips',
+            badgeColor: Colors.indigo,
+            initiallyExpanded: false,
+            padding: EdgeInsets.zero,
+            child: filteredDeposits.isEmpty
+                ? _buildEmptyState('No bank deposit slips found for $_auditDateRange.', Icons.receipt_outlined)
+                : Column(
+                    children: filteredDeposits.map((d) => _buildDepositCard(context, state, d, isMobile)).toList(),
+                  ),
           ),
-          const SizedBox(height: 10),
-          if (filteredDeposits.isEmpty)
-            _buildEmptyState('No bank deposit slips found for $_auditDateRange.', Icons.receipt_outlined)
-          else
-            ...filteredDeposits.map((d) => _buildDepositCard(context, state, d, isMobile)),
 
-          const SizedBox(height: 20),
-          Text(
-            'Petty Cash & Emergency Spend Log (${filteredPetty.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 4. Petty Cash Log (Expandable)
+          ModernExpandableCard(
+            title: 'Petty Cash & Emergency Spend Log',
+            subtitle: 'Drawer deductions for station emergency supplies & vouchers',
+            icon: Icons.outbox_rounded,
+            gradientColors: const [Colors.deepOrange, Color(0xFFF97316)],
+            badgeText: '${filteredPetty.length} Vouchers',
+            badgeColor: Colors.deepOrange,
+            initiallyExpanded: false,
+            padding: EdgeInsets.zero,
+            child: filteredPetty.isEmpty
+                ? _buildEmptyState('No petty cash expenses found for $_auditDateRange.', Icons.outbox_rounded)
+                : Column(
+                    children: filteredPetty.map((p) => _buildPettyCashCard(context, state, p, isMobile)).toList(),
+                  ),
           ),
-          const SizedBox(height: 10),
-          if (filteredPetty.isEmpty)
-            _buildEmptyState('No petty cash expenses found for $_auditDateRange.', Icons.outbox_rounded)
-          else
-            ...filteredPetty.map((p) => _buildPettyCashCard(context, state, p, isMobile)),
         ],
       ),
     );
