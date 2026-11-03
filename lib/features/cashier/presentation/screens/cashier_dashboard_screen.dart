@@ -285,14 +285,19 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                state.tr('todayRevenue'),
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white70,
+                              Flexible(
+                                child: Text(
+                                  state.tr('todayRevenue'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white70,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
@@ -373,12 +378,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            state.tr('todayRevenue'),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white70,
+                          Flexible(
+                            child: Text(
+                              state.tr('todayRevenue'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white70,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),

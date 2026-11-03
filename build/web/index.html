@@ -30,10 +30,10 @@
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
-        for (var r of regs) { r.update(); }
+        for (var r of regs) { r.unregister(); }
       });
     }
   </script>
-  <script src="flutter_bootstrap.js?v=2.3.0" async></script>
+  <script src="flutter_bootstrap.js?v=2.4.0" async></script>
 </body>
 </html>

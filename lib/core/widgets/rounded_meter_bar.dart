@@ -43,33 +43,42 @@ class RoundedMeterBar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (icon != null) ...[
-                      Icon(icon, size: 14, color: gradientColors.first),
-                      const SizedBox(width: 5),
-                    ],
-                    if (label != null)
-                      Text(
-                        label!,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: labelColor ?? AppColors.textSecondary,
+                if (label != null)
+                  Expanded(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (icon != null) ...[
+                          Icon(icon, size: 14, color: gradientColors.first),
+                          const SizedBox(width: 5),
+                        ],
+                        Flexible(
+                          child: Text(
+                            label!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: labelColor ?? AppColors.textSecondary,
+                            ),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-                if (valueText != null)
+                      ],
+                    ),
+                  ),
+                if (valueText != null) ...[
+                  const SizedBox(width: 6),
                   Text(
                     valueText!,
+                    maxLines: 1,
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w800,
                       color: valueColor ?? gradientColors.first,
                     ),
                   ),
+                ],
               ],
             ),
           ),

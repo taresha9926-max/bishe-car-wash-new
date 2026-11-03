@@ -989,16 +989,17 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   // ==========================================
 
   Widget _buildPnLTab(BuildContext context, dynamic state, bool isMobile) {
-    final paidBookings = state.bookings.where((b) => b.payment.isPaid).toList();
-    final grossRevenue = paidBookings.fold(0.0, (sum, b) => sum + b.totalPrice);
-    final commissionPaid = state.commissionLogs.fold(0.0, (sum, l) => sum + l.commissionEarnedETB);
+    final allBookings = (state.bookings as List).cast<WashBooking>();
+    final paidBookings = allBookings.where((WashBooking b) => b.payment.isPaid).toList();
+    final grossRevenue = paidBookings.fold<double>(0.0, (double sum, WashBooking b) => sum + b.totalPrice);
+    final commissionPaid = (state.commissionLogs as List).fold<double>(0.0, (double sum, dynamic l) => sum + ((l.commissionEarnedETB as num?)?.toDouble() ?? 0.0));
     final suppliesCost = (state.stockTransactions as List<StockTransaction>)
         .where((t) => t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption')
-        .fold(0.0, (sum, t) => sum + t.totalCostEtb);
+        .fold<double>(0.0, (double sum, StockTransaction t) => sum + t.totalCostEtb);
     final pettyCost = (state.pettyCashExpenses as List<PettyCashExpense>)
-        .fold(0.0, (sum, p) => sum + p.amount);
+        .fold<double>(0.0, (double sum, PettyCashExpense p) => sum + p.amount);
     final fixedAssetsCost = 0.0;
-    final monthlySalaryObligation = state.monthlyTotalBaseSalary as double;
+    final monthlySalaryObligation = (state.monthlyTotalBaseSalary as num?)?.toDouble() ?? 0.0;
 
     final cogs = commissionPaid + suppliesCost;
     final grossProfit = grossRevenue - cogs;
