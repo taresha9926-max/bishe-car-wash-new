@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/floating_pill_nav_bar.dart';
 import '../../../../core/widgets/modern_expandable_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
+import '../../../../core/widgets/rounded_meter_bar.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
@@ -219,6 +222,89 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
               // 2. Interactive Time Filter Selector
               _buildTimeFilterBar(state),
+              const SizedBox(height: 14),
+
+              // Executive Radial Health & Real-Time Performance Gauges
+              Container(
+                padding: EdgeInsets.all(isMobile ? 12 : 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.cardBorder),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    AnimatedCircularRing(
+                      progress: totalRevenue > 0 ? (netProfit > 0 ? (netProfit / totalRevenue) : 0.0) : 0.0,
+                      size: isMobile ? 74 : 84,
+                      strokeWidth: 7,
+                      primaryColor: AppColors.statusReady,
+                      secondaryColor: const Color(0xFF059669),
+                      centerValue: totalRevenue > 0 ? '${((netProfit / totalRevenue) * 100).toInt()}%' : '0%',
+                      centerLabel: 'Net Margin',
+                    ),
+                    SizedBox(width: isMobile ? 12 : 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Executive Real-Time Metrics',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '$completedCars Washed',
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.blue.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          RoundedMeterBar(
+                            progress: totalRevenue > 0 ? (digitalRevenue / totalRevenue) : 0.0,
+                            label: 'Digital Transfers vs Cash',
+                            valueText: '${CurrencyFormatter.formatShort(digitalRevenue)} Digital',
+                            gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
+                            height: 6,
+                          ),
+                          const SizedBox(height: 6),
+                          RoundedMeterBar(
+                            progress: (state.presentWashersCount / (state.totalWashersCount == 0 ? 1 : state.totalWashersCount)).clamp(0.0, 1.0),
+                            label: 'Washer Crew Attendance',
+                            valueText: '${state.presentWashersCount} / ${state.totalWashersCount} On Duty',
+                            gradientColors: const [AppColors.oromiaGold, Color(0xFFF59E0B)],
+                            height: 6,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 14),
 
               // 3. Financial & Operational KPIs (Responsive Grid with no text clipping)

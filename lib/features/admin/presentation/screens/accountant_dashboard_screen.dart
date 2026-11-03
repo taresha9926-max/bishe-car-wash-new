@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/floating_pill_nav_bar.dart';
 import '../../../../core/widgets/modern_expandable_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
+import '../../../../core/widgets/rounded_meter_bar.dart';
 import '../../../../core/widgets/unified_washer_roster_card.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -31,6 +34,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   @override
@@ -48,6 +52,28 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('accountantRole'),
+      ),
+      bottomNavigationBar: FloatingPillNavBar(
+        selectedIndex: _tabController.index,
+        onItemSelected: (idx) => _tabController.animateTo(idx),
+        items: const [
+          FloatingNavItem(
+            icon: Icons.verified_rounded,
+            label: 'Audits',
+          ),
+          FloatingNavItem(
+            icon: Icons.table_chart_rounded,
+            label: 'Payroll',
+          ),
+          FloatingNavItem(
+            icon: Icons.receipt_long_rounded,
+            label: 'OpEx',
+          ),
+          FloatingNavItem(
+            icon: Icons.analytics_rounded,
+            label: 'P&L',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -172,26 +198,83 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
-              borderRadius: BorderRadius.circular(16),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.cardBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: Colors.cyan.withValues(alpha: 0.2), shape: BoxShape.circle),
-                  child: const Icon(Icons.account_balance_rounded, color: Colors.cyanAccent, size: 24),
+                AnimatedCircularRing(
+                  progress: filteredClosings.isEmpty
+                      ? 1.0
+                      : (filteredClosings.where((c) => c.isConfirmed).length / filteredClosings.length),
+                  size: isMobile ? 74 : 84,
+                  strokeWidth: 7,
+                  primaryColor: const Color(0xFF0F766E),
+                  secondaryColor: const Color(0xFF14B8A6),
+                  centerValue: '${filteredClosings.length}',
+                  centerLabel: 'Closings',
                 ),
-                const SizedBox(width: 14),
-                const Expanded(
+                SizedBox(width: isMobile ? 12 : 18),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Cashier Shifts & Bank Deposit Verification', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
-                      SizedBox(height: 2),
-                      Text('Account A (CBE) & Account B (Awash) Stamped Slip Audits', style: TextStyle(color: Colors.white70, fontSize: 11.5)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Shift & Bank Audit Status',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.teal.shade50,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${filteredDeposits.length} Bank Deposits',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.teal.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      RoundedMeterBar(
+                        progress: filteredDigitalBookings.isEmpty
+                            ? 1.0
+                            : (filteredDigitalBookings.where((b) => b.payment.isPaid).length / filteredDigitalBookings.length),
+                        label: 'Digital Receipts Reconciled',
+                        valueText: '${filteredDigitalBookings.length} Receipts',
+                        gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
+                        height: 6,
+                      ),
+                      const SizedBox(height: 6),
+                      RoundedMeterBar(
+                        progress: 0.85,
+                        label: 'Petty Cash Ledger Verified',
+                        valueText: '${filteredPetty.length} Vouchers',
+                        gradientColors: const [Colors.deepOrange, Color(0xFFF97316)],
+                        height: 6,
+                      ),
                     ],
                   ),
                 ),

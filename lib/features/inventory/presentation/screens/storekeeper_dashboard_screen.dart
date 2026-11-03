@@ -3,8 +3,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
+import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/floating_pill_nav_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
+import '../../../../core/widgets/rounded_meter_bar.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/consumable_item.dart';
 import '../../domain/models/daily_handover.dart';
@@ -28,6 +31,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() => setState(() {}));
   }
 
   @override
@@ -40,14 +44,119 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isMobile = ResponsiveLayout.isMobile(context);
+    final consumables = state.consumables as List<ConsumableItem>;
+    final fixedAssets = state.fixedAssets as List<FixedAsset>;
+    final inStockCount = consumables.where((c) => c.currentStock > 0).length;
+    final stockHealth = consumables.isEmpty ? 1.0 : (inStockCount / consumables.length);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('storekeeperRole'),
       ),
+      bottomNavigationBar: FloatingPillNavBar(
+        selectedIndex: _tabController.index,
+        onItemSelected: (idx) => _tabController.animateTo(idx),
+        items: const [
+          FloatingNavItem(
+            icon: Icons.autorenew_rounded,
+            label: 'ዕቃ በዕቃ',
+          ),
+          FloatingNavItem(
+            icon: Icons.inventory_2_rounded,
+            label: 'አላቂ',
+          ),
+          FloatingNavItem(
+            icon: Icons.build_circle_rounded,
+            label: 'ቋሚ',
+          ),
+        ],
+      ),
       body: Column(
         children: [
+          // Storekeeper Stock KPI Overview Banner
+          Container(
+            margin: EdgeInsets.fromLTRB(isMobile ? 12 : 18, 12, isMobile ? 12 : 18, 4),
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.cardBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                AnimatedCircularRing(
+                  progress: stockHealth,
+                  size: isMobile ? 74 : 84,
+                  strokeWidth: 7,
+                  primaryColor: const Color(0xFF0D9488),
+                  secondaryColor: const Color(0xFF14B8A6),
+                  centerValue: '${(stockHealth * 100).toInt()}%',
+                  centerLabel: 'Stocked',
+                ),
+                SizedBox(width: isMobile ? 12 : 18),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Storehouse Inventory Status',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.teal.shade50,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '$inStockCount/${consumables.length} Items In Stock',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.teal.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      RoundedMeterBar(
+                        progress: 1.0,
+                        label: 'Empty Return Rate (ዕቃ በዕቃ)',
+                        valueText: '100% Accounted',
+                        gradientColors: const [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                        height: 6,
+                      ),
+                      const SizedBox(height: 6),
+                      RoundedMeterBar(
+                        progress: fixedAssets.isEmpty ? 1.0 : (fixedAssets.where((a) => a.condition != 'broken').length / fixedAssets.length),
+                        label: 'Fixed Assets Operational (ቋሚ)',
+                        valueText: '${fixedAssets.length} Assets',
+                        gradientColors: const [Color(0xFF2563EB), Color(0xFF38BDF8)],
+                        height: 6,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Sub-header tabs
           Container(
             color: Colors.white,

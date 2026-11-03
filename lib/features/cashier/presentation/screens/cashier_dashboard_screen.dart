@@ -4,8 +4,11 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
+import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/floating_pill_nav_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
+import '../../../../core/widgets/rounded_meter_bar.dart';
 import '../../../../core/widgets/unified_washer_roster_card.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/service_type.dart';
@@ -33,8 +36,6 @@ class CashierDashboardScreen extends StatefulWidget {
 class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   int _selectedFilterIndex = 0; // 0: Queue & Vehicles, 1: Attendance Desk, 2: Wash History, 3: Closing & Financial Reports
   bool _isDigitalBreakdownExpanded = false;
-  bool _isShiftKpiExpanded = false;
-  bool _isActionsExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +57,30 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         title: state.activeStaffFullName != null && state.activeStaffFullName!.isNotEmpty
             ? '${state.tr("cashierTitle")} • ${state.activeStaffFullName}'
             : state.tr('cashierTitle'),
+      ),
+      bottomNavigationBar: FloatingPillNavBar(
+        selectedIndex: _selectedFilterIndex,
+        onItemSelected: (idx) => setState(() => _selectedFilterIndex = idx),
+        items: [
+          FloatingNavItem(
+            icon: Icons.local_car_wash_rounded,
+            label: state.tr('queueAndVehicles'),
+            badge: filteredBookings.isNotEmpty ? '${filteredBookings.length}' : null,
+          ),
+          FloatingNavItem(
+            icon: Icons.groups_rounded,
+            label: state.currentLang == 'OM' ? 'Hojjattoota' : (state.currentLang == 'AM' ? 'አጣቢዎች' : 'Attendance'),
+            badge: '${state.presentWashersCount}/${state.totalWashersCount}',
+          ),
+          FloatingNavItem(
+            icon: Icons.history_rounded,
+            label: state.tr('washHistory'),
+          ),
+          FloatingNavItem(
+            icon: Icons.fact_check_rounded,
+            label: state.tr('closingAndFinancialReports'),
+          ),
+        ],
       ),
       floatingActionButton: isMobile
           ? Row(
@@ -210,235 +235,214 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   }
 
   Widget _buildShiftSummaryBanner(dynamic state, bool isMobile) {
-    if (isMobile) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            InkWell(
-              onTap: () => setState(() => _isShiftKpiExpanded = !_isShiftKpiExpanded),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.08),
-                      AppColors.secondary.withValues(alpha: 0.04),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [AppColors.primary, AppColors.secondary],
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.bar_chart_rounded, color: Colors.white, size: 16),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              state.tr('todayRevenue'),
-                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary),
-                                ),
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.statusCompleted.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    '${state.totalCompletedCarsToday} ${state.tr("carsWashed")}',
-                                    style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          _isShiftKpiExpanded ? 'Less' : 'Details',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
-                        ),
-                        const SizedBox(width: 2),
-                        Icon(
-                          _isShiftKpiExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                          size: 18,
-                          color: AppColors.primary,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            AnimatedCrossFade(
-              firstChild: const SizedBox(width: double.infinity, height: 0),
-              secondChild: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildKPIColumn(
-                        state.tr('digitalPay'),
-                        CurrencyFormatter.formatShort(state.totalDigitalRevenueETB),
-                        state.tr('digitalPayments'),
-                        AppColors.telebirrBlue,
-                        isMobile: true,
-                      ),
-                    ),
-                    Container(width: 1, height: 32, color: AppColors.cardBorder),
-                    Expanded(
-                      child: _buildKPIColumn(
-                        state.tr('cashCollected'),
-                        CurrencyFormatter.formatShort(state.totalCashRevenueETB),
-                        state.tr('atFrontDesk'),
-                        AppColors.cashGreen,
-                        isMobile: true,
-                      ),
-                    ),
-                    Container(width: 1, height: 32, color: AppColors.cardBorder),
-                    Expanded(
-                      child: _buildKPIColumn(
-                        state.currentLang == 'OM' ? 'Komishiinii' : (state.currentLang == 'AM' ? 'ኮሚሽን' : 'Commission'),
-                        CurrencyFormatter.formatShort(state.teamCommissionPoolTodayETB as double),
-                        '${(state.teamCommissionRate * 100).toInt()}% Pool',
-                        AppColors.oromiaGold,
-                        isMobile: true,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              crossFadeState: _isShiftKpiExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-              duration: const Duration(milliseconds: 250),
-            ),
-          ],
-        ),
-      );
-    }
+    const targetCars = 30;
+    final completedCars = state.totalCompletedCarsToday as int;
+    final carProgress = (completedCars / targetCars).clamp(0.0, 1.0);
+    final totalRev = state.totalRevenueTodayETB as double;
+    final cashRev = state.totalCashRevenueETB as double;
+    final commPool = state.teamCommissionPoolTodayETB as double;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isMobile ? 12 : 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildKPIColumn(
-              state.tr('todayRevenue'),
-              CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
-              '${state.totalCompletedCarsToday} ${state.tr("carsWashed")}',
-              AppColors.primary,
-              isMobile: false,
+      child: isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    AnimatedCircularRing(
+                      progress: carProgress,
+                      size: 72,
+                      strokeWidth: 6.5,
+                      primaryColor: AppColors.primary,
+                      secondaryColor: AppColors.secondary,
+                      centerValue: '$completedCars',
+                      centerLabel: '/$targetCars Cars',
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                state.tr('todayRevenue'),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.cashGreen.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '${(carProgress * 100).toInt()}% Target',
+                                  style: const TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.cashGreen,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            CurrencyFormatter.format(totalRev),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.textPrimary,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          RoundedMeterBar(
+                            progress: totalRev > 0 ? (cashRev / totalRev) : 0.0,
+                            label: state.tr('cashCollected'),
+                            valueText: CurrencyFormatter.formatShort(cashRev),
+                            gradientColors: const [AppColors.cashGreen, Color(0xFF10B981)],
+                            height: 6,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                RoundedMeterBar(
+                  progress: totalRev > 0 ? (commPool / (totalRev * 0.20)).clamp(0.0, 1.0) : 0.0,
+                  label: '${state.currentLang == "OM" ? "Komishiinii" : (state.currentLang == "AM" ? "ኮሚሽን" : "Commission Pool")} (${state.presentWashersCount} Washers)',
+                  valueText: CurrencyFormatter.format(commPool),
+                  gradientColors: const [AppColors.oromiaGold, Color(0xFFF59E0B)],
+                  height: 6,
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                AnimatedCircularRing(
+                  progress: carProgress,
+                  size: 86,
+                  strokeWidth: 8,
+                  primaryColor: AppColors.primary,
+                  secondaryColor: AppColors.secondary,
+                  centerValue: '$completedCars',
+                  centerLabel: '/$targetCars Goal',
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            state.tr('todayRevenue'),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.cashGreen.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${(carProgress * 100).toInt()}% of Daily Goal',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.cashGreen,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        CurrencyFormatter.format(totalRev),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      RoundedMeterBar(
+                        progress: totalRev > 0 ? (cashRev / totalRev) : 0.0,
+                        label: '${state.tr("cashCollected")} vs Digital',
+                        valueText: '${CurrencyFormatter.formatShort(cashRev)} Cash',
+                        gradientColors: const [AppColors.cashGreen, Color(0xFF10B981)],
+                        height: 7,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Container(width: 1, height: 70, color: AppColors.cardBorder),
+                const SizedBox(width: 20),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${state.currentLang == "OM" ? "Komishiinii" : (state.currentLang == "AM" ? "የቡድን ኮሚሽን" : "Team Commission Pool")}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        CurrencyFormatter.format(commPool),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.oromiaGold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      RoundedMeterBar(
+                        progress: (state.presentWashersCount / (state.totalWashersCount == 0 ? 1 : state.totalWashersCount)).clamp(0.0, 1.0),
+                        label: 'Active Washers on Duty',
+                        valueText: '${state.presentWashersCount} / ${state.totalWashersCount}',
+                        gradientColors: const [AppColors.primary, AppColors.secondary],
+                        height: 7,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          Container(width: 1, height: 36, color: AppColors.cardBorder),
-          Expanded(
-            child: _buildKPIColumn(
-              state.tr('digitalPay'),
-              CurrencyFormatter.formatShort(state.totalDigitalRevenueETB),
-              state.tr('digitalPayments'),
-              AppColors.telebirrBlue,
-              isMobile: false,
-            ),
-          ),
-          Container(width: 1, height: 36, color: AppColors.cardBorder),
-          Expanded(
-            child: _buildKPIColumn(
-              state.tr('cashCollected'),
-              CurrencyFormatter.formatShort(state.totalCashRevenueETB),
-              state.tr('atFrontDesk'),
-              AppColors.cashGreen,
-              isMobile: false,
-            ),
-          ),
-          Container(width: 1, height: 36, color: AppColors.cardBorder),
-          Expanded(
-            child: _buildKPIColumn(
-              state.currentLang == 'OM' ? 'Komishiinii' : (state.currentLang == 'AM' ? 'ኮሚሽን' : 'Commission'),
-              CurrencyFormatter.formatShort(state.teamCommissionPoolTodayETB as double),
-              '${(state.teamCommissionRate * 100).toInt()}% Pool (${state.presentWashersCount} Duty)',
-              AppColors.oromiaGold,
-              isMobile: false,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildKPIColumn(String title, String value, String sub, Color color, {bool isMobile = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: isMobile ? 10.5 : 11, color: AppColors.textMuted, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 2),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            value,
-            style: TextStyle(fontSize: isMobile ? 15 : 17, fontWeight: FontWeight.w900, color: color),
-          ),
-        ),
-        const SizedBox(height: 1),
-        Text(
-          sub,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: isMobile ? 9.5 : 10, color: AppColors.textSecondary),
-        ),
-      ],
     );
   }
 
@@ -485,264 +489,111 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. Fast Action Buttons: Deposit Cash, Log Petty Cash, & Confirm Daily Closing
-          if (isMobile)
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.indigo.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.indigo.withValues(alpha: 0.2)),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 450;
+              return Row(
                 children: [
-                  InkWell(
-                    onTap: () => setState(() => _isActionsExpanded = !_isActionsExpanded),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // Deposit Cash Button
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => BankDepositDialog.show(context),
+                      icon: const Icon(Icons.account_balance_rounded, size: 16),
+                      label: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [Colors.indigo, Color(0xFF4F46E5)],
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(Icons.flash_on_rounded, color: Colors.white, size: 14),
-                              ),
-                              const SizedBox(width: 8),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Cashier Quick Actions',
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                                  ),
-                                  Text(
-                                    isClosed ? 'Daily closing confirmed' : 'Bank deposit, petty cash & shift close',
-                                    style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          Text(
+                            isNarrow ? 'Deposit' : state.tr('depositCashToBank'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
                           ),
-                          Row(
-                            children: [
-                              Text(
-                                _isActionsExpanded ? 'Hide' : 'Open',
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.indigo),
-                              ),
-                              const SizedBox(width: 2),
-                              Icon(
-                                _isActionsExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                                size: 18,
-                                color: Colors.indigo,
-                              ),
-                            ],
+                          Text(
+                            CurrencyFormatter.formatShort(undepositedCash),
+                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
                           ),
                         ],
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.indigo,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 0,
                       ),
                     ),
                   ),
-                  AnimatedCrossFade(
-                    firstChild: const SizedBox(width: double.infinity, height: 0),
-                    secondChild: Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                      child: Column(
+                  const SizedBox(width: 8),
+
+                  // Log Petty Cash Button
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => PettyCashDialog.show(context),
+                      icon: const Icon(Icons.outbox_rounded, size: 16),
+                      label: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () => BankDepositDialog.show(context),
-                              icon: const Icon(Icons.account_balance_rounded, size: 16),
-                              label: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    state.tr('depositCashToBank'),
-                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                                  ),
-                                  Text(
-                                    '${CurrencyFormatter.formatShort(undepositedCash)} awaiting deposit',
-                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.indigo,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                elevation: 0,
-                              ),
-                            ),
+                          Text(
+                            isNarrow ? 'Petty Cash' : state.tr('logPettyCash'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
                           ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () => PettyCashDialog.show(context),
-                              icon: const Icon(Icons.outbox_rounded, size: 16),
-                              label: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    state.tr('logPettyCash'),
-                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                                  ),
-                                  Text(
-                                    '${CurrencyFormatter.formatShort(state.todayPettyCashExpensesETB as double)} logged',
-                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepOrange,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                elevation: 0,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
-                              icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
-                              label: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    isClosed ? 'Daily Closing Confirmed' : state.tr('confirmDailyClosing'),
-                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                                  ),
-                                  Text(
-                                    isClosed ? 'Shift locked' : 'Reconcile register',
-                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: AppColors.statusCompleted,
-                                disabledForegroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                elevation: 0,
-                              ),
-                            ),
+                          Text(
+                            CurrencyFormatter.formatShort(state.todayPettyCashExpensesETB as double),
+                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
                           ),
                         ],
                       ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepOrange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 0,
+                      ),
                     ),
-                    crossFadeState: _isActionsExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                    duration: const Duration(milliseconds: 250),
+                  ),
+                  const SizedBox(width: 8),
+
+                  // Confirm Daily Closing Button
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
+                      icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
+                      label: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            isClosed ? 'Closed' : (isNarrow ? 'Closing' : state.tr('confirmDailyClosing')),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                          ),
+                          Text(
+                            isClosed ? 'Verified' : 'Reconcile',
+                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: AppColors.statusCompleted,
+                        disabledForegroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 0,
+                      ),
+                    ),
                   ),
                 ],
-              ),
-            )
-          else
-            Row(
-              children: [
-                // Deposit Cash Button
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => BankDepositDialog.show(context),
-                    icon: const Icon(Icons.account_balance_rounded, size: 16),
-                    label: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          state.tr('depositCashToBank'),
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                        ),
-                        Text(
-                          '${CurrencyFormatter.formatShort(undepositedCash)} awaiting deposit',
-                          style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // Log Petty Cash Button
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => PettyCashDialog.show(context),
-                    icon: const Icon(Icons.outbox_rounded, size: 16),
-                    label: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          state.tr('logPettyCash'),
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                        ),
-                        Text(
-                          '${CurrencyFormatter.formatShort(state.todayPettyCashExpensesETB as double)} recorded',
-                          style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // Confirm Daily Closing Button (Disabled once confirmed)
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
-                    icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
-                    label: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isClosed ? 'Daily Closing Confirmed' : state.tr('confirmDailyClosing'),
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                        ),
-                        Text(
-                          isClosed ? 'Shift locked' : 'Reconcile register & commission',
-                          style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: AppColors.statusCompleted,
-                      disabledForegroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
+          ),
           const SizedBox(height: 10),
 
           // 2. Clear Categorized Breakdown: Cash Collected vs Digital Money Transfer
