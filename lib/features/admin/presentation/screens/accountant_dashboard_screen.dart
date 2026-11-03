@@ -248,7 +248,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           const SizedBox(height: 20),
           Text(
-            'Bank Deposit Slips Log (${filteredDeposits.length}):',
+            'Cash Recieved by Cashier Deposited to Bank Log (${filteredDeposits.length}):',
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 10),
