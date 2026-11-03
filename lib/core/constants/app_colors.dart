@@ -36,7 +36,7 @@ class AppColors {
   static const Color statusCancelled = Color(0xFFEF4444); // Red
 
   // Neutral Colors & Surfaces
-  static const Color background = Color(0xFFF8FAFC);
+  static const Color background = Color(0xFFF1F5F9);
   static const Color surface = Colors.white;
   static const Color surfaceVariant = Color(0xFFF1F5F9);
   static const Color cardBorder = Color(0xFFE2E8F0);

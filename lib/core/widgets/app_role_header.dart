@@ -19,30 +19,65 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(68);
 
+  Color _getRoleAccentColor(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return const Color(0xFFF59E0B); // Amber / Gold
+      case UserRole.cashier:
+        return const Color(0xFF10B981); // Emerald
+      case UserRole.accountant:
+        return const Color(0xFF38BDF8); // Sky Blue
+      case UserRole.storekeeper:
+        return const Color(0xFF2DD4BF); // Teal
+      case UserRole.customer:
+        return AppColors.accent;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final currentRole = state.currentRole;
     final currentLang = state.currentLang;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
+    final roleAccent = _getRoleAccentColor(currentRole);
 
     return AppBar(
       elevation: 0,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF0F172A),
       surfaceTintColor: Colors.transparent,
       titleSpacing: isMobile ? 10 : 16,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0A192F), Color(0xFF172A45)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border(
+            bottom: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          ),
+        ),
+      ),
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: EdgeInsets.all(isMobile ? 6 : 8),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, AppColors.secondary],
+              gradient: LinearGradient(
+                colors: [roleAccent, AppColors.secondary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
+              boxShadow: [
+                BoxShadow(
+                  color: roleAccent.withValues(alpha: 0.35),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Icon(Icons.local_car_wash, color: Colors.white, size: isMobile ? 18 : 22),
           ),
@@ -62,8 +97,8 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: isMobile ? 14.5 : 18,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
                           letterSpacing: -0.3,
                         ),
                       ),
@@ -73,16 +108,17 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.12),
+                          color: roleAccent.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: roleAccent.withValues(alpha: 0.4), width: 0.8),
                         ),
-                        child: const Text(
+                        child: Text(
                           'BISHOFTU',
                           style: TextStyle(
                             fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
-                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w900,
+                            color: roleAccent,
+                            letterSpacing: 0.6,
                           ),
                         ),
                       ),
@@ -97,7 +133,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
+                      color: Color(0xFF94A3B8),
                     ),
                   ),
               ],
@@ -108,7 +144,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         // Return to Welcome Hub
         IconButton(
-          icon: const Icon(Icons.home_outlined, color: AppColors.primary, size: 21),
+          icon: const Icon(Icons.home_rounded, color: Colors.white70, size: 21),
           tooltip: 'Return to Welcome Hub',
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
@@ -120,18 +156,19 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
           margin: EdgeInsets.symmetric(vertical: isMobile ? 14 : 14, horizontal: 4),
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 8),
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
+            color: const Color(0xFF1E293B),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: const Color(0xFF334155)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: currentLang,
-              icon: const Icon(Icons.language_rounded, size: 15, color: AppColors.primary),
+              dropdownColor: const Color(0xFF1E293B),
+              icon: Icon(Icons.language_rounded, size: 15, color: roleAccent),
               items: const [
-                DropdownMenuItem(value: 'EN', child: Text('EN', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
-                DropdownMenuItem(value: 'OM', child: Text('OM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
-                DropdownMenuItem(value: 'AM', child: Text('AM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                DropdownMenuItem(value: 'EN', child: Text('EN', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.white))),
+                DropdownMenuItem(value: 'OM', child: Text('OM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.white))),
+                DropdownMenuItem(value: 'AM', child: Text('AM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.white))),
               ],
               onChanged: (lang) {
                 if (lang != null) state.setLanguage(lang);
@@ -146,14 +183,15 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
             margin: EdgeInsets.symmetric(vertical: 12, horizontal: isMobile ? 4 : 8),
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 4),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: const Color(0xFF1E293B),
               borderRadius: BorderRadius.circular(isMobile ? 12 : 20),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: roleAccent.withValues(alpha: 0.4)),
             ),
             child: PopupMenuButton<UserRole>(
               initialValue: currentRole,
               tooltip: 'Switch User Role',
               offset: const Offset(0, 42),
+              color: const Color(0xFF1E293B),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               onSelected: (role) async {
                 if (role == currentRole) return;
@@ -169,6 +207,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
               itemBuilder: (context) {
                 return UserRole.values.map((role) {
                   final isCurrent = role == currentRole;
+                  final itemAccent = _getRoleAccentColor(role);
                   return PopupMenuItem(
                     value: role,
                     child: Row(
@@ -176,7 +215,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                         Icon(
                           role.icon,
                           size: 18,
-                          color: isCurrent ? AppColors.primary : AppColors.textSecondary,
+                          color: isCurrent ? itemAccent : Colors.white70,
                         ),
                         const SizedBox(width: 10),
                         Text(
@@ -184,12 +223,12 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w500,
-                            color: isCurrent ? AppColors.primary : AppColors.textPrimary,
+                            color: isCurrent ? itemAccent : Colors.white,
                           ),
                         ),
                         if (isCurrent) ...[
                           const Spacer(),
-                          const Icon(Icons.check, size: 16, color: AppColors.primary),
+                          Icon(Icons.check, size: 16, color: itemAccent),
                         ],
                       ],
                     ),
@@ -204,7 +243,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                     Icon(
                       currentRole.icon,
                       size: 16,
-                      color: AppColors.primary,
+                      color: roleAccent,
                     ),
                     if (!isMobile) ...[
                       const SizedBox(width: 6),
@@ -212,17 +251,17 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                         (state.activeStaffFullName != null && state.activeStaffFullName!.isNotEmpty && currentRole != UserRole.customer)
                             ? state.activeStaffFullName!
                             : currentRole.displayName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                          color: roleAccent,
                         ),
                       ),
                       const SizedBox(width: 2),
-                      const Icon(
+                      Icon(
                         Icons.arrow_drop_down,
                         size: 18,
-                        color: AppColors.primary,
+                        color: roleAccent,
                       ),
                     ],
                   ],

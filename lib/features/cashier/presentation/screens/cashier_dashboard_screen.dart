@@ -243,16 +243,19 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     final commPool = state.teamCommissionPoolTodayETB as double;
 
     return Container(
-      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      padding: EdgeInsets.all(isMobile ? 14 : 18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF003847), Color(0xFF00586F)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: const Color(0xFF003847).withValues(alpha: 0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -264,12 +267,15 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   children: [
                     AnimatedCircularRing(
                       progress: carProgress,
-                      size: 72,
-                      strokeWidth: 6.5,
-                      primaryColor: AppColors.primary,
-                      secondaryColor: AppColors.secondary,
+                      size: 74,
+                      strokeWidth: 7,
+                      primaryColor: const Color(0xFF06B6D4),
+                      secondaryColor: const Color(0xFF38BDF8),
+                      trackColor: const Color(0xFF002833),
                       centerValue: '$completedCars',
                       centerLabel: '/$targetCars Cars',
+                      valueStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+                      labelStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.cyanAccent),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -282,35 +288,36 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                               Text(
                                 state.tr('todayRevenue'),
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white70,
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.cashGreen.withValues(alpha: 0.1),
+                                  color: const Color(0xFF10B981).withValues(alpha: 0.25),
                                   borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 0.8),
                                 ),
                                 child: Text(
                                   '${(carProgress * 100).toInt()}% Target',
                                   style: const TextStyle(
                                     fontSize: 9.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.cashGreen,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF34D399),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 3),
                           Text(
                             CurrencyFormatter.format(totalRev),
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 19,
                               fontWeight: FontWeight.w900,
-                              color: AppColors.textPrimary,
+                              color: Colors.white,
                               letterSpacing: -0.5,
                             ),
                           ),
@@ -319,7 +326,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                             progress: totalRev > 0 ? (cashRev / totalRev) : 0.0,
                             label: state.tr('cashCollected'),
                             valueText: CurrencyFormatter.formatShort(cashRev),
-                            gradientColors: const [AppColors.cashGreen, Color(0xFF10B981)],
+                            gradientColors: const [Color(0xFF10B981), Color(0xFF34D399)],
+                            trackColor: const Color(0xFF002833),
+                            labelColor: Colors.white70,
+                            valueColor: const Color(0xFF34D399),
                             height: 6,
                           ),
                         ],
@@ -332,7 +342,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   progress: totalRev > 0 ? (commPool / (totalRev * 0.20)).clamp(0.0, 1.0) : 0.0,
                   label: '${state.currentLang == "OM" ? "Komishiinii" : (state.currentLang == "AM" ? "ኮሚሽን" : "Commission Pool")} (${state.presentWashersCount} Washers)',
                   valueText: CurrencyFormatter.format(commPool),
-                  gradientColors: const [AppColors.oromiaGold, Color(0xFFF59E0B)],
+                  gradientColors: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+                  trackColor: const Color(0xFF002833),
+                  labelColor: Colors.white70,
+                  valueColor: const Color(0xFFFBBF24),
                   height: 6,
                 ),
               ],
@@ -341,12 +354,15 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               children: [
                 AnimatedCircularRing(
                   progress: carProgress,
-                  size: 86,
+                  size: 88,
                   strokeWidth: 8,
-                  primaryColor: AppColors.primary,
-                  secondaryColor: AppColors.secondary,
+                  primaryColor: const Color(0xFF06B6D4),
+                  secondaryColor: const Color(0xFF38BDF8),
+                  trackColor: const Color(0xFF002833),
                   centerValue: '$completedCars',
                   centerLabel: '/$targetCars Goal',
+                  valueStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white),
+                  labelStyle: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Colors.cyanAccent),
                 ),
                 const SizedBox(width: 20),
                 Expanded(
@@ -361,23 +377,24 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                             state.tr('todayRevenue'),
                             style: const TextStyle(
                               fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white70,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.cashGreen.withValues(alpha: 0.1),
+                              color: const Color(0xFF10B981).withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 0.8),
                             ),
                             child: Text(
                               '${(carProgress * 100).toInt()}% of Daily Goal',
                               style: const TextStyle(
                                 fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.cashGreen,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF34D399),
                               ),
                             ),
                           ),
@@ -387,9 +404,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       Text(
                         CurrencyFormatter.format(totalRev),
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 24,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.textPrimary,
+                          color: Colors.white,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -398,14 +415,17 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                         progress: totalRev > 0 ? (cashRev / totalRev) : 0.0,
                         label: '${state.tr("cashCollected")} vs Digital',
                         valueText: '${CurrencyFormatter.formatShort(cashRev)} Cash',
-                        gradientColors: const [AppColors.cashGreen, Color(0xFF10B981)],
+                        gradientColors: const [Color(0xFF10B981), Color(0xFF34D399)],
+                        trackColor: const Color(0xFF002833),
+                        labelColor: Colors.white70,
+                        valueColor: const Color(0xFF34D399),
                         height: 7,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 20),
-                Container(width: 1, height: 70, color: AppColors.cardBorder),
+                Container(width: 1, height: 74, color: Colors.white24),
                 const SizedBox(width: 20),
                 Expanded(
                   flex: 2,
@@ -417,17 +437,17 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                         '${state.currentLang == "OM" ? "Komishiinii" : (state.currentLang == "AM" ? "የቡድን ኮሚሽን" : "Team Commission Pool")}',
                         style: const TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white70,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         CurrencyFormatter.format(commPool),
                         style: const TextStyle(
-                          fontSize: 18,
+                          fontSize: 19,
                           fontWeight: FontWeight.w900,
-                          color: AppColors.oromiaGold,
+                          color: Color(0xFFFBBF24),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -435,7 +455,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                         progress: (state.presentWashersCount / (state.totalWashersCount == 0 ? 1 : state.totalWashersCount)).clamp(0.0, 1.0),
                         label: 'Active Washers on Duty',
                         valueText: '${state.presentWashersCount} / ${state.totalWashersCount}',
-                        gradientColors: const [AppColors.primary, AppColors.secondary],
+                        gradientColors: const [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+                        trackColor: const Color(0xFF002833),
+                        labelColor: Colors.white70,
+                        valueColor: const Color(0xFFFBBF24),
                         height: 7,
                       ),
                     ],
@@ -772,17 +795,23 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
   /// Mobile Queue Row: Stacked cards with generous touch targets and no horizontal overflows.
   Widget _buildCleanQueueRowMobile(BuildContext context, dynamic state, WashBooking b) {
+    final statusColor = b.status.color;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border(
+          left: BorderSide(color: statusColor, width: 4.5),
+          top: const BorderSide(color: AppColors.cardBorder),
+          right: const BorderSide(color: AppColors.cardBorder),
+          bottom: const BorderSide(color: AppColors.cardBorder),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
+            color: statusColor.withValues(alpha: 0.10),
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
@@ -1049,13 +1078,26 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
   /// Tablet & Desktop Queue Row: Spacious horizontal layout
   Widget _buildCleanQueueRowDesktop(BuildContext context, dynamic state, WashBooking b) {
+    final statusColor = b.status.color;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border(
+          left: BorderSide(color: statusColor, width: 4.5),
+          top: const BorderSide(color: AppColors.cardBorder),
+          right: const BorderSide(color: AppColors.cardBorder),
+          bottom: const BorderSide(color: AppColors.cardBorder),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: statusColor.withValues(alpha: 0.10),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [

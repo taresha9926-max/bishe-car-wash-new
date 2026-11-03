@@ -198,16 +198,19 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(isMobile ? 12 : 16),
+            padding: EdgeInsets.all(isMobile ? 14 : 18),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.cardBorder),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF064E3B), Color(0xFF0F766E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
+                  color: const Color(0xFF064E3B).withValues(alpha: 0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -219,10 +222,13 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                       : (filteredClosings.where((c) => c.isConfirmed).length / filteredClosings.length),
                   size: isMobile ? 74 : 84,
                   strokeWidth: 7,
-                  primaryColor: const Color(0xFF0F766E),
-                  secondaryColor: const Color(0xFF14B8A6),
+                  primaryColor: const Color(0xFF34D399),
+                  secondaryColor: const Color(0xFF6EE7B7),
+                  trackColor: const Color(0xFF032B21),
                   centerValue: '${filteredClosings.length}',
                   centerLabel: 'Closings',
+                  valueStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+                  labelStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Color(0xFF6EE7B7)),
                 ),
                 SizedBox(width: isMobile ? 12 : 18),
                 Expanded(
@@ -235,44 +241,51 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                           const Text(
                             'Shift & Bank Audit Status',
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 13,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: Colors.white,
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.teal.shade50,
+                              color: const Color(0xFF10B981).withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5), width: 0.8),
                             ),
                             child: Text(
                               '${filteredDeposits.length} Bank Deposits',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 9.5,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.teal.shade800,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF34D399),
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 7),
                       RoundedMeterBar(
                         progress: filteredDigitalBookings.isEmpty
                             ? 1.0
                             : (filteredDigitalBookings.where((b) => b.payment.isPaid).length / filteredDigitalBookings.length),
                         label: 'Digital Receipts Reconciled',
                         valueText: '${filteredDigitalBookings.length} Receipts',
-                        gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
+                        gradientColors: const [Color(0xFF38BDF8), Color(0xFF0284C7)],
+                        trackColor: const Color(0xFF032B21),
+                        labelColor: Colors.white70,
+                        valueColor: const Color(0xFF38BDF8),
                         height: 6,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 7),
                       RoundedMeterBar(
                         progress: 0.85,
                         label: 'Petty Cash Ledger Verified',
                         valueText: '${filteredPetty.length} Vouchers',
-                        gradientColors: const [Colors.deepOrange, Color(0xFFF97316)],
+                        gradientColors: const [Color(0xFFFB923C), Color(0xFFF97316)],
+                        trackColor: const Color(0xFF032B21),
+                        labelColor: Colors.white70,
+                        valueColor: const Color(0xFFFB923C),
                         height: 6,
                       ),
                     ],
@@ -383,8 +396,12 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   Widget _buildClosingAuditCard(BuildContext context, dynamic state, DailyFinancialClosing c, bool isMobile) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: const Color(0xFF0F766E).withValues(alpha: 0.25), width: 1.2),
+      ),
+      elevation: 2,
+      shadowColor: const Color(0xFF0F766E).withValues(alpha: 0.12),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -483,9 +500,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   }
 
   Widget _buildDepositCard(BuildContext context, dynamic state, BankDepositRecord d, bool isMobile) {
+    final isAwash = d.targetAccount.toLowerCase().contains('awash');
+    final bankColor = isAwash ? const Color(0xFF0284C7) : const Color(0xFF701A75);
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: bankColor.withValues(alpha: 0.25), width: 1.2),
+      ),
+      elevation: 2,
+      shadowColor: bankColor.withValues(alpha: 0.08),
       child: ListTile(
         leading: AutoCareAssets.buildPhotoThumbnail(
           imageUrl: d.targetAccount.toLowerCase().contains('awash') ? AutoCareAssets.cbeLogoUrl : AutoCareAssets.cbeLogoUrl,
@@ -509,9 +533,15 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   }
 
   Widget _buildPettyCashCard(BuildContext context, dynamic state, PettyCashExpense p, bool isMobile) {
+    const pettyColor = Color(0xFFEA580C);
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: pettyColor.withValues(alpha: 0.25), width: 1.2),
+      ),
+      elevation: 2,
+      shadowColor: pettyColor.withValues(alpha: 0.08),
       child: ListTile(
         leading: AutoCareAssets.buildPhotoThumbnail(
           imageUrl: AutoCareAssets.cashMoneyUrl,
@@ -534,15 +564,21 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     );
   }
 
-  Widget _buildDigitalPaymentCard(BuildContext context, dynamic state, WashBooking b, bool isMobile) {
+  Widget _buildDigitalPaymentCard(BuildContext context, dynamic state, WashBooking b, [bool isMobile = false]) {
     final method = b.payment.method;
     final hasScreenshot = b.payment.receiptScreenshot != null && b.payment.receiptScreenshot!.isNotEmpty;
     final date = b.payment.paidAt ?? b.createdAt;
     final dateStr = '${date.day}/${date.month} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    final payColor = method.color;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: payColor.withValues(alpha: 0.25), width: 1.2),
+      ),
+      elevation: 2,
+      shadowColor: payColor.withValues(alpha: 0.08),
       child: ListTile(
         leading: Container(
           width: 38,

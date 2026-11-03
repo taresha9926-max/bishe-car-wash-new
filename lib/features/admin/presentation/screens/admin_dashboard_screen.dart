@@ -228,14 +228,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: EdgeInsets.all(isMobile ? 12 : 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.cardBorder),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
+                      color: const Color(0xFF0F172A).withValues(alpha: 0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -245,10 +248,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       progress: totalRevenue > 0 ? (netProfit > 0 ? (netProfit / totalRevenue) : 0.0) : 0.0,
                       size: isMobile ? 74 : 84,
                       strokeWidth: 7,
-                      primaryColor: AppColors.statusReady,
-                      secondaryColor: const Color(0xFF059669),
+                      primaryColor: const Color(0xFF10B981),
+                      secondaryColor: const Color(0xFF34D399),
+                      trackColor: const Color(0xFF0B1320),
                       centerValue: totalRevenue > 0 ? '${((netProfit / totalRevenue) * 100).toInt()}%' : '0%',
                       centerLabel: 'Net Margin',
+                      valueStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+                      labelStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Color(0xFF34D399)),
                     ),
                     SizedBox(width: isMobile ? 12 : 18),
                     Expanded(
@@ -261,42 +267,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               const Text(
                                 'Executive Real-Time Metrics',
                                 style: TextStyle(
-                                  fontSize: 12.5,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
+                                  color: Colors.white,
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
+                                  color: const Color(0xFF38BDF8).withValues(alpha: 0.25),
                                   borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFF38BDF8).withValues(alpha: 0.5), width: 0.8),
                                 ),
                                 child: Text(
                                   '$completedCars Washed',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 9.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.blue.shade800,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF38BDF8),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 7),
                           RoundedMeterBar(
                             progress: totalRevenue > 0 ? (digitalRevenue / totalRevenue) : 0.0,
                             label: 'Digital Transfers vs Cash',
                             valueText: '${CurrencyFormatter.formatShort(digitalRevenue)} Digital',
-                            gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
+                            gradientColors: const [Color(0xFF38BDF8), Color(0xFF0284C7)],
+                            trackColor: const Color(0xFF0B1320),
+                            labelColor: Colors.white70,
+                            valueColor: const Color(0xFF38BDF8),
                             height: 6,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 7),
                           RoundedMeterBar(
                             progress: (state.presentWashersCount / (state.totalWashersCount == 0 ? 1 : state.totalWashersCount)).clamp(0.0, 1.0),
                             label: 'Washer Crew Attendance',
                             valueText: '${state.presentWashersCount} / ${state.totalWashersCount} On Duty',
-                            gradientColors: const [AppColors.oromiaGold, Color(0xFFF59E0B)],
+                            gradientColors: const [Color(0xFFFBBF24), Color(0xFFF59E0B)],
+                            trackColor: const Color(0xFF0B1320),
+                            labelColor: Colors.white70,
+                            valueColor: const Color(0xFFFBBF24),
                             height: 6,
                           ),
                         ],
@@ -2090,7 +2103,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: color.withValues(alpha: 0.28), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2106,12 +2126,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: isMobile ? 11 : 11.5,
-                    color: AppColors.textMuted,
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-              Icon(icon, color: color, size: isMobile ? 18 : 20),
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: isMobile ? 16 : 18),
+              ),
             ],
           ),
           Column(
@@ -2124,9 +2151,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: Text(
                   value,
                   style: TextStyle(
-                    fontSize: isMobile ? 16 : 18,
+                    fontSize: isMobile ? 17 : 20,
                     fontWeight: FontWeight.w900,
                     color: color,
+                    letterSpacing: -0.3,
                   ),
                 ),
               ),
@@ -2136,8 +2164,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: isMobile ? 10 : 10.5,
-                  color: AppColors.textSecondary,
+                  fontSize: isMobile ? 9.5 : 10.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textMuted,
                 ),
               ),
             ],

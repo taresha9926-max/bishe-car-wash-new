@@ -77,16 +77,19 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           // Storekeeper Stock KPI Overview Banner
           Container(
             margin: EdgeInsets.fromLTRB(isMobile ? 12 : 18, 12, isMobile ? 12 : 18, 4),
-            padding: EdgeInsets.all(isMobile ? 12 : 16),
+            padding: EdgeInsets.all(isMobile ? 14 : 18),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.cardBorder),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF042F2E), Color(0xFF0D9488)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
+                  color: const Color(0xFF042F2E).withValues(alpha: 0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -96,10 +99,13 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   progress: stockHealth,
                   size: isMobile ? 74 : 84,
                   strokeWidth: 7,
-                  primaryColor: const Color(0xFF0D9488),
-                  secondaryColor: const Color(0xFF14B8A6),
+                  primaryColor: const Color(0xFF2DD4BF),
+                  secondaryColor: const Color(0xFF5EEAD4),
+                  trackColor: const Color(0xFF021B1A),
                   centerValue: '${(stockHealth * 100).toInt()}%',
                   centerLabel: 'Stocked',
+                  valueStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+                  labelStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Color(0xFF5EEAD4)),
                 ),
                 SizedBox(width: isMobile ? 12 : 18),
                 Expanded(
@@ -112,42 +118,49 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                           const Text(
                             'Storehouse Inventory Status',
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: 13,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: Colors.white,
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.teal.shade50,
+                              color: const Color(0xFF14B8A6).withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF14B8A6).withValues(alpha: 0.5), width: 0.8),
                             ),
                             child: Text(
                               '$inStockCount/${consumables.length} Items In Stock',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 9.5,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.teal.shade800,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF5EEAD4),
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 7),
                       RoundedMeterBar(
                         progress: 1.0,
                         label: 'Empty Return Rate (ዕቃ በዕቃ)',
                         valueText: '100% Accounted',
-                        gradientColors: const [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                        gradientColors: const [Color(0xFF2DD4BF), Color(0xFF14B8A6)],
+                        trackColor: const Color(0xFF021B1A),
+                        labelColor: Colors.white70,
+                        valueColor: const Color(0xFF2DD4BF),
                         height: 6,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 7),
                       RoundedMeterBar(
                         progress: fixedAssets.isEmpty ? 1.0 : (fixedAssets.where((a) => a.condition != 'broken').length / fixedAssets.length),
                         label: 'Fixed Assets Operational (ቋሚ)',
                         valueText: '${fixedAssets.length} Assets',
-                        gradientColors: const [Color(0xFF2563EB), Color(0xFF38BDF8)],
+                        gradientColors: const [Color(0xFF38BDF8), Color(0xFF2563EB)],
+                        trackColor: const Color(0xFF021B1A),
+                        labelColor: Colors.white70,
+                        valueColor: const Color(0xFF38BDF8),
                         height: 6,
                       ),
                     ],
@@ -871,10 +884,16 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: item.isDecommissioned ? Colors.grey.shade400 : (isLow ? Colors.red.shade300 : Colors.transparent),
-          width: isLow ? 1.5 : 1,
+          color: item.isDecommissioned
+              ? Colors.grey.shade400
+              : (isLow
+                  ? const Color(0xFFEF4444)
+                  : const Color(0xFF0D9488).withValues(alpha: 0.25)),
+          width: isLow ? 1.5 : 1.2,
         ),
       ),
+      elevation: 2,
+      shadowColor: isLow ? const Color(0xFFEF4444).withValues(alpha: 0.12) : const Color(0xFF0D9488).withValues(alpha: 0.08),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -1078,7 +1097,12 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: condColor.withValues(alpha: 0.35), width: 1.2),
+      ),
+      elevation: 2,
+      shadowColor: condColor.withValues(alpha: 0.10),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(

@@ -11,6 +11,8 @@ class RoundedMeterBar extends StatelessWidget {
   final IconData? icon;
   final List<Color> gradientColors;
   final Color trackColor;
+  final Color? labelColor;
+  final Color? valueColor;
   final Duration duration;
 
   const RoundedMeterBar({
@@ -22,6 +24,8 @@ class RoundedMeterBar extends StatelessWidget {
     this.icon,
     this.gradientColors = const [AppColors.primary, AppColors.secondary],
     this.trackColor = const Color(0xFFE2E8F0),
+    this.labelColor,
+    this.valueColor,
     this.duration = const Duration(milliseconds: 800),
   });
 
@@ -49,10 +53,10 @@ class RoundedMeterBar extends StatelessWidget {
                     if (label != null)
                       Text(
                         label!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary,
+                          color: labelColor ?? AppColors.textSecondary,
                         ),
                       ),
                   ],
@@ -63,7 +67,7 @@ class RoundedMeterBar extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w800,
-                      color: gradientColors.first,
+                      color: valueColor ?? gradientColors.first,
                     ),
                   ),
               ],
