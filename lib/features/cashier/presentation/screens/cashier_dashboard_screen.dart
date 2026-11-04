@@ -31,8 +31,9 @@ class CashierDashboardScreen extends StatefulWidget {
 }
 
 class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
-  int _selectedFilterIndex = 0; // 0: All, 1: Unpaid, 2: Phone, 3: Attendance, 4: History, 5: Reports
+  int _selectedFilterIndex = 0; // 0: Queue & Vehicles, 1: Attendance & Commission Desk, 2: Wash History, 3: Closing & Financial Reports
   bool _isDigitalBreakdownExpanded = false;
+  bool _isWasherRosterExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -151,11 +152,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _selectedFilterIndex == 3
+                    _selectedFilterIndex == 1
                         ? '${state.tr("attendanceAndCommission")} (${state.presentWashersCount}/${state.totalWashersCount})'
-                        : (_selectedFilterIndex == 4
+                        : (_selectedFilterIndex == 2
                             ? state.tr("washHistory")
-                            : (_selectedFilterIndex == 5
+                            : (_selectedFilterIndex == 3
                                 ? state.tr("closingAndFinancialReports")
                                 : '${state.tr("queueAndVehicles")} (${filteredBookings.length})')),
                     style: TextStyle(
@@ -173,11 +174,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               const SizedBox(height: 12),
 
               // Queue Items OR Washer Attendance & Commission Desk OR Wash History OR Financial Reports
-              if (_selectedFilterIndex == 3)
+              if (_selectedFilterIndex == 1)
                 _buildWasherAttendanceAndCommissionSection(context, state, isMobile)
-              else if (_selectedFilterIndex == 4)
+              else if (_selectedFilterIndex == 2)
                 const VehicleHistoryScreen(isEmbedded: true)
-              else if (_selectedFilterIndex == 5)
+              else if (_selectedFilterIndex == 3)
                 const FinancialReportsView(isEmbedded: true)
               else if (filteredBookings.isEmpty)
                 Container(
@@ -1210,12 +1211,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
   Widget _buildFilterChips(dynamic state, bool isMobile) {
     final tabs = [
-      (index: 0, title: state.tr('filterAll') as String, icon: Icons.view_list_rounded),
-      (index: 1, title: state.tr('filterUnpaid') as String, icon: Icons.money_off_csred_rounded),
-      (index: 2, title: state.tr('phoneCallBooking') as String, icon: Icons.phone_in_talk_rounded),
-      (index: 3, title: '${state.tr("attendanceDesk")} (${state.presentWashersCount})', icon: Icons.how_to_reg_rounded),
-      (index: 4, title: state.tr('washHistory') as String, icon: Icons.history_rounded),
-      (index: 5, title: state.tr('closingAndFinancialReports') as String, icon: Icons.fact_check_rounded),
+      (index: 0, title: state.tr('queueAndVehicles') as String, icon: Icons.local_car_wash_rounded),
+      (index: 1, title: '${state.tr("attendanceDesk")} (${state.presentWashersCount})', icon: Icons.how_to_reg_rounded),
+      (index: 2, title: state.tr('washHistory') as String, icon: Icons.history_rounded),
+      (index: 3, title: state.tr('closingAndFinancialReports') as String, icon: Icons.fact_check_rounded),
     ];
 
     if (isMobile) {
@@ -1317,525 +1316,476 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     final pool = state.teamCommissionPoolTodayETB as double;
     final dividends = state.washerDividendsToday as Map<String, dynamic>;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 1. Shifted Disburse Commission Pool Card (Managed by Cashier)
-        Container(
-          padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.oromiaGold.withOpacity(0.4)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.oromiaGold.withOpacity(0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.oromiaGold.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.oromiaGold.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (isMobile) ...[
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.oromiaGold.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(10),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Unified Card Header (Title, Pool Pill, Expand/Collapse Chevron)
+          InkWell(
+            onTap: () => setState(() => _isWasherRosterExpanded = !_isWasherRosterExpanded),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.oromiaGold, AppColors.oromiaGold.withOpacity(0.8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 22),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            state.tr('dailyWasherCommissionPool'),
-                            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                          ),
-                          Text(
-                            '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • 15% Gross Pool',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => WeeklyCommissionReportDialog.show(context),
-                        icon: const Icon(Icons.assignment_turned_in_rounded, size: 14),
-                        label: Text(
-                          state.tr('reportWeeklyCommission'),
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: (pool > 0 && !state.isDailyCommissionDisbursedToday)
-                            ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
-                            : null,
-                        icon: Icon(
-                          state.isDailyCommissionDisbursedToday ? Icons.check_circle_rounded : Icons.payments_rounded,
-                          size: 14,
-                        ),
-                        label: Text(
-                          state.isDailyCommissionDisbursedToday
-                              ? 'Disbursed'
-                              : state.tr('disburseCommission'),
-                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: state.isDailyCommissionDisbursedToday ? Colors.grey.shade400 : AppColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          elevation: 0,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ] else ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+                    child: const Icon(Icons.stars_rounded, color: Colors.white, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.oromiaGold.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 22),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            Text(
-                              state.tr('dailyWasherCommissionPool'),
-                              style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                            ),
-                            Text(
-                              '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • 15% Gross Pool',
-                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                            Flexible(
+                              child: Text(
+                                state.tr('dailyWasherCommissionPool'),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () => WeeklyCommissionReportDialog.show(context),
-                          icon: const Icon(Icons.assignment_turned_in_rounded, size: 14),
-                          label: Text(
-                            state.tr('reportWeeklyCommission'),
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            side: const BorderSide(color: AppColors.primary),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton.icon(
-                          onPressed: (pool > 0 && !state.isDailyCommissionDisbursedToday)
-                              ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
-                              : null,
-                          icon: Icon(
-                            state.isDailyCommissionDisbursedToday ? Icons.check_circle_rounded : Icons.payments_rounded,
-                            size: 14,
-                          ),
-                          label: Text(
-                            state.isDailyCommissionDisbursedToday
-                                ? 'Disbursed Today (${CurrencyFormatter.format(pool)})'
-                                : state.tr('disburseCommission'),
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: state.isDailyCommissionDisbursedToday ? Colors.grey.shade400 : AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            elevation: 0,
-                          ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${state.presentWashersCount} of ${state.totalWashersCount} Washers on Duty • 15% Pool',
+                          style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
-                  ],
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.oromiaGold.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.oromiaGold.withOpacity(0.3)),
+                        ),
+                        child: Text(
+                          CurrencyFormatter.format(pool),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13.5,
+                            color: AppColors.oromiaGold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _isWasherRosterExpanded ? state.tr('collapseRoster') : state.tr('expandRoster'),
+                            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primary),
+                          ),
+                          Icon(
+                            _isWasherRosterExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const Divider(height: 1),
+
+          // 2. Action Toolbar (Disburse, Weekly Report, Mark All Present)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: (pool > 0 && !state.isDailyCommissionDisbursedToday)
+                      ? () => _showDisburseCommissionDialog(context, state, pool, state.presentWashersCount)
+                      : null,
+                  icon: Icon(
+                    state.isDailyCommissionDisbursedToday ? Icons.check_circle_rounded : Icons.payments_rounded,
+                    size: 14,
+                  ),
+                  label: Text(
+                    state.isDailyCommissionDisbursedToday
+                        ? state.tr('disbursedToday')
+                        : state.tr('disburseCommission'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: state.isDailyCommissionDisbursedToday ? Colors.grey.shade400 : AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                    elevation: 0,
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => WeeklyCommissionReportDialog.show(context),
+                  icon: const Icon(Icons.assignment_turned_in_rounded, size: 14),
+                  label: Text(
+                    state.tr('reportWeeklyCommission'),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  ),
+                ),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.statusCompleted,
+                    side: const BorderSide(color: AppColors.statusCompleted),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: const Icon(Icons.done_all_rounded, size: 14),
+                  label: Text(state.tr('markAllPresent'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5)),
+                  onPressed: () {
+                    state.markAllWashersPresent();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.tr('markAllPresent')),
+                        backgroundColor: AppColors.statusCompleted,
+                      ),
+                    );
+                  },
                 ),
               ],
-              const SizedBox(height: 12),
+            ),
+          ),
 
-              // Pool ETB Banner
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.oromiaGold.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.oromiaGold.withOpacity(0.25)),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // 3. Compact Status Bar: Present / Absent / Total
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusCompleted.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.statusCompleted.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Total Earned Commission Pool Today:',
-                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                        ),
-                        Text(
-                          CurrencyFormatter.format(pool),
-                          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w900, color: AppColors.oromiaGold),
+                        const Icon(Icons.check_circle, color: AppColors.statusCompleted, size: 14),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            '${state.presentWashersCount} Present',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppColors.statusCompleted),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Real Amount of Commission Earned:',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                        ),
-                        Text(
-                          CurrencyFormatter.format(pool),
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
+                        const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 14),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            '${state.totalWashersCount - state.presentWashersCount} Absent',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.redAccent),
+                          ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-
-              // Absent washer protection notice
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.withOpacity(0.15)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.shield_outlined, size: 14, color: Colors.blue),
-                    SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        '100% of the commission pool is distributed strictly among washers on duty today. Absent washers receive 0 ETB, and their share is automatically redistributed proportionally to active washers.',
-                        style: TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Dividends breakdown list
-              if (dividends.isNotEmpty) ...[
-                const Text(
-                  'Individual 100% Pool Distribution:',
-                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: 6),
-                ...dividends.values.map((div) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: AppColors.cardBorder),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              div.isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                              size: 13,
-                              color: div.isPresent ? AppColors.statusCompleted : Colors.red,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              div.washerName,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: div.isPresent ? FontWeight.w700 : FontWeight.w500,
-                                color: div.isPresent ? AppColors.textPrimary : AppColors.textMuted,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                div.customTierName ?? '',
-                                style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          div.isPresent
-                              ? '${div.percentageShare.toStringAsFixed(1)}% • ${CurrencyFormatter.format(div.earnedETB)}'
-                              : 'Absent (0 ETB)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: div.isPresent ? AppColors.oromiaGold : Colors.red,
+                        const Icon(Icons.groups_rounded, color: AppColors.textSecondary, size: 14),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            '${state.totalWashersCount} Total',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppColors.textPrimary),
                           ),
                         ),
                       ],
                     ),
-                  );
-                }),
-              ],
-            ],
-          ),
-        ),
-
-        // 2. Attendance Overview Card
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.assignment_ind_rounded, color: AppColors.primary, size: 20),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Daily Washer Roster & Attendance',
-                            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: AppColors.textPrimary),
-                          ),
-                          Text(
-                            'Shift: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.statusCompleted,
-                      side: const BorderSide(color: AppColors.statusCompleted),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    icon: const Icon(Icons.done_all_rounded, size: 16),
-                    label: const Text('Mark All Present', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5)),
-                    onPressed: () {
-                      state.markAllWashersPresent();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('All washers marked present for today.'),
-                          backgroundColor: AppColors.statusCompleted,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.statusCompleted.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.statusCompleted.withOpacity(0.2)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check_circle, color: AppColors.statusCompleted, size: 16),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${state.presentWashersCount} Present',
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.statusCompleted),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.red.withOpacity(0.2)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 16),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${state.totalWashersCount - state.presentWashersCount} Absent',
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.redAccent),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.cardBorder),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.groups_rounded, color: AppColors.textSecondary, size: 16),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${state.totalWashersCount} Total',
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.textPrimary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // List of Washers
-        ...washers.map((w) {
-          final isPresent = state.isWasherPresentToday(w.id);
-
-          return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isPresent ? AppColors.statusCompleted.withOpacity(0.4) : Colors.red.withOpacity(0.3),
-                width: 1.2,
-              ),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
-                  child: Text(
-                    w.name.isNotEmpty ? w.name[0] : 'W',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                      color: isPresent ? AppColors.statusCompleted : Colors.red,
-                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              w.name,
-                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary),
-                            ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // 4. Animated Expandable Content (Roster + Pool Dividends + Absent Protection)
+          AnimatedCrossFade(
+            firstChild: const SizedBox(height: 6),
+            secondChild: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Pool ETB details
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.oromiaGold.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.oromiaGold.withOpacity(0.25)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Commission Pool Today:',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(pool),
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.oromiaGold),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Absent washer protection notice
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue.withOpacity(0.15)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.shield_outlined, size: 14, color: Colors.blue),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            state.tr('absentWashersProtection'),
+                            style: const TextStyle(fontSize: 10.5, color: Colors.blueGrey, fontWeight: FontWeight.w600),
                           ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(4),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Dividends breakdown list (if any)
+                  if (dividends.isNotEmpty) ...[
+                    Text(
+                      state.tr('assignedCommissionShare'),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: 6),
+                    ...dividends.values.map((div) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.cardBorder),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  div.isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                                  size: 13,
+                                  color: div.isPresent ? AppColors.statusCompleted : Colors.red,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  div.washerName,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: div.isPresent ? FontWeight.w700 : FontWeight.w500,
+                                    color: div.isPresent ? AppColors.textPrimary : AppColors.textMuted,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    div.customTierName ?? '',
+                                    style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                  ),
+                                ),
+                              ],
                             ),
-                            child: Text(
-                              isPresent ? 'ON DUTY' : 'ABSENT',
+                            Text(
+                              div.isPresent
+                                  ? '${div.percentageShare.toStringAsFixed(1)}% • ${CurrencyFormatter.format(div.earnedETB)}'
+                                  : 'Absent (0 ETB)',
                               style: TextStyle(
-                                fontSize: 9.5,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w800,
+                                color: div.isPresent ? AppColors.oromiaGold : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 10),
+                  ],
+
+                  // 8 Washers Attendance Toggle List
+                  Text(
+                    '${state.tr("attendanceDesk")} (${washers.length} Washers)',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 6),
+                  ...washers.map((w) {
+                    final isPresent = state.isWasherPresentToday(w.id);
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isPresent ? AppColors.statusCompleted.withOpacity(0.35) : Colors.red.withOpacity(0.25),
+                          width: 1.1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
+                            child: Text(
+                              w.name.isNotEmpty ? w.name[0] : 'W',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12.5,
                                 color: isPresent ? AppColors.statusCompleted : Colors.red,
                               ),
                             ),
                           ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        w.name,
+                                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                      decoration: BoxDecoration(
+                                        color: isPresent ? AppColors.statusCompleted.withOpacity(0.12) : Colors.red.withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        isPresent ? state.tr('onDutyBadge') : state.tr('absentBadge'),
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w800,
+                                          color: isPresent ? AppColors.statusCompleted : Colors.red,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% • Earned: ${isPresent && dividends[w.id] != null ? CurrencyFormatter.format(dividends[w.id]!.earnedETB) : "0 ETB"} • ${w.phone}',
+                                  style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch.adaptive(
+                            value: isPresent,
+                            activeColor: AppColors.statusCompleted,
+                            onChanged: (val) {
+                              state.setWasherAttendance(w.id, val);
+                            },
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Assigned Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% • Earned: ${isPresent && dividends[w.id] != null ? CurrencyFormatter.format(dividends[w.id]!.earnedETB) : "0 ETB"} • ${w.phone}',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                Switch.adaptive(
-                  value: isPresent,
-                  activeColor: AppColors.statusCompleted,
-                  onChanged: (val) {
-                    state.setWasherAttendance(w.id, val);
-                  },
-                ),
-              ],
+                    );
+                  }),
+                ],
+              ),
             ),
-          );
-        }),
-      ],
+            crossFadeState: _isWasherRosterExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 220),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1887,16 +1837,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   List<WashBooking> _getFilteredBookings(List<WashBooking> bookings) {
     // Only vehicles that are NOT yet paid belong in the active station queue.
     // As soon as payment is confirmed, the vehicle vanishes from the queue and moves to Wash History.
-    final activeQueue = bookings.where((b) => !b.payment.isPaid && b.status != WashStatus.cancelled).toList();
-
-    switch (_selectedFilterIndex) {
-      case 1:
-        return activeQueue.where((b) => !b.payment.isPaid).toList();
-      case 2:
-        return activeQueue.where((b) => b.isPhoneBooking).toList();
-      default:
-        return activeQueue;
-    }
+    return bookings.where((b) => !b.payment.isPaid && b.status != WashStatus.cancelled).toList();
   }
 
   Widget _buildCleanStationCapacityBar(

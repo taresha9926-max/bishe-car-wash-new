@@ -2064,6 +2064,36 @@ class AppStrings {
       AppLanguage.om: 'Argama & Komishiinii',
       AppLanguage.am: 'የመገኘትና ኮሚሽን መዝገብ',
     },
+    'expandRoster': {
+      AppLanguage.en: 'Expand Washer Roster',
+      AppLanguage.om: 'Tarree Dhiqitootaa Bal\'isi',
+      AppLanguage.am: 'የአጣቢዎች ዝርዝር ዘርጋ',
+    },
+    'collapseRoster': {
+      AppLanguage.en: 'Collapse Washer Roster',
+      AppLanguage.om: 'Tarree Dhiqitootaa Dhiphisi',
+      AppLanguage.am: 'የአጣቢዎች ዝርዝር አሳንስ',
+    },
+    'onDutyBadge': {
+      AppLanguage.en: 'ON DUTY',
+      AppLanguage.om: 'HOJIRRA',
+      AppLanguage.am: 'በስራ ላይ',
+    },
+    'absentBadge': {
+      AppLanguage.en: 'ABSENT',
+      AppLanguage.om: 'HIN JIRRE',
+      AppLanguage.am: 'ቀሪ',
+    },
+    'absentWashersProtection': {
+      AppLanguage.en: '100% of the commission pool is distributed strictly among washers on duty today. Absent washers receive 0 ETB.',
+      AppLanguage.om: '100% kuusaa komishiinii qulqullinaan hojjettoota guyyaa kana hojirra jiran qofaaf raabsama. Kanneen hin jirre 0 ETB argatu.',
+      AppLanguage.am: '100% የኮሚሽን ገቢ ዛሬ በስራ ላይ ላሉ አጣቢዎች ብቻ ይከፋፈላል። የቀሩ አጣቢዎች 0 ብር ያገኛሉ።',
+    },
+    'disbursedToday': {
+      AppLanguage.en: 'Disbursed Today',
+      AppLanguage.om: 'Har\'a Kaffalameera',
+      AppLanguage.am: 'ዛሬ ተከፍሏል',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
