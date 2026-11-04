@@ -110,7 +110,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: const Text('Daily Exchange', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF0D9488))),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: _buildEmptyRefillExchangeCard(context, state, isMobile),
           ),
           const SizedBox(height: 12),
@@ -127,7 +127,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${exchanges.length} Logged', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.blueAccent)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: exchanges.isEmpty
                 ? _buildEmptyState('No empty container refill exchanges logged yet.', Icons.autorenew_rounded)
                 : Column(
@@ -170,7 +170,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               decoration: BoxDecoration(color: Colors.amber.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
               child: Text(active != null ? 'Open Shift' : 'New Shift', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.amber.shade900)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: active != null
                 ? _buildActiveHandoverCard(context, state, active, isMobile)
                 : _buildStartHandoverCard(context, state, isMobile),
@@ -189,7 +189,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${handovers.length} Logs', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.primary)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: handovers.isEmpty
                 ? _buildEmptyState('No past shift handovers recorded yet.', Icons.assignment_outlined)
                 : Column(children: handovers.map((h) => _buildHandoverHistoryCard(context, state, h, isMobile)).toList()),

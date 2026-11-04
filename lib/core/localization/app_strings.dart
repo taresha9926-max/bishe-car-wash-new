@@ -2144,6 +2144,66 @@ class AppStrings {
       AppLanguage.om: 'Qorichaa fi saamunaa qullaa deebisuun qofa kenni',
       AppLanguage.am: 'ኬሚካሎችና ሳሙናዎችን ባዶ እቃ ሲመለስ ብቻ ይስጡ',
     },
+    'dailyClosingTitle': {
+      AppLanguage.en: 'Daily Closing & Financial Reconciliations',
+      AppLanguage.om: 'Cufiinsa Guyyaa & Madaallii Faayinaansii',
+      AppLanguage.am: 'የዕለት ሂሳብ መዝጊያ እና የፋይናንስ ማጠቃለያ',
+    },
+    'liveStationCapacity': {
+      AppLanguage.en: 'Live Station & Van Capacity',
+      AppLanguage.om: 'Dandeettii Buufataafi Vaan Dhiqannaa',
+      AppLanguage.am: 'የቀጥታ ጣቢያ እና የሞባይል ቫን አቅም',
+    },
+    'statusPaid': {
+      AppLanguage.en: 'Paid',
+      AppLanguage.om: 'Kaffalameera',
+      AppLanguage.am: 'ተከፍሏል',
+    },
+    'financialReports': {
+      AppLanguage.en: 'Financial Reports',
+      AppLanguage.om: 'Gabaasaalee Faayinaansii',
+      AppLanguage.am: 'የፋይናንስ ሪፖርቶች',
+    },
+    'depositToOwnerAccounts': {
+      AppLanguage.en: 'Deposit Cash to Owner Accounts',
+      AppLanguage.om: 'Qarshii Herrega Abbaa Qabeenyaatti Galchi',
+      AppLanguage.am: 'ጥሬ ገንዘብ ለባለቤቱ አካውንት ገቢ አድርግ',
+    },
+    'cashAwaitingDeposit': {
+      AppLanguage.en: 'Cash Awaiting Deposit',
+      AppLanguage.om: 'Qarshii Baankii Galuu Eegu',
+      AppLanguage.am: 'ባንክ ሊገባ የሚጠብቅ ጥሬ ገንዘብ',
+    },
+    'selectTargetBankAccount': {
+      AppLanguage.en: 'Select Target Bank Account',
+      AppLanguage.om: 'Herrega Baankii Filadhu',
+      AppLanguage.am: 'የባንክ አካውንት ይምረጡ',
+    },
+    'dailyClosing': {
+      AppLanguage.en: 'Daily Closing',
+      AppLanguage.om: 'Cufiinsa Guyyaa',
+      AppLanguage.am: 'የዕለት መዝጊያ',
+    },
+    'bay': {
+      AppLanguage.en: 'Bay',
+      AppLanguage.om: 'Kutaa',
+      AppLanguage.am: 'ክፍል',
+    },
+    'recentRefillLogs': {
+      AppLanguage.en: 'Recent Refill Logs',
+      AppLanguage.om: 'Galmee Guutinsa Dhiyoo',
+      AppLanguage.am: 'የቅርብ ጊዜ የመሙያ መዝገቦች',
+    },
+    'shiftHandoverDesk': {
+      AppLanguage.en: 'Shift Handover Desk',
+      AppLanguage.om: 'Dabarsa Wal-Harkaa Fudhinsaa',
+      AppLanguage.am: 'የፈረቃ ርክክብ ማዕከል',
+    },
+    'shiftHandoverLogs': {
+      AppLanguage.en: 'Shift Handover Logs',
+      AppLanguage.om: 'Galmee Dabarsa Wal-Harkaa',
+      AppLanguage.am: 'የፈረቃ ርክክብ መዝገቦች',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

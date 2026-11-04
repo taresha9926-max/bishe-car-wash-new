@@ -239,7 +239,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${filteredClosings.length} Closings', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.blueAccent)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: filteredClosings.isEmpty
                 ? _buildEmptyState('No daily shift closings found for $_auditDateRange.', Icons.point_of_sale)
                 : Column(children: filteredClosings.map((c) => _buildClosingAuditCard(context, state, c, isMobile)).toList()),
@@ -257,7 +257,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               decoration: BoxDecoration(color: AppColors.telebirrBlue.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${filteredDigitalBookings.length} Receipts', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.telebirrBlue)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: filteredDigitalBookings.isEmpty
                 ? _buildEmptyState('No digital payment receipts found for $_auditDateRange.', Icons.qr_code_scanner_rounded)
                 : Column(children: filteredDigitalBookings.map((b) => _buildDigitalPaymentCard(context, state, b, isMobile)).toList()),
@@ -275,7 +275,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               decoration: BoxDecoration(color: Colors.teal.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${filteredDeposits.length} Deposits', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.teal)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: filteredDeposits.isEmpty
                 ? _buildEmptyState('No bank deposit slips found for $_auditDateRange.', Icons.receipt_outlined)
                 : Column(children: filteredDeposits.map((d) => _buildDepositCard(context, state, d, isMobile)).toList()),
@@ -293,7 +293,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               decoration: BoxDecoration(color: Colors.deepOrangeAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${filteredPetty.length} Logs', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.deepOrangeAccent)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: filteredPetty.isEmpty
                 ? _buildEmptyState('No petty cash expenses found for $_auditDateRange.', Icons.outbox_rounded)
                 : Column(children: filteredPetty.map((p) => _buildPettyCashCard(context, state, p, isMobile)).toList()),
@@ -590,7 +590,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             state: state,
             role: WasherHubRole.accountant,
             isMobile: isMobile,
-            initiallyExpanded: true,
+            initiallyExpanded: false,
           ),
           const SizedBox(height: 16),
 
@@ -765,7 +765,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${consumed.length} Consumed', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF0D9488))),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: consumed.isEmpty
                 ? _buildEmptyState('No daily consumable usage reported by storekeeper yet.', Icons.autorenew_rounded)
                 : Column(
@@ -807,7 +807,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
               child: Text('${restocks.length} Invoices', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.primary)),
             ),
-            initiallyExpanded: !isMobile,
+            initiallyExpanded: false,
             child: restocks.isEmpty
                 ? _buildEmptyState('No inventory purchases logged by storekeeper yet.', Icons.shopping_bag_outlined)
                 : Column(

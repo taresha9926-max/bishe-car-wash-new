@@ -155,7 +155,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: AppColors.primary),
                   ),
                 ),
-                initiallyExpanded: !isMobile,
+                initiallyExpanded: false,
                 child: Column(
                   children: [
                     _buildShiftSummaryBanner(state, isMobile),
@@ -183,7 +183,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.statusCompleted),
                   ),
                 ),
-                initiallyExpanded: !isMobile,
+                initiallyExpanded: false,
                 child: _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
               ),
 
@@ -216,7 +216,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.blueAccent),
                   ),
                 ),
-                initiallyExpanded: !isMobile,
+                initiallyExpanded: false,
                 child: filteredBookings.isEmpty
                     ? Container(
                         padding: const EdgeInsets.all(24),
