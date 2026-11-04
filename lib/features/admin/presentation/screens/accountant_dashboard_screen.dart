@@ -14,6 +14,8 @@ import '../../domain/models/petty_cash_expense.dart';
 import '../../domain/models/weekly_commission_report.dart';
 import '../../domain/models/commission_log.dart';
 import '../../../inventory/domain/models/stock_transaction.dart';
+import '../../../../core/widgets/shared_washer_commission_hub.dart';
+import '../../../../core/widgets/expandable_action_card.dart';
 
 class AccountantDashboardScreen extends StatefulWidget {
   const AccountantDashboardScreen({super.key});
@@ -25,9 +27,7 @@ class AccountantDashboardScreen extends StatefulWidget {
 class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  int _selectedWeekOffset = 0; // 0 = current week, 1 = prev week
   String _auditDateRange = 'All'; // All, Today, This Week, This Month
-  bool _isWasherMatrixExpanded = true;
 
   @override
   void initState() {
@@ -546,555 +546,114 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   // ==========================================
 
   Widget _buildCommissionsTab(BuildContext context, dynamic state, bool isMobile) {
-    final washers = state.availableWashers as List<StaffMember>;
-    final weeklyPool = state.weeklyTotalCommissionPool as double;
-    final monthlySalary = state.monthlyTotalBaseSalary as double;
     final weeklyReports = state.weeklyCommissionReports as List<WeeklyCommissionReport>;
-
-    // 7 days of the current week (Mon-Sun)
-    final now = DateTime.now().subtract(Duration(days: _selectedWeekOffset * 7));
-    final monday = now.subtract(Duration(days: now.weekday - 1));
-    final weekDays = List.generate(7, (i) => monday.add(Duration(days: i)));
-
-    final List<String> dayLabels = [
-      state.tr('monShort') as String,
-      state.tr('tueShort') as String,
-      state.tr('wedShort') as String,
-      state.tr('thuShort') as String,
-      state.tr('friShort') as String,
-      state.tr('satShort') as String,
-      state.tr('sunShort') as String,
-    ];
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Unified Washer Payroll & Attendance Matrix Hub (Mirrored from Cashier Dashboard)
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.oromiaGold.withOpacity(0.4)),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.oromiaGold.withOpacity(0.06),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
+          // 1. Unified Master Washer Team Roster, Attendance & Commission Hub
+          // Mirrored across Cashier and Accountant dashboards with full mobile-first expandable architecture,
+          // displaying exact daily earned commission (e.g. Br 250) instead of P, showing A only when absent,
+          // and providing the "Confirm & Mark Weekly Commission Paid" action button.
+          SharedWasherCommissionHub(
+            state: state,
+            role: WasherHubRole.accountant,
+            isMobile: isMobile,
+            initiallyExpanded: true,
+          ),
+          const SizedBox(height: 16),
+
+          // 2. Expandable Action Card for Weekly Commission Submission Reports
+          ExpandableActionCard(
+            icon: const Icon(Icons.assignment_turned_in_rounded, color: Color(0xFF0D9488), size: 22),
+            iconBackgroundColor: const Color(0xFF0D9488).withOpacity(0.12),
+            borderColor: const Color(0xFF0D9488),
+            title: 'Weekly Commission Submission Reports',
+            subtitle: '${weeklyReports.length} submitted reports from Cashier',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: weeklyReports.any((r) => !r.isDisbursed)
+                    ? Colors.orange.withOpacity(0.15)
+                    : Colors.green.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '${weeklyReports.where((r) => !r.isDisbursed).length} Pending',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                  color: weeklyReports.any((r) => !r.isDisbursed) ? Colors.orange.shade900 : Colors.green.shade800,
                 ),
-              ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Header (Title, Total Pool Badge, Expand/Collapse Toggle)
-                InkWell(
-                  onTap: () => setState(() => _isWasherMatrixExpanded = !_isWasherMatrixExpanded),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [AppColors.oromiaGold, AppColors.oromiaGold.withOpacity(0.8)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.stars_rounded, color: Colors.white, size: 24),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                state.tr('weeklyPayrollMatrix'),
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${state.presentWashersCount} of ${state.totalWashersCount} ${state.tr("onDutyWashers")} • 15% Pool',
-                                style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+            initiallyExpanded: false,
+            child: weeklyReports.isEmpty
+                ? _buildEmptyState('No weekly commission reports submitted yet.', Icons.date_range)
+                : Column(
+                    children: weeklyReports.map((r) => Card(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.oromiaGold.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.oromiaGold.withOpacity(0.3)),
-                              ),
-                              child: Text(
-                                CurrencyFormatter.format(weeklyPool),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 13.5,
-                                  color: AppColors.oromiaGold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
                             Row(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  _isWasherMatrixExpanded ? state.tr('collapseRoster') : state.tr('expandRoster'),
-                                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primary),
+                                  '${r.weekStartDate.day}/${r.weekStartDate.month} – ${r.weekEndDate.day}/${r.weekEndDate.month} • Pool: ${CurrencyFormatter.format(r.totalWeeklyPool)}',
+                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                                 ),
-                                Icon(
-                                  _isWasherMatrixExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                                  size: 16,
-                                  color: AppColors.primary,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: r.isDisbursed ? Colors.green.shade50 : Colors.orange.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: r.isDisbursed ? Colors.green.shade300 : Colors.orange.shade300),
+                                  ),
+                                  child: Text(
+                                    r.isDisbursed ? state.tr('disbursedStatus') : state.tr('pendingDisbursal'),
+                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: r.isDisbursed ? Colors.green.shade800 : Colors.orange.shade900),
+                                  ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const Divider(height: 1),
-
-                // 2. Action Toolbar & Week Navigator
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.date_range_rounded, size: 14, color: AppColors.primary),
-                            const SizedBox(width: 6),
-                            Text(
-                              _selectedWeekOffset == 0 ? 'Current Week' : '$_selectedWeekOffset Week Ago',
-                              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary),
-                            ),
+                            const SizedBox(height: 6),
+                            Text('Reported by: ${r.cashierName} • Washers: ${r.washerCommissions.length}', style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
+                            if (!r.isDisbursed) ...[
+                              const SizedBox(height: 8),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    await state.disburseWeeklyCommission(r.id);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Weekly commission disbursed successfully!')),
+                                      );
+                                    }
+                                  },
+                                  icon: const Icon(Icons.payments_outlined, size: 14),
+                                  label: Text(state.tr('disburseWeeklyAction'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade700,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.chevron_left_rounded, size: 20),
-                            onPressed: () => setState(() => _selectedWeekOffset++),
-                            tooltip: 'Previous Week',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.chevron_right_rounded, size: 20),
-                            onPressed: _selectedWeekOffset > 0 ? () => setState(() => _selectedWeekOffset--) : null,
-                            tooltip: 'Next Week',
-                          ),
-                        ],
-                      ),
-                    ],
+                    )).toList(),
                   ),
-                ),
-
-                // 3. Compact Status Bar: Present / Absent / Total (Mirrored from Cashier)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.statusCompleted.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.statusCompleted.withOpacity(0.2)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.check_circle, color: AppColors.statusCompleted, size: 14),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  '${state.presentWashersCount} Present',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppColors.statusCompleted),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.withOpacity(0.2)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 14),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  '${state.totalWashersCount - state.presentWashersCount} Absent',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.redAccent),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.cardBorder),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.groups_rounded, color: AppColors.textSecondary, size: 14),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  '${state.totalWashersCount} Total',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppColors.textPrimary),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // 4. Animated Expandable Content (2-Tier Compensation + Matrix)
-                AnimatedCrossFade(
-                  firstChild: const SizedBox(height: 6),
-                  secondChild: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 2-Tier Compensation Card
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFF1E3A8A), Color(0xFF0F172A)]),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text('2-Tier Compensation Structure', style: TextStyle(color: Colors.white70, fontSize: 11.5, fontWeight: FontWeight.w600)),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-                                    child: const Text('Weekly Comm + Monthly Wage', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 10)),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text('Weekly Commission Pool', style: TextStyle(color: Colors.white70, fontSize: 10.5)),
-                                        const SizedBox(height: 2),
-                                        Text(CurrencyFormatter.format(weeklyPool), style: const TextStyle(color: Colors.white, fontSize: 16.5, fontWeight: FontWeight.w900)),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(width: 1, height: 28, color: Colors.white24),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text('Monthly Base Salaries', style: TextStyle(color: Colors.white70, fontSize: 10.5)),
-                                        const SizedBox(height: 2),
-                                        Text(CurrencyFormatter.format(monthlySalary), style: const TextStyle(color: Colors.amberAccent, fontSize: 16.5, fontWeight: FontWeight.w900)),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Payroll View: Mobile Individual Cards vs Desktop Tabular Matrix
-                        if (isMobile)
-                          Column(
-                            children: washers.map((w) {
-                              final weeklyComm = (state.weeklyWasherCommissions as Map<String, double>)[w.name] ?? 0.0;
-                              final isPresentToday = state.isWasherPresentToday(w.id);
-                              return _buildMobileWasherCard(context, state, w, weeklyComm, isPresentToday, weekDays, dayLabels);
-                            }).toList(),
-                          )
-                        else
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: AppColors.cardBorder),
-                            ),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: DataTable(
-                                headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
-                                columnSpacing: 14,
-                                horizontalMargin: 12,
-                                columns: [
-                                  const DataColumn(label: Text('Washer', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
-                                  const DataColumn(label: Text('Tier', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
-                                  ...List.generate(7, (i) => DataColumn(
-                                    label: Text('${dayLabels[i]}\n${weekDays[i].day}', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-                                  )),
-                                  const DataColumn(label: Text('Active', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
-                                  DataColumn(label: Text(state.tr('weeklyCommEarned'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
-                                  DataColumn(label: Text(state.tr('monthlySalary'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
-                                ],
-                                rows: washers.map((w) {
-                                  final weeklyComm = (state.weeklyWasherCommissions as Map<String, double>)[w.name] ?? 0.0;
-                                  final isPresentToday = state.isWasherPresentToday(w.id);
-
-                                  return DataRow(
-                                    cells: [
-                                      DataCell(
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 12,
-                                              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                                              child: Text(w.name.isNotEmpty ? w.name[0] : 'W', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(w.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                                          ],
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(6)),
-                                          child: Text('T${w.skillSeniorityLevel}', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.blue.shade900)),
-                                        ),
-                                      ),
-                                      // 7 days (Mon-Sun)
-                                      ...List.generate(7, (dayIdx) {
-                                        final dayDate = weekDays[dayIdx];
-                                        final isTodayCol = dayDate.day == DateTime.now().day &&
-                                            dayDate.month == DateTime.now().month &&
-                                            _selectedWeekOffset == 0;
-                                        final att = state.getWasherAttendanceForDate(w.id, dayDate);
-                                        final isPresent = isTodayCol ? isPresentToday : (att?.isPresent ?? true);
-                                        final earned = isTodayCol
-                                            ? (state.isDailyCommissionDisbursedToday
-                                                ? (state.washerDividendsToday[w.id]?.earnedETB ?? 0.0)
-                                                : 0.0)
-                                            : (att?.commissionEarnedETB ?? 0.0);
-                                        final hasDisbursed = (isTodayCol && state.isDailyCommissionDisbursedToday) ||
-                                            (att != null && att.commissionEarnedETB > 0);
-
-                                        String label;
-                                        if (!isPresent) {
-                                          label = 'A';
-                                        } else if (hasDisbursed && earned > 0) {
-                                          label = 'P • Br ${earned.toStringAsFixed(0)}';
-                                        } else {
-                                          label = 'P';
-                                        }
-
-                                        return DataCell(
-                                          Center(
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: isPresent ? Colors.green.shade50 : Colors.red.shade50,
-                                                borderRadius: BorderRadius.circular(4),
-                                                border: Border.all(
-                                                  color: isPresent ? Colors.green.shade200 : Colors.red.shade200,
-                                                  width: 0.8,
-                                                ),
-                                              ),
-                                              child: Text(
-                                                label,
-                                                style: TextStyle(
-                                                  fontSize: 9.5,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: isPresent ? Colors.green.shade800 : Colors.red.shade800,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }),
-                                      const DataCell(Center(child: Text('6d', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)))),
-                                      DataCell(Text(CurrencyFormatter.format(weeklyComm), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.green))),
-                                      DataCell(Text(CurrencyFormatter.format(w.baseSalaryMonthlyETB), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.textSecondary))),
-                                    ],
-                                  );
-                                }).toList()
-                                  ..add(
-                                    DataRow(
-                                      color: WidgetStateProperty.all(AppColors.surfaceVariant),
-                                      cells: [
-                                        const DataCell(
-                                          Text(
-                                            'Daily Total Pool',
-                                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: AppColors.primary),
-                                          ),
-                                        ),
-                                        const DataCell(
-                                          Text('TOTAL', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 10, color: AppColors.primary)),
-                                        ),
-                                        ...List.generate(7, (dayIdx) {
-                                          final dayDate = weekDays[dayIdx];
-                                          final isTodayCol = dayDate.day == DateTime.now().day &&
-                                              dayDate.month == DateTime.now().month &&
-                                              _selectedWeekOffset == 0;
-                                          final dailyTotal = (isTodayCol && state.isDailyCommissionDisbursedToday)
-                                              ? state.teamCommissionPoolTodayETB
-                                              : state.getDailyCommissionTotalForDate(dayDate);
-
-                                          return DataCell(
-                                            Center(
-                                              child: Text(
-                                                dailyTotal > 0 ? CurrencyFormatter.format(dailyTotal) : '-',
-                                                style: TextStyle(
-                                                  fontSize: 10.5,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: dailyTotal > 0 ? Colors.green.shade800 : AppColors.textMuted,
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                                        const DataCell(Center(child: Text('—', style: TextStyle(color: AppColors.textMuted)))),
-                                        DataCell(Text(
-                                          CurrencyFormatter.format(weeklyPool),
-                                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.green),
-                                        )),
-                                        DataCell(Text(
-                                          CurrencyFormatter.format(monthlySalary),
-                                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: AppColors.textSecondary),
-                                        )),
-                                      ],
-                                    ),
-                                  ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  crossFadeState: _isWasherMatrixExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 220),
-                ),
-              ],
-            ),
           ),
-          const SizedBox(height: 20),
-
-          // Weekly Submission Reports & One-Click Disbursement
-          const Text('Weekly Commission Submission Reports:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-          const SizedBox(height: 10),
-          if (weeklyReports.isEmpty)
-            _buildEmptyState('No weekly commission reports submitted yet.', Icons.date_range)
-          else
-            ...weeklyReports.map((r) => Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('${r.weekStartDate.day}/${r.weekStartDate.month} – ${r.weekEndDate.day}/${r.weekEndDate.month} • Pool: ${CurrencyFormatter.format(r.totalWeeklyPool)}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: r.isDisbursed ? Colors.green.shade50 : Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: r.isDisbursed ? Colors.green.shade300 : Colors.orange.shade300),
-                          ),
-                          child: Text(
-                            r.isDisbursed ? state.tr('disbursedStatus') : state.tr('pendingDisbursal'),
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: r.isDisbursed ? Colors.green.shade800 : Colors.orange.shade900),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text('Reported by: ${r.cashierName} • Washers: ${r.washerCommissions.length}', style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-                    if (!r.isDisbursed) ...[
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            await state.disburseWeeklyCommission(r.id);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Weekly commission disbursed successfully!')),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.payments_outlined, size: 14),
-                          label: Text(state.tr('disburseWeeklyAction'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green.shade700,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            )),
         ],
       ),
     );
@@ -1502,141 +1061,6 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildMobileWasherCard(
-    BuildContext context,
-    dynamic state,
-    StaffMember w,
-    double weeklyComm,
-    bool isPresentToday,
-    List<DateTime> weekDays,
-    List<String> dayLabels,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: AppColors.primary.withOpacity(0.12),
-                child: Text(
-                  w.name.isNotEmpty ? w.name[0] : 'W',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.primary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(w.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                    const SizedBox(height: 1),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(4)),
-                          child: Text('Tier ${w.skillSeniorityLevel}', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.blue.shade900)),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(w.phone, style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    CurrencyFormatter.format(weeklyComm),
-                    style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: Colors.green),
-                  ),
-                  Text(
-                    state.tr('weeklyCommEarned'),
-                    style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Mon-Sun Attendance Day Chips (Fits across screen without scrolling!)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(7, (dayIdx) {
-                final isTodayCol = weekDays[dayIdx].day == DateTime.now().day && _selectedWeekOffset == 0;
-                final isPresent = isTodayCol ? isPresentToday : true;
-                return Column(
-                  children: [
-                    Text(dayLabels[dayIdx], style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
-                    const SizedBox(height: 3),
-                    Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: isPresent ? Colors.green.shade100 : Colors.red.shade100,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: isPresent ? Colors.green.shade400 : Colors.red.shade400),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          isPresent ? Icons.check_rounded : Icons.close_rounded,
-                          size: 12,
-                          color: isPresent ? Colors.green.shade900 : Colors.red.shade900,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${state.tr("monthlySalary")}: ${CurrencyFormatter.format(w.baseSalaryMonthlyETB)}',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text('6/7 Days Present', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.green)),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

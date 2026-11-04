@@ -22,6 +22,8 @@ import 'petty_cash_dialog.dart';
 import 'phone_booking_dialog.dart';
 import 'walk_in_registration_screen.dart';
 import 'weekly_commission_report_dialog.dart';
+import '../../../../core/widgets/expandable_action_card.dart';
+import '../../../../core/widgets/shared_washer_commission_hub.dart';
 
 class CashierDashboardScreen extends StatefulWidget {
   const CashierDashboardScreen({super.key});
@@ -135,70 +137,129 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Shift KPI Stats
-              _buildShiftSummaryBanner(state, isMobile),
-              const SizedBox(height: 10),
-
-              // 1.1 Payment Received by Channel & Cashier Actions (Deposit Cash & Confirm Closing)
-              _buildFinancialActionToolbar(context, state, isMobile),
-              const SizedBox(height: 14),
-
-              // 2. Real-Time Capacity Quick Status Bar (Bay 1, Bay 2, Mobile Van 1)
-              _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
-              const SizedBox(height: 18),
-
-              // 3. Queue Management Section OR Attendance Desk OR Wash History OR Financial Reports
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _selectedFilterIndex == 1
-                        ? '${state.tr("attendanceAndCommission")} (${state.presentWashersCount}/${state.totalWashersCount})'
-                        : (_selectedFilterIndex == 2
-                            ? state.tr("washHistory")
-                            : (_selectedFilterIndex == 3
-                                ? state.tr("closingAndFinancialReports")
-                                : '${state.tr("queueAndVehicles")} (${filteredBookings.length})')),
-                    style: TextStyle(
-                      fontSize: isMobile ? 15.5 : 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              // Queue Filter Tabs (including Washer Attendance, Wash History & Financial Reports)
-              _buildFilterChips(state, isMobile),
-              const SizedBox(height: 12),
-
-              // Queue Items OR Washer Attendance & Commission Desk OR Wash History OR Financial Reports
-              if (_selectedFilterIndex == 1)
-                _buildWasherAttendanceAndCommissionSection(context, state, isMobile)
-              else if (_selectedFilterIndex == 2)
-                const VehicleHistoryScreen(isEmbedded: true)
-              else if (_selectedFilterIndex == 3)
-                const FinancialReportsView(isEmbedded: true)
-              else if (filteredBookings.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(28),
+              // 1. Shift Financials & Cash Drawer Action Card (Expandable on Mobile)
+              ExpandableActionCard(
+                icon: const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 22),
+                iconBackgroundColor: AppColors.primary.withOpacity(0.12),
+                borderColor: AppColors.primary,
+                title: state.tr('dailyClosingTitle'),
+                subtitle: 'Drawer Cash: ${CurrencyFormatter.format(state.undepositedCashTodayETB as double)} • Revenue: ${CurrencyFormatter.format(state.totalRevenueTodayETB as double)}',
+                badge: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.cardBorder),
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Center(
-                    child: Text(
-                      'No vehicles in this queue filter.',
-                      style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
-                    ),
+                  child: Text(
+                    CurrencyFormatter.formatShort(state.undepositedCashTodayETB as double),
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: AppColors.primary),
                   ),
-                )
-              else
-                ...filteredBookings.map((b) => isMobile
-                    ? _buildCleanQueueRowMobile(context, state, b)
-                    : _buildCleanQueueRowDesktop(context, state, b)),
+                ),
+                initiallyExpanded: !isMobile,
+                child: Column(
+                  children: [
+                    _buildShiftSummaryBanner(state, isMobile),
+                    const SizedBox(height: 10),
+                    _buildFinancialActionToolbar(context, state, isMobile),
+                  ],
+                ),
+              ),
+
+              // 2. Real-Time Bays & Mobile Van Capacity (Expandable on Mobile)
+              ExpandableActionCard(
+                icon: const Icon(Icons.local_car_wash_rounded, color: AppColors.statusCompleted, size: 22),
+                iconBackgroundColor: AppColors.statusCompleted.withOpacity(0.12),
+                borderColor: AppColors.statusCompleted,
+                title: state.tr('liveStationCapacity'),
+                subtitle: '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
+                badge: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.statusCompleted.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${state.availableBaysCount} Free',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.statusCompleted),
+                  ),
+                ),
+                initiallyExpanded: !isMobile,
+                child: _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
+              ),
+
+              // 3. Shared Unified Washer Team, Attendance & Commission Hub (Directly visible, Expandable!)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SharedWasherCommissionHub(
+                  state: state,
+                  role: WasherHubRole.cashier,
+                  isMobile: isMobile,
+                  initiallyExpanded: false,
+                ),
+              ),
+
+              // 4. Active Vehicle Queue & Live Processing (Expandable, Initially Open!)
+              ExpandableActionCard(
+                icon: const Icon(Icons.queue_rounded, color: Colors.blueAccent, size: 22),
+                iconBackgroundColor: Colors.blueAccent.withOpacity(0.12),
+                borderColor: Colors.blueAccent,
+                title: state.tr('queueAndVehicles'),
+                subtitle: '${filteredBookings.length} Vehicles in Queue / Active',
+                badge: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${filteredBookings.length} Active',
+                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.blueAccent),
+                  ),
+                ),
+                initiallyExpanded: true,
+                child: filteredBookings.isEmpty
+                    ? Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.cardBorder),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'No vehicles currently in queue.',
+                            style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      )
+                    : Column(
+                        children: filteredBookings.map((b) => isMobile
+                            ? _buildCleanQueueRowMobile(context, state, b)
+                            : _buildCleanQueueRowDesktop(context, state, b)).toList(),
+                      ),
+              ),
+
+              // 5. Vehicle Wash History & Audit Logs (Expandable)
+              ExpandableActionCard(
+                icon: Icon(Icons.history_edu_rounded, color: Colors.amber.shade800, size: 22),
+                iconBackgroundColor: Colors.amber.shade800.withOpacity(0.12),
+                borderColor: Colors.amber.shade800,
+                title: state.tr('washHistory'),
+                subtitle: 'Audit paid & completed washes by date range',
+                initiallyExpanded: false,
+                child: const VehicleHistoryScreen(isEmbedded: true),
+              ),
+
+              // 6. Closing & Financial Reports (Expandable)
+              ExpandableActionCard(
+                icon: const Icon(Icons.fact_check_rounded, color: Colors.teal, size: 22),
+                iconBackgroundColor: Colors.teal.withOpacity(0.12),
+                borderColor: Colors.teal,
+                title: state.tr('closingAndFinancialReports'),
+                subtitle: 'Audit daily closings, bank deposits & payment channels',
+                initiallyExpanded: false,
+                child: const FinancialReportsView(isEmbedded: true),
+              ),
 
               const SizedBox(height: 50),
             ],

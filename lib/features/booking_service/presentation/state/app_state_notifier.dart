@@ -1061,6 +1061,52 @@ class AppStateNotifier extends ChangeNotifier {
     }
   }
 
+  final Set<int> _paidWeeklyCommissionWeekOffsets = {};
+
+  bool isWeeklyCommissionPaid(int weekOffset) {
+    if (_paidWeeklyCommissionWeekOffsets.contains(weekOffset)) return true;
+    final now = DateTime.now().subtract(Duration(days: weekOffset * 7));
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return _weeklyCommissionReports.any((r) =>
+        r.weekStartDate.year == monday.year &&
+        r.weekStartDate.month == monday.month &&
+        r.weekStartDate.day == monday.day &&
+        r.isDisbursed);
+  }
+
+  Future<void> confirmWeeklyCommissionPaid(int weekOffset) async {
+    _paidWeeklyCommissionWeekOffsets.add(weekOffset);
+    final now = DateTime.now().subtract(Duration(days: weekOffset * 7));
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final existingReportIdx = _weeklyCommissionReports.indexWhere((r) =>
+        r.weekStartDate.year == monday.year &&
+        r.weekStartDate.month == monday.month &&
+        r.weekStartDate.day == monday.day);
+    if (existingReportIdx != -1) {
+      _weeklyCommissionReports[existingReportIdx] = _weeklyCommissionReports[existingReportIdx].copyWith(
+        isDisbursed: true,
+        disbursedAt: DateTime.now(),
+      );
+    } else {
+      await submitWeeklyCommissionReportToAdmin(
+        cashierName: activeStaffFullName ?? 'Cashier',
+        notes: 'Weekly commission confirmed and disbursed by Accountant.',
+      );
+      if (_weeklyCommissionReports.isNotEmpty) {
+        _weeklyCommissionReports[0] = _weeklyCommissionReports[0].copyWith(
+          isDisbursed: true,
+          disbursedAt: DateTime.now(),
+        );
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> disburseAndReportDailyCommissionToAdmin({required String cashierName}) async {
+    markDailyCommissionDisbursed();
+    notifyListeners();
+  }
+
   int get availableBaysCount {
     return _bays.where((b) => b.type != BayType.mobileVan && b.isVacant).length;
   }

@@ -2094,6 +2094,31 @@ class AppStrings {
       AppLanguage.om: 'Har\'a Kaffalameera',
       AppLanguage.am: 'ዛሬ ተከፍሏል',
     },
+    'disburseAndReportDailyCommission': {
+      AppLanguage.en: 'Disburse & Report Daily Commission',
+      AppLanguage.om: 'Komishiinii Guyyaa Raabsii Gabaasi',
+      AppLanguage.am: 'ዕለታዊ ኮሚሽን አከፋፍለህ ሪፖርት አድርግ',
+    },
+    'confirmWeeklyCommissionPaid': {
+      AppLanguage.en: 'Confirm & Mark Weekly Commission Paid',
+      AppLanguage.om: 'Komishiinii Torbanii Kaffalame Mirkaneessi',
+      AppLanguage.am: 'ሳምንታዊ ኮሚሽን መከፈሉን አረጋግጥ',
+    },
+    'weeklyCommissionPaidAndConfirmed': {
+      AppLanguage.en: 'Weekly Commission Paid & Confirmed',
+      AppLanguage.om: 'Komishiiniin Torbanii Kaffalamee Mirkanaa\'eera',
+      AppLanguage.am: 'ሳምንታዊ ኮሚሽን ተከፍሎ ተረጋግጧል',
+    },
+    'dailyCommissionDisbursedReported': {
+      AppLanguage.en: 'Daily commission pool disbursed and reported to Accountant & Admin!',
+      AppLanguage.om: 'Kuusaan komishiinii guyyaa raabsamee Herregaafi Bulchaaf gabaafameera!',
+      AppLanguage.am: 'ዕለታዊ የኮሚሽን ገቢ ተከፋፍሎ ለሂሳብ ሹምና ለአስተዳዳሪ ሪፖርት ተደርጓል!',
+    },
+    'weeklyCommissionPaidSuccess': {
+      AppLanguage.en: 'Weekly commission successfully marked as paid and confirmed!',
+      AppLanguage.om: 'Komishiiniin torbanii milkaa\'inaan kaffalamee mirkanaa\'eera!',
+      AppLanguage.am: 'ሳምንታዊ ኮሚሽን በተሳካ ሁኔታ ተከፍሎ ተረጋግጧል!',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
