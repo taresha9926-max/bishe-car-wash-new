@@ -174,21 +174,26 @@ class AutoCareAssets {
     return packageFoamUrl;
   }
 
-  /// Reusable rounded automotive photo thumbnail with glass gradient and offline fallback.
+  /// Reusable rounded automotive photo thumbnail with obsidian glass border,
+  /// dark gradient scrim overlay, and smooth offline fallback icon.
   static Widget buildPhotoThumbnail({
     required String imageUrl,
     required double width,
     required double height,
-    double borderRadius = 10.0,
-    IconData fallbackIcon = Icons.local_car_wash_rounded,
+    double borderRadius = 12.0,
+    IconData fallbackIcon = Icons.directions_car_rounded,
     Color fallbackColor = AppColors.primary,
     String? durationBadge,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: SizedBox(
-        width: width,
-        height: height,
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: AppColors.cardGlassBorder, width: 1.0),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius > 1 ? borderRadius - 1 : borderRadius),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -205,7 +210,7 @@ class AutoCareAssets {
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.52)],
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.55)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),

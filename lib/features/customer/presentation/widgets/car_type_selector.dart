@@ -53,26 +53,13 @@ class CarTypeSelector extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          AutoCareAssets.getCarTypeImage(type),
-                          width: 44,
-                          height: 36,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: isSelected ? AppColors.primary : AppColors.surfaceVariant,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              type.icon,
-                              size: 20,
-                              color: isSelected ? Colors.white : AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: AutoCareAssets.getCarTypeImage(type),
+                        width: 52,
+                        height: 38,
+                        borderRadius: 12,
+                        fallbackIcon: type.icon,
+                        fallbackColor: isSelected ? AppColors.primary : AppColors.textSecondary,
                       ),
                       const SizedBox(height: 10),
                       Text(

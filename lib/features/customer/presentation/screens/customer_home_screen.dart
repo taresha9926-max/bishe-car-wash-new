@@ -705,19 +705,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        _getCarTypeImageUrl(type),
-                        width: 44,
-                        height: 32,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
-                          type.icon,
-                          size: 20,
-                          color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                        ),
-                      ),
+                    AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: _getCarTypeImageUrl(type),
+                      width: 48,
+                      height: 32,
+                      borderRadius: 12,
+                      fallbackIcon: type.icon,
+                      fallbackColor: isSelected ? AppColors.primary : AppColors.textSecondary,
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -774,50 +768,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Real AI Photographic Thumbnail with Duration Pill
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 58,
-                    height: 58,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.network(
-                          photoUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.primary.withOpacity(0.12),
-                            child: const Icon(Icons.local_car_wash_rounded, color: AppColors.primary, size: 24),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.transparent, Colors.black.withOpacity(0.55)],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 3,
-                          left: 3,
-                          right: 3,
-                          child: Text(
-                            '${pkg.durationMinutes}m',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              shadows: [Shadow(color: Colors.black, blurRadius: 3)],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: photoUrl,
+                  width: 58,
+                  height: 58,
+                  borderRadius: 12,
+                  fallbackIcon: Icons.local_car_wash_rounded,
+                  durationBadge: '${pkg.durationMinutes}m',
                 ),
                 const SizedBox(width: 10),
                 Expanded(

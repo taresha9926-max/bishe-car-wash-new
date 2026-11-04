@@ -1,11 +1,11 @@
-# 🚗 BISHE Car Wash Service Mobile App
+# BISHE Car Wash Service Mobile App
 **Location:** Bishoftu (Debre Zeyit), Oromia, Ethiopia  
 **Architecture:** Clean Architecture (Domain, Data, Presentation)  
 **State Management:** Native Reactive State Pattern (`AppStateNotifier` / `InheritedNotifier` / `ChangeNotifier`)
 
 ---
 
-## 🌟 Overview
+## Overview
 **BISHE Car Wash Service** is a multi-role mobile application built with Flutter for a car wash business located in Bishoftu, Oromia. The app provides specialized user experiences for **three distinct roles**:
 1. **Customer**: Online booking for stationary washing (2 bays) or at-home mobile service (1 van), vehicle category selection, and live wash status tracking.
 2. **Cashier**: Gate entry registration, vehicle bay assignment (Bay 1, Bay 2, Mobile Van), washer dispatching, and Cash / Digital Money Transfer (Telebirr, CBE Birr) payment collection.
@@ -13,7 +13,7 @@
 
 ---
 
-## 🏗️ Clean Architecture Blueprint
+## Clean Architecture Blueprint
 
 ```
 lib/
@@ -93,9 +93,9 @@ lib/
 
 ---
 
-## 🔑 Key Features per Role
+## Key Features per Role
 
-### 1. 👤 Customer Role
+### 1. Customer Role
 - **Station & Van Capacity Visibility**: Real-time monitor showing whether Bay 1, Bay 2, and Mobile Van are vacant or occupied.
 - **Service Mode Selection**:
   - `Walk-in Station`: 2 stationary pressure washing bays at the Bishoftu main gate.
@@ -110,20 +110,20 @@ lib/
   - Executive Detailing & Wax
   - Chassis & Engine Flush
 - **Live Wash Progress Tracking**: 
-  - Visual 6-step progress stepper: `Confirmed` ➔ `Queued in Bay` ➔ `Washing` ➔ `Drying & Detailing` ➔ `Ready for Pickup` ➔ `Completed`.
+  - Visual 6-step progress stepper: `Confirmed` -> `Queued in Bay` -> `Washing` -> `Drying & Detailing` -> `Ready for Pickup` -> `Completed`.
   - Shows assigned bay, assigned washer staff, and digital receipt breakdown.
 
-### 2. 🧾 Cashier Role
+### 2. Cashier Role
 - **Gate Walk-In Registration**: Fast gate check-in for arriving drive-in cars. Cashier enters license plate, customer phone, car type, package, bay assignment, and staff washer.
 - **Live 3-Bay Occupancy Dashboard**:
   - Dedicated interactive monitor cards for **Bay 1 (Station)**, **Bay 2 (Station)**, and **Mobile Van 1 (At-Home)**.
-  - One-tap quick advance button (e.g. `Start Washing` ➔ `Move to Drying` ➔ `Ready for Pickup` ➔ `Complete & Free Bay`).
+  - One-tap quick advance button (e.g. `Start Washing` -> `Move to Drying` -> `Ready for Pickup` -> `Complete & Free Bay`).
 - **Bay & Washer Reassignment**: Reassign or move vehicles between Bay 1, Bay 2, and Mobile Van, and dispatch specific washers from the staff roster.
 - **Payment Processing**:
   - **Cash** (physical handover at gate checkout)
   - **Digital Money Transfer** (Telebirr & CBE Birr with transaction SMS reference verification).
 
-### 3. 🛡️ Admin Role
+### 3. Admin Role
 - **Executive Revenue Dashboard**: Total revenue today (ETB), cash vs. digital split, total washer commissions paid, and net margin calculation.
 - **Service Pricing by Car Type Matrix**:
   - Fully customizable pricing matrix for every wash package across `Automobile`, `Minibus`, and `Truck`.
@@ -134,12 +134,12 @@ lib/
   - Track total completed washes and accumulated commissions per team member.
 - **Automated Washer Commission Logs**:
   - Whenever a wash is marked as `completed` by the Cashier or Admin, the repository **automatically calculates and writes an immutable commission log**.
-  - Commission formula: `Total Wash Price (ETB) × Washer Commission Rate (%) = Commission Earned (ETB)`.
+  - Commission formula: `Total Wash Price (ETB) * Washer Commission Rate (%) = Commission Earned (ETB)`.
   - Audit trail with filter by washer and total payout summation.
 
 ---
 
-## 🚀 How to Run the App
+## How to Run the App
 
 1. Ensure the Flutter SDK is installed on your machine (`flutter --version`).
 2. Navigate to the project root directory:
@@ -159,7 +159,7 @@ lib/
 
 ---
 
-## 🔄 Interactive Multi-Role Testing
+## Interactive Multi-Role Testing
 You can switch roles at any moment using:
 - **Top AppBar Dropdown**: Tap the role indicator in the top right of the header to pick `Customer`, `Cashier`, or `Admin`.
 - **Bottom Navigation Bar**: Tap any of the 3 tabs (`Customer`, `Cashier`, `Admin`) for immediate switching.

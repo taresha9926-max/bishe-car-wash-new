@@ -28,12 +28,18 @@
 </head>
 <body>
   <script>
+    // Force purge stale Service Workers and CacheStorage from browser caches
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
         for (var r of regs) { r.unregister(); }
       });
     }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (var name of names) { caches.delete(name); }
+      });
+    }
   </script>
-  <script src="flutter_bootstrap.js?v=2.8.0" async></script>
+  <script src="flutter_bootstrap.js?v=2.9.0" async></script>
 </body>
 </html>

@@ -40,6 +40,7 @@ class AppColors {
   static const Color surface = Colors.white;
   static const Color surfaceVariant = Color(0xFFF1F5F9);
   static const Color cardBorder = Color(0xFFE2E8F0);
+  static const Color cardGlassBorder = Color(0x33007791); // Subtle obsidian glass border
 
   // Text Colors
   static const Color textPrimary = Color(0xFF0F172A);
