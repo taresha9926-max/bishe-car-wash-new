@@ -1,3 +1,4 @@
+import '../../../../core/widgets/expandable_action_card.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -98,92 +99,101 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. Primary Empty-for-Full Refill Exchange Desk
-          _buildEmptyRefillExchangeCard(context, state, isMobile),
-          const SizedBox(height: 20),
+          ExpandableActionCard(
+            icon: const Icon(Icons.autorenew_rounded, color: Color(0xFF0D9488), size: 22),
+            iconBackgroundColor: const Color(0xFF0D9488).withOpacity(0.12),
+            borderColor: const Color(0xFF0D9488),
+            title: state.tr('emptyRefillExchangeTitle'),
+            subtitle: state.tr('emptyRefillExchangeSub'),
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: const Text('Daily Exchange', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF0D9488))),
+            ),
+            initiallyExpanded: !isMobile,
+            child: _buildEmptyRefillExchangeCard(context, state, isMobile),
+          ),
+          const SizedBox(height: 12),
 
           // 2. Recent Empty-for-Full Refill Exchange Logs
-          Row(
-            children: [
-              const Icon(Icons.autorenew_rounded, size: 20, color: Color(0xFF0D9488)),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Recent Empty-for-Full Refill Exchanges',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${exchanges.length} Logged',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-              ),
-            ],
+          ExpandableActionCard(
+            icon: const Icon(Icons.history_rounded, color: Colors.blueAccent, size: 22),
+            iconBackgroundColor: Colors.blueAccent.withOpacity(0.12),
+            borderColor: Colors.blueAccent,
+            title: state.tr('recentRefillLogs'),
+            subtitle: 'Chemical & detergent swap audit ledger',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${exchanges.length} Logged', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.blueAccent)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: exchanges.isEmpty
+                ? _buildEmptyState('No empty container refill exchanges logged yet.', Icons.autorenew_rounded)
+                : Column(
+                    children: exchanges.map((ex) => Card(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        leading: AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.getInventoryImage(ex.itemName),
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8,
+                          fallbackIcon: Icons.water_drop_rounded,
+                          fallbackColor: Colors.teal,
+                        ),
+                        title: Text(ex.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                        subtitle: Text(
+                          '${ex.quantity} ${ex.unit} • Team Leader: ${ex.supplier} (${ex.date.day}/${ex.date.month})\n${ex.notes}',
+                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        ),
+                        trailing: Text(
+                          CurrencyFormatter.format(ex.totalCostEtb),
+                          style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange, fontSize: 13),
+                        ),
+                      ),
+                    )).toList(),
+                  ),
           ),
-          const SizedBox(height: 10),
-          if (exchanges.isEmpty)
-            _buildEmptyState('No empty container refill exchanges logged yet. When the washer leader returns finished bottles, log them here.', Icons.autorenew_rounded)
-          else
-            ...exchanges.map((ex) => Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.getInventoryImage(ex.itemName),
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  fallbackIcon: Icons.water_drop_rounded,
-                  fallbackColor: Colors.teal,
-                ),
-                title: Text(ex.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
-                subtitle: Text(
-                  '${ex.quantity} ${ex.unit} • Team Leader: ${ex.supplier} (${ex.date.day}/${ex.date.month})\n${ex.notes}',
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                ),
-                trailing: Text(
-                  CurrencyFormatter.format(ex.totalCostEtb),
-                  style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange, fontSize: 13),
-                ),
-              ),
-            )),
+          const SizedBox(height: 12),
 
-          const SizedBox(height: 24),
-          const Divider(height: 1, color: AppColors.cardBorder),
-          const SizedBox(height: 20),
-
-          // 3. Optional Bulk Shift Handover Desk
-          if (active != null)
-            _buildActiveHandoverCard(context, state, active, isMobile)
-          else
-            _buildStartHandoverCard(context, state, isMobile),
-
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              const Icon(Icons.history_rounded, size: 20, color: AppColors.textPrimary),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Shift Handover Audit Logs',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${handovers.length} Total Logs',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-              ),
-            ],
+          // 3. Shift Handover Desk
+          ExpandableActionCard(
+            icon: const Icon(Icons.wb_sunny_rounded, color: Colors.amber, size: 22),
+            iconBackgroundColor: Colors.amber.withOpacity(0.15),
+            borderColor: Colors.amber.shade700,
+            title: state.tr('shiftHandoverDesk'),
+            subtitle: 'Issue daily equipment & chemicals to team leader',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: Colors.amber.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
+              child: Text(active != null ? 'Open Shift' : 'New Shift', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.amber.shade900)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: active != null
+                ? _buildActiveHandoverCard(context, state, active, isMobile)
+                : _buildStartHandoverCard(context, state, isMobile),
           ),
-          const SizedBox(height: 10),
-          if (handovers.isEmpty)
-            _buildEmptyState('No past shift handovers recorded yet.', Icons.assignment_outlined)
-          else
-            ...handovers.map((h) => _buildHandoverHistoryCard(context, state, h, isMobile)),
+          const SizedBox(height: 12),
+
+          // 4. Shift Handover Audit Logs
+          ExpandableActionCard(
+            icon: const Icon(Icons.fact_check_rounded, color: AppColors.primary, size: 22),
+            iconBackgroundColor: AppColors.primary.withOpacity(0.12),
+            borderColor: AppColors.primary,
+            title: state.tr('shiftHandoverLogs'),
+            subtitle: 'Signed inventory handoffs between shifts',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${handovers.length} Logs', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.primary)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: handovers.isEmpty
+                ? _buildEmptyState('No past shift handovers recorded yet.', Icons.assignment_outlined)
+                : Column(children: handovers.map((h) => _buildHandoverHistoryCard(context, state, h, isMobile)).toList()),
+          ),
         ],
       ),
     );

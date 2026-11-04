@@ -2119,6 +2119,31 @@ class AppStrings {
       AppLanguage.om: 'Komishiiniin torbanii milkaa\'inaan kaffalamee mirkanaa\'eera!',
       AppLanguage.am: 'ሳምንታዊ ኮሚሽን በተሳካ ሁኔታ ተከፍሎ ተረጋግጧል!',
     },
+    'adminWasherHubTitle': {
+      AppLanguage.en: 'Washer Team Operations & 7-Day Matrix',
+      AppLanguage.om: 'Hojii Garee Dhiqxootaa fi Maatriksii Guyyaa 7',
+      AppLanguage.am: 'የአጣቢዎች ቡድን ስራዎች እና የ7 ቀን ማትሪክስ',
+    },
+    'sevenDayMatrix': {
+      AppLanguage.en: '7-Day Payroll Matrix',
+      AppLanguage.om: 'Maatriksii Mindaa Guyyaa 7',
+      AppLanguage.am: 'የ7 ቀን የደመወዝ ማትሪክስ',
+    },
+    'liveRosterAndSwitches': {
+      AppLanguage.en: 'Live Shift Attendance Roster',
+      AppLanguage.om: 'Galmee Hojii Dhiqxootaa Ammee',
+      AppLanguage.am: 'የቀጥታ የአጣቢዎች የስራ ምዝገባ',
+    },
+    'emptyRefillExchangeTitle': {
+      AppLanguage.en: 'Empty Return & Refill Desk (ዕቃ በዕቃ)',
+      AppLanguage.om: 'Iddoo Meeshaa Qullaa Deebisanii Guutuu (ዕቃ በዕቃ)',
+      AppLanguage.am: 'የባዶ እቃ መልሶ መሙያ ጠረጴዛ (ዕቃ በዕቃ)',
+    },
+    'emptyRefillExchangeSub': {
+      AppLanguage.en: 'Issue chemicals & soaps strictly upon returning empty bottles',
+      AppLanguage.om: 'Qorichaa fi saamunaa qullaa deebisuun qofa kenni',
+      AppLanguage.am: 'ኬሚካሎችና ሳሙናዎችን ባዶ እቃ ሲመለስ ብቻ ይስጡ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

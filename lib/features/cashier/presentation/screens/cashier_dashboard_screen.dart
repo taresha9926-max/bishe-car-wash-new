@@ -216,7 +216,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.blueAccent),
                   ),
                 ),
-                initiallyExpanded: true,
+                initiallyExpanded: !isMobile,
                 child: filteredBookings.isEmpty
                     ? Container(
                         padding: const EdgeInsets.all(24),

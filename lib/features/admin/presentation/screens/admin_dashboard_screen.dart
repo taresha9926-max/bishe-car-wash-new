@@ -6,6 +6,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/modern_expandable_card.dart';
+import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/rounded_meter_bar.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
@@ -458,7 +459,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 child: _buildStandardFinancialStatementCard(context, state, isMobile, totalRevenue, commissionPool, totalPettyCash, totalSupplies, totalFixedAssets),
               ),
 
-              // D. Weekly Washer Commission Reports
+              // D. Shared Master Washer Team, Attendance & Commission Hub
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: SharedWasherCommissionHub(
+                  state: state,
+                  role: WasherHubRole.admin,
+                  isMobile: isMobile,
+                  initiallyExpanded: false,
+                ),
+              ),
+
+              // E. Weekly Washer Commission Reports
               ModernExpandableCard(
                 title: 'Weekly Washer Commission Reports',
                 subtitle: 'Cashier-submitted weekly payout ledgers and audits',
@@ -2726,7 +2738,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           elevation: 0,
                         ),
                         icon: const Icon(Icons.sync_rounded, size: 16),
-                        label: const Text('🔄 1-Click Sync All to @bishecarwash', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        label: const Text('1-Click Sync All to @bishecarwash', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                         onPressed: () async {
                           final synced = <TikTokAdVideo>[];
                           final count = AutoCareAssets.officialTikTokVideos.length;
@@ -2764,7 +2776,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         ),
                         onPressed: () => _showBatchImportDialog(context, reels, setDialogState, state),
                         icon: const Icon(Icons.playlist_add_rounded, size: 16),
-                        label: const Text('📋 Batch Paste Links', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        label: const Text('Batch Paste Links', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(

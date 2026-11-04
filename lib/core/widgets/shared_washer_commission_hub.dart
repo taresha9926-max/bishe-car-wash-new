@@ -33,11 +33,12 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
   late AnimationController _animController;
   late Animation<double> _chevronTurns;
   int _selectedWeekOffset = 0;
+  bool _adminShowLiveRoster = false;
 
   @override
   void initState() {
     super.initState();
-    _isExpanded = widget.initiallyExpanded;
+    _isExpanded = widget.isMobile ? false : widget.initiallyExpanded;
     _animController = AnimationController(
       duration: const Duration(milliseconds: 220),
       vsync: this,
@@ -156,7 +157,9 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                             Text(
                               isCashier
                                   ? state.tr('dailyWasherCommissionPool')
-                                  : state.tr('weeklyPayrollMatrix'),
+                                  : (widget.role == WasherHubRole.admin
+                                      ? state.tr('adminWasherHubTitle')
+                                      : state.tr('weeklyPayrollMatrix')),
                               style: const TextStyle(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w800,
@@ -418,15 +421,27 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                     padding: const EdgeInsets.all(14),
                     child: isCashier
                         ? _buildCashierExpandedContent(context, state, washers, dividends, pool)
-                        : _buildAccountantExpandedContent(
-                            context,
-                            state,
-                            washers,
-                            weeklyPool,
-                            weekDays,
-                            dayLabels,
-                            isMobile,
-                          ),
+                        : (widget.role == WasherHubRole.admin
+                            ? _buildAdminExpandedContent(
+                                context,
+                                state,
+                                washers,
+                                dividends,
+                                pool,
+                                weeklyPool,
+                                weekDays,
+                                dayLabels,
+                                isMobile,
+                              )
+                            : _buildAccountantExpandedContent(
+                                context,
+                                state,
+                                washers,
+                                weeklyPool,
+                                weekDays,
+                                dayLabels,
+                                isMobile,
+                              )),
                   ),
                 ],
               ),
@@ -620,6 +635,79 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
             ),
           );
         }),
+      ],
+    );
+  }
+
+  // --- ADMIN EXPANDED VIEW (TOGGLE BETWEEN 7-DAY MATRIX & LIVE SHIFT ROSTER) ---
+  Widget _buildAdminExpandedContent(
+    BuildContext context,
+    dynamic state,
+    List<StaffMember> washers,
+    Map<String, dynamic> dividends,
+    double pool,
+    double weeklyPool,
+    List<DateTime> weekDays,
+    List<String> dayLabels,
+    bool isMobile,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: ChoiceChip(
+                  label: Center(
+                    child: Text(
+                      state.tr('sevenDayMatrix'),
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: !_adminShowLiveRoster ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  selected: !_adminShowLiveRoster,
+                  selectedColor: AppColors.primary,
+                  onSelected: (val) => setState(() => _adminShowLiveRoster = !val),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ChoiceChip(
+                  label: Center(
+                    child: Text(
+                      state.tr('liveRosterAndSwitches'),
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: _adminShowLiveRoster ? Colors.white : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  selected: _adminShowLiveRoster,
+                  selectedColor: AppColors.primary,
+                  onSelected: (val) => setState(() => _adminShowLiveRoster = val),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (_adminShowLiveRoster)
+          _buildCashierExpandedContent(context, state, washers, dividends, pool)
+        else
+          _buildAccountantExpandedContent(
+            context,
+            state,
+            washers,
+            weeklyPool,
+            weekDays,
+            dayLabels,
+            isMobile,
+          ),
       ],
     );
   }

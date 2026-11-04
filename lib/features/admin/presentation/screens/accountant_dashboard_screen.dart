@@ -227,48 +227,77 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           const SizedBox(height: 16),
 
-          Text(
-            'Submitted Daily Closings (${filteredClosings.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 1. Submitted Daily Closings
+          ExpandableActionCard(
+            icon: const Icon(Icons.point_of_sale_rounded, color: Colors.blueAccent, size: 22),
+            iconBackgroundColor: Colors.blueAccent.withOpacity(0.12),
+            borderColor: Colors.blueAccent,
+            title: 'Submitted Daily Closings',
+            subtitle: 'Reconciliation of gross/net drawer cash and digital receipts',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${filteredClosings.length} Closings', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.blueAccent)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: filteredClosings.isEmpty
+                ? _buildEmptyState('No daily shift closings found for $_auditDateRange.', Icons.point_of_sale)
+                : Column(children: filteredClosings.map((c) => _buildClosingAuditCard(context, state, c, isMobile)).toList()),
           ),
-          const SizedBox(height: 10),
-          if (filteredClosings.isEmpty)
-            _buildEmptyState('No daily shift closings found for $_auditDateRange.', Icons.point_of_sale)
-          else
-            ...filteredClosings.map((c) => _buildClosingAuditCard(context, state, c, isMobile)),
 
-          const SizedBox(height: 20),
-          Text(
-            'Digital Payment Receipts & Verification (${filteredDigitalBookings.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 2. Digital Payment Receipts & Verification
+          ExpandableActionCard(
+            icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.telebirrBlue, size: 22),
+            iconBackgroundColor: AppColors.telebirrBlue.withOpacity(0.12),
+            borderColor: AppColors.telebirrBlue,
+            title: 'Digital Payment Receipts & Verification',
+            subtitle: 'Telebirr, CBE Birr & Awash mobile bank slip audits',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: AppColors.telebirrBlue.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${filteredDigitalBookings.length} Receipts', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.telebirrBlue)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: filteredDigitalBookings.isEmpty
+                ? _buildEmptyState('No digital payment receipts found for $_auditDateRange.', Icons.qr_code_scanner_rounded)
+                : Column(children: filteredDigitalBookings.map((b) => _buildDigitalPaymentCard(context, state, b, isMobile)).toList()),
           ),
-          const SizedBox(height: 10),
-          if (filteredDigitalBookings.isEmpty)
-            _buildEmptyState('No digital payment receipts found for $_auditDateRange.', Icons.qr_code_scanner_rounded)
-          else
-            ...filteredDigitalBookings.map((b) => _buildDigitalPaymentCard(context, state, b, isMobile)),
 
-          const SizedBox(height: 20),
-          Text(
-            'Cash Recieved by Cashier Deposited to Bank Log (${filteredDeposits.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 3. Cash Recieved by Cashier Deposited to Bank Log
+          ExpandableActionCard(
+            icon: const Icon(Icons.account_balance_rounded, color: Colors.teal, size: 22),
+            iconBackgroundColor: Colors.teal.withOpacity(0.12),
+            borderColor: Colors.teal,
+            title: 'Cash Deposited to Bank (Account A & B)',
+            subtitle: 'CBE & Awash stamped slip verification and drawer bank balance',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: Colors.teal.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${filteredDeposits.length} Deposits', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.teal)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: filteredDeposits.isEmpty
+                ? _buildEmptyState('No bank deposit slips found for $_auditDateRange.', Icons.receipt_outlined)
+                : Column(children: filteredDeposits.map((d) => _buildDepositCard(context, state, d, isMobile)).toList()),
           ),
-          const SizedBox(height: 10),
-          if (filteredDeposits.isEmpty)
-            _buildEmptyState('No bank deposit slips found for $_auditDateRange.', Icons.receipt_outlined)
-          else
-            ...filteredDeposits.map((d) => _buildDepositCard(context, state, d, isMobile)),
 
-          const SizedBox(height: 20),
-          Text(
-            'Petty Cash & Emergency Spend Log (${filteredPetty.length}):',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          // 4. Petty Cash & Emergency Spend Log
+          ExpandableActionCard(
+            icon: const Icon(Icons.outbox_rounded, color: Colors.deepOrangeAccent, size: 22),
+            iconBackgroundColor: Colors.deepOrangeAccent.withOpacity(0.12),
+            borderColor: Colors.deepOrangeAccent,
+            title: 'Petty Cash & Emergency Spends',
+            subtitle: 'Incidentals & cashier minor expense slips',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: Colors.deepOrangeAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${filteredPetty.length} Logs', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.deepOrangeAccent)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: filteredPetty.isEmpty
+                ? _buildEmptyState('No petty cash expenses found for $_auditDateRange.', Icons.outbox_rounded)
+                : Column(children: filteredPetty.map((p) => _buildPettyCashCard(context, state, p, isMobile)).toList()),
           ),
-          const SizedBox(height: 10),
-          if (filteredPetty.isEmpty)
-            _buildEmptyState('No petty cash expenses found for $_auditDateRange.', Icons.outbox_rounded)
-          else
-            ...filteredPetty.map((p) => _buildPettyCashCard(context, state, p, isMobile)),
         ],
       ),
     );
@@ -725,91 +754,107 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           const SizedBox(height: 18),
 
           // 1. Daily Consumed Supplies (Empty-for-Full Exchanges)
-          const Text(
-            'Daily Consumed Supplies Reported by Storekeeper (Empty-for-Full):',
-            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 10),
-          if (consumed.isEmpty)
-            _buildEmptyState('No daily consumable usage reported by storekeeper yet.', Icons.autorenew_rounded)
-          else
-            ...consumed.map((t) => Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.getInventoryImage(t.itemName),
-                  width: 40,
-                  height: 40,
-                  borderRadius: 8,
-                  fallbackIcon: Icons.water_drop_rounded,
-                  fallbackColor: Colors.teal,
-                ),
-                title: Text(t.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
-                subtitle: Text(
-                  '${t.quantity} ${t.unit} consumed • ${t.supplier} (${t.date.day}/${t.date.month})\n${t.notes}',
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                ),
-                trailing: Text(
-                  CurrencyFormatter.format(t.totalCostEtb),
-                  style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange, fontSize: 13),
-                ),
-              ),
-            )),
-
-          const SizedBox(height: 20),
-
-          // 2. Inventory Goods Received Notes (GRN - Supplier Purchases)
-          const Text(
-            'Inventory Goods Received Notes (GRN - Purchases):',
-            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 10),
-          if (restocks.isEmpty)
-            _buildEmptyState('No inventory purchases logged by storekeeper yet.', Icons.shopping_bag_outlined)
-          else
-            ...restocks.map((t) => Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        AutoCareAssets.buildPhotoThumbnail(
+          ExpandableActionCard(
+            icon: const Icon(Icons.autorenew_rounded, color: Color(0xFF0D9488), size: 22),
+            iconBackgroundColor: const Color(0xFF0D9488).withOpacity(0.12),
+            borderColor: const Color(0xFF0D9488),
+            title: 'Daily Consumed Supplies (Empty-for-Full)',
+            subtitle: 'Reported chemical usage from storekeeper',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${consumed.length} Consumed', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF0D9488))),
+            ),
+            initiallyExpanded: !isMobile,
+            child: consumed.isEmpty
+                ? _buildEmptyState('No daily consumable usage reported by storekeeper yet.', Icons.autorenew_rounded)
+                : Column(
+                    children: consumed.map((t) => Card(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        leading: AutoCareAssets.buildPhotoThumbnail(
                           imageUrl: AutoCareAssets.getInventoryImage(t.itemName),
-                          width: 36,
-                          height: 36,
+                          width: 40,
+                          height: 40,
                           borderRadius: 8,
-                          fallbackIcon: Icons.inventory_2_rounded,
-                          fallbackColor: AppColors.primary,
+                          fallbackIcon: Icons.water_drop_rounded,
+                          fallbackColor: Colors.teal,
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(t.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                        title: Text(t.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                        subtitle: Text(
+                          '${t.quantity} ${t.unit} consumed • ${t.supplier} (${t.date.day}/${t.date.month})\n${t.notes}',
+                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                         ),
-                        Text(CurrencyFormatter.format(t.totalCostEtb), style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.red, fontSize: 13.5)),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${t.quantity} ${t.unit.isNotEmpty ? t.unit : "units"} @ ${CurrencyFormatter.format(t.unitCostEtb)} / ${t.unit.isNotEmpty ? t.unit : "unit"} • Supplier: ${t.supplier}',
-                      style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-                    ),
-                    if (t.invoiceScreenshot != null && t.invoiceScreenshot!.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      TextButton.icon(
-                        icon: const Icon(Icons.receipt_rounded, size: 14),
-                        label: const Text('View Invoice Attachment', style: TextStyle(fontSize: 11)),
-                        onPressed: () => _viewImageDialog(context, 'Invoice: ${t.itemName}', t.invoiceScreenshot!),
+                        trailing: Text(
+                          CurrencyFormatter.format(t.totalCostEtb),
+                          style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange, fontSize: 13),
+                        ),
                       ),
-                    ],
-                  ],
-                ),
-              ),
-            )),
+                    )).toList(),
+                  ),
+          ),
+
+          // 2. Inventory Goods Received Notes (GRN - Purchases)
+          ExpandableActionCard(
+            icon: const Icon(Icons.shopping_bag_outlined, color: AppColors.primary, size: 22),
+            iconBackgroundColor: AppColors.primary.withOpacity(0.12),
+            borderColor: AppColors.primary,
+            title: 'Inventory Goods Received Notes (GRN)',
+            subtitle: 'Inbound supplier purchases & invoice audits',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${restocks.length} Invoices', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.primary)),
+            ),
+            initiallyExpanded: !isMobile,
+            child: restocks.isEmpty
+                ? _buildEmptyState('No inventory purchases logged by storekeeper yet.', Icons.shopping_bag_outlined)
+                : Column(
+                    children: restocks.map((t) => Card(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                AutoCareAssets.buildPhotoThumbnail(
+                                  imageUrl: AutoCareAssets.getInventoryImage(t.itemName),
+                                  width: 36,
+                                  height: 36,
+                                  borderRadius: 8,
+                                  fallbackIcon: Icons.inventory_2_rounded,
+                                  fallbackColor: AppColors.primary,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(t.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                                ),
+                                Text(CurrencyFormatter.format(t.totalCostEtb), style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.red, fontSize: 13.5)),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${t.quantity} ${t.unit.isNotEmpty ? t.unit : "units"} @ ${CurrencyFormatter.format(t.unitCostEtb)} / ${t.unit.isNotEmpty ? t.unit : "unit"} • Supplier: ${t.supplier}',
+                              style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                            ),
+                            if (t.invoiceScreenshot != null && t.invoiceScreenshot!.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              TextButton.icon(
+                                icon: const Icon(Icons.receipt_rounded, size: 14),
+                                label: const Text('View Invoice Attachment', style: TextStyle(fontSize: 11)),
+                                onPressed: () => _viewImageDialog(context, 'Invoice: ${t.itemName}', t.invoiceScreenshot!),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    )).toList(),
+                  ),
+          ),
         ],
       ),
     );
