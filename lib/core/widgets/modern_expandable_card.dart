@@ -152,6 +152,8 @@ class _ModernExpandableCardState extends State<ModernExpandableCard>
                             Flexible(
                               child: Text(
                                 widget.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontSize: 14.5,
                                   fontWeight: FontWeight.w800,
@@ -161,24 +163,28 @@ class _ModernExpandableCardState extends State<ModernExpandableCard>
                             ),
                             if (widget.badgeText != null) ...[
                               const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: (widget.badgeColor ?? widget.gradientColors.first)
-                                      .withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
                                     color: (widget.badgeColor ?? widget.gradientColors.first)
-                                        .withValues(alpha: 0.25),
-                                    width: 0.8,
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: (widget.badgeColor ?? widget.gradientColors.first)
+                                          .withValues(alpha: 0.25),
+                                      width: 0.8,
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  widget.badgeText!,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    color: widget.badgeColor ?? widget.gradientColors.first,
+                                  child: Text(
+                                    widget.badgeText!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      color: widget.badgeColor ?? widget.gradientColors.first,
+                                    ),
                                   ),
                                 ),
                               ),

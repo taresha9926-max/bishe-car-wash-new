@@ -252,38 +252,47 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.speed_rounded, color: AppColors.primary, size: 18),
                     ),
-                    child: const Icon(Icons.speed_rounded, color: AppColors.primary, size: 18),
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Live Turnaround & Queue Status',
-                        style: TextStyle(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Live Turnaround & Queue Status',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            totalCarsAhead == 0
+                                ? state.tr('noQueueImmediate')
+                                : '$totalCarsAhead ${state.tr("vehiclesAhead")}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                          ),
+                        ],
                       ),
-                      Text(
-                        totalCarsAhead == 0
-                            ? state.tr('noQueueImmediate')
-                            : '$totalCarsAhead ${state.tr("vehiclesAhead")}',
-                        style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -291,6 +300,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.shield_outlined, size: 11, color: AppColors.textMuted),
                     const SizedBox(width: 3),
@@ -816,6 +826,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     children: [
                       Text(
                         pkg.localizedName(state.currentLang),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -825,16 +837,20 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: AppColors.cardBorder),
-                            ),
-                            child: Text(
-                              '~${pkg.durationMinutes} ${state.tr("minWait")}',
-                              style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w700),
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: AppColors.background,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: AppColors.cardBorder),
+                              ),
+                              child: Text(
+                                '~${pkg.durationMinutes} ${state.tr("minWait")}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w700),
+                              ),
                             ),
                           ),
                         ],
@@ -1112,45 +1128,56 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.statusPending.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.location_on_rounded, color: AppColors.statusPending, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 360;
+          final infoRow = Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.statusPending.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.location_on_rounded, color: AppColors.statusPending, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      state.tr('locateBisheStation'),
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            state.tr('locateBisheStation'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                          decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                          child: const Text('GPS', style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.green)),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                      decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                      child: const Text('GPS', style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.green)),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Bishoftu (Debre Zeyit) • Auto Care Station',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
-                const Text(
-                  'Bishoftu (Debre Zeyit) • Auto Care Station',
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton.icon(
+              ),
+            ],
+          );
+
+          final mapsButton = ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
@@ -1161,8 +1188,27 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             icon: const Icon(Icons.navigation_rounded, size: 14),
             label: Text(state.tr('openGoogleMaps'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
             onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-          ),
-        ],
+          );
+
+          if (isNarrow) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                infoRow,
+                const SizedBox(height: 10),
+                mapsButton,
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              Expanded(child: infoRow),
+              const SizedBox(width: 8),
+              mapsButton,
+            ],
+          );
+        },
       ),
     );
   }

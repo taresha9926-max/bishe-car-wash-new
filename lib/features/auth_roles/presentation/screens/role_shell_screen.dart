@@ -142,13 +142,14 @@ class RoleShellScreen extends StatelessWidget {
   }
 
   Widget _buildNavigationRail(BuildContext context, dynamic state, UserRole currentRole) {
-    return Container(
-      width: 230,
+    return Material(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Container(
+        width: 230,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Row(
             children: [
               Container(
@@ -255,6 +256,7 @@ class RoleShellScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

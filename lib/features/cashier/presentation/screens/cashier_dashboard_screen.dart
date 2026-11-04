@@ -1336,6 +1336,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 tab.title,
                 tab.icon,
                 _selectedFilterIndex == tab.index,
+                isMobile: true,
               ),
             );
           }).toList(),
@@ -1348,14 +1349,31 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         return Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: _buildFilterTabButton(tab.index, tab.title, tab.icon, _selectedFilterIndex == tab.index),
+            child: _buildFilterTabButton(
+              tab.index,
+              tab.title,
+              tab.icon,
+              _selectedFilterIndex == tab.index,
+              isMobile: false,
+            ),
           ),
         );
       }).toList(),
     );
   }
 
-  Widget _buildFilterTabButton(int index, String title, IconData icon, bool isSelected) {
+  Widget _buildFilterTabButton(int index, String title, IconData icon, bool isSelected, {required bool isMobile}) {
+    final textWidget = Text(
+      title,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+        color: isSelected ? Colors.white : AppColors.textPrimary,
+      ),
+    );
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1395,6 +1413,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   ],
           ),
           child: Row(
+            mainAxisSize: isMobile ? MainAxisSize.min : MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
@@ -1403,18 +1422,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 color: isSelected ? Colors.white : AppColors.textSecondary,
               ),
               const SizedBox(width: 5),
-              Flexible(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? Colors.white : AppColors.textPrimary,
-                  ),
-                ),
-              ),
+              if (isMobile)
+                textWidget
+              else
+                Flexible(child: textWidget),
             ],
           ),
         ),

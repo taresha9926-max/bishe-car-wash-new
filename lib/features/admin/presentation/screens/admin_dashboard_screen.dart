@@ -264,14 +264,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Executive Real-Time Metrics',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                              const Expanded(
+                                child: Text(
+                                  'Executive Real-Time Metrics',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                 decoration: BoxDecoration(
@@ -384,14 +389,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    state.tr('managementOperations'),
-                    style: TextStyle(
-                      fontSize: isMobile ? 15.5 : 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                  Expanded(
+                    child: Text(
+                      state.tr('managementOperations'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: isMobile ? 15.5 : 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
@@ -608,10 +618,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                state.tr('cashVsDigital'),
-                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              Expanded(
+                child: Text(
+                  state.tr('cashVsDigital'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 '${CurrencyFormatter.format(total)} Total',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
@@ -1573,22 +1588,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     child: Icon(op.icon, color: op.color, size: 20),
                   ),
-                  if (op.badge != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: op.color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        op.badge!,
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w800,
-                          color: op.color,
+                  if (op.badge != null) ...[
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: op.color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          op.badge!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: op.color,
+                          ),
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
               const SizedBox(height: 10),
@@ -2059,12 +2080,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      state.tr('adminTitle'),
-                      style: TextStyle(
-                        fontSize: isMobile ? 14 : 15,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
+                    Flexible(
+                      child: Text(
+                        state.tr('adminTitle'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: isMobile ? 14 : 15,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
