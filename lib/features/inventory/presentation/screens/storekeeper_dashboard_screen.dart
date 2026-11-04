@@ -3,11 +3,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
-import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
-import '../../../../core/widgets/floating_pill_nav_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
-import '../../../../core/widgets/rounded_meter_bar.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/consumable_item.dart';
 import '../../domain/models/daily_handover.dart';
@@ -31,7 +28,6 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(() => setState(() {}));
   }
 
   @override
@@ -44,156 +40,30 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isMobile = ResponsiveLayout.isMobile(context);
-    final consumables = state.consumables as List<ConsumableItem>;
-    final fixedAssets = state.fixedAssets as List<FixedAsset>;
-    final inStockCount = consumables.where((c) => c.currentStock > 0).length;
-    final stockHealth = consumables.isEmpty ? 1.0 : (inStockCount / consumables.length);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('storekeeperRole'),
       ),
-      bottomNavigationBar: FloatingPillNavBar(
-        selectedIndex: _tabController.index,
-        onItemSelected: (idx) => _tabController.animateTo(idx),
-        items: const [
-          FloatingNavItem(
-            icon: Icons.autorenew_rounded,
-            label: 'ዕቃ በዕቃ',
-          ),
-          FloatingNavItem(
-            icon: Icons.inventory_2_rounded,
-            label: 'አላቂ',
-          ),
-          FloatingNavItem(
-            icon: Icons.build_circle_rounded,
-            label: 'ቋሚ',
-          ),
-        ],
-      ),
       body: Column(
         children: [
-          // Storekeeper Stock KPI Overview Banner
-          Container(
-            margin: EdgeInsets.fromLTRB(isMobile ? 12 : 18, 12, isMobile ? 12 : 18, 4),
-            padding: EdgeInsets.all(isMobile ? 14 : 18),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF042F2E), Color(0xFF0D9488)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF042F2E).withValues(alpha: 0.35),
-                  blurRadius: 16,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                AnimatedCircularRing(
-                  progress: stockHealth,
-                  size: isMobile ? 74 : 84,
-                  strokeWidth: 7,
-                  primaryColor: const Color(0xFF2DD4BF),
-                  secondaryColor: const Color(0xFF5EEAD4),
-                  trackColor: const Color(0xFF021B1A),
-                  centerValue: '${(stockHealth * 100).toInt()}%',
-                  centerLabel: 'Stocked',
-                  valueStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
-                  labelStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Color(0xFF5EEAD4)),
-                ),
-                SizedBox(width: isMobile ? 12 : 18),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Storehouse Inventory Status',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF14B8A6).withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: const Color(0xFF14B8A6).withValues(alpha: 0.5), width: 0.8),
-                            ),
-                            child: Text(
-                              '$inStockCount/${consumables.length} Items In Stock',
-                              style: const TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF5EEAD4),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 7),
-                      RoundedMeterBar(
-                        progress: 1.0,
-                        label: 'Empty Return Rate (ዕቃ በዕቃ)',
-                        valueText: '100% Accounted',
-                        gradientColors: const [Color(0xFF2DD4BF), Color(0xFF14B8A6)],
-                        trackColor: const Color(0xFF021B1A),
-                        labelColor: Colors.white70,
-                        valueColor: const Color(0xFF2DD4BF),
-                        height: 6,
-                      ),
-                      const SizedBox(height: 7),
-                      RoundedMeterBar(
-                        progress: fixedAssets.isEmpty ? 1.0 : (fixedAssets.where((a) => a.condition != 'broken').length / fixedAssets.length),
-                        label: 'Fixed Assets Operational (ቋሚ)',
-                        valueText: '${fixedAssets.length} Assets',
-                        gradientColors: const [Color(0xFF38BDF8), Color(0xFF2563EB)],
-                        trackColor: const Color(0xFF021B1A),
-                        labelColor: Colors.white70,
-                        valueColor: const Color(0xFF38BDF8),
-                        height: 6,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
           // Sub-header tabs
           Container(
-            margin: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 18, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
-              borderRadius: BorderRadius.circular(12),
-            ),
+            color: Colors.white,
             child: TabBar(
               controller: _tabController,
               isScrollable: isMobile,
               tabAlignment: isMobile ? TabAlignment.start : TabAlignment.fill,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: const Color(0xFF0D9488),
-              ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white60,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicatorColor: AppColors.primary,
+              indicatorWeight: 3,
+              labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
               tabs: const [
-                Tab(icon: Icon(Icons.autorenew_rounded, size: 16), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
-                Tab(icon: Icon(Icons.inventory_2_rounded, size: 16), text: 'Consumables (አላቂ)'),
-                Tab(icon: Icon(Icons.build_circle_rounded, size: 16), text: 'Fixed Assets (ቋሚ)'),
+                Tab(icon: Icon(Icons.autorenew_rounded, size: 18), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
+                Tab(icon: Icon(Icons.inventory_2_rounded, size: 18), text: 'Consumables (አላቂ)'),
+                Tab(icon: Icon(Icons.build_circle_rounded, size: 18), text: 'Fixed Assets (ቋሚ)'),
               ],
             ),
           ),
@@ -236,13 +106,17 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             children: [
               const Icon(Icons.autorenew_rounded, size: 20, color: Color(0xFF0D9488)),
               const SizedBox(width: 8),
-              const Text(
-                'Recent Empty-for-Full Refill Exchanges',
-                style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              const Expanded(
+                child: Text(
+                  'Recent Empty-for-Full Refill Exchanges',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Text(
-                '${exchanges.length} Exchanges Logged',
+                '${exchanges.length} Logged',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
               ),
             ],
@@ -290,11 +164,15 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             children: [
               const Icon(Icons.history_rounded, size: 20, color: AppColors.textPrimary),
               const SizedBox(width: 8),
-              const Text(
-                'Shift Handover Audit Logs',
-                style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              const Expanded(
+                child: Text(
+                  'Shift Handover Audit Logs',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Text(
                 '${handovers.length} Total Logs',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
@@ -892,16 +770,10 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: item.isDecommissioned
-              ? Colors.grey.shade400
-              : (isLow
-                  ? const Color(0xFFEF4444)
-                  : const Color(0xFF0D9488).withValues(alpha: 0.25)),
-          width: isLow ? 1.5 : 1.2,
+          color: item.isDecommissioned ? Colors.grey.shade400 : (isLow ? Colors.red.shade300 : Colors.transparent),
+          width: isLow ? 1.5 : 1,
         ),
       ),
-      elevation: 2,
-      shadowColor: isLow ? const Color(0xFFEF4444).withValues(alpha: 0.12) : const Color(0xFF0D9488).withValues(alpha: 0.08),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -1105,12 +977,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: condColor.withValues(alpha: 0.35), width: 1.2),
-      ),
-      elevation: 2,
-      shadowColor: condColor.withValues(alpha: 0.10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(

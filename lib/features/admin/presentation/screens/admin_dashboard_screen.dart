@@ -5,7 +5,6 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
-import '../../../../core/widgets/floating_pill_nav_bar.dart';
 import '../../../../core/widgets/modern_expandable_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/rounded_meter_bar.dart';
