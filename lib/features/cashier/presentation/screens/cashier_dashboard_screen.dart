@@ -1367,30 +1367,39 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       children: [
         // Card Grid View with 3 Rows (2 cards per row)
         // Row 1
-        Row(
-          children: [
-            Expanded(child: _buildCashierModuleCard(context, modules[0], 0, isMobile)),
-            const SizedBox(width: 10),
-            Expanded(child: _buildCashierModuleCard(context, modules[1], 1, isMobile)),
-          ],
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _buildCashierModuleCard(context, modules[0], 0, isMobile)),
+              const SizedBox(width: 10),
+              Expanded(child: _buildCashierModuleCard(context, modules[1], 1, isMobile)),
+            ],
+          ),
         ),
         const SizedBox(height: 10),
         // Row 2
-        Row(
-          children: [
-            Expanded(child: _buildCashierModuleCard(context, modules[2], 2, isMobile)),
-            const SizedBox(width: 10),
-            Expanded(child: _buildCashierModuleCard(context, modules[3], 3, isMobile)),
-          ],
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _buildCashierModuleCard(context, modules[2], 2, isMobile)),
+              const SizedBox(width: 10),
+              Expanded(child: _buildCashierModuleCard(context, modules[3], 3, isMobile)),
+            ],
+          ),
         ),
         const SizedBox(height: 10),
         // Row 3
-        Row(
-          children: [
-            Expanded(child: _buildCashierModuleCard(context, modules[4], 4, isMobile)),
-            const SizedBox(width: 10),
-            Expanded(child: _buildCashierModuleCard(context, modules[5], 5, isMobile)),
-          ],
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _buildCashierModuleCard(context, modules[4], 4, isMobile)),
+              const SizedBox(width: 10),
+              Expanded(child: _buildCashierModuleCard(context, modules[5], 5, isMobile)),
+            ],
+          ),
         ),
 
         // Active Expanded Content Panel
