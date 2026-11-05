@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 
 /// A modern, colorful expandable card designed for mobile-first views.
 /// Allows bulky screen sections to be collapsed or expanded with smooth animations,
@@ -8,6 +9,7 @@ class ModernExpandableCard extends StatefulWidget {
   final String title;
   final String? subtitle;
   final IconData icon;
+  final String? imageUrl;
   final List<Color> gradientColors;
   final String? badgeText;
   final Color? badgeColor;
@@ -22,6 +24,7 @@ class ModernExpandableCard extends StatefulWidget {
     required this.title,
     this.subtitle,
     required this.icon,
+    this.imageUrl,
     this.gradientColors = const [AppColors.primary, AppColors.secondary],
     this.badgeText,
     this.badgeColor,
@@ -120,26 +123,35 @@ class _ModernExpandableCardState extends State<ModernExpandableCard>
               ),
               child: Row(
                 children: [
-                  // Gradient Icon Container
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: widget.gradientColors,
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: widget.gradientColors.first.withValues(alpha: 0.25),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                  // Leading Thumbnail or Gradient Icon
+                  widget.imageUrl != null
+                      ? AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: widget.imageUrl!,
+                          width: 36,
+                          height: 36,
+                          borderRadius: 10,
+                          fallbackIcon: widget.icon,
+                          fallbackColor: widget.gradientColors.first,
+                        )
+                      : Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: widget.gradientColors,
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: widget.gradientColors.first.withValues(alpha: 0.25),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(widget.icon, color: Colors.white, size: 20),
                         ),
-                      ],
-                    ),
-                    child: Icon(widget.icon, color: Colors.white, size: 20),
-                  ),
                   const SizedBox(width: 12),
 
                   // Title & Subtitle

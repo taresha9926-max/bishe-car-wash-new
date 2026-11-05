@@ -23,6 +23,8 @@ class AutoCareAssets {
       'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400&auto=format&fit=crop&q=80';
   static const String carTruckUrl =
       'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&auto=format&fit=crop&q=80';
+  static const String carCockpitUrl =
+      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&auto=format&fit=crop&q=80';
 
   // Detailing Service Tiers
   static const String packageFoamUrl =

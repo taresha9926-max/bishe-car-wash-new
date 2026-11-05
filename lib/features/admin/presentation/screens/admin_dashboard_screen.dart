@@ -53,6 +53,7 @@ class _OperationItem {
   final String title;
   final String subtitle;
   final IconData icon;
+  final String? imageUrl;
   final Color color;
   final String? badge;
   final VoidCallback onTap;
@@ -61,6 +62,7 @@ class _OperationItem {
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.imageUrl,
     required this.color,
     this.badge,
     required this.onTap,
@@ -349,6 +351,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         '$completedCars ${state.tr("carsWashed")}',
                         Icons.account_balance_wallet_rounded,
                         AppColors.primary,
+                        imageUrl: AutoCareAssets.stationBayUrl,
                         isMobile: isMobile,
                       ),
                       _buildMetricCard(
@@ -357,6 +360,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         '${(state.teamCommissionRate * 100).toStringAsFixed(0)}% team pool',
                         Icons.handshake_rounded,
                         AppColors.oromiaGold,
+                        imageUrl: AutoCareAssets.packageFoamUrl,
                         isMobile: isMobile,
                       ),
                       _buildMetricCard(
@@ -365,6 +369,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         state.tr('afterPayrollCuts'),
                         Icons.trending_up_rounded,
                         AppColors.statusReady,
+                        imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
                         isMobile: isMobile,
                       ),
                       _buildMetricCard(
@@ -373,6 +378,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         '${state.totalWashersCount} total washers',
                         Icons.groups_rounded,
                         AppColors.secondary,
+                        imageUrl: AutoCareAssets.valetDriverUrl,
                         isMobile: isMobile,
                       ),
                     ],
@@ -409,7 +415,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
-                      '5 MODULES',
+                      '6 MODULES',
                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
                     ),
                   ),
@@ -425,6 +431,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Automated Customer SMS & Hotline',
                 subtitle: 'Customer vehicle completion SMS dispatch & hotline numbers',
                 icon: Icons.sms_rounded,
+                imageUrl: AutoCareAssets.carSedanUrl,
                 gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
                 badgeText: 'Active Gateway',
                 badgeColor: const Color(0xFF4F46E5),
@@ -438,6 +445,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Welcome Screen TikTok Commercial Reels',
                 subtitle: 'Video showcase on app launch for customer engagement',
                 icon: Icons.video_library_rounded,
+                imageUrl: AutoCareAssets.packageFoamUrl,
                 gradientColors: const [Color(0xFFEC4899), Color(0xFFBE185D)],
                 badgeText: '${(state.tiktokReels as List).length} Reels',
                 badgeColor: const Color(0xFFEC4899),
@@ -451,6 +459,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Executive Financial Statement (P&L)',
                 subtitle: 'Gross revenue, COGS, operating expenses & net station profit',
                 icon: Icons.analytics_rounded,
+                imageUrl: AutoCareAssets.stationBayUrl,
                 gradientColors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
                 badgeText: 'P&L Ledger',
                 badgeColor: const Color(0xFF0F766E),
@@ -475,6 +484,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Weekly Washer Commission Reports',
                 subtitle: 'Cashier-submitted weekly payout ledgers and audits',
                 icon: Icons.assignment_turned_in_rounded,
+                imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
                 gradientColors: const [AppColors.oromiaGold, Color(0xFFD97706)],
                 badgeText: '${(state.weeklyCommissionReports as List).length} Reports',
                 badgeColor: AppColors.oromiaGold,
@@ -488,6 +498,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Digital Payment Receipts Audit',
                 subtitle: 'Telebirr, CBE Birr & Awash transaction verification',
                 icon: Icons.receipt_long_rounded,
+                imageUrl: AutoCareAssets.stationBayUrl,
                 gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
                 badgeText: '${digitalBookings.length} Receipts',
                 badgeColor: AppColors.telebirrBlue,
@@ -501,6 +512,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: 'Live Pricing Matrix Editor',
                 subtitle: 'Adjust tariff rates for sedan, SUV, minivan & heavy vehicles',
                 icon: Icons.tune_rounded,
+                imageUrl: AutoCareAssets.carTruckUrl,
                 gradientColors: const [AppColors.primary, AppColors.secondary],
                 badgeText: '${state.packages.length} Tariffs',
                 badgeColor: AppColors.primary,
@@ -514,6 +526,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title: state.tr('recentCommissions'),
                 subtitle: 'Automated 15% dividend distribution log per wash',
                 icon: Icons.stars_rounded,
+                imageUrl: AutoCareAssets.packageTireRimUrl,
                 gradientColors: const [AppColors.oromiaGold, Color(0xFFB45309)],
                 badgeText: '${recentLogs.length} Records',
                 badgeColor: AppColors.oromiaGold,
@@ -560,44 +573,76 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           final isSelected = filter == _selectedFilter;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
-              avatar: filter == AdminTimeFilter.customDate
-                  ? Icon(Icons.calendar_month_rounded, size: 16, color: isSelected ? Colors.white : AppColors.primary)
-                  : null,
-              label: Text(
-                filter.localizedLabel(state, _selectedCustomDate),
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () async {
+                  if (filter == AdminTimeFilter.customDate) {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedCustomDate ?? DateTime.now(),
+                      firstDate: DateTime(2022),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _selectedCustomDate = picked;
+                        _selectedFilter = AdminTimeFilter.customDate;
+                      });
+                    }
+                  } else {
+                    setState(() => _selectedFilter = filter);
+                  }
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primary : Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isSelected ? AppColors.primary : AppColors.cardBorder,
+                      width: isSelected ? 1.4 : 1,
+                    ),
+                    boxShadow: [
+                      if (isSelected)
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.25),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        )
+                      else
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (filter == AdminTimeFilter.customDate) ...[
+                        Icon(
+                          Icons.calendar_month_rounded,
+                          size: 15,
+                          color: isSelected ? Colors.white : AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(
+                        filter.localizedLabel(state, _selectedCustomDate),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                          color: isSelected ? Colors.white : AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              selected: isSelected,
-              selectedColor: AppColors.primary,
-              backgroundColor: Colors.white,
-              showCheckmark: false,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(color: isSelected ? AppColors.primary : AppColors.cardBorder),
-              ),
-              onSelected: (_) async {
-                if (filter == AdminTimeFilter.customDate) {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedCustomDate ?? DateTime.now(),
-                    firstDate: DateTime(2022),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      _selectedCustomDate = picked;
-                      _selectedFilter = AdminTimeFilter.customDate;
-                    });
-                  }
-                } else {
-                  setState(() => _selectedFilter = filter);
-                }
-              },
             ),
           );
         }).toList(),
@@ -981,13 +1026,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           if (isMobile) ...[
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.oromiaGold.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.receipt_long_rounded, color: AppColors.oromiaGold, size: 20),
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.receipt_long_rounded,
+                  fallbackColor: AppColors.oromiaGold,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -1042,13 +1087,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.oromiaGold.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.receipt_long_rounded, color: AppColors.oromiaGold, size: 20),
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
+                        width: 38,
+                        height: 38,
+                        borderRadius: 10,
+                        fallbackIcon: Icons.receipt_long_rounded,
+                        fallbackColor: AppColors.oromiaGold,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -1452,14 +1497,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   /// Responsive Management Operations:
-  /// - Mobile: Generous full-width stacked cards with clear titles, full subtitles, and indicator badges.
-  /// - Tablet / Desktop: 3-column side-by-side row.
+  /// Modern card view with three clean rows (2 cards per row) featuring
+  /// high-definition automotive photography thumbnails and status badges.
   Widget _buildManagementOperations(BuildContext context, dynamic state, bool isMobile) {
     final operations = [
       _OperationItem(
         title: state.tr('pricingMatrix'),
         subtitle: state.tr('pricingSubtitle'),
         icon: Icons.tune_rounded,
+        imageUrl: AutoCareAssets.carSedanUrl,
         color: AppColors.primary,
         badge: '${state.packages.length} Tariffs',
         onTap: () {
@@ -1473,6 +1519,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         title: state.tr('staffPayroll'),
         subtitle: state.tr('staffPayrollSub'),
         icon: Icons.badge_rounded,
+        imageUrl: AutoCareAssets.mobileVanUrl,
         color: AppColors.secondary,
         badge: '${state.staff.length} Crew',
         onTap: () {
@@ -1486,6 +1533,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         title: state.tr('staffPins'),
         subtitle: state.tr('staffPinsSub'),
         icon: Icons.pin_outlined,
+        imageUrl: AutoCareAssets.carCockpitUrl,
         color: AppColors.accent,
         badge: 'Security',
         onTap: () {
@@ -1496,9 +1544,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         },
       ),
       _OperationItem(
-        title: 'Vehicle History',
+        title: state.tr('washHistory'),
         subtitle: 'Audit paid & completed washes by date range',
         icon: Icons.history_edu_rounded,
+        imageUrl: AutoCareAssets.welcomeHeroUrl,
         color: AppColors.telebirrBlue,
         badge: 'History',
         onTap: () {
@@ -1509,9 +1558,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         },
       ),
       _OperationItem(
-        title: 'Closing & Financial Reports',
+        title: state.tr('closingAndFinancialReports'),
         subtitle: 'Audit daily closings, bank deposits & payment channels',
         icon: Icons.fact_check_rounded,
+        imageUrl: AutoCareAssets.packageTireRimUrl,
         color: AppColors.cashGreen,
         badge: 'Reports',
         onTap: () {
@@ -1526,45 +1576,57 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           title: state.tr('clearAllBookings'),
           subtitle: state.tr('clearAllBookingsSubtitle'),
           icon: Icons.delete_sweep_rounded,
+          imageUrl: AutoCareAssets.packageSteamEngineUrl,
           color: Colors.red.shade700,
           badge: '${state.bookings.length} Booked',
           onTap: () => _confirmClearAllBookings(context, state),
+        )
+      else
+        _OperationItem(
+          title: 'Automated SMS Gateway',
+          subtitle: 'Active vehicle completion SMS dispatch & hotline numbers',
+          icon: Icons.sms_rounded,
+          imageUrl: AutoCareAssets.stationBayUrl,
+          color: const Color(0xFF6366F1),
+          badge: 'Gateway',
+          onTap: () {},
         ),
     ];
 
-    if (isMobile) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final itemWidth = (constraints.maxWidth - 10) / 2;
-          return Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: operations.map((op) => SizedBox(
-              width: itemWidth,
-              child: _buildOperationCardGrid(context, op),
-            )).toList(),
-          );
-        },
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth >= 1000 ? 5 : (constraints.maxWidth >= 650 ? 3 : 2);
-        final itemWidth = (constraints.maxWidth - (crossAxisCount - 1) * 10) / crossAxisCount;
-        return Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: operations.map((op) => SizedBox(
-            width: itemWidth,
-            child: _buildOperationCardDesktop(context, op),
-          )).toList(),
-        );
-      },
+    // Card View with Three Rows (2 cards per row)
+    return Column(
+      children: [
+        // Row 1
+        Row(
+          children: [
+            Expanded(child: _buildOperationCard(context, operations[0], isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildOperationCard(context, operations[1], isMobile)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Row 2
+        Row(
+          children: [
+            Expanded(child: _buildOperationCard(context, operations[2], isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildOperationCard(context, operations[3], isMobile)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Row 3
+        Row(
+          children: [
+            Expanded(child: _buildOperationCard(context, operations[4], isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildOperationCard(context, operations[5], isMobile)),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildOperationCardGrid(BuildContext context, _OperationItem op) {
+  Widget _buildOperationCard(BuildContext context, _OperationItem op, bool isMobile) {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
@@ -1572,33 +1634,42 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         onTap: op.onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(isMobile ? 12 : 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: op.color.withOpacity(0.25)),
+            border: Border.all(color: op.color.withValues(alpha: 0.25), width: 1.2),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 6,
+                color: op.color.withValues(alpha: 0.04),
+                blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: op.color.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(op.icon, color: op.color, size: 20),
-                  ),
+                  op.imageUrl != null
+                      ? AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: op.imageUrl!,
+                          width: isMobile ? 38 : 44,
+                          height: isMobile ? 38 : 44,
+                          borderRadius: 10,
+                          fallbackIcon: op.icon,
+                          fallbackColor: op.color,
+                        )
+                      : Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: op.color.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(op.icon, color: op.color, size: 20),
+                        ),
                   if (op.badge != null) ...[
                     const SizedBox(width: 4),
                     Flexible(
@@ -1628,88 +1699,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 op.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: isMobile ? 12.5 : 13.5,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 op.subtitle,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted, height: 1.2),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOperationCardDesktop(BuildContext context, _OperationItem op) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: op.onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: op.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(op.icon, color: op.color, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            op.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: AppColors.textPrimary),
-                          ),
-                        ),
-                        if (op.badge != null) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: op.color.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              op.badge!,
-                              style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: op.color),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      op.subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                    ),
-                  ],
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  color: AppColors.textMuted,
+                  height: 1.2,
                 ),
               ),
-              const SizedBox(width: 6),
-              const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textMuted),
             ],
           ),
         ),
@@ -2139,6 +2145,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     String sub,
     IconData icon,
     Color color, {
+    String? imageUrl,
     bool isMobile = false,
   }) {
     return Container(
@@ -2174,14 +2181,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: color, size: isMobile ? 16 : 18),
-              ),
+              imageUrl != null
+                  ? AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: imageUrl,
+                      width: isMobile ? 32 : 36,
+                      height: isMobile ? 32 : 36,
+                      borderRadius: 8,
+                      fallbackIcon: icon,
+                      fallbackColor: color,
+                    )
+                  : Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(icon, color: color, size: isMobile ? 16 : 18),
+                    ),
             ],
           ),
           Column(
