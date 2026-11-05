@@ -25,6 +25,28 @@ import 'weekly_commission_report_dialog.dart';
 import '../../../../core/widgets/expandable_action_card.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 
+class _CashierModuleItem {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final String imageUrl;
+  final List<Color> gradientColors;
+  final String badgeText;
+  final Color badgeColor;
+  final Widget Function() contentBuilder;
+
+  const _CashierModuleItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.imageUrl,
+    required this.gradientColors,
+    required this.badgeText,
+    required this.badgeColor,
+    required this.contentBuilder,
+  });
+}
+
 class CashierDashboardScreen extends StatefulWidget {
   const CashierDashboardScreen({super.key});
 
@@ -34,6 +56,7 @@ class CashierDashboardScreen extends StatefulWidget {
 
 class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   int _selectedFilterIndex = 0; // 0: Queue & Vehicles, 1: Attendance & Commission Desk, 2: Wash History, 3: Closing & Financial Reports
+  int? _activeModuleIndex;
   bool _isDigitalBreakdownExpanded = false;
   bool _isWasherRosterExpanded = true;
 
@@ -137,146 +160,38 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Shift Financials & Cash Drawer Action Card (Expandable on Mobile)
-              ExpandableActionCard(
-                icon: AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.cashMoneyUrl,
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
-                  fallbackIcon: Icons.account_balance_wallet_rounded,
-                  fallbackColor: AppColors.primary,
-                ),
-                iconPadding: EdgeInsets.zero,
-                iconBackgroundColor: Colors.transparent,
-                borderColor: AppColors.primary,
-                title: state.tr('dailyClosingTitle'),
-                subtitle: 'Drawer Cash: ${CurrencyFormatter.format(state.undepositedCashTodayETB as double)} • Revenue: ${CurrencyFormatter.format(state.totalRevenueTodayETB as double)}',
-                badge: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    CurrencyFormatter.formatShort(state.undepositedCashTodayETB as double),
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: AppColors.primary),
-                  ),
-                ),
-                initiallyExpanded: false,
-                child: Column(
-                  children: [
-                    _buildShiftSummaryBanner(state, isMobile),
-                    const SizedBox(height: 10),
-                    _buildFinancialActionToolbar(context, state, isMobile),
-                  ],
-                ),
-              ),
-
-              // 2. Real-Time Bays & Mobile Van Capacity (Expandable on Mobile)
-              ExpandableActionCard(
-                icon: AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.stationBayUrl,
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
-                  fallbackIcon: Icons.local_car_wash_rounded,
-                  fallbackColor: AppColors.statusCompleted,
-                ),
-                iconPadding: EdgeInsets.zero,
-                iconBackgroundColor: Colors.transparent,
-                borderColor: AppColors.statusCompleted,
-                title: state.tr('liveStationCapacity'),
-                subtitle: '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
-                badge: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.statusCompleted.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '${state.availableBaysCount} Free',
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.statusCompleted),
-                  ),
-                ),
-                initiallyExpanded: false,
-                child: _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
-              ),
-
-              // 3. Shared Unified Washer Team, Attendance & Commission Hub (Directly visible, Expandable!)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SharedWasherCommissionHub(
-                  state: state,
-                  role: WasherHubRole.cashier,
-                  isMobile: isMobile,
-                  initiallyExpanded: false,
-                ),
-              ),
-
-              // 4. Active Vehicle Queue & Live Processing (Expandable, Initially Open!)
-              ExpandableActionCard(
-                icon: const Icon(Icons.queue_rounded, color: Colors.blueAccent, size: 22),
-                iconBackgroundColor: Colors.blueAccent.withOpacity(0.12),
-                borderColor: Colors.blueAccent,
-                title: state.tr('queueAndVehicles'),
-                subtitle: '${filteredBookings.length} Vehicles in Queue / Active',
-                badge: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '${filteredBookings.length} Active',
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.blueAccent),
-                  ),
-                ),
-                initiallyExpanded: false,
-                child: filteredBookings.isEmpty
-                    ? Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceVariant,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.cardBorder),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'No vehicles currently in queue.',
-                            style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      )
-                    : Column(
-                        children: filteredBookings.map((b) => isMobile
-                            ? _buildCleanQueueRowMobile(context, state, b)
-                            : _buildCleanQueueRowDesktop(context, state, b)).toList(),
+              // Operational Modules Grid (Card Grid View with 3 Rows)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      state.tr('managementOperations'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: isMobile ? 15.5 : 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
                       ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      '6 MODULES',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
+                    ),
+                  ),
+                ],
               ),
-
-              // 5. Vehicle Wash History & Audit Logs (Expandable)
-              ExpandableActionCard(
-                icon: Icon(Icons.history_edu_rounded, color: Colors.amber.shade800, size: 22),
-                iconBackgroundColor: Colors.amber.shade800.withOpacity(0.12),
-                borderColor: Colors.amber.shade800,
-                title: state.tr('washHistory'),
-                subtitle: 'Audit paid & completed washes by date range',
-                initiallyExpanded: false,
-                child: const VehicleHistoryScreen(isEmbedded: true),
-              ),
-
-              // 6. Closing & Financial Reports (Expandable)
-              ExpandableActionCard(
-                icon: const Icon(Icons.fact_check_rounded, color: Colors.teal, size: 22),
-                iconBackgroundColor: Colors.teal.withOpacity(0.12),
-                borderColor: Colors.teal,
-                title: state.tr('closingAndFinancialReports'),
-                subtitle: 'Audit daily closings, bank deposits & payment channels',
-                initiallyExpanded: false,
-                child: const FinancialReportsView(isEmbedded: true),
-              ),
-
+              const SizedBox(height: 12),
+              _buildCashierModulesGrid(context, state, isMobile, filteredBookings, bay1, bay2, van),
               const SizedBox(height: 50),
             ],
           ),
@@ -1342,104 +1257,357 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     UrlLauncherHelper.openUrl(mapUrl);
   }
 
-  Widget _buildFilterChips(dynamic state, bool isMobile) {
-    final tabs = [
-      (index: 0, title: state.tr('queueAndVehicles') as String, icon: Icons.local_car_wash_rounded),
-      (index: 1, title: '${state.tr("attendanceDesk")} (${state.presentWashersCount})', icon: Icons.how_to_reg_rounded),
-      (index: 2, title: state.tr('washHistory') as String, icon: Icons.history_rounded),
-      (index: 3, title: state.tr('closingAndFinancialReports') as String, icon: Icons.fact_check_rounded),
+  /// Card Grid View with 3 Rows:
+  /// Modern 2-column, 3-row card grid with automotive photography thumbnails,
+  /// indicator badges, and inline active panel expansion.
+  Widget _buildCashierModulesGrid(
+    BuildContext context,
+    dynamic state,
+    bool isMobile,
+    List<WashBooking> filteredBookings,
+    StationBay bay1,
+    StationBay bay2,
+    StationBay van,
+  ) {
+    final modules = [
+      _CashierModuleItem(
+        title: state.tr('dailyClosingTitle'),
+        subtitle: 'Drawer cash: ${CurrencyFormatter.format(state.undepositedCashTodayETB as double)} • Revenue: ${CurrencyFormatter.format(state.totalRevenueTodayETB as double)}',
+        icon: Icons.account_balance_wallet_rounded,
+        imageUrl: AutoCareAssets.cashMoneyUrl,
+        gradientColors: const [Color(0xFF0F766E), Color(0xFF115E59)],
+        badgeText: CurrencyFormatter.formatShort(state.undepositedCashTodayETB as double),
+        badgeColor: AppColors.primary,
+        contentBuilder: () => Column(
+          children: [
+            _buildShiftSummaryBanner(state, isMobile),
+            const SizedBox(height: 10),
+            _buildFinancialActionToolbar(context, state, isMobile),
+          ],
+        ),
+      ),
+      _CashierModuleItem(
+        title: state.tr('liveStationCapacity'),
+        subtitle: '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
+        icon: Icons.local_car_wash_rounded,
+        imageUrl: AutoCareAssets.stationBayUrl,
+        gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
+        badgeText: '${state.availableBaysCount} Free',
+        badgeColor: AppColors.statusCompleted,
+        contentBuilder: () => _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
+      ),
+      _CashierModuleItem(
+        title: state.tr('attendanceDesk'),
+        subtitle: 'Washer attendance roster, daily presence & 100% pool distribution',
+        icon: Icons.how_to_reg_rounded,
+        imageUrl: AutoCareAssets.valetDriverUrl,
+        gradientColors: const [AppColors.oromiaGold, Color(0xFFD97706)],
+        badgeText: '${state.presentWashersCount} Present',
+        badgeColor: AppColors.oromiaGold,
+        contentBuilder: () => SharedWasherCommissionHub(
+          state: state,
+          role: WasherHubRole.cashier,
+          isMobile: isMobile,
+          initiallyExpanded: true,
+        ),
+      ),
+      _CashierModuleItem(
+        title: state.tr('queueAndVehicles'),
+        subtitle: '${filteredBookings.length} Vehicles in Queue / Active processing',
+        icon: Icons.queue_rounded,
+        imageUrl: AutoCareAssets.welcomeHeroUrl,
+        gradientColors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
+        badgeText: '${filteredBookings.length} Active',
+        badgeColor: Colors.blueAccent,
+        contentBuilder: () => filteredBookings.isEmpty
+            ? Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: const Center(
+                  child: Text(
+                    'No vehicles currently in queue.',
+                    style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              )
+            : Column(
+                children: filteredBookings.map((b) => isMobile
+                    ? _buildCleanQueueRowMobile(context, state, b)
+                    : _buildCleanQueueRowDesktop(context, state, b)).toList(),
+              ),
+      ),
+      _CashierModuleItem(
+        title: state.tr('washHistory'),
+        subtitle: 'Audit paid & completed washes by date range',
+        icon: Icons.history_edu_rounded,
+        imageUrl: AutoCareAssets.carSedanUrl,
+        gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
+        badgeText: 'History',
+        badgeColor: const Color(0xFF4F46E5),
+        contentBuilder: () => const VehicleHistoryScreen(isEmbedded: true),
+      ),
+      _CashierModuleItem(
+        title: state.tr('closingAndFinancialReports'),
+        subtitle: 'Audit daily closings, bank deposits & payment channels',
+        icon: Icons.fact_check_rounded,
+        imageUrl: AutoCareAssets.packageTireRimUrl,
+        gradientColors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
+        badgeText: 'Reports',
+        badgeColor: AppColors.cashGreen,
+        contentBuilder: () => const FinancialReportsView(isEmbedded: true),
+      ),
     ];
 
-    if (isMobile) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          children: tabs.map((tab) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: _buildFilterTabButton(
-                tab.index,
-                tab.title,
-                tab.icon,
-                _selectedFilterIndex == tab.index,
-                isMobile: true,
-              ),
-            );
-          }).toList(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Card Grid View with 3 Rows (2 cards per row)
+        // Row 1
+        Row(
+          children: [
+            Expanded(child: _buildCashierModuleCard(context, modules[0], 0, isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildCashierModuleCard(context, modules[1], 1, isMobile)),
+          ],
         ),
-      );
-    }
+        const SizedBox(height: 10),
+        // Row 2
+        Row(
+          children: [
+            Expanded(child: _buildCashierModuleCard(context, modules[2], 2, isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildCashierModuleCard(context, modules[3], 3, isMobile)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Row 3
+        Row(
+          children: [
+            Expanded(child: _buildCashierModuleCard(context, modules[4], 4, isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildCashierModuleCard(context, modules[5], 5, isMobile)),
+          ],
+        ),
 
-    return Row(
-      children: tabs.map((tab) {
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: _buildFilterTabButton(tab.index, tab.title, tab.icon, _selectedFilterIndex == tab.index, isMobile: false),
-          ),
-        );
-      }).toList(),
+        // Active Expanded Content Panel
+        if (_activeModuleIndex != null && _activeModuleIndex! < modules.length) ...[
+          const SizedBox(height: 14),
+          _buildActiveCashierModulePanel(context, modules[_activeModuleIndex!], isMobile),
+        ],
+      ],
     );
   }
 
-  Widget _buildFilterTabButton(int index, String title, IconData icon, bool isSelected, {bool isMobile = false}) {
-    final textWidget = Text(
-      title,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-        color: isSelected ? Colors.white : AppColors.textPrimary,
-      ),
-    );
+  Widget _buildCashierModuleCard(BuildContext context, _CashierModuleItem item, int index, bool isMobile) {
+    final isActive = _activeModuleIndex == index;
+    final primaryColor = item.gradientColors.first;
 
     return Material(
-      color: Colors.transparent,
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        onTap: () => setState(() => _selectedFilterIndex = index),
-        borderRadius: BorderRadius.circular(10),
+        onTap: () {
+          setState(() {
+            if (_activeModuleIndex == index) {
+              _activeModuleIndex = null;
+            } else {
+              _activeModuleIndex = index;
+            }
+          });
+        },
+        borderRadius: BorderRadius.circular(16),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.all(isMobile ? 12 : 14),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.white,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? AppColors.primary : AppColors.cardBorder,
-              width: isSelected ? 1.5 : 1,
+              color: isActive ? primaryColor : primaryColor.withValues(alpha: 0.25),
+              width: isActive ? 2.0 : 1.2,
             ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.25),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    )
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.015),
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
-                    )
-                  ],
+            boxShadow: [
+              if (isActive)
+                BoxShadow(
+                  color: primaryColor.withValues(alpha: 0.18),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                )
+              else
+                BoxShadow(
+                  color: primaryColor.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+            ],
           ),
-          child: Row(
-            mainAxisSize: isMobile ? MainAxisSize.min : MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                icon,
-                size: 14,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  AutoCareAssets.buildPhotoThumbnail(
+                    imageUrl: item.imageUrl,
+                    width: isMobile ? 38 : 44,
+                    height: isMobile ? 38 : 44,
+                    borderRadius: 10,
+                    fallbackIcon: item.icon,
+                    fallbackColor: primaryColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: item.badgeColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: item.badgeColor.withValues(alpha: 0.3),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        item.badgeText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          color: item.badgeColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 4),
-              if (isMobile) textWidget else Flexible(child: textWidget),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: isMobile ? 12.5 : 13.5,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    isActive ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    size: 16,
+                    color: isActive ? primaryColor : AppColors.textMuted,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                item.subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  color: AppColors.textMuted,
+                  height: 1.2,
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildActiveCashierModulePanel(BuildContext context, _CashierModuleItem item, bool isMobile) {
+    final primaryColor = item.gradientColors.first;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.35), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withValues(alpha: 0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: item.gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: item.imageUrl,
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        fallbackIcon: item.icon,
+                        fallbackColor: Colors.white,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => setState(() => _activeModuleIndex = null),
+                  icon: const Icon(Icons.close_rounded, size: 16, color: Colors.white),
+                  label: const Text(
+                    'Close',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 11),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Child content
+          Padding(
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
+            child: item.contentBuilder(),
+          ),
+        ],
       ),
     );
   }
