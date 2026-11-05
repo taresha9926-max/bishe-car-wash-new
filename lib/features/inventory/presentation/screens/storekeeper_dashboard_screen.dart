@@ -824,11 +824,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             Row(
               children: [
                 AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.getInventoryImage(item.name),
-                  width: 42,
-                  height: 42,
+                  imageUrl: AutoCareAssets.getConsumableImage(item.name, id: item.id),
+                  width: 44,
+                  height: 44,
                   borderRadius: 10,
-                  fallbackIcon: Icons.inventory_2_rounded,
+                  fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(item.name, id: item.id),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1028,11 +1028,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             Row(
               children: [
                 AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.getInventoryImage(asset.name),
-                  width: 42,
-                  height: 42,
+                  imageUrl: AutoCareAssets.getFixedAssetImage(asset.name, id: asset.id),
+                  width: 44,
+                  height: 44,
                   borderRadius: 10,
-                  fallbackIcon: Icons.precision_manufacturing_rounded,
+                  fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(asset.name, id: asset.id),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
