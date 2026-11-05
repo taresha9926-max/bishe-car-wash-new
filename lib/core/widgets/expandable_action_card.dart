@@ -14,6 +14,7 @@ class ExpandableActionCard extends StatefulWidget {
   final Color? borderColor;
   final Color? headerColor;
   final Color? iconBackgroundColor;
+  final EdgeInsetsGeometry? iconPadding;
   final List<Color>? backgroundGradient;
   final ValueChanged<bool>? onExpansionChanged;
 
@@ -28,6 +29,7 @@ class ExpandableActionCard extends StatefulWidget {
     this.borderColor,
     this.headerColor,
     this.iconBackgroundColor,
+    this.iconPadding,
     this.backgroundGradient,
     this.onExpansionChanged,
   });
@@ -128,7 +130,7 @@ class _ExpandableActionCardState extends State<ExpandableActionCard>
                     children: [
                       // Vibrant Leading Icon
                       Container(
-                        padding: const EdgeInsets.all(9),
+                        padding: widget.iconPadding ?? const EdgeInsets.all(9),
                         decoration: BoxDecoration(
                           color: widget.iconBackgroundColor ??
                               AppColors.primary.withOpacity(0.12),

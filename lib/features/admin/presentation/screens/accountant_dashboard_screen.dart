@@ -181,10 +181,13 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             ),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: Colors.cyan.withValues(alpha: 0.2), shape: BoxShape.circle),
-                  child: const Icon(Icons.account_balance_rounded, color: Colors.cyanAccent, size: 24),
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.cbeLogoUrl,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.account_balance_rounded,
+                  fallbackColor: Colors.cyanAccent,
                 ),
                 const SizedBox(width: 14),
                 const Expanded(
@@ -229,8 +232,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // 1. Submitted Daily Closings
           ExpandableActionCard(
-            icon: const Icon(Icons.point_of_sale_rounded, color: Colors.blueAccent, size: 22),
-            iconBackgroundColor: Colors.blueAccent.withOpacity(0.12),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.stationBayUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.point_of_sale_rounded,
+              fallbackColor: Colors.blueAccent,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: Colors.blueAccent,
             title: 'Submitted Daily Closings',
             subtitle: 'Reconciliation of gross/net drawer cash and digital receipts',
@@ -247,8 +258,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // 2. Digital Payment Receipts & Verification
           ExpandableActionCard(
-            icon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.telebirrBlue, size: 22),
-            iconBackgroundColor: AppColors.telebirrBlue.withOpacity(0.12),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.cbeLogoUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.qr_code_scanner_rounded,
+              fallbackColor: AppColors.telebirrBlue,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: AppColors.telebirrBlue,
             title: 'Digital Payment Receipts & Verification',
             subtitle: 'Telebirr, CBE Birr & Awash mobile bank slip audits',
@@ -265,8 +284,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // 3. Cash Recieved by Cashier Deposited to Bank Log
           ExpandableActionCard(
-            icon: const Icon(Icons.account_balance_rounded, color: Colors.teal, size: 22),
-            iconBackgroundColor: Colors.teal.withOpacity(0.12),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.cbeLogoUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.account_balance_rounded,
+              fallbackColor: Colors.teal,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: Colors.teal,
             title: 'Cash Deposited to Bank (Account A & B)',
             subtitle: 'CBE & Awash stamped slip verification and drawer bank balance',
@@ -283,8 +310,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // 4. Petty Cash & Emergency Spend Log
           ExpandableActionCard(
-            icon: const Icon(Icons.outbox_rounded, color: Colors.deepOrangeAccent, size: 22),
-            iconBackgroundColor: Colors.deepOrangeAccent.withOpacity(0.12),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.cashMoneyUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.outbox_rounded,
+              fallbackColor: Colors.deepOrangeAccent,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: Colors.deepOrangeAccent,
             title: 'Petty Cash & Emergency Spends',
             subtitle: 'Incidentals & cashier minor expense slips',
@@ -315,8 +350,18 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           children: [
             Row(
               children: [
-                Text('${c.closingDate.day}/${c.closingDate.month}/${c.closingDate.year} • Cashier: ${c.cashierName}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
-                const Spacer(),
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.stationBayUrl,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 6,
+                  fallbackIcon: Icons.point_of_sale_rounded,
+                  fallbackColor: Colors.blueAccent,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('${c.closingDate.day}/${c.closingDate.month}/${c.closingDate.year} • Cashier: ${c.cashierName}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.green.shade300)),
@@ -467,14 +512,13 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Container(
+        leading: AutoCareAssets.buildPhotoThumbnail(
+          imageUrl: AutoCareAssets.cbeLogoUrl,
           width: 38,
           height: 38,
-          decoration: BoxDecoration(
-            color: method.color.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(method.icon, color: method.color, size: 20),
+          borderRadius: 8,
+          fallbackIcon: method.icon,
+          fallbackColor: method.color,
         ),
         title: Row(
           children: [

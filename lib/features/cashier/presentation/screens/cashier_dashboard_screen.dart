@@ -139,8 +139,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             children: [
               // 1. Shift Financials & Cash Drawer Action Card (Expandable on Mobile)
               ExpandableActionCard(
-                icon: const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 22),
-                iconBackgroundColor: AppColors.primary.withOpacity(0.12),
+                icon: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.cashMoneyUrl,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.account_balance_wallet_rounded,
+                  fallbackColor: AppColors.primary,
+                ),
+                iconPadding: EdgeInsets.zero,
+                iconBackgroundColor: Colors.transparent,
                 borderColor: AppColors.primary,
                 title: state.tr('dailyClosingTitle'),
                 subtitle: 'Drawer Cash: ${CurrencyFormatter.format(state.undepositedCashTodayETB as double)} • Revenue: ${CurrencyFormatter.format(state.totalRevenueTodayETB as double)}',
@@ -167,8 +175,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
               // 2. Real-Time Bays & Mobile Van Capacity (Expandable on Mobile)
               ExpandableActionCard(
-                icon: const Icon(Icons.local_car_wash_rounded, color: AppColors.statusCompleted, size: 22),
-                iconBackgroundColor: AppColors.statusCompleted.withOpacity(0.12),
+                icon: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.stationBayUrl,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.local_car_wash_rounded,
+                  fallbackColor: AppColors.statusCompleted,
+                ),
+                iconPadding: EdgeInsets.zero,
+                iconBackgroundColor: Colors.transparent,
                 borderColor: AppColors.statusCompleted,
                 title: state.tr('liveStationCapacity'),
                 subtitle: '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
@@ -408,7 +424,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () => BankDepositDialog.show(context),
-                icon: const Icon(Icons.account_balance_rounded, size: 16),
+                icon: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.cbeLogoUrl,
+                  width: 22,
+                  height: 22,
+                  borderRadius: 6,
+                  fallbackIcon: Icons.account_balance_rounded,
+                  fallbackColor: Colors.white,
+                ),
                 label: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -441,7 +464,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () => PettyCashDialog.show(context),
-                icon: const Icon(Icons.outbox_rounded, size: 16),
+                icon: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.cashMoneyUrl,
+                  width: 22,
+                  height: 22,
+                  borderRadius: 6,
+                  fallbackIcon: Icons.outbox_rounded,
+                  fallbackColor: Colors.white,
+                ),
                 label: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -474,7 +504,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
-                icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
+                icon: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.stationBayUrl,
+                  width: 22,
+                  height: 22,
+                  borderRadius: 6,
+                  fallbackIcon: isClosed ? Icons.verified_rounded : Icons.fact_check_rounded,
+                  fallbackColor: Colors.white,
+                ),
                 label: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -511,7 +548,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => BankDepositDialog.show(context),
-                    icon: const Icon(Icons.account_balance_rounded, size: 16),
+                    icon: AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: AutoCareAssets.cbeLogoUrl,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 6,
+                      fallbackIcon: Icons.account_balance_rounded,
+                      fallbackColor: Colors.white,
+                    ),
                     label: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -541,7 +585,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => PettyCashDialog.show(context),
-                    icon: const Icon(Icons.outbox_rounded, size: 16),
+                    icon: AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: AutoCareAssets.cashMoneyUrl,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 6,
+                      fallbackIcon: Icons.outbox_rounded,
+                      fallbackColor: Colors.white,
+                    ),
                     label: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -571,7 +622,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
-                    icon: Icon(isClosed ? Icons.verified_rounded : Icons.fact_check_rounded, size: 16),
+                    icon: AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: AutoCareAssets.stationBayUrl,
+                      width: 22,
+                      height: 22,
+                      borderRadius: 6,
+                      fallbackIcon: isClosed ? Icons.verified_rounded : Icons.fact_check_rounded,
+                      fallbackColor: Colors.white,
+                    ),
                     label: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -616,7 +674,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.payments_rounded, size: 18, color: AppColors.cashGreen),
+                      AutoCareAssets.buildPhotoThumbnail(
+                        imageUrl: AutoCareAssets.cashMoneyUrl,
+                        width: 36,
+                        height: 36,
+                        borderRadius: 8,
+                        fallbackIcon: Icons.payments_rounded,
+                        fallbackColor: AppColors.cashGreen,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -662,7 +727,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.phonelink_ring_rounded, size: 18, color: AppColors.telebirrBlue),
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.cbeLogoUrl,
+                          width: 36,
+                          height: 36,
+                          borderRadius: 8,
+                          fallbackIcon: Icons.phonelink_ring_rounded,
+                          fallbackColor: AppColors.telebirrBlue,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Column(

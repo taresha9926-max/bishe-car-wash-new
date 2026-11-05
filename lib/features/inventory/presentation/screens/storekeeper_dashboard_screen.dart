@@ -100,8 +100,16 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         children: [
           // 1. Primary Empty-for-Full Refill Exchange Desk
           ExpandableActionCard(
-            icon: const Icon(Icons.autorenew_rounded, color: Color(0xFF0D9488), size: 22),
-            iconBackgroundColor: const Color(0xFF0D9488).withOpacity(0.12),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.assetShampooUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.autorenew_rounded,
+              fallbackColor: const Color(0xFF0D9488),
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: const Color(0xFF0D9488),
             title: state.tr('emptyRefillExchangeTitle'),
             subtitle: state.tr('emptyRefillExchangeSub'),
@@ -117,8 +125,16 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
 
           // 2. Recent Empty-for-Full Refill Exchange Logs
           ExpandableActionCard(
-            icon: const Icon(Icons.history_rounded, color: Colors.blueAccent, size: 22),
-            iconBackgroundColor: Colors.blueAccent.withOpacity(0.12),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.assetTowelsUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.history_rounded,
+              fallbackColor: Colors.blueAccent,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: Colors.blueAccent,
             title: state.tr('recentRefillLogs'),
             subtitle: 'Chemical & detergent swap audit ledger',
@@ -160,8 +176,16 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
 
           // 3. Shift Handover Desk
           ExpandableActionCard(
-            icon: const Icon(Icons.wb_sunny_rounded, color: Colors.amber, size: 22),
-            iconBackgroundColor: Colors.amber.withOpacity(0.15),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.stationBayUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.schedule_rounded,
+              fallbackColor: Colors.amber,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: Colors.amber.shade700,
             title: state.tr('shiftHandoverDesk'),
             subtitle: 'Issue daily equipment & chemicals to team leader',
@@ -179,8 +203,16 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
 
           // 4. Shift Handover Audit Logs
           ExpandableActionCard(
-            icon: const Icon(Icons.fact_check_rounded, color: AppColors.primary, size: 22),
-            iconBackgroundColor: AppColors.primary.withOpacity(0.12),
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.assetEquipmentUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.fact_check_rounded,
+              fallbackColor: AppColors.primary,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
             borderColor: AppColors.primary,
             title: state.tr('shiftHandoverLogs'),
             subtitle: 'Signed inventory handoffs between shifts',
@@ -223,13 +255,13 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.tealAccent.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.autorenew_rounded, color: Colors.tealAccent, size: 24),
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: AutoCareAssets.assetShampooUrl,
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                fallbackIcon: Icons.autorenew_rounded,
+                fallbackColor: Colors.tealAccent,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -467,13 +499,13 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.wb_sunny_rounded, color: Colors.amber, size: 24),
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: AutoCareAssets.stationBayUrl,
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                fallbackIcon: Icons.schedule_rounded,
+                fallbackColor: Colors.amber,
               ),
               const SizedBox(width: 12),
               Expanded(
