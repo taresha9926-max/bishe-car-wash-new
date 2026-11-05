@@ -69,6 +69,28 @@ class _OperationItem {
   });
 }
 
+class _DeepModuleItem {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final String? imageUrl;
+  final List<Color> gradientColors;
+  final String? badgeText;
+  final Color? badgeColor;
+  final Widget Function() contentBuilder;
+
+  const _DeepModuleItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    this.imageUrl,
+    required this.gradientColors,
+    this.badgeText,
+    this.badgeColor,
+    required this.contentBuilder,
+  });
+}
+
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
@@ -79,6 +101,7 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   AdminTimeFilter _selectedFilter = AdminTimeFilter.today;
   DateTime? _selectedCustomDate;
+  int? _activeDeepModuleIndex;
   String _washerCommissionFilter = 'Weekly'; // Daily, Weekly, Date Range
   late final TextEditingController _cashierPhoneController;
   late final TextEditingController _customerPhoneController;
@@ -425,136 +448,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               _buildManagementOperations(context, state, isMobile),
               const SizedBox(height: 18),
 
-              // 6. Deep Operations & Audits (Expandable Cards on Mobile)
-              // A. Automated Customer SMS & Hotline Gateway
-              ModernExpandableCard(
-                title: 'Automated Customer SMS & Hotline',
-                subtitle: 'Customer vehicle completion SMS dispatch & hotline numbers',
-                icon: Icons.sms_rounded,
-                imageUrl: AutoCareAssets.carSedanUrl,
-                gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
-                badgeText: 'Active Gateway',
-                badgeColor: const Color(0xFF4F46E5),
-                initiallyExpanded: false,
-                padding: EdgeInsets.zero,
-                child: _buildCashierSmsConfigCard(context, state, isMobile),
-              ),
-
-              // B. Welcome Screen TikTok Commercial Reels Manager
-              ModernExpandableCard(
-                title: 'Welcome Screen TikTok Commercial Reels',
-                subtitle: 'Video showcase on app launch for customer engagement',
-                icon: Icons.video_library_rounded,
-                imageUrl: AutoCareAssets.packageFoamUrl,
-                gradientColors: const [Color(0xFFEC4899), Color(0xFFBE185D)],
-                badgeText: '${(state.tiktokReels as List).length} Reels',
-                badgeColor: const Color(0xFFEC4899),
-                initiallyExpanded: false,
-                padding: EdgeInsets.zero,
-                child: _buildTikTokCommercialReelsManagerCard(context, state, isMobile),
-              ),
-
-              // C. Executive P&L Financial Statement
-              ModernExpandableCard(
-                title: 'Executive Financial Statement (P&L)',
-                subtitle: 'Gross revenue, COGS, operating expenses & net station profit',
-                icon: Icons.analytics_rounded,
-                imageUrl: AutoCareAssets.stationBayUrl,
-                gradientColors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
-                badgeText: 'P&L Ledger',
-                badgeColor: const Color(0xFF0F766E),
-                initiallyExpanded: false,
-                padding: EdgeInsets.zero,
-                child: _buildStandardFinancialStatementCard(context, state, isMobile, totalRevenue, commissionPool, totalPettyCash, totalSupplies, totalFixedAssets),
-              ),
-
-              // D. Shared Master Washer Team, Attendance & Commission Hub
-              Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: SharedWasherCommissionHub(
-                  state: state,
-                  role: WasherHubRole.admin,
-                  isMobile: isMobile,
-                  initiallyExpanded: false,
-                ),
-              ),
-
-              // E. Weekly Washer Commission Reports
-              ModernExpandableCard(
-                title: 'Weekly Washer Commission Reports',
-                subtitle: 'Cashier-submitted weekly payout ledgers and audits',
-                icon: Icons.assignment_turned_in_rounded,
-                imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
-                gradientColors: const [AppColors.oromiaGold, Color(0xFFD97706)],
-                badgeText: '${(state.weeklyCommissionReports as List).length} Reports',
-                badgeColor: AppColors.oromiaGold,
-                initiallyExpanded: false,
-                padding: EdgeInsets.zero,
-                child: _buildWeeklyWasherCommissionReportSection(context, state, isMobile),
-              ),
-
-              // E. Digital Payment Receipts Audit
-              ModernExpandableCard(
-                title: 'Digital Payment Receipts Audit',
-                subtitle: 'Telebirr, CBE Birr & Awash transaction verification',
-                icon: Icons.receipt_long_rounded,
-                imageUrl: AutoCareAssets.stationBayUrl,
-                gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
-                badgeText: '${digitalBookings.length} Receipts',
-                badgeColor: AppColors.telebirrBlue,
-                initiallyExpanded: false,
-                padding: EdgeInsets.zero,
-                child: _buildDigitalReceiptsSection(context, digitalBookings, isMobile),
-              ),
-
-              // F. Live Pricing Matrix Editor
-              ModernExpandableCard(
-                title: 'Live Pricing Matrix Editor',
-                subtitle: 'Adjust tariff rates for sedan, SUV, minivan & heavy vehicles',
-                icon: Icons.tune_rounded,
-                imageUrl: AutoCareAssets.carTruckUrl,
-                gradientColors: const [AppColors.primary, AppColors.secondary],
-                badgeText: '${state.packages.length} Tariffs',
-                badgeColor: AppColors.primary,
-                initiallyExpanded: false,
-                padding: EdgeInsets.zero,
-                child: PricingMatrixEditor(packages: state.packages),
-              ),
-
-              // G. Automated Commission Split Ledger
-              ModernExpandableCard(
-                title: state.tr('recentCommissions'),
-                subtitle: 'Automated 15% dividend distribution log per wash',
-                icon: Icons.stars_rounded,
-                imageUrl: AutoCareAssets.packageTireRimUrl,
-                gradientColors: const [AppColors.oromiaGold, Color(0xFFB45309)],
-                badgeText: '${recentLogs.length} Records',
-                badgeColor: AppColors.oromiaGold,
-                initiallyExpanded: false,
-                padding: EdgeInsets.zero,
-                headerAction: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const CommissionLogsScreen()),
-                    );
-                  },
-                  child: Text(state.tr('viewAll'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
-                ),
-                child: recentLogs.isEmpty
-                    ? Container(
-                        padding: const EdgeInsets.all(24),
-                        child: const Center(
-                          child: Text(
-                            'No commission logs recorded yet today.',
-                            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                          ),
-                        ),
-                      )
-                    : Column(
-                        children: recentLogs.map((log) => CommissionItemCard(log: log)).toList(),
+              // 6. Deep Operations & Audits (Card View with 3 Rows)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Deep Operations & Audits',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: isMobile ? 15.5 : 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
                       ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      '6 MODULES',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.secondary),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 12),
+              _buildDeepManagementOperations(
+                context,
+                state,
+                isMobile,
+                totalRevenue,
+                commissionPool,
+                totalPettyCash,
+                totalSupplies,
+                totalFixedAssets,
+                digitalBookings,
+              ),
+              const SizedBox(height: 36),
 
               const SizedBox(height: 40),
             ],
@@ -1719,6 +1655,361 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Responsive Deep Management Operations:
+  /// Modern card view with three clean rows (2 cards per row = 6 cards)
+  /// featuring automotive photography thumbnails, indicator badges, and
+  /// active inline panel expansion.
+  Widget _buildDeepManagementOperations(
+    BuildContext context,
+    dynamic state,
+    bool isMobile,
+    double totalRevenue,
+    double commissionPool,
+    double totalPettyCash,
+    double totalSupplies,
+    double totalFixedAssets,
+    List<WashBooking> digitalBookings,
+  ) {
+    final modules = [
+      _DeepModuleItem(
+        title: 'Customer SMS & Hotline',
+        subtitle: 'Customer vehicle completion SMS dispatch & hotline numbers',
+        icon: Icons.sms_rounded,
+        imageUrl: AutoCareAssets.carSedanUrl,
+        gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
+        badgeText: 'Active Gateway',
+        badgeColor: const Color(0xFF4F46E5),
+        contentBuilder: () => _buildCashierSmsConfigCard(context, state, isMobile),
+      ),
+      _DeepModuleItem(
+        title: 'TikTok Commercial Reels',
+        subtitle: 'Video showcase on app launch for customer engagement',
+        icon: Icons.video_library_rounded,
+        imageUrl: AutoCareAssets.packageFoamUrl,
+        gradientColors: const [Color(0xFFEC4899), Color(0xFFBE185D)],
+        badgeText: '${(state.tiktokReels as List).length} Reels',
+        badgeColor: const Color(0xFFEC4899),
+        contentBuilder: () => _buildTikTokCommercialReelsManagerCard(context, state, isMobile),
+      ),
+      _DeepModuleItem(
+        title: 'Financial Statement (P&L)',
+        subtitle: 'Gross revenue, COGS, operating expenses & net station profit',
+        icon: Icons.analytics_rounded,
+        imageUrl: AutoCareAssets.stationBayUrl,
+        gradientColors: const [Color(0xFF0F766E), Color(0xFF14B8A6)],
+        badgeText: 'P&L Ledger',
+        badgeColor: const Color(0xFF0F766E),
+        contentBuilder: () => _buildStandardFinancialStatementCard(
+          context,
+          state,
+          isMobile,
+          totalRevenue,
+          commissionPool,
+          totalPettyCash,
+          totalSupplies,
+          totalFixedAssets,
+        ),
+      ),
+      _DeepModuleItem(
+        title: 'Washer Team & Attendance',
+        subtitle: 'Washer attendance roster, daily presence & 100% pool distribution',
+        icon: Icons.groups_rounded,
+        imageUrl: AutoCareAssets.valetDriverUrl,
+        gradientColors: const [AppColors.secondary, Color(0xFF0284C7)],
+        badgeText: '${state.presentWashersCount}/${state.totalWashersCount} On Duty',
+        badgeColor: AppColors.secondary,
+        contentBuilder: () => SharedWasherCommissionHub(
+          state: state,
+          role: WasherHubRole.admin,
+          isMobile: isMobile,
+          initiallyExpanded: true,
+        ),
+      ),
+      _DeepModuleItem(
+        title: 'Weekly Washer Reports',
+        subtitle: 'Cashier-submitted weekly payout ledgers and audits',
+        icon: Icons.assignment_turned_in_rounded,
+        imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
+        gradientColors: const [AppColors.oromiaGold, Color(0xFFD97706)],
+        badgeText: '${(state.weeklyCommissionReports as List).length} Reports',
+        badgeColor: AppColors.oromiaGold,
+        contentBuilder: () => _buildWeeklyWasherCommissionReportSection(context, state, isMobile),
+      ),
+      _DeepModuleItem(
+        title: 'Digital Receipts Audit',
+        subtitle: 'Telebirr, CBE Birr & Awash transaction verification',
+        icon: Icons.receipt_long_rounded,
+        imageUrl: AutoCareAssets.stationBayUrl,
+        gradientColors: const [AppColors.telebirrBlue, Color(0xFF0284C7)],
+        badgeText: '${digitalBookings.length} Receipts',
+        badgeColor: AppColors.telebirrBlue,
+        contentBuilder: () => _buildDigitalReceiptsSection(context, digitalBookings, isMobile),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Card View with Three Rows (2 cards per row)
+        // Row 1
+        Row(
+          children: [
+            Expanded(child: _buildDeepModuleCard(context, modules[0], 0, isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildDeepModuleCard(context, modules[1], 1, isMobile)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Row 2
+        Row(
+          children: [
+            Expanded(child: _buildDeepModuleCard(context, modules[2], 2, isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildDeepModuleCard(context, modules[3], 3, isMobile)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Row 3
+        Row(
+          children: [
+            Expanded(child: _buildDeepModuleCard(context, modules[4], 4, isMobile)),
+            const SizedBox(width: 10),
+            Expanded(child: _buildDeepModuleCard(context, modules[5], 5, isMobile)),
+          ],
+        ),
+
+        // Active Expanded Content Panel
+        if (_activeDeepModuleIndex != null && _activeDeepModuleIndex! < modules.length) ...[
+          const SizedBox(height: 14),
+          _buildActiveDeepModulePanel(context, modules[_activeDeepModuleIndex!], isMobile),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDeepModuleCard(BuildContext context, _DeepModuleItem item, int index, bool isMobile) {
+    final isActive = _activeDeepModuleIndex == index;
+    final primaryColor = item.gradientColors.first;
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            if (_activeDeepModuleIndex == index) {
+              _activeDeepModuleIndex = null;
+            } else {
+              _activeDeepModuleIndex = index;
+            }
+          });
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.all(isMobile ? 12 : 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isActive ? primaryColor : primaryColor.withValues(alpha: 0.25),
+              width: isActive ? 2.0 : 1.2,
+            ),
+            boxShadow: [
+              if (isActive)
+                BoxShadow(
+                  color: primaryColor.withValues(alpha: 0.18),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                )
+              else
+                BoxShadow(
+                  color: primaryColor.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  item.imageUrl != null
+                      ? AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: item.imageUrl!,
+                          width: isMobile ? 38 : 44,
+                          height: isMobile ? 38 : 44,
+                          borderRadius: 10,
+                          fallbackIcon: item.icon,
+                          fallbackColor: primaryColor,
+                        )
+                      : Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: item.gradientColors),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(item.icon, color: Colors.white, size: 20),
+                        ),
+                  if (item.badgeText != null) ...[
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: (item.badgeColor ?? primaryColor).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: (item.badgeColor ?? primaryColor).withValues(alpha: 0.3),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Text(
+                          item.badgeText!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: item.badgeColor ?? primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: isMobile ? 12.5 : 13.5,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    isActive ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    size: 16,
+                    color: isActive ? primaryColor : AppColors.textMuted,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                item.subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  color: AppColors.textMuted,
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveDeepModulePanel(BuildContext context, _DeepModuleItem item, bool isMobile) {
+    final primaryColor = item.gradientColors.first;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.35), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withValues(alpha: 0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: item.gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      item.imageUrl != null
+                          ? AutoCareAssets.buildPhotoThumbnail(
+                              imageUrl: item.imageUrl!,
+                              width: 32,
+                              height: 32,
+                              borderRadius: 8,
+                              fallbackIcon: item.icon,
+                              fallbackColor: Colors.white,
+                            )
+                          : Icon(item.icon, color: Colors.white, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => setState(() => _activeDeepModuleIndex = null),
+                  icon: const Icon(Icons.close_rounded, size: 16, color: Colors.white),
+                  label: const Text(
+                    'Close',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 11),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Child content
+          Padding(
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
+            child: item.contentBuilder(),
+          ),
+        ],
       ),
     );
   }
