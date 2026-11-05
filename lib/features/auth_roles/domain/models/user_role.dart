@@ -4,6 +4,7 @@ import 'package:bishe_car_wash/core/localization/app_strings.dart';
 enum UserRole {
   customer,
   cashier,
+  manager,
   storekeeper,
   accountant,
   admin;
@@ -15,6 +16,8 @@ enum UserRole {
         return AppStrings.get('customerRole', lang);
       case UserRole.cashier:
         return AppStrings.get('cashierRole', lang);
+      case UserRole.manager:
+        return AppStrings.get('managerRole', lang);
       case UserRole.storekeeper:
         return AppStrings.get('storekeeperRole', lang);
       case UserRole.accountant:
@@ -32,6 +35,8 @@ enum UserRole {
         return 'Book Station or Mobile Van wash & track live status';
       case UserRole.cashier:
         return 'Gate entries, assign Bay 1, Bay 2 or Van, process Cash & Telebirr';
+      case UserRole.manager:
+        return 'Manage night shift intake, cashier handovers, washer dividends & closing';
       case UserRole.storekeeper:
         return 'Manage fixed assets, consumables stock & daily washer team handovers';
       case UserRole.accountant:
@@ -47,6 +52,8 @@ enum UserRole {
         return Icons.person_rounded;
       case UserRole.cashier:
         return Icons.point_of_sale_rounded;
+      case UserRole.manager:
+        return Icons.manage_accounts_rounded;
       case UserRole.storekeeper:
         return Icons.inventory_2_rounded;
       case UserRole.accountant:

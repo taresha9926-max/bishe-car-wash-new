@@ -30,6 +30,14 @@ class MockWashDataSource {
         isActive: true,
       ),
       const StaffCredential(
+        id: 'cred-manager',
+        username: 'manager',
+        pin: '7788',
+        role: UserRole.manager,
+        fullName: 'Dawit Manager',
+        isActive: true,
+      ),
+      const StaffCredential(
         id: 'cred-storekeeper',
         username: 'storekeeper',
         pin: '3344',

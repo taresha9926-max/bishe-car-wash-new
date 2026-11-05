@@ -16,6 +16,14 @@ class DailyFinancialClosing {
   final Map<String, double> washerDividends;
   final String? notes;
   final bool isConfirmed;
+  final String shiftType; // 'day' or 'night'
+  final String closedByRole; // 'cashier' or 'manager'
+  final String handoverTo; // 'Operational Manager' or 'Admin / Owner'
+  final double handoverCashAmount;
+  final bool isHandoverAccepted;
+  final String? acceptedByName;
+  final DateTime? acceptedAt;
+  final double carriedCashAmount;
 
   const DailyFinancialClosing({
     required this.id,
@@ -35,7 +43,50 @@ class DailyFinancialClosing {
     required this.washerDividends,
     this.notes,
     this.isConfirmed = true,
+    this.shiftType = 'day',
+    this.closedByRole = 'cashier',
+    this.handoverTo = 'Operational Manager',
+    this.handoverCashAmount = 0.0,
+    this.isHandoverAccepted = false,
+    this.acceptedByName,
+    this.acceptedAt,
+    this.carriedCashAmount = 0.0,
   });
+
+  DailyFinancialClosing copyWith({
+    bool? isHandoverAccepted,
+    String? acceptedByName,
+    DateTime? acceptedAt,
+    bool? isConfirmed,
+  }) {
+    return DailyFinancialClosing(
+      id: id,
+      closingDate: closingDate,
+      closedAt: closedAt,
+      cashierName: cashierName,
+      grossRevenue: grossRevenue,
+      cashRevenue: cashRevenue,
+      digitalRevenue: digitalRevenue,
+      providerBreakdown: providerBreakdown,
+      carsWashedCount: carsWashedCount,
+      commissionPool: commissionPool,
+      netStationProfit: netStationProfit,
+      cashDeposited: cashDeposited,
+      pettyCashExpenses: pettyCashExpenses,
+      cashRemaining: cashRemaining,
+      washerDividends: washerDividends,
+      notes: notes,
+      isConfirmed: isConfirmed ?? this.isConfirmed,
+      shiftType: shiftType,
+      closedByRole: closedByRole,
+      handoverTo: handoverTo,
+      handoverCashAmount: handoverCashAmount,
+      isHandoverAccepted: isHandoverAccepted ?? this.isHandoverAccepted,
+      acceptedByName: acceptedByName ?? this.acceptedByName,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
+      carriedCashAmount: carriedCashAmount,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -56,6 +107,14 @@ class DailyFinancialClosing {
       'washerDividends': washerDividends,
       'notes': notes,
       'isConfirmed': isConfirmed,
+      'shiftType': shiftType,
+      'closedByRole': closedByRole,
+      'handoverTo': handoverTo,
+      'handoverCashAmount': handoverCashAmount,
+      'isHandoverAccepted': isHandoverAccepted,
+      'acceptedByName': acceptedByName,
+      'acceptedAt': acceptedAt?.toIso8601String(),
+      'carriedCashAmount': carriedCashAmount,
     };
   }
 
@@ -78,6 +137,14 @@ class DailyFinancialClosing {
       washerDividends: Map<String, double>.from(map['washerDividends'] ?? {}),
       notes: map['notes'],
       isConfirmed: map['isConfirmed'] ?? true,
+      shiftType: map['shiftType'] ?? 'day',
+      closedByRole: map['closedByRole'] ?? 'cashier',
+      handoverTo: map['handoverTo'] ?? 'Operational Manager',
+      handoverCashAmount: (map['handoverCashAmount'] as num?)?.toDouble() ?? 0.0,
+      isHandoverAccepted: map['isHandoverAccepted'] ?? false,
+      acceptedByName: map['acceptedByName'],
+      acceptedAt: map['acceptedAt'] != null ? DateTime.tryParse(map['acceptedAt']) : null,
+      carriedCashAmount: (map['carriedCashAmount'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

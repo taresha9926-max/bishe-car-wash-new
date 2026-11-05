@@ -49,6 +49,11 @@ class AppStrings {
       AppLanguage.om: 'Qabaa Qarshii',
       AppLanguage.am: 'ገንዘብ ያዥ',
     },
+    'managerRole': {
+      AppLanguage.en: 'Operational Manager',
+      AppLanguage.om: 'Hojii Geggeessaa',
+      AppLanguage.am: 'ኦፕሬሽን ስራ አስኪያጅ',
+    },
     'storekeeperRole': {
       AppLanguage.en: 'Storekeeper Desk',
       AppLanguage.om: 'Kuusaa Qulqullinaa',
@@ -533,6 +538,66 @@ class AppStrings {
       AppLanguage.en: 'Super Admin Hub',
       AppLanguage.om: 'Giddugala Bulchiinsaa',
       AppLanguage.am: 'ዋና አስተዳዳሪ ማዕከል',
+    },
+    'managerPortal': {
+      AppLanguage.en: 'Operational Manager',
+      AppLanguage.om: 'Hojii Geggeessaa',
+      AppLanguage.am: 'የኦፕሬሽን ስራ አስኪያጅ',
+    },
+    'managerPortalDesc': {
+      AppLanguage.en: 'Night shift intake, cashier cash handover, washer dividends & closing',
+      AppLanguage.om: 'Halkan hojjechuu, dabarsa qarshii saanduqaa, komishinii & cufiinsa',
+      AppLanguage.am: 'የሌሊት ፈረቃ፣ ከካሺየር ገንዘብ ርክክብ፣ የአጣቢዎች ኮሚሽንና ሂሳብ መዝጊያ',
+    },
+    'managerPinBadge': {
+      AppLanguage.en: 'Night Operations',
+      AppLanguage.om: 'Hojii Halkan',
+      AppLanguage.am: 'የሌሊት ኦፕሬሽን',
+    },
+    'operationalManagerTitle': {
+      AppLanguage.en: 'Operations Manager Hub',
+      AppLanguage.om: 'Wiirtuu Hojii Geggeessaa',
+      AppLanguage.am: 'የኦፕሬሽን ስራ አስኪያጅ ማዕከል',
+    },
+    'cashierHandoverTitle': {
+      AppLanguage.en: 'Cashier Cash Handover',
+      AppLanguage.om: 'Dabarsa Qarshii Saanduqaa',
+      AppLanguage.am: 'የካሺየር ጥሬ ገንዘብ ርክክብ',
+    },
+    'acceptCashierHandover': {
+      AppLanguage.en: 'Accept & Verify Cashier Handover',
+      AppLanguage.om: 'Dabarsa Qarshii Fudhadhu & Mirkaneessi',
+      AppLanguage.am: 'የካሺየሩን ጥሬ ገንዘብ ተረክበው ያረጋግጡ',
+    },
+    'handoverPending': {
+      AppLanguage.en: 'Pending Manager Acceptance',
+      AppLanguage.om: 'Fudhatama Eegaa Jira',
+      AppLanguage.am: 'የስራ አስኪያጅ ማረጋገጫ በመጠባበቅ ላይ',
+    },
+    'handoverConfirmed': {
+      AppLanguage.en: 'Confirmed',
+      AppLanguage.om: 'Mirkanaa\'eera',
+      AppLanguage.am: 'የተረጋገጠ',
+    },
+    'nightClosingTitle': {
+      AppLanguage.en: 'Night Shift Closing & Payout to Admin',
+      AppLanguage.om: 'Cufiinsa Halkan & Kaffaltii Bulchaaf',
+      AppLanguage.am: 'የሌሊት ፈረቃ ሂሳብ መዝጊያ እና ለአስተዳዳሪ ማስረከቢያ',
+    },
+    'carriedCashierCash': {
+      AppLanguage.en: 'Carried Cashier Cash',
+      AppLanguage.om: 'Qarshii Saanduqarraa Fudhatame',
+      AppLanguage.am: 'ከካሺየር የተረከቡት ጥሬ ገንዘብ',
+    },
+    'nightShiftGross': {
+      AppLanguage.en: 'Night Shift Gross Revenue',
+      AppLanguage.om: 'Galii Waliigalaa Halkan',
+      AppLanguage.am: 'የሌሊት ፈረቃ ጠቅላላ ገቢ',
+    },
+    'totalCashHandedToAdmin': {
+      AppLanguage.en: 'Total Physical Cash Handed to Admin',
+      AppLanguage.om: 'Waliigala Qarshii Bulchaaf Kenname',
+      AppLanguage.am: 'ለአስተዳዳሪው የሚሰጥ ጠቅላላ ጥሬ ገንዘብ',
     },
     'enterCustomerPortal': {
       AppLanguage.en: 'Enter Customer Portal',

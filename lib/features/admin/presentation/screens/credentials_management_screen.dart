@@ -298,6 +298,7 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                   ),
                   items: const [
                     DropdownMenuItem(value: UserRole.cashier, child: Text('Cashier')),
+                    DropdownMenuItem(value: UserRole.manager, child: Text('Operational Manager')),
                     DropdownMenuItem(value: UserRole.storekeeper, child: Text('Storekeeper')),
                     DropdownMenuItem(value: UserRole.accountant, child: Text('Accountant')),
                     DropdownMenuItem(value: UserRole.admin, child: Text('Secondary Admin')),

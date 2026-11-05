@@ -8,13 +8,14 @@ import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class DailyClosingDialog extends StatefulWidget {
-  const DailyClosingDialog({super.key});
+  final bool isManagerClosing;
+  const DailyClosingDialog({super.key, this.isManagerClosing = false});
 
-  static Future<void> show(BuildContext context) {
+  static Future<void> show(BuildContext context, {bool isManagerClosing = false}) {
     return showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) => const DailyClosingDialog(),
+      builder: (_) => DailyClosingDialog(isManagerClosing: isManagerClosing),
     );
   }
 
@@ -23,7 +24,7 @@ class DailyClosingDialog extends StatefulWidget {
 }
 
 class _DailyClosingDialogState extends State<DailyClosingDialog> {
-  final _cashierNameController = TextEditingController(text: 'Cashier On Duty');
+  final _cashierNameController = TextEditingController(text: 'Staff On Duty');
   final _notesController = TextEditingController();
   bool _isSubmitting = false;
 
@@ -33,6 +34,8 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
     final active = AppStateProvider.read(context).activeStaffFullName;
     if (active != null && active.isNotEmpty) {
       _cashierNameController.text = active;
+    } else {
+      _cashierNameController.text = widget.isManagerClosing ? 'Dawit Manager' : 'Cashier On Duty';
     }
   }
 
@@ -55,7 +58,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
     final petty = state.todayPettyCashExpensesETB;
     final remainingCash = state.undepositedCashTodayETB;
     final dividends = state.washerDividendsToday;
-    final isAlreadyClosed = state.isTodayClosed;
+    final isAlreadyClosed = widget.isManagerClosing ? state.isTodayNightShiftClosed : state.isTodayDayShiftClosed;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return Dialog(
@@ -76,7 +79,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   Row(
                     children: [
                       AutoCareAssets.buildPhotoThumbnail(
-                        imageUrl: AutoCareAssets.welcomeHeroUrl,
+                        imageUrl: widget.isManagerClosing ? AutoCareAssets.packageTireRimUrl : AutoCareAssets.welcomeHeroUrl,
                         width: 44,
                         height: 44,
                         borderRadius: 12,
@@ -87,11 +90,15 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            state.tr('dailyClosing'),
+                            widget.isManagerClosing ? state.tr('nightClosingTitle') : state.tr('dailyClosing'),
                             style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                           ),
                           Text(
-                            isAlreadyClosed ? 'Shift Already Closed & Confirmed' : 'End of day transaction reconciliation',
+                            isAlreadyClosed
+                                ? 'Shift Already Closed & Confirmed'
+                                : (widget.isManagerClosing
+                                    ? 'Night shift closing & total payout to Admin'
+                                    : 'Day shift closing & handover to Operational Manager'),
                             style: TextStyle(
                               fontSize: 11.5,
                               color: isAlreadyClosed ? AppColors.statusCompleted : AppColors.textSecondary,
@@ -120,21 +127,37 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                 ),
                 child: Column(
                   children: [
-                    _buildClosingRow('Daily Gross Revenue:', CurrencyFormatter.format(gross), isBold: true, valueColor: AppColors.primary),
+                    _buildClosingRow(
+                      widget.isManagerClosing ? 'Night Shift Gross Revenue:' : 'Daily Gross Revenue:',
+                      CurrencyFormatter.format(gross),
+                      isBold: true,
+                      valueColor: AppColors.primary,
+                    ),
                     const Divider(height: 16),
-                    _buildClosingRow('  • Cash Handover at Gate:', CurrencyFormatter.format(cash), valueColor: AppColors.cashGreen),
+                    _buildClosingRow('  • Cash Collected at Station:', CurrencyFormatter.format(cash), valueColor: AppColors.cashGreen),
                     const SizedBox(height: 4),
-                    _buildClosingRow('  • Digital Channels Total:', CurrencyFormatter.format(digital), valueColor: AppColors.telebirrBlue),
+                    _buildClosingRow('  • Digital Channels Total (Telebirr/CBE):', CurrencyFormatter.format(digital), valueColor: AppColors.telebirrBlue),
                     const Divider(height: 16),
-                    _buildClosingRow('Washer Commission (15% Pool):', '- ${CurrencyFormatter.format(comm)}', isBold: true, valueColor: AppColors.oromiaGold),
+                    _buildClosingRow(
+                      widget.isManagerClosing ? 'Night Washer Commission (15% Pool):' : 'Day Washer Commission (15% Pool):',
+                      '- ${CurrencyFormatter.format(comm)}',
+                      isBold: true,
+                      valueColor: AppColors.oromiaGold,
+                    ),
                     const SizedBox(height: 4),
                     _buildClosingRow('Remaining Station Net Profit:', CurrencyFormatter.format(net), isBold: true, valueColor: AppColors.statusCompleted),
                     const Divider(height: 16),
-                    _buildClosingRow('Cash Deposited to Bank (A/B):', CurrencyFormatter.format(deposited), valueColor: Colors.indigo),
-                    const SizedBox(height: 4),
-                    _buildClosingRow('Petty Cash / Emergency Outflow:', CurrencyFormatter.format(petty), valueColor: Colors.deepOrange),
-                    const SizedBox(height: 4),
-                    _buildClosingRow('Cash Balance in Drawer:', CurrencyFormatter.format(remainingCash), isBold: true, valueColor: remainingCash > 0 ? AppColors.primary : AppColors.textSecondary),
+                    if (widget.isManagerClosing) ...[
+                      _buildClosingRow('Carried Cash from Cashier Handover:', CurrencyFormatter.format(state.managerCarriedCashETB), isBold: true, valueColor: Colors.indigo),
+                      const SizedBox(height: 4),
+                      _buildClosingRow('Night Shift Cash in Drawer:', CurrencyFormatter.format(remainingCash), valueColor: AppColors.cashGreen),
+                      const Divider(height: 16),
+                      _buildClosingRow('Total Physical Cash Handed to Admin:', CurrencyFormatter.format(state.managerCarriedCashETB + remainingCash), isBold: true, valueColor: AppColors.primary),
+                    ] else ...[
+                      _buildClosingRow('Petty Cash / Emergency Outflow:', CurrencyFormatter.format(petty), valueColor: Colors.deepOrange),
+                      const SizedBox(height: 4),
+                      _buildClosingRow('Cash Balance to Handover to Manager:', CurrencyFormatter.format(remainingCash), isBold: true, valueColor: remainingCash > 0 ? AppColors.primary : AppColors.textSecondary),
+                    ],
                   ],
                 ),
               ),
@@ -230,11 +253,11 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Cashier Name & Notes
+              // Staff Name & Notes
               CustomTextField(
                 controller: _cashierNameController,
-                label: 'Closing Cashier Name',
-                hint: 'Cashier confirming closing',
+                label: widget.isManagerClosing ? 'Closing Manager Name' : 'Closing Cashier Name',
+                hint: widget.isManagerClosing ? 'Manager confirming closing' : 'Cashier confirming closing',
                 prefixIcon: Icons.badge_rounded,
               ),
               const SizedBox(height: 10),
@@ -343,24 +366,30 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
   }
 
   Future<void> _handleClosingConfirm() async {
-    final cashierName = _cashierNameController.text.trim().isNotEmpty
+    final staffName = _cashierNameController.text.trim().isNotEmpty
         ? _cashierNameController.text.trim()
-        : 'Cashier On Duty';
+        : (widget.isManagerClosing ? 'Dawit Manager' : 'Cashier On Duty');
 
     setState(() => _isSubmitting = true);
 
     try {
       final state = AppStateProvider.read(context);
       final closing = await state.confirmDailyClosing(
-        cashierName: cashierName,
+        cashierName: staffName,
         notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+        shiftType: widget.isManagerClosing ? 'night' : 'day',
+        closedByRole: widget.isManagerClosing ? 'manager' : 'cashier',
+        handoverTo: widget.isManagerClosing ? 'Admin / Owner' : 'Operational Manager',
       );
 
       if (mounted) {
         Navigator.pop(context);
+        final message = widget.isManagerClosing
+            ? 'Night closing confirmed for ${CurrencyFormatter.format(closing.grossRevenue)}! Total cash handed to Admin.'
+            : 'Day shift closing confirmed! Cash handover submitted to Operational Manager.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Daily closing report confirmed for ${CurrencyFormatter.format(closing.grossRevenue)} gross revenue! Admin dashboard notified.'),
+            content: Text(message),
             backgroundColor: AppColors.statusReady,
             behavior: SnackBarBehavior.floating,
           ),
@@ -371,7 +400,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
         setState(() => _isSubmitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error confirming daily closing: $e'),
+            content: Text('Error confirming closing: $e'),
             backgroundColor: Colors.redAccent,
           ),
         );

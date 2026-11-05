@@ -360,7 +360,30 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text('${c.closingDate.day}/${c.closingDate.month}/${c.closingDate.year} • Cashier: ${c.cashierName}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${c.closingDate.day}/${c.closingDate.month}/${c.closingDate.year} • ${c.shiftType == 'night' ? 'Night Shift (Op Manager)' : 'Day Shift (Cashier)'}: ${c.cashierName}',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        c.shiftType == 'night'
+                            ? 'Handover to Admin: ${CurrencyFormatter.format(c.handoverCashAmount)} Total Cash'
+                            : (c.isHandoverAccepted
+                                ? 'Handover Confirmed by Op Manager (${c.acceptedByName ?? "Manager"})'
+                                : 'Handover Pending Manager Acceptance'),
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: c.shiftType == 'night'
+                              ? Colors.indigo
+                              : (c.isHandoverAccepted ? Colors.green.shade700 : Colors.orange.shade800),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

@@ -25,6 +25,8 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
         return const Color(0xFFF59E0B); // Amber / Gold
       case UserRole.cashier:
         return const Color(0xFF10B981); // Emerald
+      case UserRole.manager:
+        return const Color(0xFF6366F1); // Indigo
       case UserRole.accountant:
         return const Color(0xFF38BDF8); // Sky Blue
       case UserRole.storekeeper:

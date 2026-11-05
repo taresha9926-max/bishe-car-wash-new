@@ -6,6 +6,7 @@ import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart'
 class StaffAuthenticator {
   static const String defaultAdminPin = '1234';
   static const String defaultCashierPin = '0000';
+  static const String defaultManagerPin = '7788';
   static const String defaultStorekeeperPin = '3344';
   static const String defaultAccountantPin = '5566';
 
@@ -30,6 +31,7 @@ class StaffAuthenticator {
     // Fallback only if the credentials database is completely uninitialized
     if (role == UserRole.admin && pin == defaultAdminPin) return true;
     if (role == UserRole.cashier && pin == defaultCashierPin) return true;
+    if (role == UserRole.manager && pin == defaultManagerPin) return true;
     if (role == UserRole.storekeeper && pin == defaultStorekeeperPin) return true;
     if (role == UserRole.accountant && pin == defaultAccountantPin) return true;
 

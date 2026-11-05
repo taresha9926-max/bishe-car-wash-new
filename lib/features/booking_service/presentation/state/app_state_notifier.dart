@@ -855,15 +855,101 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   /// Checks if a given date has an approved daily closing report
-  bool isDateClosed(DateTime date) {
+  bool isDateClosed(DateTime date, {String? shiftType}) {
     return _dailyFinancialClosings.any((c) =>
         c.closingDate.year == date.year &&
         c.closingDate.month == date.month &&
         c.closingDate.day == date.day &&
-        c.isConfirmed);
+        c.isConfirmed &&
+        (shiftType == null || c.shiftType == shiftType));
   }
 
   bool get isTodayClosed => isDateClosed(DateTime.now());
+  bool get isTodayDayShiftClosed => isDateClosed(DateTime.now(), shiftType: 'day');
+  bool get isTodayNightShiftClosed => isDateClosed(DateTime.now(), shiftType: 'night');
+
+  DailyFinancialClosing? get pendingCashierHandover {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'day' &&
+          !c.isHandoverAccepted &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  DailyFinancialClosing? get latestDayClosing {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'day' &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  DailyFinancialClosing? get latestNightClosing {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'night' &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  double get managerCarriedCashETB {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'day' &&
+          c.isHandoverAccepted &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return c.cashRemaining;
+      }
+    }
+    return 0.0;
+  }
+
+  Future<void> acceptCashierHandover({
+    required String managerName,
+  }) async {
+    final now = DateTime.now();
+    final index = _dailyFinancialClosings.indexWhere(
+      (c) =>
+          c.shiftType == 'day' &&
+          !c.isHandoverAccepted &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day,
+    );
+
+    if (index != -1) {
+      final updated = _dailyFinancialClosings[index].copyWith(
+        isHandoverAccepted: true,
+        acceptedByName: managerName,
+        acceptedAt: now,
+      );
+      _dailyFinancialClosings[index] = updated;
+      try {
+        await _repository.saveDailyFinancialClosing(updated);
+      } catch (e) {
+        debugPrint('Failed to save handover acceptance: $e');
+      }
+      notifyListeners();
+    }
+  }
 
   /// Cashier records cash deposit to Owner Bank Account A or B
   Future<void> recordBankDeposit({
@@ -896,10 +982,13 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Cashier confirms daily financial transactions closing summary
+  /// Confirms daily/shift financial transactions closing summary
   Future<DailyFinancialClosing> confirmDailyClosing({
     required String cashierName,
     String? notes,
+    String shiftType = 'day',
+    String closedByRole = 'cashier',
+    String handoverTo = 'Operational Manager',
   }) async {
     final now = DateTime.now();
     final paidToday = _bookings.where((b) {
@@ -932,8 +1021,13 @@ class AppStateNotifier extends ChangeNotifier {
       }
     });
 
+    final carried = shiftType == 'night' ? managerCarriedCashETB : 0.0;
+    final totalCashToHandover = shiftType == 'night'
+        ? (carried + remainingCash)
+        : remainingCash;
+
     final closing = DailyFinancialClosing(
-      id: 'closing-${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
+      id: 'closing-${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}-$shiftType',
       closingDate: now,
       closedAt: now,
       cashierName: cashierName,
@@ -950,12 +1044,19 @@ class AppStateNotifier extends ChangeNotifier {
       washerDividends: divSummary,
       notes: notes,
       isConfirmed: true,
+      shiftType: shiftType,
+      closedByRole: closedByRole,
+      handoverTo: handoverTo,
+      handoverCashAmount: totalCashToHandover,
+      isHandoverAccepted: shiftType == 'night',
+      carriedCashAmount: carried,
     );
 
     _dailyFinancialClosings.removeWhere((c) =>
         c.closingDate.year == now.year &&
         c.closingDate.month == now.month &&
-        c.closingDate.day == now.day);
+        c.closingDate.day == now.day &&
+        c.shiftType == shiftType);
     _dailyFinancialClosings.insert(0, closing);
 
     try {

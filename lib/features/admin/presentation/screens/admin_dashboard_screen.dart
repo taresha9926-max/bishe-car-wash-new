@@ -217,12 +217,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Cashier Shift Closing Confirmed',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.5),
+                            Text(
+                              state.latestClosingAlert!.shiftType == 'night'
+                                  ? 'Station Night Shift Closing Confirmed (Handover to Admin)'
+                                  : 'Cashier Day Shift Closing Confirmed (Handover to Manager)',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.5),
                             ),
                             Text(
-                              'Cashier: ${state.latestClosingAlert!.cashierName} • Revenue: ${CurrencyFormatter.format(state.latestClosingAlert!.grossRevenue)} (${state.latestClosingAlert!.carsWashedCount} cars washed)',
+                              state.latestClosingAlert!.shiftType == 'night'
+                                  ? 'Op Manager: ${state.latestClosingAlert!.cashierName} • Total Cash to Admin: ${CurrencyFormatter.format(state.latestClosingAlert!.handoverCashAmount)} • Gross: ${CurrencyFormatter.format(state.latestClosingAlert!.grossRevenue)}'
+                                  : 'Cashier: ${state.latestClosingAlert!.cashierName} • Handover Cash: ${CurrencyFormatter.format(state.latestClosingAlert!.cashRemaining)} • Revenue: ${CurrencyFormatter.format(state.latestClosingAlert!.grossRevenue)}',
                               style: const TextStyle(color: Colors.white70, fontSize: 11.5),
                             ),
                           ],

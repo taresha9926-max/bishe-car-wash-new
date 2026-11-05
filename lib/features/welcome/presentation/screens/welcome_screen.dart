@@ -92,6 +92,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     }
   }
 
+  void _openManagerPortal() async {
+    final state = AppStateProvider.read(context);
+    final auth = await RoleAuthDialog.show(context, UserRole.manager);
+    if (auth) {
+      state.switchRole(UserRole.manager);
+    }
+  }
+
   void _openStorekeeperPortal() async {
     final state = AppStateProvider.read(context);
     final auth = await RoleAuthDialog.show(context, UserRole.storekeeper);
@@ -193,6 +201,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           onSelected: (value) {
                             if (value == 'cashier') {
                               _openCashierPortal();
+                            } else if (value == 'manager') {
+                              _openManagerPortal();
                             } else if (value == 'storekeeper') {
                               _openStorekeeperPortal();
                             } else if (value == 'accountant') {
@@ -259,6 +269,39 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                         ),
                                         Text(
                                           state.tr('cashierPinBadge'),
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            PopupMenuItem(
+                              value: 'manager',
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF6366F1).withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(Icons.manage_accounts_rounded, color: Color(0xFF6366F1), size: 18),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          state.tr('managerPortal'),
+                                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                                        ),
+                                        Text(
+                                          state.tr('managerPinBadge'),
                                           style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                         ),
                                       ],

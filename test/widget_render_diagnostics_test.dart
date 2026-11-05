@@ -4,6 +4,7 @@ import 'package:bishe_car_wash/core/constants/app_theme.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/auth_roles/presentation/screens/role_shell_screen.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
+import 'package:bishe_car_wash/features/manager/presentation/screens/operational_manager_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/accountant_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/inventory/presentation/screens/storekeeper_dashboard_screen.dart';
@@ -77,6 +78,21 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(AdminDashboardScreen), findsOneWidget);
+  });
+
+  testWidgets('Operational Manager Dashboard renders without exceptions', (tester) async {
+    notifier.switchRole(UserRole.manager);
+    await tester.pumpWidget(
+      AppStateProvider(
+        notifier: notifier,
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const OperationalManagerDashboardScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(OperationalManagerDashboardScreen), findsOneWidget);
   });
 
   testWidgets('RoleShellScreen renders without exceptions', (tester) async {
