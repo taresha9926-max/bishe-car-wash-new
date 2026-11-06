@@ -872,6 +872,21 @@ class AppStateNotifier extends ChangeNotifier {
     final now = DateTime.now();
     for (final c in _dailyFinancialClosings) {
       if (c.shiftType == 'day' &&
+          c.handoverMethod == 'manager_otp' &&
+          !c.isHandoverAccepted &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return c;
+      }
+    }
+    return null;
+  }
+
+  DailyFinancialClosing? get pendingAdminNightHandover {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'night' &&
           !c.isHandoverAccepted &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
@@ -912,6 +927,7 @@ class AppStateNotifier extends ChangeNotifier {
     final now = DateTime.now();
     for (final c in _dailyFinancialClosings) {
       if (c.shiftType == 'day' &&
+          c.handoverMethod == 'manager_otp' &&
           c.isHandoverAccepted &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
@@ -922,13 +938,15 @@ class AppStateNotifier extends ChangeNotifier {
     return 0.0;
   }
 
-  Future<void> acceptCashierHandover({
+  Future<bool> acceptCashierHandover({
     required String managerName,
+    String? enteredOtp,
   }) async {
     final now = DateTime.now();
     final index = _dailyFinancialClosings.indexWhere(
       (c) =>
           c.shiftType == 'day' &&
+          c.handoverMethod == 'manager_otp' &&
           !c.isHandoverAccepted &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
@@ -936,7 +954,13 @@ class AppStateNotifier extends ChangeNotifier {
     );
 
     if (index != -1) {
-      final updated = _dailyFinancialClosings[index].copyWith(
+      final record = _dailyFinancialClosings[index];
+      if (record.handoverOtp != null && record.handoverOtp!.isNotEmpty) {
+        if (enteredOtp == null || enteredOtp.trim() != record.handoverOtp!.trim()) {
+          return false;
+        }
+      }
+      final updated = record.copyWith(
         isHandoverAccepted: true,
         acceptedByName: managerName,
         acceptedAt: now,
@@ -948,7 +972,47 @@ class AppStateNotifier extends ChangeNotifier {
         debugPrint('Failed to save handover acceptance: $e');
       }
       notifyListeners();
+      return true;
     }
+    return false;
+  }
+
+  Future<bool> acceptAdminHandover({
+    required String adminName,
+    String? enteredOtp,
+  }) async {
+    final now = DateTime.now();
+    final index = _dailyFinancialClosings.indexWhere(
+      (c) =>
+          c.shiftType == 'night' &&
+          !c.isHandoverAccepted &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day,
+    );
+
+    if (index != -1) {
+      final record = _dailyFinancialClosings[index];
+      if (record.handoverOtp != null && record.handoverOtp!.isNotEmpty) {
+        if (enteredOtp == null || enteredOtp.trim() != record.handoverOtp!.trim()) {
+          return false;
+        }
+      }
+      final updated = record.copyWith(
+        isHandoverAccepted: true,
+        acceptedByName: adminName,
+        acceptedAt: now,
+      );
+      _dailyFinancialClosings[index] = updated;
+      try {
+        await _repository.saveDailyFinancialClosing(updated);
+      } catch (e) {
+        debugPrint('Failed to save admin handover acceptance: $e');
+      }
+      notifyListeners();
+      return true;
+    }
+    return false;
   }
 
   /// Cashier records cash deposit to Owner Bank Account A or B
@@ -989,6 +1053,9 @@ class AppStateNotifier extends ChangeNotifier {
     String shiftType = 'day',
     String closedByRole = 'cashier',
     String handoverTo = 'Operational Manager',
+    String handoverMethod = 'manager_otp', // 'manager_otp', 'bank_deposit', 'admin_otp'
+    String? bankAccountKey,
+    String? bankReferenceSlip,
   }) async {
     final now = DateTime.now();
     final paidToday = _bookings.where((b) {
@@ -1026,6 +1093,43 @@ class AppStateNotifier extends ChangeNotifier {
         ? (carried + remainingCash)
         : remainingCash;
 
+    // Determine OTP and Handover Target based on method
+    String? otp;
+    bool isAccepted = false;
+    String targetRecipient = handoverTo;
+    double finalRemainingCash = remainingCash;
+    double finalDeposited = deposited;
+
+    if (shiftType == 'night') {
+      targetRecipient = 'Admin / Owner';
+      otp = (1000 + (now.millisecondsSinceEpoch % 9000)).toString();
+      isAccepted = false; // Admin must verify with OTP
+    } else {
+      if (handoverMethod == 'bank_deposit') {
+        final accName = bankAccountKey == 'account_b' ? ownerAccountBName : ownerAccountAName;
+        final accNum = bankAccountKey == 'account_b' ? ownerAccountBNumber : ownerAccountANumber;
+        targetRecipient = 'Bank Deposit ($accName)';
+        isAccepted = true;
+        otp = null;
+        if (remainingCash > 0) {
+          await recordBankDeposit(
+            amount: remainingCash,
+            accountKey: bankAccountKey ?? 'account_a',
+            referenceSlipNumber: bankReferenceSlip ?? 'DEP-${now.millisecondsSinceEpoch}',
+            cashierName: cashierName,
+            notes: notes ?? 'Automatic deposit during Cashier daily closing fallback',
+          );
+          finalDeposited += remainingCash;
+          finalRemainingCash = 0.0;
+        }
+      } else {
+        // manager_otp
+        targetRecipient = 'Operational Manager';
+        otp = (1000 + (now.millisecondsSinceEpoch % 9000)).toString();
+        isAccepted = false; // Manager must verify with OTP
+      }
+    }
+
     final closing = DailyFinancialClosing(
       id: 'closing-${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}-$shiftType',
       closingDate: now,
@@ -1038,18 +1142,23 @@ class AppStateNotifier extends ChangeNotifier {
       carsWashedCount: paidToday.length,
       commissionPool: comm,
       netStationProfit: net,
-      cashDeposited: deposited,
+      cashDeposited: finalDeposited,
       pettyCashExpenses: petty,
-      cashRemaining: remainingCash,
+      cashRemaining: finalRemainingCash,
       washerDividends: divSummary,
       notes: notes,
       isConfirmed: true,
       shiftType: shiftType,
       closedByRole: closedByRole,
-      handoverTo: handoverTo,
+      handoverTo: targetRecipient,
       handoverCashAmount: totalCashToHandover,
-      isHandoverAccepted: shiftType == 'night',
+      isHandoverAccepted: isAccepted,
       carriedCashAmount: carried,
+      handoverMethod: shiftType == 'night' ? 'admin_otp' : handoverMethod,
+      handoverOtp: otp,
+      bankAccountName: handoverMethod == 'bank_deposit' ? (bankAccountKey == 'account_b' ? ownerAccountBName : ownerAccountAName) : null,
+      bankAccountNumber: handoverMethod == 'bank_deposit' ? (bankAccountKey == 'account_b' ? ownerAccountBNumber : ownerAccountANumber) : null,
+      depositSlipRef: handoverMethod == 'bank_deposit' ? bankReferenceSlip : null,
     );
 
     _dailyFinancialClosings.removeWhere((c) =>

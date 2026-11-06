@@ -6,6 +6,7 @@ import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
+import '../../../admin/domain/models/daily_financial_closing.dart';
 
 class DailyClosingDialog extends StatefulWidget {
   final bool isManagerClosing;
@@ -26,6 +27,9 @@ class DailyClosingDialog extends StatefulWidget {
 class _DailyClosingDialogState extends State<DailyClosingDialog> {
   final _cashierNameController = TextEditingController(text: 'Staff On Duty');
   final _notesController = TextEditingController();
+  final _bankSlipController = TextEditingController();
+  String _handoverMethod = 'manager_otp'; // 'manager_otp' or 'bank_deposit'
+  String _selectedAccountKey = 'account_a';
   bool _isSubmitting = false;
 
   @override
@@ -43,6 +47,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
   void dispose() {
     _cashierNameController.dispose();
     _notesController.dispose();
+    _bankSlipController.dispose();
     super.dispose();
   }
 
@@ -253,6 +258,169 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               ),
               const SizedBox(height: 16),
 
+              // Physical Cash Destination Option (Cashier shift only)
+              if (!widget.isManagerClosing) ...[
+                Text(
+                  state.tr('handoverMethod'),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => setState(() => _handoverMethod = 'manager_otp'),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _handoverMethod == 'manager_otp' ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _handoverMethod == 'manager_otp' ? AppColors.primary : AppColors.cardBorder,
+                        width: _handoverMethod == 'manager_otp' ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _handoverMethod == 'manager_otp' ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                          color: _handoverMethod == 'manager_otp' ? AppColors.primary : AppColors.textMuted,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('handoverToManagerOption'),
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: _handoverMethod == 'manager_otp' ? AppColors.primary : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Generates 4-digit code for Operational Manager to count and verify.',
+                                style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => setState(() => _handoverMethod = 'bank_deposit'),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _handoverMethod == 'bank_deposit' ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _handoverMethod == 'bank_deposit' ? AppColors.primary : AppColors.cardBorder,
+                        width: _handoverMethod == 'bank_deposit' ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _handoverMethod == 'bank_deposit' ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                          color: _handoverMethod == 'bank_deposit' ? AppColors.primary : AppColors.textMuted,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('bankDepositOption'),
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: _handoverMethod == 'bank_deposit' ? AppColors.primary : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                state.tr('bankDepositSub'),
+                                style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (_handoverMethod == 'bank_deposit') ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => setState(() => _selectedAccountKey = 'account_a'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: _selectedAccountKey == 'account_a' ? Colors.white : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: _selectedAccountKey == 'account_a' ? AppColors.cbeBirrPurple : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: const Text('CBE (Account A)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => setState(() => _selectedAccountKey = 'account_b'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: _selectedAccountKey == 'account_b' ? Colors.white : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: _selectedAccountKey == 'account_b' ? const Color(0xFFEA580C) : Colors.transparent,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: const Text('Awash (Account B)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _bankSlipController,
+                          label: 'Deposit Slip Reference / Transaction #',
+                          hint: 'e.g. CBE-TX-982187 or Awash-Slip-441',
+                          prefixIcon: Icons.receipt_long_rounded,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+              ],
+
               // Staff Name & Notes
               CustomTextField(
                 controller: _cashierNameController,
@@ -380,20 +548,24 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
         shiftType: widget.isManagerClosing ? 'night' : 'day',
         closedByRole: widget.isManagerClosing ? 'manager' : 'cashier',
         handoverTo: widget.isManagerClosing ? 'Admin / Owner' : 'Operational Manager',
+        handoverMethod: widget.isManagerClosing ? 'admin_otp' : _handoverMethod,
+        bankAccountKey: _selectedAccountKey,
+        bankReferenceSlip: _bankSlipController.text.trim().isNotEmpty ? _bankSlipController.text.trim() : null,
       );
 
       if (mounted) {
         Navigator.pop(context);
-        final message = widget.isManagerClosing
-            ? 'Night closing confirmed for ${CurrencyFormatter.format(closing.grossRevenue)}! Total cash handed to Admin.'
-            : 'Day shift closing confirmed! Cash handover submitted to Operational Manager.';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: AppColors.statusReady,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        if (closing.handoverOtp != null && closing.handoverOtp!.isNotEmpty) {
+          _showOtpReceiptDialog(context, closing, state);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.tr('bankDepositRecorded')),
+              backgroundColor: AppColors.statusReady,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -406,5 +578,90 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
         );
       }
     }
+  }
+
+  void _showOtpReceiptDialog(BuildContext context, DailyFinancialClosing closing, dynamic state) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          width: 420,
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.pin_rounded, color: AppColors.primary, size: 30),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                state.tr('transferOtpCode'),
+                style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                widget.isManagerClosing
+                    ? 'Give this 4-digit code to Admin after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} cash.'
+                    : 'Give this 4-digit code to Operational Manager after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} cash.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1.5),
+                ),
+                child: Text(
+                  closing.handoverOtp ?? '',
+                  style: const TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 10,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Physical Handover Cash:', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                    Text(
+                      CurrencyFormatter.format(closing.handoverCashAmount),
+                      style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900, color: AppColors.cashGreen),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              CustomButton(
+                text: 'Done',
+                icon: Icons.check_circle_rounded,
+                backgroundColor: AppColors.primary,
+                isLoading: false,
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

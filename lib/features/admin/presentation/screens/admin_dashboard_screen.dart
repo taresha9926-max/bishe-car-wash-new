@@ -242,6 +242,65 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ],
 
+              // Pending Manager Night Closing Cash Receipt via OTP
+              if (state.pendingAdminNightHandover != null) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFEA580C), Color(0xFFC2410C)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFEA580C).withOpacity(0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.shield_moon_rounded, size: 28, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.tr('adminHandoverPending'),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.5),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Manager ${state.pendingAdminNightHandover!.cashierName} closed night shift. Handover Cash: ${CurrencyFormatter.format(state.pendingAdminNightHandover!.handoverCashAmount)}',
+                              style: const TextStyle(color: Colors.white70, fontSize: 11.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () => _confirmAcceptManagerNightCash(context, state),
+                        icon: const Icon(Icons.vpn_key_rounded, size: 16, color: Color(0xFFC2410C)),
+                        label: Text(
+                          state.tr('verifyAdminOtp'),
+                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Color(0xFFC2410C)),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               // Pending Approval Queue (from Secondary Admin actions)
               _buildPendingApprovalsBanner(context, state),
 
@@ -3435,5 +3494,102 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         ],
       ),
     );
+  }
+
+  void _confirmAcceptManagerNightCash(BuildContext context, dynamic state) async {
+    final pending = state.pendingAdminNightHandover;
+    if (pending == null) return;
+
+    final otpController = TextEditingController();
+    String? errorMessage;
+
+    final accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: Row(
+            children: [
+              const Icon(Icons.verified_user_rounded, color: AppColors.primary, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.tr('enterHandoverOtp'),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Count ${CurrencyFormatter.format(pending.handoverCashAmount)} physical cash from Operational Manager ${pending.cashierName}, then enter the 4-digit code given by the manager.',
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: otpController,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 8, color: AppColors.primary),
+                decoration: InputDecoration(
+                  counterText: '',
+                  hintText: '••••',
+                  hintStyle: const TextStyle(letterSpacing: 8, color: AppColors.textMuted),
+                  filled: true,
+                  fillColor: AppColors.surfaceVariant,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  errorText: errorMessage,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final otp = otpController.text.trim();
+                final ok = await state.acceptAdminHandover(
+                  adminName: state.activeStaffFullName ?? 'Admin / Owner',
+                  enteredOtp: otp,
+                );
+                if (ok) {
+                  Navigator.pop(ctx, true);
+                } else {
+                  setDialogState(() {
+                    errorMessage = state.tr('invalidOtpCode');
+                  });
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.cashGreen,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(
+                state.tr('verifyAndTakeCustody'),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (accepted == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('handoverSuccess')),
+          backgroundColor: AppColors.statusReady,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

@@ -599,6 +599,71 @@ class AppStrings {
       AppLanguage.om: 'Waliigala Qarshii Bulchaaf Kenname',
       AppLanguage.am: 'ለአስተዳዳሪው የሚሰጥ ጠቅላላ ጥሬ ገንዘብ',
     },
+    'handoverMethod': {
+      AppLanguage.en: 'Cash Handover Method',
+      AppLanguage.om: 'Akkaataa Dabarsoo Qarshii',
+      AppLanguage.am: 'የጥሬ ገንዘብ ርክክብ ዘዴ',
+    },
+    'handoverToManagerOption': {
+      AppLanguage.en: 'Handover to Operational Manager',
+      AppLanguage.om: 'Hojii Geggeessaatti Dabarsuu',
+      AppLanguage.am: 'ለስራ አስኪያጅ ማስረከብ',
+    },
+    'bankDepositOption': {
+      AppLanguage.en: 'Deposit to Owner Bank Account',
+      AppLanguage.om: 'Herrega Baankii Abbaatti Galchuu',
+      AppLanguage.am: 'ወደ ባለንብረቱ የባንክ ሂሳብ ማስገባት',
+    },
+    'bankDepositSub': {
+      AppLanguage.en: 'If Manager is absent or deposited before 5 PM',
+      AppLanguage.om: 'Hojii geggeessaan yoo hin jirre ykn sa\'a 11 dura',
+      AppLanguage.am: 'ስራ አስኪያጁ ከሌለ ወይም ከቀኑ 11 ሰዓት በፊት',
+    },
+    'transferOtpCode': {
+      AppLanguage.en: 'Handover Verification Code',
+      AppLanguage.om: 'Koodii Mirkaneessa Dabarsoo',
+      AppLanguage.am: 'የርክክብ ማረጋገጫ ኮድ',
+    },
+    'enterHandoverOtp': {
+      AppLanguage.en: 'Enter 4-Digit Handover Code',
+      AppLanguage.om: 'Koodii Dabarsoo Dijitii 4 Galchaa',
+      AppLanguage.am: 'ባለ 4 አሃዝ የርክክብ ኮድ ያስገቡ',
+    },
+    'giveOtpToReceiver': {
+      AppLanguage.en: 'Give this 4-digit code to the receiver after counting physical cash',
+      AppLanguage.om: 'Qarshii erga lakkooftanii kennitanii booda koodii kana fuudhataaf kennaa',
+      AppLanguage.am: 'ጥሬ ገንዘቡን ቆጥረው ካስረከቡ በኋላ ይህንን ባለ 4 አሃዝ ኮድ ለተቀባዩ ይስጡ',
+    },
+    'verifyAndTakeCustody': {
+      AppLanguage.en: 'Verify & Take Custody',
+      AppLanguage.om: 'Mirkaneessi & Fudhadhu',
+      AppLanguage.am: 'አረጋግጥ እና ተረከብ',
+    },
+    'invalidOtpCode': {
+      AppLanguage.en: 'Invalid Code. Please confirm physical count with sender.',
+      AppLanguage.om: 'Koodiin dogoggora. Maaloo lakkoofsa qarshii waliin mirkaneeffadhaa.',
+      AppLanguage.am: 'የተሳሳተ ኮድ። እባክዎ ከላኪው ጋር የገንዘቡን መጠን ያረጋግጡ።',
+    },
+    'handoverSuccess': {
+      AppLanguage.en: 'Cash handover verified and received successfully!',
+      AppLanguage.om: 'Dabarsoon qarshii milkaa\'inaan mirkanaa\'eera!',
+      AppLanguage.am: 'የጥሬ ገንዘብ ርክክቡ በተሳካ ሁኔታ ተረጋግጧል!',
+    },
+    'bankDepositRecorded': {
+      AppLanguage.en: 'Cash deposit to Owner\'s Bank Account recorded',
+      AppLanguage.om: 'Galiin herrega baankiitti galmaa\'eera',
+      AppLanguage.am: 'ወደ ባለንብረቱ የባንክ ሂሳብ የተደረገው ተቀማጭ ተመዝግቧል',
+    },
+    'adminHandoverPending': {
+      AppLanguage.en: 'Night Cash Pending Admin Acceptance',
+      AppLanguage.om: 'Qarshii Halkan Bulchaan Fudhatamu',
+      AppLanguage.am: 'የሌሊት ጥሬ ገንዘብ በአስተዳዳሪው እንዲረጋገጥ የሚጠብቅ',
+    },
+    'verifyAdminOtp': {
+      AppLanguage.en: 'Verify & Accept Night Cash',
+      AppLanguage.om: 'Mirkaneessi & Qarshii Halkan Fudhadhu',
+      AppLanguage.am: 'አረጋግጥ እና የሌሊት ጥሬ ገንዘብ ተረከብ',
+    },
     'enterCustomerPortal': {
       AppLanguage.en: 'Enter Customer Portal',
       AppLanguage.om: 'Gara Balbala Maamilaa Seenaa',

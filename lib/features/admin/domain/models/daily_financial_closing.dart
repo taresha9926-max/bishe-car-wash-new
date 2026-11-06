@@ -24,6 +24,11 @@ class DailyFinancialClosing {
   final String? acceptedByName;
   final DateTime? acceptedAt;
   final double carriedCashAmount;
+  final String handoverMethod; // 'manager_otp', 'bank_deposit', 'admin_otp'
+  final String? handoverOtp; // 4-digit verification code
+  final String? bankAccountName;
+  final String? bankAccountNumber;
+  final String? depositSlipRef;
 
   const DailyFinancialClosing({
     required this.id,
@@ -51,6 +56,11 @@ class DailyFinancialClosing {
     this.acceptedByName,
     this.acceptedAt,
     this.carriedCashAmount = 0.0,
+    this.handoverMethod = 'manager_otp',
+    this.handoverOtp,
+    this.bankAccountName,
+    this.bankAccountNumber,
+    this.depositSlipRef,
   });
 
   DailyFinancialClosing copyWith({
@@ -58,6 +68,11 @@ class DailyFinancialClosing {
     String? acceptedByName,
     DateTime? acceptedAt,
     bool? isConfirmed,
+    String? handoverMethod,
+    String? handoverOtp,
+    String? bankAccountName,
+    String? bankAccountNumber,
+    String? depositSlipRef,
   }) {
     return DailyFinancialClosing(
       id: id,
@@ -85,6 +100,11 @@ class DailyFinancialClosing {
       acceptedByName: acceptedByName ?? this.acceptedByName,
       acceptedAt: acceptedAt ?? this.acceptedAt,
       carriedCashAmount: carriedCashAmount,
+      handoverMethod: handoverMethod ?? this.handoverMethod,
+      handoverOtp: handoverOtp ?? this.handoverOtp,
+      bankAccountName: bankAccountName ?? this.bankAccountName,
+      bankAccountNumber: bankAccountNumber ?? this.bankAccountNumber,
+      depositSlipRef: depositSlipRef ?? this.depositSlipRef,
     );
   }
 
@@ -115,6 +135,11 @@ class DailyFinancialClosing {
       'acceptedByName': acceptedByName,
       'acceptedAt': acceptedAt?.toIso8601String(),
       'carriedCashAmount': carriedCashAmount,
+      'handoverMethod': handoverMethod,
+      'handoverOtp': handoverOtp,
+      'bankAccountName': bankAccountName,
+      'bankAccountNumber': bankAccountNumber,
+      'depositSlipRef': depositSlipRef,
     };
   }
 
@@ -145,6 +170,11 @@ class DailyFinancialClosing {
       acceptedByName: map['acceptedByName'],
       acceptedAt: map['acceptedAt'] != null ? DateTime.tryParse(map['acceptedAt']) : null,
       carriedCashAmount: (map['carriedCashAmount'] as num?)?.toDouble() ?? 0.0,
+      handoverMethod: map['handoverMethod'] ?? 'manager_otp',
+      handoverOtp: map['handoverOtp'],
+      bankAccountName: map['bankAccountName'],
+      bankAccountNumber: map['bankAccountNumber'],
+      depositSlipRef: map['depositSlipRef'],
     );
   }
 }

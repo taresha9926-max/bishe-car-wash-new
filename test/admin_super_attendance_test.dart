@@ -380,5 +380,92 @@ https://www.tiktok.com/@bishecarwash/video/7703201662713728274?sender_device=pc
       await freshState.loadData();
       expect(freshState.customerPhoneBookingNumber, equals('0911223344'));
     });
+
+    test('Cashier day closing with manager OTP handover requires valid OTP for acceptance', () async {
+      // 1. Cashier closes day shift with manager_otp
+      final closing = await state.confirmDailyClosing(
+        cashierName: 'Meron Cashier',
+        shiftType: 'day',
+        closedByRole: 'cashier',
+        handoverTo: 'Operational Manager',
+        handoverMethod: 'manager_otp',
+      );
+
+      expect(closing.handoverMethod, 'manager_otp');
+      expect(closing.isHandoverAccepted, isFalse);
+      expect(closing.handoverOtp, isNotNull);
+      expect(closing.handoverOtp!.length, 4);
+      expect(state.pendingCashierHandover, isNotNull);
+
+      // 2. Manager attempts with incorrect OTP -> fails
+      final wrongOk = await state.acceptCashierHandover(
+        managerName: 'Dawit Manager',
+        enteredOtp: '0000',
+      );
+      expect(wrongOk, isFalse);
+      expect(state.pendingCashierHandover, isNotNull);
+      expect(state.managerCarriedCashETB, 0.0);
+
+      // 3. Manager enters exact OTP -> succeeds
+      final correctOk = await state.acceptCashierHandover(
+        managerName: 'Dawit Manager',
+        enteredOtp: closing.handoverOtp,
+      );
+      expect(correctOk, isTrue);
+      expect(state.pendingCashierHandover, isNull);
+      expect(state.managerCarriedCashETB, closing.cashRemaining);
+    });
+
+    test('Cashier day closing with bank deposit contingency directly deposits cash to owner bank', () async {
+      final initialDepositsCount = state.bankDeposits.length;
+
+      final closing = await state.confirmDailyClosing(
+        cashierName: 'Meron Cashier',
+        shiftType: 'day',
+        closedByRole: 'cashier',
+        handoverMethod: 'bank_deposit',
+        bankAccountKey: 'account_b',
+        bankReferenceSlip: 'SLIP-CONTINGENCY-123',
+      );
+
+      expect(closing.handoverMethod, 'bank_deposit');
+      expect(closing.isHandoverAccepted, isTrue);
+      expect(closing.handoverOtp, isNull);
+      expect(closing.bankAccountName, contains('Awash'));
+      expect(state.pendingCashierHandover, isNull);
+    });
+
+    test('Operational manager night closing combines day + night cash and verifies with admin OTP', () async {
+      // 1. Manager closes night shift
+      final nightClosing = await state.confirmDailyClosing(
+        cashierName: 'Dawit Manager',
+        shiftType: 'night',
+        closedByRole: 'manager',
+        handoverTo: 'Admin / Owner',
+      );
+
+      expect(nightClosing.shiftType, 'night');
+      expect(nightClosing.handoverMethod, 'admin_otp');
+      expect(nightClosing.isHandoverAccepted, isFalse);
+      expect(nightClosing.handoverOtp, isNotNull);
+      expect(nightClosing.handoverOtp!.length, 4);
+      expect(state.pendingAdminNightHandover, isNotNull);
+
+      // 2. Admin attempts wrong OTP -> fails
+      final wrongAdmin = await state.acceptAdminHandover(
+        adminName: 'Owner Admin',
+        enteredOtp: '9999',
+      );
+      expect(wrongAdmin, isFalse);
+      expect(state.pendingAdminNightHandover, isNotNull);
+
+      // 3. Admin enters exact OTP -> verified!
+      final correctAdmin = await state.acceptAdminHandover(
+        adminName: 'Owner Admin',
+        enteredOtp: nightClosing.handoverOtp,
+      );
+      expect(correctAdmin, isTrue);
+      expect(state.pendingAdminNightHandover, isNull);
+    });
   });
 }

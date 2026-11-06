@@ -346,40 +346,96 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
     final pending = state.pendingCashierHandover;
     if (pending == null) return;
 
-    final confirm = await showDialog<bool>(
+    final otpController = TextEditingController();
+    String? errorMessage;
+
+    final accepted = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Cash Receipt'),
-        content: Text(
-          'Do you confirm receiving ${CurrencyFormatter.format(pending.cashRemaining)} physical banknotes from Cashier ${pending.cashierName}?\n\nThis cash will be transferred to your custody for station night operations.',
+      barrierDismissible: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: Row(
+            children: [
+              const Icon(Icons.verified_user_rounded, color: AppColors.primary, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.tr('enterHandoverOtp'),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Count ${CurrencyFormatter.format(pending.cashRemaining)} physical cash from Cashier ${pending.cashierName}, then enter the 4-digit code given by the cashier.',
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: otpController,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 8, color: AppColors.primary),
+                decoration: InputDecoration(
+                  counterText: '',
+                  hintText: '••••',
+                  hintStyle: const TextStyle(letterSpacing: 8, color: AppColors.textMuted),
+                  filled: true,
+                  fillColor: AppColors.surfaceVariant,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  errorText: errorMessage,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final otp = otpController.text.trim();
+                final ok = await state.acceptCashierHandover(
+                  managerName: state.activeStaffFullName ?? 'Dawit Manager',
+                  enteredOtp: otp,
+                );
+                if (ok) {
+                  Navigator.pop(ctx, true);
+                } else {
+                  setDialogState(() {
+                    errorMessage = state.tr('invalidOtpCode');
+                  });
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.cashGreen,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(
+                state.tr('verifyAndTakeCustody'),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.cashGreen),
-            child: const Text('Confirm & Accept', style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
     );
 
-    if (confirm == true) {
-      await state.acceptCashierHandover(
-        managerName: state.activeStaffFullName ?? 'Dawit Manager',
+    if (accepted == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('handoverSuccess')),
+          backgroundColor: AppColors.statusReady,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cashier handover accepted! Physical cash is now registered in Manager custody.'),
-            backgroundColor: AppColors.statusReady,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     }
   }
 

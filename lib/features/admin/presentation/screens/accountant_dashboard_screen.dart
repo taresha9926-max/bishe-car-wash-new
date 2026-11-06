@@ -370,15 +370,19 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                       const SizedBox(height: 2),
                       Text(
                         c.shiftType == 'night'
-                            ? 'Handover to Admin: ${CurrencyFormatter.format(c.handoverCashAmount)} Total Cash'
-                            : (c.isHandoverAccepted
-                                ? 'Handover Confirmed by Op Manager (${c.acceptedByName ?? "Manager"})'
-                                : 'Handover Pending Manager Acceptance'),
+                            ? (c.isHandoverAccepted
+                                ? 'Delivered to Admin (${c.acceptedByName ?? "Admin"}) via OTP'
+                                : 'Night Cash Pending Admin OTP Verification')
+                            : (c.handoverMethod == 'bank_deposit'
+                                ? 'Bank Deposited to ${c.handoverTo}'
+                                : (c.isHandoverAccepted
+                                    ? 'Handover Confirmed by Op Manager (${c.acceptedByName ?? "Manager"}) via OTP'
+                                    : 'Handover Pending Manager OTP Verification')),
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: c.shiftType == 'night'
-                              ? Colors.indigo
+                              ? (c.isHandoverAccepted ? Colors.indigo : Colors.orange.shade800)
                               : (c.isHandoverAccepted ? Colors.green.shade700 : Colors.orange.shade800),
                         ),
                       ),
