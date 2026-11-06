@@ -17,6 +17,7 @@ import '../../../booking_service/presentation/screens/vehicle_history_screen.dar
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'bank_deposit_dialog.dart';
 import 'daily_closing_dialog.dart';
+import '../../../admin/domain/models/daily_financial_closing.dart';
 import 'payment_process_dialog.dart';
 import 'petty_cash_dialog.dart';
 import 'phone_booking_dialog.dart';
@@ -373,11 +374,244 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
+  Widget _buildCashierOtpDesk(
+    BuildContext context,
+    dynamic state,
+    bool isMobile,
+    dynamic pendingHandover,
+    DailyFinancialClosing? latestDayClosing,
+    bool isClosed,
+  ) {
+    if (pendingHandover != null) {
+      // Pending Manager OTP verification
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.all(isMobile ? 12 : 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.6), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.pin_rounded, color: Color(0xFFF59E0B), size: 18),
+                    const SizedBox(width: 6),
+                    Text(
+                      state.tr('handoverOtpCode'),
+                      style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    state.tr('waitingForManager'),
+                    style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFFF59E0B)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Text(
+                  '[ ${pendingHandover.handoverOtp ?? '----'} ]',
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 4, color: Color(0xFFF59E0B)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '• ${CurrencyFormatter.format(pendingHandover.handoverCashAmount)} ${state.tr('physicalCash')}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    state.tr('waitingForManagerOtpDesc'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white70, fontSize: 10.5),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => DailyClosingDialog.show(context),
+                  icon: const Icon(Icons.receipt_long_rounded, size: 14, color: Color(0xFFF59E0B)),
+                  label: Text(
+                    state.tr('viewClosingVoucher'),
+                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFFF59E0B)),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (latestDayClosing != null && latestDayClosing.isHandoverAccepted) {
+      // Completed & Verified
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF10B981).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.verified_user_rounded, color: Color(0xFF059669), size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        state.tr('handoverVerifiedTitle'),
+                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Color(0xFF047857)),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          state.tr('verifiedBadge'),
+                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF059669)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'OTP [ ${latestDayClosing.handoverOtp ?? '----'} ] • Custody transferred to ${latestDayClosing.acceptedByName ?? 'Manager'} (${CurrencyFormatter.format(latestDayClosing.handoverCashAmount)})',
+                    style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: state.tr('viewClosingVoucher'),
+              icon: const Icon(Icons.receipt_long_rounded, color: Color(0xFF059669), size: 18),
+              onPressed: () => DailyClosingDialog.show(context),
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.zero,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Steady-state before closing (Always visible info desk!)
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.vpn_key_rounded, size: 16, color: AppColors.primary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        state.tr('shiftHandoverMethodTitle'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        state.tr('threePartyCustody'),
+                        style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Color(0xFF10B981)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  state.tr('shiftHandoverMethodDesc'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFinancialActionToolbar(BuildContext context, dynamic state, bool isMobile) {
     final methodRevenue = state.getRevenueByPaymentMethod() as Map<PaymentMethod, double>;
     final methodCounts = state.getTransactionCountByPaymentMethod() as Map<PaymentMethod, int>;
     final undepositedCash = state.undepositedCashTodayETB as double;
-    final isClosed = state.isTodayClosed as bool;
+    final isClosed = state.isTodayDayShiftClosed as bool;
+    final pendingHandover = state.pendingCashierHandover;
+    final latestDayClosing = state.latestDayClosing;
 
     final cashRevenue = methodRevenue[PaymentMethod.cash] ?? 0.0;
     final cashCount = methodCounts[PaymentMethod.cash] ?? 0;
@@ -415,7 +649,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Fast Action Buttons: Deposit Cash, Log Petty Cash, & Confirm Daily Closing
+          // Permanent Shift Handover OTP Desk inside Daily Closing Section
+          _buildCashierOtpDesk(context, state, isMobile, pendingHandover, latestDayClosing, isClosed),
+          const SizedBox(height: 10),
+
+          // 1. Fast Action Buttons: Deposit Cash, Log Petty Cash, & Confirm Daily Closing (OTP)
           if (isMobile) ...[
             SizedBox(
               width: double.infinity,
@@ -500,13 +738,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
+                onPressed: () => DailyClosingDialog.show(context),
                 icon: AutoCareAssets.buildPhotoThumbnail(
                   imageUrl: AutoCareAssets.stationBayUrl,
                   width: 22,
                   height: 22,
                   borderRadius: 6,
-                  fallbackIcon: isClosed ? Icons.verified_rounded : Icons.fact_check_rounded,
+                  fallbackIcon: (isClosed || pendingHandover != null) ? Icons.verified_rounded : Icons.pin_rounded,
                   fallbackColor: Colors.white,
                 ),
                 label: Row(
@@ -514,7 +752,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        isClosed ? 'Daily Closing Confirmed' : state.tr('confirmDailyClosing'),
+                        pendingHandover != null
+                            ? 'OTP: [ ${pendingHandover.handoverOtp} ] • ${state.tr('waitingForManager')}'
+                            : (isClosed
+                                ? (latestDayClosing?.isHandoverAccepted == true
+                                    ? '${state.tr('dailyClosingConfirmed')} • ${state.tr('verifiedBadge')}'
+                                    : state.tr('dailyClosingConfirmed'))
+                                : state.tr('confirmDailyClosingOtp')),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
@@ -522,16 +766,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      isClosed ? 'Shift locked' : 'Reconcile register',
+                      pendingHandover != null
+                          ? state.tr('viewClosingVoucher')
+                          : (isClosed ? 'Shift locked' : state.tr('reconcileAndGenerateOtp')),
                       style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70),
                     ),
                   ],
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: pendingHandover != null ? const Color(0xFFD97706) : (isClosed ? AppColors.statusCompleted : AppColors.primary),
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppColors.statusCompleted,
-                  disabledForegroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
@@ -615,16 +859,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 ),
                 const SizedBox(width: 8),
 
-                // Confirm Daily Closing Button (Disabled once confirmed)
+                // Confirm Daily Closing (OTP) Button
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: isClosed ? null : () => DailyClosingDialog.show(context),
+                    onPressed: () => DailyClosingDialog.show(context),
                     icon: AutoCareAssets.buildPhotoThumbnail(
                       imageUrl: AutoCareAssets.stationBayUrl,
                       width: 22,
                       height: 22,
                       borderRadius: 6,
-                      fallbackIcon: isClosed ? Icons.verified_rounded : Icons.fact_check_rounded,
+                      fallbackIcon: (isClosed || pendingHandover != null) ? Icons.verified_rounded : Icons.pin_rounded,
                       fallbackColor: Colors.white,
                     ),
                     label: Column(
@@ -632,20 +876,30 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          isClosed ? 'Daily Closing Confirmed' : state.tr('confirmDailyClosing'),
+                          pendingHandover != null
+                              ? 'OTP: [ ${pendingHandover.handoverOtp} ]'
+                              : (isClosed
+                                  ? (latestDayClosing?.isHandoverAccepted == true
+                                      ? '${state.tr('dailyClosingConfirmed')} • ${state.tr('verifiedBadge')}'
+                                      : state.tr('dailyClosingConfirmed'))
+                                  : state.tr('confirmDailyClosingOtp')),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
                         ),
                         Text(
-                          isClosed ? 'Shift locked' : 'Reconcile register & commission',
+                          pendingHandover != null
+                              ? state.tr('waitingForManager')
+                              : (isClosed ? 'Shift locked • Reconciled' : state.tr('reconcileAndGenerateOtp')),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.normal, color: Colors.white70),
                         ),
                       ],
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: pendingHandover != null ? const Color(0xFFD97706) : (isClosed ? AppColors.statusCompleted : AppColors.primary),
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: AppColors.statusCompleted,
-                      disabledForegroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       elevation: 0,

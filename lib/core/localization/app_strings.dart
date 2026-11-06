@@ -2399,6 +2399,41 @@ class AppStrings {
       AppLanguage.om: 'qarshii harkaa',
       AppLanguage.am: 'ጥሬ ገንዘብ',
     },
+    'confirmDailyClosingOtp': {
+      AppLanguage.en: 'Confirm Daily Closing (OTP)',
+      AppLanguage.om: 'Cufiinsa Guyyaa Mirkaneessi (OTP)',
+      AppLanguage.am: 'ዕለታዊ ሂሳብ መዝጊያን አረጋግጥ (OTP)',
+    },
+    'shiftHandoverMethodTitle': {
+      AppLanguage.en: 'Shift Handover: Operational Manager (4-Digit OTP)',
+      AppLanguage.om: 'Dabarsa Faraqaa: Hojii Geggeessaa (OTP Dijitii 4)',
+      AppLanguage.am: 'የፈረቃ ርክክብ፡ ስራ አስኪያጅ (ባለ 4 አሃዝ OTP)',
+    },
+    'shiftHandoverMethodDesc': {
+      AppLanguage.en: 'Closing the register calculates washer dividends and generates a 4-digit OTP for the Operational Manager to count and accept physical cash.',
+      AppLanguage.om: 'Saanduqa cufuun komishiinii dhiqaa shallagee koodii OTP dijitii 4 hojii geggeessaaf uuma.',
+      AppLanguage.am: 'መዝገቡን መዝጋት የአጣቢዎችን ኮሚሽን በማስላት ስራ አስኪያጁ ጥሬ ገንዘቡን እንዲያረጋግጥ ባለ 4 አሃዝ OTP ያመነጫል።',
+    },
+    'viewClosingVoucher': {
+      AppLanguage.en: 'View Closing Voucher',
+      AppLanguage.om: 'Nagahee Cufiinsaa Ilaali',
+      AppLanguage.am: 'የሂሳብ መዝጊያ ደረሰኝ እይ',
+    },
+    'waitingForManagerOtpDesc': {
+      AppLanguage.en: 'Give this 4-digit code to the Operational Manager after counting physical cash.',
+      AppLanguage.om: 'Qarshii harkaa erga lakkooftanii booda koodii OTP kana hojii geggeessaaf kennaa.',
+      AppLanguage.am: 'ጥሬ ገንዘቡን ቆጥረው ካስረከቡ በኋላ ይህንን የ OTP ኮድ ለስራ አስኪያጁ ይስጡ።',
+    },
+    'handoverVerifiedTitle': {
+      AppLanguage.en: 'Handover Verified & Accepted',
+      AppLanguage.om: 'Dabarsoon Mirkanaa\'ee Fudhatameera',
+      AppLanguage.am: 'ርክክቡ ተረጋግጦ ተጠናቋል',
+    },
+    'reconcileAndGenerateOtp': {
+      AppLanguage.en: 'Reconcile register & generate OTP',
+      AppLanguage.om: 'Herrega saanduqaafi koodii OTP uumi',
+      AppLanguage.am: 'ሂሳብ አስታርቅ እና OTP አመንጭ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
