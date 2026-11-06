@@ -3508,8 +3508,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final dayClosing = state.latestDayClosing;
     final nightClosing = state.latestNightClosing;
     final pendingNight = state.pendingAdminNightHandover;
-    final pendingCashier = state.pendingCashierHandover;
-    final pendingCashierAdmin = state.pendingCashierAdminHandover;
+    final anyPendingDay = state.pendingCashierAdminHandover ?? state.pendingCashierHandover;
+
+    final isDayPending = anyPendingDay != null && !anyPendingDay.isHandoverAccepted;
+    final isDayReconciled = dayClosing != null && dayClosing.isHandoverAccepted;
+
+    final isNightPending = pendingNight != null && !pendingNight.isHandoverAccepted;
+    final isNightReconciled = nightClosing != null && nightClosing.isHandoverAccepted;
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 12 : 16),
@@ -3528,6 +3533,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header Bar
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -3581,301 +3587,263 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Cashier Direct Handover to Admin (when Manager absent)
-          if (pendingCashierAdmin != null) ...[
-            Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withOpacity(0.08),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+          // 1. CASHIER OTP DESK CARD (PERMANENTLY VISIBLE)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDayPending
+                  ? const Color(0xFFF59E0B).withValues(alpha: 0.08)
+                  : (isDayReconciled ? const Color(0xFF10B981).withValues(alpha: 0.05) : AppColors.surfaceVariant.withValues(alpha: 0.6)),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDayPending
+                    ? const Color(0xFFF59E0B).withValues(alpha: 0.6)
+                    : (isDayReconciled ? const Color(0xFF10B981).withValues(alpha: 0.35) : AppColors.cardBorder),
+                width: isDayPending ? 1.5 : 1.0,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
                         children: [
-                          const Icon(Icons.pin_rounded, color: Color(0xFFD97706), size: 16),
+                          const Icon(Icons.wb_sunny_rounded, color: Color(0xFFD97706), size: 18),
                           const SizedBox(width: 6),
-                          Text(
-                            'DIRECT CASHIER HANDOVER: ${CurrencyFormatter.format(pendingCashierAdmin.handoverCashAmount)}',
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Color(0xFFB45309)),
+                          Expanded(
+                            child: Text(
+                              state.tr('cashierHandoverVerification'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Color(0xFFB45309)),
+                            ),
                           ),
                         ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text('MANAGER ABSENT', style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Color(0xFFB45309))),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Cashier ${pendingCashierAdmin.cashierName} bypassed Manager and handed cash to Admin. Count cash and enter Cashier OTP:',
-                    style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 38,
-                        child: TextField(
-                          controller: _adminCashierOtpController,
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 4),
-                          decoration: InputDecoration(
-                            counterText: '',
-                            hintText: 'OTP',
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFF59E0B))),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => _handleInlineAdminVerifyCashier(context, state, pendingCashierAdmin),
-                        icon: const Icon(Icons.check_circle_rounded, size: 14, color: Colors.white),
-                        label: Text(
-                          state.tr('confirmCashierHandover'),
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD97706),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          // Day Shift Row (Cashier -> Manager)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.wb_sunny_rounded, size: 16, color: Colors.amber),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        state.tr('dayShiftCustody'),
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                      ),
-                      Text(
-                        dayClosing != null
-                            ? (dayClosing.isHandoverAccepted
-                                ? 'Confirmed via OTP [ ${dayClosing.handoverOtp ?? '----'} ] by ${dayClosing.acceptedByName ?? 'Manager'} • ${CurrencyFormatter.format(dayClosing.cashRemaining)}'
-                                : 'Pending: OTP [ ${dayClosing.handoverOtp ?? '----'} ] • Waiting for Recipient')
-                            : (pendingCashier != null
-                                ? 'Waiting Manager OTP: [ ${pendingCashier.handoverOtp} ] • ${CurrencyFormatter.format(pendingCashier.cashRemaining)}'
-                                : (pendingCashierAdmin != null
-                                    ? 'Cashier Waiting Admin OTP: [ ${pendingCashierAdmin.handoverOtp} ] • ${CurrencyFormatter.format(pendingCashierAdmin.cashRemaining)}'
-                                    : 'Day shift active • Hands over to Manager at ~7:00 PM via OTP')),
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: (dayClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: (dayClosing?.isHandoverAccepted == true)
-                        ? const Color(0xFF10B981).withValues(alpha: 0.15)
-                        : Colors.orange.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    (dayClosing?.isHandoverAccepted == true) ? state.tr('verifiedBadge') : state.tr('activeShiftBadge'),
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: (dayClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : Colors.orange.shade800,
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Night Shift Row (Manager -> Admin)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.nightlight_round, size: 16, color: Colors.indigo),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        state.tr('nightShiftCustody'),
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isDayPending
+                            ? const Color(0xFFF59E0B).withValues(alpha: 0.2)
+                            : (isDayReconciled ? const Color(0xFF10B981).withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.15)),
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      Text(
-                        nightClosing != null
-                            ? (nightClosing.isHandoverAccepted
-                                ? 'Sealed in Vault via Admin OTP [ ${nightClosing.handoverOtp ?? '----'} ] • ${CurrencyFormatter.format(nightClosing.handoverCashAmount)}'
-                                : 'Pending Admin OTP: [ ${nightClosing.handoverOtp ?? '----'} ]')
-                            : (pendingNight != null
-                                ? 'Pending Receipt: ${CurrencyFormatter.format(pendingNight.handoverCashAmount)} cash'
-                                : 'Night shift active • Hands over to Admin at station closing via OTP'),
+                      child: Text(
+                        isDayPending
+                            ? 'PENDING CASHIER OTP'
+                            : (isDayReconciled ? 'RECONCILED' : 'DAY SHIFT ACTIVE'),
                         style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: (nightClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : AppColors.textSecondary,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: isDayPending
+                              ? const Color(0xFFB45309)
+                              : (isDayReconciled ? const Color(0xFF047857) : AppColors.textSecondary),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: (nightClosing?.isHandoverAccepted == true)
-                        ? const Color(0xFF10B981).withValues(alpha: 0.15)
-                        : Colors.indigo.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    (nightClosing?.isHandoverAccepted == true) ? state.tr('inVaultBadge') : state.tr('activeShiftBadge'),
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      color: (nightClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : Colors.indigo,
                     ),
-                  ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  isDayPending
+                      ? 'Cashier ${anyPendingDay.cashierName} closed day shift • Cash to Handover: ${CurrencyFormatter.format(anyPendingDay.handoverCashAmount > 0 ? anyPendingDay.handoverCashAmount : anyPendingDay.cashRemaining)}. Enter Cashier 4-digit OTP to confirm custody:'
+                      : (isDayReconciled
+                          ? 'Day shift reconciled: ${CurrencyFormatter.format(dayClosing.cashRemaining)} • Handed over to ${dayClosing.acceptedByName ?? "Admin"} via OTP [ ${dayClosing.handoverOtp ?? "----"} ]'
+                          : 'Day shift active. Enter the 4-digit OTP sent by Cashier to verify and take cash custody:'),
+                  style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 130,
+                      height: 40,
+                      child: TextField(
+                        controller: _adminCashierOtpController,
+                        keyboardType: TextInputType.number,
+                        maxLength: 4,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: 4),
+                        decoration: InputDecoration(
+                          counterText: '',
+                          hintText: 'OTP',
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFF59E0B))),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: isDayPending ? const Color(0xFFF59E0B) : AppColors.cardBorder)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFD97706), width: 2)),
+                        ),
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _handleInlineAdminVerifyCashier(context, state),
+                      icon: const Icon(Icons.check_circle_rounded, size: 15, color: Colors.white),
+                      label: Text(
+                        state.tr('confirmCashierHandover'),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD97706),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
 
-          // Night Shift Direct Handover to Admin Vault Inline Field
-          if (pendingNight != null) ...[
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4338CA).withOpacity(0.08),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFF818CF8).withOpacity(0.5)),
+          // 2. OPERATIONAL MANAGER OTP DESK CARD (PERMANENTLY VISIBLE)
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isNightPending
+                  ? const Color(0xFF4338CA).withValues(alpha: 0.08)
+                  : (isNightReconciled ? const Color(0xFF10B981).withValues(alpha: 0.05) : AppColors.surfaceVariant.withValues(alpha: 0.6)),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isNightPending
+                    ? const Color(0xFF818CF8).withValues(alpha: 0.6)
+                    : (isNightReconciled ? const Color(0xFF10B981).withValues(alpha: 0.35) : AppColors.cardBorder),
+                width: isNightPending ? 1.5 : 1.0,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
                         children: [
-                          const Icon(Icons.shield_rounded, color: Color(0xFF4338CA), size: 16),
+                          const Icon(Icons.shield_moon_rounded, color: Color(0xFF4338CA), size: 18),
                           const SizedBox(width: 6),
-                          Text(
-                            'NIGHT CASH TO VAULT: ${CurrencyFormatter.format(pendingNight.handoverCashAmount)}',
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Color(0xFF3730A3)),
+                          Expanded(
+                            child: Text(
+                              state.tr('managerHandoverVerification'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Color(0xFF3730A3)),
+                            ),
                           ),
                         ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4338CA).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text('PENDING VAULT SEAL', style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Color(0xFF3730A3))),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isNightPending
+                            ? const Color(0xFF4338CA).withValues(alpha: 0.2)
+                            : (isNightReconciled ? const Color(0xFF10B981).withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.15)),
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Op Manager ${pendingNight.cashierName} closed night shift. Enter 4-digit Manager OTP to seal physical cash in Admin Vault:',
-                    style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 38,
-                        child: TextField(
-                          controller: _adminNightOtpController,
-                          keyboardType: TextInputType.number,
-                          maxLength: 4,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 4),
-                          decoration: InputDecoration(
-                            counterText: '',
-                            hintText: 'OTP',
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF818CF8))),
-                          ),
+                      child: Text(
+                        isNightPending
+                            ? 'PENDING VAULT SEAL'
+                            : (isNightReconciled ? 'SEALED IN VAULT' : 'NIGHT SHIFT ACTIVE'),
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: isNightPending
+                              ? const Color(0xFF3730A3)
+                              : (isNightReconciled ? const Color(0xFF047857) : AppColors.textSecondary),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: () => _handleInlineAdminVerifyNight(context, state, pendingNight),
-                        icon: const Icon(Icons.vpn_key_rounded, size: 14, color: Colors.white),
-                        label: Text(
-                          state.tr('confirmManagerNightCash'),
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4338CA),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  isNightPending
+                      ? 'Op Manager ${pendingNight.cashierName} closed night shift • Combined Cash: ${CurrencyFormatter.format(pendingNight.handoverCashAmount)}. Enter Manager 4-digit OTP to seal cash in Admin Vault:'
+                      : (isNightReconciled
+                          ? 'Night shift cash sealed in Vault: ${CurrencyFormatter.format(nightClosing.handoverCashAmount)} • Verified by Admin via OTP [ ${nightClosing.handoverOtp ?? "----"} ]'
+                          : 'Night shift active. Enter the 4-digit OTP sent by Op Manager to confirm physical cash and seal into Vault:'),
+                  style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 130,
+                      height: 40,
+                      child: TextField(
+                        controller: _adminNightOtpController,
+                        keyboardType: TextInputType.number,
+                        maxLength: 4,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: 4),
+                        decoration: InputDecoration(
+                          counterText: '',
+                          hintText: 'OTP',
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF818CF8))),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: isNightPending ? const Color(0xFF818CF8) : AppColors.cardBorder)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF4338CA), width: 2)),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _handleInlineAdminVerifyNight(context, state),
+                      icon: const Icon(Icons.vpn_key_rounded, size: 15, color: Colors.white),
+                      label: Text(
+                        state.tr('confirmManagerNightCash'),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4338CA),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  void _handleInlineAdminVerifyCashier(BuildContext context, dynamic state, dynamic pending) async {
+  void _handleInlineAdminVerifyCashier(BuildContext context, dynamic state) async {
     final entered = _adminCashierOtpController.text.trim();
     if (entered.isEmpty || entered.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter the 4-digit Cashier OTP code.'), backgroundColor: Colors.redAccent),
       );
+      return;
+    }
+
+    final anyPending = state.pendingCashierAdminHandover ?? state.pendingCashierHandover;
+    if (anyPending == null) {
+      if (state.latestDayClosing?.isHandoverAccepted == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.tr('alreadyVerifiedClosing')), backgroundColor: Colors.orange),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.tr('noPendingClosingToVerify')), backgroundColor: Colors.redAccent),
+        );
+      }
       return;
     }
 
@@ -3907,12 +3875,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
-  void _handleInlineAdminVerifyNight(BuildContext context, dynamic state, dynamic pending) async {
+  void _handleInlineAdminVerifyNight(BuildContext context, dynamic state) async {
     final entered = _adminNightOtpController.text.trim();
     if (entered.isEmpty || entered.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter the 4-digit Manager OTP code.'), backgroundColor: Colors.redAccent),
       );
+      return;
+    }
+
+    final pending = state.pendingAdminNightHandover;
+    if (pending == null) {
+      if (state.latestNightClosing?.isHandoverAccepted == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.tr('alreadyVerifiedClosing')), backgroundColor: Colors.indigo),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.tr('noPendingClosingToVerify')), backgroundColor: Colors.redAccent),
+        );
+      }
       return;
     }
 

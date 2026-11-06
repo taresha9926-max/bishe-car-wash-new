@@ -2514,6 +2514,26 @@ class AppStrings {
       AppLanguage.om: 'Eeyyee, Garee Bani',
       AppLanguage.am: 'አዎ፣ ፈረቃውን ክፈት',
     },
+    'cashierHandoverVerification': {
+      AppLanguage.en: '1. Cashier Handover Verification (Day Shift)',
+      AppLanguage.om: '1. Mirkaneessa Dabarsoo Qabaa Qarshii (Garee Guyyaa)',
+      AppLanguage.am: '1. የገንዘብ ያዥ ርክክብ ማረጋገጫ (የቀን ፈረቃ)',
+    },
+    'managerHandoverVerification': {
+      AppLanguage.en: '2. Operational Manager Handover Verification (Night Vault)',
+      AppLanguage.om: '2. Mirkaneessa Dabarsoo Hoggansa Hojii (Saanduqa Halkan)',
+      AppLanguage.am: '2. የስራ አስኪያጅ ርክክብ ማረጋገጫ (የምሽት ካዝና)',
+    },
+    'noPendingClosingToVerify': {
+      AppLanguage.en: 'No pending closing found. The staff must submit daily closing first.',
+      AppLanguage.om: 'Gabaasni cufiinsa eeggatu hin jiru. Jalqaba gabaasa cufaa dhiyeessuu qabu.',
+      AppLanguage.am: 'በመጠባበቅ ላይ ያለ መዝጊያ አልተገኘም። መጀመሪያ የዕለት መዝጊያውን ማስገባት አለባቸው።',
+    },
+    'alreadyVerifiedClosing': {
+      AppLanguage.en: 'This shift closing is already verified and reconciled.',
+      AppLanguage.om: 'Cufiinsi garee kanaa duraan mirkanaa\'ee qulqullaa\'eera.',
+      AppLanguage.am: 'ይህ የፈረቃ መዝጊያ ቀደም ሲል ተረጋግጦ ተጠናቋል።',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

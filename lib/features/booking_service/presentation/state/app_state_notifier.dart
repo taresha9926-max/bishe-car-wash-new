@@ -1001,10 +1001,8 @@ class AppStateNotifier extends ChangeNotifier {
     final index = _dailyFinancialClosings.indexWhere(
       (c) =>
           (shiftType == null
-              ? (c.shiftType == 'night' || (c.shiftType == 'day' && c.handoverMethod == 'admin_otp'))
-              : (shiftType == 'day'
-                  ? (c.shiftType == 'day' && c.handoverMethod == 'admin_otp')
-                  : c.shiftType == 'night')) &&
+              ? (c.shiftType == 'night' || c.shiftType == 'day')
+              : (shiftType == 'day' ? c.shiftType == 'day' : c.shiftType == 'night')) &&
           !c.isHandoverAccepted &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
@@ -1022,6 +1020,7 @@ class AppStateNotifier extends ChangeNotifier {
         isHandoverAccepted: true,
         acceptedByName: adminName,
         acceptedAt: now,
+        handoverTo: shiftType == 'day' ? 'Admin / Owner' : record.handoverTo,
       );
       _dailyFinancialClosings[index] = updated;
       try {
