@@ -162,86 +162,93 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Active Cashier Handover OTP Banner (Visible when Day Closing submitted via OTP)
-              if (state.pendingCashierHandover != null) ...[
-                Container(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  padding: EdgeInsets.all(isMobile ? 12 : 14),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              Builder(
+                builder: (context) {
+                  final activePending = state.pendingCashierHandover ?? state.pendingCashierAdminHandover;
+                  if (activePending == null) return const SizedBox.shrink();
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: EdgeInsets.all(isMobile ? 12 : 14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.6), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.6), width: 1.5),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.pin_rounded, color: Color(0xFFF59E0B), size: 24),
                         ),
-                        child: const Icon(Icons.pin_rounded, color: Color(0xFFF59E0B), size: 24),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  state.tr('handoverOtpCode'),
-                                  style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(6),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    state.tr('handoverOtpCode'),
+                                    style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700),
                                   ),
-                                  child: Text(
-                                    state.tr('waitingForManager'),
-                                    style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFFF59E0B)),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      activePending.handoverTo.contains('Admin')
+                                          ? 'WAITING FOR ADMIN'
+                                          : state.tr('waitingForManager'),
+                                      style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFFF59E0B)),
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 3),
-                            Row(
-                              children: [
-                                Text(
-                                  '[ ${state.pendingCashierHandover!.handoverOtp ?? '----'} ]',
-                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 4, color: Color(0xFFF59E0B)),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    '• ${CurrencyFormatter.format(state.pendingCashierHandover!.handoverCashAmount)} ${state.tr('physicalCash')}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              Row(
+                                children: [
+                                  Text(
+                                    '[ ${activePending.handoverOtp ?? '----'} ]',
+                                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 4, color: Color(0xFFF59E0B)),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      '• ${CurrencyFormatter.format(activePending.handoverCashAmount)} ${state.tr('physicalCash')}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                      ],
+                    ),
+                  );
+                },
+              ),
 
               // Operational Modules Grid (Card Grid View with 3 Rows)
               Row(
@@ -426,7 +433,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    state.tr('waitingForManager'),
+                    pendingHandover.handoverTo.contains('Admin')
+                        ? 'WAITING FOR ADMIN'
+                        : state.tr('waitingForManager'),
                     style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFFF59E0B)),
                   ),
                 ),
@@ -456,7 +465,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    state.tr('waitingForManagerOtpDesc'),
+                    pendingHandover.handoverTo.contains('Admin')
+                        ? 'Give this 4-digit code to Admin after counting physical cash.'
+                        : state.tr('waitingForManagerOtpDesc'),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: Colors.white70, fontSize: 10.5),
@@ -610,7 +621,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     final methodCounts = state.getTransactionCountByPaymentMethod() as Map<PaymentMethod, int>;
     final undepositedCash = state.undepositedCashTodayETB as double;
     final isClosed = state.isTodayDayShiftClosed as bool;
-    final pendingHandover = state.pendingCashierHandover;
+    final pendingHandover = state.pendingCashierHandover ?? state.pendingCashierAdminHandover;
     final latestDayClosing = state.latestDayClosing;
 
     final cashRevenue = methodRevenue[PaymentMethod.cash] ?? 0.0;

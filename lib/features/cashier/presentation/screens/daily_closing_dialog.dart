@@ -191,6 +191,26 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   ),
                 ],
               ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.oromiaGold.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, size: 13, color: AppColors.oromiaGold),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        state.tr('washerCommissionReportNote'),
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF92400E)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.all(10),
@@ -302,6 +322,52 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                               const Text(
                                 'Generates 4-digit code for Operational Manager to count and verify.',
                                 style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => setState(() => _handoverMethod = 'admin_otp'),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _handoverMethod == 'admin_otp' ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _handoverMethod == 'admin_otp' ? AppColors.primary : AppColors.cardBorder,
+                        width: _handoverMethod == 'admin_otp' ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _handoverMethod == 'admin_otp' ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                          color: _handoverMethod == 'admin_otp' ? AppColors.primary : AppColors.textMuted,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('handoverToAdminOption'),
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: _handoverMethod == 'admin_otp' ? AppColors.primary : AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                state.tr('handoverToAdminSub'),
+                                style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                               ),
                             ],
                           ),
@@ -541,13 +607,22 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
     setState(() => _isSubmitting = true);
 
     try {
+      String targetRecipient = 'Operational Manager';
+      if (widget.isManagerClosing) {
+        targetRecipient = 'Admin / Owner';
+      } else if (_handoverMethod == 'admin_otp') {
+        targetRecipient = 'Admin / Owner';
+      } else if (_handoverMethod == 'bank_deposit') {
+        targetRecipient = 'Bank Deposit';
+      }
+
       final state = AppStateProvider.read(context);
       final closing = await state.confirmDailyClosing(
         cashierName: staffName,
         notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
         shiftType: widget.isManagerClosing ? 'night' : 'day',
         closedByRole: widget.isManagerClosing ? 'manager' : 'cashier',
-        handoverTo: widget.isManagerClosing ? 'Admin / Owner' : 'Operational Manager',
+        handoverTo: targetRecipient,
         handoverMethod: widget.isManagerClosing ? 'admin_otp' : _handoverMethod,
         bankAccountKey: _selectedAccountKey,
         bankReferenceSlip: _bankSlipController.text.trim().isNotEmpty ? _bankSlipController.text.trim() : null,
@@ -608,9 +683,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               ),
               const SizedBox(height: 6),
               Text(
-                widget.isManagerClosing
-                    ? 'Give this 4-digit code to Admin after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} cash.'
-                    : 'Give this 4-digit code to Operational Manager after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} cash.',
+                widget.isManagerClosing || _handoverMethod == 'admin_otp'
+                    ? 'Give this 4-digit code to Admin after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} physical cash.'
+                    : 'Give this 4-digit code to Operational Manager after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} physical cash.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),

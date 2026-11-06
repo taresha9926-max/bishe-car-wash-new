@@ -435,6 +435,41 @@ https://www.tiktok.com/@bishecarwash/video/7703201662713728274?sender_device=pc
       expect(state.pendingCashierHandover, isNull);
     });
 
+    test('Cashier day closing with direct Admin OTP handover (when manager is absent) verifies via admin', () async {
+      final closing = await state.confirmDailyClosing(
+        cashierName: 'Meron Cashier',
+        shiftType: 'day',
+        closedByRole: 'cashier',
+        handoverTo: 'Admin / Owner',
+        handoverMethod: 'admin_otp',
+      );
+
+      expect(closing.handoverMethod, 'admin_otp');
+      expect(closing.isHandoverAccepted, isFalse);
+      expect(closing.handoverOtp, isNotNull);
+      expect(closing.handoverOtp!.length, 4);
+      expect(state.pendingCashierHandover, isNull);
+      expect(state.pendingCashierAdminHandover, isNotNull);
+
+      // Wrong OTP fails
+      final wrongAdmin = await state.acceptAdminHandover(
+        adminName: 'Owner Admin',
+        enteredOtp: '0000',
+        shiftType: 'day',
+      );
+      expect(wrongAdmin, isFalse);
+      expect(state.pendingCashierAdminHandover, isNotNull);
+
+      // Correct OTP succeeds
+      final correctAdmin = await state.acceptAdminHandover(
+        adminName: 'Owner Admin',
+        enteredOtp: closing.handoverOtp,
+        shiftType: 'day',
+      );
+      expect(correctAdmin, isTrue);
+      expect(state.pendingCashierAdminHandover, isNull);
+    });
+
     test('Operational manager night closing combines day + night cash and verifies with admin OTP', () async {
       // 1. Manager closes night shift
       final nightClosing = await state.confirmDailyClosing(

@@ -609,6 +609,16 @@ class AppStrings {
       AppLanguage.om: 'Hojii Geggeessaatti Dabarsuu',
       AppLanguage.am: 'ለስራ አስኪያጅ ማስረከብ',
     },
+    'handoverToAdminOption': {
+      AppLanguage.en: 'Handover directly to Admin / Owner',
+      AppLanguage.om: 'Kallattiin Bulchaatti Dabarsuu',
+      AppLanguage.am: 'ቀጥታ ለአስተዳዳሪው ማስረከብ',
+    },
+    'handoverToAdminSub': {
+      AppLanguage.en: 'If Operational Manager is absent, off-duty, or on leave',
+      AppLanguage.om: 'Hojii geggeessaan yoo hin jirre ykn boqonnaa irra jiraate',
+      AppLanguage.am: 'ስራ አስኪያጁ ከሌለ፣ ስራ ላይ ካልሆነ ወይም እረፍት ላይ ከሆነ',
+    },
     'bankDepositOption': {
       AppLanguage.en: 'Deposit to Owner Bank Account',
       AppLanguage.om: 'Herrega Baankii Abbaatti Galchuu',
@@ -2433,6 +2443,26 @@ class AppStrings {
       AppLanguage.en: 'Reconcile register & generate OTP',
       AppLanguage.om: 'Herrega saanduqaafi koodii OTP uumi',
       AppLanguage.am: 'ሂሳብ አስታርቅ እና OTP አመንጭ',
+    },
+    'washerCommissionReportNote': {
+      AppLanguage.en: 'Reported for Weekly Admin Payroll • Not deducted from daily cash drawer',
+      AppLanguage.om: 'Kaffaltii torbaniitiif gabaafame • Saanduqa guyyaarraa hin hir\'ifamu',
+      AppLanguage.am: 'ለሳምንታዊ ክፍያ ሪፖርት የተደረገ • ከዕለታዊ ካሽ የማይቀነስ',
+    },
+    'confirmCashierHandover': {
+      AppLanguage.en: 'Confirm Cashier Handover',
+      AppLanguage.om: 'Dabarsa Qabaa Qarshii Mirkaneessi',
+      AppLanguage.am: 'የገንዘብ ያዡን ርክክብ አረጋግጥ',
+    },
+    'confirmManagerNightCash': {
+      AppLanguage.en: 'Confirm & Seal in Vault',
+      AppLanguage.om: 'Mirkaneessi & Saanduqatti Galchi',
+      AppLanguage.am: 'አረጋግጥ እና ካዝና አስገባ',
+    },
+    'enterHandoverOtpInline': {
+      AppLanguage.en: 'Enter 4-Digit Handover OTP',
+      AppLanguage.om: 'Koodii OTP Dijitii 4 Galchaa',
+      AppLanguage.am: 'ባለ 4 አሃዝ የርክክብ OTP ያስገቡ',
     },
   };
 

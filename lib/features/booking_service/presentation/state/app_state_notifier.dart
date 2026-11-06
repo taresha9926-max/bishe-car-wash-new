@@ -883,6 +883,21 @@ class AppStateNotifier extends ChangeNotifier {
     return null;
   }
 
+  DailyFinancialClosing? get pendingCashierAdminHandover {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'day' &&
+          c.handoverMethod == 'admin_otp' &&
+          !c.isHandoverAccepted &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return c;
+      }
+    }
+    return null;
+  }
+
   DailyFinancialClosing? get pendingAdminNightHandover {
     final now = DateTime.now();
     for (final c in _dailyFinancialClosings) {
@@ -980,11 +995,16 @@ class AppStateNotifier extends ChangeNotifier {
   Future<bool> acceptAdminHandover({
     required String adminName,
     String? enteredOtp,
+    String? shiftType,
   }) async {
     final now = DateTime.now();
     final index = _dailyFinancialClosings.indexWhere(
       (c) =>
-          c.shiftType == 'night' &&
+          (shiftType == null
+              ? (c.shiftType == 'night' || (c.shiftType == 'day' && c.handoverMethod == 'admin_otp'))
+              : (shiftType == 'day'
+                  ? (c.shiftType == 'day' && c.handoverMethod == 'admin_otp')
+                  : c.shiftType == 'night')) &&
           !c.isHandoverAccepted &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
@@ -1122,6 +1142,10 @@ class AppStateNotifier extends ChangeNotifier {
           finalDeposited += remainingCash;
           finalRemainingCash = 0.0;
         }
+      } else if (handoverMethod == 'admin_otp') {
+        targetRecipient = 'Admin / Owner';
+        otp = (1000 + (now.millisecondsSinceEpoch % 9000)).toString();
+        isAccepted = false; // Admin must verify with OTP
       } else {
         // manager_otp
         targetRecipient = 'Operational Manager';

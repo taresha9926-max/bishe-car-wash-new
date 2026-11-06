@@ -375,9 +375,13 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                                 : 'Night Cash Pending Admin OTP Verification')
                             : (c.handoverMethod == 'bank_deposit'
                                 ? 'Bank Deposited to ${c.handoverTo}'
-                                : (c.isHandoverAccepted
-                                    ? 'Handover Confirmed by Op Manager (${c.acceptedByName ?? "Manager"}) via OTP'
-                                    : 'Handover Pending Manager OTP Verification')),
+                                : (c.handoverMethod == 'admin_otp'
+                                    ? (c.isHandoverAccepted
+                                        ? 'Direct Cashier Handover Confirmed by Admin (${c.acceptedByName ?? "Admin"}) via OTP'
+                                        : 'Direct Cashier Handover Pending Admin OTP Verification')
+                                    : (c.isHandoverAccepted
+                                        ? 'Handover Confirmed by Op Manager (${c.acceptedByName ?? "Manager"}) via OTP'
+                                        : 'Handover Pending Manager OTP Verification'))),
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -407,8 +411,8 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildKpiPill('Gross Revenue', CurrencyFormatter.format(c.grossRevenue), Colors.blueGrey),
-                _buildKpiPill('Washer 15%', '- ${CurrencyFormatter.format(c.commissionPool)}', Colors.orange),
-                _buildKpiPill('Net Drawer Cash', CurrencyFormatter.format(c.cashRevenue), Colors.green),
+                _buildKpiPill('Washer 15% (Accrued)', CurrencyFormatter.format(c.commissionPool), Colors.orange),
+                _buildKpiPill('Physical Cash', CurrencyFormatter.format(c.handoverCashAmount > 0 ? c.handoverCashAmount : c.cashRemaining), Colors.green),
               ],
             ),
             const SizedBox(height: 10),

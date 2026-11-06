@@ -46,6 +46,13 @@ class OperationalManagerDashboardScreen extends StatefulWidget {
 
 class _OperationalManagerDashboardScreenState extends State<OperationalManagerDashboardScreen> {
   int? _activeModuleIndex;
+  final _managerInlineOtpController = TextEditingController();
+
+  @override
+  void dispose() {
+    _managerInlineOtpController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,56 +217,114 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AutoCareAssets.buildPhotoThumbnail(
-              imageUrl: AutoCareAssets.cashMoneyUrl,
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              fallbackIcon: Icons.payments_rounded,
-              fallbackColor: Colors.white,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            Row(
+              children: [
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.cashMoneyUrl,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.payments_rounded,
+                  fallbackColor: Colors.white,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.notification_important_rounded, size: 16, color: Colors.white),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          state.tr('acceptCashierHandover'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.5),
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                const Icon(Icons.notification_important_rounded, size: 16, color: Colors.white),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    state.tr('acceptCashierHandover'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13.5),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.25),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'CASH: ${CurrencyFormatter.format(pending.handoverCashAmount)}',
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Cashier ${pending.cashierName} submitted ${CurrencyFormatter.format(pending.handoverCashAmount)} physical cash. Count drawer cash, enter 4-digit Cashier OTP below to confirm & take custody.',
+                        style: const TextStyle(color: Colors.white70, fontSize: 11),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    'Cashier ${pending.cashierName} submitted ${CurrencyFormatter.format(pending.cashRemaining)} physical cash. Enter Cashier OTP to accept.',
-                    style: const TextStyle(color: Colors.white70, fontSize: 11),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            ElevatedButton.icon(
-              onPressed: () => _confirmAcceptHandover(context, state),
-              icon: const Icon(Icons.pin_rounded, size: 16, color: Color(0xFFC2410C)),
-              label: Text(
-                state.tr('enterOtp'),
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Color(0xFFC2410C)),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
+            const SizedBox(height: 12),
+            // Direct Inline OTP Input & Verification Button
+            Row(
+              children: [
+                SizedBox(
+                  width: 130,
+                  height: 42,
+                  child: TextField(
+                    controller: _managerInlineOtpController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 4,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 6,
+                      color: Color(0xFFC2410C),
+                    ),
+                    decoration: InputDecoration(
+                      counterText: '',
+                      hintText: 'OTP',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, letterSpacing: 2, fontSize: 13),
+                      fillColor: Colors.white,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _handleInlineManagerVerify(context, state, pending),
+                    icon: const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFFC2410C)),
+                    label: Text(
+                      state.tr('verifyAndTakeCustody'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Color(0xFFC2410C)),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -414,6 +479,42 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
         ],
       ),
     );
+  }
+
+  void _handleInlineManagerVerify(BuildContext context, dynamic state, dynamic pending) async {
+    final entered = _managerInlineOtpController.text.trim();
+    if (entered.isEmpty || entered.length < 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter the 4-digit Cashier OTP code.'), backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    final success = await state.acceptCashierHandover(
+      managerName: state.activeStaffFullName ?? 'Dawit Manager',
+      enteredOtp: entered,
+    );
+
+    if (success) {
+      _managerInlineOtpController.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.tr('handoverSuccess')),
+            backgroundColor: AppColors.statusCompleted,
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.tr('invalidOtpCode')),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   void _confirmAcceptHandover(BuildContext context, dynamic state) async {
