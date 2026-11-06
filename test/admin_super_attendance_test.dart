@@ -502,5 +502,59 @@ https://www.tiktok.com/@bishecarwash/video/7703201662713728274?sender_device=pc
       expect(correctAdmin, isTrue);
       expect(state.pendingAdminNightHandover, isNull);
     });
+
+    test('Cashier unlocks pending day closing to add and wash more cars, then re-closes', () async {
+      // 1. Cashier confirms day closing
+      final closing = await state.confirmDailyClosing(
+        cashierName: 'Meron Cashier',
+        shiftType: 'day',
+        closedByRole: 'cashier',
+        handoverTo: 'Operational Manager',
+        handoverMethod: 'manager_otp',
+      );
+      expect(state.isTodayDayShiftClosed, isTrue);
+      expect(state.pendingCashierHandover, isNotNull);
+
+      // 2. A new car arrives; Cashier unlocks the pending closing
+      final unlocked = await state.unlockDayShiftClosing();
+      expect(unlocked, isTrue);
+      expect(state.isTodayDayShiftClosed, isFalse);
+      expect(state.pendingCashierHandover, isNull);
+
+      // 3. Cashier can close again with new totals
+      final reclosing = await state.confirmDailyClosing(
+        cashierName: 'Meron Cashier',
+        shiftType: 'day',
+        closedByRole: 'cashier',
+        handoverTo: 'Operational Manager',
+        handoverMethod: 'manager_otp',
+      );
+      expect(state.isTodayDayShiftClosed, isTrue);
+      expect(reclosing.handoverOtp, isNotNull);
+    });
+
+    test('Cashier unlocks verified day closing, correctly reversing manager carried cash', () async {
+      // 1. Cashier closes and manager accepts
+      final closing = await state.confirmDailyClosing(
+        cashierName: 'Meron Cashier',
+        shiftType: 'day',
+        closedByRole: 'cashier',
+        handoverTo: 'Operational Manager',
+        handoverMethod: 'manager_otp',
+      );
+      final accepted = await state.acceptCashierHandover(
+        managerName: 'Dawit Manager',
+        enteredOtp: closing.handoverOtp,
+      );
+      expect(accepted, isTrue);
+      expect(state.managerCarriedCashETB, closing.handoverCashAmount);
+
+      // 2. Unlock shift after manager took custody
+      final unlocked = await state.unlockDayShiftClosing();
+      expect(unlocked, isTrue);
+      expect(state.isTodayDayShiftClosed, isFalse);
+      // Carried cash reversed
+      expect(state.managerCarriedCashETB, 0.0);
+    });
   });
 }

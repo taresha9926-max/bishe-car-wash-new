@@ -1035,6 +1035,28 @@ class AppStateNotifier extends ChangeNotifier {
     return false;
   }
 
+  /// Unlocks today's day shift closing so the cashier can continue recording, washing, and collecting payments for new cars.
+  Future<bool> unlockDayShiftClosing() async {
+    final now = DateTime.now();
+    final index = _dailyFinancialClosings.indexWhere((c) =>
+        c.shiftType == 'day' &&
+        c.closingDate.year == now.year &&
+        c.closingDate.month == now.month &&
+        c.closingDate.day == now.day);
+
+    if (index != -1) {
+      final closing = _dailyFinancialClosings.removeAt(index);
+      try {
+        await _repository.deleteDailyFinancialClosing(closing.id);
+      } catch (e) {
+        debugPrint('Failed to delete daily closing during unlock: $e');
+      }
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
   /// Cashier records cash deposit to Owner Bank Account A or B
   Future<void> recordBankDeposit({
     required double amount,

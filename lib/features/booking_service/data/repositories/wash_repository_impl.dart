@@ -332,6 +332,11 @@ class WashRepositoryImpl implements IWashRepository {
     _dailyClosings.insert(0, closing);
   }
 
+  @override
+  Future<void> deleteDailyFinancialClosing(String id) async {
+    _dailyClosings.removeWhere((c) => c.id == id);
+  }
+
   // --- Helper state management methods ---
 
   void _occupyBay(BayType bayType, WashBooking booking) {

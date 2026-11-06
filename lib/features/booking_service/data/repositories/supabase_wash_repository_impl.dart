@@ -895,6 +895,16 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<void> deleteDailyFinancialClosing(String id) async {
+    try {
+      await _delete('daily_closings?id=eq.$id');
+    } catch (e) {
+      debugPrint('Supabase deleteDailyFinancialClosing exception: $e');
+    }
+    await _fallbackLocalRepo.deleteDailyFinancialClosing(id);
+  }
+
+  @override
   Future<List<TikTokAdVideo>> getTikTokReels() async {
     try {
       final dynamic data = await _get('staff_credentials?username=eq.app_config_tiktok_reels&select=*');

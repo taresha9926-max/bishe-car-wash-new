@@ -62,6 +62,7 @@ abstract class IStaffRepository {
   // Daily Financial Closings & Audit Broadcast
   Future<List<DailyFinancialClosing>> getDailyFinancialClosings();
   Future<void> saveDailyFinancialClosing(DailyFinancialClosing closing);
+  Future<void> deleteDailyFinancialClosing(String id);
 }
 
 /// Domain port for commercial marketing assets and TikTok reel configurations.

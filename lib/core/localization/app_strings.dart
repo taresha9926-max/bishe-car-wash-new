@@ -2464,6 +2464,56 @@ class AppStrings {
       AppLanguage.om: 'Koodii OTP Dijitii 4 Galchaa',
       AppLanguage.am: 'ባለ 4 አሃዝ የርክክብ OTP ያስገቡ',
     },
+    'unlockAndResumeShift': {
+      AppLanguage.en: 'Unlock & Resume Day Shift',
+      AppLanguage.om: 'Garee Guyyaa Bani & Itti Fufi',
+      AppLanguage.am: 'የቀን ፈረቃን ክፈት እና ቀጥል',
+    },
+    'cancelHandoverAndAddCars': {
+      AppLanguage.en: 'Cancel Handover & Add Cars',
+      AppLanguage.om: 'Dabarsuu Haki & Konkolaataa Dabaladhu',
+      AppLanguage.am: 'ማስተላለፍን ሰርዝ እና መኪና ጨምር',
+    },
+    'unlockWithManagerPin': {
+      AppLanguage.en: 'Unlock Shift (Manager / Admin PIN)',
+      AppLanguage.om: 'Garee Bani (PIN Hoggansaa / Bulchaa)',
+      AppLanguage.am: 'ፈረቃን ክፈት (የስራ አስኪያጅ / አስተዳዳሪ ፒን)',
+    },
+    'confirmUnlockShiftTitle': {
+      AppLanguage.en: 'Unlock Day Shift Closing?',
+      AppLanguage.om: 'Cuffaa Guyyaa Banuu Barbaaddaa?',
+      AppLanguage.am: 'የቀን ፈረቃ መዝጊያን መክፈት ይፈልጋሉ?',
+    },
+    'confirmUnlockShiftDesc': {
+      AppLanguage.en: 'This will cancel the pending closing and allow you to record and wash new vehicles. You can close again when done.',
+      AppLanguage.om: 'Kun cufiinsa eeggataa haqa, konkolaattota haaraa galmeessuuf carraa kenna. Erga xumurte booda deebitee cufuu dandeessa.',
+      AppLanguage.am: 'ይህ በመጠባበቅ ላይ ያለውን መዝጊያ ይሰርዛል፤ አዳዲስ መኪኖችን መዝግበው እንዲያጥቡ ያስችላል። ሲጨርሱ እንደገና መዝጋት ይችላሉ።',
+    },
+    'shiftUnlockedSuccess': {
+      AppLanguage.en: 'Day shift unlocked! You can now record new cars and close again.',
+      AppLanguage.om: 'Gareen guyyaa banameera! Konkolaattota haaraa galmeessitee deebitee cufuu dandeessa.',
+      AppLanguage.am: 'የቀን ፈረቃ ተከፍቷል! አሁን አዳዲስ መኪኖችን መዝግበው እንደገና መዝጋት ይችላሉ።',
+    },
+    'managerOrAdminPinRequired': {
+      AppLanguage.en: 'Manager or Admin PIN required to unlock verified closing',
+      AppLanguage.om: 'Cufiinsa mirkanaa\'e banuuf PIN Hoggansaa ykn Bulchaa barbaachisa',
+      AppLanguage.am: 'የተረጋገጠ መዝጊያን ለመክፈት የስራ አስኪያጅ ወይም አስተዳዳሪ ፒን ያስፈልጋል',
+    },
+    'enterManagerOrAdminPin': {
+      AppLanguage.en: 'Enter Operational Manager or Admin PIN',
+      AppLanguage.om: 'PIN Hoggansa Hojii ykn Bulchaa galchaa',
+      AppLanguage.am: 'የስራ አስኪያጅ ወይም የአስተዳዳሪ ፒን ያስገቡ',
+    },
+    'invalidManagerOrAdminPin': {
+      AppLanguage.en: 'Invalid Manager or Admin PIN. Access denied.',
+      AppLanguage.om: 'PIN Hoggansaa ykn Bulchaa dogoggora. Hayyamni dhowwameera.',
+      AppLanguage.am: 'ልክ ያልሆነ የስራ አስኪያጅ ወይም አስተዳዳሪ ፒን። አልተፈቀደም።',
+    },
+    'confirmUnlockAction': {
+      AppLanguage.en: 'Yes, Unlock Shift',
+      AppLanguage.om: 'Eeyyee, Garee Bani',
+      AppLanguage.am: 'አዎ፣ ፈረቃውን ክፈት',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

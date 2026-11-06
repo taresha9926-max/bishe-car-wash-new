@@ -7,6 +7,7 @@ import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../admin/domain/models/daily_financial_closing.dart';
+import '../../../auth_roles/domain/models/user_role.dart';
 
 class DailyClosingDialog extends StatefulWidget {
   final bool isManagerClosing;
@@ -504,15 +505,36 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               const SizedBox(height: 20),
 
               // Action Buttons
-              if (isAlreadyClosed)
+              if (isAlreadyClosed) ...[
                 CustomButton(
-                  text: 'Daily Closing Confirmed (Shift Locked)',
+                  text: '${state.tr('dailyClosingConfirmed')} (${state.tr('shiftLocked')})',
                   icon: Icons.lock_outline_rounded,
                   backgroundColor: Colors.grey.shade600,
                   isLoading: false,
                   onPressed: null,
-                )
-              else
+                ),
+                if (!widget.isManagerClosing) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _handleUnlockShift(context, state),
+                      icon: const Icon(Icons.lock_open_rounded, color: AppColors.primary, size: 18),
+                      label: Text(
+                        (state.pendingCashierHandover != null || state.pendingCashierAdminHandover != null)
+                            ? state.tr('unlockAndResumeShift')
+                            : state.tr('unlockWithManagerPin'),
+                        style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 13),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.primary, width: 1.5),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ),
+                ],
+              ] else
                 CustomButton(
                   text: state.tr('confirmDailyClosing'),
                   icon: Icons.check_circle_outline_rounded,
@@ -653,6 +675,170 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
         );
       }
     }
+  }
+
+  Future<void> _handleUnlockShift(BuildContext context, dynamic state) async {
+    final isPending = state.pendingCashierHandover != null || state.pendingCashierAdminHandover != null;
+    if (isPending) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              const Icon(Icons.lock_open_rounded, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.tr('confirmUnlockShiftTitle'),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            state.tr('confirmUnlockShiftDesc'),
+            style: const TextStyle(fontSize: 13),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(state.tr('cancel'), style: const TextStyle(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text(state.tr('confirmUnlockAction')),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true) {
+        await state.unlockDayShiftClosing();
+        if (context.mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.tr('shiftUnlockedSuccess')),
+              backgroundColor: AppColors.statusReady,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } else {
+      final unlocked = await _showUnlockShiftPinDialog(context, state);
+      if (unlocked == true && context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.tr('shiftUnlockedSuccess')),
+            backgroundColor: AppColors.statusReady,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<bool> _showUnlockShiftPinDialog(BuildContext context, dynamic state) async {
+    final pinController = TextEditingController();
+    String? errorMessage;
+    bool isVerifying = false;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                const Icon(Icons.security_rounded, color: AppColors.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    state.tr('enterManagerOrAdminPin'),
+                    style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.tr('managerOrAdminPinRequired'),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: pinController,
+                  obscureText: true,
+                  autofocus: true,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  decoration: InputDecoration(
+                    labelText: 'PIN',
+                    errorText: errorMessage,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    prefixIcon: const Icon(Icons.pin_rounded),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(state.tr('cancel'), style: const TextStyle(color: AppColors.textSecondary)),
+              ),
+              ElevatedButton(
+                onPressed: isVerifying
+                    ? null
+                    : () async {
+                        final pin = pinController.text.trim();
+                        if (pin.isEmpty) return;
+                        setDialogState(() {
+                          isVerifying = true;
+                          errorMessage = null;
+                        });
+
+                        final isMgr = await state.authenticateRoleAsync(UserRole.manager, pin);
+                        final isAdmin = isMgr ? false : await state.authenticateRoleAsync(UserRole.admin, pin);
+
+                        if (isMgr || isAdmin) {
+                          await state.unlockDayShiftClosing();
+                          if (ctx.mounted) Navigator.pop(ctx, true);
+                        } else {
+                          setDialogState(() {
+                            isVerifying = false;
+                            errorMessage = state.tr('invalidManagerOrAdminPin');
+                          });
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: isVerifying
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Text(state.tr('unlock')),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    pinController.dispose();
+    return result ?? false;
   }
 
   void _showOtpReceiptDialog(BuildContext context, DailyFinancialClosing closing, dynamic state) {
