@@ -26,6 +26,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   final String supabaseUrl;
   final String anonKey;
   final WashRepositoryImpl _fallbackLocalRepo = WashRepositoryImpl();
+  static DateTime _dataPurgeEpoch = DateTime.parse('2026-11-06T16:25:00Z');
 
   SupabaseWashRepositoryImpl({
     required this.supabaseUrl,
@@ -641,6 +642,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> clearAllBookings() async {
+    _dataPurgeEpoch = DateTime.now();
     try {
       // 1. Invoke server-side RPC function (truncates bookings, logs, sms, and resets bays)
       await _post('rpc/clear_all_bookings', {});
@@ -653,6 +655,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       await _delete('wash_bookings?id=neq.00000000-0000-0000-0000-000000000000');
       await _delete('commission_logs?id=neq.00000000-0000-0000-0000-000000000000');
       await _delete('sms_outbox?id=neq.00000000-0000-0000-0000-000000000000');
+      await _delete('daily_closings?id=neq.00000000-0000-0000-0000-000000000000');
       
       // 3. Reset station bays to vacant
       await _patch('station_bays?id=neq.00000000-0000-0000-0000-000000000000', {
@@ -835,10 +838,12 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (res is List && res.isNotEmpty) {
         return res.map((item) {
           final map = item as Map<String, dynamic>;
+          final cDate = DateTime.tryParse(map['closing_date']?.toString() ?? '') ?? DateTime.now();
+          final cClosed = DateTime.tryParse(map['closed_at']?.toString() ?? '') ?? cDate;
           return DailyFinancialClosing(
             id: map['id']?.toString() ?? '',
-            closingDate: DateTime.tryParse(map['closing_date']?.toString() ?? '') ?? DateTime.now(),
-            closedAt: DateTime.tryParse(map['closed_at']?.toString() ?? '') ?? DateTime.now(),
+            closingDate: cDate,
+            closedAt: cClosed,
             cashierName: map['cashier_name']?.toString() ?? 'Cashier',
             grossRevenue: (map['gross_revenue'] as num?)?.toDouble() ?? 0.0,
             cashRevenue: (map['cash_revenue'] as num?)?.toDouble() ?? 0.0,
@@ -857,8 +862,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
                 : {},
             notes: map['notes']?.toString(),
             isConfirmed: map['is_confirmed'] == true,
+            shiftType: map['id']?.toString().endsWith('-night') == true ? 'night' : 'day',
           );
-        }).toList();
+        }).where((c) => c.closedAt.isAfter(_dataPurgeEpoch)).toList();
       }
     } catch (e) {
       debugPrint('Supabase getDailyFinancialClosings exception: $e');

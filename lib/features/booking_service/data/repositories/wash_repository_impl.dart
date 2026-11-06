@@ -224,6 +224,7 @@ class WashRepositoryImpl implements IWashRepository {
   Future<void> clearAllBookings() async {
     _bookings.clear();
     _commissionLogs.clear();
+    _dailyClosings.clear();
     _dailyHandovers.clear();
     _stockTransactions.clear();
     _consumables = List.from(InitialInventorySeed.getConsumables());
