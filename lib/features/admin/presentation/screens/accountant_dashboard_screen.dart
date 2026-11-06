@@ -411,6 +411,39 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 _buildKpiPill('Net Drawer Cash', CurrencyFormatter.format(c.cashRevenue), Colors.green),
               ],
             ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: c.isHandoverAccepted ? const Color(0xFF10B981).withValues(alpha: 0.1) : const Color(0xFFEA580C).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: c.isHandoverAccepted ? const Color(0xFF10B981).withValues(alpha: 0.35) : const Color(0xFFEA580C).withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    c.isHandoverAccepted ? Icons.verified_user_rounded : Icons.pending_actions_rounded,
+                    size: 16,
+                    color: c.isHandoverAccepted ? const Color(0xFF059669) : const Color(0xFFC2410C),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      c.handoverOtp != null
+                          ? 'OTP CODE: [ ${c.handoverOtp} ] • ${c.isHandoverAccepted ? "${state.tr('verifiedBadge')} & RECONCILED (${c.acceptedByName ?? 'Recipient'})" : state.tr('otpReconciliationPending')}'
+                          : 'BANK DEPOSIT STAMPED • RECONCILED DIRECTLY TO ${c.handoverTo.toUpperCase()}',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
+                        color: c.isHandoverAccepted ? const Color(0xFF047857) : const Color(0xFFC2410C),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             if (c.providerBreakdown.isNotEmpty) ...[
               const SizedBox(height: 10),
               Row(

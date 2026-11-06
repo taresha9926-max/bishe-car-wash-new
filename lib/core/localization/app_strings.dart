@@ -2334,6 +2334,71 @@ class AppStrings {
       AppLanguage.om: 'Galmee Dabarsa Wal-Harkaa',
       AppLanguage.am: 'የፈረቃ ርክክብ መዝገቦች',
     },
+    'handoverOtpCode': {
+      AppLanguage.en: 'HANDOVER OTP CODE:',
+      AppLanguage.om: 'KOODII DABARSAA OTP:',
+      AppLanguage.am: 'የርክክብ OTP ኮድ:',
+    },
+    'waitingForManager': {
+      AppLanguage.en: 'WAITING FOR MANAGER',
+      AppLanguage.om: 'HOJII GEGGEESSAA EEGA',
+      AppLanguage.am: 'ስራ አስኪያጁን በመጠባበቅ ላይ',
+    },
+    'enterOtp': {
+      AppLanguage.en: 'Enter OTP',
+      AppLanguage.om: 'OTP Galchaa',
+      AppLanguage.am: 'OTP ያስገቡ',
+    },
+    'adminNightHandoverCode': {
+      AppLanguage.en: 'ADMIN NIGHT HANDOVER CODE:',
+      AppLanguage.om: 'KOODII DABARSA BULCHAA HALKAN:',
+      AppLanguage.am: 'የሌሊት ርክክብ አስተዳዳሪ OTP ኮድ:',
+    },
+    'pendingAdminReceipt': {
+      AppLanguage.en: 'PENDING ADMIN RECEIPT',
+      AppLanguage.om: 'FUUDHATAMA BULCHAA EEGA',
+      AppLanguage.am: 'የአስተዳዳሪ ርክክብ በመጠባበቅ ላይ',
+    },
+    'threePartyCustody': {
+      AppLanguage.en: '3-PARTY CUSTODY',
+      AppLanguage.om: 'EEGUUMSA QAAMA 3',
+      AppLanguage.am: 'የ 3 ወገን ጥበቃ',
+    },
+    'dayShiftCustody': {
+      AppLanguage.en: 'Day Shift (Cashier → Op Manager)',
+      AppLanguage.om: 'Faraqaa Guyyaa (Qabaa Qarshii → Hojii Geggeessaa)',
+      AppLanguage.am: 'የቀን ፈረቃ (ገንዘብ ያዥ → ስራ አስኪያጅ)',
+    },
+    'nightShiftCustody': {
+      AppLanguage.en: 'Night Shift (Op Manager → Admin Vault)',
+      AppLanguage.om: 'Faraqaa Halkan (Hojii Geggeessaa → Saanduqa Bulchaa)',
+      AppLanguage.am: 'የሌሊት ፈረቃ (ስራ አስኪያጅ → የአስተዳዳሪ ካዝና)',
+    },
+    'verifiedBadge': {
+      AppLanguage.en: 'VERIFIED',
+      AppLanguage.om: 'MIRKANAA\'EERA',
+      AppLanguage.am: 'የተረጋገጠ',
+    },
+    'inVaultBadge': {
+      AppLanguage.en: 'IN VAULT',
+      AppLanguage.om: 'SAANDUQA KEESSA',
+      AppLanguage.am: 'ካዝና ገብቷል',
+    },
+    'activeShiftBadge': {
+      AppLanguage.en: 'ACTIVE',
+      AppLanguage.om: 'HOJII IRRA',
+      AppLanguage.am: 'በስራ ላይ',
+    },
+    'otpReconciliationPending': {
+      AppLanguage.en: 'PENDING OTP RECONCILIATION',
+      AppLanguage.om: 'WAL-SIMSIISA OTP EEGA',
+      AppLanguage.am: 'የ OTP ማስታረቅ በመጠባበቅ ላይ',
+    },
+    'physicalCash': {
+      AppLanguage.en: 'physical cash',
+      AppLanguage.om: 'qarshii harkaa',
+      AppLanguage.am: 'ጥሬ ገንዘብ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

@@ -301,6 +301,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 ),
               ],
 
+              // Permanent OTP Shift Handover Desk (Always Visible)
+              _buildOtpShiftHandoverDesk(context, state, isMobile),
+              const SizedBox(height: 14),
+
               // Pending Approval Queue (from Secondary Admin actions)
               _buildPendingApprovalsBanner(context, state),
 
@@ -3490,6 +3494,213 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 );
               }
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtpShiftHandoverDesk(BuildContext context, dynamic state, bool isMobile) {
+    final dayClosing = state.latestDayClosing;
+    final nightClosing = state.latestNightClosing;
+    final pendingNight = state.pendingAdminNightHandover;
+    final pendingCashier = state.pendingCashierHandover;
+
+    return Container(
+      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.vpn_key_rounded, size: 16, color: AppColors.primary),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.tr('shiftHandoverDesk'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: isMobile ? 13 : 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.shield_rounded, size: 11, color: Color(0xFF10B981)),
+                    const SizedBox(width: 4),
+                    Text(
+                      state.tr('threePartyCustody'),
+                      style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFF10B981)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Day Shift Row (Cashier -> Manager)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.wb_sunny_rounded, size: 16, color: Colors.amber),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.tr('dayShiftCustody'),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      ),
+                      Text(
+                        dayClosing != null
+                            ? (dayClosing.isHandoverAccepted
+                                ? 'Confirmed via OTP [ ${dayClosing.handoverOtp ?? '----'} ] by ${dayClosing.acceptedByName ?? 'Manager'} • ${CurrencyFormatter.format(dayClosing.cashRemaining)}'
+                                : 'Pending: OTP [ ${dayClosing.handoverOtp ?? '----'} ] • Waiting for Manager')
+                            : (pendingCashier != null
+                                ? 'Waiting Manager OTP: [ ${pendingCashier.handoverOtp} ] • ${CurrencyFormatter.format(pendingCashier.cashRemaining)}'
+                                : 'Day shift active • Hands over to Manager at ~7:00 PM via OTP'),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: (dayClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: (dayClosing?.isHandoverAccepted == true)
+                        ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                        : Colors.orange.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    (dayClosing?.isHandoverAccepted == true) ? state.tr('verifiedBadge') : state.tr('activeShiftBadge'),
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: (dayClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : Colors.orange.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Night Shift Row (Manager -> Admin)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.nightlight_round, size: 16, color: Colors.indigo),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.tr('nightShiftCustody'),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      ),
+                      Text(
+                        nightClosing != null
+                            ? (nightClosing.isHandoverAccepted
+                                ? 'Sealed in Vault via Admin OTP [ ${nightClosing.handoverOtp ?? '----'} ] • ${CurrencyFormatter.format(nightClosing.handoverCashAmount)}'
+                                : 'Pending Admin OTP: [ ${nightClosing.handoverOtp ?? '----'} ]')
+                            : (pendingNight != null
+                                ? 'Pending Receipt: ${CurrencyFormatter.format(pendingNight.handoverCashAmount)} cash'
+                                : 'Night shift active • Hands over to Admin at station closing via OTP'),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: (nightClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (pendingNight != null)
+                  ElevatedButton(
+                    onPressed: () => _confirmAcceptManagerNightCash(context, state),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEA580C),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(state.tr('enterOtp'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white)),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: (nightClosing?.isHandoverAccepted == true)
+                          ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                          : Colors.indigo.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      (nightClosing?.isHandoverAccepted == true) ? state.tr('inVaultBadge') : state.tr('activeShiftBadge'),
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: (nightClosing?.isHandoverAccepted == true) ? const Color(0xFF059669) : Colors.indigo,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

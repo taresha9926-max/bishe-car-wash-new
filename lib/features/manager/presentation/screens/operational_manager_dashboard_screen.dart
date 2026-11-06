@@ -241,7 +241,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    'Cashier ${pending.cashierName} submitted ${CurrencyFormatter.format(pending.cashRemaining)} physical drawer cash.',
+                    'Cashier ${pending.cashierName} submitted ${CurrencyFormatter.format(pending.cashRemaining)} physical cash. Enter Cashier OTP to accept.',
                     style: const TextStyle(color: Colors.white70, fontSize: 11),
                   ),
                 ],
@@ -250,15 +250,89 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
             const SizedBox(width: 8),
             ElevatedButton.icon(
               onPressed: () => _confirmAcceptHandover(context, state),
-              icon: const Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFFC2410C)),
-              label: const Text(
-                'Accept',
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Color(0xFFC2410C)),
+              icon: const Icon(Icons.pin_rounded, size: 16, color: Color(0xFFC2410C)),
+              label: Text(
+                state.tr('enterOtp'),
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Color(0xFFC2410C)),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final adminPending = state.pendingAdminNightHandover;
+    if (adminPending != null) {
+      return Container(
+        padding: EdgeInsets.all(isMobile ? 12 : 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4338CA), Color(0xFF312E81)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF818CF8).withValues(alpha: 0.5), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.pin_rounded, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        state.tr('adminNightHandoverCode'),
+                        style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          state.tr('pendingAdminReceipt'),
+                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Text(
+                        '[ ${adminPending.handoverOtp ?? '----'} ]',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 4, color: Colors.white),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '• ${CurrencyFormatter.format(adminPending.handoverCashAmount)} cash to Admin',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
