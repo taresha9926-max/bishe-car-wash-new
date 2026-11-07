@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -7,12 +8,15 @@ import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
+import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
+import '../../../booking_service/domain/models/wash_dispatcher.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/screens/financial_reports_view.dart';
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../cashier/presentation/screens/daily_closing_dialog.dart';
+import '../../../cashier/presentation/screens/payment_process_dialog.dart';
 import '../../../cashier/presentation/screens/phone_booking_dialog.dart';
 import '../../../cashier/presentation/screens/walk_in_registration_screen.dart';
 
@@ -67,7 +71,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
     final bay2 = bays.firstWhere((b) => b.type == BayType.bay2, orElse: () => const StationBay(type: BayType.bay2));
     final van = bays.firstWhere((b) => b.type == BayType.mobileVan, orElse: () => const StationBay(type: BayType.mobileVan));
 
-    final filteredBookings = allBookings.where((b) => b.status != WashStatus.cancelled).toList();
+    final filteredBookings = _getFilteredBookings(allBookings, state.isCarpetDivisionActive);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -85,23 +89,25 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
                   tooltip: state.tr('registerPhoneBooking'),
-                  onPressed: () => PhoneBookingDialog.show(context),
+                  onPressed: () => PhoneBookingDialog.show(context, initialCarpetMode: state.isCarpetDivisionActive),
                   child: const Icon(Icons.phone_in_talk_rounded, size: 18),
                 ),
                 const SizedBox(width: 8),
                 FloatingActionButton.extended(
                   heroTag: 'op_fab_walkin',
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: state.isCarpetDivisionActive ? const Color(0xFF7C3AED) : AppColors.primary,
                   foregroundColor: Colors.white,
-                  icon: const Icon(Icons.add_road_rounded, size: 18),
+                  icon: Icon(state.isCarpetDivisionActive ? Icons.texture_rounded : Icons.add_road_rounded, size: 18),
                   label: Text(
-                    state.tr('newWalkIn'),
+                    state.isCarpetDivisionActive ? state.tr('carpetIntakeRegister') : state.tr('newWalkIn'),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
                   ),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const WalkInRegistrationScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => WalkInRegistrationScreen(initialCarpetMode: state.isCarpetDivisionActive),
+                      ),
                     );
                   },
                 ),
@@ -119,22 +125,24 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
                     state.tr('registerPhoneBooking'),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
                   ),
-                  onPressed: () => PhoneBookingDialog.show(context),
+                  onPressed: () => PhoneBookingDialog.show(context, initialCarpetMode: state.isCarpetDivisionActive),
                 ),
                 const SizedBox(width: 10),
                 FloatingActionButton.extended(
                   heroTag: 'op_fab_walkin',
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: state.isCarpetDivisionActive ? const Color(0xFF7C3AED) : AppColors.primary,
                   foregroundColor: Colors.white,
-                  icon: const Icon(Icons.add_road_rounded, size: 18),
+                  icon: Icon(state.isCarpetDivisionActive ? Icons.texture_rounded : Icons.add_road_rounded, size: 18),
                   label: Text(
-                    state.tr('newWalkIn'),
+                    state.isCarpetDivisionActive ? state.tr('carpetIntakeRegister') : state.tr('newWalkIn'),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
                   ),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const WalkInRegistrationScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => WalkInRegistrationScreen(initialCarpetMode: state.isCarpetDivisionActive),
+                      ),
                     );
                   },
                 ),
@@ -627,7 +635,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
     StationBay van,
   ) {
     final isCarpet = state.isCarpetDivisionActive;
-    final relevantBookings = filteredBookings.where((b) => isCarpet ? b.isCarpet : !b.isCarpet).toList();
+    final relevantBookings = filteredBookings;
 
     final modules = [
       _ManagerModuleItem(
@@ -689,7 +697,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
                 ),
                 child: Center(
                   child: Text(
-                    isCarpet ? 'No carpets currently in queue.' : 'No vehicles currently in queue.',
+                    isCarpet ? state.tr('noCarpetsInQueue') : state.tr('noVehiclesInQueue'),
                     style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -1028,19 +1036,102 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
     );
   }
 
+  List<WashBooking> _getFilteredBookings(List<WashBooking> bookings, bool isCarpetDivision) {
+    return bookings.where((b) {
+      if (b.status == WashStatus.cancelled) return false;
+      if (b.isCarpet != isCarpetDivision) return false;
+      final isFinishedAndSettled = b.status == WashStatus.completed && b.payment.isPaid;
+      return !isFinishedAndSettled;
+    }).toList();
+  }
+
+  Future<void> _advanceBookingStatus(
+    BuildContext context,
+    WashBooking booking, {
+    WashStatus? targetStatus,
+  }) async {
+    final state = AppStateProvider.read(context);
+    final next = targetStatus ?? (
+      (booking.status == WashStatus.drying || booking.status == WashStatus.readyForPickup)
+          ? WashStatus.completed
+          : WashDispatcher.nextStatus(booking.status)
+    );
+    if (next == null) return;
+
+    await state.updateWashStatus(booking.id, next);
+
+    if (next == WashStatus.completed) {
+      await state.sendCustomerCompletionSms(booking);
+    }
+
+    if (context.mounted) {
+      final msg = next == WashStatus.completed
+          ? (booking.isCarpet
+              ? '${booking.licensePlate}: ${state.tr("carpetCompletionSmsSent")}'
+              : '${booking.licensePlate} completed! Ready for payment • SMS dispatched to ${booking.customerPhone}')
+          : '${booking.licensePlate} updated to ${next.displayName}!';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 5),
+          backgroundColor: next == WashStatus.completed ? AppColors.cashGreen : next.color,
+          action: next == WashStatus.completed
+              ? SnackBarAction(
+                  label: 'Copy SMS',
+                  textColor: Colors.amberAccent,
+                  onPressed: () {
+                    final sms = state.getCustomerCompletionSmsText(booking);
+                    Clipboard.setData(ClipboardData(text: sms));
+                  },
+                )
+              : null,
+          content: Text(msg, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        ),
+      );
+    }
+  }
+
   Widget _buildCleanStationCapacityBar(BuildContext context, dynamic state, StationBay bay1, StationBay bay2, StationBay van, bool isMobile) {
+    if (state.isCarpetDivisionActive) {
+      final carpetBookings = (state.bookings as List<WashBooking>)
+          .where((b) => b.isCarpet && b.status != WashStatus.cancelled && !(b.status == WashStatus.completed && b.payment.isPaid))
+          .toList();
+      final washingCarpets = carpetBookings.where((b) => b.status == WashStatus.washing || b.status == WashStatus.assignedToBay || b.status == WashStatus.pending).toList();
+      final dryingCarpets = carpetBookings.where((b) => b.status == WashStatus.drying).toList();
+      final valetCarpets = carpetBookings.where((b) => (b.serviceType == ServiceType.valetPickUp || b.serviceType == ServiceType.atHomeMobile) && b.status != WashStatus.completed).toList();
+
+      final isWashFloorBusy = washingCarpets.isNotEmpty;
+      final washFloorStatus = isWashFloorBusy ? '${washingCarpets.length} in wash (${washingCarpets.first.licensePlate})' : state.tr('availableNow');
+
+      final isDryingBusy = dryingCarpets.isNotEmpty;
+      final dryingStatus = isDryingBusy ? '${dryingCarpets.length} drying (${dryingCarpets.first.licensePlate})' : state.tr('availableNow');
+
+      final isValetBusy = valetCarpets.isNotEmpty;
+      final valetStatus = isValetBusy ? '${valetCarpets.length} active' : state.tr('availableNow');
+
+      return Column(
+        children: [
+          _buildBayMiniTile(state.tr('carpetWashFloor'), isWashFloorBusy, washFloorStatus, isMobile, icon: Icons.waves_rounded),
+          const SizedBox(height: 8),
+          _buildBayMiniTile(state.tr('carpetDryingRacks'), isDryingBusy, dryingStatus, isMobile, icon: Icons.dry_cleaning_rounded),
+          const SizedBox(height: 8),
+          _buildBayMiniTile(state.tr('carpetValetDriver'), isValetBusy, valetStatus, isMobile, icon: Icons.local_shipping_rounded),
+        ],
+      );
+    }
+
     return Column(
       children: [
-        _buildBayMiniTile('Bay 1 (Drive-through)', bay1.isOccupied, bay1.activeBookingId, isMobile),
+        _buildBayMiniTile('Bay 1 (Drive-through)', bay1.isOccupied, bay1.isOccupied ? 'Occupied' : 'Available', isMobile, icon: Icons.local_car_wash_rounded),
         const SizedBox(height: 8),
-        _buildBayMiniTile('Bay 2 (Detailing)', bay2.isOccupied, bay2.activeBookingId, isMobile),
+        _buildBayMiniTile('Bay 2 (Detailing)', bay2.isOccupied, bay2.isOccupied ? 'Occupied' : 'Available', isMobile, icon: Icons.auto_awesome_rounded),
         const SizedBox(height: 8),
-        _buildBayMiniTile('Mobile Van Service', van.isOccupied, van.activeBookingId, isMobile),
+        _buildBayMiniTile('Mobile Van Service', van.isOccupied, van.isOccupied ? 'Occupied' : 'Available', isMobile, icon: Icons.airport_shuttle_rounded),
       ],
     );
   }
 
-  Widget _buildBayMiniTile(String bayName, bool isOccupied, String? bookingId, bool isMobile) {
+  Widget _buildBayMiniTile(String bayName, bool isOccupied, String statusLabel, bool isMobile, {IconData? icon}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -1054,7 +1145,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
           Row(
             children: [
               Icon(
-                isOccupied ? Icons.do_not_disturb_on_rounded : Icons.check_circle_rounded,
+                icon ?? (isOccupied ? Icons.do_not_disturb_on_rounded : Icons.check_circle_rounded),
                 color: isOccupied ? Colors.orange : AppColors.statusCompleted,
                 size: 16,
               ),
@@ -1069,7 +1160,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              isOccupied ? 'Occupied' : 'Available',
+              statusLabel,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
@@ -1088,64 +1179,432 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
         ? (booking.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
         : AutoCareAssets.carSedanUrl;
 
+    if (isMobile) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.cardBorder),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: photoUrl,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  fallbackIcon: isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        booking.licensePlate,
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5),
+                      ),
+                      Text(
+                        isCarpet
+                            ? (booking.carpetType == 'type_b' ? state.tr('carpetTypeB') : state.tr('carpetTypeA'))
+                            : booking.package.name,
+                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: booking.status.color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    booking.status.displayName,
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: booking.status.color),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    isCarpet && booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty
+                        ? '${booking.customerName} • ${booking.carpetDimensions}'
+                        : '${booking.customerName} (${booking.customerPhone})',
+                    style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  CurrencyFormatter.format(booking.totalPrice),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.primary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Divider(height: 1, color: AppColors.cardBorder),
+            const SizedBox(height: 8),
+            _buildActionButtonsMobile(context, state, booking),
+          ],
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.cardBorder),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: photoUrl,
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                fallbackIcon: isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
-              ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isCarpet
-                        ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                        : '${booking.licensePlate} • ${booking.package.name}',
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    isCarpet && booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty
-                        ? '${booking.customerName} • ${booking.carpetDimensions} • ${CurrencyFormatter.format(booking.totalPrice)}'
-                        : '${booking.customerName} • ${CurrencyFormatter.format(booking.totalPrice)}',
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-            ],
+          AutoCareAssets.buildPhotoThumbnail(
+            imageUrl: photoUrl,
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            fallbackIcon: isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isCarpet
+                      ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                      : '${booking.licensePlate} • ${booking.package.name}',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  isCarpet && booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty
+                      ? '${booking.customerName} (${booking.customerPhone}) • ${booking.carpetDimensions}'
+                      : '${booking.customerName} (${booking.customerPhone})',
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: booking.payment.isPaid ? Colors.green.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
+              color: booking.status.color.withOpacity(0.12),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              booking.payment.isPaid ? 'PAID' : 'IN QUEUE',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: booking.payment.isPaid ? Colors.green.shade800 : Colors.blue.shade800,
+              booking.status.displayName,
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: booking.status.color),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            CurrencyFormatter.format(booking.totalPrice),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: AppColors.primary),
+          ),
+          const SizedBox(width: 16),
+          _buildActionButtonsDesktop(context, state, booking),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtonsMobile(BuildContext context, dynamic state, WashBooking b) {
+    if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay || b.status == WashStatus.confirmed) {
+      return Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 38,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: b.isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
               ),
+              icon: const Icon(Icons.play_arrow_rounded, size: 16),
+              label: Text(
+                b.isCarpet ? state.tr('startWashFloorAction') : state.tr('startWashAction'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+              ),
+              onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.washing),
+            ),
+          ),
+          if (b.isCarpet) ...[
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              height: 34,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF7C3AED),
+                  side: const BorderSide(color: Color(0xFF7C3AED), width: 1.2),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                icon: const Icon(Icons.sms_rounded, size: 14),
+                label: Text(
+                  '${state.tr("sendCarpetIntakeSms")} (${b.licensePlate})',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                ),
+                onPressed: () async {
+                  await state.sendCarpetRegistrationSms(b);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.tr('carpetIntakeSmsSent')),
+                        backgroundColor: const Color(0xFF7C3AED),
+                        action: SnackBarAction(
+                          label: 'Copy SMS',
+                          textColor: Colors.amberAccent,
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(b)));
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ],
+      );
+    } else if (b.status == WashStatus.washing) {
+      return SizedBox(
+        width: double.infinity,
+        height: 38,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: b.isCarpet ? const Color(0xFF6366F1) : AppColors.bay1Color,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.air_rounded, size: 16),
+          label: Text(
+            b.isCarpet ? state.tr('moveToDryingRacksAction') : state.tr('moveToDryingAction'),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+          ),
+          onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.drying),
+        ),
+      );
+    } else if (b.status == WashStatus.drying) {
+      return SizedBox(
+        width: double.infinity,
+        height: 38,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: b.isCarpet ? const Color(0xFF059669) : AppColors.bay2Color,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
+          label: Text(
+            b.isCarpet ? state.tr('markCarpetReadyAction') : state.tr('markCompletedAction'),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+          ),
+          onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.completed),
+        ),
+      );
+    } else if ((b.status == WashStatus.completed || b.status == WashStatus.readyForPickup) && !b.payment.isPaid) {
+      final payLabel = state.currentLang == 'EN'
+          ? 'Pay (${CurrencyFormatter.format(b.totalPrice)})'
+          : '${state.tr("collectPaymentAction")} (${CurrencyFormatter.format(b.totalPrice)})';
+
+      return SizedBox(
+        width: double.infinity,
+        height: 40,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.cashGreen,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 0,
+          ),
+          icon: const Icon(Icons.payments_rounded, size: 16),
+          label: Text(
+            payLabel,
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5),
+          ),
+          onPressed: () => PaymentProcessDialog.show(context, b),
+        ),
+      );
+    } else if (b.payment.isPaid) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          color: AppColors.statusCompleted.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.statusCompleted.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, size: 14, color: AppColors.statusCompleted),
+            const SizedBox(width: 6),
+            Text(
+              'PAID (${b.payment.method.displayName})',
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
+            ),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildActionButtonsDesktop(BuildContext context, dynamic state, WashBooking b) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay || b.status == WashStatus.confirmed) ...[
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: b.isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.play_arrow_rounded, size: 14),
+            label: Text(
+              b.isCarpet ? state.tr('startWashFloorAction') : state.tr('startWashAction'),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+            ),
+            onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.washing),
+          ),
+          if (b.isCarpet) ...[
+            const SizedBox(width: 6),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF7C3AED),
+                side: const BorderSide(color: Color(0xFF7C3AED), width: 1.2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              icon: const Icon(Icons.sms_rounded, size: 13),
+              label: Text(
+                state.tr('sendCarpetIntakeSms'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+              ),
+              onPressed: () async {
+                await state.sendCarpetRegistrationSms(b);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.tr('carpetIntakeSmsSent')),
+                      backgroundColor: const Color(0xFF7C3AED),
+                      action: SnackBarAction(
+                        label: 'Copy SMS',
+                        textColor: Colors.amberAccent,
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(b)));
+                        },
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ] else if (b.status == WashStatus.washing) ...[
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: b.isCarpet ? const Color(0xFF6366F1) : AppColors.bay1Color,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.air_rounded, size: 14),
+            label: Text(
+              b.isCarpet ? state.tr('moveToDryingRacksAction') : state.tr('moveToDryingAction'),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+            ),
+            onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.drying),
+          ),
+        ] else if (b.status == WashStatus.drying) ...[
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: b.isCarpet ? const Color(0xFF059669) : AppColors.bay2Color,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.check_circle_outline_rounded, size: 14),
+            label: Text(
+              b.isCarpet ? state.tr('markCarpetReadyAction') : state.tr('markCompletedAction'),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+            ),
+            onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.completed),
+          ),
+        ],
+
+        if ((b.status == WashStatus.completed || b.status == WashStatus.readyForPickup) && !b.payment.isPaid) ...[
+          const SizedBox(width: 6),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.cashGreen,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              elevation: 0,
+            ),
+            icon: const Icon(Icons.payments_rounded, size: 14),
+            label: Text(
+              state.currentLang == 'EN'
+                  ? 'Pay (${CurrencyFormatter.formatShort(b.totalPrice)})'
+                  : '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+            ),
+            onPressed: () => PaymentProcessDialog.show(context, b),
+          ),
+        ] else if (b.payment.isPaid) ...[
+          const SizedBox(width: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.statusCompleted.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: AppColors.statusCompleted.withOpacity(0.4)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle, size: 12, color: AppColors.statusCompleted),
+                const SizedBox(width: 4),
+                Text(
+                  'PAID (${b.payment.method.displayName})',
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
+                ),
+              ],
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
@@ -1850,10 +1851,18 @@ class AppStateNotifier extends ChangeNotifier {
     debugPrint('Message: $message');
     debugPrint('-----------------------------------');
 
+    // Automatically copy message to system clipboard for instant pasting on desktop web or mobile
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      await Clipboard.setData(ClipboardData(text: message));
+    } catch (e) {
+      debugPrint('Clipboard copy error: $e');
+    }
+
     if (cleanPhone.isNotEmpty) {
       try {
         final uriStr = 'sms:$cleanPhone?body=${Uri.encodeComponent(message)}';
-        UrlLauncherHelper.openUrl(uriStr);
+        await UrlLauncherHelper.openUrl(uriStr);
         return true;
       } catch (e) {
         debugPrint('SMS launcher error: $e');
@@ -1902,10 +1911,18 @@ class AppStateNotifier extends ChangeNotifier {
     debugPrint('Message: $message');
     debugPrint('------------------------------');
 
+    // Automatically copy completion message to system clipboard for instant pasting on desktop web or mobile
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      await Clipboard.setData(ClipboardData(text: message));
+    } catch (e) {
+      debugPrint('Clipboard copy error: $e');
+    }
+
     if (cleanPhone.isNotEmpty) {
       try {
         final uriStr = 'sms:$cleanPhone?body=${Uri.encodeComponent(message)}';
-        UrlLauncherHelper.openUrl(uriStr);
+        await UrlLauncherHelper.openUrl(uriStr);
         return true;
       } catch (e) {
         debugPrint('SMS launcher error: $e');

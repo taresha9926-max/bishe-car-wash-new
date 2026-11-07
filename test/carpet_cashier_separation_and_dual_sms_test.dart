@@ -147,5 +147,81 @@ void main() {
       expect(sms2Am, contains('CPT-9901'));
       expect(sms2Am, contains('ተጠናቆ ዝግጁ ሆኗል'));
     });
+
+    test('Operational Manager full operational parity: status advancement and completion SMS', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      // Register an active carpet booking
+      final carpetBooking = await state.registerWalkIn(
+        customerName: 'Haile Gebrselassie',
+        customerPhone: '+251 91 777 8899',
+        licensePlate: 'CPT-1122',
+        carType: CarType.automobile,
+        package: state.packages.first,
+        assignedBay: null,
+        paymentMethod: PaymentMethod.cash,
+        isCarpet: true,
+        carpetType: 'type_a',
+        carpetAreaSqMeters: 6.0,
+        carpetDimensions: '2.0m x 3.0m',
+        customTotalPrice: 720.0,
+      );
+
+      expect(carpetBooking.status, WashStatus.pending);
+
+      // Operational manager advances status: pending -> washing -> drying -> completed
+      await state.updateWashStatus(carpetBooking.id, WashStatus.washing);
+      var current = state.bookings.firstWhere((b) => b.id == carpetBooking.id);
+      expect(current.status, WashStatus.washing);
+
+      await state.updateWashStatus(carpetBooking.id, WashStatus.drying);
+      current = state.bookings.firstWhere((b) => b.id == carpetBooking.id);
+      expect(current.status, WashStatus.drying);
+
+      await state.updateWashStatus(carpetBooking.id, WashStatus.completed);
+      current = state.bookings.firstWhere((b) => b.id == carpetBooking.id);
+      expect(current.status, WashStatus.completed);
+
+      // Verify completion SMS dispatch succeeds
+      final smsSent = await state.sendCustomerCompletionSms(current);
+      expect(smsSent, isTrue);
+    });
+
+    test('Daily financial closing multiple saves and night closing persist without duplicate error', () async {
+      final closing1 = await state.confirmDailyClosing(
+        cashierName: 'Dawit Manager',
+        shiftType: 'day',
+        closedByRole: 'operational_manager',
+        handoverTo: 'Operational Manager',
+        handoverMethod: 'manager_otp',
+      );
+
+      expect(closing1.id, contains('day'));
+      expect(state.dailyFinancialClosings.first.id, closing1.id);
+
+      // Second save (updating closing on same date & shift)
+      final closing2 = await state.confirmDailyClosing(
+        cashierName: 'Dawit Manager',
+        shiftType: 'day',
+        notes: 'Updated daily closing numbers',
+        closedByRole: 'operational_manager',
+        handoverTo: 'Operational Manager',
+        handoverMethod: 'manager_otp',
+      );
+
+      expect(closing2.id, closing1.id);
+      expect(state.dailyFinancialClosings.first.notes, 'Updated daily closing numbers');
+
+      // Night shift closing
+      final nightClosing = await state.confirmDailyClosing(
+        cashierName: 'Dawit Manager',
+        shiftType: 'night',
+        closedByRole: 'operational_manager',
+        handoverTo: 'Admin',
+        handoverMethod: 'admin_otp',
+      );
+
+      expect(nightClosing.id, contains('night'));
+      expect(state.dailyFinancialClosings.any((c) => c.shiftType == 'night'), isTrue);
+    });
   });
 }

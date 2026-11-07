@@ -908,28 +908,46 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> saveDailyFinancialClosing(DailyFinancialClosing closing) async {
+    final payload = <String, dynamic>{
+      'id': closing.id,
+      'closing_date': closing.closingDate.toIso8601String(),
+      'closed_at': closing.closedAt.toIso8601String(),
+      'cashier_name': closing.cashierName,
+      'gross_revenue': closing.grossRevenue,
+      'cash_revenue': closing.cashRevenue,
+      'digital_revenue': closing.digitalRevenue,
+      'cars_washed_count': closing.carsWashedCount,
+      'commission_pool': closing.commissionPool,
+      'net_station_profit': closing.netStationProfit,
+      'cash_deposited': closing.cashDeposited,
+      'petty_cash_expenses': closing.pettyCashExpenses,
+      'cash_remaining': closing.cashRemaining,
+      'provider_breakdown': closing.providerBreakdown,
+      'washer_dividends': closing.washerDividends,
+      'notes': closing.notes,
+      'is_confirmed': closing.isConfirmed,
+    };
+
     try {
-      await _post('daily_closings', {
-        'id': closing.id,
-        'closing_date': closing.closingDate.toIso8601String(),
-        'closed_at': closing.closedAt.toIso8601String(),
-        'cashier_name': closing.cashierName,
-        'gross_revenue': closing.grossRevenue,
-        'cash_revenue': closing.cashRevenue,
-        'digital_revenue': closing.digitalRevenue,
-        'cars_washed_count': closing.carsWashedCount,
-        'commission_pool': closing.commissionPool,
-        'net_station_profit': closing.netStationProfit,
-        'cash_deposited': closing.cashDeposited,
-        'petty_cash_expenses': closing.pettyCashExpenses,
-        'cash_remaining': closing.cashRemaining,
-        'provider_breakdown': closing.providerBreakdown,
-        'washer_dividends': closing.washerDividends,
-        'notes': closing.notes,
-        'is_confirmed': closing.isConfirmed,
-      });
+      // Use PostgREST upsert to seamlessly handle repeat/shift closings without 409 conflict
+      final upsertUri = Uri.parse('$supabaseUrl/rest/v1/daily_closings?on_conflict=id');
+      final upsertHeaders = Map<String, String>.from(_headers)
+        ..['Prefer'] = 'resolution=merge-duplicates';
+      final response = await http.post(upsertUri, headers: upsertHeaders, body: jsonEncode(payload));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        // Upsert succeeded
+      } else if (response.statusCode == 409 || response.statusCode == 400) {
+        // Fallback: patch existing closing record by ID
+        await _patch('daily_closings?id=eq.${closing.id}', payload);
+      } else {
+        debugPrint('Supabase daily_closings upsert returned ${response.statusCode}: ${response.body}');
+        await _patch('daily_closings?id=eq.${closing.id}', payload);
+      }
     } catch (e) {
       debugPrint('Supabase saveDailyFinancialClosing exception: $e');
+      try {
+        await _patch('daily_closings?id=eq.${closing.id}', payload);
+      } catch (_) {}
     }
     await _fallbackLocalRepo.saveDailyFinancialClosing(closing);
   }

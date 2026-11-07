@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart' as ul;
 
@@ -66,6 +67,14 @@ class UrlLauncherHelper {
     if (uri == null) {
       debugPrint('Invalid URI formatted: $target');
       return false;
+    }
+
+    // Skip sms: scheme on desktop web where no OS handler exists, avoiding browser console errors
+    if (uri.scheme == 'sms') {
+      if (kIsWeb && defaultTargetPlatform != TargetPlatform.android && defaultTargetPlatform != TargetPlatform.iOS) {
+        debugPrint('Desktop web detected: sms scheme skipped; message was preserved on clipboard.');
+        return false;
+      }
     }
 
     // 1. Try external application first (TikTok app, native map app, phone dialer)
