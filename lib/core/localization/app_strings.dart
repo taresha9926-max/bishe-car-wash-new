@@ -2757,6 +2757,41 @@ class AppStrings {
       AppLanguage.om: 'Buufata Keessatti',
       AppLanguage.am: 'ጣቢያው ድረስ',
     },
+    'carpetStationService': {
+      AppLanguage.en: 'At-Station Carpet Cleaning',
+      AppLanguage.om: 'Dhiqa Karpeetii Buufatatti',
+      AppLanguage.am: 'የጣቢያ ውስጥ የምንጣፍ እጥበት',
+    },
+    'carpetStationSub': {
+      AppLanguage.en: 'Bring your carpet directly to our station wash floor & drying racks.',
+      AppLanguage.om: 'Karpeetii keessan kallattiin gara buufata keenyaafi iddoo gogsiisaatti fidaa.',
+      AppLanguage.am: 'ምንጣፍዎን በቀጥታ ወደ ማጠቢያ ጣቢያችንና ማድረቂያ ቦታ ያምጡ።',
+    },
+    'carpetValetTitle': {
+      AppLanguage.en: 'Carpet Pick-up & Return',
+      AppLanguage.om: 'Karpeetii Fudhatanii Deebisuu',
+      AppLanguage.am: 'ምንጣፍን መውሰድና ማድረስ',
+    },
+    'carpetValetSub': {
+      AppLanguage.en: 'Staff picks up your carpet from your door, deep-cleans at station, and returns it safely.',
+      AppLanguage.om: 'Hojjettoonni keenya balbala keessanirraa fuudhanii, dhiqanii, deebisanii isiniif fidu.',
+      AppLanguage.am: 'ሰራተኞቻችን ደጃፍዎ ድረስ መጥተው ምንጣፍዎን ወስደው፣ አጥበውና አድርቀው ይመልሱልዎታል።',
+    },
+    'carpetValetAvailable': {
+      AppLanguage.en: 'Carpet Pick-up Available',
+      AppLanguage.om: 'Karpeetii Fuudhuun Qophiidha',
+      AppLanguage.am: 'የምንጣፍ ማድረስና መውሰድ ዝግጁ ነው',
+    },
+    'carpetHomeTitle': {
+      AppLanguage.en: 'At-Home Carpet Cleaning',
+      AppLanguage.om: 'Dhiqa Karpeetii Mana Keessanitti',
+      AppLanguage.am: 'የቤት ውስጥ የምንጣፍ እጥበት',
+    },
+    'carpetHomeSub': {
+      AppLanguage.en: 'Mobile crew comes to your home equipped with carpet extraction machines & shampoo.',
+      AppLanguage.om: 'Gareen keenya maashina cuunfaafi saamuunaan mana keessan dhufee dhiqa.',
+      AppLanguage.am: 'ተንቀሳቃሽ ቡድናችን ከነማሽኑና ሳሙናው ቤትዎ ድረስ መጥቶ ያጥባልዎታል።',
+    },
     'atHomeService': {
       AppLanguage.en: 'At Customer Home',
       AppLanguage.om: 'Mana Maamilaatti',
@@ -2766,6 +2801,41 @@ class AppStrings {
       AppLanguage.en: 'Valet Pickup & Return',
       AppLanguage.om: 'Fuudhanii Deebisuu',
       AppLanguage.am: 'ተወስዶ የሚመለስ',
+    },
+    'carpetPickUpLocation': {
+      AppLanguage.en: 'Carpet Pick-up & Return Address',
+      AppLanguage.om: 'Teessoo Karpeetii Fudhatanii Deebisan',
+      AppLanguage.am: 'ምንጣፍ የሚወሰድበትና የሚመለስበት አድራሻ',
+    },
+    'carpetPaymentAtGateNote': {
+      AppLanguage.en: 'No advance payment needed. Payment is settled at delivery or pickup once your carpet is cleaned & dried.',
+      AppLanguage.om: 'Kaffaltii duroo hin barbaachisu. Kaffaltiin kan kaffalamu erga karpeetiin dhiqamee gogee booda.',
+      AppLanguage.am: 'ቅድመ ክፍያ አያስፈልግም። ክፍያ የሚፈጸመው ምንጣፍዎ ታጥቦና ደርቆ ሲረከቡ ነው።',
+    },
+    'trackMyCarpet': {
+      AppLanguage.en: 'Track My Carpet Cleaning',
+      AppLanguage.om: 'Qulqullina Karpeetii Koo Hordofaa',
+      AppLanguage.am: 'የምንጣፍ እጥበትን ይከታተሉ',
+    },
+    'trackCarpetPrompt': {
+      AppLanguage.en: 'Enter your carpet tracking tag (e.g. CPT-8941) or phone number to see real-time progress',
+      AppLanguage.om: 'Koodii karpeetii keessanii yookiin lakkoofsa bilbilaa galchuun haala dhiqannaa hordofaa',
+      AppLanguage.am: 'የምንጣፍ መለያ ቁጥር ወይም ስልክ ቁጥር በማስገባት የእጥበቱን ሂደት በቀጥታ ይከታተሉ',
+    },
+    'carpetTagOrPhoneHint': {
+      AppLanguage.en: 'Carpet Tag (CPT-...) or Phone Number',
+      AppLanguage.om: 'Koodii Karpeetii ykn Bilbila',
+      AppLanguage.am: 'የምንጣፍ መለያ ወይም ስልክ ቁጥር',
+    },
+    'carpetTrackingTitle': {
+      AppLanguage.en: 'Carpet Live Tracking',
+      AppLanguage.om: 'Hordoffii Dhiqa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት የቀጥታ ክትትል',
+    },
+    'enterCarpetTag': {
+      AppLanguage.en: 'Please enter carpet tracking tag',
+      AppLanguage.om: 'Koodii karpeetii galchaa',
+      AppLanguage.am: 'እባክዎ የምንጣፍ መለያ ቁጥር ያስገቡ',
     },
     'customTip': {
       AppLanguage.en: 'Custom Tip',

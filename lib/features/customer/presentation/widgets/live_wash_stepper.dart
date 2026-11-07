@@ -4,10 +4,12 @@ import '../../../booking_service/domain/models/wash_status.dart';
 
 class LiveWashStepper extends StatelessWidget {
   final WashStatus currentStatus;
+  final bool isCarpet;
 
   const LiveWashStepper({
     super.key,
     required this.currentStatus,
+    this.isCarpet = false,
   });
 
   static const List<WashStatus> _steps = [
@@ -29,6 +31,11 @@ class LiveWashStepper extends StatelessWidget {
         final isDone = currentIndex > index || currentStatus == WashStatus.completed;
         final isCurrent = currentIndex == index && currentStatus != WashStatus.completed;
         final isLast = index == _steps.length - 1;
+        final stepIcon = isCarpet
+            ? (step == WashStatus.assignedToBay
+                ? Icons.layers_rounded
+                : (step == WashStatus.washing ? Icons.wash_rounded : step.icon))
+            : step.icon;
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,7 +67,7 @@ class LiveWashStepper extends StatelessWidget {
                   ),
                   child: Center(
                     child: Icon(
-                      isDone ? Icons.check : step.icon,
+                      isDone ? Icons.check : stepIcon,
                       size: 18,
                       color: isDone || isCurrent ? Colors.white : AppColors.textMuted,
                     ),
@@ -85,7 +92,7 @@ class LiveWashStepper extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          step.displayName,
+                          isCarpet && step == WashStatus.assignedToBay ? 'Assigned to Wash Floor' : step.displayName,
                           style: TextStyle(
                             fontSize: 14.5,
                             fontWeight: isCurrent ? FontWeight.w800 : (isDone ? FontWeight.w700 : FontWeight.w500),
@@ -116,7 +123,7 @@ class LiveWashStepper extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _getStepSubtitle(step, isCurrent, isDone),
+                      _getStepSubtitle(step, isCurrent, isDone, isCarpet: isCarpet),
                       style: TextStyle(
                         fontSize: 12,
                         color: isCurrent ? AppColors.textSecondary : AppColors.textMuted,
@@ -132,8 +139,26 @@ class LiveWashStepper extends StatelessWidget {
     );
   }
 
-  String _getStepSubtitle(WashStatus status, bool isCurrent, bool isDone) {
+  String _getStepSubtitle(WashStatus status, bool isCurrent, bool isDone, {bool isCarpet = false}) {
     if (isDone) return 'Completed successfully';
+    if (isCarpet) {
+      switch (status) {
+        case WashStatus.confirmed:
+          return 'Carpet received & registered into cleaning queue';
+        case WashStatus.assignedToBay:
+          return 'Carpet laid on dedicated wash floor for treatment';
+        case WashStatus.washing:
+          return 'Deep rotary shampoo scrub, dust extraction & stain treatment';
+        case WashStatus.drying:
+          return 'Transferred to ventilated drying racks for thorough drying';
+        case WashStatus.readyForPickup:
+          return 'Inspection passed, sanitized, rolled & ready for pickup/delivery';
+        case WashStatus.completed:
+          return 'Carpet delivered safely to customer';
+        default:
+          return '';
+      }
+    }
     switch (status) {
       case WashStatus.confirmed:
         return 'Booking verified & added to queue';

@@ -9,6 +9,7 @@ class StationTypeCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final int availableCapacity; // e.g. 2 bays or 1 mobile van
+  final bool isCarpet;
 
   const StationTypeCard({
     super.key,
@@ -16,6 +17,7 @@ class StationTypeCard extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.availableCapacity,
+    this.isCarpet = false,
   });
 
   @override
@@ -24,17 +26,37 @@ class StationTypeCard extends StatelessWidget {
     final isStation = serviceType == ServiceType.walkInStation;
     final isValet = serviceType == ServiceType.valetPickUp;
     final primaryAccent = isStation
-        ? AppColors.bay1Color
-        : (isValet ? const Color(0xFF7C3AED) : AppColors.mobileVanColor);
+        ? (isCarpet ? const Color(0xFF4F46E5) : AppColors.bay1Color)
+        : (isValet ? const Color(0xFF7C3AED) : (isCarpet ? const Color(0xFF0D9488) : AppColors.mobileVanColor));
 
-    final title = isStation
-        ? state.tr('driveInStation')
-        : (isValet ? state.tr('serviceValetPickUp') : state.tr('atHomeMobile'));
-    final subtitle = isStation
-        ? state.tr('driveInSub')
-        : (isValet
-            ? state.tr('serviceValetPickUpSub')
-            : state.tr('atHomeSub'));
+    final title = isCarpet
+        ? (isStation
+            ? state.tr('carpetStationService')
+            : (isValet ? state.tr('carpetValetTitle') : state.tr('carpetHomeTitle')))
+        : (isStation
+            ? state.tr('driveInStation')
+            : (isValet ? state.tr('serviceValetPickUp') : state.tr('atHomeMobile')));
+    final subtitle = isCarpet
+        ? (isStation
+            ? state.tr('carpetStationSub')
+            : (isValet ? state.tr('carpetValetSub') : state.tr('carpetHomeSub')))
+        : (isStation
+            ? state.tr('driveInSub')
+            : (isValet
+                ? state.tr('serviceValetPickUpSub')
+                : state.tr('atHomeSub')));
+    final imageUrl = isCarpet
+        ? (isStation
+            ? AutoCareAssets.carpetStationWashUrl
+            : (isValet ? AutoCareAssets.carpetValetPickupUrl : AutoCareAssets.carpetHomeWashUrl))
+        : (isStation
+            ? AutoCareAssets.stationBayUrl
+            : (isValet ? AutoCareAssets.valetDriverUrl : AutoCareAssets.mobileVanUrl));
+    final fallbackIcon = isCarpet
+        ? (isStation
+            ? Icons.wash_rounded
+            : (isValet ? Icons.local_shipping_rounded : Icons.home_repair_service_rounded))
+        : serviceType.icon;
     final badgeText = availableCapacity > 0 ? state.tr('availableNow') : state.tr('busyWashing');
 
     return GestureDetector(
@@ -61,13 +83,11 @@ class StationTypeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AutoCareAssets.buildPhotoThumbnail(
-              imageUrl: isStation
-                  ? AutoCareAssets.stationBayUrl
-                  : (isValet ? AutoCareAssets.valetDriverUrl : AutoCareAssets.mobileVanUrl),
+              imageUrl: imageUrl,
               width: 54,
               height: 54,
               borderRadius: 14,
-              fallbackIcon: serviceType.icon,
+              fallbackIcon: fallbackIcon,
               fallbackColor: primaryAccent,
             ),
             const SizedBox(width: 14),

@@ -7,8 +7,20 @@ enum ServiceType {
   valetPickUp,
   phoneCallBooking;
 
-  String localizedName(String langCode) {
+  String localizedName(String langCode, {bool isCarpet = false}) {
     final lang = AppLanguage.fromCode(langCode);
+    if (isCarpet) {
+      switch (this) {
+        case ServiceType.walkInStation:
+          return AppStrings.get('carpetStationService', lang);
+        case ServiceType.atHomeMobile:
+          return AppStrings.get('carpetHomeTitle', lang);
+        case ServiceType.valetPickUp:
+          return AppStrings.get('carpetValetTitle', lang);
+        case ServiceType.phoneCallBooking:
+          return AppStrings.get('servicePhoneCall', lang);
+      }
+    }
     switch (this) {
       case ServiceType.walkInStation:
         return AppStrings.get('serviceWalkIn', lang);
@@ -35,8 +47,20 @@ enum ServiceType {
     }
   }
 
-  String localizedDescription(String langCode) {
+  String localizedDescription(String langCode, {bool isCarpet = false}) {
     final lang = AppLanguage.fromCode(langCode);
+    if (isCarpet) {
+      switch (this) {
+        case ServiceType.walkInStation:
+          return AppStrings.get('carpetStationSub', lang);
+        case ServiceType.atHomeMobile:
+          return AppStrings.get('carpetHomeSub', lang);
+        case ServiceType.valetPickUp:
+          return AppStrings.get('carpetValetSub', lang);
+        case ServiceType.phoneCallBooking:
+          return AppStrings.get('servicePhoneDesc', lang);
+      }
+    }
     switch (this) {
       case ServiceType.walkInStation:
         return AppStrings.get('serviceWalkInDesc', lang);

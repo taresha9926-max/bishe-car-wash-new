@@ -128,6 +128,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 10),
               StationTypeCard(
                 serviceType: ServiceType.walkInStation,
+                isCarpet: _isCarpet,
                 isSelected: _selectedServiceType == ServiceType.walkInStation,
                 availableCapacity: state.availableBaysCount,
                 onTap: () {
@@ -139,6 +140,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 10),
               StationTypeCard(
                 serviceType: ServiceType.valetPickUp,
+                isCarpet: _isCarpet,
                 isSelected: _selectedServiceType == ServiceType.valetPickUp,
                 availableCapacity: 1,
                 onTap: () {
@@ -150,6 +152,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 10),
               StationTypeCard(
                 serviceType: ServiceType.atHomeMobile,
+                isCarpet: _isCarpet,
                 isSelected: _selectedServiceType == ServiceType.atHomeMobile,
                 availableCapacity: state.isMobileVanAvailable ? 1 : 0,
                 onTap: () {
@@ -504,7 +507,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 label: _isCarpet ? state.tr('carpetTrackingTag') : state.tr('licensePlate'),
                 hint: _isCarpet ? 'e.g. CPT-8941' : 'e.g. 3-B78945 ET',
                 prefixIcon: _isCarpet ? Icons.texture_rounded : Icons.tag,
-                validator: (val) => val == null || val.trim().isEmpty ? (_isCarpet ? 'Enter tracking code' : state.tr('enterPlate')) : null,
+                validator: (val) => val == null || val.trim().isEmpty ? (_isCarpet ? state.tr('enterCarpetTag') : state.tr('enterPlate')) : null,
               ),
               const SizedBox(height: 12),
 
@@ -525,7 +528,11 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                           Icon(Icons.location_on, color: _selectedServiceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            _selectedServiceType == ServiceType.valetPickUp ? state.tr('driverPickUpLocation') : state.tr('locationArea'),
+                            _isCarpet
+                                ? state.tr('carpetPickUpLocation')
+                                : (_selectedServiceType == ServiceType.valetPickUp
+                                    ? state.tr('driverPickUpLocation')
+                                    : state.tr('locationArea')),
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                           ),
                         ],
@@ -755,7 +762,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              state.tr('paymentAtGateNote'),
+                              _isCarpet ? state.tr('carpetPaymentAtGateNote') : state.tr('paymentAtGateNote'),
                               style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.3),
                             ),
                           ),

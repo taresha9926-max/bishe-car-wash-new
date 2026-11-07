@@ -94,12 +94,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    state.tr('trackMyCar'),
+                    !state.isCarWashDivisionActive ? state.tr('trackMyCarpet') : state.tr('trackMyCar'),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    state.tr('trackVehiclePrompt'),
+                    !state.isCarWashDivisionActive ? state.tr('trackCarpetPrompt') : state.tr('trackVehiclePrompt'),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                   ),
@@ -108,8 +108,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     controller: _searchController,
                     textCapitalization: TextCapitalization.characters,
                     decoration: InputDecoration(
-                      hintText: state.tr('plateOrPhoneHint'),
-                      prefixIcon: const Icon(Icons.directions_car_outlined),
+                      hintText: !state.isCarWashDivisionActive ? state.tr('carpetTagOrPhoneHint') : state.tr('plateOrPhoneHint'),
+                      prefixIcon: Icon(!state.isCarWashDivisionActive ? Icons.texture_rounded : Icons.directions_car_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: Colors.white,
@@ -137,7 +137,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${state.tr("liveTrackingTitle")} • ${booking.licensePlate}'),
+        title: Text('${booking.isCarpet ? state.tr("carpetTrackingTitle") : state.tr("liveTrackingTitle")} • ${booking.licensePlate}'),
         actions: [
           IconButton(
             icon: Icon(_showSearchHeader ? Icons.close : Icons.search_rounded),
@@ -222,7 +222,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                       const Icon(Icons.timeline, color: AppColors.primary, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        state.tr('activeWashTitle'),
+                        booking.isCarpet ? state.tr('carpetService') : state.tr('activeWashTitle'),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
@@ -233,11 +233,13 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${booking.licensePlate} • ${booking.package.localizedName(state.currentLang)}',
+                    booking.isCarpet
+                        ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                        : '${booking.licensePlate} • ${booking.package.localizedName(state.currentLang)}',
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 20),
-                  LiveWashStepper(currentStatus: booking.status),
+                  LiveWashStepper(currentStatus: booking.status, isCarpet: booking.isCarpet),
                 ],
               ),
             ),
@@ -368,7 +370,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            '${booking.licensePlate} • ${booking.package.localizedName(state.currentLang)}',
+            booking.isCarpet
+                ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                : '${booking.licensePlate} • ${booking.package.localizedName(state.currentLang)}',
             style: const TextStyle(
               fontSize: 13,
               color: Colors.white70,
@@ -393,12 +397,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           Row(
             children: [
               AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: AutoCareAssets.getCarTypeImage(booking.carType),
+                imageUrl: booking.isCarpet
+                    ? (booking.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+                    : AutoCareAssets.getCarTypeImage(booking.carType),
                 width: 58,
                 height: 58,
                 borderRadius: 14,
-                fallbackIcon: booking.carType.icon,
-                fallbackColor: AppColors.primary,
+                fallbackIcon: booking.isCarpet ? Icons.texture_rounded : booking.carType.icon,
+                fallbackColor: booking.isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -416,7 +422,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${booking.carType.localizedName(state.currentLang)} • ${booking.package.localizedName(state.currentLang)}',
+                      booking.isCarpet
+                          ? '${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}${booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? " • ${booking.carpetDimensions}" : ""}${booking.carpetAreaSqMeters != null ? " (${booking.carpetAreaSqMeters!.toStringAsFixed(1)} m²)" : ""}'
+                          : '${booking.carType.localizedName(state.currentLang)} • ${booking.package.localizedName(state.currentLang)}',
                       style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                     ),
                   ],
@@ -429,12 +437,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             children: [
               Expanded(
                 child: _buildDetailSubItem(
-                  icon: Icons.garage_rounded,
-                  label: state.tr('bay'),
-                  value: booking.assignedBay != null
-                      ? booking.assignedBay!.localizedName(state.currentLang)
-                      : state.tr('pending'),
-                  color: booking.assignedBay != null ? booking.assignedBay!.color : AppColors.textMuted,
+                  icon: booking.isCarpet ? Icons.layers_rounded : Icons.garage_rounded,
+                  label: booking.isCarpet ? state.tr('carpetWashFloor') : state.tr('bay'),
+                  value: booking.isCarpet
+                      ? (booking.status == WashStatus.drying || booking.status == WashStatus.readyForPickup
+                          ? state.tr('carpetDryingRacks')
+                          : state.tr('carpetWashFloor'))
+                      : (booking.assignedBay != null
+                          ? booking.assignedBay!.localizedName(state.currentLang)
+                          : state.tr('pending')),
+                  color: booking.isCarpet ? const Color(0xFF4F46E5) : (booking.assignedBay?.color ?? AppColors.textMuted),
                 ),
               ),
               Container(width: 1, height: 38, color: AppColors.cardBorder),
@@ -464,7 +476,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${booking.serviceType == ServiceType.valetPickUp ? state.tr("driverPickUpLocation") : state.tr("locationArea")}: ${booking.deliveryLocation}',
+                    '${booking.isCarpet ? state.tr("carpetPickUpLocation") : (booking.serviceType == ServiceType.valetPickUp ? state.tr("driverPickUpLocation") : state.tr("locationArea"))}: ${booking.deliveryLocation}',
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                   ),
                 ),
@@ -540,7 +552,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                booking.package.localizedName(state.currentLang),
+                booking.isCarpet
+                    ? '${state.tr("carpetService")} (${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")})'
+                    : booking.package.localizedName(state.currentLang),
                 style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
               Text(
