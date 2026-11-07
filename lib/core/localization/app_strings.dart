@@ -2963,6 +2963,51 @@ class AppStrings {
       AppLanguage.om: 'Lafa Dhiqaafi Bakka Gogsuu',
       AppLanguage.am: 'ማጠቢያ ወለልና ማድረቂያዎች',
     },
+    'storekeeperCombinedHeader': {
+      AppLanguage.en: 'Car Wash & Carpet Consumables & Assets Desk',
+      AppLanguage.om: 'Kutaa Qabeenyaa Dhiqa Konkolaataafi Karpeetii',
+      AppLanguage.am: 'የመኪና እና የምንጣፍ እጥበት እቃዎችና ንብረት ማዕከል',
+    },
+    'storekeeperCombinedSub': {
+      AppLanguage.en: 'Central warehouse inventory for vehicle chemicals and carpet detergents',
+      AppLanguage.om: 'Kuusaa qorichootaafi meeshaalee dhiqa konkolaataafi karpeetii',
+      AppLanguage.am: 'የመኪና ኬሚካሎች እና የምንጣፍ ሳሙናዎች ማዕከላዊ መጋዘን',
+    },
+    'accountantCombinedHeader': {
+      AppLanguage.en: 'Car Wash & Carpet Consolidated Financial Hub',
+      AppLanguage.om: 'Wiirtuu Maallaqa Dhiqa Konkolaataafi Karpeetii',
+      AppLanguage.am: 'የመኪና እና የምንጣፍ እጥበት የጋራ ፋይናንስ ማዕከል',
+    },
+    'accountantCombinedSub': {
+      AppLanguage.en: 'Audits, daily closings, bank accounts A & B, and consolidated P&L',
+      AppLanguage.om: 'Oodiitii, cufiinsa guyyaa, herrega baankii A fi B, gabaasa bu\'aafi kisaaraa',
+      AppLanguage.am: 'ኦዲት፣ ዕለታዊ ሂሳብ መዝጊያ፣ የባንክ ሂሳብ ሀ እና ለ፣ እና ጠቅላላ ትርፍና ኪሳራ',
+    },
+    'adminCombinedHeader': {
+      AppLanguage.en: 'Car Wash & Carpet Administration Desk',
+      AppLanguage.om: 'Wiirtuu Bulchiinsa Dhiqa Konkolaataafi Karpeetii',
+      AppLanguage.am: 'የመኪና እና የምንጣፍ እጥበት ዋና አስተዳደር ማዕከል',
+    },
+    'adminCombinedSub': {
+      AppLanguage.en: 'System configuration, pricing tariffs, bays & staff credentials',
+      AppLanguage.om: 'Qindaa\'ina sirnaa, madaallii gatii, iddoowwan dhiqaafi eeyyama hojjettootaa',
+      AppLanguage.am: 'የስርዓት ቅንብር፣ የዋጋ ተመኖች፣ ማጠቢያ ክፍሎች እና የሰራተኞች መለያዎች',
+    },
+    'unifiedDesk': {
+      AppLanguage.en: 'Unified Desk',
+      AppLanguage.om: 'Kutaa Qindaa\'e',
+      AppLanguage.am: 'የተቀናጀ ማዕከል',
+    },
+    'carWashAndCarpetFacilities': {
+      AppLanguage.en: 'Car Bays & Carpet Facilities',
+      AppLanguage.om: 'Bakka Dhiqa Konkolaataafi Karpeetii',
+      AppLanguage.am: 'የመኪና ማጠቢያና የምንጣፍ ክፍሎች',
+    },
+    'carWashAndCarpetFacilitiesSub': {
+      AppLanguage.en: 'Bay 1, Bay 2, Mobile Van & Carpet Drying Racks',
+      AppLanguage.om: 'Kutaa 1, Kutaa 2, Vaan Moobaayilaafi Raakii Karpeetii',
+      AppLanguage.am: 'ክፍል 1፣ ክፍል 2፣ ተንቀሳቃሽ ቫን እና የምንጣፍ ማድረቂያ ራኮች',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

@@ -5,6 +5,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/modern_expandable_card.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
@@ -203,7 +204,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 14)),
+              CombinedServiceHeaderBanner(
+                title: state.tr('adminCombinedHeader'),
+                subtitle: state.tr('adminCombinedSub'),
+                badgeText: state.tr('unifiedDesk'),
+                padding: const EdgeInsets.only(bottom: 14),
+              ),
               if (state.hasNewCashierClosingAlert && state.latestClosingAlert != null) ...[
                 Container(
                   margin: const EdgeInsets.only(bottom: 14),

@@ -5,6 +5,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -50,7 +51,12 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       ),
       body: Column(
         children: [
-          const DualServiceEntranceTabBar(padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8)),
+          CombinedServiceHeaderBanner(
+            title: state.tr('storekeeperCombinedHeader'),
+            subtitle: state.tr('storekeeperCombinedSub'),
+            badgeText: state.tr('unifiedDesk'),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          ),
           // Sub-header tabs
           Container(
             color: Colors.white,
@@ -846,11 +852,33 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                           decoration: item.isDecommissioned ? TextDecoration.lineThrough : null,
                         ),
                       ),
-                      if (item.nameAmharic.isNotEmpty)
-                        Text(
-                          item.nameAmharic,
-                          style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
-                        ),
+                      Row(
+                        children: [
+                          if (item.nameAmharic.isNotEmpty)
+                            Text(
+                              item.nameAmharic,
+                              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                            ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: item.name.toLowerCase().contains('carpet')
+                                  ? const Color(0xFF7C3AED).withOpacity(0.1)
+                                  : const Color(0xFF0284C7).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              item.name.toLowerCase().contains('carpet') ? '🧼 Carpet' : '🚗 Car Wash',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                                color: item.name.toLowerCase().contains('carpet') ? const Color(0xFF7C3AED) : const Color(0xFF0284C7),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
