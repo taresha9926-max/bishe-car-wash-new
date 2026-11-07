@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../admin/domain/models/bank_deposit_record.dart';
@@ -89,13 +90,22 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           (b.createdAt.isBefore(rangeEnd) || b.createdAt.isAtSameMomentAs(rangeEnd));
     }).toList();
 
-    // Financial Metrics for the period
-    final grossRevenue = periodBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    // Financial Metrics for the period, strictly itemized by division
+    final periodCarBookings = periodBookings.where((b) => !b.isCarpet).toList();
+    final periodCarpetBookings = periodBookings.where((b) => b.isCarpet).toList();
+
+    final carRevenue = periodCarBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final carpetRevenue = periodCarpetBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final totalTips = periodBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+    final showerRevenue = state.todayShowerRevenueETB as double;
+
+    final grossRevenue = periodBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice) + showerRevenue;
     final cashRevenue = periodBookings
         .where((b) => b.payment.method == PaymentMethod.cash)
         .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final digitalRevenue = grossRevenue - cashRevenue;
-    final commissionDeducted = grossRevenue * state.teamCommissionRate;
+    // Shower has 0% washer commission; wash services pay team commission rate
+    final commissionDeducted = (carRevenue + carpetRevenue) * state.teamCommissionRate;
     final netStationProfit = grossRevenue - commissionDeducted;
 
     // Filter bank deposits in period
@@ -118,7 +128,21 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         _buildFilterBar(context, state),
         const SizedBox(height: 14),
 
-        // 2. Financial KPI Grid
+        // 2. Division-by-Division Segmented Reconciliation Banner
+        _buildDivisionReconciliationBanner(
+          state: state,
+          carRevenue: carRevenue,
+          carCount: periodCarBookings.length,
+          carpetRevenue: carpetRevenue,
+          carpetCount: periodCarpetBookings.length,
+          showerRevenue: showerRevenue,
+          showerCount: state.todayShowerUserCount,
+          tipsTotal: totalTips,
+          isMobile: isMobile,
+        ),
+        const SizedBox(height: 14),
+
+        // 3. Financial KPI Grid
         _buildKPIGrid(
           state: state,
           grossRevenue: grossRevenue,
@@ -127,7 +151,8 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           commissionDeducted: commissionDeducted,
           netStationProfit: netStationProfit,
           totalCashDeposited: totalCashDeposited,
-          completedCars: periodBookings.length,
+          carCount: periodCarBookings.length,
+          carpetCount: periodCarpetBookings.length,
           isMobile: isMobile,
           isDesktop: isDesktop,
         ),
@@ -154,7 +179,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(state.tr('financialReports'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5)),
+        title: Text(state.tr('consolidatedStationClosing'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
@@ -233,6 +258,210 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     );
   }
 
+  Widget _buildDivisionReconciliationBanner({
+    required dynamic state,
+    required double carRevenue,
+    required int carCount,
+    required double carpetRevenue,
+    required int carpetCount,
+    required double showerRevenue,
+    required int showerCount,
+    required double tipsTotal,
+    required bool isMobile,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                state.tr('consolidatedStationClosing'),
+                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  state.tr('allServices'),
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              // 1. Car Wash Division
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E3A8A).withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF1E3A8A).withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          AutoCareAssets.buildPhotoThumbnail(imageUrl: AutoCareAssets.carSedanUrl, width: 20, height: 20, borderRadius: 4),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              state.tr('carWashSubtotal'),
+                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF1E3A8A)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        CurrencyFormatter.formatShort(carRevenue),
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Color(0xFF1E3A8A)),
+                      ),
+                      Text('$carCount ${state.tr("carsWashed")}', style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // 2. Carpet Division
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7C3AED).withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          AutoCareAssets.buildPhotoThumbnail(imageUrl: AutoCareAssets.carpetTypeAUrl, width: 20, height: 20, borderRadius: 4),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              state.tr('carpetWashSubtotal'),
+                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF7C3AED)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        CurrencyFormatter.formatShort(carpetRevenue),
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Color(0xFF7C3AED)),
+                      ),
+                      Text('$carpetCount ${state.tr("myCarpetCleanings")}', style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // 3. Station Shower Desk
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0284C7).withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF0284C7).withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          AutoCareAssets.buildPhotoThumbnail(imageUrl: AutoCareAssets.publicShowerUrl, width: 20, height: 20, borderRadius: 4),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              state.tr('showerSubtotal'),
+                              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF0284C7)),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        CurrencyFormatter.formatShort(showerRevenue),
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Color(0xFF0284C7)),
+                      ),
+                      Text('$showerCount ${state.tr("showerUsers")}', style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              ),
+              if (tipsTotal > 0) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.stars_rounded, size: 16, color: Colors.amber),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                state.tr('washerTipsSubtotal'),
+                                style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          CurrencyFormatter.formatShort(tipsTotal),
+                          style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Colors.amber.shade900),
+                        ),
+                        const Text('100% to Washers', style: TextStyle(fontSize: 9.5, color: AppColors.textMuted)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildKPIGrid({
     required dynamic state,
     required double grossRevenue,
@@ -241,15 +470,20 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     required double commissionDeducted,
     required double netStationProfit,
     required double totalCashDeposited,
-    required int completedCars,
+    required int carCount,
+    required int carpetCount,
     required bool isMobile,
     required bool isDesktop,
   }) {
+    final subLabel = carpetCount > 0
+        ? '$carCount Cars • $carpetCount Carpets'
+        : '$carCount ${state.tr("carsWashed")}';
+
     final items = [
       (
         title: state.tr('totalRevenue'),
         value: CurrencyFormatter.format(grossRevenue),
-        sub: '$completedCars ${state.tr('carsWashed')}',
+        sub: subLabel,
         icon: Icons.account_balance_wallet_rounded,
         color: AppColors.primary,
       ),

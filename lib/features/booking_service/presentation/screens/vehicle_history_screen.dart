@@ -36,8 +36,13 @@ enum HistoryDateFilter {
 
 class VehicleHistoryScreen extends StatefulWidget {
   final bool isEmbedded;
+  final bool? isCarpetFilter;
 
-  const VehicleHistoryScreen({super.key, this.isEmbedded = false});
+  const VehicleHistoryScreen({
+    super.key,
+    this.isEmbedded = false,
+    this.isCarpetFilter,
+  });
 
   @override
   State<VehicleHistoryScreen> createState() => _VehicleHistoryScreenState();
@@ -48,6 +53,21 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
   DateTimeRange? _customDateRange;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  bool _viewCarpetMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewCarpetMode = widget.isCarpetFilter ?? false;
+  }
+
+  @override
+  void didUpdateWidget(covariant VehicleHistoryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isCarpetFilter != null && widget.isCarpetFilter != oldWidget.isCarpetFilter) {
+      _viewCarpetMode = widget.isCarpetFilter!;
+    }
+  }
 
   @override
   void dispose() {
@@ -56,8 +76,10 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
   }
 
   List<WashBooking> _filterBookings(List<WashBooking> allBookings) {
-    // History contains bookings that are paid and/or completed
-    final paidBookings = allBookings.where((b) => b.payment.isPaid).toList();
+    // History contains bookings that are paid and/or completed, strictly segmented by service division
+    final paidBookings = allBookings
+        .where((b) => b.payment.isPaid && (b.isCarpet == _viewCarpetMode))
+        .toList();
     final now = DateTime.now();
 
     final filteredByDate = paidBookings.where((b) {
@@ -96,18 +118,113 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
+    // If no explicit filter was passed into constructor, align with app division state unless user toggled locally
+    if (widget.isCarpetFilter != null) {
+      _viewCarpetMode = widget.isCarpetFilter!;
+    }
+
     final historyList = _filterBookings(state.bookings);
 
-    final totalCars = historyList.length;
+    final totalCount = historyList.length;
     final totalRevenue = historyList.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final cashTotal = historyList
         .where((b) => b.payment.method == PaymentMethod.cash)
         .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final digitalTotal = totalRevenue - cashTotal;
 
+    // Carpet area calculation if carpet mode
+    double totalCarpetAreaSqM = 0.0;
+    if (_viewCarpetMode) {
+      for (final b in historyList) {
+        final dims = b.carpetDimensions;
+        if (dims != null && dims.contains('x')) {
+          final parts = dims.split('x');
+          final l = double.tryParse(parts[0].trim()) ?? 0.0;
+          final w = double.tryParse(parts[1].trim()) ?? 0.0;
+          totalCarpetAreaSqM += (l * w);
+        }
+      }
+    }
+
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Dual Service Division Switcher (shown when filter not strictly fixed by parent card)
+        if (widget.isCarpetFilter == null) ...[
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.cardBorder),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => setState(() => _viewCarpetMode = false),
+                    borderRadius: BorderRadius.circular(9),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: !_viewCarpetMode ? AppColors.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(9),
+                        boxShadow: !_viewCarpetMode ? [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 4)] : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.directions_car_rounded, size: 16, color: !_viewCarpetMode ? Colors.white : AppColors.textSecondary),
+                          const SizedBox(width: 6),
+                          Text(
+                            state.tr('carWashHistoryTitle'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: !_viewCarpetMode ? Colors.white : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => setState(() => _viewCarpetMode = true),
+                    borderRadius: BorderRadius.circular(9),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _viewCarpetMode ? const Color(0xFF7C3AED) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(9),
+                        boxShadow: _viewCarpetMode ? [BoxShadow(color: const Color(0xFF7C3AED).withOpacity(0.3), blurRadius: 4)] : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.texture_rounded, size: 16, color: _viewCarpetMode ? Colors.white : AppColors.textSecondary),
+                          const SizedBox(width: 6),
+                          Text(
+                            state.tr('carpetWashHistoryTitle'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: _viewCarpetMode ? Colors.white : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+
         // Date Filter Bar
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -137,12 +254,12 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                     ),
                   ),
                   selected: isSelected,
-                  selectedColor: AppColors.primary,
+                  selectedColor: _viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
                   backgroundColor: Colors.white,
                   showCheckmark: false,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: isSelected ? AppColors.primary : AppColors.cardBorder),
+                    side: BorderSide(color: isSelected ? (_viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary) : AppColors.cardBorder),
                   ),
                   onSelected: (_) async {
                     if (filter == HistoryDateFilter.customRange) {
@@ -194,11 +311,18 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(state.tr('carsWashed'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
+                    Text(
+                      _viewCarpetMode ? state.tr('carpetsCleanedSqM') : state.tr('carsWashed'),
+                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textMuted),
+                    ),
                     const SizedBox(height: 2),
                     Text(
-                      '$totalCars',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary),
+                      _viewCarpetMode ? '${totalCarpetAreaSqM.toStringAsFixed(1)} m² ($totalCount)' : '$totalCount',
+                      style: TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w900,
+                        color: _viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -242,7 +366,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: state.tr('searchPlateOrPhone'),
+            hintText: _viewCarpetMode ? '${state.tr("search")} (Tag #, Phone, Name)' : state.tr('searchPlateOrPhone'),
             prefixIcon: const Icon(Icons.search, size: 20),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
@@ -274,7 +398,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${state.bookings.length} Total Bookings Recorded',
+                '${historyList.length} ${_viewCarpetMode ? "Carpet Orders" : "Vehicle Washes"} Recorded',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
               ),
               TextButton.icon(
@@ -301,7 +425,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
             ),
             child: Center(
               child: Text(
-                state.tr('noVehiclesFound'),
+                _viewCarpetMode ? state.tr('noCarpetsFound') : state.tr('noVehiclesFound'),
                 style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
               ),
             ),
@@ -330,7 +454,10 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(state.tr('washAndVehicleHistory'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        title: Text(
+          _viewCarpetMode ? state.tr('carpetWashHistoryTitle') : state.tr('carWashHistoryTitle'),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -353,6 +480,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
   Widget _buildHistoryCard(BuildContext context, WashBooking b, dynamic state) {
     final method = b.payment.method;
     final isDigital = method.isDigital;
+    final isCarpet = b.isCarpet;
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -377,10 +505,13 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
               Row(
                 children: [
                   AutoCareAssets.buildPhotoThumbnail(
-                    imageUrl: AutoCareAssets.getCarTypeImage(b.carType),
+                    imageUrl: isCarpet
+                        ? (b.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+                        : AutoCareAssets.getCarTypeImage(b.carType),
                     width: 38,
                     height: 38,
                     borderRadius: 8,
+                    fallbackIcon: isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -391,12 +522,18 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
+                      color: isCarpet ? const Color(0xFF7C3AED).withOpacity(0.12) : AppColors.surfaceVariant,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      b.carType.displayName,
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                      isCarpet
+                          ? (b.carpetType == 'type_b' ? state.tr('carpetTypeB') : state.tr('carpetTypeA'))
+                          : b.carType.displayName,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: isCarpet ? const Color(0xFF7C3AED) : AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],
@@ -412,7 +549,9 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                b.package.name,
+                isCarpet
+                    ? '${b.carpetDimensions != null && b.carpetDimensions!.isNotEmpty ? '${b.carpetDimensions} m² • ' : ''}${b.serviceType.localizedName(state.currentLanguage)}'
+                    : b.package.name,
                 style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
               ),
               Container(
@@ -449,7 +588,9 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           if (b.assignedWasherName != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Washer: ${b.assignedWasherName} • Bay: ${b.assignedBay?.displayName ?? "Station"}',
+              isCarpet
+                  ? 'Washer: ${b.assignedWasherName} • ${state.tr("carpetWashFloor")}'
+                  : 'Washer: ${b.assignedWasherName} • Bay: ${b.assignedBay?.displayName ?? "Station"}',
               style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
             ),
           ],

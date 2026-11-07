@@ -79,7 +79,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13),
                         ),
                         Text(
-                          'Cashier: ${state.latestClosingAlert!.cashierName} • Gross: ${CurrencyFormatter.format(state.latestClosingAlert!.grossRevenue)} (${state.latestClosingAlert!.carsWashedCount} cars washed)',
+                          'Cashier: ${state.latestClosingAlert!.cashierName} • Gross: ${CurrencyFormatter.format(state.latestClosingAlert!.grossRevenue)} • ${state.latestClosingAlert!.carsWashedCount} orders settled',
                           style: const TextStyle(color: Colors.white70, fontSize: 11),
                         ),
                       ],

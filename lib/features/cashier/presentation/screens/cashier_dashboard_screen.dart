@@ -85,7 +85,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     final bay2 = bays.firstWhere((b) => b.type == BayType.bay2, orElse: () => const StationBay(type: BayType.bay2));
     final van = bays.firstWhere((b) => b.type == BayType.mobileVan, orElse: () => const StationBay(type: BayType.mobileVan));
 
-    final filteredBookings = _getFilteredBookings(allBookings);
+    final filteredBookings = _getFilteredBookings(allBookings, state.isCarpetDivisionActive);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -324,7 +324,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             child: _buildKPIColumn(
               state.tr('todayRevenue'),
               CurrencyFormatter.formatShort(state.totalRevenueTodayETB),
-              '${state.totalCompletedCarsToday} ${state.tr("carsWashed")}',
+              state.isCarpetDivisionActive
+                  ? '${state.carpetWashBookings.where((b) => b.payment.isPaid).length} ${state.tr("myCarpetCleanings")}'
+                  : '${state.totalCompletedCarsToday} ${state.tr("carsWashed")}',
               AppColors.primary,
               isMobile: isMobile,
             ),
@@ -1920,13 +1922,17 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         ),
       ),
       _CashierModuleItem(
-        title: state.tr('liveStationCapacity'),
-        subtitle: '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
-        icon: Icons.local_car_wash_rounded,
-        imageUrl: AutoCareAssets.stationBayUrl,
-        gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
-        badgeText: '${state.availableBaysCount} Free',
-        badgeColor: AppColors.statusCompleted,
+        title: state.isCarpetDivisionActive ? state.tr('carpetStations') : state.tr('liveStationCapacity'),
+        subtitle: state.isCarpetDivisionActive
+            ? state.tr('washFloorAndDryingRacks')
+            : '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
+        icon: state.isCarpetDivisionActive ? Icons.texture_rounded : Icons.local_car_wash_rounded,
+        imageUrl: state.isCarpetDivisionActive ? AutoCareAssets.carpetDryingRackUrl : AutoCareAssets.stationBayUrl,
+        gradientColors: state.isCarpetDivisionActive
+            ? const [Color(0xFF7C3AED), Color(0xFF6D28D9)]
+            : const [Color(0xFF10B981), Color(0xFF059669)],
+        badgeText: state.isCarpetDivisionActive ? '${state.activeCarpetQueueCount} Carpets' : '${state.availableBaysCount} Free',
+        badgeColor: state.isCarpetDivisionActive ? const Color(0xFF7C3AED) : AppColors.statusCompleted,
         contentBuilder: () => _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
       ),
       _CashierModuleItem(
@@ -1945,13 +1951,15 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         ),
       ),
       _CashierModuleItem(
-        title: state.tr('queueAndVehicles'),
-        subtitle: '${filteredBookings.length} Vehicles in Queue / Active processing',
-        icon: Icons.queue_rounded,
-        imageUrl: AutoCareAssets.welcomeHeroUrl,
-        gradientColors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
+        title: state.isCarpetDivisionActive ? state.tr('carpetQueueTitle') : state.tr('queueAndVehicles'),
+        subtitle: '${filteredBookings.length} ${state.isCarpetDivisionActive ? "Carpets" : "Vehicles"} in Queue / Active processing',
+        icon: state.isCarpetDivisionActive ? Icons.texture_rounded : Icons.queue_rounded,
+        imageUrl: state.isCarpetDivisionActive ? AutoCareAssets.carpetTypeAUrl : AutoCareAssets.welcomeHeroUrl,
+        gradientColors: state.isCarpetDivisionActive
+            ? const [Color(0xFF581C87), Color(0xFF7C3AED)]
+            : const [Color(0xFF0284C7), Color(0xFF0369A1)],
         badgeText: '${filteredBookings.length} Active',
-        badgeColor: Colors.blueAccent,
+        badgeColor: state.isCarpetDivisionActive ? const Color(0xFF7C3AED) : Colors.blueAccent,
         contentBuilder: () => filteredBookings.isEmpty
             ? Container(
                 padding: const EdgeInsets.all(24),
@@ -1960,10 +1968,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'No vehicles currently in queue.',
-                    style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                    state.isCarpetDivisionActive ? state.tr('noCarpetsInQueue') : state.tr('noVehiclesInQueue'),
+                    style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
                   ),
                 ),
               )
@@ -1974,14 +1982,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               ),
       ),
       _CashierModuleItem(
-        title: state.tr('washHistory'),
-        subtitle: 'Audit paid & completed washes by date range',
+        title: state.isCarpetDivisionActive ? state.tr('carpetWashHistoryTitle') : state.tr('carWashHistoryTitle'),
+        subtitle: state.isCarpetDivisionActive ? 'Audit completed carpets & delivery orders' : 'Audit paid & completed vehicle washes',
         icon: Icons.history_edu_rounded,
-        imageUrl: AutoCareAssets.carSedanUrl,
+        imageUrl: state.isCarpetDivisionActive ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carSedanUrl,
         gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
         badgeText: 'History',
         badgeColor: const Color(0xFF4F46E5),
-        contentBuilder: () => const VehicleHistoryScreen(isEmbedded: true),
+        contentBuilder: () => VehicleHistoryScreen(isEmbedded: true, isCarpetFilter: state.isCarpetDivisionActive),
       ),
       _CashierModuleItem(
         title: state.tr('closingAndFinancialReports'),
@@ -3042,10 +3050,12 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     );
   }
 
-  List<WashBooking> _getFilteredBookings(List<WashBooking> bookings) {
-    // Only vehicles that are NOT yet paid belong in the active station queue.
-    // As soon as payment is confirmed, the vehicle vanishes from the queue and moves to Wash History.
-    return bookings.where((b) => !b.payment.isPaid && b.status != WashStatus.cancelled).toList();
+  List<WashBooking> _getFilteredBookings(List<WashBooking> bookings, bool isCarpetDivision) {
+    // Only items belonging to the active division that are NOT yet paid belong in the active station queue.
+    // Zero cross-contamination: vehicle queue contains only vehicles, carpet queue contains only carpets.
+    return bookings
+        .where((b) => !b.payment.isPaid && b.status != WashStatus.cancelled && (b.isCarpet == isCarpetDivision))
+        .toList();
   }
 
   Widget _buildCleanStationCapacityBar(

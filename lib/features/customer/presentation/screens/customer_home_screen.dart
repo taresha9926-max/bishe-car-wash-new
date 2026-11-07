@@ -95,7 +95,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 const SizedBox(height: 14),
 
                 // 3. Vehicle Owner Status / Privacy Search Lookup Card
-                if (activeWash != null && activeWash.status.isOngoing)
+                if (activeWash != null && activeWash.status.isOngoing && !activeWash.isCarpet)
                   _buildActiveWashCard(context, state, activeWash)
                 else
                   _buildVehicleLookupCard(context, state),

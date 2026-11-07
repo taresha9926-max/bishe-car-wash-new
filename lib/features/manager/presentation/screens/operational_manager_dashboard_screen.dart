@@ -699,14 +699,14 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
               ),
       ),
       _ManagerModuleItem(
-        title: state.tr('washHistory'),
+        title: isCarpet ? state.tr('carpetWashHistoryTitle') : state.tr('carWashHistoryTitle'),
         subtitle: isCarpet ? 'Audit completed carpets & delivery orders' : 'Audit paid & completed washes by date range',
         icon: Icons.history_edu_rounded,
         imageUrl: isCarpet ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carSedanUrl,
         gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
         badgeText: 'History',
         badgeColor: const Color(0xFF4F46E5),
-        contentBuilder: () => const VehicleHistoryScreen(isEmbedded: true),
+        contentBuilder: () => VehicleHistoryScreen(isEmbedded: true, isCarpetFilter: isCarpet),
       ),
       _ManagerModuleItem(
         title: state.tr('nightClosingTitle'),

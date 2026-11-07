@@ -2893,6 +2893,76 @@ class AppStrings {
       AppLanguage.om: 'Madaallii Gatii Tajaajilootaa',
       AppLanguage.am: 'የአገልግሎት ዋጋዎች ማስተካከያ',
     },
+    'carWashHistoryTitle': {
+      AppLanguage.en: 'Car Wash History',
+      AppLanguage.om: 'Seenaa Dhiqa Konkolaataa',
+      AppLanguage.am: 'የመኪና እጥበት ታሪክ',
+    },
+    'carpetWashHistoryTitle': {
+      AppLanguage.en: 'Carpet Cleaning History',
+      AppLanguage.om: 'Seenaa Dhiqa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት ታሪክ',
+    },
+    'myCarWashes': {
+      AppLanguage.en: 'My Car Washes',
+      AppLanguage.om: 'Dhiqa Konkolaataa Koo',
+      AppLanguage.am: 'የመኪና እጥበቶቼ',
+    },
+    'myCarpetCleanings': {
+      AppLanguage.en: 'My Carpet Cleanings',
+      AppLanguage.om: 'Dhiqa Karpeetii Koo',
+      AppLanguage.am: 'የምንጣፍ እጥበቶቼ',
+    },
+    'consolidatedStationClosing': {
+      AppLanguage.en: 'Consolidated Daily Financial Report',
+      AppLanguage.om: 'Gabaasa Maallaqaa Guyyaa Waliigalaa',
+      AppLanguage.am: 'የጣቢያው ጠቅላላ ዕለታዊ የፋይናንስ ሪፖርት',
+    },
+    'carWashSubtotal': {
+      AppLanguage.en: 'Car Wash Division',
+      AppLanguage.om: 'Kutaa Dhiqa Konkolaataa',
+      AppLanguage.am: 'የመኪና እጥበት ዘርፍ',
+    },
+    'carpetWashSubtotal': {
+      AppLanguage.en: 'Carpet Cleaning Division',
+      AppLanguage.om: 'Kutaa Dhiqa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት ዘርፍ',
+    },
+    'showerSubtotal': {
+      AppLanguage.en: 'Station Public Shower',
+      AppLanguage.om: 'Dhaaba Dhiqannaa Buufataa',
+      AppLanguage.am: 'የጣቢያው የህዝብ ሻወር',
+    },
+    'washerTipsSubtotal': {
+      AppLanguage.en: 'Customer Digital Tips',
+      AppLanguage.om: 'Gumaata Maamiltootaa (Tip)',
+      AppLanguage.am: 'የደንበኞች ዲጂታል ጉርሻ (ቲፕ)',
+    },
+    'carpetsCleanedSqM': {
+      AppLanguage.en: 'Area Cleaned (m²)',
+      AppLanguage.om: 'Bal\'ina Dhiqame (m²)',
+      AppLanguage.am: 'የታጠበው ስፋት (ካሬ ሜትር)',
+    },
+    'noCarpetsFound': {
+      AppLanguage.en: 'No carpet cleaning records found',
+      AppLanguage.om: 'Galmeen dhiqa karpeetii hin jiru',
+      AppLanguage.am: 'ምንም የምንጣፍ እጥበት መረጃ አልተገኘም',
+    },
+    'noVehiclesInQueue': {
+      AppLanguage.en: 'No vehicles currently in queue',
+      AppLanguage.om: 'Konkolaataan tarree keessa jiru hin jiru',
+      AppLanguage.am: 'በተራው ላይ ያለ መኪና የለም',
+    },
+    'noCarpetsInQueue': {
+      AppLanguage.en: 'No carpets currently in queue',
+      AppLanguage.om: 'Karpeetiin tarree keessa jiru hin jiru',
+      AppLanguage.am: 'በተራው ላይ ያለ ምንጣፍ የለም',
+    },
+    'washFloorAndDryingRacks': {
+      AppLanguage.en: 'Wash Floor & Drying Racks',
+      AppLanguage.om: 'Lafa Dhiqaafi Bakka Gogsuu',
+      AppLanguage.am: 'ማጠቢያ ወለልና ማድረቂያዎች',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
