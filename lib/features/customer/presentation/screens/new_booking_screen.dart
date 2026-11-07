@@ -100,7 +100,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       _selectedPackage = packages.first;
     }
 
-    final carpetPrice = _carpetArea * (_carpetType == 'type_b' ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM);
+    final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
     final currentPrice = _isCarpet ? carpetPrice : (_selectedPackage?.getPriceFor(_selectedCarType) ?? 0.0);
     final grandTotal = currentPrice + _tipAmount;
 
@@ -312,8 +312,14 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.cleaning_services_rounded, size: 18, color: _carpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary),
-                                  const SizedBox(width: 6),
+                                  AutoCareAssets.buildPhotoThumbnail(
+                                    imageUrl: AutoCareAssets.carpetTypeAUrl,
+                                    width: 38,
+                                    height: 38,
+                                    borderRadius: 8,
+                                    fallbackIcon: Icons.cleaning_services_rounded,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       state.tr('carpetTypeA'),
@@ -326,9 +332,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Text(
-                                '${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                                '${state.getCarpetPricePerSqM("type_a", _selectedServiceType).toStringAsFixed(0)} ETB / m²',
                                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF4338CA)),
                               ),
                               Text(state.tr('carpetTypeADesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
@@ -356,8 +362,14 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.auto_awesome_rounded, size: 18, color: _carpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary),
-                                  const SizedBox(width: 6),
+                                  AutoCareAssets.buildPhotoThumbnail(
+                                    imageUrl: AutoCareAssets.carpetTypeBUrl,
+                                    width: 38,
+                                    height: 38,
+                                    borderRadius: 8,
+                                    fallbackIcon: Icons.auto_awesome_rounded,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       state.tr('carpetTypeB'),
@@ -370,9 +382,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Text(
-                                '${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                                '${state.getCarpetPricePerSqM("type_b", _selectedServiceType).toStringAsFixed(0)} ETB / m²',
                                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFB91C1C)),
                               ),
                               Text(state.tr('carpetTypeBDesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
@@ -784,7 +796,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         fullAddress = '$_selectedBishoftuArea - ${_addressController.text.trim()}';
       }
 
-      final carpetPrice = _carpetArea * (_carpetType == 'type_b' ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM);
+      final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
       final booking = await state.bookNewWash(
         customerName: _nameController.text.trim(),
         customerPhone: _phoneController.text.trim(),

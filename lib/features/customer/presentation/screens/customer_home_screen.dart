@@ -6,6 +6,7 @@ import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/core/widgets/app_role_header.dart';
+import 'package:bishe_car_wash/core/widgets/dual_service_entrance_tab_bar.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/core/widgets/service_promo_banner.dart';
 import 'package:bishe_car_wash/core/widgets/status_badge.dart';
@@ -33,6 +34,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   final TextEditingController _trackController = TextEditingController();
   bool _isCarpetTabActive = false;
   String _customerCarpetType = 'type_a';
+  ServiceType _customerCarpetDelivery = ServiceType.walkInStation;
   final _carpetLengthCalc = TextEditingController(text: '3.0');
   final _carpetWidthCalc = TextEditingController(text: '2.0');
 
@@ -79,196 +81,108 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Promotional Rotating Banner
-              ServicePromoBanner(
-                onBookTap: () => _openBookingFlow(context, ServiceType.walkInStation),
-              ),
-              const SizedBox(height: 14),
+              const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 14)),
 
-              // 2. Privacy-Safe Queue Summary & Estimated Wait Time (No private vehicle details)
-              _buildPrivacySafeQueueCard(context, state, queueAhead, bay1, bay2, van),
-              const SizedBox(height: 14),
-
-              // 3. Vehicle Owner Status / Privacy Search Lookup Card
-              if (activeWash != null && activeWash.status.isOngoing)
-                _buildActiveWashCard(context, state, activeWash)
-              else
-                _buildVehicleLookupCard(context, state),
-              const SizedBox(height: 18),
-
-              // 4. Primary Call to Action Cards (Drive-in vs At-Home Mobile)
-              Text(
-                state.tr('selectServiceMode'),
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+              if (state.isCarWashDivisionActive) ...[
+                // 1. Promotional Rotating Banner
+                ServicePromoBanner(
+                  onBookTap: () => _openBookingFlow(context, ServiceType.walkInStation),
                 ),
-              ),
-              const SizedBox(height: 10),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 780;
-                  final cards = [
-                    _buildServiceActionCard(
-                      context,
-                      title: state.tr('driveInStation'),
-                      subtitle: state.tr('driveInSub'),
-                      badge: '${state.availableBaysCount} ${state.tr('availableNow')}',
-                      isAvailable: state.availableBaysCount > 0,
-                      imageUrl: AutoCareAssets.stationBayUrl,
-                      fallbackIcon: Icons.local_car_wash_rounded,
-                      color: AppColors.bay1Color,
-                      actionLabel: state.tr('bookNow'),
-                      onTap: () => _openBookingFlow(context, ServiceType.walkInStation),
-                    ),
-                    _buildServiceActionCard(
-                      context,
-                      title: state.tr('serviceValetPickUp'),
-                      subtitle: state.tr('serviceValetPickUpSub'),
-                      badge: state.tr('valetServiceAvailable'),
-                      isAvailable: true,
-                      imageUrl: AutoCareAssets.valetDriverUrl,
-                      fallbackIcon: Icons.car_rental_rounded,
-                      color: const Color(0xFF7C3AED),
-                      actionLabel: state.tr('bookNow'),
-                      onTap: () => _openBookingFlow(context, ServiceType.valetPickUp),
-                    ),
-                    _buildServiceActionCard(
-                      context,
-                      title: state.tr('atHomeMobile'),
-                      subtitle: state.tr('atHomeSub'),
-                      badge: state.isMobileVanAvailable ? state.tr('availableNow') : state.tr('busyWashing'),
-                      isAvailable: state.isMobileVanAvailable,
-                      imageUrl: AutoCareAssets.mobileVanUrl,
-                      fallbackIcon: Icons.rv_hookup_rounded,
-                      color: AppColors.mobileVanColor,
-                      actionLabel: state.tr('bookNow'),
-                      onTap: () => _openBookingFlow(context, ServiceType.atHomeMobile),
-                    ),
-                  ];
+                const SizedBox(height: 14),
 
-                  if (isWide) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: cards
-                          .map((c) => Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                // 2. Privacy-Safe Queue Summary & Estimated Wait Time (No private vehicle details)
+                _buildPrivacySafeQueueCard(context, state, queueAhead, bay1, bay2, van),
+                const SizedBox(height: 14),
+
+                // 3. Vehicle Owner Status / Privacy Search Lookup Card
+                if (activeWash != null && activeWash.status.isOngoing)
+                  _buildActiveWashCard(context, state, activeWash)
+                else
+                  _buildVehicleLookupCard(context, state),
+                const SizedBox(height: 18),
+
+                // 4. Primary Call to Action Cards (Drive-in vs At-Home Mobile)
+                Text(
+                  state.tr('selectServiceMode'),
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWide = constraints.maxWidth >= 780;
+                    final cards = [
+                      _buildServiceActionCard(
+                        context,
+                        title: state.tr('driveInStation'),
+                        subtitle: state.tr('driveInSub'),
+                        badge: '${state.availableBaysCount} ${state.tr('availableNow')}',
+                        isAvailable: state.availableBaysCount > 0,
+                        imageUrl: AutoCareAssets.stationBayUrl,
+                        fallbackIcon: Icons.local_car_wash_rounded,
+                        color: AppColors.bay1Color,
+                        actionLabel: state.tr('bookNow'),
+                        onTap: () => _openBookingFlow(context, ServiceType.walkInStation),
+                      ),
+                      _buildServiceActionCard(
+                        context,
+                        title: state.tr('serviceValetPickUp'),
+                        subtitle: state.tr('serviceValetPickUpSub'),
+                        badge: state.tr('valetServiceAvailable'),
+                        isAvailable: true,
+                        imageUrl: AutoCareAssets.valetDriverUrl,
+                        fallbackIcon: Icons.car_rental_rounded,
+                        color: const Color(0xFF7C3AED),
+                        actionLabel: state.tr('bookNow'),
+                        onTap: () => _openBookingFlow(context, ServiceType.valetPickUp),
+                      ),
+                      _buildServiceActionCard(
+                        context,
+                        title: state.tr('atHomeMobile'),
+                        subtitle: state.tr('atHomeSub'),
+                        badge: state.isMobileVanAvailable ? state.tr('availableNow') : state.tr('busyWashing'),
+                        isAvailable: state.isMobileVanAvailable,
+                        imageUrl: AutoCareAssets.mobileVanUrl,
+                        fallbackIcon: Icons.rv_hookup_rounded,
+                        color: AppColors.mobileVanColor,
+                        actionLabel: state.tr('bookNow'),
+                        onTap: () => _openBookingFlow(context, ServiceType.atHomeMobile),
+                      ),
+                    ];
+
+                    if (isWide) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: cards
+                            .map((c) => Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    child: c,
+                                  ),
+                                ))
+                            .toList(),
+                      );
+                    } else {
+                      return Column(
+                        children: cards
+                            .map((c) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
                                   child: c,
-                                ),
-                              ))
-                          .toList(),
-                    );
-                  } else {
-                    return Column(
-                      children: cards
-                          .map((c) => Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: c,
-                              ))
-                          .toList(),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              _buildPhoneBookingCard(context, state),
-              const SizedBox(height: 12),
-              _buildStationGpsTrackerCard(context, state),
-              const SizedBox(height: 24),
-
-              // Service Category Selector Toggle (Vehicle Wash vs Carpet Cleaning)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.cardBorder),
+                                ))
+                            .toList(),
+                      );
+                    }
+                  },
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          if (_isCarpetTabActive) {
-                            setState(() => _isCarpetTabActive = false);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: !_isCarpetTabActive ? AppColors.primary : Colors.transparent,
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.local_car_wash_rounded, size: 16, color: !_isCarpetTabActive ? Colors.white : AppColors.textPrimary),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  state.tr('servicePackages'),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: !_isCarpetTabActive ? Colors.white : AppColors.textPrimary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          if (!_isCarpetTabActive) {
-                            setState(() => _isCarpetTabActive = true);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: _isCarpetTabActive ? const Color(0xFF6366F1) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.texture_rounded, size: 16, color: _isCarpetTabActive ? Colors.white : AppColors.textPrimary),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  state.tr('carpetService'),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: _isCarpetTabActive ? Colors.white : AppColors.textPrimary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
+                const SizedBox(height: 12),
+                _buildPhoneBookingCard(context, state),
+                const SizedBox(height: 12),
+                _buildStationGpsTrackerCard(context, state),
+                const SizedBox(height: 20),
 
-              if (!_isCarpetTabActive) ...[
                 // Vehicle Category Selector Segment
                 _buildVehicleSelector(state),
                 const SizedBox(height: 14),
@@ -278,7 +192,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
                 ),
               ] else ...[
+                // Dedicated Carpet Cleaning Division View
                 _buildCustomerCarpetCleaningSection(context, state),
+                const SizedBox(height: 14),
+                _buildPhoneBookingCard(context, state),
+                const SizedBox(height: 12),
+                _buildStationGpsTrackerCard(context, state),
               ],
               const SizedBox(height: 24),
 
@@ -301,7 +220,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   }
 
   Widget _buildCustomerCarpetCleaningSection(BuildContext context, dynamic state) {
-    final rate = _customerCarpetType == 'type_b' ? state.carpetTypeBPricePerSqM as double : state.carpetTypeAPricePerSqM as double;
+    final rate = state.getCarpetPricePerSqM(_customerCarpetType, _customerCarpetDelivery);
     final estimatedPrice = _customerCarpetArea * rate;
 
     return Container(
@@ -317,7 +236,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Banner
+          // Banner with Photography
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -328,7 +247,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.texture_rounded, color: Colors.white, size: 28),
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.carpetTypeAUrl,
+                  width: 52,
+                  height: 52,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.texture_rounded,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -350,7 +275,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Two Types Selection
+          // Two Types Selection with Photography Thumbnails
           Text(
             state.tr('carpetCleaningOptions'),
             style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
@@ -376,8 +301,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.cleaning_services_rounded, size: 18, color: _customerCarpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary),
-                            const SizedBox(width: 6),
+                            AutoCareAssets.buildPhotoThumbnail(
+                              imageUrl: AutoCareAssets.carpetTypeAUrl,
+                              width: 38,
+                              height: 38,
+                              borderRadius: 8,
+                              fallbackIcon: Icons.cleaning_services_rounded,
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 state.tr('carpetTypeA'),
@@ -390,9 +321,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
-                          '${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                          '${state.getCarpetPricePerSqM("type_a", _customerCarpetDelivery).toStringAsFixed(0)} ETB / m²',
                           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF4338CA)),
                         ),
                         Text(state.tr('carpetTypeADesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
@@ -420,8 +351,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.auto_awesome_rounded, size: 18, color: _customerCarpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary),
-                            const SizedBox(width: 6),
+                            AutoCareAssets.buildPhotoThumbnail(
+                              imageUrl: AutoCareAssets.carpetTypeBUrl,
+                              width: 38,
+                              height: 38,
+                              borderRadius: 8,
+                              fallbackIcon: Icons.auto_awesome_rounded,
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 state.tr('carpetTypeB'),
@@ -434,9 +371,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
-                          '${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                          '${state.getCarpetPricePerSqM("type_b", _customerCarpetDelivery).toStringAsFixed(0)} ETB / m²',
                           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFB91C1C)),
                         ),
                         Text(state.tr('carpetTypeBDesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
@@ -444,6 +381,41 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     ),
                   ),
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // 3 Delivery Modes Selectable with Photography Thumbnails
+          Text(
+            state.tr('serviceProvisionMode'),
+            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildDeliverySelectChip(
+                state: state,
+                mode: ServiceType.walkInStation,
+                title: state.tr('atStationService'),
+                imageUrl: AutoCareAssets.carpetStationWashUrl,
+                isSelected: _customerCarpetDelivery == ServiceType.walkInStation,
+              ),
+              const SizedBox(width: 8),
+              _buildDeliverySelectChip(
+                state: state,
+                mode: ServiceType.atHomeMobile,
+                title: state.tr('atHomeService'),
+                imageUrl: AutoCareAssets.carpetHomeWashUrl,
+                isSelected: _customerCarpetDelivery == ServiceType.atHomeMobile,
+              ),
+              const SizedBox(width: 8),
+              _buildDeliverySelectChip(
+                state: state,
+                mode: ServiceType.valetPickUp,
+                title: state.tr('valetPickupReturn'),
+                imageUrl: AutoCareAssets.carpetValetPickupUrl,
+                isSelected: _customerCarpetDelivery == ServiceType.valetPickUp,
               ),
             ],
           ),
@@ -527,30 +499,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 3 Provision options note
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              Chip(
-                avatar: const Icon(Icons.storefront_rounded, size: 14, color: AppColors.primary),
-                label: Text(state.tr('atStationService'), style: const TextStyle(fontSize: 11)),
-                backgroundColor: AppColors.surfaceVariant,
-              ),
-              Chip(
-                avatar: const Icon(Icons.home_repair_service_rounded, size: 14, color: AppColors.primary),
-                label: Text(state.tr('atHomeService'), style: const TextStyle(fontSize: 11)),
-                backgroundColor: AppColors.surfaceVariant,
-              ),
-              Chip(
-                avatar: const Icon(Icons.delivery_dining_rounded, size: 14, color: Color(0xFF7C3AED)),
-                label: Text(state.tr('valetPickupReturn'), style: const TextStyle(fontSize: 11)),
-                backgroundColor: AppColors.surfaceVariant,
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
           // Action button to book carpet cleaning
           SizedBox(
             width: double.infinity,
@@ -566,6 +514,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => NewBookingScreen(
+                      initialServiceType: _customerCarpetDelivery,
                       isCarpet: true,
                       initialCarpetType: _customerCarpetType,
                     ),
@@ -580,6 +529,53 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDeliverySelectChip({
+    required dynamic state,
+    required ServiceType mode,
+    required String title,
+    required String imageUrl,
+    required bool isSelected,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _customerCarpetDelivery = mode),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF6366F1).withOpacity(0.12) : Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF6366F1) : AppColors.cardBorder,
+              width: isSelected ? 1.8 : 1.0,
+            ),
+          ),
+          child: Column(
+            children: [
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: imageUrl,
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? const Color(0xFF4338CA) : AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

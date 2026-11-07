@@ -2793,6 +2793,101 @@ class AppStrings {
       AppLanguage.om: 'Kuusaa Tipii Maamiltootaa',
       AppLanguage.am: 'የደንበኞች ቲፕ ድምር',
     },
+    'carWashingService': {
+      AppLanguage.en: 'Car Washing Service',
+      AppLanguage.om: 'Tajaajila Dhiqa Konkolaataa',
+      AppLanguage.am: 'የመኪና እጥበት አገልግሎት',
+    },
+    'carpetWashingService': {
+      AppLanguage.en: 'Carpet Washing Service',
+      AppLanguage.om: 'Tajaajila Dhiqa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት አገልግሎት',
+    },
+    'carpetMatrixTitle': {
+      AppLanguage.en: 'Carpet Service Package Pricing Matrix',
+      AppLanguage.om: 'Madaallii Gatii Paakeejii Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት ፓኬጆች ዋጋ ዝርዝር',
+    },
+    'carpetMatrixSubtitle': {
+      AppLanguage.en: 'Set ETB per m² for Type A & Type B across all 3 delivery modes',
+      AppLanguage.om: 'Gatii m² akaakuu A fi B tajaajiloota 3f murteessaa',
+      AppLanguage.am: 'ለአይነት ሀ እና አይነት ለ በሦስቱም የአገልግሎት መንገዶች የካሬ ሜትር ዋጋ ይወስኑ',
+    },
+    'carpetTypeAStation': {
+      AppLanguage.en: 'Type A - At Station',
+      AppLanguage.om: 'Akaakuu A - Buufatatti',
+      AppLanguage.am: 'አይነት ሀ - ጣቢያ ውስጥ',
+    },
+    'carpetTypeAHome': {
+      AppLanguage.en: 'Type A - At Owner\'s Home',
+      AppLanguage.om: 'Akaakuu A - Mana Abbaatti',
+      AppLanguage.am: 'አይነት ሀ - ባለቤቱ ቤት',
+    },
+    'carpetTypeAValet': {
+      AppLanguage.en: 'Type A - Pick-up & Return',
+      AppLanguage.om: 'Akaakuu A - Fudhatamee Deebifamu',
+      AppLanguage.am: 'አይነት ሀ - ተወስዶ የሚመለስ',
+    },
+    'carpetTypeBStation': {
+      AppLanguage.en: 'Type B - At Station',
+      AppLanguage.om: 'Akaakuu B - Buufatatti',
+      AppLanguage.am: 'አይነት ለ - ጣቢያ ውስጥ',
+    },
+    'carpetTypeBHome': {
+      AppLanguage.en: 'Type B - At Owner\'s Home',
+      AppLanguage.om: 'Akaakuu B - Mana Abbaatti',
+      AppLanguage.am: 'አይነት ለ - ባለቤቱ ቤት',
+    },
+    'carpetTypeBValet': {
+      AppLanguage.en: 'Type B - Pick-up & Return',
+      AppLanguage.om: 'Akaakuu B - Fudhatamee Deebifamu',
+      AppLanguage.am: 'አይነት ለ - ተወስዶ የሚመለስ',
+    },
+    'carpetStations': {
+      AppLanguage.en: 'Carpet Cleaning Stations',
+      AppLanguage.om: 'Buufataalee Dhiqa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ ማጠቢያ ክፍሎች',
+    },
+    'carpetWashFloor': {
+      AppLanguage.en: 'Wash & Extraction Floor',
+      AppLanguage.om: 'Lafa Dhiqaafi Cuunfaa',
+      AppLanguage.am: 'ማጠቢያና ማድረቂያ ወለል',
+    },
+    'carpetDryingRacks': {
+      AppLanguage.en: 'Ventilated Drying Racks',
+      AppLanguage.om: 'Bakka Karpeetii Gogsuu',
+      AppLanguage.am: 'አየር የሚዘዋወርበት ማድረቂያ ራክ',
+    },
+    'carpetHomeMobileCrew': {
+      AppLanguage.en: 'Home Cleaning Mobile Crew',
+      AppLanguage.om: 'Garee Moobaayilaa Manaa',
+      AppLanguage.am: 'የቤት ውስጥ ተንቀሳቃሽ አጣቢ ቡድን',
+    },
+    'carpetValetDriver': {
+      AppLanguage.en: 'Valet Pick-up & Delivery',
+      AppLanguage.om: 'Geejjiba Karpeetii',
+      AppLanguage.am: 'የምንጣፍ ትራንስፖርትና ርክክብ',
+    },
+    'carpetQueueTitle': {
+      AppLanguage.en: 'Carpet Cleaning Queue',
+      AppLanguage.om: 'Tarree Dhiqa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት ተራ',
+    },
+    'carpetIntakeRegister': {
+      AppLanguage.en: 'Register Carpet Intake',
+      AppLanguage.om: 'Karpeetii Haaraa Galmeessi',
+      AppLanguage.am: 'አዲስ ምንጣፍ መዝግብ',
+    },
+    'carpetTagNumber': {
+      AppLanguage.en: 'Tag Number',
+      AppLanguage.om: 'Lakkoofsa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ መለያ ቁጥር',
+    },
+    'editCarpetTariff': {
+      AppLanguage.en: 'Edit Carpet Tariff (ETB/m²)',
+      AppLanguage.om: 'Gatii Karpeetii Jijjiiri (ETB/m²)',
+      AppLanguage.am: 'የምንጣፍ ካሬ ሜትር ዋጋ ቀይር (ብር/ካሬ)',
+    },
     'servicePricingSettings': {
       AppLanguage.en: 'Service Pricing & Tariffs',
       AppLanguage.om: 'Madaallii Gatii Tajaajilootaa',

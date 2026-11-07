@@ -5,6 +5,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/consumable_item.dart';
@@ -49,6 +50,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       ),
       body: Column(
         children: [
+          const DualServiceEntranceTabBar(padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8)),
           // Sub-header tabs
           Container(
             color: Colors.white,

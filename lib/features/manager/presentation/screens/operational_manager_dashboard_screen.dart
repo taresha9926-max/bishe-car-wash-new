@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
@@ -150,6 +151,8 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 14)),
+
               // 1. Handover Alert / Custody Banner
               _buildHandoverStatusBanner(context, state, isMobile),
               const SizedBox(height: 14),
@@ -623,6 +626,9 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
     StationBay bay2,
     StationBay van,
   ) {
+    final isCarpet = state.isCarpetDivisionActive;
+    final relevantBookings = filteredBookings.where((b) => isCarpet ? b.isCarpet : !b.isCarpet).toList();
+
     final modules = [
       _ManagerModuleItem(
         title: state.tr('cashierHandoverTitle'),
@@ -635,13 +641,17 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
         contentBuilder: () => _buildHandoverSummaryCard(state, isMobile),
       ),
       _ManagerModuleItem(
-        title: state.tr('liveStationCapacity'),
-        subtitle: '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
-        icon: Icons.local_car_wash_rounded,
-        imageUrl: AutoCareAssets.stationBayUrl,
-        gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
-        badgeText: '${state.availableBaysCount} Free',
-        badgeColor: AppColors.statusCompleted,
+        title: isCarpet ? state.tr('carpetStations') : state.tr('liveStationCapacity'),
+        subtitle: isCarpet
+            ? 'Wash floor, extraction & ventilated drying racks'
+            : '${state.availableBaysCount} Available • Bay 1, Bay 2 & Mobile Van',
+        icon: isCarpet ? Icons.texture_rounded : Icons.local_car_wash_rounded,
+        imageUrl: isCarpet ? AutoCareAssets.carpetDryingRackUrl : AutoCareAssets.stationBayUrl,
+        gradientColors: isCarpet
+            ? const [Color(0xFF7C3AED), Color(0xFF6D28D9)]
+            : const [Color(0xFF10B981), Color(0xFF059669)],
+        badgeText: isCarpet ? '${state.activeCarpetQueueCount} Carpets' : '${state.availableBaysCount} Free',
+        badgeColor: isCarpet ? const Color(0xFF7C3AED) : AppColors.statusCompleted,
         contentBuilder: () => _buildCleanStationCapacityBar(context, state, bay1, bay2, van, isMobile),
       ),
       _ManagerModuleItem(
@@ -660,14 +670,16 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
         ),
       ),
       _ManagerModuleItem(
-        title: state.tr('queueAndVehicles'),
-        subtitle: '${filteredBookings.length} Vehicles in Queue / Active processing',
-        icon: Icons.queue_rounded,
-        imageUrl: AutoCareAssets.welcomeHeroUrl,
-        gradientColors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
-        badgeText: '${filteredBookings.length} Active',
-        badgeColor: Colors.blueAccent,
-        contentBuilder: () => filteredBookings.isEmpty
+        title: isCarpet ? state.tr('carpetQueueTitle') : state.tr('queueAndVehicles'),
+        subtitle: '${relevantBookings.length} ${isCarpet ? "Carpets" : "Vehicles"} in Queue / Active processing',
+        icon: isCarpet ? Icons.texture_rounded : Icons.queue_rounded,
+        imageUrl: isCarpet ? AutoCareAssets.carpetTypeAUrl : AutoCareAssets.welcomeHeroUrl,
+        gradientColors: isCarpet
+            ? const [Color(0xFF6366F1), Color(0xFF4F46E5)]
+            : const [Color(0xFF0284C7), Color(0xFF0369A1)],
+        badgeText: '${relevantBookings.length} Active',
+        badgeColor: isCarpet ? const Color(0xFF6366F1) : Colors.blueAccent,
+        contentBuilder: () => relevantBookings.isEmpty
             ? Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -675,22 +687,22 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    'No vehicles currently in queue.',
-                    style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                    isCarpet ? 'No carpets currently in queue.' : 'No vehicles currently in queue.',
+                    style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600),
                   ),
                 ),
               )
             : Column(
-                children: filteredBookings.map((b) => _buildQueueRow(context, state, b, isMobile)).toList(),
+                children: relevantBookings.map((b) => _buildQueueRow(context, state, b, isMobile)).toList(),
               ),
       ),
       _ManagerModuleItem(
         title: state.tr('washHistory'),
-        subtitle: 'Audit paid & completed washes by date range',
+        subtitle: isCarpet ? 'Audit completed carpets & delivery orders' : 'Audit paid & completed washes by date range',
         icon: Icons.history_edu_rounded,
-        imageUrl: AutoCareAssets.carSedanUrl,
+        imageUrl: isCarpet ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carSedanUrl,
         gradientColors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
         badgeText: 'History',
         badgeColor: const Color(0xFF4F46E5),
@@ -1071,6 +1083,11 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
   }
 
   Widget _buildQueueRow(BuildContext context, dynamic state, WashBooking booking, bool isMobile) {
+    final isCarpet = booking.isCarpet;
+    final photoUrl = isCarpet
+        ? (booking.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+        : AutoCareAssets.carSedanUrl;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -1082,17 +1099,33 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              Text(
-                '${booking.licensePlate} • ${booking.package.name}',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: photoUrl,
+                width: 40,
+                height: 40,
+                borderRadius: 8,
+                fallbackIcon: isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
               ),
-              const SizedBox(height: 2),
-              Text(
-                '${booking.customerName} • ${CurrencyFormatter.format(booking.totalPrice)}',
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isCarpet
+                        ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                        : '${booking.licensePlate} • ${booking.package.name}',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isCarpet && booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty
+                        ? '${booking.customerName} • ${booking.carpetDimensions} • ${CurrencyFormatter.format(booking.totalPrice)}'
+                        : '${booking.customerName} • ${CurrencyFormatter.format(booking.totalPrice)}',
+                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                ],
               ),
             ],
           ),

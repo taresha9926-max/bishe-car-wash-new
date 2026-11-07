@@ -5,6 +5,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
@@ -143,18 +144,18 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 const SizedBox(width: 10),
                 FloatingActionButton.extended(
                   heroTag: 'fab_walk_in',
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: state.isCarpetDivisionActive ? const Color(0xFF7C3AED) : AppColors.primary,
                   foregroundColor: Colors.white,
-                  icon: const Icon(Icons.add_road_rounded, size: 18),
+                  icon: Icon(state.isCarpetDivisionActive ? Icons.texture_rounded : Icons.add_road_rounded, size: 18),
                   label: Text(
-                    state.tr('newWalkIn'),
+                    state.isCarpetDivisionActive ? state.tr('carpetIntakeRegister') : state.tr('newWalkIn'),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
                   ),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const WalkInRegistrationScreen(),
+                        builder: (_) => WalkInRegistrationScreen(initialCarpetMode: state.isCarpetDivisionActive),
                       ),
                     );
                   },
@@ -172,6 +173,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 14)),
               // Active Cashier Handover OTP Banner (Visible when Day Closing submitted via OTP)
               Builder(
                 builder: (context) {

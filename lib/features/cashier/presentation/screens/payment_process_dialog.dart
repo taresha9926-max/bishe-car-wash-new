@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
@@ -112,13 +113,28 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      widget.booking.isCarpet
-                          ? '${state.tr("carpetService")}: ${widget.booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                          : '${state.tr("licensePlate")}: ${widget.booking.licensePlate}',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: widget.booking.isCarpet
+                              ? (widget.booking.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+                              : AutoCareAssets.carSedanUrl,
+                          width: 36,
+                          height: 36,
+                          borderRadius: 8,
+                          fallbackIcon: widget.booking.isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.booking.isCarpet
+                              ? '${state.tr("carpetService")}: ${widget.booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                              : '${state.tr("licensePlate")}: ${widget.booking.licensePlate}',
+                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Text(
                       CurrencyFormatter.format(amountDue + _tipAmount, showDecimals: true),
                       style: const TextStyle(

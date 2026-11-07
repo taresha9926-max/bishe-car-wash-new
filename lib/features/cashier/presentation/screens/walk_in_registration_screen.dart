@@ -15,10 +15,12 @@ import 'package:bishe_car_wash/features/customer/presentation/widgets/car_type_s
 
 class WalkInRegistrationScreen extends StatefulWidget {
   final BayType? preselectedBay;
+  final bool? initialCarpetMode;
 
   const WalkInRegistrationScreen({
     super.key,
     this.preselectedBay,
+    this.initialCarpetMode,
   });
 
   @override
@@ -52,6 +54,10 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
   void initState() {
     super.initState();
     _bayType = widget.preselectedBay ?? BayType.bay1;
+    if (widget.initialCarpetMode == true) {
+      _isCarpetMode = true;
+      _plateController.text = 'CPT-${(DateTime.now().millisecondsSinceEpoch % 10000)}';
+    }
   }
 
   @override
@@ -378,8 +384,14 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.cleaning_services_rounded, size: 18, color: _carpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary),
-                                  const SizedBox(width: 6),
+                                  AutoCareAssets.buildPhotoThumbnail(
+                                    imageUrl: AutoCareAssets.carpetTypeAUrl,
+                                    width: 38,
+                                    height: 38,
+                                    borderRadius: 8,
+                                    fallbackIcon: Icons.cleaning_services_rounded,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       state.tr('carpetTypeA'),
@@ -392,9 +404,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Text(
-                                '${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                                '${state.getCarpetPricePerSqM("type_a", _carpetDeliveryMethod).toStringAsFixed(0)} ETB / m²',
                                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF4338CA)),
                               ),
                               Text(state.tr('carpetTypeADesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
@@ -422,8 +434,14 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.auto_awesome_rounded, size: 18, color: _carpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary),
-                                  const SizedBox(width: 6),
+                                  AutoCareAssets.buildPhotoThumbnail(
+                                    imageUrl: AutoCareAssets.carpetTypeBUrl,
+                                    width: 38,
+                                    height: 38,
+                                    borderRadius: 8,
+                                    fallbackIcon: Icons.auto_awesome_rounded,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       state.tr('carpetTypeB'),
@@ -436,9 +454,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Text(
-                                '${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                                '${state.getCarpetPricePerSqM("type_b", _carpetDeliveryMethod).toStringAsFixed(0)} ETB / m²',
                                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFB91C1C)),
                               ),
                               Text(state.tr('carpetTypeBDesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),

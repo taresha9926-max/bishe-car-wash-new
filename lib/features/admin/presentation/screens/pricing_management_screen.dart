@@ -3,7 +3,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../booking_service/domain/models/car_type.dart';
+import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_package.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
@@ -54,21 +56,27 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
             ),
             const SizedBox(height: 18),
 
-            Text(
-              state.tr('servicePackages'),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-            ),
-            const SizedBox(height: 10),
-
-            // Dropdown package picker
-            _buildPackageDropdown(state, packages),
             const SizedBox(height: 14),
+            const DualServiceEntranceTabBar(padding: EdgeInsets.zero),
+            const SizedBox(height: 16),
 
-            // Expandable Package List
-            ...packages.map((pkg) => _buildPackageCard(context, state, pkg, packages)),
+            if (state.isCarWashDivisionActive) ...[
+              Text(
+                state.tr('servicePackages'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 10),
 
-            // Additional Services Tariffs (Carpet & Station Shower)
-            _buildCarpetAndShowerPricingSection(context, state),
+              // Dropdown package picker
+              _buildPackageDropdown(state, packages),
+              const SizedBox(height: 14),
+
+              // Expandable Package List
+              ...packages.map((pkg) => _buildPackageCard(context, state, pkg, packages)),
+            ] else ...[
+              // Additional Services Tariffs (Carpet & Station Shower)
+              _buildCarpetAndShowerPricingSection(context, state),
+            ],
 
             const SizedBox(height: 24),
           ],
@@ -425,36 +433,39 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
 
         // Carpet Pricing Card
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.cardBorder),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 3)),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Matrix Header with Photography Thumbnail
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.texture_rounded, color: Color(0xFF6366F1), size: 20),
+                  AutoCareAssets.buildPhotoThumbnail(
+                    imageUrl: AutoCareAssets.carpetTypeAUrl,
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    fallbackIcon: Icons.texture_rounded,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          state.tr('carpetPricingTitle'),
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          state.tr('carpetMatrixTitle'),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                         ),
                         Text(
-                          state.tr('carpetPricingSubtitle'),
+                          state.tr('carpetMatrixSubtitle'),
                           style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                         ),
                       ],
@@ -462,59 +473,127 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                   ),
                 ],
               ),
-              const Divider(height: 20),
-              // Type A Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(state.tr('carpetTypeA'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                      Text(state.tr('carpetTypeADesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        '${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB/m²',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF4338CA)),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
-                        onPressed: () => _editCarpetPriceDialog(context, state, isTypeB: false),
-                      ),
-                    ],
-                  ),
-                ],
+              const Divider(height: 24),
+
+              // ================= SECTION 1: TYPE A (NORMAL) =================
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6366F1).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: AutoCareAssets.carpetTypeAUrl,
+                      width: 24,
+                      height: 24,
+                      borderRadius: 6,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      state.tr('carpetTypeA'),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF4338CA)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Type A - Station
+              _buildMatrixRow(
+                context,
+                state,
+                imageUrl: AutoCareAssets.carpetStationWashUrl,
+                title: state.tr('carpetTypeAStation'),
+                subtitle: state.tr('atStationService'),
+                price: state.carpetTypeAStationPrice,
+                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_a', mode: ServiceType.walkInStation, label: state.tr('carpetTypeAStation')),
               ),
               const Divider(height: 14),
-              // Type B Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(state.tr('carpetTypeB'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                      Text(state.tr('carpetTypeBDesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        '${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB/m²',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFB91C1C)),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
-                        onPressed: () => _editCarpetPriceDialog(context, state, isTypeB: true),
-                      ),
-                    ],
-                  ),
-                ],
+
+              // Type A - Home
+              _buildMatrixRow(
+                context,
+                state,
+                imageUrl: AutoCareAssets.carpetHomeWashUrl,
+                title: state.tr('carpetTypeAHome'),
+                subtitle: state.tr('atHomeService'),
+                price: state.carpetTypeAHomePrice,
+                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_a', mode: ServiceType.atHomeMobile, label: state.tr('carpetTypeAHome')),
+              ),
+              const Divider(height: 14),
+
+              // Type A - Valet
+              _buildMatrixRow(
+                context,
+                state,
+                imageUrl: AutoCareAssets.carpetValetPickupUrl,
+                title: state.tr('carpetTypeAValet'),
+                subtitle: state.tr('valetPickupReturn'),
+                price: state.carpetTypeAValetPrice,
+                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_a', mode: ServiceType.valetPickUp, label: state.tr('carpetTypeAValet')),
+              ),
+              const SizedBox(height: 18),
+
+              // ================= SECTION 2: TYPE B (HEAVY DUTY) =================
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDC2626).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: AutoCareAssets.carpetTypeBUrl,
+                      width: 24,
+                      height: 24,
+                      borderRadius: 6,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      state.tr('carpetTypeB'),
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFFB91C1C)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Type B - Station
+              _buildMatrixRow(
+                context,
+                state,
+                imageUrl: AutoCareAssets.carpetStationWashUrl,
+                title: state.tr('carpetTypeBStation'),
+                subtitle: state.tr('atStationService'),
+                price: state.carpetTypeBStationPrice,
+                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_b', mode: ServiceType.walkInStation, label: state.tr('carpetTypeBStation')),
+              ),
+              const Divider(height: 14),
+
+              // Type B - Home
+              _buildMatrixRow(
+                context,
+                state,
+                imageUrl: AutoCareAssets.carpetHomeWashUrl,
+                title: state.tr('carpetTypeBHome'),
+                subtitle: state.tr('atHomeService'),
+                price: state.carpetTypeBHomePrice,
+                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_b', mode: ServiceType.atHomeMobile, label: state.tr('carpetTypeBHome')),
+              ),
+              const Divider(height: 14),
+
+              // Type B - Valet
+              _buildMatrixRow(
+                context,
+                state,
+                imageUrl: AutoCareAssets.carpetValetPickupUrl,
+                title: state.tr('carpetTypeBValet'),
+                subtitle: state.tr('valetPickupReturn'),
+                price: state.carpetTypeBValetPrice,
+                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_b', mode: ServiceType.valetPickUp, label: state.tr('carpetTypeBValet')),
               ),
             ],
           ),
@@ -534,15 +613,14 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0284C7).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.shower_rounded, color: Color(0xFF0284C7), size: 20),
+                  AutoCareAssets.buildPhotoThumbnail(
+                    imageUrl: AutoCareAssets.publicShowerUrl,
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    fallbackIcon: Icons.shower_rounded,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -593,10 +671,75 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     );
   }
 
-  void _editCarpetPriceDialog(BuildContext context, dynamic state, {required bool isTypeB}) {
-    final currentPrice = isTypeB ? state.carpetTypeBPricePerSqM as double : state.carpetTypeAPricePerSqM as double;
+  Widget _buildMatrixRow(
+    BuildContext context,
+    dynamic state, {
+    required String imageUrl,
+    required String title,
+    required String subtitle,
+    required double price,
+    required VoidCallback onEdit,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: imageUrl,
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${price.toStringAsFixed(0)} ETB/m²',
+              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Color(0xFF0369A1)),
+            ),
+            const SizedBox(width: 6),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+              onPressed: onEdit,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _editCarpetMatrixDialog(
+    BuildContext context,
+    dynamic state, {
+    required String type,
+    required ServiceType mode,
+    required String label,
+  }) {
+    final currentPrice = state.getCarpetPricePerSqM(type, mode) as double;
     final controller = TextEditingController(text: currentPrice.toStringAsFixed(0));
-    final label = isTypeB ? state.tr('carpetTypeB') : state.tr('carpetTypeA');
 
     showDialog(
       context: context,
@@ -626,11 +769,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               if (newPrice != null && newPrice > 0) {
                 Navigator.pop(dialogCtx);
                 final appState = AppStateProvider.read(context);
-                if (isTypeB) {
-                  appState.updateCarpetPricing(typeBPrice: newPrice);
-                } else {
-                  appState.updateCarpetPricing(typeAPrice: newPrice);
-                }
+                appState.updateCarpetPackagePrice(type: type, mode: mode, price: newPrice);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Updated $label price to $newPrice ETB/m²'),

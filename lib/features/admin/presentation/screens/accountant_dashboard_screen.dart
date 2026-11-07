@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../domain/models/staff_member.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
@@ -53,6 +54,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       ),
       body: Column(
         children: [
+          const DualServiceEntranceTabBar(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
           if (state.hasNewCashierClosingAlert && state.latestClosingAlert != null)
             Container(
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),

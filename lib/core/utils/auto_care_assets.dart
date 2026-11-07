@@ -26,6 +26,22 @@ class AutoCareAssets {
   static const String carCockpitUrl =
       'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&auto=format&fit=crop&q=80';
 
+  // Carpet Cleaning & Facility Assets
+  static const String carpetTypeAUrl =
+      'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=600&auto=format&fit=crop&q=80';
+  static const String carpetTypeBUrl =
+      'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=600&auto=format&fit=crop&q=80';
+  static const String carpetStationWashUrl =
+      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&auto=format&fit=crop&q=80';
+  static const String carpetHomeWashUrl =
+      'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=600&auto=format&fit=crop&q=80';
+  static const String carpetValetPickupUrl =
+      'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&auto=format&fit=crop&q=80';
+  static const String carpetDryingRackUrl =
+      'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&auto=format&fit=crop&q=80';
+  static const String publicShowerUrl =
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&auto=format&fit=crop&q=80';
+
   // Detailing Service Tiers
   static const String packageFoamUrl =
       'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&auto=format&fit=crop&q=80';

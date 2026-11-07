@@ -30,6 +30,11 @@ import 'package:bishe_car_wash/features/inventory/domain/models/stock_transactio
 import 'package:bishe_car_wash/features/cashier/domain/models/shower_record.dart';
 import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inventory_seed.dart';
 
+enum ActiveServiceDivision {
+  carWash,
+  carpetWash,
+}
+
 class AppStateNotifier extends ChangeNotifier {
   final IWashRepository _repository;
 
@@ -43,6 +48,20 @@ class AppStateNotifier extends ChangeNotifier {
 
   bool _isWelcomeActive = true;
   bool get isWelcomeActive => _isWelcomeActive;
+
+  // Dual Service Division: Car Wash vs Carpet Cleaning
+  ActiveServiceDivision _activeServiceDivision = ActiveServiceDivision.carWash;
+  ActiveServiceDivision get activeServiceDivision => _activeServiceDivision;
+
+  void setActiveServiceDivision(ActiveServiceDivision division) {
+    if (_activeServiceDivision != division) {
+      _activeServiceDivision = division;
+      notifyListeners();
+    }
+  }
+
+  bool get isCarWashDivisionActive => _activeServiceDivision == ActiveServiceDivision.carWash;
+  bool get isCarpetDivisionActive => _activeServiceDivision == ActiveServiceDivision.carpetWash;
 
   // Super Admin vs Secondary Admin Role Tracking
   bool _isSuperAdmin = false;
@@ -478,18 +497,67 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Carpet Cleaning Pricing (ETB per m²)
-  double _carpetTypeAPricePerSqM = 120.0;
-  double get carpetTypeAPricePerSqM => _carpetTypeAPricePerSqM;
+  // Carpet Cleaning Pricing (ETB per m²) Matrix across 3 delivery modes
+  double _carpetTypeAStationPrice = 120.0;
+  double _carpetTypeAHomePrice = 160.0;
+  double _carpetTypeAValetPrice = 190.0;
 
-  double _carpetTypeBPricePerSqM = 180.0;
-  double get carpetTypeBPricePerSqM => _carpetTypeBPricePerSqM;
+  double _carpetTypeBStationPrice = 180.0;
+  double _carpetTypeBHomePrice = 230.0;
+  double _carpetTypeBValetPrice = 260.0;
 
-  void updateCarpetPricing({double? typeAPrice, double? typeBPrice}) {
-    if (typeAPrice != null) _carpetTypeAPricePerSqM = typeAPrice;
-    if (typeBPrice != null) _carpetTypeBPricePerSqM = typeBPrice;
+  double get carpetTypeAStationPrice => _carpetTypeAStationPrice;
+  double get carpetTypeAHomePrice => _carpetTypeAHomePrice;
+  double get carpetTypeAValetPrice => _carpetTypeAValetPrice;
+
+  double get carpetTypeBStationPrice => _carpetTypeBStationPrice;
+  double get carpetTypeBHomePrice => _carpetTypeBHomePrice;
+  double get carpetTypeBValetPrice => _carpetTypeBValetPrice;
+
+  double get carpetTypeAPricePerSqM => _carpetTypeAStationPrice;
+  double get carpetTypeBPricePerSqM => _carpetTypeBStationPrice;
+
+  double getCarpetPricePerSqM(String carpetType, ServiceType serviceType) {
+    final isTypeB = carpetType == 'type_b';
+    switch (serviceType) {
+      case ServiceType.walkInStation:
+        return isTypeB ? _carpetTypeBStationPrice : _carpetTypeAStationPrice;
+      case ServiceType.atHomeMobile:
+        return isTypeB ? _carpetTypeBHomePrice : _carpetTypeAHomePrice;
+      case ServiceType.valetPickUp:
+      case ServiceType.phoneCallBooking:
+        return isTypeB ? _carpetTypeBValetPrice : _carpetTypeAValetPrice;
+    }
+  }
+
+  void updateCarpetPackagePrice({
+    required String type,
+    required ServiceType mode,
+    required double price,
+  }) {
+    if (type == 'type_a') {
+      if (mode == ServiceType.walkInStation) _carpetTypeAStationPrice = price;
+      if (mode == ServiceType.atHomeMobile) _carpetTypeAHomePrice = price;
+      if (mode == ServiceType.valetPickUp || mode == ServiceType.phoneCallBooking) _carpetTypeAValetPrice = price;
+    } else {
+      if (mode == ServiceType.walkInStation) _carpetTypeBStationPrice = price;
+      if (mode == ServiceType.atHomeMobile) _carpetTypeBHomePrice = price;
+      if (mode == ServiceType.valetPickUp || mode == ServiceType.phoneCallBooking) _carpetTypeBValetPrice = price;
+    }
     notifyListeners();
   }
+
+  void updateCarpetPricing({double? typeAPrice, double? typeBPrice}) {
+    if (typeAPrice != null) _carpetTypeAStationPrice = typeAPrice;
+    if (typeBPrice != null) _carpetTypeBStationPrice = typeBPrice;
+    notifyListeners();
+  }
+
+  // Segmented Queues
+  List<WashBooking> get carWashBookings => _bookings.where((b) => !b.isCarpet).toList();
+  List<WashBooking> get carpetWashBookings => _bookings.where((b) => b.isCarpet).toList();
+  int get activeCarQueueCount => _bookings.where((b) => !b.isCarpet && (b.status.isOngoing || b.status == WashStatus.pending)).length;
+  int get activeCarpetQueueCount => _bookings.where((b) => b.isCarpet && (b.status.isOngoing || b.status == WashStatus.pending)).length;
 
   // Computed Properties for Dashboard & Metrics
   int get totalCompletedCarsToday {
