@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -13,13 +14,15 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../customer/presentation/widgets/car_type_selector.dart';
 
 class PhoneBookingDialog extends StatefulWidget {
-  const PhoneBookingDialog({super.key});
+  final bool? initialCarpetMode;
 
-  static Future<void> show(BuildContext context) {
+  const PhoneBookingDialog({super.key, this.initialCarpetMode});
+
+  static Future<void> show(BuildContext context, {bool? initialCarpetMode}) {
     return showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) => const PhoneBookingDialog(),
+      builder: (_) => PhoneBookingDialog(initialCarpetMode: initialCarpetMode),
     );
   }
 
@@ -35,12 +38,25 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
   final _plateController = TextEditingController();
   final _arrivalSlotController = TextEditingController(text: 'Today within 30 mins');
   final _addressController = TextEditingController();
+  final _lengthController = TextEditingController(text: '3.0');
+  final _widthController = TextEditingController(text: '4.0');
 
+  bool _isCarpetMode = false;
+  String _carpetType = 'type_a'; // 'type_a' or 'type_b'
   CarType _carType = CarType.automobile;
   ServiceType _serviceType = ServiceType.walkInStation;
   WashPackage? _selectedPackage;
   String _selectedBishoftuArea = AppConstants.bishoftuAreas.first;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isCarpetMode = widget.initialCarpetMode ?? false;
+    if (_isCarpetMode) {
+      _plateController.text = 'CPT-${(DateTime.now().millisecondsSinceEpoch % 10000)}';
+    }
+  }
 
   @override
   void dispose() {
@@ -49,7 +65,15 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
     _plateController.dispose();
     _arrivalSlotController.dispose();
     _addressController.dispose();
+    _lengthController.dispose();
+    _widthController.dispose();
     super.dispose();
+  }
+
+  double get _carpetArea {
+    final l = double.tryParse(_lengthController.text.trim()) ?? 0.0;
+    final w = double.tryParse(_widthController.text.trim()) ?? 0.0;
+    return l * w;
   }
 
   @override
@@ -60,7 +84,9 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
       _selectedPackage = packages.first;
     }
 
-    final price = _selectedPackage?.getPriceFor(_carType) ?? 0.0;
+    final carpetRate = state.getCarpetPricePerSqM(_carpetType, _serviceType);
+    final carpetPrice = _carpetArea * carpetRate;
+    final price = _isCarpetMode ? carpetPrice : (_selectedPackage?.getPriceFor(_carType) ?? 0.0);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -80,10 +106,14 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: (_isCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.phone_in_talk_rounded, color: AppColors.primary, size: 22),
+                    child: Icon(
+                      Icons.phone_in_talk_rounded,
+                      color: _isCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -91,11 +121,15 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          state.tr('registerPhoneBooking'),
+                          _isCarpetMode
+                              ? '${state.tr("registerPhoneBooking")} • ${state.tr("carpetCleaningOptions")}'
+                              : state.tr('registerPhoneBooking'),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                         ),
                         Text(
-                          'Intake for calling customers (Drive-in / At-Home)',
+                          _isCarpetMode
+                              ? 'Phone intake for carpet cleaning (Station / Valet / Home)'
+                              : 'Phone intake for vehicle wash (Drive-in / Mobile Van)',
                           style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                         ),
                       ],
@@ -108,6 +142,95 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                 ],
               ),
               const Divider(height: 20),
+
+              // Service Selector Toggle: Vehicle vs Carpet
+              Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_isCarpetMode) {
+                            setState(() {
+                              _isCarpetMode = false;
+                              if (_plateController.text.startsWith('CPT-')) {
+                                _plateController.clear();
+                              }
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: !_isCarpetMode ? AppColors.primary : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.directions_car_rounded, size: 16, color: !_isCarpetMode ? Colors.white : AppColors.textPrimary),
+                              const SizedBox(width: 6),
+                              Text(
+                                state.tr('carWash'),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 12,
+                                  color: !_isCarpetMode ? Colors.white : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (!_isCarpetMode) {
+                            setState(() {
+                              _isCarpetMode = true;
+                              if (!_plateController.text.startsWith('CPT-')) {
+                                _plateController.text = 'CPT-${(DateTime.now().millisecondsSinceEpoch % 10000)}';
+                              }
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _isCarpetMode ? const Color(0xFF7C3AED) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.texture_rounded, size: 16, color: _isCarpetMode ? Colors.white : AppColors.textPrimary),
+                              const SizedBox(width: 6),
+                              Text(
+                                state.tr('carpetDropOff'),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 12,
+                                  color: _isCarpetMode ? Colors.white : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
               // Form Scrollable Body
               Expanded(
@@ -135,17 +258,223 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                       ),
                       const SizedBox(height: 12),
 
-                      // 2. License Plate
+                      // 2. License Plate / Carpet Tag
                       CustomTextField(
                         controller: _plateController,
-                        label: state.tr('licensePlate'),
-                        hint: 'e.g. 3-A12345 ET',
-                        prefixIcon: Icons.tag,
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Please enter license plate' : null,
+                        label: _isCarpetMode ? state.tr('carpetTagNumber') : state.tr('licensePlate'),
+                        hint: _isCarpetMode ? 'e.g. CPT-8941' : 'e.g. 3-A12345 ET',
+                        prefixIcon: _isCarpetMode ? Icons.tag_rounded : Icons.badge_outlined,
+                        validator: (v) => v == null || v.trim().isEmpty ? (_isCarpetMode ? 'Enter tracking code' : 'Please enter license plate') : null,
                       ),
                       const SizedBox(height: 14),
 
-                      // 3. Service Mode (Station Bay vs Mobile Van)
+                      // Carpet specifics vs Car wash specifics
+                      if (_isCarpetMode) ...[
+                        // Carpet Treatment Type
+                        Text(
+                          state.tr('carpetTypeSelection'),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _carpetType = 'type_a'),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: _carpetType == 'type_a' ? const Color(0xFF7C3AED).withOpacity(0.08) : Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: _carpetType == 'type_a' ? const Color(0xFF7C3AED) : AppColors.cardBorder,
+                                      width: _carpetType == 'type_a' ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      AutoCareAssets.buildPhotoThumbnail(
+                                        imageUrl: AutoCareAssets.carpetTypeAUrl,
+                                        width: double.infinity,
+                                        height: 50,
+                                        borderRadius: 6,
+                                        fallbackIcon: Icons.texture_rounded,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(state.tr('carpetTypeA'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+                                      Text('${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB/m²', style: const TextStyle(fontSize: 10.5, color: Color(0xFF7C3AED), fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _carpetType = 'type_b'),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: _carpetType == 'type_b' ? const Color(0xFF7C3AED).withOpacity(0.08) : Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: _carpetType == 'type_b' ? const Color(0xFF7C3AED) : AppColors.cardBorder,
+                                      width: _carpetType == 'type_b' ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      AutoCareAssets.buildPhotoThumbnail(
+                                        imageUrl: AutoCareAssets.carpetTypeBUrl,
+                                        width: double.infinity,
+                                        height: 50,
+                                        borderRadius: 6,
+                                        fallbackIcon: Icons.texture_rounded,
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(state.tr('carpetTypeB'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+                                      Text('${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB/m²', style: const TextStyle(fontSize: 10.5, color: Color(0xFF7C3AED), fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Carpet Dimensions
+                        Text(
+                          '${state.tr("carpetDimensions")} & ${state.tr("carpetTotalArea")}',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _lengthController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: InputDecoration(
+                                  labelText: '${state.tr("carpetLength")} (m)',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                  isDense: true,
+                                ),
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Text('×', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _widthController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: InputDecoration(
+                                  labelText: '${state.tr("carpetWidth")} (m)',
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                  isDense: true,
+                                ),
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7C3AED).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${state.tr("carpetTotalArea")}: ${_carpetArea.toStringAsFixed(1)} m²',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF7C3AED)),
+                              ),
+                              Text(
+                                'ETB ${carpetPrice.toStringAsFixed(2)}',
+                                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Color(0xFF7C3AED)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                      ] else ...[
+                        // Car Type Selector
+                        CarTypeSelector(
+                          selectedType: _carType,
+                          onSelected: (t) => setState(() => _carType = t),
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Package Selection Dropdown
+                        Text(
+                          state.tr('selectedWashPackage'),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppColors.cardBorder),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: _selectedPackage?.id,
+                              items: packages.map((pkg) {
+                                final pkgPrice = pkg.getPriceFor(_carType);
+                                return DropdownMenuItem(
+                                  value: pkg.id,
+                                  child: Row(
+                                    children: [
+                                      AutoCareAssets.buildPhotoThumbnail(
+                                        imageUrl: AutoCareAssets.getPackageImage(pkg),
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: 6,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          pkg.localizedName(state.currentLang),
+                                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Text(
+                                        CurrencyFormatter.format(pkgPrice),
+                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (id) {
+                                if (id != null) {
+                                  setState(() {
+                                    _selectedPackage = packages.firstWhere(
+                                      (p) => p.id == id,
+                                      orElse: () => packages.first,
+                                    );
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                      ],
+
+                      // 3. Service Mode (Station vs Valet vs Mobile)
                       Text(
                         state.tr('serviceMode'),
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
@@ -156,9 +485,9 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         runSpacing: 6,
                         children: [
                           ChoiceChip(
-                            label: Text(state.tr('driveInStationBays')),
+                            label: Text(_isCarpetMode ? state.tr('atStationService') : state.tr('driveInStationBays')),
                             selected: _serviceType == ServiceType.walkInStation,
-                            selectedColor: AppColors.primary,
+                            selectedColor: _isCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
                             labelStyle: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
@@ -167,7 +496,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                             onSelected: (_) => setState(() => _serviceType = ServiceType.walkInStation),
                           ),
                           ChoiceChip(
-                            label: Text(state.tr('serviceValetPickUp')),
+                            label: Text(_isCarpetMode ? state.tr('valetPickupReturn') : state.tr('serviceValetPickUp')),
                             selected: _serviceType == ServiceType.valetPickUp,
                             selectedColor: const Color(0xFF7C3AED),
                             labelStyle: TextStyle(
@@ -178,7 +507,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                             onSelected: (_) => setState(() => _serviceType = ServiceType.valetPickUp),
                           ),
                           ChoiceChip(
-                            label: Text(state.tr('atHomeMobileVan')),
+                            label: Text(_isCarpetMode ? state.tr('atHomeService') : state.tr('atHomeMobileVan')),
                             selected: _serviceType == ServiceType.atHomeMobile,
                             selectedColor: AppColors.mobileVanColor,
                             labelStyle: TextStyle(
@@ -220,74 +549,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         const SizedBox(height: 14),
                       ],
 
-                      // 4. Car Type Selector
-                      CarTypeSelector(
-                        selectedType: _carType,
-                        onSelected: (t) => setState(() => _carType = t),
-                      ),
-                      const SizedBox(height: 14),
-
-                      // 5. Package Selection Dropdown
-                      Text(
-                        state.tr('selectedWashPackage'),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.cardBorder),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: _selectedPackage?.id,
-                            items: packages.map((pkg) {
-                              final pkgPrice = pkg.getPriceFor(_carType);
-                              return DropdownMenuItem(
-                                value: pkg.id,
-                                child: Row(
-                                  children: [
-                                    AutoCareAssets.buildPhotoThumbnail(
-                                      imageUrl: AutoCareAssets.getPackageImage(pkg),
-                                      width: 28,
-                                      height: 28,
-                                      borderRadius: 6,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        pkg.localizedName(state.currentLang),
-                                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Text(
-                                      CurrencyFormatter.format(pkgPrice),
-                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (id) {
-                              if (id != null) {
-                                setState(() {
-                                  _selectedPackage = packages.firstWhere(
-                                    (p) => p.id == id,
-                                    orElse: () => packages.first,
-                                  );
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 6. Arrival Slot
+                      // Arrival Slot
                       CustomTextField(
                         controller: _arrivalSlotController,
                         label: state.tr('phoneBookingArrival'),
@@ -313,7 +575,11 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                             ),
                             Text(
                               CurrencyFormatter.format(price),
-                              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                                color: _isCarpetMode ? const Color(0xFF7C3AED) : AppColors.primaryDark,
+                              ),
                             ),
                           ],
                         ),
@@ -339,7 +605,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
 
   Future<void> _submitPhoneBooking(BuildContext context, dynamic state) async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedPackage == null) return;
+    if (!_isCarpetMode && _selectedPackage == null) return;
 
     setState(() => _isSubmitting = true);
 
@@ -349,24 +615,47 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
         deliveryLoc = '$_selectedBishoftuArea - ${_addressController.text.trim()}';
       }
 
-      await state.bookNewWash(
+      final carpetRate = state.getCarpetPricePerSqM(_carpetType, _serviceType);
+      final carpetPrice = _carpetArea * carpetRate;
+
+      final booking = await state.bookNewWash(
         customerName: '${_callerNameController.text.trim()} [Phone]',
         customerPhone: _phoneController.text.trim(),
         serviceType: _serviceType,
-        carType: _carType,
-        licensePlate: _plateController.text.trim(),
-        package: _selectedPackage!,
+        carType: _isCarpetMode ? CarType.automobile : _carType,
+        licensePlate: _plateController.text.trim().toUpperCase(),
+        package: _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null)!,
         deliveryLocation: deliveryLoc,
         paymentMethod: PaymentMethod.cash,
         gpsCoordinates: null,
+        isPhoneBooking: true,
+        isCarpet: _isCarpetMode,
+        carpetType: _isCarpetMode ? _carpetType : null,
+        carpetAreaSqMeters: _isCarpetMode ? _carpetArea : null,
+        carpetDimensions: _isCarpetMode ? '${_lengthController.text.trim()}m x ${_widthController.text.trim()}m' : null,
+        customTotalPrice: _isCarpetMode ? carpetPrice : null,
       );
+
+      if (_isCarpetMode) {
+        await state.sendCarpetRegistrationSms(booking);
+      }
 
       if (context.mounted) {
         Navigator.pop(context);
+        final tagLabel = _isCarpetMode ? 'Carpet order ${booking.licensePlate}' : 'Phone booking ${booking.licensePlate}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.statusCompleted,
-            content: Text('Phone booking recorded for ${_plateController.text.trim()}!'),
+            content: Text('$tagLabel recorded successfully!'),
+            action: _isCarpetMode
+                ? SnackBarAction(
+                    label: 'Copy SMS',
+                    textColor: Colors.amberAccent,
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(booking)));
+                    },
+                  )
+                : null,
           ),
         );
       }

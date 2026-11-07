@@ -3043,6 +3043,41 @@ class AppStrings {
       AppLanguage.om: 'Kuusaa qorichootaafi meeshaalee dhiqa konkolaataafi karpeetii',
       AppLanguage.am: 'የመኪና ኬሚካሎች እና የምንጣፍ ሳሙናዎች ማዕከላዊ መጋዘን',
     },
+    'carpetIntakeSmsSent': {
+      AppLanguage.en: 'Carpet registration tag SMS sent to customer!',
+      AppLanguage.om: 'Ergaan koodii galmee karpeetii maamilaaf ergameera!',
+      AppLanguage.am: 'የምንጣፍ ምዝገባ መለያ ቁጥር ኤስኤምኤስ ለደንበኛው ተልኳል!',
+    },
+    'carpetCompletionSmsSent': {
+      AppLanguage.en: 'Carpet completion SMS sent to customer!',
+      AppLanguage.om: 'Ergaan xumura dhiqa karpeetii maamilaaf ergameera!',
+      AppLanguage.am: 'የምንጣፍ እጥበት መጠናቀቅ ኤስኤምኤስ ለደንበኛው ተልኳል!',
+    },
+    'sendCarpetIntakeSms': {
+      AppLanguage.en: 'Send Tag SMS',
+      AppLanguage.om: 'Ergaa Koodii Ergi',
+      AppLanguage.am: 'የመለያ ኤስኤምኤስ ላክ',
+    },
+    'sendCarpetCompletionSms': {
+      AppLanguage.en: 'Send Completion SMS',
+      AppLanguage.om: 'Ergaa Xumuraa Ergi',
+      AppLanguage.am: 'የመጠናቀቂያ ኤስኤምኤስ ላክ',
+    },
+    'startWashFloorAction': {
+      AppLanguage.en: 'Start Wash Floor',
+      AppLanguage.om: 'Dhiqa Lafa Jalqabi',
+      AppLanguage.am: 'ወለል ላይ ማጠብ ጀምር',
+    },
+    'moveToDryingRacksAction': {
+      AppLanguage.en: 'Move to Drying Racks',
+      AppLanguage.om: 'Bakka Gogsuutti Dabarri',
+      AppLanguage.am: 'ወደ ማድረቂያ ራክ አዛውር',
+    },
+    'markCarpetReadyAction': {
+      AppLanguage.en: 'Mark Cleaned & Dried',
+      AppLanguage.om: 'Dhiqamee Goge Jedhi',
+      AppLanguage.am: 'ታጥቦ ደርቋል በል',
+    },
     'accountantCombinedHeader': {
       AppLanguage.en: 'Car Wash & Carpet Consolidated Financial Hub',
       AppLanguage.om: 'Wiirtuu Maallaqa Dhiqa Konkolaataafi Karpeetii',

@@ -1761,7 +1761,7 @@ class AppStateNotifier extends ChangeNotifier {
     required String customerPhone,
     required CarType carType,
     required WashPackage package,
-    required BayType assignedBay,
+    BayType? assignedBay,
     String? washerId,
     String? washerName,
     required PaymentMethod paymentMethod,
@@ -1821,16 +1821,71 @@ class AppStateNotifier extends ChangeNotifier {
     return created;
   }
 
+  /// Registration & Intake SMS notifying customer of their carpet tracking tag
+  String getCarpetRegistrationSmsText(WashBooking booking) {
+    final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
+    final tag = booking.licensePlate.isNotEmpty ? booking.licensePlate : booking.id;
+    final cType = booking.carpetType == 'type_b' ? 'Deep Clean (Type B)' : 'Standard Clean (Type A)';
+    final dims = booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? ' (${booking.carpetDimensions})' : '';
+    final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
+
+    if (currentLang == 'OM') {
+      return 'Kabajamaa $customerName, ajajni qulqulleessuu kiliimii keessanii (Koodii Galmee: $tag, Gosa: $cType$dims) qophaa\'eera. Gatiin waliigalaa: $amountStr. Yommuu dhiqamee xumuramu ergaan biraa isiniif ergama. Bishe Car Wash & Carpet Cleaning Service!';
+    } else if (currentLang == 'AM') {
+      return 'ውድ $customerName፣ የካርፔት ማጠቢያ ትዕዛዝዎ (የምዝገባ መለያ ቁጥር: $tag፣ ዓይነት: $cType$dims) ተመዝግቧል። ጠቅላላ ዋጋ: $amountStr። እጥበቱ ተጠናቆ ሲደርቅ ተጨማሪ መልዕክት ይደርስዎታል። ስለመረጡን እናመሰግናለን! ቢሼ ካርፔት ማጠቢያ';
+    }
+
+    return 'Dear $customerName, your carpet cleaning order has been registered (Registration Tag: $tag, Type: $cType$dims). Estimated Total: $amountStr. We will notify you once washing and drying are complete. Thank you for choosing Bishe Carpet Cleaning Service!';
+  }
+
+  /// Dispatches intake/registration SMS to customer with carpet tag number
+  Future<bool> sendCarpetRegistrationSms(WashBooking booking) async {
+    final rawPhone = booking.customerPhone.trim();
+    final cleanPhone = rawPhone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    final message = getCarpetRegistrationSmsText(booking);
+
+    debugPrint('--- [CARPET INTAKE SMS DISPATCH] ---');
+    debugPrint('From Cashier: $_cashierSmsPhone');
+    debugPrint('To Customer: $cleanPhone');
+    debugPrint('Message: $message');
+    debugPrint('-----------------------------------');
+
+    if (cleanPhone.isNotEmpty) {
+      try {
+        final uriStr = 'sms:$cleanPhone?body=${Uri.encodeComponent(message)}';
+        UrlLauncherHelper.openUrl(uriStr);
+        return true;
+      } catch (e) {
+        debugPrint('SMS launcher error: $e');
+      }
+    }
+    return true;
+  }
+
   String getCustomerCompletionSmsText(WashBooking booking) {
     final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
     final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
     if (booking.isCarpet) {
+      final tag = booking.licensePlate.isNotEmpty ? booking.licensePlate : booking.id;
       final cType = booking.carpetType == 'type_b' ? 'Deep Clean (Type B)' : 'Standard Clean (Type A)';
       final dims = booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? ' (${booking.carpetDimensions})' : '';
-      return 'Dear $customerName, your carpet cleaning service ($cType$dims) is completed and ready. Please pay $amountStr. Thank you for choosing Bishe Car Wash & Carpet Cleaning Service!';
+
+      if (currentLang == 'OM') {
+        return 'Kabajamaa $customerName, dhiqamuun kiliimii keessanii (Koodii: $tag, $cType$dims) guutummaatti xumuramee qophii ta\'eera. Maaloo kaffaltii $amountStr kaffaluun fudhadhaa. Bishe Car Wash & Carpet Cleaning Service!';
+      } else if (currentLang == 'AM') {
+        return 'ውድ $customerName፣ የካርፔት ማጠቢያ አገልግሎትዎ (መለያ: $tag፣ $cType$dims) ሙሉ በሙሉ ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው ይረከቡ። ስለመረጡን እናመሰግናለን! ቢሼ ካርፔት ማጠቢያ';
+      }
+
+      return 'Dear $customerName, your carpet cleaning service (Tag: $tag, $cType$dims) is completed and ready. Please pay $amountStr. Thank you for choosing Bishe Car Wash & Carpet Cleaning Service!';
     }
     final pkgName = booking.package.name;
     final plate = booking.licensePlate;
+
+    if (currentLang == 'OM') {
+      return 'Kabajamaa $customerName, tajaajilli dhiqaa konkolaataa keessanii ($pkgName, Gabatee: $plate) xumuramee qophii ta\'eera. Maaloo kaffaltii $amountStr kaffaluun fudhadhaa. Galatoomaa!';
+    } else if (currentLang == 'AM') {
+      return 'ውድ $customerName፣ የተሽከርካሪዎ ($pkgName፣ ታርጋ: $plate) የመኪና ማጠብ አገልግሎት ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው መኪናዎን ይረከቡ። እናመሰግናለን!';
+    }
 
     return 'Dear $customerName, your car washing service ($pkgName) for vehicle $plate is completed and ready to pickup. Please pay $amountStr and pick up your vehicle. Thank you for choosing Bishe Car Wash Service!';
   }
@@ -1929,7 +1984,7 @@ class AppStateNotifier extends ChangeNotifier {
     required String customerPhone,
     required CarType carType,
     required WashPackage package,
-    required BayType assignedBay,
+    BayType? assignedBay,
     String? assignedWasherId,
     String? assignedWasherName,
     required PaymentMethod paymentMethod,

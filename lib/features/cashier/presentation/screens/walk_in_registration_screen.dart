@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -579,62 +580,64 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               ],
               const SizedBox(height: 18),
 
-              // 4. Station Bay / Van Assignment
-              Text(
-                state.tr('assignVehicle'),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: BayType.values.map((bay) {
-                  final isSelected = bay == _bayType;
-                  final bayData = state.bays.firstWhere(
-                    (b) => b.type == bay,
-                    orElse: () => StationBay(type: bay),
-                  );
+              // 4. Station Bay / Van Assignment (Only for vehicles, zero cross-contamination)
+              if (!_isCarpetMode) ...[
+                Text(
+                  state.tr('assignVehicle'),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: BayType.values.map((bay) {
+                    final isSelected = bay == _bayType;
+                    final bayData = state.bays.firstWhere(
+                      (b) => b.type == bay,
+                      orElse: () => StationBay(type: bay),
+                    );
 
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _bayType = bay),
-                      child: Container(
-                        margin: EdgeInsets.only(right: bay != BayType.values.last ? 8 : 0),
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-                        decoration: BoxDecoration(
-                          color: isSelected ? bay.color.withOpacity(0.1) : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? bay.color : AppColors.cardBorder,
-                            width: isSelected ? 2 : 1,
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _bayType = bay),
+                        child: Container(
+                          margin: EdgeInsets.only(right: bay != BayType.values.last ? 8 : 0),
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                          decoration: BoxDecoration(
+                            color: isSelected ? bay.color.withOpacity(0.1) : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected ? bay.color : AppColors.cardBorder,
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(bay.icon, color: bay.color, size: 22),
+                              const SizedBox(height: 4),
+                              Text(
+                                bay.shortName,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                  color: isSelected ? bay.color : AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                bayData.isVacant ? state.tr('availableNow') : state.tr('busyWashing'),
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: bayData.isVacant ? AppColors.statusReady : AppColors.statusPending,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Icon(bay.icon, color: bay.color, size: 22),
-                            const SizedBox(height: 4),
-                            Text(
-                              bay.shortName,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                color: isSelected ? bay.color : AppColors.textPrimary,
-                              ),
-                            ),
-                            Text(
-                              bayData.isVacant ? state.tr('availableNow') : state.tr('busyWashing'),
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w800,
-                                color: bayData.isVacant ? AppColors.statusReady : AppColors.statusPending,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 18),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 18),
+              ],
 
               // Submit Action
               CustomButton(
@@ -669,7 +672,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
         customerPhone: _phoneController.text.trim(),
         carType: _isCarpetMode ? CarType.automobile : _carType,
         package: effectivePackage,
-        assignedBay: _bayType,
+        assignedBay: _isCarpetMode ? null : _bayType,
         paymentMethod: PaymentMethod.cash,
         markPaid: false,
         transactionRef: null,
@@ -680,12 +683,25 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
         customTotalPrice: _isCarpetMode ? calculatedCarpetPrice : null,
       );
 
+      if (_isCarpetMode) {
+        await state.sendCarpetRegistrationSms(booking);
+      }
+
       if (mounted) {
-        final label = _isCarpetMode ? 'Carpet order ${booking.licensePlate}' : 'Gate entry ${booking.licensePlate}';
+        final label = _isCarpetMode ? 'Carpet order ${booking.licensePlate}' : 'Gate entry ${booking.licensePlate} stationed at ${_bayType.displayName}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.statusCompleted,
-            content: Text('$label stationed at ${_bayType.displayName}!'),
+            content: Text('$label registered successfully!'),
+            action: _isCarpetMode
+                ? SnackBarAction(
+                    label: 'Copy SMS',
+                    textColor: Colors.amberAccent,
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(booking)));
+                    },
+                  )
+                : null,
           ),
         );
         Navigator.pop(context);

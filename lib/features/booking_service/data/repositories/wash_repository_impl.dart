@@ -114,7 +114,7 @@ class WashRepositoryImpl implements IWashRepository {
     _bookings.insert(0, booking);
 
     // If bay is already assigned at creation (walk-in gate entry), occupy bay
-    if (booking.assignedBay != null) {
+    if (booking.assignedBay != null && !booking.isCarpet) {
       _occupyBay(booking.assignedBay!, booking);
     }
     return booking;
@@ -137,7 +137,7 @@ class WashRepositoryImpl implements IWashRepository {
 
     // If marked completed, free bay and trigger automatic commission logging
     if (newStatus == WashStatus.completed && oldStatus != WashStatus.completed) {
-      if (booking.assignedBay != null) {
+      if (booking.assignedBay != null && !booking.isCarpet) {
         _freeBay(booking.assignedBay!);
       }
 

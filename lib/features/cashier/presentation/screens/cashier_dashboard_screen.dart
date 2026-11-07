@@ -103,24 +103,24 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
                   tooltip: state.tr('registerPhoneBooking'),
-                  onPressed: () => PhoneBookingDialog.show(context),
+                  onPressed: () => PhoneBookingDialog.show(context, initialCarpetMode: state.isCarpetDivisionActive),
                   child: const Icon(Icons.phone_in_talk_rounded, size: 18),
                 ),
                 const SizedBox(width: 8),
                 FloatingActionButton.extended(
                   heroTag: 'fab_walk_in',
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: state.isCarpetDivisionActive ? const Color(0xFF7C3AED) : AppColors.primary,
                   foregroundColor: Colors.white,
-                  icon: const Icon(Icons.add_road_rounded, size: 18),
+                  icon: Icon(state.isCarpetDivisionActive ? Icons.texture_rounded : Icons.add_road_rounded, size: 18),
                   label: Text(
-                    state.tr('newWalkIn'),
+                    state.isCarpetDivisionActive ? state.tr('carpetIntakeRegister') : state.tr('newWalkIn'),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
                   ),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const WalkInRegistrationScreen(),
+                        builder: (_) => WalkInRegistrationScreen(initialCarpetMode: state.isCarpetDivisionActive),
                       ),
                     );
                   },
@@ -139,7 +139,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                     state.tr('registerPhoneBooking'),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
                   ),
-                  onPressed: () => PhoneBookingDialog.show(context),
+                  onPressed: () => PhoneBookingDialog.show(context, initialCarpetMode: state.isCarpetDivisionActive),
                 ),
                 const SizedBox(width: 10),
                 FloatingActionButton.extended(
@@ -1346,11 +1346,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           Row(
             children: [
               AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: AutoCareAssets.getPackageImage(b.package),
+                imageUrl: b.isCarpet
+                    ? (b.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+                    : AutoCareAssets.getPackageImage(b.package),
                 width: 36,
                 height: 36,
                 borderRadius: 8,
-                fallbackIcon: Icons.local_car_wash_rounded,
+                fallbackIcon: b.isCarpet ? Icons.texture_rounded : Icons.local_car_wash_rounded,
               ),
               const SizedBox(width: 8),
               Text(
@@ -1542,20 +1544,64 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
   Widget _buildActionButtonsMobile(BuildContext context, dynamic state, WashBooking b) {
     if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay || b.status == WashStatus.confirmed) {
-      return SizedBox(
-        width: double.infinity,
-        height: 38,
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            elevation: 0,
+      return Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 38,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: b.isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.play_arrow_rounded, size: 16),
+              label: Text(
+                b.isCarpet ? state.tr('startWashFloorAction') : state.tr('startWashAction'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+              ),
+              onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.washing),
+            ),
           ),
-          icon: const Icon(Icons.play_arrow_rounded, size: 16),
-          label: Text(state.tr('startWashAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
-          onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.washing),
-        ),
+          if (b.isCarpet) ...[
+            const SizedBox(height: 6),
+            SizedBox(
+              width: double.infinity,
+              height: 34,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF7C3AED),
+                  side: const BorderSide(color: Color(0xFF7C3AED), width: 1.2),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                icon: const Icon(Icons.sms_rounded, size: 14),
+                label: Text(
+                  '${state.tr("sendCarpetIntakeSms")} (${b.licensePlate})',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+                ),
+                onPressed: () async {
+                  await state.sendCarpetRegistrationSms(b);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.tr('carpetIntakeSmsSent')),
+                        backgroundColor: const Color(0xFF7C3AED),
+                        action: SnackBarAction(
+                          label: 'Copy SMS',
+                          textColor: Colors.amberAccent,
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(b)));
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ],
       );
     } else if (b.status == WashStatus.washing) {
       return SizedBox(
@@ -1563,13 +1609,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         height: 38,
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.bay1Color,
+            backgroundColor: b.isCarpet ? const Color(0xFF6366F1) : AppColors.bay1Color,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             elevation: 0,
           ),
           icon: const Icon(Icons.air_rounded, size: 16),
-          label: Text(state.tr('moveToDryingAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+          label: Text(
+            b.isCarpet ? state.tr('moveToDryingRacksAction') : state.tr('moveToDryingAction'),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+          ),
           onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.drying),
         ),
       );
@@ -1579,13 +1628,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         height: 38,
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.bay2Color,
+            backgroundColor: b.isCarpet ? const Color(0xFF059669) : AppColors.bay2Color,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             elevation: 0,
           ),
           icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
-          label: Text(state.tr('markCompletedAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+          label: Text(
+            b.isCarpet ? state.tr('markCarpetReadyAction') : state.tr('markCompletedAction'),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+          ),
           onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.completed),
         ),
       );
@@ -1650,11 +1702,13 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
       child: Row(
         children: [
           AutoCareAssets.buildPhotoThumbnail(
-            imageUrl: AutoCareAssets.getPackageImage(b.package),
+            imageUrl: b.isCarpet
+                ? (b.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+                : AutoCareAssets.getPackageImage(b.package),
             width: 48,
             height: 48,
             borderRadius: 10,
-            fallbackIcon: Icons.local_car_wash_rounded,
+            fallbackIcon: b.isCarpet ? Icons.texture_rounded : Icons.local_car_wash_rounded,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1799,42 +1853,82 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
           // 1. Readable Status Advancement Action Button
           if (b.status == WashStatus.pending || b.status == WashStatus.assignedToBay || b.status == WashStatus.confirmed) ...[
+            if (b.isCarpet) ...[
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF7C3AED),
+                  side: const BorderSide(color: Color(0xFF7C3AED), width: 1.2),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                icon: const Icon(Icons.sms_rounded, size: 13),
+                label: Text(state.tr('sendCarpetIntakeSms'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+                onPressed: () async {
+                  await state.sendCarpetRegistrationSms(b);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.tr('carpetIntakeSmsSent')),
+                        backgroundColor: const Color(0xFF7C3AED),
+                        action: SnackBarAction(
+                          label: 'Copy SMS',
+                          textColor: Colors.amberAccent,
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(b)));
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(width: 6),
+            ],
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: b.isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 14),
-              label: Text(state.tr('startWashAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              label: Text(
+                b.isCarpet ? state.tr('startWashFloorAction') : state.tr('startWashAction'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+              ),
               onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.washing),
             ),
           ] else if (b.status == WashStatus.washing) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.bay1Color,
+                backgroundColor: b.isCarpet ? const Color(0xFF6366F1) : AppColors.bay1Color,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
               ),
               icon: const Icon(Icons.air_rounded, size: 14),
-              label: Text(state.tr('moveToDryingAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              label: Text(
+                b.isCarpet ? state.tr('moveToDryingRacksAction') : state.tr('moveToDryingAction'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+              ),
               onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.drying),
             ),
           ] else if (b.status == WashStatus.drying) ...[
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.bay2Color,
+                backgroundColor: b.isCarpet ? const Color(0xFF059669) : AppColors.bay2Color,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 elevation: 0,
               ),
               icon: const Icon(Icons.check_circle_outline_rounded, size: 14),
-              label: Text(state.tr('markCompletedAction'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11)),
+              label: Text(
+                b.isCarpet ? state.tr('markCarpetReadyAction') : state.tr('markCompletedAction'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+              ),
               onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.completed),
             ),
           ],
@@ -3051,11 +3145,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   }
 
   List<WashBooking> _getFilteredBookings(List<WashBooking> bookings, bool isCarpetDivision) {
-    // Only items belonging to the active division that are NOT yet paid belong in the active station queue.
     // Zero cross-contamination: vehicle queue contains only vehicles, carpet queue contains only carpets.
-    return bookings
-        .where((b) => !b.payment.isPaid && b.status != WashStatus.cancelled && (b.isCarpet == isCarpetDivision))
-        .toList();
+    // Active station queue contains:
+    // 1. Any booking currently in progress (pending, confirmed, assignedToBay, washing, drying, readyForPickup)
+    // 2. Any completed booking that has NOT yet been paid/settled
+    return bookings.where((b) {
+      if (b.status == WashStatus.cancelled) return false;
+      if (b.isCarpet != isCarpetDivision) return false;
+      final isFinishedAndSettled = b.status == WashStatus.completed && b.payment.isPaid;
+      return !isFinishedAndSettled;
+    }).toList();
   }
 
   Widget _buildCleanStationCapacityBar(
@@ -3066,6 +3165,76 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
     StationBay van,
     bool isMobile,
   ) {
+    if (state.isCarpetDivisionActive) {
+      final carpetBookings = (state.bookings as List<WashBooking>)
+          .where((b) => b.isCarpet && b.status != WashStatus.cancelled && !(b.status == WashStatus.completed && b.payment.isPaid))
+          .toList();
+      final washingCarpets = carpetBookings.where((b) => b.status == WashStatus.washing || b.status == WashStatus.assignedToBay || b.status == WashStatus.pending).toList();
+      final dryingCarpets = carpetBookings.where((b) => b.status == WashStatus.drying).toList();
+      final valetCarpets = carpetBookings.where((b) => (b.serviceType == ServiceType.valetPickUp || b.serviceType == ServiceType.atHomeMobile) && b.status != WashStatus.completed).toList();
+
+      final isWashFloorBusy = washingCarpets.isNotEmpty;
+      final washFloorStatus = isWashFloorBusy ? '${washingCarpets.length} in wash (${washingCarpets.first.licensePlate})' : state.tr('availableNow');
+
+      final isDryingBusy = dryingCarpets.isNotEmpty;
+      final dryingStatus = isDryingBusy ? '${dryingCarpets.length} drying (${dryingCarpets.first.licensePlate})' : state.tr('availableNow');
+
+      final isValetBusy = valetCarpets.isNotEmpty;
+      final valetStatus = isValetBusy ? '${valetCarpets.length} active' : state.tr('availableNow');
+
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.cardBorder),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildStationMiniIndicator(
+                state.tr('carpetWashFloor'),
+                !isWashFloorBusy,
+                washFloorStatus,
+                AutoCareAssets.carpetStationWashUrl,
+                Icons.waves_rounded,
+                isMobile,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStationMiniIndicator(
+                state.tr('carpetDryingRacks'),
+                !isDryingBusy,
+                dryingStatus,
+                AutoCareAssets.carpetDryingRackUrl,
+                Icons.dry_cleaning_rounded,
+                isMobile,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStationMiniIndicator(
+                state.tr('carpetValetDriver'),
+                !isValetBusy,
+                valetStatus,
+                AutoCareAssets.valetDriverUrl,
+                Icons.local_shipping_rounded,
+                isMobile,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final bookings = state.bookings as List<WashBooking>;
 
     // Real-time busy detection from active queue in washing/drying/assigned
@@ -3120,6 +3289,72 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: _buildBayMiniIndicator(state.tr('mobileVan'), !isVanBusy, plateVan, state, isMobile),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStationMiniIndicator(String title, bool isFree, String statusText, String imageUrl, IconData fallbackIcon, bool isMobile) {
+    final color = isFree ? AppColors.statusReady : AppColors.statusWashing;
+
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 6 : 8, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          AutoCareAssets.buildPhotoThumbnail(
+            imageUrl: imageUrl,
+            width: isMobile ? 32 : 36,
+            height: isMobile ? 32 : 36,
+            borderRadius: 8,
+            fallbackIcon: fallbackIcon,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: isMobile ? 10.5 : 11.5,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  statusText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: isMobile ? 9.5 : 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -3219,7 +3454,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
 
     if (context.mounted) {
       final msg = next == WashStatus.completed
-          ? '${booking.licensePlate} completed! Ready for payment • SMS ready for ${booking.customerPhone}'
+          ? (booking.isCarpet
+              ? '${booking.licensePlate}: ${state.tr("carpetCompletionSmsSent")}'
+              : '${booking.licensePlate} completed! Ready for payment • SMS ready for ${booking.customerPhone}')
           : '${booking.licensePlate} updated to ${next.displayName}!';
 
       ScaffoldMessenger.of(context).showSnackBar(

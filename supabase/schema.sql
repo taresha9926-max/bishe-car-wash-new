@@ -113,6 +113,11 @@ CREATE TABLE IF NOT EXISTS public.wash_bookings (
     receipt_url TEXT,
     scheduled_time TIMESTAMPTZ,
     commission_logged BOOLEAN DEFAULT FALSE,
+    is_carpet BOOLEAN DEFAULT FALSE,
+    carpet_type TEXT,
+    carpet_area_sq_meters NUMERIC(10, 2),
+    carpet_dimensions TEXT,
+    custom_total_price NUMERIC(10, 2),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     completed_at TIMESTAMPTZ
 );

@@ -336,6 +336,16 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         }
 
         final isPhone = json['booking_origin'] == 'phone_booking';
+        final rawPlate = json['license_plate']?.toString() ?? '';
+        final isCarpet = (json['is_carpet'] == true) || rawPlate.startsWith('CPT-');
+        final carpetType = json['carpet_type']?.toString();
+        final carpetAreaSqMeters = json['carpet_area_sq_meters'] != null
+            ? double.tryParse(json['carpet_area_sq_meters'].toString())
+            : null;
+        final carpetDimensions = json['carpet_dimensions']?.toString();
+        final customTotalPrice = json['custom_total_price'] != null
+            ? double.tryParse(json['custom_total_price'].toString())
+            : (isCarpet && json['total_amount'] != null ? double.tryParse(json['total_amount'].toString()) : null);
 
         return WashBooking(
           id: json['id'].toString(),
@@ -344,7 +354,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           serviceType: serviceType,
           deliveryLocation: json['delivery_location'],
           carType: carType,
-          licensePlate: json['license_plate'] ?? '',
+          licensePlate: rawPlate,
           package: pkg,
           status: status,
           assignedBay: assignedBay,
@@ -361,6 +371,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           completedAt: json['completed_at'] != null ? DateTime.tryParse(json['completed_at']) : null,
           commissionLogged: json['commission_logged'] ?? false,
           isPhoneBooking: isPhone,
+          isCarpet: isCarpet,
+          carpetType: carpetType,
+          carpetAreaSqMeters: carpetAreaSqMeters,
+          carpetDimensions: carpetDimensions,
+          customTotalPrice: customTotalPrice,
         );
       }).toList();
     } catch (e) {
@@ -409,13 +424,28 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'scheduled_time': booking.scheduledTime?.toIso8601String(),
         'transaction_ref': booking.payment.transactionRef,
         'receipt_url': booking.payment.receiptScreenshot,
+        'is_carpet': booking.isCarpet,
+        'carpet_type': booking.carpetType,
+        'carpet_area_sq_meters': booking.carpetAreaSqMeters,
+        'carpet_dimensions': booking.carpetDimensions,
+        'custom_total_price': booking.customTotalPrice,
       };
 
-      final dynamic res = await _post('wash_bookings', payload);
+      dynamic res = await _post('wash_bookings', payload);
+      if (res == null && booking.isCarpet) {
+        // Fallback: If remote Supabase table has not run the 20261107 migration yet, omit extra columns so POST succeeds!
+        final fallbackPayload = Map<String, dynamic>.from(payload)
+          ..remove('is_carpet')
+          ..remove('carpet_type')
+          ..remove('carpet_area_sq_meters')
+          ..remove('carpet_dimensions')
+          ..remove('custom_total_price');
+        res = await _post('wash_bookings', fallbackPayload);
+      }
       if (res != null && res is List && res.isNotEmpty) {
         final newId = res.first['id'].toString();
 
-        if (booking.assignedBay != null) {
+        if (booking.assignedBay != null && !booking.isCarpet) {
           final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
           await _patch('station_bays?bay_number=eq.$bayNum', {
             'is_occupied': true,
@@ -447,7 +477,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
         final booking = await getBookingById(bookingId);
         if (booking != null && newStatus == WashStatus.completed && !booking.commissionLogged && booking.payment.isPaid) {
-          if (booking.assignedBay != null) {
+          if (booking.assignedBay != null && !booking.isCarpet) {
             final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
             await _patch('station_bays?bay_number=eq.$bayNum', {
               'is_occupied': false,
