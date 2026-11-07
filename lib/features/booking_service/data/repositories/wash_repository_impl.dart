@@ -190,6 +190,7 @@ class WashRepositoryImpl implements IWashRepository {
     required String bookingId,
     required PaymentMethod method,
     required double amount,
+    double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
   }) async {
@@ -203,6 +204,7 @@ class WashRepositoryImpl implements IWashRepository {
       isPaid: true,
       method: method,
       amount: amount,
+      tipAmount: tipAmount,
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
       paidAt: DateTime.now(),

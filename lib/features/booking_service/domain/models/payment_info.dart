@@ -97,6 +97,7 @@ class PaymentInfo {
   final bool isPaid;
   final PaymentMethod method;
   final double amount;
+  final double tipAmount; // Gratuity for the washers team (100% pass-through)
   final String? transactionRef;
   final String? receiptScreenshot; // Base64 or receipt URL
   final DateTime? paidAt;
@@ -105,15 +106,19 @@ class PaymentInfo {
     this.isPaid = false,
     this.method = PaymentMethod.cash,
     required this.amount,
+    this.tipAmount = 0.0,
     this.transactionRef,
     this.receiptScreenshot,
     this.paidAt,
   });
 
+  double get totalPaid => amount + tipAmount;
+
   PaymentInfo copyWith({
     bool? isPaid,
     PaymentMethod? method,
     double? amount,
+    double? tipAmount,
     String? transactionRef,
     String? receiptScreenshot,
     DateTime? paidAt,
@@ -122,6 +127,7 @@ class PaymentInfo {
       isPaid: isPaid ?? this.isPaid,
       method: method ?? this.method,
       amount: amount ?? this.amount,
+      tipAmount: tipAmount ?? this.tipAmount,
       transactionRef: transactionRef ?? this.transactionRef,
       receiptScreenshot: receiptScreenshot ?? this.receiptScreenshot,
       paidAt: paidAt ?? this.paidAt,

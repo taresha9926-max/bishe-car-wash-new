@@ -33,19 +33,26 @@ class PaymentProcessDialog extends StatefulWidget {
 class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   late PaymentMethod _selectedMethod;
   final _refCodeController = TextEditingController();
+  final _tipController = TextEditingController();
   bool _isProcessing = false;
   String? _uploadedScreenshotName;
   String? _screenshotBase64;
+  double _tipAmount = 0.0;
 
   @override
   void initState() {
     super.initState();
     _selectedMethod = widget.booking.payment.method;
+    _tipAmount = widget.booking.payment.tipAmount;
+    if (_tipAmount > 0) {
+      _tipController.text = _tipAmount.toStringAsFixed(0);
+    }
   }
 
   @override
   void dispose() {
     _refCodeController.dispose();
+    _tipController.dispose();
     super.dispose();
   }
 
@@ -106,12 +113,14 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 child: Column(
                   children: [
                     Text(
-                      '${state.tr("licensePlate")}: ${widget.booking.licensePlate}',
+                      widget.booking.isCarpet
+                          ? '${state.tr("carpetService")}: ${widget.booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                          : '${state.tr("licensePlate")}: ${widget.booking.licensePlate}',
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      CurrencyFormatter.format(amountDue, showDecimals: true),
+                      CurrencyFormatter.format(amountDue + _tipAmount, showDecimals: true),
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -119,13 +128,90 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                       ),
                     ),
                     Text(
-                      '${widget.booking.package.localizedName(state.currentLang)} • ${widget.booking.carType.localizedName(state.currentLang)}',
+                      widget.booking.isCarpet
+                          ? '${widget.booking.carpetAreaSqMeters ?? 0.0} m² (${widget.booking.carpetDimensions ?? ""}) • ${widget.booking.serviceType.localizedName(state.currentLang)}'
+                          : '${widget.booking.package.localizedName(state.currentLang)} • ${widget.booking.carType.localizedName(state.currentLang)}',
                       style: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
+
+              // Optional Washer Tip Box
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.volunteer_activism_rounded, size: 16, color: Colors.amber.shade900),
+                        const SizedBox(width: 6),
+                        Text(
+                          state.tr('washersTip'),
+                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.amber.shade900),
+                        ),
+                        const Spacer(),
+                        if (_tipAmount > 0)
+                          Text(
+                            '+ETB ${_tipAmount.toStringAsFixed(0)}',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        for (final tipVal in [50, 100, 200]) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: ChoiceChip(
+                              label: Text('+$tipVal'),
+                              selected: _tipAmount == tipVal.toDouble(),
+                              onSelected: (selected) {
+                                setState(() {
+                                  _tipAmount = selected ? tipVal.toDouble() : 0.0;
+                                  _tipController.text = _tipAmount > 0 ? _tipAmount.toStringAsFixed(0) : '';
+                                });
+                              },
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        ],
+                        Expanded(
+                          child: SizedBox(
+                            height: 38,
+                            child: TextField(
+                              controller: _tipController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: state.tr('customTip'),
+                                hintStyle: const TextStyle(fontSize: 11),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                isDense: true,
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  _tipAmount = double.tryParse(val) ?? 0.0;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
 
               Text(
                 state.tr('paymentMethod'),
@@ -322,6 +408,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         bookingId: widget.booking.id,
         method: _selectedMethod,
         amount: amount,
+        tipAmount: _tipAmount,
         transactionRef: refCode,
         receiptScreenshot: _screenshotBase64,
       );
@@ -329,13 +416,16 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
       navigator.pop();
 
       if (mounted) {
+        final totalText = _tipAmount > 0
+            ? '${CurrencyFormatter.format(amount + _tipAmount)} (includes ETB ${_tipAmount.toStringAsFixed(0)} tip)'
+            : CurrencyFormatter.format(amount);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
                 const Icon(Icons.check_circle, color: Colors.white, size: 20),
                 const SizedBox(width: 8),
-                Text('Payment of ${CurrencyFormatter.format(amount)} recorded successfully!'),
+                Text('Payment of $totalText recorded successfully!'),
               ],
             ),
             backgroundColor: AppColors.statusCompleted,

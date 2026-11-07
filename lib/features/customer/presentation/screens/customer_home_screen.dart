@@ -31,11 +31,23 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   CarType _previewCarType = CarType.automobile;
   String? _selectedPackageId;
   final TextEditingController _trackController = TextEditingController();
+  bool _isCarpetTabActive = false;
+  String _customerCarpetType = 'type_a';
+  final _carpetLengthCalc = TextEditingController(text: '3.0');
+  final _carpetWidthCalc = TextEditingController(text: '2.0');
 
   @override
   void dispose() {
     _trackController.dispose();
+    _carpetLengthCalc.dispose();
+    _carpetWidthCalc.dispose();
     super.dispose();
+  }
+
+  double get _customerCarpetArea {
+    final l = double.tryParse(_carpetLengthCalc.text.trim()) ?? 0.0;
+    final w = double.tryParse(_carpetWidthCalc.text.trim()) ?? 0.0;
+    return l * w;
   }
 
   @override
@@ -166,25 +178,108 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               _buildStationGpsTrackerCard(context, state),
               const SizedBox(height: 24),
 
-              // 6. Vehicle Type Pricing Matrix Tabs
-              Text(
-                state.tr('servicePackages'),
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+              // Service Category Selector Toggle (Vehicle Wash vs Carpet Cleaning)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_isCarpetTabActive) {
+                            setState(() => _isCarpetTabActive = false);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: !_isCarpetTabActive ? AppColors.primary : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.local_car_wash_rounded, size: 16, color: !_isCarpetTabActive ? Colors.white : AppColors.textPrimary),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  state.tr('servicePackages'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: !_isCarpetTabActive ? Colors.white : AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          if (!_isCarpetTabActive) {
+                            setState(() => _isCarpetTabActive = true);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: _isCarpetTabActive ? const Color(0xFF6366F1) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.texture_rounded, size: 16, color: _isCarpetTabActive ? Colors.white : AppColors.textPrimary),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  state.tr('carpetService'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: _isCarpetTabActive ? Colors.white : AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 18),
 
-              // Vehicle Category Selector Segment
-              _buildVehicleSelector(state),
-              const SizedBox(height: 14),
+              if (!_isCarpetTabActive) ...[
+                // Vehicle Category Selector Segment
+                _buildVehicleSelector(state),
+                const SizedBox(height: 14),
 
-              // Packages List with Itemized Services
-              Column(
-                children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
-              ),
+                // Packages List with Itemized Services
+                Column(
+                  children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
+                ),
+              ] else ...[
+                _buildCustomerCarpetCleaningSection(context, state),
+              ],
               const SizedBox(height: 24),
 
               // Footer: Bishoftu Location
@@ -201,6 +296,290 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => NewBookingScreen(initialServiceType: type),
+      ),
+    );
+  }
+
+  Widget _buildCustomerCarpetCleaningSection(BuildContext context, dynamic state) {
+    final rate = _customerCarpetType == 'type_b' ? state.carpetTypeBPricePerSqM as double : state.carpetTypeAPricePerSqM as double;
+    final estimatedPrice = _customerCarpetArea * rate;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Banner
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF4F46E5), Color(0xFF4338CA)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.texture_rounded, color: Colors.white, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.tr('carpetCleaningService'),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15),
+                      ),
+                      Text(
+                        'Deep carpet shampooing, dust extraction, sanitization & quick drying',
+                        style: const TextStyle(color: Colors.white70, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Two Types Selection
+          Text(
+            state.tr('carpetCleaningOptions'),
+            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _customerCarpetType = 'type_a'),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _customerCarpetType == 'type_a' ? const Color(0xFF6366F1).withOpacity(0.08) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _customerCarpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.cardBorder,
+                        width: _customerCarpetType == 'type_a' ? 2 : 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.cleaning_services_rounded, size: 18, color: _customerCarpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                state.tr('carpetTypeA'),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: _customerCarpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF4338CA)),
+                        ),
+                        Text(state.tr('carpetTypeADesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _customerCarpetType = 'type_b'),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _customerCarpetType == 'type_b' ? const Color(0xFFDC2626).withOpacity(0.08) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _customerCarpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.cardBorder,
+                        width: _customerCarpetType == 'type_b' ? 2 : 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.auto_awesome_rounded, size: 18, color: _customerCarpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                state.tr('carpetTypeB'),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: _customerCarpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFB91C1C)),
+                        ),
+                        Text(state.tr('carpetTypeBDesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Area Calculator
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.cardBorder),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  state.tr('carpetDimensionsTitle'),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _carpetLengthCalc,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: '${state.tr("carpetLength")} (m)',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          isDense: true,
+                          fillColor: Colors.white,
+                          filled: true,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text('×', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _carpetWidthCalc,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: '${state.tr("carpetWidth")} (m)',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          isDense: true,
+                          fillColor: Colors.white,
+                          filled: true,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${state.tr("carpetTotalArea")}: ${_customerCarpetArea.toStringAsFixed(1)} m²',
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFF4338CA)),
+                      ),
+                      Text(
+                        'ETB ${estimatedPrice.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: Color(0xFF312E81)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // 3 Provision options note
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              Chip(
+                avatar: const Icon(Icons.storefront_rounded, size: 14, color: AppColors.primary),
+                label: Text(state.tr('atStationService'), style: const TextStyle(fontSize: 11)),
+                backgroundColor: AppColors.surfaceVariant,
+              ),
+              Chip(
+                avatar: const Icon(Icons.home_repair_service_rounded, size: 14, color: AppColors.primary),
+                label: Text(state.tr('atHomeService'), style: const TextStyle(fontSize: 11)),
+                backgroundColor: AppColors.surfaceVariant,
+              ),
+              Chip(
+                avatar: const Icon(Icons.delivery_dining_rounded, size: 14, color: Color(0xFF7C3AED)),
+                label: Text(state.tr('valetPickupReturn'), style: const TextStyle(fontSize: 11)),
+                backgroundColor: AppColors.surfaceVariant,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Action button to book carpet cleaning
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4F46E5),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NewBookingScreen(
+                      isCarpet: true,
+                      initialCarpetType: _customerCarpetType,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.bookmark_add_rounded, size: 20),
+              label: Text(
+                '${state.tr("bookCarpetCleaning")} • ${CurrencyFormatter.format(estimatedPrice)}',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

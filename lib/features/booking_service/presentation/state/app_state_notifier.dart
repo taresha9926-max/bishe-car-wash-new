@@ -27,6 +27,7 @@ import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart
 import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/shower_record.dart';
 import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inventory_seed.dart';
 
 class AppStateNotifier extends ChangeNotifier {
@@ -418,6 +419,7 @@ class AppStateNotifier extends ChangeNotifier {
     _stockTransactions.clear();
     _pendingApprovals.clear();
     _consumables = List.from(InitialInventorySeed.getConsumables());
+    _showerRecords.clear();
     notifyListeners();
     await _repository.clearAllBookings();
     try {
@@ -444,34 +446,183 @@ class AppStateNotifier extends ChangeNotifier {
     }
   }
 
+  // Shower Service State
+  final List<ShowerRecord> _showerRecords = [];
+  List<ShowerRecord> get showerRecords => List.unmodifiable(_showerRecords);
+
+  double _showerPricePerPerson = 50.0;
+  double get showerPricePerPerson => _showerPricePerPerson;
+
+  void updateShowerPrice(double price) {
+    _showerPricePerPerson = price;
+    notifyListeners();
+  }
+
+  Future<void> recordShowerEntry({
+    required int userCount,
+    required PaymentMethod paymentMethod,
+    required String cashierName,
+    String? notes,
+  }) async {
+    final record = ShowerRecord(
+      id: 'SHW-${DateTime.now().millisecondsSinceEpoch}',
+      userCount: userCount,
+      unitPrice: _showerPricePerPerson,
+      totalAmount: userCount * _showerPricePerPerson,
+      paymentMethod: paymentMethod,
+      recordedAt: DateTime.now(),
+      recordedBy: cashierName,
+      notes: notes,
+    );
+    _showerRecords.insert(0, record);
+    notifyListeners();
+  }
+
+  // Carpet Cleaning Pricing (ETB per m²)
+  double _carpetTypeAPricePerSqM = 120.0;
+  double get carpetTypeAPricePerSqM => _carpetTypeAPricePerSqM;
+
+  double _carpetTypeBPricePerSqM = 180.0;
+  double get carpetTypeBPricePerSqM => _carpetTypeBPricePerSqM;
+
+  void updateCarpetPricing({double? typeAPrice, double? typeBPrice}) {
+    if (typeAPrice != null) _carpetTypeAPricePerSqM = typeAPrice;
+    if (typeBPrice != null) _carpetTypeBPricePerSqM = typeBPrice;
+    notifyListeners();
+  }
+
   // Computed Properties for Dashboard & Metrics
   int get totalCompletedCarsToday {
-    return _bookings.where((b) => b.status == WashStatus.completed).length;
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final d = b.createdAt;
+      return !b.isCarpet && b.status == WashStatus.completed && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).length;
   }
+
+  int get totalCompletedCarpetsToday {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final d = b.createdAt;
+      return b.isCarpet && b.status == WashStatus.completed && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).length;
+  }
+
+  int get todayCarpetCleanedCount => totalCompletedCarpetsToday;
 
   int get activeQueueCount {
     return _bookings.where((b) => b.status.isOngoing || b.status == WashStatus.pending).length;
   }
 
-  double get totalRevenueTodayETB {
+  int get todayShowerUserCount {
+    final now = DateTime.now();
+    return _showerRecords.where((s) {
+      final d = s.recordedAt;
+      return d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0, (sum, s) => sum + s.userCount);
+  }
+
+  double get todayShowerRevenueETB {
+    final now = DateTime.now();
+    return _showerRecords.where((s) {
+      final d = s.recordedAt;
+      return d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, s) => sum + s.totalAmount);
+  }
+
+  double get todayShowerCashETB {
+    final now = DateTime.now();
+    return _showerRecords.where((s) {
+      final d = s.recordedAt;
+      return s.isCash && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, s) => sum + s.totalAmount);
+  }
+
+  double get todayShowerDigitalETB {
+    final now = DateTime.now();
+    return _showerRecords.where((s) {
+      final d = s.recordedAt;
+      return s.isDigital && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, s) => sum + s.totalAmount);
+  }
+
+  double get todayCustomerTipsETB {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final d = b.createdAt;
+      return b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, b) => sum + b.payment.tipAmount);
+  }
+
+  double get todayCashTipsETB {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final d = b.createdAt;
+      return b.payment.isPaid && b.payment.method == PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, b) => sum + b.payment.tipAmount);
+  }
+
+  double get todayDigitalTipsETB {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final d = b.createdAt;
+      return b.payment.isPaid && b.payment.method != PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, b) => sum + b.payment.tipAmount);
+  }
+
+  double get todayCarpetRevenueETB {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final d = b.createdAt;
+      return b.isCarpet && b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, b) => sum + b.totalPrice);
+  }
+
+  double get todayVehicleRevenueETB {
+    final now = DateTime.now();
+    return _bookings.where((b) {
+      final d = b.createdAt;
+      return !b.isCarpet && b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
+    }).fold(0.0, (sum, b) => sum + b.totalPrice);
+  }
+
+  double get serviceRevenueTodayETB {
+    final now = DateTime.now();
     return _bookings
-        .where((b) => b.payment.isPaid)
+        .where((b) {
+          final d = b.createdAt;
+          return b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
+        })
         .fold(0.0, (sum, b) => sum + b.totalPrice);
   }
 
+  double get totalRevenueTodayETB {
+    return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB;
+  }
+
   double get totalCashRevenueETB {
-    return _bookings
-        .where((b) => b.payment.isPaid && b.payment.method == PaymentMethod.cash)
-        .fold(0.0, (sum, b) => sum + b.totalPrice);
+    final now = DateTime.now();
+    final bookCash = _bookings
+        .where((b) {
+          final d = b.createdAt;
+          return b.payment.isPaid && b.payment.method == PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
+        })
+        .fold(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+    return bookCash + todayShowerCashETB;
   }
 
   double get digitalRevenueETB => totalDigitalRevenueETB;
   double get cashRevenueETB => totalCashRevenueETB;
 
   double get totalDigitalRevenueETB {
-    return _bookings
-        .where((b) => b.payment.isPaid && b.payment.method != PaymentMethod.cash)
-        .fold(0.0, (sum, b) => sum + b.totalPrice);
+    final now = DateTime.now();
+    final bookDig = _bookings
+        .where((b) {
+          final d = b.createdAt;
+          return b.payment.isPaid && b.payment.method != PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
+        })
+        .fold(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+    return bookDig + todayShowerDigitalETB;
   }
 
   double get totalCommissionsPaidETB {
@@ -487,7 +638,8 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  double get teamCommissionPoolTodayETB => totalRevenueTodayETB * _teamCommissionRate;
+  // Shower has 0% washer commission; tips pass 100% to washers
+  double get teamCommissionPoolTodayETB => (serviceRevenueTodayETB * _teamCommissionRate) + todayCustomerTipsETB;
 
   // Daily Washer Attendance: washerId -> isPresent (defaults to true)
   final Map<String, bool> _washerAttendanceToday = {};
@@ -821,7 +973,12 @@ class AppStateNotifier extends ChangeNotifier {
       if (!b.payment.isPaid) continue;
       if (start != null && b.createdAt.isBefore(start)) continue;
       if (end != null && b.createdAt.isAfter(end)) continue;
-      result[b.payment.method] = (result[b.payment.method] ?? 0.0) + b.totalPrice;
+      result[b.payment.method] = (result[b.payment.method] ?? 0.0) + b.totalPrice + b.payment.tipAmount;
+    }
+    for (final s in _showerRecords) {
+      if (start != null && s.recordedAt.isBefore(start)) continue;
+      if (end != null && s.recordedAt.isAfter(end)) continue;
+      result[s.paymentMethod] = (result[s.paymentMethod] ?? 0.0) + s.totalAmount;
     }
     return result;
   }
@@ -836,6 +993,11 @@ class AppStateNotifier extends ChangeNotifier {
       if (start != null && b.createdAt.isBefore(start)) continue;
       if (end != null && b.createdAt.isAfter(end)) continue;
       result[b.payment.method] = (result[b.payment.method] ?? 0) + 1;
+    }
+    for (final s in _showerRecords) {
+      if (start != null && s.recordedAt.isBefore(start)) continue;
+      if (end != null && s.recordedAt.isAfter(end)) continue;
+      result[s.paymentMethod] = (result[s.paymentMethod] ?? 0) + 1;
     }
     return result;
   }
@@ -1104,20 +1266,36 @@ class AppStateNotifier extends ChangeNotifier {
       return b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
     }).toList();
 
-    final gross = paidToday.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final cash = paidToday.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final vehiclePaid = paidToday.where((b) => !b.isCarpet).toList();
+    final carpetPaid = paidToday.where((b) => b.isCarpet).toList();
+
+    final vehicleRev = vehiclePaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final carpetRev = carpetPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final showerRev = todayShowerRevenueETB;
+    final tipsRev = paidToday.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+
+    final serviceGross = vehicleRev + carpetRev;
+    final gross = serviceGross + showerRev + tipsRev;
+
+    final serviceCash = paidToday.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+    final cash = serviceCash + todayShowerCashETB;
     final digital = gross - cash;
-    final comm = gross * teamCommissionRate;
-    final net = gross - comm;
+
+    final comm = (serviceGross * teamCommissionRate) + tipsRev;
+    final net = (serviceGross - (serviceGross * teamCommissionRate)) + showerRev;
     final deposited = totalCashDepositedTodayETB;
     final petty = todayPettyCashExpensesETB;
     final remainingCash = cash > (deposited + petty) ? cash - (deposited + petty) : 0.0;
 
     final breakdown = <String, double>{};
     for (final m in PaymentMethod.values) {
-      final amt = paidToday.where((b) => b.payment.method == m).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-      if (amt > 0) {
-        breakdown[m.shortName] = amt;
+      final amt = paidToday.where((b) => b.payment.method == m).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+      final showerAmt = _showerRecords.where((s) {
+        final d = s.recordedAt;
+        return s.paymentMethod == m && d.year == now.year && d.month == now.month && d.day == now.day;
+      }).fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+      if (amt + showerAmt > 0) {
+        breakdown[m.shortName] = amt + showerAmt;
       }
     }
 
@@ -1184,7 +1362,12 @@ class AppStateNotifier extends ChangeNotifier {
       cashRevenue: cash,
       digitalRevenue: digital,
       providerBreakdown: breakdown,
-      carsWashedCount: paidToday.length,
+      carsWashedCount: vehiclePaid.length,
+      carpetsCleanedCount: carpetPaid.length,
+      carpetRevenue: carpetRev,
+      showerUsersCount: todayShowerUserCount,
+      showerRevenue: showerRev,
+      totalTipsAmount: tipsRev,
       commissionPool: comm,
       netStationProfit: net,
       cashDeposited: finalDeposited,
@@ -1237,7 +1420,8 @@ class AppStateNotifier extends ChangeNotifier {
     }).toList();
 
     final weeklyGross = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final weeklyPool = weeklyGross * teamCommissionRate;
+    final weeklyTips = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+    final weeklyPool = (weeklyGross * teamCommissionRate) + weeklyTips;
 
     final dividends = calculateWasherDividends(weeklyPool);
     final result = <String, double>{};
@@ -1257,7 +1441,9 @@ class AppStateNotifier extends ChangeNotifier {
       return b.payment.isPaid && (b.createdAt.isAfter(startOfWeek) || b.createdAt.isAtSameMomentAs(startOfWeek));
     }).toList();
 
-    return weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice) * teamCommissionRate;
+    final weeklyGross = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final weeklyTips = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+    return (weeklyGross * teamCommissionRate) + weeklyTips;
   }
 
   /// Total monthly base salary obligation for active washers (Salaries are paid monthly)
@@ -1455,9 +1641,17 @@ class AppStateNotifier extends ChangeNotifier {
     DateTime? scheduledTime,
     bool isPhoneBooking = false,
     String? gpsCoordinates,
+    bool isCarpet = false,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    double? customTotalPrice,
+    double tipAmount = 0.0,
   }) async {
-    final bookingId = 'BSH-${(100 + _bookings.length + 1)}';
-    final price = package.getPriceFor(carType);
+    final bookingId = isCarpet
+        ? 'CPT-${(100 + _bookings.length + 1)}'
+        : 'BSH-${(100 + _bookings.length + 1)}';
+    final price = customTotalPrice ?? package.getPriceFor(carType);
 
     final newBooking = WashBooking(
       id: bookingId,
@@ -1473,11 +1667,17 @@ class AppStateNotifier extends ChangeNotifier {
         isPaid: false,
         method: paymentMethod,
         amount: price,
+        tipAmount: tipAmount,
       ),
       createdAt: DateTime.now(),
       scheduledTime: scheduledTime,
       isPhoneBooking: isPhoneBooking,
       gpsCoordinates: gpsCoordinates,
+      isCarpet: isCarpet,
+      carpetType: carpetType,
+      carpetAreaSqMeters: carpetAreaSqMeters,
+      carpetDimensions: carpetDimensions,
+      customTotalPrice: customTotalPrice,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -1501,12 +1701,22 @@ class AppStateNotifier extends ChangeNotifier {
     String? transactionRef,
     String? receiptScreenshot,
     bool isPhoneBooking = false,
+    bool isCarpet = false,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    double? customTotalPrice,
+    double tipAmount = 0.0,
   }) async {
-    final bookingId = 'BSH-${(100 + _bookings.length + 1)}';
-    final price = package.getPriceFor(carType);
+    final bookingId = isCarpet
+        ? 'CPT-${(100 + _bookings.length + 1)}'
+        : 'BSH-${(100 + _bookings.length + 1)}';
+    final price = customTotalPrice ?? package.getPriceFor(carType);
     final finalName = (customerName != null && customerName.trim().isNotEmpty)
         ? customerName.trim()
-        : 'Walk-In (${licensePlate.toUpperCase()})';
+        : isCarpet
+            ? 'Carpet Client (${licensePlate.toUpperCase()})'
+            : 'Walk-In (${licensePlate.toUpperCase()})';
 
     final newBooking = WashBooking(
       id: bookingId,
@@ -1524,12 +1734,18 @@ class AppStateNotifier extends ChangeNotifier {
         isPaid: markPaid,
         method: paymentMethod,
         amount: price,
+        tipAmount: tipAmount,
         transactionRef: transactionRef,
         receiptScreenshot: receiptScreenshot,
         paidAt: markPaid ? DateTime.now() : null,
       ),
       createdAt: DateTime.now(),
       isPhoneBooking: isPhoneBooking,
+      isCarpet: isCarpet,
+      carpetType: carpetType,
+      carpetAreaSqMeters: carpetAreaSqMeters,
+      carpetDimensions: carpetDimensions,
+      customTotalPrice: customTotalPrice,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -1540,6 +1756,11 @@ class AppStateNotifier extends ChangeNotifier {
   String getCustomerCompletionSmsText(WashBooking booking) {
     final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
     final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
+    if (booking.isCarpet) {
+      final cType = booking.carpetType == 'type_b' ? 'Deep Clean (Type B)' : 'Standard Clean (Type A)';
+      final dims = booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? ' (${booking.carpetDimensions})' : '';
+      return 'Dear $customerName, your carpet cleaning service ($cType$dims) is completed and ready. Please pay $amountStr. Thank you for choosing Bishe Car Wash & Carpet Cleaning Service!';
+    }
     final pkgName = booking.package.name;
     final plate = booking.licensePlate;
 
@@ -1597,6 +1818,7 @@ class AppStateNotifier extends ChangeNotifier {
     required String bookingId,
     required PaymentMethod method,
     required double amount,
+    double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
   }) async {
@@ -1604,6 +1826,7 @@ class AppStateNotifier extends ChangeNotifier {
       bookingId: bookingId,
       method: method,
       amount: amount,
+      tipAmount: tipAmount,
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
     );
@@ -1646,6 +1869,12 @@ class AppStateNotifier extends ChangeNotifier {
     String? transactionRef,
     String? receiptScreenshot,
     bool isPhoneBooking = false,
+    bool isCarpet = false,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    double? customTotalPrice,
+    double tipAmount = 0.0,
   }) => registerWalkInGate(
     customerName: customerName,
     licensePlate: licensePlate,
@@ -1660,6 +1889,12 @@ class AppStateNotifier extends ChangeNotifier {
     transactionRef: transactionRef,
     receiptScreenshot: receiptScreenshot,
     isPhoneBooking: isPhoneBooking,
+    isCarpet: isCarpet,
+    carpetType: carpetType,
+    carpetAreaSqMeters: carpetAreaSqMeters,
+    carpetDimensions: carpetDimensions,
+    customTotalPrice: customTotalPrice,
+    tipAmount: tipAmount,
   );
 
   /// Admin edits service pricing by car type

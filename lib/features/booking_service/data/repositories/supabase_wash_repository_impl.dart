@@ -565,6 +565,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     required String bookingId,
     required PaymentMethod method,
     required double amount,
+    double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
   }) async {
@@ -584,7 +585,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             final washerName = (booking.assignedWasherName != null && booking.assignedWasherName!.trim().isNotEmpty)
                 ? booking.assignedWasherName!.trim()
                 : 'Team Washers';
-            final commissionEarned = amount * 0.15;
+            final commissionEarned = (amount * 0.15) + tipAmount;
 
             try {
               await _post('commission_logs', {
@@ -611,6 +612,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               isPaid: true,
               method: method,
               amount: amount,
+              tipAmount: tipAmount,
               transactionRef: transactionRef,
               receiptScreenshot: receiptScreenshot,
               paidAt: DateTime.now(),
@@ -621,6 +623,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               bookingId: bookingId,
               method: method,
               amount: amount,
+              tipAmount: tipAmount,
               transactionRef: transactionRef,
               receiptScreenshot: receiptScreenshot,
             );
@@ -635,6 +638,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       bookingId: bookingId,
       method: method,
       amount: amount,
+      tipAmount: tipAmount,
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
     );

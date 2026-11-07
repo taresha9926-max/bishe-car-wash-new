@@ -6,6 +6,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/responsive_layout.dart';
+import '../../../../core/widgets/custom_button.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
@@ -61,6 +62,15 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
   int? _activeModuleIndex;
   bool _isDigitalBreakdownExpanded = false;
   bool _isWasherRosterExpanded = true;
+  int _showerCount = 1;
+  PaymentMethod _showerPaymentMethod = PaymentMethod.cash;
+  final _showerNotesController = TextEditingController();
+
+  @override
+  void dispose() {
+    _showerNotesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1343,18 +1353,54 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 b.licensePlate,
                 style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5, color: AppColors.textPrimary),
               ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(6),
+              if (b.isCarpet) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.texture_rounded, size: 10, color: Color(0xFF6366F1)),
+                      const SizedBox(width: 3),
+                      Text(
+                        b.carpetType == 'type_b' ? 'CARPET (TYPE B)' : 'CARPET (TYPE A)',
+                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFF6366F1)),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Text(
-                  b.carType.displayName,
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+              ] else ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    b.carType.displayName,
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                  ),
                 ),
-              ),
+              ],
+              if (b.payment.tipAmount > 0) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '+ETB ${b.payment.tipAmount.toStringAsFixed(0)} Tip',
+                    style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
+                  ),
+                ),
+              ],
               if (b.isPhoneBooking) ...[
                 const SizedBox(width: 4),
                 Container(
@@ -1414,7 +1460,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
             children: [
               Expanded(
                 child: Text(
-                  '${b.package.name}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
+                  b.isCarpet
+                      ? 'Carpet Clean (${b.carpetDimensions ?? "${b.carpetAreaSqMeters ?? 0.0} m²"})${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}'
+                      : '${b.package.name}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
@@ -1615,18 +1663,54 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                       b.licensePlate,
                       style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: AppColors.textPrimary),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant,
-                        borderRadius: BorderRadius.circular(6),
+                    if (b.isCarpet) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6366F1).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.texture_rounded, size: 11, color: Color(0xFF6366F1)),
+                            const SizedBox(width: 3),
+                            Text(
+                              b.carpetType == 'type_b' ? 'CARPET (TYPE B)' : 'CARPET (TYPE A)',
+                              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF6366F1)),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Text(
-                        b.carType.displayName,
-                        style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                    ] else ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          b.carType.displayName,
+                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                        ),
                       ),
-                    ),
+                    ],
+                    if (b.payment.tipAmount > 0) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade100,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '+ETB ${b.payment.tipAmount.toStringAsFixed(0)} Tip',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
+                        ),
+                      ),
+                    ],
                     if (b.isPhoneBooking) ...[
                       const SizedBox(width: 6),
                       Container(
@@ -1652,7 +1736,9 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${b.package.name} • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
+                  b.isCarpet
+                      ? 'Carpet Clean (${b.carpetDimensions ?? "${b.carpetAreaSqMeters ?? 0.0} m²"}) • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}'
+                      : '${b.package.name} • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
                   style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                 ),
                 if (b.serviceType.requiresLocation) ...[
@@ -1905,12 +1991,22 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
         badgeColor: AppColors.cashGreen,
         contentBuilder: () => const FinancialReportsView(isEmbedded: true),
       ),
+      _CashierModuleItem(
+        title: state.tr('stationShowerService'),
+        subtitle: '${state.todayShowerUserCount} ${state.tr("showerUsers")} • ${CurrencyFormatter.format(state.todayShowerRevenueETB as double)}',
+        icon: Icons.shower_rounded,
+        imageUrl: AutoCareAssets.stationBayUrl,
+        gradientColors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
+        badgeText: '${state.todayShowerUserCount} Users',
+        badgeColor: const Color(0xFF0284C7),
+        contentBuilder: () => _buildStationShowerModule(context, state, isMobile),
+      ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Card Grid View with 3 Rows (2 cards per row)
+        // Card Grid View with 4 Rows
         // Row 1
         IntrinsicHeight(
           child: Row(
@@ -1943,6 +2039,16 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
               Expanded(child: _buildCashierModuleCard(context, modules[4], 4, isMobile)),
               const SizedBox(width: 10),
               Expanded(child: _buildCashierModuleCard(context, modules[5], 5, isMobile)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Row 4
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _buildCashierModuleCard(context, modules[6], 6, isMobile)),
             ],
           ),
         ),
@@ -2160,6 +2266,251 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
           Padding(
             padding: EdgeInsets.all(isMobile ? 12 : 16),
             child: item.contentBuilder(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStationShowerModule(BuildContext context, dynamic state, bool isMobile) {
+    final showerPrice = state.showerPricePerPerson as double;
+    final totalToPay = _showerCount * showerPrice;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Banner
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0284C7), Color(0xFF0369A1)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.shower_rounded, color: Colors.white, size: 26),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.tr('stationShowerService'),
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white),
+                      ),
+                      Text(
+                        '${showerPrice.toStringAsFixed(0)} ETB ${state.tr("perPerson")} • ${state.tr("showerCommissionNotice")}',
+                        style: const TextStyle(fontSize: 11, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${state.todayShowerUserCount} ${state.tr("showerUsers")}',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // User count tally selector
+          Text(
+            state.tr('numberOfPersons'),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              IconButton(
+                onPressed: _showerCount > 1 ? () => setState(() => _showerCount--) : null,
+                icon: const Icon(Icons.remove_circle_outline, color: AppColors.primary),
+              ),
+              Container(
+                width: 50,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$_showerCount',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                ),
+              ),
+              IconButton(
+                onPressed: () => setState(() => _showerCount++),
+                icon: const Icon(Icons.add_circle_outline, color: AppColors.primary),
+              ),
+              const SizedBox(width: 8),
+              for (final n in [1, 2, 5]) ...[
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    onPressed: () => setState(() => _showerCount = n),
+                    child: Text('+$n'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Payment Method Selector
+          Text(
+            state.tr('paymentMethod'),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: ChoiceChip(
+                  label: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.payments_rounded, size: 15),
+                      const SizedBox(width: 5),
+                      Text(state.tr('payCash')),
+                    ],
+                  ),
+                  selected: _showerPaymentMethod == PaymentMethod.cash,
+                  onSelected: (val) {
+                    if (val) setState(() => _showerPaymentMethod = PaymentMethod.cash);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ChoiceChip(
+                  label: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.phone_android_rounded, size: 15),
+                      const SizedBox(width: 5),
+                      Text(state.tr('payTelebirr')),
+                    ],
+                  ),
+                  selected: _showerPaymentMethod == PaymentMethod.telebirr,
+                  onSelected: (val) {
+                    if (val) setState(() => _showerPaymentMethod = PaymentMethod.telebirr);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Record Button
+          CustomButton(
+            text: '${state.tr("recordShowerEntry")} • ${CurrencyFormatter.format(totalToPay)}',
+            icon: Icons.check_circle_rounded,
+            backgroundColor: const Color(0xFF0284C7),
+            onPressed: () async {
+              final cashierName = state.activeStaffFullName ?? 'Cashier';
+              await state.recordShowerEntry(
+                userCount: _showerCount,
+                paymentMethod: _showerPaymentMethod,
+                cashierName: cashierName,
+              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppColors.statusCompleted,
+                    content: Text('Recorded $_showerCount shower user(s) (${CurrencyFormatter.format(totalToPay)})!'),
+                  ),
+                );
+                setState(() {
+                  _showerCount = 1;
+                });
+              }
+            },
+          ),
+          const SizedBox(height: 14),
+
+          // Summary Cards
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(state.tr('showerTotalRevenue'), style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                      const SizedBox(height: 2),
+                      Text(
+                        CurrencyFormatter.format(state.todayShowerRevenueETB as double),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Color(0xFF0284C7)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(state.tr('cashCollected'), style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                      const SizedBox(height: 2),
+                      Text(
+                        CurrencyFormatter.format(state.todayShowerCashETB as double),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.cashGreen),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(state.tr('digitalPay'), style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                      const SizedBox(height: 2),
+                      Text(
+                        CurrencyFormatter.format(state.todayShowerDigitalETB as double),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.telebirrBlue),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

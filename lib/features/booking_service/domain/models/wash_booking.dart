@@ -25,6 +25,11 @@ class WashBooking {
   final bool commissionLogged;
   final bool isPhoneBooking;
   final String? gpsCoordinates;
+  final bool isCarpet;
+  final String? carpetType; // 'type_a' or 'type_b'
+  final double? carpetAreaSqMeters;
+  final String? carpetDimensions;
+  final double? customTotalPrice;
 
   const WashBooking({
     required this.id,
@@ -46,9 +51,14 @@ class WashBooking {
     this.commissionLogged = false,
     this.isPhoneBooking = false,
     this.gpsCoordinates,
+    this.isCarpet = false,
+    this.carpetType,
+    this.carpetAreaSqMeters,
+    this.carpetDimensions,
+    this.customTotalPrice,
   });
 
-  double get totalPrice => package.getPriceFor(carType);
+  double get totalPrice => customTotalPrice ?? package.getPriceFor(carType);
 
   WashBooking copyWith({
     String? id,
@@ -70,6 +80,11 @@ class WashBooking {
     bool? commissionLogged,
     bool? isPhoneBooking,
     String? gpsCoordinates,
+    bool? isCarpet,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    double? customTotalPrice,
   }) {
     return WashBooking(
       id: id ?? this.id,
@@ -91,6 +106,11 @@ class WashBooking {
       commissionLogged: commissionLogged ?? this.commissionLogged,
       isPhoneBooking: isPhoneBooking ?? this.isPhoneBooking,
       gpsCoordinates: gpsCoordinates ?? this.gpsCoordinates,
+      isCarpet: isCarpet ?? this.isCarpet,
+      carpetType: carpetType ?? this.carpetType,
+      carpetAreaSqMeters: carpetAreaSqMeters ?? this.carpetAreaSqMeters,
+      carpetDimensions: carpetDimensions ?? this.carpetDimensions,
+      customTotalPrice: customTotalPrice ?? this.customTotalPrice,
     );
   }
 }

@@ -18,12 +18,16 @@ class NewBookingScreen extends StatefulWidget {
   final ServiceType? initialServiceType;
   final CarType? initialCarType;
   final WashPackage? initialPackage;
+  final bool isCarpet;
+  final String? initialCarpetType;
 
   const NewBookingScreen({
     super.key,
     this.initialServiceType,
     this.initialCarType,
     this.initialPackage,
+    this.isCarpet = false,
+    this.initialCarpetType,
   });
 
   @override
@@ -37,10 +41,17 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   late CarType _selectedCarType;
   WashPackage? _selectedPackage;
 
+  late bool _isCarpet;
+  String _carpetType = 'type_a';
+  final _lengthController = TextEditingController(text: '3.0');
+  final _widthController = TextEditingController(text: '2.0');
+
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController(text: '+251 9');
   final _plateController = TextEditingController();
   final _addressController = TextEditingController();
+  final _tipController = TextEditingController();
+  double _tipAmount = 0.0;
   String _selectedBishoftuArea = AppConstants.bishoftuAreas.first;
   String? _pinnedGpsCoordinates;
   bool _isPinningGps = false;
@@ -50,9 +61,16 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   @override
   void initState() {
     super.initState();
+    _isCarpet = widget.isCarpet;
+    if (widget.initialCarpetType != null) {
+      _carpetType = widget.initialCarpetType!;
+    }
     _selectedServiceType = widget.initialServiceType ?? ServiceType.walkInStation;
     _selectedCarType = widget.initialCarType ?? CarType.automobile;
     _selectedPackage = widget.initialPackage;
+    if (_isCarpet) {
+      _plateController.text = 'CPT-${(DateTime.now().millisecondsSinceEpoch % 10000)}';
+    }
   }
 
   @override
@@ -61,7 +79,16 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     _phoneController.dispose();
     _plateController.dispose();
     _addressController.dispose();
+    _lengthController.dispose();
+    _widthController.dispose();
+    _tipController.dispose();
     super.dispose();
+  }
+
+  double get _carpetArea {
+    final l = double.tryParse(_lengthController.text.trim()) ?? 0.0;
+    final w = double.tryParse(_widthController.text.trim()) ?? 0.0;
+    return l * w;
   }
 
   @override
@@ -73,11 +100,13 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       _selectedPackage = packages.first;
     }
 
-    final currentPrice = _selectedPackage?.getPriceFor(_selectedCarType) ?? 0.0;
+    final carpetPrice = _carpetArea * (_carpetType == 'type_b' ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM);
+    final currentPrice = _isCarpet ? carpetPrice : (_selectedPackage?.getPriceFor(_selectedCarType) ?? 0.0);
+    final grandTotal = currentPrice + _tipAmount;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(state.tr('bookWashTitle')),
+        title: Text(_isCarpet ? state.tr('carpetCleaningService') : state.tr('bookWashTitle')),
         elevation: 0,
       ),
       body: Form(
@@ -131,16 +160,17 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               ),
               const SizedBox(height: 22),
 
-              // 2. Select Car Type (Automobile, Minibus, Truck)
-              CarTypeSelector(
-                selectedType: _selectedCarType,
-                onSelected: (type) {
-                  setState(() {
-                    _selectedCarType = type;
-                  });
-                },
-              ),
-              const SizedBox(height: 22),
+              if (!_isCarpet) ...[
+                // 2. Select Car Type (Automobile, Minibus, Truck)
+                CarTypeSelector(
+                  selectedType: _selectedCarType,
+                  onSelected: (type) {
+                    setState(() {
+                      _selectedCarType = type;
+                    });
+                  },
+                ),
+                const SizedBox(height: 22),
 
               // 3. Wash Package
               Text(
@@ -251,6 +281,183 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   ),
                 );
               }),
+              ] else ...[
+                // Carpet Cleaning Options
+                Text(
+                  state.tr('carpetCleaningOptions'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _carpetType = 'type_a'),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _carpetType == 'type_a' ? const Color(0xFF6366F1).withOpacity(0.08) : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _carpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.cardBorder,
+                              width: _carpetType == 'type_a' ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.cleaning_services_rounded, size: 18, color: _carpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      state.tr('carpetTypeA'),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: _carpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF4338CA)),
+                              ),
+                              Text(state.tr('carpetTypeADesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _carpetType = 'type_b'),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: _carpetType == 'type_b' ? const Color(0xFFDC2626).withOpacity(0.08) : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _carpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.cardBorder,
+                              width: _carpetType == 'type_b' ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.auto_awesome_rounded, size: 18, color: _carpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      state.tr('carpetTypeB'),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: _carpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB / m²',
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFB91C1C)),
+                              ),
+                              Text(state.tr('carpetTypeBDesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+
+                // Dimension inputs
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.tr('carpetDimensionsTitle'),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _lengthController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                labelText: '${state.tr("carpetLength")} (m)',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                isDense: true,
+                              ),
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: Text('×', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _widthController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                labelText: '${state.tr("carpetWidth")} (m)',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                isDense: true,
+                              ),
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6366F1).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${state.tr("carpetTotalArea")}: ${_carpetArea.toStringAsFixed(1)} m²',
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF4338CA)),
+                            ),
+                            Text(
+                              'ETB ${carpetPrice.toStringAsFixed(2)}',
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF312E81)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
 
               // 4. Vehicle & Customer Details
@@ -282,10 +489,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 12),
               CustomTextField(
                 controller: _plateController,
-                label: state.tr('licensePlate'),
-                hint: 'e.g. 3-B78945 ET',
-                prefixIcon: Icons.tag,
-                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterPlate') : null,
+                label: _isCarpet ? state.tr('carpetTrackingTag') : state.tr('licensePlate'),
+                hint: _isCarpet ? 'e.g. CPT-8941' : 'e.g. 3-B78945 ET',
+                prefixIcon: _isCarpet ? Icons.texture_rounded : Icons.tag,
+                validator: (val) => val == null || val.trim().isEmpty ? (_isCarpet ? 'Enter tracking code' : state.tr('enterPlate')) : null,
               ),
               const SizedBox(height: 12),
 
@@ -388,7 +595,82 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 const SizedBox(height: 20),
               ],
 
-              // 5. Booking Order Summary Box (Payment collected at gate)
+              // 5. Optional Washer Gratuity / Tip
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.volunteer_activism_rounded, size: 16, color: Colors.amber.shade900),
+                        const SizedBox(width: 6),
+                        Text(
+                          state.tr('washersTip'),
+                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.amber.shade900),
+                        ),
+                        const Spacer(),
+                        if (_tipAmount > 0)
+                          Text(
+                            '+ETB ${_tipAmount.toStringAsFixed(0)}',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        for (final tipVal in [50, 100, 200]) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: ChoiceChip(
+                              label: Text('+$tipVal'),
+                              selected: _tipAmount == tipVal.toDouble(),
+                              onSelected: (selected) {
+                                setState(() {
+                                  _tipAmount = selected ? tipVal.toDouble() : 0.0;
+                                  _tipController.text = _tipAmount > 0 ? _tipAmount.toStringAsFixed(0) : '';
+                                });
+                              },
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ),
+                        ],
+                        Expanded(
+                          child: SizedBox(
+                            height: 38,
+                            child: TextField(
+                              controller: _tipController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: state.tr('customTip'),
+                                hintStyle: const TextStyle(fontSize: 11),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                isDense: true,
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  _tipAmount = double.tryParse(val) ?? 0.0;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // 6. Booking Order Summary Box (Payment collected at gate)
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -403,7 +685,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            _selectedPackage?.localizedName(state.currentLang) ?? '',
+                            _isCarpet
+                                ? '${state.tr("carpetService")}: ${_carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                                : (_selectedPackage?.localizedName(state.currentLang) ?? ''),
                             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -416,9 +700,21 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _selectedCarType.localizedName(state.currentLang),
+                      _isCarpet
+                          ? '${_carpetArea.toStringAsFixed(1)} m² (${_lengthController.text.trim()}m × ${_widthController.text.trim()}m)'
+                          : _selectedCarType.localizedName(state.currentLang),
                       style: const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
+                    if (_tipAmount > 0) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('  + ${state.tr("washersTip")}:', style: const TextStyle(color: Colors.white70, fontSize: 11.5)),
+                          Text('+ ETB ${_tipAmount.toStringAsFixed(2)}', style: TextStyle(color: Colors.amber.shade300, fontWeight: FontWeight.w700, fontSize: 12)),
+                        ],
+                      ),
+                    ],
                     const Divider(color: Colors.white24, height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -428,7 +724,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                           style: const TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                         Text(
-                          CurrencyFormatter.format(currentPrice),
+                          CurrencyFormatter.format(grandTotal),
                           style: const TextStyle(color: AppColors.oromiaGold, fontWeight: FontWeight.w900, fontSize: 20),
                         ),
                       ],
@@ -461,7 +757,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
 
               // Submit Button
               CustomButton(
-                text: state.tr('bookNow'),
+                text: _isCarpet ? state.tr('bookCarpetCleaning') : state.tr('bookNow'),
                 isLoading: _isSubmitting,
                 onPressed: _handleBookingSubmit,
               ),
@@ -475,30 +771,36 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
 
   Future<void> _handleBookingSubmit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedPackage == null) return;
+    final state = AppStateProvider.read(context);
+    if (!_isCarpet && _selectedPackage == null && state.packages.isEmpty) return;
 
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      final state = AppStateProvider.read(context);
-
       String? fullAddress;
       if (_selectedServiceType.requiresLocation) {
         fullAddress = '$_selectedBishoftuArea - ${_addressController.text.trim()}';
       }
 
+      final carpetPrice = _carpetArea * (_carpetType == 'type_b' ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM);
       final booking = await state.bookNewWash(
         customerName: _nameController.text.trim(),
         customerPhone: _phoneController.text.trim(),
         serviceType: _selectedServiceType,
-        carType: _selectedCarType,
-        licensePlate: _plateController.text.trim(),
-        package: _selectedPackage!,
+        carType: _isCarpet ? CarType.automobile : _selectedCarType,
+        licensePlate: _plateController.text.trim().toUpperCase(),
+        package: _selectedPackage ?? state.packages.first,
         deliveryLocation: fullAddress,
         paymentMethod: PaymentMethod.cash,
         gpsCoordinates: _pinnedGpsCoordinates,
+        isCarpet: _isCarpet,
+        carpetType: _isCarpet ? _carpetType : null,
+        carpetAreaSqMeters: _isCarpet ? _carpetArea : null,
+        carpetDimensions: _isCarpet ? '${_lengthController.text.trim()}m x ${_widthController.text.trim()}m' : null,
+        customTotalPrice: _isCarpet ? carpetPrice : null,
+        tipAmount: _tipAmount,
       );
 
       if (mounted) {

@@ -2534,6 +2534,270 @@ class AppStrings {
       AppLanguage.om: 'Cufiinsi garee kanaa duraan mirkanaa\'ee qulqullaa\'eera.',
       AppLanguage.am: 'ይህ የፈረቃ መዝጊያ ቀደም ሲል ተረጋግጦ ተጠናቋል።',
     },
+
+    // Carpet Cleaning Service
+    'carpetCleaning': {
+      AppLanguage.en: 'Carpet Cleaning',
+      AppLanguage.om: 'Qulqulleessaa Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት',
+    },
+    'carpetCleaningSubtitle': {
+      AppLanguage.en: 'Professional residential & commercial carpet deep wash & sanitize',
+      AppLanguage.om: 'Tajaajila qulqulleessa karpeetii qulqullina olaanaa fi ammayyaa',
+      AppLanguage.am: 'ሙያዊ የመኖሪያ እና የንግድ ምንጣፍ ጥልቅ እጥበት እና ማጽዳት',
+    },
+    'carpetTypeA': {
+      AppLanguage.en: 'Type A (Normal Clean)',
+      AppLanguage.om: 'Akaakuu A (Idilee)',
+      AppLanguage.am: 'አይነት ሀ (መደበኛ እጥበት)',
+    },
+    'carpetTypeB': {
+      AppLanguage.en: 'Type B (Heavy Duty / Deep Clean)',
+      AppLanguage.om: 'Akaakuu B (Xurii Cimaa)',
+      AppLanguage.am: 'አይነት ለ (ከባድ ቆሻሻ/ጥልቅ እጥበት)',
+    },
+    'carpetTypeADesc': {
+      AppLanguage.en: 'Standard clean: snow foam, dirt lift & air dry.',
+      AppLanguage.om: 'Dhiqannaa idilee: soofii dhoqqee kaasuu fi gogsuu.',
+      AppLanguage.am: 'መደበኛ እጥበት፡ አረፋ፣ ቆሻሻ ማንሳት እና ማድረቅ።',
+    },
+    'carpetTypeBDesc': {
+      AppLanguage.en: 'Deep extraction: stain treatment, brush agitation & sanitization.',
+      AppLanguage.om: 'Qulqulleessa gadi fageenyaa: bブラシ fi keemikaala xurii balleessu.',
+      AppLanguage.am: 'ጥልቅ እጥበት፡ የቆሻሻ ማስለቀቂያ፣ ፍቅፋቂ እና ማጽዳት።',
+    },
+    'carpetDimensions': {
+      AppLanguage.en: 'Dimensions (Length × Width)',
+      AppLanguage.om: 'Safartuu (Dheerina × Bal\'ina)',
+      AppLanguage.am: 'ልኬት (ርዝመት × ወርድ)',
+    },
+    'carpetAreaSqM': {
+      AppLanguage.en: 'Area (m²)',
+      AppLanguage.om: 'Bal\'ina (m²)',
+      AppLanguage.am: 'ስፋት (በካሬ ሜትር)',
+    },
+    'pricePerSqM': {
+      AppLanguage.en: 'Rate per m²',
+      AppLanguage.om: 'Gatii m² Tokkoo',
+      AppLanguage.am: 'ዋጋ በካሬ ሜትር',
+    },
+    'carpetDropOff': {
+      AppLanguage.en: 'Station Drop-off',
+      AppLanguage.om: 'Buufataatti Fiduu',
+      AppLanguage.am: 'ጣቢያው ድረስ አምጥቶ ማስረከብ',
+    },
+    'carpetPickUpValet': {
+      AppLanguage.en: 'Staff Pickup & Return',
+      AppLanguage.om: 'Hojjattootaan Fudhatamee Deebifamu',
+      AppLanguage.am: 'በሰራተኞች ተወስዶ የሚመለስ',
+    },
+    'carpetTag': {
+      AppLanguage.en: 'Carpet Tag / ID',
+      AppLanguage.om: 'Koodii Karpeetii',
+      AppLanguage.am: 'የምንጣፍ መለያ ቁጥር',
+    },
+    'bookCarpet': {
+      AppLanguage.en: 'Book Carpet Cleaning',
+      AppLanguage.om: 'Qulqulleessaa Karpeetii Qabadhaa',
+      AppLanguage.am: 'የምንጣፍ እጥበት ያስይዙ',
+    },
+    'carpetServicesTab': {
+      AppLanguage.en: 'Carpet Cleaning',
+      AppLanguage.om: 'Qulqullina Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት',
+    },
+    'vehicleServicesTab': {
+      AppLanguage.en: 'Car Wash Packages',
+      AppLanguage.om: 'Paakeejii Makiinaa',
+      AppLanguage.am: 'የመኪና እጥበት ጥቅሎች',
+    },
+    // Shower Service
+    'showerServiceTitle': {
+      AppLanguage.en: 'Station Public Shower',
+      AppLanguage.om: 'Shawaaraa Buufataa',
+      AppLanguage.am: 'የጣቢያው የህዝብ ሻወር',
+    },
+    'showerServiceSubtitle': {
+      AppLanguage.en: 'Fast counter logger for shower users & payments',
+      AppLanguage.om: 'Galmeessaa kaffaltii fi fayyadamtoota shawaaraa',
+      AppLanguage.am: 'የሻወር ተጠቃሚዎች እና ክፍያ ፈጣን መዝገብ',
+    },
+    'showerUsers': {
+      AppLanguage.en: 'Shower Users',
+      AppLanguage.om: 'Fayyadamtoota Shawaaraa',
+      AppLanguage.am: 'የሻወር ተጠቃሚዎች',
+    },
+    'showerTariff': {
+      AppLanguage.en: 'Shower Tariff (per person)',
+      AppLanguage.om: 'Gatii Shawaaraa (Nama 1)',
+      AppLanguage.am: 'የአንድ ሰው የሻወር ዋጋ',
+    },
+    'recordShower': {
+      AppLanguage.en: 'Record Shower Entry',
+      AppLanguage.om: 'Seensa Shawaaraa Galmeessi',
+      AppLanguage.am: 'የሻወር ተጠቃሚ መዝግብ',
+    },
+    'todayShowerRevenue': {
+      AppLanguage.en: 'Shower Revenue',
+      AppLanguage.om: 'Galii Shawaaraa',
+      AppLanguage.am: 'የሻወር ገቢ',
+    },
+    'stationShowerService': {
+      AppLanguage.en: 'Station Public Shower',
+      AppLanguage.om: 'Shawaaraa Buufataa',
+      AppLanguage.am: 'የጣቢያው የህዝብ ሻወር',
+    },
+    'perPerson': {
+      AppLanguage.en: 'per person',
+      AppLanguage.om: 'nama tokkoof',
+      AppLanguage.am: 'በአንድ ሰው',
+    },
+    'showerCommissionNotice': {
+      AppLanguage.en: '100% Station Net Revenue • 0% Washer Commission',
+      AppLanguage.om: 'Galii Buufataa %100 • Dhiqdootaaf %0',
+      AppLanguage.am: '100% የጣቢያው ገቢ • ለእጣቢዎች 0% ኮሚሽን',
+    },
+    'numberOfPersons': {
+      AppLanguage.en: 'Number of Persons',
+      AppLanguage.om: 'Baay\'ina Namootaa',
+      AppLanguage.am: 'የሰዎች ብዛት',
+    },
+    'recordShowerEntry': {
+      AppLanguage.en: 'Record Shower Entry',
+      AppLanguage.om: 'Seensa Shawaaraa Galmeessi',
+      AppLanguage.am: 'የሻወር ተጠቃሚ መዝግብ',
+    },
+    'showerTotalRevenue': {
+      AppLanguage.en: 'Total Shower Revenue',
+      AppLanguage.om: 'Ida\'ama Galii Shawaaraa',
+      AppLanguage.am: 'አጠቃላይ የሻወር ገቢ',
+    },
+    'additionalServicesTariffs': {
+      AppLanguage.en: 'Additional Services Tariffs',
+      AppLanguage.om: 'Madaallii Gatii Tajaajiloota Biroo',
+      AppLanguage.am: 'ተጨማሪ የአገልግሎት ዋጋዎች',
+    },
+    'carpetPricingTitle': {
+      AppLanguage.en: 'Carpet Cleaning Pricing (ETB/m²)',
+      AppLanguage.om: 'Gatii Qulqullina Karpeetii (ETB/m²)',
+      AppLanguage.am: 'የምንጣፍ እጥበት ዋጋ (ብር/ካሬ)',
+    },
+    'carpetPricingSubtitle': {
+      AppLanguage.en: 'Estimated dynamically by area square meters',
+      AppLanguage.om: 'Bal\'ina kaaree meetiraatiin kan shallagamu',
+      AppLanguage.am: 'በካሬ ሜትር ስፋት የሚሰላ ዋጋ',
+    },
+    'showerTariffTitle': {
+      AppLanguage.en: 'Station Public Shower Fee',
+      AppLanguage.om: 'Gatii Shawaaraa Buufataa',
+      AppLanguage.am: 'የጣቢያው የህዝብ ሻወር ክፍያ',
+    },
+    'showerFeePerPerson': {
+      AppLanguage.en: 'Shower Fee per Person',
+      AppLanguage.om: 'Kaffaltii Shawaaraa Nama Tokkoo',
+      AppLanguage.am: 'የአንድ ሰው የሻወር ክፍያ',
+    },
+    'publicShowerAtStation': {
+      AppLanguage.en: 'On-site hot & cold shower facility',
+      AppLanguage.om: 'Tajaajila shawaaraa buufata keessatti argamu',
+      AppLanguage.am: 'በጣቢያው የሚገኝ የሻወር አገልግሎት',
+    },
+    'carpetDimensionsTitle': {
+      AppLanguage.en: 'Carpet Dimensions (Length × Width)',
+      AppLanguage.om: 'Safartuu Karpeetii (Dheerina × Bal\'ina)',
+      AppLanguage.am: 'የምንጣፍ ልኬት (ርዝመት × ወርድ)',
+    },
+    'carpetLength': {
+      AppLanguage.en: 'Length',
+      AppLanguage.om: 'Dheerina',
+      AppLanguage.am: 'ርዝመት',
+    },
+    'carpetWidth': {
+      AppLanguage.en: 'Width',
+      AppLanguage.om: 'Bal\'ina',
+      AppLanguage.am: 'ወርድ',
+    },
+    'carpetTotalArea': {
+      AppLanguage.en: 'Total Area',
+      AppLanguage.om: 'Bal\'ina Waliigalaa',
+      AppLanguage.am: 'አጠቃላይ ስፋት',
+    },
+    'bookCarpetCleaning': {
+      AppLanguage.en: 'Book Carpet Cleaning',
+      AppLanguage.om: 'Qulqullina Karpeetii Qabadhaa',
+      AppLanguage.am: 'የምንጣፍ እጥበት ያስይዙ',
+    },
+    'carpetService': {
+      AppLanguage.en: 'Carpet Cleaning',
+      AppLanguage.om: 'Qulqullina Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት',
+    },
+    'carpetCleaningOptions': {
+      AppLanguage.en: 'Carpet Cleaning Options',
+      AppLanguage.om: 'Filannoowwan Qulqullina Karpeetii',
+      AppLanguage.am: 'የምንጣፍ እጥበት አማራጮች',
+    },
+    'serviceProvisionMode': {
+      AppLanguage.en: 'Service Delivery Provision',
+      AppLanguage.om: 'Haala Tajaajilli Itti Kennamu',
+      AppLanguage.am: 'የአገልግሎት አሰጣጥ ዘዴ',
+    },
+    'carpetTrackingTag': {
+      AppLanguage.en: 'Carpet Tracking Tag / ID',
+      AppLanguage.om: 'Koodii Karpeetii',
+      AppLanguage.am: 'የምንጣፍ መለያ ቁጥር',
+    },
+    'vehicleRegistration': {
+      AppLanguage.en: 'Vehicle Registration',
+      AppLanguage.om: 'Galmee Makiinaa',
+      AppLanguage.am: 'የመኪና ምዝገባ',
+    },
+    'atStationService': {
+      AppLanguage.en: 'At Station',
+      AppLanguage.om: 'Buufata Keessatti',
+      AppLanguage.am: 'ጣቢያው ድረስ',
+    },
+    'atHomeService': {
+      AppLanguage.en: 'At Customer Home',
+      AppLanguage.om: 'Mana Maamilaatti',
+      AppLanguage.am: 'ደንበኛ መኖሪያ ቤት',
+    },
+    'valetPickupReturn': {
+      AppLanguage.en: 'Valet Pickup & Return',
+      AppLanguage.om: 'Fuudhanii Deebisuu',
+      AppLanguage.am: 'ተወስዶ የሚመለስ',
+    },
+    'customTip': {
+      AppLanguage.en: 'Custom Tip',
+      AppLanguage.om: 'Tipii Kan Biroo',
+      AppLanguage.am: 'ሌላ የቲፕ መጠን',
+    },
+    // Tips
+    'washersTip': {
+      AppLanguage.en: 'Washer Team Tip (ETB)',
+      AppLanguage.om: 'Gumaata Dhiqdootaa (ETB)',
+      AppLanguage.am: 'የእጣቢዎች ቲፕ (ብር)',
+    },
+    'addTipPrompt': {
+      AppLanguage.en: 'Add Tip for Washers (Optional)',
+      AppLanguage.om: 'Dhiqdootaaf tipii dabali (filannoo)',
+      AppLanguage.am: 'ለእጣቢዎች ቲፕ ጨምር (አማራጭ)',
+    },
+    'tipPassThroughNotice': {
+      AppLanguage.en: '100% of customer tips are passed directly to the washing crew.',
+      AppLanguage.om: 'Tipiin maamilaa %100 kallattiin garee dhiqdootaatiif kennama.',
+      AppLanguage.am: '100% የደንበኛ ቲፕ በቀጥታ ለእጣቢዎች ይተላለፋል።',
+    },
+    'customerTipsPool': {
+      AppLanguage.en: 'Customer Tips Pool',
+      AppLanguage.om: 'Kuusaa Tipii Maamiltootaa',
+      AppLanguage.am: 'የደንበኞች ቲፕ ድምር',
+    },
+    'servicePricingSettings': {
+      AppLanguage.en: 'Service Pricing & Tariffs',
+      AppLanguage.om: 'Madaallii Gatii Tajaajilootaa',
+      AppLanguage.am: 'የአገልግሎት ዋጋዎች ማስተካከያ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

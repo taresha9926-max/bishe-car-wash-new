@@ -31,6 +31,7 @@ abstract class IBookingRepository {
     required String bookingId,
     required PaymentMethod method,
     required double amount,
+    double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
   });

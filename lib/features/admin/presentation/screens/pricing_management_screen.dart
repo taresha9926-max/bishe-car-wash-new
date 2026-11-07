@@ -67,6 +67,9 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
             // Expandable Package List
             ...packages.map((pkg) => _buildPackageCard(context, state, pkg, packages)),
 
+            // Additional Services Tariffs (Carpet & Station Shower)
+            _buildCarpetAndShowerPricingSection(context, state),
+
             const SizedBox(height: 24),
           ],
         ),
@@ -400,6 +403,288 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     ),
                   );
                 }
+              }
+            },
+            child: Text(state.tr('save')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCarpetAndShowerPricingSection(BuildContext context, dynamic state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 18),
+        Text(
+          state.tr('additionalServicesTariffs'),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+        ),
+        const SizedBox(height: 10),
+
+        // Carpet Pricing Card
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6366F1).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.texture_rounded, color: Color(0xFF6366F1), size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.tr('carpetPricingTitle'),
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        ),
+                        Text(
+                          state.tr('carpetPricingSubtitle'),
+                          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 20),
+              // Type A Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(state.tr('carpetTypeA'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      Text(state.tr('carpetTypeADesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB/m²',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF4338CA)),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                        onPressed: () => _editCarpetPriceDialog(context, state, isTypeB: false),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const Divider(height: 14),
+              // Type B Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(state.tr('carpetTypeB'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      Text(state.tr('carpetTypeBDesc'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB/m²',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFB91C1C)),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                        onPressed: () => _editCarpetPriceDialog(context, state, isTypeB: true),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // Station Shower Tariff Card
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0284C7).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.shower_rounded, color: Color(0xFF0284C7), size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          state.tr('showerTariffTitle'),
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        ),
+                        Text(
+                          state.tr('showerCommissionNotice'),
+                          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(state.tr('showerFeePerPerson'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      Text(state.tr('publicShowerAtStation'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '${state.showerPricePerPerson.toStringAsFixed(0)} ETB',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF0284C7)),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+                        onPressed: () => _editShowerPriceDialog(context, state),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _editCarpetPriceDialog(BuildContext context, dynamic state, {required bool isTypeB}) {
+    final currentPrice = isTypeB ? state.carpetTypeBPricePerSqM as double : state.carpetTypeAPricePerSqM as double;
+    final controller = TextEditingController(text: currentPrice.toStringAsFixed(0));
+    final label = isTypeB ? state.tr('carpetTypeB') : state.tr('carpetTypeA');
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('${state.tr("editPrice")}: $label'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: 'Price in ETB / m²',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(state.tr('cancel')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              final newPrice = double.tryParse(controller.text.trim());
+              if (newPrice != null && newPrice > 0) {
+                Navigator.pop(dialogCtx);
+                final appState = AppStateProvider.read(context);
+                if (isTypeB) {
+                  appState.updateCarpetPricing(typeBPrice: newPrice);
+                } else {
+                  appState.updateCarpetPricing(typeAPrice: newPrice);
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Updated $label price to $newPrice ETB/m²'),
+                    backgroundColor: AppColors.statusCompleted,
+                  ),
+                );
+              }
+            },
+            child: Text(state.tr('save')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editShowerPriceDialog(BuildContext context, dynamic state) {
+    final currentPrice = state.showerPricePerPerson as double;
+    final controller = TextEditingController(text: currentPrice.toStringAsFixed(0));
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('${state.tr("editPrice")}: ${state.tr("showerFeePerPerson")}'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: 'Price in ETB / person',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(state.tr('cancel')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0284C7),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              final newPrice = double.tryParse(controller.text.trim());
+              if (newPrice != null && newPrice > 0) {
+                Navigator.pop(dialogCtx);
+                final appState = AppStateProvider.read(context);
+                appState.updateShowerPrice(newPrice);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Updated shower price to $newPrice ETB/person'),
+                    backgroundColor: AppColors.statusCompleted,
+                  ),
+                );
               }
             },
             child: Text(state.tr('save')),

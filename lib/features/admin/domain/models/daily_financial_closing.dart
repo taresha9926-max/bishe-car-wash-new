@@ -29,6 +29,11 @@ class DailyFinancialClosing {
   final String? bankAccountName;
   final String? bankAccountNumber;
   final String? depositSlipRef;
+  final int carpetsCleanedCount;
+  final double carpetRevenue;
+  final int showerUsersCount;
+  final double showerRevenue;
+  final double totalTipsAmount;
 
   const DailyFinancialClosing({
     required this.id,
@@ -61,6 +66,11 @@ class DailyFinancialClosing {
     this.bankAccountName,
     this.bankAccountNumber,
     this.depositSlipRef,
+    this.carpetsCleanedCount = 0,
+    this.carpetRevenue = 0.0,
+    this.showerUsersCount = 0,
+    this.showerRevenue = 0.0,
+    this.totalTipsAmount = 0.0,
   });
 
   DailyFinancialClosing copyWith({
@@ -74,6 +84,11 @@ class DailyFinancialClosing {
     String? bankAccountName,
     String? bankAccountNumber,
     String? depositSlipRef,
+    int? carpetsCleanedCount,
+    double? carpetRevenue,
+    int? showerUsersCount,
+    double? showerRevenue,
+    double? totalTipsAmount,
   }) {
     return DailyFinancialClosing(
       id: id,
@@ -106,6 +121,11 @@ class DailyFinancialClosing {
       bankAccountName: bankAccountName ?? this.bankAccountName,
       bankAccountNumber: bankAccountNumber ?? this.bankAccountNumber,
       depositSlipRef: depositSlipRef ?? this.depositSlipRef,
+      carpetsCleanedCount: carpetsCleanedCount ?? this.carpetsCleanedCount,
+      carpetRevenue: carpetRevenue ?? this.carpetRevenue,
+      showerUsersCount: showerUsersCount ?? this.showerUsersCount,
+      showerRevenue: showerRevenue ?? this.showerRevenue,
+      totalTipsAmount: totalTipsAmount ?? this.totalTipsAmount,
     );
   }
 
