@@ -12,3 +12,11 @@ ADD COLUMN IF NOT EXISTS custom_total_price NUMERIC(10, 2);
 
 -- Performance index for real-time division separation
 CREATE INDEX IF NOT EXISTS idx_wash_bookings_is_carpet ON public.wash_bookings(is_carpet);
+
+-- Backfill any existing carpet orders created with CPT tag
+UPDATE public.wash_bookings
+SET is_carpet = TRUE
+WHERE license_plate LIKE 'CPT-%' AND (is_carpet IS FALSE OR is_carpet IS NULL);
+
+-- Refresh PostgREST schema cache immediately
+NOTIFY pgrst, 'reload schema';
