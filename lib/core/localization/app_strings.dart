@@ -3138,6 +3138,16 @@ class AppStrings {
       AppLanguage.om: 'Ida\'ama Gatii Dhaabbataa',
       AppLanguage.am: 'መደበኛ የተሰላ ድምር ዋጋ',
     },
+    'staffTariff': {
+      AppLanguage.en: 'Staff Tariff Total',
+      AppLanguage.om: 'Ida\'ama Gatii Hojjattootaa',
+      AppLanguage.am: 'የሰራተኞች መደበኛ ታሪፍ',
+    },
+    'agreedTariff': {
+      AppLanguage.en: 'Agreed Tariff (ETB)',
+      AppLanguage.om: 'Gatii Waliigaltee (ETB)',
+      AppLanguage.am: 'የተስማሙበት ዋጋ (ብር)',
+    },
     'useSuggestedPrice': {
       AppLanguage.en: 'Use Tariff',
       AppLanguage.om: 'Gatii Dhaabbataa Fudhadhu',
