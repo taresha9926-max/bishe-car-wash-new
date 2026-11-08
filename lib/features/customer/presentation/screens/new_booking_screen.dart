@@ -6,6 +6,7 @@ import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/widgets/custom_button.dart';
 import 'package:bishe_car_wash/core/widgets/custom_text_field.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
@@ -20,6 +21,8 @@ class NewBookingScreen extends StatefulWidget {
   final WashPackage? initialPackage;
   final bool isCarpet;
   final String? initialCarpetType;
+  final List<String>? initialSelectedServices;
+  final bool? initialUseCustomChecklist;
 
   const NewBookingScreen({
     super.key,
@@ -28,6 +31,8 @@ class NewBookingScreen extends StatefulWidget {
     this.initialPackage,
     this.isCarpet = false,
     this.initialCarpetType,
+    this.initialSelectedServices,
+    this.initialUseCustomChecklist,
   });
 
   @override
@@ -40,6 +45,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   late ServiceType _selectedServiceType;
   late CarType _selectedCarType;
   WashPackage? _selectedPackage;
+
+  // Custom Detailing Checklist State
+  bool _useCustomChecklist = false;
+  final Set<String> _selectedServiceIds = {};
 
   late bool _isCarpet;
   String _carpetType = 'type_a';
@@ -68,9 +77,28 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     _selectedServiceType = widget.initialServiceType ?? ServiceType.walkInStation;
     _selectedCarType = widget.initialCarType ?? CarType.automobile;
     _selectedPackage = widget.initialPackage;
+
+    if (widget.initialSelectedServices != null && widget.initialSelectedServices!.isNotEmpty) {
+      _selectedServiceIds.addAll(widget.initialSelectedServices!);
+      _useCustomChecklist = widget.initialUseCustomChecklist ?? true;
+    } else if (widget.initialUseCustomChecklist == true) {
+      _useCustomChecklist = true;
+    }
+
     if (_isCarpet) {
       _plateController.text = 'CPT-${(DateTime.now().millisecondsSinceEpoch % 10000)}';
     }
+  }
+
+  double _calculateSuggestedServicesTotal(dynamic state) {
+    double total = 0.0;
+    final items = state.activeServiceItems as List<CarWashServiceItem>;
+    for (final item in items) {
+      if (_selectedServiceIds.contains(item.id)) {
+        total += item.getPriceFor(_selectedCarType);
+      }
+    }
+    return total;
   }
 
   @override
@@ -101,7 +129,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     }
 
     final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
-    final currentPrice = _isCarpet ? carpetPrice : (_selectedPackage?.getPriceFor(_selectedCarType) ?? 0.0);
+    final washPrice = _useCustomChecklist
+        ? _calculateSuggestedServicesTotal(state)
+        : (_selectedPackage?.getPriceFor(_selectedCarType) ?? 0.0);
+    final currentPrice = _isCarpet ? carpetPrice : washPrice;
     final grandTotal = currentPrice + _tipAmount;
 
     return Scaffold(
@@ -175,115 +206,252 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                 ),
                 const SizedBox(height: 22),
 
-              // 3. Wash Package
-              Text(
-                state.tr('servicePackages'),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 10),
-              ...packages.map((pkg) {
-                final isSelected = pkg.id == _selectedPackage?.id;
-                final price = pkg.getPriceFor(_selectedCarType);
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedPackage = pkg;
-                    });
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.cardBorder,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Radio<String>(
-                          value: pkg.id,
-                          groupValue: _selectedPackage?.id,
-                          activeColor: AppColors.primary,
-                          onChanged: (_) {
-                            setState(() {
-                              _selectedPackage = pkg;
-                            });
-                          },
+              // Service Selection Mode Switcher
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _useCustomChecklist = true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 9),
+                        decoration: BoxDecoration(
+                          color: _useCustomChecklist ? AppColors.primary : AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: _useCustomChecklist ? AppColors.primary : AppColors.cardBorder),
                         ),
-                        AutoCareAssets.buildPhotoThumbnail(
-                          imageUrl: AutoCareAssets.getPackageImage(pkg),
-                          width: 52,
-                          height: 52,
-                          borderRadius: 10,
-                          durationBadge: '${pkg.durationMinutes}m',
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                pkg.localizedName(state.currentLang),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.checklist_rounded, size: 16, color: _useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                state.tr('customServicesChecklist'),
                                 style: TextStyle(
-                                  fontSize: 14.5,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                  color: _useCustomChecklist ? Colors.white : AppColors.textPrimary,
                                 ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${pkg.durationMinutes} mins • ${pkg.localizedDescription(state.currentLang)}',
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  color: AppColors.textSecondary,
-                                ),
-                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              if (isSelected && pkg.features.isNotEmpty) ...[
-                                const SizedBox(height: 6),
-                                ...pkg.localizedFeatures(state.currentLang).map((f) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 2),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(Icons.check_circle_outline, size: 12, color: AppColors.primary),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          f,
-                                          style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )),
-                              ],
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          CurrencyFormatter.format(price),
-                          style: const TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primaryDark,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                );
-              }),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _useCustomChecklist = false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 9),
+                        decoration: BoxDecoration(
+                          color: !_useCustomChecklist ? AppColors.primary : AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: !_useCustomChecklist ? AppColors.primary : AppColors.cardBorder),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.inventory_2_outlined, size: 16, color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                state.tr('presetPackages'),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              if (_useCustomChecklist) ...[
+                ...state.activeServiceItems.map((item) {
+                  final isChecked = _selectedServiceIds.contains(item.id);
+                  final itemPrice = item.getPriceFor(_selectedCarType);
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: isChecked ? AppColors.primary.withOpacity(0.04) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isChecked ? AppColors.primary : AppColors.cardBorder,
+                        width: isChecked ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: CheckboxListTile(
+                        value: isChecked,
+                        dense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                        activeColor: AppColors.primary,
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.name,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
+                                  color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                CurrencyFormatter.format(itemPrice),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: item.description != null && item.description!.isNotEmpty
+                            ? Text(
+                                item.description!,
+                                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                              )
+                            : null,
+                        onChanged: (val) {
+                          setState(() {
+                            if (val == true) {
+                              _selectedServiceIds.add(item.id);
+                            } else {
+                              _selectedServiceIds.remove(item.id);
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                }),
+              ] else ...[
+                // 3. Wash Package
+                Text(
+                  state.tr('servicePackages'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                ...packages.map((pkg) {
+                  final isSelected = pkg.id == _selectedPackage?.id;
+                  final price = pkg.getPriceFor(_selectedCarType);
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedPackage = pkg;
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected ? AppColors.primary : AppColors.cardBorder,
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Radio<String>(
+                            value: pkg.id,
+                            groupValue: _selectedPackage?.id,
+                            activeColor: AppColors.primary,
+                            onChanged: (_) {
+                              setState(() {
+                                _selectedPackage = pkg;
+                              });
+                            },
+                          ),
+                          AutoCareAssets.buildPhotoThumbnail(
+                            imageUrl: AutoCareAssets.getPackageImage(pkg),
+                            width: 52,
+                            height: 52,
+                            borderRadius: 10,
+                            durationBadge: '${pkg.durationMinutes}m',
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  pkg.localizedName(state.currentLang),
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${pkg.durationMinutes} mins • ${pkg.localizedDescription(state.currentLang)}',
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (isSelected && pkg.features.isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  ...pkg.localizedFeatures(state.currentLang).map((f) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 2),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(Icons.check_circle_outline, size: 12, color: AppColors.primary),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            f,
+                                            style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            CurrencyFormatter.format(price),
+                            style: const TextStyle(
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ],
               ] else ...[
                 // Carpet Cleaning Options
                 Text(
@@ -706,7 +874,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                           child: Text(
                             _isCarpet
                                 ? '${state.tr("carpetService")}: ${_carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                                : (_selectedPackage?.localizedName(state.currentLang) ?? ''),
+                                : (_useCustomChecklist
+                                    ? '${state.tr("customServicesChecklist")} (${_selectedServiceIds.length})'
+                                    : (_selectedPackage?.localizedName(state.currentLang) ?? '')),
                             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -791,7 +961,16 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   Future<void> _handleBookingSubmit() async {
     if (!_formKey.currentState!.validate()) return;
     final state = AppStateProvider.read(context);
-    if (!_isCarpet && _selectedPackage == null && state.packages.isEmpty) return;
+    if (!_isCarpet && !_useCustomChecklist && _selectedPackage == null && state.packages.isEmpty) return;
+    if (!_isCarpet && _useCustomChecklist && _selectedServiceIds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange.shade800,
+          content: Text(state.tr('selectAtLeastOneService')),
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isSubmitting = true;
@@ -804,6 +983,19 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       }
 
       final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
+      final suggestedWashPrice = _useCustomChecklist
+          ? _calculateSuggestedServicesTotal(state)
+          : (_selectedPackage?.getPriceFor(_selectedCarType) ?? 0.0);
+
+      List<String>? selectedServiceNames;
+      if (!_isCarpet && _useCustomChecklist) {
+        final activeItems = state.activeServiceItems;
+        selectedServiceNames = activeItems
+            .where((item) => _selectedServiceIds.contains(item.id))
+            .map((item) => item.name)
+            .toList();
+      }
+
       final booking = await state.bookNewWash(
         customerName: _nameController.text.trim(),
         customerPhone: _phoneController.text.trim(),
@@ -818,8 +1010,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         carpetType: _isCarpet ? _carpetType : null,
         carpetAreaSqMeters: _isCarpet ? _carpetArea : null,
         carpetDimensions: _isCarpet ? '${_lengthController.text.trim()}m x ${_widthController.text.trim()}m' : null,
-        customTotalPrice: _isCarpet ? carpetPrice : null,
+        customTotalPrice: _isCarpet ? carpetPrice : (_useCustomChecklist ? suggestedWashPrice : null),
         tipAmount: _tipAmount,
+        selectedServices: selectedServiceNames,
       );
 
       if (mounted) {

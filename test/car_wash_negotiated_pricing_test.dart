@@ -145,5 +145,32 @@ void main() {
       expect(amSms, contains('Touchless Snow Foam & Hand Wash + Machine High-Gloss Polish'));
       expect(amSms, contains('ውድ Abebe Bikila'));
     });
+
+    test('Customer creates online booking with custom selected services checklist and gratuity tip', () async {
+      final selectedServices = [
+        'Body Hand Wash with Shampoo',
+        'Tire Cleaning & Tire Black Finish',
+        'Headlight Restoration',
+      ];
+      // Automobile prices: 500 + 200 + 1000 = 1700
+      const totalCustomServicesPrice = 1700.0;
+      const tipAmount = 100.0;
+
+      final booking = await state.bookNewWash(
+        customerName: 'Dawit Tolessa',
+        customerPhone: '+251 93 111 2233',
+        serviceType: ServiceType.walkInStation,
+        carType: CarType.automobile,
+        licensePlate: '3-B99887 ET',
+        package: state.packages.first,
+        selectedServices: selectedServices,
+        customTotalPrice: totalCustomServicesPrice,
+        tipAmount: tipAmount,
+      );
+
+      expect(booking.totalPrice, 1700.0);
+      expect(booking.selectedServices, equals(selectedServices));
+      expect(booking.serviceDisplayName, 'Body Hand Wash with Shampoo (+2 services)');
+    });
   });
 }

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
@@ -12,6 +11,7 @@ import 'package:bishe_car_wash/core/widgets/service_promo_banner.dart';
 import 'package:bishe_car_wash/core/widgets/status_badge.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
@@ -32,11 +32,25 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   CarType _previewCarType = CarType.automobile;
   String? _selectedPackageId;
   final TextEditingController _trackController = TextEditingController();
-  bool _isCarpetTabActive = false;
   String _customerCarpetType = 'type_a';
   ServiceType _customerCarpetDelivery = ServiceType.walkInStation;
   final _carpetLengthCalc = TextEditingController(text: '3.0');
   final _carpetWidthCalc = TextEditingController(text: '2.0');
+
+  // Custom Detailing Checklist Selection
+  bool _useCustomChecklist = true;
+  final Set<String> _selectedServiceIds = {'srv_body_wash', 'srv_tire_clean'};
+
+  double _calculateSuggestedServicesTotal(dynamic state) {
+    double total = 0.0;
+    final items = state.activeServiceItems as List<CarWashServiceItem>;
+    for (final item in items) {
+      if (_selectedServiceIds.contains(item.id)) {
+        total += item.getPriceFor(_previewCarType);
+      }
+    }
+    return total;
+  }
 
   @override
   void dispose() {
@@ -122,10 +136,218 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 _buildVehicleSelector(state),
                 const SizedBox(height: 14),
 
-                // Packages List with Itemized Services
-                Column(
-                  children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
+                // Service Selection Mode Switcher
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _useCustomChecklist = true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                          decoration: BoxDecoration(
+                            color: _useCustomChecklist ? AppColors.primary : AppColors.surfaceVariant,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: _useCustomChecklist ? AppColors.primary : AppColors.cardBorder),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.checklist_rounded, size: 16, color: _useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  state.tr('customServicesChecklist'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: _useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _useCustomChecklist = false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                          decoration: BoxDecoration(
+                            color: !_useCustomChecklist ? AppColors.primary : AppColors.surfaceVariant,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: !_useCustomChecklist ? AppColors.primary : AppColors.cardBorder),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.inventory_2_outlined, size: 16, color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  state.tr('presetPackages'),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 14),
+
+                if (_useCustomChecklist) ...[
+                  ...state.activeServiceItems.map((item) {
+                    final isChecked = _selectedServiceIds.contains(item.id);
+                    final itemPrice = item.getPriceFor(_previewCarType);
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: isChecked ? AppColors.primary.withOpacity(0.04) : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isChecked ? AppColors.primary : AppColors.cardBorder,
+                          width: isChecked ? 1.5 : 1,
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: CheckboxListTile(
+                          value: isChecked,
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          activeColor: AppColors.primary,
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  item.name,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
+                                    color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  CurrencyFormatter.format(itemPrice),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: item.description != null && item.description!.isNotEmpty
+                              ? Text(
+                                  item.description!,
+                                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                )
+                              : null,
+                          onChanged: (val) {
+                            setState(() {
+                              if (val == true) {
+                                _selectedServiceIds.add(item.id);
+                              } else {
+                                _selectedServiceIds.remove(item.id);
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 10),
+
+                  // Customer Booking Bar for Custom Services
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${_selectedServiceIds.length} ${state.tr("customWashServices")}',
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              CurrencyFormatter.format(_calculateSuggestedServicesTotal(state)),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              elevation: 0,
+                            ),
+                            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                            label: Text(
+                              '${state.tr("bookThisWash")} • ${CurrencyFormatter.format(_calculateSuggestedServicesTotal(state))}',
+                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+                            ),
+                            onPressed: () {
+                              if (_selectedServiceIds.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: Colors.orange.shade800,
+                                    content: Text(state.tr('selectAtLeastOneService')),
+                                  ),
+                                );
+                                return;
+                              }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => NewBookingScreen(
+                                    initialCarType: _previewCarType,
+                                    initialSelectedServices: _selectedServiceIds.toList(),
+                                    initialUseCustomChecklist: true,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  // Packages List with Itemized Services
+                  Column(
+                    children: state.packages.map((pkg) => _buildPackageCard(context, state, pkg)).toList(),
+                  ),
+                ],
               ] else ...[
                 // Dedicated Carpet Cleaning Division View
                 Text(
@@ -1396,7 +1618,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            '${wash.package.localizedName(state.currentLang)} • ${wash.carType.localizedName(state.currentLang)} • ${wash.assignedWasherName != null ? "${state.tr('washer')}: ${wash.assignedWasherName}" : state.tr("pending")}',
+            '${wash.serviceDisplayName} • ${wash.carType.localizedName(state.currentLang)} • ${wash.assignedWasherName != null ? "${state.tr('washer')}: ${wash.assignedWasherName}" : state.tr("pending")}',
             style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),
