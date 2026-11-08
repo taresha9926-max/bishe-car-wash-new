@@ -30,6 +30,7 @@ class FixedAsset {
   final DateTime? lastServicedDate;
   final int quantity;
   final String notes;
+  final double assetValueEtb;
 
   const FixedAsset({
     required this.id,
@@ -43,6 +44,7 @@ class FixedAsset {
     this.lastServicedDate,
     this.quantity = 1,
     this.notes = '',
+    this.assetValueEtb = 0.0,
   });
 
   FixedAsset copyWith({
@@ -57,6 +59,7 @@ class FixedAsset {
     DateTime? lastServicedDate,
     int? quantity,
     String? notes,
+    double? assetValueEtb,
   }) {
     return FixedAsset(
       id: id ?? this.id,
@@ -70,6 +73,7 @@ class FixedAsset {
       lastServicedDate: lastServicedDate ?? this.lastServicedDate,
       quantity: quantity ?? this.quantity,
       notes: notes ?? this.notes,
+      assetValueEtb: assetValueEtb ?? this.assetValueEtb,
     );
   }
 
@@ -85,6 +89,7 @@ class FixedAsset {
     'lastServicedDate': lastServicedDate?.toIso8601String(),
     'quantity': quantity,
     'notes': notes,
+    'assetValueEtb': assetValueEtb,
   };
 
   factory FixedAsset.fromJson(Map<String, dynamic> json) {
@@ -105,6 +110,7 @@ class FixedAsset {
           : null,
       quantity: json['quantity'] as int? ?? 1,
       notes: json['notes'] as String? ?? '',
+      assetValueEtb: (json['assetValueEtb'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

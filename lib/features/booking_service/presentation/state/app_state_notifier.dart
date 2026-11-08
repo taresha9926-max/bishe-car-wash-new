@@ -559,6 +559,51 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Carpet Specialty Add-on Services (Editable by Super Admin)
+  final List<Map<String, dynamic>> _carpetAddonServices = [
+    {
+      'id': 'cpt_stain_extraction',
+      'name': 'Deep Chemical Stain Extraction',
+      'category': 'Specialty',
+      'price': 350.0,
+      'description': 'Targeted enzyme chemical extraction for coffee, ink & oil stains',
+    },
+    {
+      'id': 'cpt_antibacterial',
+      'name': 'Anti-Bacterial Sanitization & Perfume',
+      'category': 'Sanitization',
+      'price': 250.0,
+      'description': 'Hospital-grade steam disinfection and long-lasting fresh aroma',
+    },
+    {
+      'id': 'cpt_express_dry',
+      'name': 'Express Dehumidifier Drying (Same Day)',
+      'category': 'Express',
+      'price': 400.0,
+      'description': 'High-velocity heated air blower drying for 4-hour turnaround',
+    },
+  ];
+
+  List<Map<String, dynamic>> get carpetAddonServices => _carpetAddonServices;
+
+  void addCarpetAddonService(Map<String, dynamic> item) {
+    _carpetAddonServices.add(item);
+    notifyListeners();
+  }
+
+  void updateCarpetAddonService(Map<String, dynamic> updated) {
+    final idx = _carpetAddonServices.indexWhere((i) => i['id'] == updated['id']);
+    if (idx != -1) {
+      _carpetAddonServices[idx] = updated;
+      notifyListeners();
+    }
+  }
+
+  void deleteCarpetAddonService(String id) {
+    _carpetAddonServices.removeWhere((i) => i['id'] == id);
+    notifyListeners();
+  }
+
   // Segmented Queues
   List<WashBooking> get carWashBookings => _bookings.where((b) => !b.isCarpet).toList();
   List<WashBooking> get carpetWashBookings => _bookings.where((b) => b.isCarpet).toList();
@@ -2097,6 +2142,13 @@ class AppStateNotifier extends ChangeNotifier {
       notifyListeners();
       await _repository.saveServiceItems(_serviceItems);
     }
+  }
+
+  /// Admin deletes a custom service item
+  Future<void> deleteCustomServiceItem(String itemId) async {
+    _serviceItems.removeWhere((i) => i.id == itemId);
+    notifyListeners();
+    await _repository.saveServiceItems(_serviceItems);
   }
 
   /// Admin toggles active state of custom service item

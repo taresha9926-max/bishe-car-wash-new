@@ -230,6 +230,28 @@ class CarWashServiceItem {
           CarType.truck: 1800.0,
         },
       ),
+      CarWashServiceItem(
+        id: 'srv_plastic_trim',
+        name: 'Plastic Trim Restoration',
+        category: 'specialty',
+        description: 'UV deep black plastic and exterior rubber restoration & protection',
+        pricingByCarType: {
+          CarType.automobile: 400.0,
+          CarType.minibus: 600.0,
+          CarType.truck: 800.0,
+        },
+      ),
+      CarWashServiceItem(
+        id: 'srv_diamond_detailing',
+        name: 'Diamond - Interior & Exterior Detailing (1 Day)',
+        category: 'specialty',
+        description: 'Comprehensive 13-point full day detailing: unbolted seats, machine polish, engine degreasing & ceramic coat',
+        pricingByCarType: {
+          CarType.automobile: 5000.0,
+          CarType.minibus: 7500.0,
+          CarType.truck: 10000.0,
+        },
+      ),
     ];
   }
 }

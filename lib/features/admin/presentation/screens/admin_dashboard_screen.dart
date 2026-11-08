@@ -1517,12 +1517,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildManagementOperations(BuildContext context, dynamic state, bool isMobile) {
     final operations = [
       _OperationItem(
-        title: state.tr('pricingMatrix'),
-        subtitle: state.tr('pricingSubtitle'),
+        title: state.tr('masterPricingAndInventory'),
+        subtitle: 'Edit tariffs, car wash, carpet, consumables & fixed assets',
         icon: Icons.tune_rounded,
         imageUrl: AutoCareAssets.carSedanUrl,
         color: AppColors.primary,
-        badge: '${state.packages.length} Tariffs',
+        badge: '${state.serviceItems.length + state.consumables.length + state.fixedAssets.length} Items',
         onTap: () {
           Navigator.push(
             context,

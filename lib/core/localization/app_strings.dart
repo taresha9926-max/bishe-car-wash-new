@@ -1281,9 +1281,114 @@ class AppStrings {
       AppLanguage.am: 'ደረሰኝ የለም',
     },
     'pricingManagementTitle': {
-      AppLanguage.en: 'Service Pricing by Car Type',
-      AppLanguage.om: 'Gatii Tajaajilaa Konkolaataan',
-      AppLanguage.am: 'የእጥበት ዋጋ እንደ መኪናው ዓይነት',
+      AppLanguage.en: 'Service Pricing & Master Inventory',
+      AppLanguage.om: 'Gatii Tajaajilaa fi Qabeenyaa Waliigalaa',
+      AppLanguage.am: 'የእጥበት ዋጋ እና አጠቃላይ የንብረት መቆጣጠሪያ',
+    },
+    'masterPricingAndInventory': {
+      AppLanguage.en: 'Pricing & Master Inventory Editor',
+      AppLanguage.om: 'Gulaalaa Gatii fi Qabeenyaa Waliigalaa',
+      AppLanguage.am: 'የዋጋ ማስተካከያ እና አጠቃላይ የንብረት መቆጣጠሪያ',
+    },
+    'carWashTariffs': {
+      AppLanguage.en: 'Car Wash Detailing',
+      AppLanguage.om: 'Dhiqannaa Konkolaataa',
+      AppLanguage.am: 'የመኪና ማጠቢያ ዋጋዎች',
+    },
+    'carpetTariffs': {
+      AppLanguage.en: 'Carpet Services',
+      AppLanguage.om: 'Tajaajila Karpeetii',
+      AppLanguage.am: 'የምንጣፍ አገልግሎቶች',
+    },
+    'consumablesPricing': {
+      AppLanguage.en: 'Storekeeper Consumables',
+      AppLanguage.om: 'Meeshaalee Dhumatoo Bakka Kuusaa',
+      AppLanguage.am: 'የመጋዘን አላቂ እቃዎች',
+    },
+    'fixedAssetsValuation': {
+      AppLanguage.en: 'Storekeeper Fixed Assets',
+      AppLanguage.om: 'Qabeenya Dhaabbataa Bakka Kuusaa',
+      AppLanguage.am: 'የመጋዘን ቋሚ ንብረቶች',
+    },
+    'addNewService': {
+      AppLanguage.en: 'Add New Service',
+      AppLanguage.om: 'Tajaajila Haaraa Dabali',
+      AppLanguage.am: 'አዲስ አገልግሎት ያክሉ',
+    },
+    'editService': {
+      AppLanguage.en: 'Edit Service',
+      AppLanguage.om: 'Tajaajila Gulaali',
+      AppLanguage.am: 'አገልግሎቱን ያርትዑ',
+    },
+    'deleteService': {
+      AppLanguage.en: 'Delete Service',
+      AppLanguage.om: 'Tajaajila Haqi',
+      AppLanguage.am: 'አገልግሎቱን ይሰርዙ',
+    },
+    'confirmDeleteService': {
+      AppLanguage.en: 'Are you sure you want to permanently delete this service?',
+      AppLanguage.om: 'Tajaajila kana dhaabbataan haquu barbaadduu?',
+      AppLanguage.am: 'እርግጠኛ ነዎት ይህን አገልግሎት እስከመጨረሻው መሰረዝ ይፈልጋሉ?',
+    },
+    'addNewConsumable': {
+      AppLanguage.en: 'Add Consumable Item',
+      AppLanguage.om: 'Meeshaa Dhumataa Haaraa Dabali',
+      AppLanguage.am: 'አዲስ አላቂ እቃ ያክሉ',
+    },
+    'editConsumable': {
+      AppLanguage.en: 'Edit Consumable Item',
+      AppLanguage.om: 'Meeshaa Dhumataa Gulaali',
+      AppLanguage.am: 'አላቂ እቃውን ያርትዑ',
+    },
+    'deleteConsumableConfirm': {
+      AppLanguage.en: 'Are you sure you want to delete this consumable item from inventory?',
+      AppLanguage.om: 'Meeshaa dhumataa kana kuusaa keessaa haquu barbaadduu?',
+      AppLanguage.am: 'እርግጠኛ ነዎት ይህን አላቂ እቃ ከመጋዘን ዝርዝር መሰረዝ ይፈልጋሉ?',
+    },
+    'addNewFixedAsset': {
+      AppLanguage.en: 'Add Fixed Asset',
+      AppLanguage.om: 'Qabeenya Dhaabbataa Haaraa Dabali',
+      AppLanguage.am: 'አዲስ ቋሚ ንብረት ያክሉ',
+    },
+    'editFixedAsset': {
+      AppLanguage.en: 'Edit Fixed Asset',
+      AppLanguage.om: 'Qabeenya Dhaabbataa Gulaali',
+      AppLanguage.am: 'ቋሚ ንብረቱን ያርትዑ',
+    },
+    'deleteFixedAssetConfirm': {
+      AppLanguage.en: 'Are you sure you want to permanently delete this fixed asset?',
+      AppLanguage.om: 'Qabeenya dhaabbataa kana dhaabbataan haquu barbaadduu?',
+      AppLanguage.am: 'እርግጠኛ ነዎት ይህን ቋሚ ንብረት እስከመጨረሻው መሰረዝ ይፈልጋሉ?',
+    },
+    'assetValueEtb': {
+      AppLanguage.en: 'Asset Valuation (ETB)',
+      AppLanguage.om: 'Gatii Qabeenyaa (ETB)',
+      AppLanguage.am: 'የንብረቱ ዋጋ (ብር)',
+    },
+    'unitCostEtb': {
+      AppLanguage.en: 'Unit Cost / Price (ETB)',
+      AppLanguage.om: 'Gatii Tokkoo (ETB)',
+      AppLanguage.am: 'የአንዱ ዋጋ (ብር)',
+    },
+    'addNewCarpetService': {
+      AppLanguage.en: 'Add Carpet Service',
+      AppLanguage.om: 'Tajaajila Karpeetii Dabali',
+      AppLanguage.am: 'የምንጣፍ አገልግሎት ያክሉ',
+    },
+    'editCarpetService': {
+      AppLanguage.en: 'Edit Carpet Service',
+      AppLanguage.om: 'Tajaajila Karpeetii Gulaali',
+      AppLanguage.am: 'የምንጣፍ አገልግሎት ያርትዑ',
+    },
+    'deleteCarpetServiceConfirm': {
+      AppLanguage.en: 'Are you sure you want to delete this carpet service?',
+      AppLanguage.om: 'Tajaajila karpeetii kana haquu barbaadduu?',
+      AppLanguage.am: 'እርግጠኛ ነዎት ይህን የምንጣፍ አገልግሎት መሰረዝ ይፈልጋሉ?',
+    },
+    'superAdminOnlyNotice': {
+      AppLanguage.en: 'Super Admin Access: Direct live changes to system tariffs & inventory',
+      AppLanguage.om: 'Eeyyama Super Admin: Gatiiwwan sirnaa fi kuusaa kallattiin gulaaluuf',
+      AppLanguage.am: 'የሱፐር አድሚን ፈቃድ፡ የሲስተም ዋጋዎችንና የመጋዘን እቃዎችን በቀጥታ የማስተካከል ስልጣን',
     },
     'staffManagementTitle': {
       AppLanguage.en: 'Staff & Salaries Management',
