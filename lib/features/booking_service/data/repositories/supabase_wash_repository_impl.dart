@@ -9,6 +9,7 @@ import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart'
 import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authenticator.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
@@ -155,6 +156,52 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       }
     } catch (_) {}
     await _fallbackLocalRepo.updatePackagePrice(packageId, carType, newPrice);
+  }
+
+  @override
+  Future<List<CarWashServiceItem>> getServiceItems() async {
+    try {
+      final dynamic data = await _get('staff_credentials?username=eq.app_config_service_items&select=*');
+      if (data is List && data.isNotEmpty) {
+        final rawJson = data.first['full_name']?.toString() ?? '';
+        if (rawJson.isNotEmpty) {
+          final dynamic decoded = jsonDecode(rawJson);
+          if (decoded is List && decoded.isNotEmpty) {
+            return decoded
+                .map((e) => CarWashServiceItem.fromMap(Map<String, dynamic>.from(e as Map)))
+                .toList();
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Supabase getServiceItems exception: $e');
+    }
+    return _fallbackLocalRepo.getServiceItems();
+  }
+
+  @override
+  Future<void> saveServiceItems(List<CarWashServiceItem> items) async {
+    try {
+      final jsonPayload = jsonEncode(items.map((i) => i.toMap()).toList());
+      final dynamic existing = await _get('staff_credentials?username=eq.app_config_service_items&select=id');
+      if (existing is List && existing.isNotEmpty) {
+        await _patch('staff_credentials?username=eq.app_config_service_items', {
+          'full_name': jsonPayload,
+          'is_active': true,
+        });
+      } else {
+        await _post('staff_credentials', {
+          'username': 'app_config_service_items',
+          'pin_hash': '4450',
+          'role': 'admin',
+          'full_name': jsonPayload,
+          'is_active': true,
+        });
+      }
+    } catch (e) {
+      debugPrint('Supabase saveServiceItems exception: $e');
+    }
+    await _fallbackLocalRepo.saveServiceItems(items);
   }
 
   @override
@@ -347,6 +394,24 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             ? double.tryParse(json['custom_total_price'].toString())
             : (isCarpet && json['total_amount'] != null ? double.tryParse(json['total_amount'].toString()) : null);
 
+        List<String>? selectedServices;
+        if (json['selected_services'] != null) {
+          if (json['selected_services'] is List) {
+            selectedServices = (json['selected_services'] as List).map((e) => e.toString()).toList();
+          } else if (json['selected_services'] is String) {
+            try {
+              final dec = jsonDecode(json['selected_services']);
+              if (dec is List) selectedServices = dec.map((e) => e.toString()).toList();
+            } catch (_) {}
+          }
+        }
+        if (selectedServices == null && json['delivery_location'] != null) {
+          final loc = json['delivery_location'].toString();
+          if (loc.startsWith('Services: ')) {
+            selectedServices = loc.substring('Services: '.length).split(', ').map((s) => s.trim()).toList();
+          }
+        }
+
         return WashBooking(
           id: json['id'].toString(),
           customerName: json['owner_name'] ?? 'Customer',
@@ -376,6 +441,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           carpetAreaSqMeters: carpetAreaSqMeters,
           carpetDimensions: carpetDimensions,
           customTotalPrice: customTotalPrice,
+          selectedServices: selectedServices,
         );
       }).toList();
     } catch (e) {
@@ -413,7 +479,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'package_id': _isUuid(booking.package.id) ? booking.package.id : null,
         'assigned_bay_id': bayId,
         'license_plate': booking.licensePlate,
-        'delivery_location': booking.deliveryLocation ?? booking.gpsCoordinates,
+        'delivery_location': booking.deliveryLocation ??
+            (booking.selectedServices != null && booking.selectedServices!.isNotEmpty
+                ? 'Services: ${booking.selectedServices!.join(", ")}'
+                : booking.gpsCoordinates),
         'status': booking.status.name,
         'is_paid': booking.payment.isPaid,
         'payment_method': booking.payment.method.name,

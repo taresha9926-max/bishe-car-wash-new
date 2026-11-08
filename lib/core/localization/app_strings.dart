@@ -3113,6 +3113,96 @@ class AppStrings {
       AppLanguage.om: 'Kutaa 1, Kutaa 2, Vaan Moobaayilaafi Raakii Karpeetii',
       AppLanguage.am: 'ክፍል 1፣ ክፍል 2፣ ተንቀሳቃሽ ቫን እና የምንጣፍ ማድረቂያ ራኮች',
     },
+    'serviceSelectionMode': {
+      AppLanguage.en: 'Service Mode',
+      AppLanguage.om: 'Haala Tajaajilaa',
+      AppLanguage.am: 'የአገልግሎት ምርጫ',
+    },
+    'customServicesChecklist': {
+      AppLanguage.en: 'Detailing Services Checklist',
+      AppLanguage.om: 'Tarree Tajaajiloota Filataman',
+      AppLanguage.am: 'የዝርዝር አገልግሎቶች አመራረጥ',
+    },
+    'presetPackages': {
+      AppLanguage.en: 'Preset Packages',
+      AppLanguage.om: 'Paakeejiiwwan Qophaa\'an',
+      AppLanguage.am: 'ዝግጁ ፓኬጆች',
+    },
+    'negotiatedTotalPrice': {
+      AppLanguage.en: 'Negotiated Total Price (ETB)',
+      AppLanguage.om: 'Gatii Waliigaltee Waliigalaa (ETB)',
+      AppLanguage.am: 'የተደራደሩበት ጠቅላላ ዋጋ (ብር)',
+    },
+    'suggestedTariffTotal': {
+      AppLanguage.en: 'Suggested Tariff Total',
+      AppLanguage.om: 'Ida\'ama Gatii Dhaabbataa',
+      AppLanguage.am: 'መደበኛ የተሰላ ድምር ዋጋ',
+    },
+    'useSuggestedPrice': {
+      AppLanguage.en: 'Use Tariff',
+      AppLanguage.om: 'Gatii Dhaabbataa Fudhadhu',
+      AppLanguage.am: 'መደበኛ ዋጋ ተጠቀም',
+    },
+    'manageDetailServices': {
+      AppLanguage.en: 'Manage Detailing Services',
+      AppLanguage.om: 'Tajaajiloota Bal\'aa Bulchi',
+      AppLanguage.am: 'ዝርዝር አገልግሎቶችን አስተዳድር',
+    },
+    'addNewDetailService': {
+      AppLanguage.en: 'Add Detailing Service',
+      AppLanguage.om: 'Tajaajila Haaraa Dabaladhu',
+      AppLanguage.am: 'አዲስ ዝርዝር አገልግሎት አክል',
+    },
+    'serviceCategory': {
+      AppLanguage.en: 'Service Category',
+      AppLanguage.om: 'Ramaddii Tajaajilaa',
+      AppLanguage.am: 'የአገልግሎት ምድብ',
+    },
+    'categoryExterior': {
+      AppLanguage.en: 'Exterior & Wash',
+      AppLanguage.om: 'Dhiqannaa Alaa',
+      AppLanguage.am: 'የውጭ እጥበት',
+    },
+    'categoryPolish': {
+      AppLanguage.en: 'Body Polish & Restoration',
+      AppLanguage.om: 'Pooliishii fi Bareechuu',
+      AppLanguage.am: 'የመኪና ፖሊሽ እና ማብራት',
+    },
+    'categoryInterior': {
+      AppLanguage.en: 'Interior Detailing',
+      AppLanguage.om: 'Qulqullina Keessoo',
+      AppLanguage.am: 'የውስጥ ዲቴይሊንግ',
+    },
+    'categoryEngine': {
+      AppLanguage.en: 'Engine Detailing',
+      AppLanguage.om: 'Qulqullina Motooraa',
+      AppLanguage.am: 'የሞተር ጽዳት',
+    },
+    'categorySpecialty': {
+      AppLanguage.en: 'Specialty Add-ons',
+      AppLanguage.om: 'Tajaajiloota Dabalataa',
+      AppLanguage.am: 'ልዩ ተጨማሪ አገልግሎቶች',
+    },
+    'selectAtLeastOneService': {
+      AppLanguage.en: 'Please select at least one detailing service',
+      AppLanguage.om: 'Maaloo yoo xiqqaate tajaajila tokko filadhaa',
+      AppLanguage.am: 'እባክዎ ቢያንስ አንድ ዝርዝር አገልግሎት ይምረጡ',
+    },
+    'enterAgreedPrice': {
+      AppLanguage.en: 'Enter agreed price',
+      AppLanguage.om: 'Gatii waliigaltee galchaa',
+      AppLanguage.am: 'የተስማሙበትን ዋጋ ያስገቡ',
+    },
+    'customNegotiatedWash': {
+      AppLanguage.en: 'Custom Detailing Wash',
+      AppLanguage.om: 'Dhiqannaa Addaa Filatame',
+      AppLanguage.am: 'ልዩ የተመረጠ ዲቴይሊንግ እጥበት',
+    },
+    'customWashServices': {
+      AppLanguage.en: 'Custom Wash Services',
+      AppLanguage.om: 'Tajaajiloota Dhiqannaa Filataman',
+      AppLanguage.am: 'የተመረጡ የእጥበት አገልግሎቶች',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

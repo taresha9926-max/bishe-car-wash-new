@@ -1219,7 +1219,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
                       Text(
                         isCarpet
                             ? (booking.carpetType == 'type_b' ? state.tr('carpetTypeB') : state.tr('carpetTypeA'))
-                            : booking.package.name,
+                            : booking.serviceDisplayName,
                         style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -1292,7 +1292,7 @@ class _OperationalManagerDashboardScreenState extends State<OperationalManagerDa
                 Text(
                   isCarpet
                       ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                      : '${booking.licensePlate} • ${booking.package.name}',
+                      : '${booking.licensePlate} • ${booking.serviceDisplayName}',
                   style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                 ),
                 const SizedBox(height: 2),

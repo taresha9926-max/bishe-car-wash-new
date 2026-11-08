@@ -7,6 +7,7 @@ import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authentic
 import 'package:bishe_car_wash/features/booking_service/data/datasources/mock_wash_datasource.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
@@ -21,6 +22,7 @@ import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inven
 
 class WashRepositoryImpl implements IWashRepository {
   List<WashPackage> _packages = [];
+  List<CarWashServiceItem> _serviceItems = List.from(CarWashServiceItem.getInitialServiceItems());
   List<StaffMember> _staff = [];
   List<StationBay> _bays = [];
   List<WashBooking> _bookings = [];
@@ -254,6 +256,16 @@ class WashRepositoryImpl implements IWashRepository {
     if (index != -1) {
       _packages[index] = _packages[index].updatePrice(carType, newPrice);
     }
+  }
+
+  @override
+  Future<List<CarWashServiceItem>> getServiceItems() async {
+    return List.unmodifiable(_serviceItems);
+  }
+
+  @override
+  Future<void> saveServiceItems(List<CarWashServiceItem> items) async {
+    _serviceItems = List.from(items);
   }
 
   @override

@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/domain/models/car_type.dart';
+import '../../../booking_service/domain/models/car_wash_service_item.dart';
 import '../../../booking_service/domain/models/wash_package.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
@@ -26,8 +27,11 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
     final state = AppStateProvider.of(context);
     final packages = widget.packages;
 
-    return Container(
-      decoration: BoxDecoration(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder),
@@ -264,6 +268,128 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
           ),
         ],
       ),
+    ),
+    const SizedBox(height: 18),
+
+        // 2. Detailing Services Manager (Atomic Dynamic Services)
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with Add Button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: const BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      state.tr('manageDetailServices').toUpperCase(),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: const Icon(Icons.add, size: 14),
+                      label: Text(state.tr('addNewDetailService'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                      onPressed: () => _showAddServiceDialog(context),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Service items list
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: state.serviceItems.length,
+                separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.cardBorder),
+                itemBuilder: (ctx, index) {
+                  final item = state.serviceItems[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Row(
+                      children: [
+                        Switch(
+                          value: item.isActive,
+                          activeColor: AppColors.primary,
+                          onChanged: (_) => state.toggleServiceItemActive(item.id),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.name,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: item.isActive ? AppColors.textPrimary : AppColors.textMuted,
+                                ),
+                              ),
+                              if (item.description != null && item.description!.isNotEmpty)
+                                Text(
+                                  item.description!,
+                                  style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
+                        ),
+                        ...CarType.values.map((cType) {
+                          final tariff = item.getPriceFor(cType);
+                          return Expanded(
+                            flex: 2,
+                            child: InkWell(
+                              onTap: () => _showEditItemPriceDialog(context, item, cType, tariff),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      CurrencyFormatter.format(tariff),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: item.isActive ? AppColors.primaryDark : AppColors.textMuted,
+                                      ),
+                                    ),
+                                    const Text('edit', style: TextStyle(fontSize: 9, color: AppColors.textMuted)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -332,6 +458,194 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
             child: Text(state.tr('save')),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEditItemPriceDialog(
+    BuildContext context,
+    CarWashServiceItem item,
+    CarType carType,
+    double currentPrice,
+  ) {
+    final state = AppStateProvider.read(context);
+    final priceController = TextEditingController(text: currentPrice.toStringAsFixed(0));
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('${item.name} (${carType.localizedName(state.currentLang)})'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${carType.localizedName(state.currentLang)} Tariff',
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+            ),
+            const SizedBox(height: 12),
+            CustomTextField(
+              controller: priceController,
+              label: 'Price in ETB',
+              hint: 'e.g. 500',
+              keyboardType: TextInputType.number,
+              prefixIcon: Icons.payments_outlined,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(state.tr('cancel')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              final newPrice = double.tryParse(priceController.text.trim());
+              if (newPrice != null && newPrice > 0) {
+                Navigator.pop(dialogCtx);
+                final updatedPricing = Map<CarType, double>.from(item.pricingByCarType);
+                updatedPricing[carType] = newPrice;
+                final updatedItem = item.copyWith(pricingByCarType: updatedPricing);
+                await state.updateCustomServiceItem(updatedItem);
+              }
+            },
+            child: Text(state.tr('save')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddServiceDialog(BuildContext context) {
+    final state = AppStateProvider.read(context);
+    final nameController = TextEditingController();
+    final descController = TextEditingController();
+    final autoPriceController = TextEditingController(text: '500');
+    final minibusPriceController = TextEditingController(text: '700');
+    final truckPriceController = TextEditingController(text: '1200');
+    String selectedCategory = 'exterior';
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(state.tr('addNewDetailService')),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomTextField(
+                  controller: nameController,
+                  label: 'Service Name',
+                  hint: 'e.g. Headlight Restoration',
+                  prefixIcon: Icons.cleaning_services_outlined,
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: selectedCategory,
+                  decoration: InputDecoration(
+                    labelText: state.tr('serviceCategory'),
+                    filled: true,
+                    fillColor: AppColors.surfaceVariant,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'exterior', child: Text('Exterior & Wash')),
+                    DropdownMenuItem(value: 'polish', child: Text('Body Polish & Restoration')),
+                    DropdownMenuItem(value: 'interior', child: Text('Interior Detailing')),
+                    DropdownMenuItem(value: 'engine', child: Text('Engine Detailing')),
+                    DropdownMenuItem(value: 'specialty', child: Text('Specialty Add-on')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => selectedCategory = val);
+                  },
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: descController,
+                  label: 'Description (Optional)',
+                  hint: 'e.g. Chemical stain removal',
+                  prefixIcon: Icons.description_outlined,
+                ),
+                const SizedBox(height: 12),
+                const Text('Tariffs by Vehicle Type:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: autoPriceController,
+                        label: 'Auto (ETB)',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: CustomTextField(
+                        controller: minibusPriceController,
+                        label: 'Minibus (ETB)',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: CustomTextField(
+                        controller: truckPriceController,
+                        label: 'Truck (ETB)',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text(state.tr('cancel')),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () async {
+                final name = nameController.text.trim();
+                if (name.isEmpty) return;
+                final autoPrice = double.tryParse(autoPriceController.text.trim()) ?? 500.0;
+                final minibusPrice = double.tryParse(minibusPriceController.text.trim()) ?? 700.0;
+                final truckPrice = double.tryParse(truckPriceController.text.trim()) ?? 1200.0;
+
+                final newItem = CarWashServiceItem(
+                  id: 'srv_${DateTime.now().millisecondsSinceEpoch}',
+                  name: name,
+                  category: selectedCategory,
+                  description: descController.text.trim().isNotEmpty ? descController.text.trim() : null,
+                  pricingByCarType: {
+                    CarType.automobile: autoPrice,
+                    CarType.minibus: minibusPrice,
+                    CarType.truck: truckPrice,
+                  },
+                  isActive: true,
+                );
+
+                Navigator.pop(dialogCtx);
+                await state.addCustomServiceItem(newItem);
+              },
+              child: Text(state.tr('save')),
+            ),
+          ],
+        ),
       ),
     );
   }

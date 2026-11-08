@@ -5,6 +5,7 @@ import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
@@ -43,6 +44,8 @@ abstract class IBookingRepository {
 abstract class IPricingRepository {
   Future<List<WashPackage>> getPackages();
   Future<void> updatePackagePrice(String packageId, CarType carType, double newPrice);
+  Future<List<CarWashServiceItem>> getServiceItems();
+  Future<void> saveServiceItems(List<CarWashServiceItem> items);
 }
 
 /// Domain port for staff personnel, commission ledgers, and role credentials.

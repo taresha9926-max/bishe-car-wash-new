@@ -30,6 +30,7 @@ class WashBooking {
   final double? carpetAreaSqMeters;
   final String? carpetDimensions;
   final double? customTotalPrice;
+  final List<String>? selectedServices;
 
   const WashBooking({
     required this.id,
@@ -56,9 +57,24 @@ class WashBooking {
     this.carpetAreaSqMeters,
     this.carpetDimensions,
     this.customTotalPrice,
+    this.selectedServices,
   });
 
   double get totalPrice => customTotalPrice ?? package.getPriceFor(carType);
+
+  String get serviceDisplayName {
+    if (isCarpet) {
+      final dims = carpetDimensions != null && carpetDimensions!.isNotEmpty ? ' ($carpetDimensions)' : '';
+      return '${carpetType == "type_b" ? "Deep Clean (Type B)" : "Standard Clean (Type A)"}$dims';
+    }
+    if (selectedServices != null && selectedServices!.isNotEmpty) {
+      if (selectedServices!.length <= 2) {
+        return selectedServices!.join(' + ');
+      }
+      return '${selectedServices!.first} (+${selectedServices!.length - 1} services)';
+    }
+    return package.name;
+  }
 
   WashBooking copyWith({
     String? id,
@@ -85,6 +101,7 @@ class WashBooking {
     double? carpetAreaSqMeters,
     String? carpetDimensions,
     double? customTotalPrice,
+    List<String>? selectedServices,
   }) {
     return WashBooking(
       id: id ?? this.id,
@@ -111,6 +128,7 @@ class WashBooking {
       carpetAreaSqMeters: carpetAreaSqMeters ?? this.carpetAreaSqMeters,
       carpetDimensions: carpetDimensions ?? this.carpetDimensions,
       customTotalPrice: customTotalPrice ?? this.customTotalPrice,
+      selectedServices: selectedServices ?? this.selectedServices,
     );
   }
 }

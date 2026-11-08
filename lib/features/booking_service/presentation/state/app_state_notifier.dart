@@ -17,6 +17,7 @@ import 'package:bishe_car_wash/features/auth_roles/domain/models/staff_authentic
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
@@ -342,6 +343,10 @@ class AppStateNotifier extends ChangeNotifier {
 
   List<WashPackage> _packages = [];
   List<WashPackage> get packages => _packages;
+
+  List<CarWashServiceItem> _serviceItems = [];
+  List<CarWashServiceItem> get serviceItems => _serviceItems;
+  List<CarWashServiceItem> get activeServiceItems => _serviceItems.where((i) => i.isActive).toList();
 
   List<StaffMember> _staff = [];
   List<StaffMember> get staff => _staff;
@@ -1689,6 +1694,17 @@ class AppStateNotifier extends ChangeNotifier {
           _customerPhoneBookingNumber = hotline;
         }
       } catch (_) {}
+
+      try {
+        final items = await _repository.getServiceItems();
+        if (items.isNotEmpty) {
+          _serviceItems = List.from(items);
+        } else {
+          _serviceItems = List.from(CarWashServiceItem.getInitialServiceItems());
+        }
+      } catch (_) {
+        _serviceItems = List.from(CarWashServiceItem.getInitialServiceItems());
+      }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -1715,6 +1731,7 @@ class AppStateNotifier extends ChangeNotifier {
     double? carpetAreaSqMeters,
     String? carpetDimensions,
     double? customTotalPrice,
+    List<String>? selectedServices,
     double tipAmount = 0.0,
   }) async {
     final bookingId = isCarpet
@@ -1747,6 +1764,7 @@ class AppStateNotifier extends ChangeNotifier {
       carpetAreaSqMeters: carpetAreaSqMeters,
       carpetDimensions: carpetDimensions,
       customTotalPrice: customTotalPrice,
+      selectedServices: selectedServices,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -1775,6 +1793,7 @@ class AppStateNotifier extends ChangeNotifier {
     double? carpetAreaSqMeters,
     String? carpetDimensions,
     double? customTotalPrice,
+    List<String>? selectedServices,
     double tipAmount = 0.0,
   }) async {
     final bookingId = isCarpet
@@ -1815,6 +1834,7 @@ class AppStateNotifier extends ChangeNotifier {
       carpetAreaSqMeters: carpetAreaSqMeters,
       carpetDimensions: carpetDimensions,
       customTotalPrice: customTotalPrice,
+      selectedServices: selectedServices,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -1887,7 +1907,7 @@ class AppStateNotifier extends ChangeNotifier {
 
       return 'Dear $customerName, your carpet cleaning service (Tag: $tag, $cType$dims) is completed and ready. Please pay $amountStr. Thank you for choosing Bishe Car Wash & Carpet Cleaning Service!';
     }
-    final pkgName = booking.package.name;
+    final pkgName = booking.serviceDisplayName;
     final plate = booking.licensePlate;
 
     if (currentLang == 'OM') {
@@ -2014,6 +2034,7 @@ class AppStateNotifier extends ChangeNotifier {
     double? carpetAreaSqMeters,
     String? carpetDimensions,
     double? customTotalPrice,
+    List<String>? selectedServices,
     double tipAmount = 0.0,
   }) => registerWalkInGate(
     customerName: customerName,
@@ -2034,6 +2055,7 @@ class AppStateNotifier extends ChangeNotifier {
     carpetAreaSqMeters: carpetAreaSqMeters,
     carpetDimensions: carpetDimensions,
     customTotalPrice: customTotalPrice,
+    selectedServices: selectedServices,
     tipAmount: tipAmount,
   );
 
@@ -2058,6 +2080,34 @@ class AppStateNotifier extends ChangeNotifier {
     }
     await _repository.updatePackagePrice(packageId, carType, newPrice);
     await _refreshPricing();
+  }
+
+  /// Admin or manager adds dynamic custom service item
+  Future<void> addCustomServiceItem(CarWashServiceItem item) async {
+    _serviceItems.add(item);
+    notifyListeners();
+    await _repository.saveServiceItems(_serviceItems);
+  }
+
+  /// Admin or manager updates custom service item
+  Future<void> updateCustomServiceItem(CarWashServiceItem updated) async {
+    final idx = _serviceItems.indexWhere((i) => i.id == updated.id);
+    if (idx != -1) {
+      _serviceItems[idx] = updated;
+      notifyListeners();
+      await _repository.saveServiceItems(_serviceItems);
+    }
+  }
+
+  /// Admin toggles active state of custom service item
+  Future<void> toggleServiceItemActive(String itemId) async {
+    final idx = _serviceItems.indexWhere((i) => i.id == itemId);
+    if (idx != -1) {
+      final current = _serviceItems[idx];
+      _serviceItems[idx] = current.copyWith(isActive: !current.isActive);
+      notifyListeners();
+      await _repository.saveServiceItems(_serviceItems);
+    }
   }
 
   /// Admin manages staff base salaries and commission rates
@@ -2434,6 +2484,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   Future<void> _refreshPricing() async {
     _packages = await _repository.getPackages();
+    _serviceItems = await _repository.getServiceItems();
     notifyListeners();
   }
 
@@ -2450,6 +2501,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   Future<void> _refreshData() async {
     _packages = await _repository.getPackages();
+    _serviceItems = await _repository.getServiceItems();
     _staff = await _repository.getStaffMembers();
     _bays = await _repository.getBays();
     _bookings = await _repository.getBookings();
