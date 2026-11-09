@@ -55,6 +55,30 @@ class TikTokAdVideo {
     } else if (id == 'reel-8') {
       if (code == 'OM') return 'Tajaajila Makiinaa Socho\'aa Manaatti';
       if (code == 'AM') return 'ተንቀሳቃሽ የቤት ለቤት የእጥበት ቫን';
+    } else if (id == 'reel-ad-1') {
+      if (code == 'OM') return 'Dhiqannaa Qaama Alaa fi Harka Saamunaatiin';
+      if (code == 'AM') return 'አክቲቭ ስኖው ፎም እና የእጅ እጥበት';
+    } else if (id == 'reel-ad-2') {
+      if (code == 'OM') return 'Qulqullina Keessaa fi Vaakiyuumii Teessumaa';
+      if (code == 'AM') return 'የውስጥ ክፍል ጥልቅ ፅዳት እና ቫኪዩም';
+    } else if (id == 'reel-ad-3') {
+      if (code == 'OM') return 'Poolishii Qaamaa & Sirreeffama Halluu';
+      if (code == 'AM') return 'የሰውነት ማሽን ፖሊሽ እና የቀለም ጭረት ጥገና';
+    } else if (id == 'reel-ad-4') {
+      if (code == 'OM') return 'Dhiqannaa Gadi-Fageenyaa Kaarpeetii Manaafi Waajjiraa';
+      if (code == 'AM') return 'የምንጣፍ ጥልቅ ፅዳት እና ፀረ-ተባይ እጥበት';
+    } else if (id == 'reel-ad-5') {
+      if (code == 'OM') return 'Dhiqannaa Gadi-Fageenyaa Kaarpeetii';
+      if (code == 'AM') return 'የምንጣፍ የሻምፖ እጥበት እና በማሽን ማድረቅ';
+    } else if (id == 'reel-ad-6') {
+      if (code == 'OM') return 'Moora Mootoraa Kemikaalaan Cooma Qulqulleessuu';
+      if (code == 'AM') return 'የሞተር ክፍል በኬሚካል ቅባት ማስለቀቅ እና ስቲም';
+    } else if (id == 'reel-ad-7') {
+      if (code == 'OM') return 'Tajaajila Makiinaa Socho\'aa Manaatti';
+      if (code == 'AM') return 'የሞባይል ቫን የቤት ለቤት የመኪና እጥበት';
+    } else if (id == 'reel-ad-8') {
+      if (code == 'OM') return 'Tajaajila Diyaamondii Guyyaa 1 Guutuu Miidheksuu';
+      if (code == 'AM') return 'ዳይመንድ ሙሉ ዲቴይሊንግ (የ1 ቀን አገልግሎት)';
     }
     return title;
   }
@@ -85,6 +109,30 @@ class TikTokAdVideo {
     } else if (id == 'reel-8') {
       if (code == 'OM') return 'Makiinaa dhufee mana keessanitti dhiqu • Daawwadhaa';
       if (code == 'AM') return 'ቫኑ ደጃፍዎ መጥቶ የሚሰጠው ፈጣን አገልግሎት • ይመልከቱ';
+    } else if (id == 'reel-ad-1') {
+      if (code == 'OM') return 'Dhiqannaa shaamപ്പോ fi fooxaa faayiberiitiin • Kuula gommaa';
+      if (code == 'AM') return 'የመኪና አካል በሻምፖ እና በፋይበር ፎጣ • የጎማ እጥበት እና ማጥቆሪያ';
+    } else if (id == 'reel-ad-2') {
+      if (code == 'OM') return 'Dhukkee lafaa fi teessumaa • Korniisa dhiquu • Daashboordii miidheksuu';
+      if (code == 'AM') return 'የወለል እና የወንበር አቧራ ማጽዳት • የጣራ ጨርቅ ስቲም • የዳሽቦርድ ክሬም';
+    } else if (id == 'reel-ad-3') {
+      if (code == 'OM') return 'Madaa fi ciccitaa halluu balleessuu • Poolishii maashiniin';
+      if (code == 'AM') return 'የጭረት እና ጥቃቅን ስንጥቆች ማስለቀቅ • የሰውነት ፖሊሽ';
+    } else if (id == 'reel-ad-4') {
+      if (code == 'OM') return 'Afata manaafi waajjiraa • Maashina gogsuu saffisaa • Manaa fuunee deebifna';
+      if (code == 'AM') return 'የቤት እና የቢሮ ምንጣፎች • ፈጣን ማድረቂያ ማሽን • ከደጃፍዎ ተረክበን እናደርሳለን';
+    } else if (id == 'reel-ad-5') {
+      if (code == 'OM') return 'Iskaayer meetiraan herreegama • Qulqullina amansiisaa';
+      if (code == 'AM') return 'በካሬ ሜትር የሚሰላ • ጥልቅ የቆሻሻ ማጠቢያ • ፈጣን ርክክብ';
+    } else if (id == 'reel-ad-6') {
+      if (code == 'OM') return 'Dhiquu, dhiqachuu fi gogsuu • Eegumsa shiboo electrikii';
+      if (code == 'AM') return 'ጥልቅ ጽዳት፣ ማጠብ እና ማድረቅ • የሽቦዎች እና ኤሌክትሪክ ጥበቃ';
+    } else if (id == 'reel-ad-7') {
+      if (code == 'OM') return 'Baaniin dhufee mana keessanitti dhiqa • Bishaaniifi jeneretara guutuu';
+      if (code == 'AM') return 'በመሳሪያ የተሟላ ቫን • የራስ ውሃ እና ጀነሬተር • ቢሾፍቱ';
+    } else if (id == 'reel-ad-8') {
+      if (code == 'OM') return 'Poolishii maashiniin • Teessumoota baasanii dhiquu • Mootora dhiquu';
+      if (code == 'AM') return 'የሰውነት ማሽን ፖሊሽ • ወንበሮችና የወለል ምንጣፎች ወጥተው የሚታጠቡበት • የሞተር እጥበት';
     }
     return subtitle;
   }

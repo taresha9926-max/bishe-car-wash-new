@@ -709,6 +709,21 @@ class AppStrings {
       AppLanguage.om: 'Bishoftuu (Dabrazayiti), Oromiyaa, Itoophiyaa',
       AppLanguage.am: 'ቢሾፍቱ (ደብረ ዘይት)፣ ኦሮሚያ፣ ኢትዮጵያ',
     },
+    'curatedReelsPoolTitle': {
+      AppLanguage.en: 'Curated Detailing & Ad Photo Pool (Tap to Apply):',
+      AppLanguage.om: 'Filannoo Suuraalee Beeksisaafi Miidhaginaa (Tuqaa Fayyadamaa):',
+      AppLanguage.am: 'የተመረጡ የማስታወቂያ እና ዲቴይሊንግ ፎቶዎች (ለመምረጥ ይንኩ):',
+    },
+    'curatedPoolArtworks': {
+      AppLanguage.en: 'Official Branding Artworks & Murals',
+      AppLanguage.om: 'Mallattoolee fi Fakkiiwwan Bishee Official',
+      AppLanguage.am: 'ይፋዊ የቢሼ አርማዎች እና የግድግዳ ስዕሎች',
+    },
+    'curatedPoolAdBanners': {
+      AppLanguage.en: 'Commercial Service Ad Banners (Trilingual Detailing & Carpet)',
+      AppLanguage.om: 'Baanaroota Beeksisa Tajaajilaa (Miidhagina Makiinaa fi Kaarpeetii)',
+      AppLanguage.am: 'የአገልግሎት ማስታወቂያ ባነሮች (የመኪና ዲቴይሊንግ እና ምንጣፍ እጥበት)',
+    },
     'reelCounter': {
       AppLanguage.en: 'REEL',
       AppLanguage.om: 'REEL',

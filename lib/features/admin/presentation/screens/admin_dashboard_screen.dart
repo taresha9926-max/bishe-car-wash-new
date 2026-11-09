@@ -3240,6 +3240,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   void _editReelPopup(BuildContext context, TikTokAdVideo reel, void Function(TikTokAdVideo) onSaved) {
+    final state = AppStateProvider.read(context);
     final titleCtrl = TextEditingController(text: reel.title);
     final subCtrl = TextEditingController(text: reel.subtitle);
     final linkCtrl = TextEditingController(text: reel.tiktokUrl);
@@ -3247,183 +3248,212 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Edit TikTok Reel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleCtrl,
-                  decoration: const InputDecoration(labelText: 'Title / Highlight', border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: subCtrl,
-                  decoration: const InputDecoration(labelText: 'Subtitle / Description', border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Video Source', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                    InkWell(
-                      onTap: () {
-                        if (linkCtrl.text.isEmpty || !linkCtrl.text.contains('@bishecarwash')) {
-                          linkCtrl.text = 'https://www.tiktok.com/@bishecarwash';
-                        }
-                      },
-                      borderRadius: BorderRadius.circular(6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFE2C55).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text('Use @bishecarwash', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFE2C55))),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: linkCtrl,
-                        decoration: const InputDecoration(
-                          labelText: 'TikTok Video Link',
-                          hintText: 'https://www.tiktok.com/@bishecarwash/... or https://vt.tiktok.com/...',
-                          prefixIcon: Icon(Icons.link_rounded),
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton.filledTonal(
-                      tooltip: 'Test Link in TikTok',
-                      icon: const Icon(Icons.open_in_new_rounded, size: 20),
-                      onPressed: () {
-                        final testUrl = UrlLauncherHelper.cleanUrl(linkCtrl.text);
-                        if (testUrl.isNotEmpty) {
-                          UrlLauncherHelper.openUrl(testUrl);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please paste a valid TikTok link first')),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: thumbCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Thumbnail Image URL',
-                    hintText: 'https://images.unsplash.com/...',
-                    prefixIcon: Icon(Icons.image_rounded),
-                    border: OutlineInputBorder(),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          Widget buildPoolChip(Map<String, String> p) {
+            final isSel = thumbCtrl.text == p['url'];
+            return InkWell(
+              onTap: () {
+                setDialogState(() {
+                  thumbCtrl.text = p['url']!;
+                  if (titleCtrl.text.isEmpty || titleCtrl.text.startsWith('New Detailing')) {
+                    titleCtrl.text = p['title']!;
+                    subCtrl.text = p['subtitle']!;
+                  }
+                });
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSel ? const Color(0xFFFE2C55).withOpacity(0.12) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSel ? const Color(0xFFFE2C55) : AppColors.cardBorder,
+                    width: isSel ? 1.5 : 1,
                   ),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Curated Detailing Photo Pool (Tap to Apply):',
-                  style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: p['url']!.startsWith('assets/')
+                          ? Image.asset(
+                              p['url']!,
+                              width: 24,
+                              height: 24,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
+                            )
+                          : Image.network(
+                              p['url']!,
+                              width: 24,
+                              height: 24,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
+                            ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      p['label']!,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: isSel ? FontWeight.bold : FontWeight.w600,
+                        color: isSel ? const Color(0xFFFE2C55) : AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: AutoCareAssets.curatedReelsPool.map((p) {
-                    final isSel = thumbCtrl.text == p['url'];
-                    return InkWell(
-                      onTap: () {
-                        thumbCtrl.text = p['url']!;
-                        if (titleCtrl.text.isEmpty || titleCtrl.text.startsWith('New Detailing')) {
-                          titleCtrl.text = p['title']!;
-                          subCtrl.text = p['subtitle']!;
-                        }
-                      },
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isSel ? const Color(0xFFFE2C55).withOpacity(0.12) : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSel ? const Color(0xFFFE2C55) : AppColors.cardBorder,
-                            width: isSel ? 1.5 : 1,
+              ),
+            );
+          }
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            title: const Text('Edit TikTok Reel', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: titleCtrl,
+                      decoration: const InputDecoration(labelText: 'Title / Highlight', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: subCtrl,
+                      decoration: const InputDecoration(labelText: 'Subtitle / Description', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Video Source', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                        InkWell(
+                          onTap: () {
+                            setDialogState(() {
+                              if (linkCtrl.text.isEmpty || !linkCtrl.text.contains('@bishecarwash')) {
+                                linkCtrl.text = 'https://www.tiktok.com/@bishecarwash';
+                              }
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFE2C55).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text('Use @bishecarwash', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFE2C55))),
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: p['url']!.startsWith('assets/')
-                                  ? Image.asset(
-                                      p['url']!,
-                                      width: 22,
-                                      height: 22,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
-                                    )
-                                  : Image.network(
-                                      p['url']!,
-                                      width: 22,
-                                      height: 22,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
-                                    ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: linkCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'TikTok Video Link',
+                              hintText: 'https://www.tiktok.com/@bishecarwash/... or https://vt.tiktok.com/...',
+                              prefixIcon: Icon(Icons.link_rounded),
+                              border: OutlineInputBorder(),
                             ),
-                            const SizedBox(width: 5),
-                            Text(
-                              p['label']!,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: isSel ? FontWeight.bold : FontWeight.w600,
-                                color: isSel ? const Color(0xFFFE2C55) : AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
+                        IconButton.filledTonal(
+                          tooltip: 'Test Link in TikTok',
+                          icon: const Icon(Icons.open_in_new_rounded, size: 20),
+                          onPressed: () {
+                            final testUrl = UrlLauncherHelper.cleanUrl(linkCtrl.text);
+                            if (testUrl.isNotEmpty) {
+                              UrlLauncherHelper.openUrl(testUrl);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please paste a valid TikTok link first')),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: thumbCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Thumbnail Image URL / Asset',
+                        hintText: 'assets/images/ad_reel_1.jpg',
+                        prefixIcon: Icon(Icons.image_rounded),
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      state.tr('curatedReelsPoolTitle'),
+                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 8),
+                    // Section 1: Official Bishe Branding Artworks (First 8)
+                    Text(
+                      '🎨 ${state.tr('curatedPoolArtworks')}',
+                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppColors.primary),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: AutoCareAssets.curatedReelsPool.take(8).map((p) => buildPoolChip(p)).toList(),
+                    ),
+                    const SizedBox(height: 12),
+                    // Section 2: Commercial Detailing & Carpet Ad Banners (Next 8)
+                    Text(
+                      '📢 ${state.tr('curatedPoolAdBanners')}',
+                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: Color(0xFFFE2C55)),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: AutoCareAssets.curatedReelsPool.skip(8).map((p) => buildPoolChip(p)).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
+                onPressed: () {
+                  final cleaned = UrlLauncherHelper.sanitizeTikTokUrl(linkCtrl.text);
+                  if (cleaned.isNotEmpty) {
+                    onSaved(
+                      reel.copyWith(
+                        title: titleCtrl.text.trim().isNotEmpty ? titleCtrl.text.trim() : reel.title,
+                        subtitle: subCtrl.text.trim().isNotEmpty ? subCtrl.text.trim() : reel.subtitle,
+                        tiktokUrl: cleaned,
+                        thumbnailUrl: thumbCtrl.text.trim().isNotEmpty ? thumbCtrl.text.trim() : reel.thumbnailUrl,
                       ),
                     );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
-            onPressed: () {
-              final cleaned = UrlLauncherHelper.sanitizeTikTokUrl(linkCtrl.text);
-              if (cleaned.isNotEmpty) {
-                onSaved(
-                  reel.copyWith(
-                    title: titleCtrl.text.trim().isNotEmpty ? titleCtrl.text.trim() : reel.title,
-                    subtitle: subCtrl.text.trim().isNotEmpty ? subCtrl.text.trim() : reel.subtitle,
-                    tiktokUrl: cleaned,
-                    thumbnailUrl: thumbCtrl.text.trim(),
-                  ),
-                );
-                Navigator.pop(ctx);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter a valid TikTok video URL')),
-                );
-              }
-            },
-            child: const Text('Save Reel'),
-          ),
-        ],
+                    Navigator.pop(ctx);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid TikTok link or username')),
+                    );
+                  }
+                },
+                child: const Text('Save Reel'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

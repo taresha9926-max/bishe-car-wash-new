@@ -336,13 +336,19 @@ https://www.tiktok.com/@bishecarwash/video/7703201662713728274?sender_device=pc
       expect(extracted[0], equals('https://www.tiktok.com/@bishecarwash/video/7703232736168791303'));
       expect(extracted[1], equals('https://www.tiktok.com/@bishecarwash/video/7703201662713728274'));
 
-      // Verify curated 8-reel photography pool
-      expect(AutoCareAssets.curatedReelsPool.length, equals(8));
+      // Verify curated 16-reel photography and ad pool (8 artworks + 8 ad banners)
+      expect(AutoCareAssets.curatedReelsPool.length, equals(16));
       expect(AutoCareAssets.curatedReelsPool.every((r) => r['url']!.isNotEmpty), isTrue);
 
       // Verify reels 5 to 8 localization
       const reel5 = TikTokAdVideo(id: 'reel-5', title: 'Tire Gloss', subtitle: 'Tire care', tiktokUrl: '', thumbnailUrl: '');
       expect(reel5.localizedTitle('OM'), contains('Gommaa'));
+      expect(reel5.localizedTitle('AM'), contains('የጎማ'));
+
+      // Verify new ad banners localization
+      const adReel1 = TikTokAdVideo(id: 'reel-ad-1', title: 'Snow Foam', subtitle: 'Wash', tiktokUrl: '', thumbnailUrl: '');
+      expect(adReel1.localizedTitle('AM'), contains('ስኖው ፎም'));
+      expect(adReel1.localizedTitle('OM'), contains('Saamunaatiin'));
       expect(reel5.localizedTitle('AM'), contains('የጎማ'));
 
       const reel8 = TikTokAdVideo(id: 'reel-8', title: 'Mobile Van', subtitle: 'Van care', tiktokUrl: '', thumbnailUrl: '');
