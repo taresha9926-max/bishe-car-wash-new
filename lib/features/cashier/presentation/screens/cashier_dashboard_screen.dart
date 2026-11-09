@@ -1468,7 +1468,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 child: Text(
                   b.isCarpet
                       ? 'Carpet Clean (${b.carpetDimensions ?? "${b.carpetAreaSqMeters ?? 0.0} m²"})${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}'
-                      : '${b.serviceDisplayName}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
+                      : '${b.localizedServiceDisplayName(state.currentLang)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
@@ -1796,7 +1796,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
                 Text(
                   b.isCarpet
                       ? 'Carpet Clean (${b.carpetDimensions ?? "${b.carpetAreaSqMeters ?? 0.0} m²"}) • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}'
-                      : '${b.serviceDisplayName} • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
+                      : '${b.localizedServiceDisplayName(state.currentLang)} • ${CurrencyFormatter.format(b.totalPrice)}${b.customerName != null && b.customerName!.isNotEmpty ? " • ${b.customerName}" : ""}',
                   style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                 ),
                 if (b.serviceType.requiresLocation) ...[

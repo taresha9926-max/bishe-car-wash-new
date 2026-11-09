@@ -1390,6 +1390,122 @@ class AppStrings {
       AppLanguage.om: 'Eeyyama Super Admin: Gatiiwwan sirnaa fi kuusaa kallattiin gulaaluuf',
       AppLanguage.am: 'የሱፐር አድሚን ፈቃድ፡ የሲስተም ዋጋዎችንና የመጋዘን እቃዎችን በቀጥታ የማስተካከል ስልጣን',
     },
+
+    // ================= UPDATED FULL MASTER TABLE LOCALIZATION =================
+    // Categories
+    'cat_exterior': {
+      AppLanguage.en: 'Exterior & Hand Wash',
+      AppLanguage.am: 'የውጭ አካል እና የእጅ እጥበት',
+      AppLanguage.om: 'Dhiqannaa Qaama Alaa fi Harka',
+    },
+    'cat_polish': {
+      AppLanguage.en: 'Body Polish & Paint Correction',
+      AppLanguage.am: 'የመኪና አካል ፖሊሽ እና የቀለም ጭረት ጥገና',
+      AppLanguage.om: 'Poolishii Qaama Konkolaataa fi Bakkoltee Halluu Sirreessuu',
+    },
+    'cat_interior': {
+      AppLanguage.en: 'Interior Restoration & Detailing',
+      AppLanguage.am: 'የውስጥ ክፍል ፅዳት እና ዲቴይሊንግ',
+      AppLanguage.om: 'Qulqullina Keessaa fi Miidhagina Guutuu',
+    },
+    'cat_engine': {
+      AppLanguage.en: 'Engine & Specialty Detailing',
+      AppLanguage.am: 'የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት',
+      AppLanguage.om: 'Qulqullina Gadi-fageenyaa Mootoraa fi Kutaa Addaa',
+    },
+    'cat_specialty': {
+      AppLanguage.en: 'Engine & Specialty Detailing',
+      AppLanguage.am: 'የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት',
+      AppLanguage.om: 'Qulqullina Gadi-fageenyaa Mootoraa fi Kutaa Addaa',
+    },
+
+    // 1. Exterior & Hand Wash Items
+    'srv_body_wash': {
+      AppLanguage.en: 'Body Hand Wash with Shampoo & Fiber Towel',
+      AppLanguage.am: 'የመኪና አካል በሻምፖ እና በፋይበር ፎጣ እጥበት',
+      AppLanguage.om: 'Dhiqannaa qaama konkolaataa shaamപ്പോ fi fooxaa faayiberiitiin',
+    },
+    'srv_tire_clean': {
+      AppLanguage.en: 'Tire Cleaning & Tire Black Finish',
+      AppLanguage.am: 'የጎማ እጥበት እና ማጥቆሪያ ቅባት',
+      AppLanguage.om: 'Qulqullina gommaa fi kuula guraachessituu gommaa',
+    },
+    'srv_window_polish': {
+      AppLanguage.en: 'Window Polish & Cleaning',
+      AppLanguage.am: 'የመስኮት መስታወት ማጽዳት',
+      AppLanguage.om: 'Daawwitii foddaa konkolaataa qulqulleessuu',
+    },
+
+    // 2. Body Polish & Paint Correction Items
+    'srv_machine_polish': {
+      AppLanguage.en: 'Machine Body Polish',
+      AppLanguage.am: 'በማሽን የሚደረግ የሰውነት ፖሊሽ',
+      AppLanguage.om: 'Poolishii qaamaa maashiniin hojjetamu',
+    },
+    'srv_scratch_removal': {
+      AppLanguage.en: 'Scratch / Minor Scratch Removal',
+      AppLanguage.am: 'የጭረት እና ጥቃቅን ስንጥቆች ማስለቀቅ',
+      AppLanguage.om: 'Ciccitaa fi madaa xixiqqoo halluu balleessuu',
+    },
+    'srv_water_spot': {
+      AppLanguage.en: 'Water Spot Chemical Removal',
+      AppLanguage.am: 'የውሃ እና የጨው ድርቀት ምልክቶችን ማስለቀቅ',
+      AppLanguage.om: 'Mallattoo bishaanii fi ashaboo goge qorichaan balleessuu',
+    },
+
+    // 3. Interior Restoration & Detailing Items
+    'srv_int_vacuum': {
+      AppLanguage.en: 'Interior Vacuum: Floor & Seat Cleaning',
+      AppLanguage.am: 'የውስጥ ክፍል ቫኪዩም (የወለል እና የወንበር አቧራ ማጽዳት)',
+      AppLanguage.om: 'Vaakiyuumii keessaa (dhukkee lafaa fi teessumaa qulqulleessuu)',
+    },
+    'srv_seats_out': {
+      AppLanguage.en: 'Seat & Floor Carpet Removed & Washed',
+      AppLanguage.am: 'ወንበሮችና የወለል ምንጣፎች ወጥተው የሚታጠቡበት',
+      AppLanguage.om: 'Teessumootaa fi afata lafaa baasanii dhiquu',
+    },
+    'srv_roof_cleaning': {
+      AppLanguage.en: 'Roof Headliner Deep Cleaning',
+      AppLanguage.am: 'የኮርኒስ/የጣራ ጨርቅ ጥልቅ እጥበት',
+      AppLanguage.om: 'Huccuu korniisa/baaxii keessaa gadi-fageenyaan dhiquu',
+    },
+    'srv_dashboard_detailing': {
+      AppLanguage.en: 'Dashboard Detailing: Cream & Airfresh',
+      AppLanguage.am: 'የዳሽቦርድ ማስዋብ (ክሬም እና ሽቶ ማስተካከል)',
+      AppLanguage.om: 'Daashboordii miidheksuu (kiriimii fi shittoo sirreessuu)',
+    },
+    'srv_door_panel': {
+      AppLanguage.en: 'Door Panel Deep Cleaning',
+      AppLanguage.am: 'የበር ውስጣዊ ገጽታዎች ጥልቅ ጽዳት እና ማስዋብ',
+      AppLanguage.om: 'Qaama keessoo balbalaa gadi-fageenyaan qulqulleessuu fi miidheksuu',
+    },
+
+    // 4. Engine & Specialty Detailing Items
+    'srv_engine_shampoo': {
+      AppLanguage.en: 'Engine Cleaning: Shampoo',
+      AppLanguage.am: 'የሞተር እጥበት (በሻምፖ)',
+      AppLanguage.om: 'Mootora shaamപ്പോdhaan dhiquu',
+    },
+    'srv_engine_chemical': {
+      AppLanguage.en: 'Engine Bay Chemical Degreasing: Deep Clean, Rinse & Dry',
+      AppLanguage.am: 'የሞተር ክፍል በኬሚካል ቅባት ማስለቀቅ (ጥልቅ ጽዳት፣ ማጠብ እና ማድረቅ)',
+      AppLanguage.om: 'Moora mootoraa kemikaalaan cooma qulqulleessuu (dhiquu, dhiqachuu fi gogsuu)',
+    },
+    'srv_headlight_restoration': {
+      AppLanguage.en: 'Headlight Restoration',
+      AppLanguage.am: 'የደበዘዘ (የወየበ) የግንባር መብራት መስታወት ወደ ኦሪጂናል መመለስ',
+      AppLanguage.om: 'Daawwitii ifaa fuulduraa kan dhiitama/bifa gate gara oriijinaalaatti deebisuu',
+    },
+    'srv_plastic_trim': {
+      AppLanguage.en: 'Plastic Trim Restoration',
+      AppLanguage.am: 'የፕላስቲክ እና የጎማ ማደስ',
+      AppLanguage.om: 'Pilaastikii fi Gommaa Haaromsuu',
+    },
+    'srv_diamond_detailing': {
+      AppLanguage.en: 'Diamond - Interior & Exterior Detailing (1 Day)',
+      AppLanguage.am: 'ዳይመንድ - የውስጥ እና የውጭ ሙሉ ዲቴይሊንግ (1 ቀን)',
+      AppLanguage.om: 'Daayimandii - Miidhagina Keessaa fi Alaa Guutuu (Guyyaa 1)',
+    },
     'staffManagementTitle': {
       AppLanguage.en: 'Staff & Salaries Management',
       AppLanguage.om: 'Bulchiinsa Hojjettootaafi Miindaa',
@@ -3542,5 +3658,114 @@ class AppStrings {
       return pkgMap[lang] ?? pkgMap[AppLanguage.en] ?? const [];
     }
     return const [];
+  }
+
+  /// Maps any car wash service name (or ID) into the exact Master Table translation for AM/OM.
+  static String translateServiceName(String name, dynamic lang) {
+    AppLanguage targetLang = AppLanguage.en;
+    if (lang is AppLanguage) {
+      targetLang = lang;
+    } else if (lang != null) {
+      targetLang = AppLanguage.fromCode(lang.toString());
+    }
+    if (targetLang == AppLanguage.en) return name;
+
+    // Check if key is already an exact service ID
+    if (_strings.containsKey(name)) {
+      return get(name, targetLang);
+    }
+
+    final lower = name.toLowerCase().trim();
+
+    // 1.1 Body Hand Wash
+    if (lower.contains('body hand wash') || lower.contains('body wash')) {
+      return get('srv_body_wash', targetLang);
+    }
+    // 1.2 Tire Cleaning
+    if (lower.contains('tire clean') || lower.contains('tire black')) {
+      return get('srv_tire_clean', targetLang);
+    }
+    // 1.3 Window Polish & Cleaning
+    if (lower.contains('window polish') || lower.contains('exterior glass') || lower.contains('window')) {
+      return get('srv_window_polish', targetLang);
+    }
+    // 2.1 Machine Body Polish
+    if (lower.contains('machine body polish') || lower.contains('machine polish')) {
+      return get('srv_machine_polish', targetLang);
+    }
+    // 2.2 Scratch Removal
+    if (lower.contains('scratch') || lower.contains('scuff')) {
+      return get('srv_scratch_removal', targetLang);
+    }
+    // 2.3 Water Spot
+    if (lower.contains('water spot')) {
+      return get('srv_water_spot', targetLang);
+    }
+    // 3.1 Interior Vacuum
+    if (lower.contains('interior vacuum') || lower.contains('vacuum floor') || (lower.contains('vacuum') && lower.contains('seat'))) {
+      return get('srv_int_vacuum', targetLang);
+    }
+    // 3.2 Seat & Floor Carpet
+    if ((lower.contains('seat') && lower.contains('carpet')) || lower.contains('seats out') || lower.contains('unbolted seat')) {
+      return get('srv_seats_out', targetLang);
+    }
+    // 3.3 Roof Headliner
+    if (lower.contains('roof') || lower.contains('headliner')) {
+      return get('srv_roof_cleaning', targetLang);
+    }
+    // 3.4 Dashboard Detailing
+    if (lower.contains('dashboard')) {
+      return get('srv_dashboard_detailing', targetLang);
+    }
+    // 3.5 Door Panel
+    if (lower.contains('door panel')) {
+      return get('srv_door_panel', targetLang);
+    }
+    // 4.1 Engine Shampoo
+    if (lower.contains('engine') && lower.contains('shampoo')) {
+      return get('srv_engine_shampoo', targetLang);
+    }
+    // 4.2 Engine Degreasing / Chemical
+    if (lower.contains('engine') && (lower.contains('chemical') || lower.contains('degreas') || lower.contains('rinse'))) {
+      return get('srv_engine_chemical', targetLang);
+    }
+    // 4.3 Headlight Restoration
+    if (lower.contains('headlight')) {
+      return get('srv_headlight_restoration', targetLang);
+    }
+    // Plastic trim
+    if (lower.contains('plastic trim')) {
+      return get('srv_plastic_trim', targetLang);
+    }
+    // Diamond Detailing
+    if (lower.contains('diamond')) {
+      return get('srv_diamond_detailing', targetLang);
+    }
+
+    return name;
+  }
+
+  /// Maps category keywords into the exact Master Table translation for AM/OM.
+  static String translateCategoryName(String category, dynamic lang) {
+    AppLanguage targetLang = AppLanguage.en;
+    if (lang is AppLanguage) {
+      targetLang = lang;
+    } else if (lang != null) {
+      targetLang = AppLanguage.fromCode(lang.toString());
+    }
+    final lower = category.toLowerCase().trim();
+    if (lower == 'exterior' || lower.contains('exterior')) {
+      return get('cat_exterior', targetLang);
+    }
+    if (lower == 'polish' || lower.contains('polish') || lower.contains('paint')) {
+      return get('cat_polish', targetLang);
+    }
+    if (lower == 'interior' || lower.contains('interior')) {
+      return get('cat_interior', targetLang);
+    }
+    if (lower == 'engine' || lower.contains('engine') || lower == 'specialty' || lower.contains('specialty')) {
+      return get('cat_engine', targetLang);
+    }
+    return category;
   }
 }

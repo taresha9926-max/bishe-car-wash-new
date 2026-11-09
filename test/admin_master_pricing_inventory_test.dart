@@ -47,7 +47,7 @@ void main() {
       expect(find.textContaining('Fixed Assets'), findsWidgets);
 
       // Tab 0: Car Wash Detailing Services displayed
-      expect(find.text('Body Hand Wash with Shampoo'), findsOneWidget);
+      expect(find.text('Body Hand Wash with Shampoo & Fiber Towel'), findsOneWidget);
       expect(find.text('Tire Cleaning & Tire Black Finish'), findsOneWidget);
     });
 

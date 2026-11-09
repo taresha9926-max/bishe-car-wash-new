@@ -235,7 +235,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   Text(
                     booking.isCarpet
                         ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                        : '${booking.licensePlate} • ${booking.serviceDisplayName}',
+                        : '${booking.licensePlate} • ${booking.localizedServiceDisplayName(state.currentLang)}',
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 20),
@@ -372,7 +372,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           Text(
             booking.isCarpet
                 ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                : '${booking.licensePlate} • ${booking.serviceDisplayName}',
+                : '${booking.licensePlate} • ${booking.localizedServiceDisplayName(state.currentLang)}',
             style: const TextStyle(
               fontSize: 13,
               color: Colors.white70,
@@ -424,7 +424,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     Text(
                       booking.isCarpet
                           ? '${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}${booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? " • ${booking.carpetDimensions}" : ""}${booking.carpetAreaSqMeters != null ? " (${booking.carpetAreaSqMeters!.toStringAsFixed(1)} m²)" : ""}'
-                          : '${booking.carType.localizedName(state.currentLang)} • ${booking.serviceDisplayName}',
+                          : '${booking.carType.localizedName(state.currentLang)} • ${booking.localizedServiceDisplayName(state.currentLang)}',
                       style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                     ),
                   ],
@@ -554,7 +554,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
               Text(
                 booking.isCarpet
                     ? '${state.tr("carpetService")} (${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")})'
-                    : booking.serviceDisplayName,
+                    : booking.localizedServiceDisplayName(state.currentLang),
                 style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
               ),
               Text(

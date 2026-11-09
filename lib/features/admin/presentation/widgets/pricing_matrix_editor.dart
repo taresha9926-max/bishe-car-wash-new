@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_strings.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/domain/models/car_type.dart';
@@ -338,7 +339,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.name,
+                                item.localizedName(state.currentLang),
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
@@ -475,7 +476,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('${item.name} (${carType.localizedName(state.currentLang)})'),
+        title: Text('${item.localizedName(state.currentLang)} (${carType.localizedName(state.currentLang)})'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,6 +526,8 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
   void _showAddServiceDialog(BuildContext context) {
     final state = AppStateProvider.read(context);
     final nameController = TextEditingController();
+    final nameAmharicController = TextEditingController();
+    final nameOromoController = TextEditingController();
     final descController = TextEditingController();
     final autoPriceController = TextEditingController(text: '500');
     final minibusPriceController = TextEditingController(text: '700');
@@ -544,9 +547,23 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
               children: [
                 CustomTextField(
                   controller: nameController,
-                  label: 'Service Name',
+                  label: 'Service Name (EN)',
                   hint: 'e.g. Headlight Restoration',
                   prefixIcon: Icons.cleaning_services_outlined,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: nameAmharicController,
+                  label: 'የአገልግሎት ስም (AM)',
+                  hint: 'ለምሳሌ፡ የግንባር መብራት መስታወት ማደስ',
+                  prefixIcon: Icons.translate_rounded,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: nameOromoController,
+                  label: 'Maqaa Tajaajilaa (OM)',
+                  hint: 'fakkeenya: Daawwitii ifaa fuulduraa haaromsuu',
+                  prefixIcon: Icons.language_rounded,
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
@@ -557,12 +574,12 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                     fillColor: AppColors.surfaceVariant,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'exterior', child: Text('Exterior & Wash')),
-                    DropdownMenuItem(value: 'polish', child: Text('Body Polish & Restoration')),
-                    DropdownMenuItem(value: 'interior', child: Text('Interior Detailing')),
-                    DropdownMenuItem(value: 'engine', child: Text('Engine Detailing')),
-                    DropdownMenuItem(value: 'specialty', child: Text('Specialty Add-on')),
+                  items: [
+                    DropdownMenuItem(value: 'exterior', child: Text(AppStrings.translateCategoryName('exterior', state.currentLang))),
+                    DropdownMenuItem(value: 'polish', child: Text(AppStrings.translateCategoryName('polish', state.currentLang))),
+                    DropdownMenuItem(value: 'interior', child: Text(AppStrings.translateCategoryName('interior', state.currentLang))),
+                    DropdownMenuItem(value: 'engine', child: Text(AppStrings.translateCategoryName('engine', state.currentLang))),
+                    DropdownMenuItem(value: 'specialty', child: Text(AppStrings.translateCategoryName('specialty', state.currentLang))),
                   ],
                   onChanged: (val) {
                     if (val != null) setDialogState(() => selectedCategory = val);
@@ -629,6 +646,8 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                 final newItem = CarWashServiceItem(
                   id: 'srv_${DateTime.now().millisecondsSinceEpoch}',
                   name: name,
+                  nameAmharic: nameAmharicController.text.trim().isNotEmpty ? nameAmharicController.text.trim() : null,
+                  nameOromo: nameOromoController.text.trim().isNotEmpty ? nameOromoController.text.trim() : null,
                   category: selectedCategory,
                   description: descController.text.trim().isNotEmpty ? descController.text.trim() : null,
                   pricingByCarType: {

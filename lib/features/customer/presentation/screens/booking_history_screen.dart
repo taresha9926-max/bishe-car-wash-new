@@ -217,7 +217,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                                     Text(
                                       isCarpet
                                           ? '${booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? '${booking.carpetDimensions} m² • ' : ''}${booking.serviceType.localizedName(state.currentLang, isCarpet: true)}'
-                                          : booking.serviceDisplayName,
+                                          : booking.localizedServiceDisplayName(state.currentLang),
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,

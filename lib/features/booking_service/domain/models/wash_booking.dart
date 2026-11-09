@@ -1,3 +1,4 @@
+import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -74,6 +75,23 @@ class WashBooking {
       return '${selectedServices!.first} (+${selectedServices!.length - 1} services)';
     }
     return package.name;
+  }
+
+  String localizedServiceDisplayName(dynamic lang) {
+    if (isCarpet) {
+      final dims = carpetDimensions != null && carpetDimensions!.isNotEmpty ? ' ($carpetDimensions)' : '';
+      final carpetName = carpetType == 'type_b' ? AppStrings.get('carpetTypeB', lang) : AppStrings.get('carpetTypeA', lang);
+      return '$carpetName$dims';
+    }
+    if (selectedServices != null && selectedServices!.isNotEmpty) {
+      final localizedList = selectedServices!.map((s) => AppStrings.translateServiceName(s, lang)).toList();
+      if (localizedList.length <= 2) {
+        return localizedList.join(' + ');
+      }
+      return '${localizedList.first} (+${localizedList.length - 1})';
+    }
+    final code = lang is AppLanguage ? lang.code : (lang?.toString() ?? 'en');
+    return package.localizedName(code);
   }
 
   WashBooking copyWith({

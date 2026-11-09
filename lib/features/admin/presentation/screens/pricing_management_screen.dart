@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/localization/app_strings.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -316,7 +317,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              item.name,
+                              item.localizedName(state.currentLang),
                               style: TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w800,
@@ -331,7 +332,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              item.category.toUpperCase(),
+                              item.localizedCategory(state.currentLang).toUpperCase(),
                               style: TextStyle(
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w800,
@@ -457,6 +458,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
 
   void _showAddCarWashServiceDialog(BuildContext context, dynamic state) {
     final nameController = TextEditingController();
+    final nameAmharicController = TextEditingController();
+    final nameOromoController = TextEditingController();
     final descController = TextEditingController();
     final autoPriceController = TextEditingController(text: '500');
     final minibusPriceController = TextEditingController(text: '700');
@@ -476,9 +479,23 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               children: [
                 CustomTextField(
                   controller: nameController,
-                  label: 'Service Name',
-                  hint: 'e.g. Diamond Detailing or Engine Chemical',
+                  label: 'Service Name (EN)',
+                  hint: 'e.g. Diamond Detailing',
                   prefixIcon: Icons.cleaning_services_outlined,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: nameAmharicController,
+                  label: 'የአገልግሎት ስም (AM)',
+                  hint: 'ለምሳሌ፡ ዳይመንድ ዲቴይሊንግ',
+                  prefixIcon: Icons.translate_rounded,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: nameOromoController,
+                  label: 'Maqaa Tajaajilaa (OM)',
+                  hint: 'fakkeenya: Daayimandii',
+                  prefixIcon: Icons.language_rounded,
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
@@ -489,12 +506,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     fillColor: AppColors.surfaceVariant,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'exterior', child: Text('Exterior & Wash')),
-                    DropdownMenuItem(value: 'polish', child: Text('Body Polish & Restoration')),
-                    DropdownMenuItem(value: 'interior', child: Text('Interior Detailing')),
-                    DropdownMenuItem(value: 'engine', child: Text('Engine Detailing')),
-                    DropdownMenuItem(value: 'specialty', child: Text('Specialty Add-on')),
+                  items: [
+                    DropdownMenuItem(value: 'exterior', child: Text(AppStrings.translateCategoryName('exterior', state.currentLang))),
+                    DropdownMenuItem(value: 'polish', child: Text(AppStrings.translateCategoryName('polish', state.currentLang))),
+                    DropdownMenuItem(value: 'interior', child: Text(AppStrings.translateCategoryName('interior', state.currentLang))),
+                    DropdownMenuItem(value: 'engine', child: Text(AppStrings.translateCategoryName('engine', state.currentLang))),
+                    DropdownMenuItem(value: 'specialty', child: Text(AppStrings.translateCategoryName('specialty', state.currentLang))),
                   ],
                   onChanged: (val) {
                     if (val != null) setDialogState(() => selectedCategory = val);
@@ -561,6 +578,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 final newItem = CarWashServiceItem(
                   id: 'srv_${DateTime.now().millisecondsSinceEpoch}',
                   name: name,
+                  nameAmharic: nameAmharicController.text.trim().isNotEmpty ? nameAmharicController.text.trim() : null,
+                  nameOromo: nameOromoController.text.trim().isNotEmpty ? nameOromoController.text.trim() : null,
                   category: selectedCategory,
                   description: descController.text.trim().isNotEmpty ? descController.text.trim() : null,
                   pricingByCarType: {
@@ -576,7 +595,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Added new car wash service: $name'),
+                      content: Text('Added new car wash service: ${newItem.localizedName(state.currentLang)}'),
                       backgroundColor: AppColors.statusCompleted,
                     ),
                   );
@@ -592,6 +611,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
 
   void _showEditCarWashServiceDialog(BuildContext context, dynamic state, CarWashServiceItem item) {
     final nameController = TextEditingController(text: item.name);
+    final nameAmharicController = TextEditingController(text: item.nameAmharic ?? '');
+    final nameOromoController = TextEditingController(text: item.nameOromo ?? '');
     final descController = TextEditingController(text: item.description ?? '');
     final autoPriceController = TextEditingController(text: item.getPriceFor(CarType.automobile).toStringAsFixed(0));
     final minibusPriceController = TextEditingController(text: item.getPriceFor(CarType.minibus).toStringAsFixed(0));
@@ -603,7 +624,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       builder: (dialogCtx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('${state.tr("editService")}: ${item.name}'),
+          title: Text('${state.tr("editService")}: ${item.localizedName(state.currentLang)}'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -611,8 +632,22 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               children: [
                 CustomTextField(
                   controller: nameController,
-                  label: 'Service Name',
+                  label: 'Service Name (EN)',
                   prefixIcon: Icons.cleaning_services_outlined,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: nameAmharicController,
+                  label: 'የአገልግሎት ስም (AM)',
+                  hint: 'የአማርኛ ስም',
+                  prefixIcon: Icons.translate_rounded,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: nameOromoController,
+                  label: 'Maqaa Tajaajilaa (OM)',
+                  hint: 'Maqaa Afaan Oromoo',
+                  prefixIcon: Icons.language_rounded,
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
@@ -625,12 +660,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     fillColor: AppColors.surfaceVariant,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'exterior', child: Text('Exterior & Wash')),
-                    DropdownMenuItem(value: 'polish', child: Text('Body Polish & Restoration')),
-                    DropdownMenuItem(value: 'interior', child: Text('Interior Detailing')),
-                    DropdownMenuItem(value: 'engine', child: Text('Engine Detailing')),
-                    DropdownMenuItem(value: 'specialty', child: Text('Specialty Add-on')),
+                  items: [
+                    DropdownMenuItem(value: 'exterior', child: Text(AppStrings.translateCategoryName('exterior', state.currentLang))),
+                    DropdownMenuItem(value: 'polish', child: Text(AppStrings.translateCategoryName('polish', state.currentLang))),
+                    DropdownMenuItem(value: 'interior', child: Text(AppStrings.translateCategoryName('interior', state.currentLang))),
+                    DropdownMenuItem(value: 'engine', child: Text(AppStrings.translateCategoryName('engine', state.currentLang))),
+                    DropdownMenuItem(value: 'specialty', child: Text(AppStrings.translateCategoryName('specialty', state.currentLang))),
                   ],
                   onChanged: (val) {
                     if (val != null) setDialogState(() => selectedCategory = val);
@@ -695,6 +730,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
 
                 final updated = item.copyWith(
                   name: name,
+                  nameAmharic: nameAmharicController.text.trim().isNotEmpty ? nameAmharicController.text.trim() : null,
+                  nameOromo: nameOromoController.text.trim().isNotEmpty ? nameOromoController.text.trim() : null,
                   category: selectedCategory,
                   description: descController.text.trim().isNotEmpty ? descController.text.trim() : null,
                   pricingByCarType: {
@@ -709,7 +746,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Updated service: $name'),
+                      content: Text('Updated service: ${updated.localizedName(state.currentLang)}'),
                       backgroundColor: AppColors.statusCompleted,
                     ),
                   );

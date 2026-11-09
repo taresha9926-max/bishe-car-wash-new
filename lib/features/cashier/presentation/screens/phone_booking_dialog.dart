@@ -528,13 +528,27 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                   title: Row(
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          item.name,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
-                                            color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
-                                          ),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.localizedName(state.currentLang),
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
+                                                color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 1),
+                                            Text(
+                                              item.localizedCategory(state.currentLang),
+                                              style: TextStyle(
+                                                fontSize: 9.5,
+                                                fontWeight: FontWeight.w700,
+                                                color: isChecked ? AppColors.primary : AppColors.textMuted,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                       Text(
