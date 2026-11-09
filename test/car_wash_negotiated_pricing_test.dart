@@ -172,5 +172,38 @@ void main() {
       expect(booking.selectedServices, equals(selectedServices));
       expect(booking.serviceDisplayName, 'Body Hand Wash with Shampoo (+2 services)');
     });
+
+    test('Trilingual localization keys exist for dual-tab switcher', () {
+      expect(state.tr('customDetailingTab'), isNotEmpty);
+      expect(state.tr('presetPackagesTab'), isNotEmpty);
+
+      state.setLanguage('OM');
+      expect(state.tr('customDetailingTab'), contains('Filannoo Qubaa'));
+      expect(state.tr('presetPackagesTab'), contains("Paakeejiiwwan"));
+
+      state.setLanguage('AM');
+      expect(state.tr('customDetailingTab'), contains('ብጁ ዲቴይሊንግ'));
+      expect(state.tr('presetPackagesTab'), contains('የተዘጋጁ'));
+    });
+
+    test('Super Admin can edit pricing for all 10 preset packages across Automobile, Minibus, and Truck', () async {
+      state.setSuperAdminStatus(true);
+      expect(state.packages.length, equals(10));
+
+      final silverPkg = state.packages.firstWhere((p) => p.id.endsWith('0101'));
+      expect(silverPkg.getPriceFor(CarType.automobile), equals(500.0));
+      expect(silverPkg.getPriceFor(CarType.minibus), equals(700.0));
+      expect(silverPkg.getPriceFor(CarType.truck), equals(1200.0));
+
+      // Admin updates silver automobile tariff to 550.0
+      await state.updatePackagePrice(
+        packageId: silverPkg.id,
+        carType: CarType.automobile,
+        newPrice: 550.0,
+      );
+
+      final updatedSilver = state.packages.firstWhere((p) => p.id == silverPkg.id);
+      expect(updatedSilver.getPriceFor(CarType.automobile), equals(550.0));
+    });
   });
 }

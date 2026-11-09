@@ -15,6 +15,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_s
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
@@ -38,6 +39,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   // Detailing Services Checklist Selection & Agreed Tariff
   final Set<String> _selectedServiceIds = {'srv_body_wash', 'srv_tire_clean'};
   final _agreedPriceController = TextEditingController();
+  bool _useCustomChecklist = true;
+  WashPackage? _selectedPackage;
 
   @override
   void initState() {
@@ -45,7 +48,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final state = AppStateProvider.read(context);
-        _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+        if (!_useCustomChecklist) {
+          _selectedPackage ??= state.packages.isNotEmpty ? state.packages.first : null;
+          if (_selectedPackage != null) {
+            _agreedPriceController.text = _selectedPackage!.getPriceFor(_previewCarType).toStringAsFixed(0);
+          }
+        } else {
+          _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+        }
         setState(() {});
       }
     });
@@ -147,95 +157,273 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                 _buildVehicleSelector(state),
                 const SizedBox(height: 14),
 
-                Text(
-                  state.tr('customServicesChecklist'),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                // Dual Tab Bar - Custom Detailing vs Preset Packages
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _useCustomChecklist = true;
+                              _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 9),
+                            decoration: BoxDecoration(
+                              color: _useCustomChecklist ? AppColors.primary : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.checklist_rounded, size: 16, color: _useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    state.tr('customDetailingTab'),
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: _useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _useCustomChecklist = false;
+                              if (_selectedPackage == null && state.packages.isNotEmpty) {
+                                _selectedPackage = state.packages.first;
+                              }
+                              if (_selectedPackage != null) {
+                                _agreedPriceController.text = _selectedPackage!.getPriceFor(_previewCarType).toStringAsFixed(0);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 9),
+                            decoration: BoxDecoration(
+                              color: !_useCustomChecklist ? AppColors.primary : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.inventory_2_outlined, size: 16, color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    state.tr('presetPackagesTab'),
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                ...state.activeServiceItems.map((item) {
-                  final isChecked = _selectedServiceIds.contains(item.id);
-                  final itemPrice = item.getPriceFor(_previewCarType);
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: isChecked ? AppColors.primary.withOpacity(0.04) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isChecked ? AppColors.primary : AppColors.cardBorder,
-                        width: isChecked ? 1.5 : 1,
+                if (_useCustomChecklist) ...[
+                  ...state.activeServiceItems.map((item) {
+                    final isChecked = _selectedServiceIds.contains(item.id);
+                    final itemPrice = item.getPriceFor(_previewCarType);
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: isChecked ? AppColors.primary.withOpacity(0.04) : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isChecked ? AppColors.primary : AppColors.cardBorder,
+                          width: isChecked ? 1.5 : 1,
+                        ),
                       ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: CheckboxListTile(
-                        value: isChecked,
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                        activeColor: AppColors.primary,
-                        title: Row(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: CheckboxListTile(
+                          value: isChecked,
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          activeColor: AppColors.primary,
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.localizedName(state.currentLang),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
+                                        color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      item.localizedCategory(state.currentLang),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: isChecked ? AppColors.primary : AppColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  CurrencyFormatter.format(itemPrice),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: item.description != null && item.description!.isNotEmpty
+                              ? Text(
+                                  item.description!,
+                                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                )
+                              : null,
+                          onChanged: (val) {
+                            setState(() {
+                              if (val == true) {
+                                _selectedServiceIds.add(item.id);
+                              } else {
+                                _selectedServiceIds.remove(item.id);
+                              }
+                              _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+                ] else ...[
+                  ...state.packages.map((pkg) {
+                    final isSelected = pkg.id == _selectedPackage?.id;
+                    final pkgPrice = pkg.getPriceFor(_previewCarType);
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedPackage = pkg;
+                          _agreedPriceController.text = pkgPrice.toStringAsFixed(0);
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? AppColors.primary : AppColors.cardBorder,
+                            width: isSelected ? 1.8 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Radio<String>(
+                              value: pkg.id,
+                              groupValue: _selectedPackage?.id,
+                              activeColor: AppColors.primary,
+                              onChanged: (_) {
+                                setState(() {
+                                  _selectedPackage = pkg;
+                                  _agreedPriceController.text = pkgPrice.toStringAsFixed(0);
+                                });
+                              },
+                            ),
+                            AutoCareAssets.buildPhotoThumbnail(
+                              imageUrl: AutoCareAssets.getPackageImage(pkg),
+                              width: 48,
+                              height: 48,
+                              borderRadius: 8,
+                              durationBadge: '${pkg.durationMinutes}m',
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    item.localizedName(state.currentLang),
+                                    pkg.localizedName(state.currentLang),
                                     style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
-                                      color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.localizedCategory(state.currentLang),
-                                    style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
-                                      color: isChecked ? AppColors.primary : AppColors.textMuted,
+                                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
                                     ),
                                   ),
+                                  Text(
+                                    '${pkg.durationMinutes} mins • ${pkg.localizedDescription(state.currentLang)}',
+                                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                  ),
+                                  if (isSelected && pkg.features.isNotEmpty) ...[
+                                    const SizedBox(height: 6),
+                                    ...pkg.localizedFeatures(state.currentLang).map((f) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 2),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Icon(Icons.check_circle_outline, size: 12, color: AppColors.primary),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              f,
+                                              style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
+                                  ],
                                 ],
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                CurrencyFormatter.format(itemPrice),
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
-                              ),
+                            const SizedBox(width: 8),
+                            Text(
+                              CurrencyFormatter.format(pkgPrice),
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
                             ),
                           ],
                         ),
-                        subtitle: item.description != null && item.description!.isNotEmpty
-                            ? Text(
-                                item.description!,
-                                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-                              )
-                            : null,
-                        onChanged: (val) {
-                          setState(() {
-                            if (val == true) {
-                              _selectedServiceIds.add(item.id);
-                            } else {
-                              _selectedServiceIds.remove(item.id);
-                            }
-                            _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
-                          });
-                        },
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ],
                 const SizedBox(height: 10),
 
                 // Staff Tariff and Agreed Tariff Card
@@ -269,7 +457,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            CurrencyFormatter.format(_calculateSuggestedServicesTotal(state)),
+                            CurrencyFormatter.format(_useCustomChecklist
+                                ? _calculateSuggestedServicesTotal(state)
+                                : ((_selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null))?.getPriceFor(_previewCarType) ?? 0.0)),
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
                           ),
                         ],
@@ -285,7 +475,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                                 keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                   labelText: state.tr('agreedTariff'),
-                                  hintText: _calculateSuggestedServicesTotal(state).toStringAsFixed(0),
+                                  hintText: (_useCustomChecklist
+                                          ? _calculateSuggestedServicesTotal(state)
+                                          : ((_selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null))?.getPriceFor(_previewCarType) ?? 0.0))
+                                      .toStringAsFixed(0),
                                   prefixIcon: const Icon(Icons.handshake_outlined, size: 18, color: AppColors.primary),
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -316,7 +509,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                             ),
                             onPressed: () {
                               setState(() {
-                                _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                                final currentTariff = _useCustomChecklist
+                                    ? _calculateSuggestedServicesTotal(state)
+                                    : ((_selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null))?.getPriceFor(_previewCarType) ?? 0.0);
+                                _agreedPriceController.text = currentTariff.toStringAsFixed(0);
                               });
                             },
                           ),
@@ -335,11 +531,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                           ),
                           icon: const Icon(Icons.arrow_forward_rounded, size: 18),
                           label: Text(
-                            '${state.tr("bookThisWash")} • ${CurrencyFormatter.format(double.tryParse(_agreedPriceController.text.trim()) ?? _calculateSuggestedServicesTotal(state))}',
+                            '${state.tr("bookThisWash")} • ${CurrencyFormatter.format(double.tryParse(_agreedPriceController.text.trim()) ?? (_useCustomChecklist ? _calculateSuggestedServicesTotal(state) : ((_selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null))?.getPriceFor(_previewCarType) ?? 0.0)))}',
                             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
                           ),
                           onPressed: () {
-                            if (_selectedServiceIds.isEmpty) {
+                            if (_useCustomChecklist && _selectedServiceIds.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   backgroundColor: Colors.orange.shade800,
@@ -348,13 +544,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                               );
                               return;
                             }
-                            final agreedPrice = double.tryParse(_agreedPriceController.text.trim()) ?? _calculateSuggestedServicesTotal(state);
+                            final currentTariff = _useCustomChecklist
+                                ? _calculateSuggestedServicesTotal(state)
+                                : ((_selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null))?.getPriceFor(_previewCarType) ?? 0.0);
+                            final agreedPrice = double.tryParse(_agreedPriceController.text.trim()) ?? currentTariff;
+                            final selectedPkg = _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => NewBookingScreen(
                                   initialCarType: _previewCarType,
-                                  initialSelectedServices: _selectedServiceIds.toList(),
+                                  initialPackage: _useCustomChecklist ? null : selectedPkg,
+                                  initialUseCustomChecklist: _useCustomChecklist,
+                                  initialSelectedServices: _useCustomChecklist ? _selectedServiceIds.toList() : null,
                                   initialCustomPrice: agreedPrice,
                                 ),
                               ),
@@ -1379,7 +1581,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               onTap: () {
                 setState(() {
                   _previewCarType = type;
-                  _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                  if (_useCustomChecklist) {
+                    _agreedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                  } else {
+                    final pkg = _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null);
+                    if (pkg != null) {
+                      _agreedPriceController.text = pkg.getPriceFor(type).toStringAsFixed(0);
+                    }
+                  }
                 });
               },
               borderRadius: BorderRadius.circular(10),

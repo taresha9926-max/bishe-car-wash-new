@@ -219,41 +219,106 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                 ),
                 Text(
-                  '${items.length} services • ${state.activeServiceItems.length} active',
+                  _showCarWashPackages
+                      ? '${state.packages.length} ${state.tr("presetPackagesTab")}'
+                      : '${items.length} ${state.tr("customDetailingTab")} • ${state.activeServiceItems.length} active',
                   style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
               ],
             ),
-            Row(
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () => setState(() => _showCarWashPackages = !_showCarWashPackages),
-                  icon: Icon(_showCarWashPackages ? Icons.view_list_rounded : Icons.all_inbox_rounded, size: 14),
-                  label: Text(
-                    _showCarWashPackages ? 'Detail Services' : 'Preset Packages (${state.packages.length})',
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
+            if (!_showCarWashPackages)
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  icon: const Icon(Icons.add, size: 16),
-                  label: Text(state.tr('addNewService'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
-                  onPressed: () => _showAddCarWashServiceDialog(context, state),
-                ),
-              ],
-            ),
+                icon: const Icon(Icons.add, size: 16),
+                label: Text(state.tr('addNewService'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+                onPressed: () => _showAddCarWashServiceDialog(context, state),
+              ),
           ],
+        ),
+        const SizedBox(height: 12),
+
+        // Dual Sub-Tab Switcher: Custom Detailing vs Preset Packages
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _showCarWashPackages = false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    decoration: BoxDecoration(
+                      color: !_showCarWashPackages ? AppColors.primary : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.checklist_rounded, size: 16, color: !_showCarWashPackages ? Colors.white : AppColors.textPrimary),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            '${state.tr("customDetailingTab")} (${items.length})',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: !_showCarWashPackages ? Colors.white : AppColors.textPrimary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _showCarWashPackages = true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    decoration: BoxDecoration(
+                      color: _showCarWashPackages ? AppColors.primary : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.inventory_2_outlined, size: 16, color: _showCarWashPackages ? Colors.white : AppColors.textPrimary),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            '${state.tr("presetPackagesTab")} (${state.packages.length})',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: _showCarWashPackages ? Colors.white : AppColors.textPrimary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -2305,7 +2370,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                                 Text(type.localizedName(state.currentLang).split(' ').first, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
                                 const SizedBox(height: 2),
                                 Text(CurrencyFormatter.format(price), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primaryDark)),
-                                const Text('edit', style: TextStyle(fontSize: 9, color: AppColors.textMuted)),
+                                Text(state.tr('edit'), style: const TextStyle(fontSize: 9, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
                               ],
                             ),
                           ),
@@ -2313,6 +2378,25 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                       );
                     }).toList(),
                   ),
+                  if (pkg.features.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    ...pkg.localizedFeatures(state.currentLang).map((f) => Padding(
+                      padding: const EdgeInsets.only(bottom: 3),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.check_circle_outline, size: 12, color: AppColors.primary),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              f,
+                              style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
+                  ],
                 ],
               ),
             ),

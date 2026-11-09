@@ -50,6 +50,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   // Detailing Services Checklist & Agreed Tariff State
   final Set<String> _selectedServiceIds = {};
   final _negotiatedPriceController = TextEditingController();
+  bool _useCustomChecklist = true;
+  WashPackage? _selectedPackage;
 
   late bool _isCarpet;
   String _carpetType = 'type_a';
@@ -77,6 +79,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     }
     _selectedServiceType = widget.initialServiceType ?? ServiceType.walkInStation;
     _selectedCarType = widget.initialCarType ?? CarType.automobile;
+    _useCustomChecklist = widget.initialUseCustomChecklist ?? (widget.initialPackage == null);
+    _selectedPackage = widget.initialPackage;
 
     if (widget.initialSelectedServices != null && widget.initialSelectedServices!.isNotEmpty) {
       _selectedServiceIds.addAll(widget.initialSelectedServices!);
@@ -90,7 +94,14 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           final state = AppStateProvider.read(context);
-          _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+          if (!_useCustomChecklist) {
+            _selectedPackage ??= state.packages.isNotEmpty ? state.packages.first : null;
+            if (_selectedPackage != null) {
+              _negotiatedPriceController.text = _selectedPackage!.getPriceFor(_selectedCarType).toStringAsFixed(0);
+            }
+          } else {
+            _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+          }
           setState(() {});
         }
       });
@@ -136,7 +147,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     final state = AppStateProvider.of(context);
 
     final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
-    final staffTariff = _calculateSuggestedServicesTotal(state);
+    final effectivePackage = _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null);
+    final staffTariff = _useCustomChecklist
+        ? _calculateSuggestedServicesTotal(state)
+        : (effectivePackage?.getPriceFor(_selectedCarType) ?? 0.0);
     final agreedTariff = double.tryParse(_negotiatedPriceController.text.trim()) ?? staffTariff;
     final currentPrice = _isCarpet ? carpetPrice : agreedTariff;
     final grandTotal = currentPrice + _tipAmount;
@@ -207,101 +221,286 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   onSelected: (type) {
                     setState(() {
                       _selectedCarType = type;
-                      _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                      if (_useCustomChecklist) {
+                        _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                      } else {
+                        final pkg = _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null);
+                        if (pkg != null) {
+                          _negotiatedPriceController.text = pkg.getPriceFor(type).toStringAsFixed(0);
+                        }
+                      }
                     });
                   },
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 18),
 
-                Text(
-                  state.tr('customServicesChecklist'),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                // Dual Tab Bar - Custom Detailing vs Preset Packages
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _useCustomChecklist = true;
+                              _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 9),
+                            decoration: BoxDecoration(
+                              color: _useCustomChecklist ? AppColors.primary : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.checklist_rounded, size: 16, color: _useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    state.tr('customDetailingTab'),
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: _useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _useCustomChecklist = false;
+                              if (_selectedPackage == null && state.packages.isNotEmpty) {
+                                _selectedPackage = state.packages.first;
+                              }
+                              if (_selectedPackage != null) {
+                                _negotiatedPriceController.text = _selectedPackage!.getPriceFor(_selectedCarType).toStringAsFixed(0);
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 9),
+                            decoration: BoxDecoration(
+                              color: !_useCustomChecklist ? AppColors.primary : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            alignment: Alignment.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.inventory_2_outlined, size: 16, color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    state.tr('presetPackagesTab'),
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                ...state.activeServiceItems.map((item) {
-                  final isChecked = _selectedServiceIds.contains(item.id);
-                  final itemPrice = item.getPriceFor(_selectedCarType);
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: isChecked ? AppColors.primary.withOpacity(0.04) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isChecked ? AppColors.primary : AppColors.cardBorder,
-                        width: isChecked ? 1.5 : 1,
+                if (_useCustomChecklist) ...[
+                  ...state.activeServiceItems.map((item) {
+                    final isChecked = _selectedServiceIds.contains(item.id);
+                    final itemPrice = item.getPriceFor(_selectedCarType);
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: isChecked ? AppColors.primary.withOpacity(0.04) : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isChecked ? AppColors.primary : AppColors.cardBorder,
+                          width: isChecked ? 1.5 : 1,
+                        ),
                       ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: CheckboxListTile(
-                        value: isChecked,
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                        activeColor: AppColors.primary,
-                        title: Row(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: CheckboxListTile(
+                          value: isChecked,
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                          activeColor: AppColors.primary,
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.localizedName(state.currentLang),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
+                                        color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      item.localizedCategory(state.currentLang),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: isChecked ? AppColors.primary : AppColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  CurrencyFormatter.format(itemPrice),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: item.description != null && item.description!.isNotEmpty
+                              ? Text(
+                                  item.description!,
+                                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                )
+                              : null,
+                          onChanged: (val) {
+                            setState(() {
+                              if (val == true) {
+                                _selectedServiceIds.add(item.id);
+                              } else {
+                                _selectedServiceIds.remove(item.id);
+                              }
+                              _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+                ] else ...[
+                  ...state.packages.map((pkg) {
+                    final isSelected = pkg.id == _selectedPackage?.id;
+                    final pkgPrice = pkg.getPriceFor(_selectedCarType);
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedPackage = pkg;
+                          _negotiatedPriceController.text = pkgPrice.toStringAsFixed(0);
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? AppColors.primary : AppColors.cardBorder,
+                            width: isSelected ? 1.8 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Radio<String>(
+                              value: pkg.id,
+                              groupValue: _selectedPackage?.id,
+                              activeColor: AppColors.primary,
+                              onChanged: (_) {
+                                setState(() {
+                                  _selectedPackage = pkg;
+                                  _negotiatedPriceController.text = pkgPrice.toStringAsFixed(0);
+                                });
+                              },
+                            ),
+                            AutoCareAssets.buildPhotoThumbnail(
+                              imageUrl: AutoCareAssets.getPackageImage(pkg),
+                              width: 48,
+                              height: 48,
+                              borderRadius: 8,
+                              durationBadge: '${pkg.durationMinutes}m',
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    item.localizedName(state.currentLang),
+                                    pkg.localizedName(state.currentLang),
                                     style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
-                                      color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.localizedCategory(state.currentLang),
-                                    style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
-                                      color: isChecked ? AppColors.primary : AppColors.textMuted,
+                                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
                                     ),
                                   ),
+                                  Text(
+                                    '${pkg.durationMinutes} mins • ${pkg.localizedDescription(state.currentLang)}',
+                                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                  ),
+                                  if (isSelected && pkg.features.isNotEmpty) ...[
+                                    const SizedBox(height: 6),
+                                    ...pkg.localizedFeatures(state.currentLang).map((f) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 2),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Icon(Icons.check_circle_outline, size: 12, color: AppColors.primary),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              f,
+                                              style: const TextStyle(fontSize: 10.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
+                                  ],
                                 ],
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceVariant,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                CurrencyFormatter.format(itemPrice),
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
-                              ),
+                            const SizedBox(width: 8),
+                            Text(
+                              CurrencyFormatter.format(pkgPrice),
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
                             ),
                           ],
                         ),
-                        subtitle: item.description != null && item.description!.isNotEmpty
-                            ? Text(
-                                item.description!,
-                                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-                              )
-                            : null,
-                        onChanged: (val) {
-                          setState(() {
-                            if (val == true) {
-                              _selectedServiceIds.add(item.id);
-                            } else {
-                              _selectedServiceIds.remove(item.id);
-                            }
-                            _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
-                          });
-                        },
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ],
                 const SizedBox(height: 10),
 
                 // Staff Tariff and Agreed Tariff Card
@@ -898,13 +1097,18 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   Future<void> _handleBookingSubmit() async {
     if (!_formKey.currentState!.validate()) return;
     final state = AppStateProvider.read(context);
-    if (!_isCarpet && _selectedServiceIds.isEmpty) {
+    if (!_isCarpet && _useCustomChecklist && _selectedServiceIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.orange.shade800,
           content: Text(state.tr('selectAtLeastOneService')),
         ),
       );
+      return;
+    }
+
+    final activePackage = _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null);
+    if (!_isCarpet && !_useCustomChecklist && activePackage == null) {
       return;
     }
 
@@ -919,11 +1123,13 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       }
 
       final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
-      final staffTariff = _calculateSuggestedServicesTotal(state);
+      final staffTariff = _useCustomChecklist
+          ? _calculateSuggestedServicesTotal(state)
+          : (activePackage?.getPriceFor(_selectedCarType) ?? 0.0);
       final agreedPrice = double.tryParse(_negotiatedPriceController.text.trim()) ?? staffTariff;
 
       List<String>? selectedServiceNames;
-      if (!_isCarpet) {
+      if (!_isCarpet && _useCustomChecklist) {
         final activeItems = state.activeServiceItems;
         selectedServiceNames = activeItems
             .where((item) => _selectedServiceIds.contains(item.id))
@@ -937,7 +1143,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         serviceType: _selectedServiceType,
         carType: _isCarpet ? CarType.automobile : _selectedCarType,
         licensePlate: _plateController.text.trim().toUpperCase(),
-        package: state.packages.first,
+        package: activePackage ?? state.packages.first,
         deliveryLocation: fullAddress,
         paymentMethod: PaymentMethod.cash,
         gpsCoordinates: _pinnedGpsCoordinates,

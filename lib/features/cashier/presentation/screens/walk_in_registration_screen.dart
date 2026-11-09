@@ -289,7 +289,16 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                 // 2. Select Car Type
                 CarTypeSelector(
                   selectedType: _carType,
-                  onSelected: (type) => setState(() => _carType = type),
+                  onSelected: (type) {
+                    setState(() {
+                      _carType = type;
+                      if (_useCustomChecklist) {
+                        _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                      } else if (_package != null) {
+                        _negotiatedPriceController.text = _package!.getPriceFor(type).toStringAsFixed(0);
+                      }
+                    });
+                  },
                 ),
                 const SizedBox(height: 18),
 
@@ -308,7 +317,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _useCustomChecklist = true),
+                        onTap: () {
+                          setState(() {
+                            _useCustomChecklist = true;
+                            _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                          });
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 9),
                           decoration: BoxDecoration(
@@ -325,7 +339,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
-                                  state.tr('customServicesChecklist'),
+                                  state.tr('customDetailingTab'),
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
@@ -342,7 +356,17 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _useCustomChecklist = false),
+                        onTap: () {
+                          setState(() {
+                            _useCustomChecklist = false;
+                            if (_package == null && packages.isNotEmpty) {
+                              _package = packages.first;
+                            }
+                            if (_package != null) {
+                              _negotiatedPriceController.text = _package!.getPriceFor(_carType).toStringAsFixed(0);
+                            }
+                          });
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 9),
                           decoration: BoxDecoration(
@@ -359,7 +383,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
-                                  state.tr('presetPackages'),
+                                  state.tr('presetPackagesTab'),
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
@@ -525,7 +549,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                     final isSelected = pkg.id == _package?.id;
                     final pkgPrice = pkg.getPriceFor(_carType);
                     return GestureDetector(
-                      onTap: () => setState(() => _package = pkg),
+                      onTap: () {
+                        setState(() {
+                          _package = pkg;
+                          _negotiatedPriceController.text = pkgPrice.toStringAsFixed(0);
+                        });
+                      },
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -544,7 +573,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                               value: pkg.id,
                               groupValue: _package?.id,
                               activeColor: AppColors.primary,
-                              onChanged: (_) => setState(() => _package = pkg),
+                              onChanged: (_) {
+                                setState(() {
+                                  _package = pkg;
+                                  _negotiatedPriceController.text = pkgPrice.toStringAsFixed(0);
+                                });
+                              },
                             ),
                             AutoCareAssets.buildPhotoThumbnail(
                               imageUrl: AutoCareAssets.getPackageImage(pkg),

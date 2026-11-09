@@ -903,6 +903,18 @@ class AppStrings {
       AppLanguage.am: 'በባንክ ሒሳብ ማስተላለፍ',
     },
 
+    // Dual Tab Bar - Service Selection
+    'customDetailingTab': {
+      AppLanguage.en: 'Custom Detailing (Tick Boxes)',
+      AppLanguage.om: 'Filannoo Qubaa (Tajaajila Filatamaa)',
+      AppLanguage.am: 'ብጁ ዲቴይሊንግ (የሚመረጡ አገልግሎቶች)',
+    },
+    'presetPackagesTab': {
+      AppLanguage.en: 'Preset Service Packages',
+      AppLanguage.om: 'Paakeejiiwwan Tajaajilaa Qophaa\'an',
+      AppLanguage.am: 'የተዘጋጁ የአገልግሎት ፓኬጆች',
+    },
+
     // Database / SQL Packages Localization
     'pkg_silver_name': {
       AppLanguage.en: 'Basic / Silver Package',
@@ -936,8 +948,8 @@ class AppStrings {
     },
     'pkg_plat_ext_a_name': {
       AppLanguage.en: 'Platinum Exterior - A',
-      AppLanguage.om: 'Pulaatiiniyemii Alaa - Paakeejii A',
-      AppLanguage.am: 'ፕላቲነም የውጭ - ፓኬጅ ኤ',
+      AppLanguage.om: 'Pulaatiiniyemii Alaa - Sadarkaa A',
+      AppLanguage.am: 'ፕላቲነም የውጭ - ደረጃ ኤ',
     },
     'pkg_plat_ext_a_desc': {
       AppLanguage.en: 'Body Polish + Water Spot removal and gloss treatment.',
@@ -946,8 +958,8 @@ class AppStrings {
     },
     'pkg_plat_ext_b_name': {
       AppLanguage.en: 'Platinum Exterior - B',
-      AppLanguage.om: 'Pulaatiiniyemii Alaa - Paakeejii B',
-      AppLanguage.am: 'ፕላቲነም የውጭ - ፓኬጅ ቢ',
+      AppLanguage.om: 'Pulaatiiniyemii Alaa - Sadarkaa B',
+      AppLanguage.am: 'ፕላቲነም የውጭ - ደረጃ ቢ',
     },
     'pkg_plat_ext_b_desc': {
       AppLanguage.en: 'Body + Water Spot + Tire Detailing & rim protection.',
@@ -956,8 +968,8 @@ class AppStrings {
     },
     'pkg_plat_ext_c_name': {
       AppLanguage.en: 'Platinum Exterior - C',
-      AppLanguage.om: 'Pulaatiiniyemii Alaa - Paakeejii C',
-      AppLanguage.am: 'ፕላቲነም የውጭ - ፓኬጅ ሲ',
+      AppLanguage.om: 'Pulaatiiniyemii Alaa - Sadarkaa C',
+      AppLanguage.am: 'ፕላቲነም የውጭ - ደረጃ ሲ',
     },
     'pkg_plat_ext_c_desc': {
       AppLanguage.en: 'Body + Water Spot + Tire Detailing + Headlight restoration.',
@@ -986,13 +998,13 @@ class AppStrings {
     },
     'pkg_diamond_full_name': {
       AppLanguage.en: 'Diamond Package C (Full)',
-      AppLanguage.om: 'Paakeejii Daayimandii C (Guutuu)',
-      AppLanguage.am: 'ዳይመንድ ፓኬጅ ሲ (ሙሉ)',
+      AppLanguage.om: 'Paakeejii Daayimandii Guutuu',
+      AppLanguage.am: 'ዳይመንድ ሙሉ ፓኬጅ',
     },
     'pkg_diamond_full_desc': {
-      AppLanguage.en: 'Ultimate Interior Detailing + Exterior Comprehensive detailing suite.',
-      AppLanguage.om: 'Dhiqannaa keessaa fi alaa sadarkaa olaanaa guutuu.',
-      AppLanguage.am: 'የላቀ የውስጥ እና የውጭ የተሟላ የዲቴይሊንግ አገልግሎት።',
+      AppLanguage.en: 'The ultimate showroom detail: Full Platinum Interior + Complete Platinum Exterior Level C.',
+      AppLanguage.om: 'Sadarkaa olaanaa: Pulaatiiniyemii Keessoo Guutuu + Pulaatiiniyemii Alaa Sadarkaa C guutuu.',
+      AppLanguage.am: 'የላቀ የሾውሩም ደረጃ ዲቴይሊንግ፡ ሙሉ የፕላቲነም የውስጥ + የተሟላ የፕላቲነም የውጭ ደረጃ ሲ።',
     },
     'pkg_engine_chem_name': {
       AppLanguage.en: 'Engine Chemical Cleaning',
@@ -1329,6 +1341,11 @@ class AppStrings {
       AppLanguage.en: 'Add New Service',
       AppLanguage.om: 'Tajaajila Haaraa Dabali',
       AppLanguage.am: 'አዲስ አገልግሎት ያክሉ',
+    },
+    'edit': {
+      AppLanguage.en: 'Edit',
+      AppLanguage.om: 'Gulaali',
+      AppLanguage.am: 'አስተካክል',
     },
     'editService': {
       AppLanguage.en: 'Edit Service',
