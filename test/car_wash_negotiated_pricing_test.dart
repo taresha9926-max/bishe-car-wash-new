@@ -182,7 +182,7 @@ void main() {
       expect(state.tr('presetPackagesTab'), contains("Paakeejiiwwan"));
 
       state.setLanguage('AM');
-      expect(state.tr('customDetailingTab'), contains('ብጁ ዲቴይሊንግ'));
+      expect(state.tr('customDetailingTab'), contains('ልዩ ዲቴይሊንግ'));
       expect(state.tr('presetPackagesTab'), contains('የተዘጋጁ'));
     });
 

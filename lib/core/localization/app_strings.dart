@@ -907,7 +907,7 @@ class AppStrings {
     'customDetailingTab': {
       AppLanguage.en: 'Custom Detailing (Tick Boxes)',
       AppLanguage.om: 'Filannoo Qubaa (Tajaajila Filatamaa)',
-      AppLanguage.am: 'ብጁ ዲቴይሊንግ (የሚመረጡ አገልግሎቶች)',
+      AppLanguage.am: 'ልዩ ዲቴይሊንግ (የሚመረጡ አገልግሎቶች)',
     },
     'presetPackagesTab': {
       AppLanguage.en: 'Preset Service Packages',
