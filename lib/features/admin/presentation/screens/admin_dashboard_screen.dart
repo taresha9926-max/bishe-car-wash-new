@@ -2946,11 +2946,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           width: double.infinity,
                           color: Colors.black12,
                           child: reel.thumbnailUrl.isNotEmpty
-                              ? Image.network(
-                                  reel.thumbnailUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.music_note, color: Colors.grey)),
-                                )
+                              ? (reel.thumbnailUrl.startsWith('assets/')
+                                  ? Image.asset(
+                                      reel.thumbnailUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.music_note, color: Colors.grey)),
+                                    )
+                                  : Image.network(
+                                      reel.thumbnailUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.music_note, color: Colors.grey)),
+                                    ))
                               : const Center(child: Icon(Icons.music_note, color: Colors.grey)),
                         ),
                       ),
@@ -3054,11 +3060,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   height: 46,
                                   color: Colors.black12,
                                   child: reel.thumbnailUrl.isNotEmpty
-                                      ? Image.network(
-                                          reel.thumbnailUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.grey),
-                                        )
+                                      ? (reel.thumbnailUrl.startsWith('assets/')
+                                          ? Image.asset(
+                                              reel.thumbnailUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.grey),
+                                            )
+                                          : Image.network(
+                                              reel.thumbnailUrl,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.grey),
+                                            ))
                                       : const Icon(Icons.music_note, color: Colors.grey),
                                 ),
                               ),
@@ -3352,13 +3364,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(4),
-                              child: Image.network(
-                                p['url']!,
-                                width: 22,
-                                height: 22,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
-                              ),
+                              child: p['url']!.startsWith('assets/')
+                                  ? Image.asset(
+                                      p['url']!,
+                                      width: 22,
+                                      height: 22,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
+                                    )
+                                  : Image.network(
+                                      p['url']!,
+                                      width: 22,
+                                      height: 22,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14),
+                                    ),
                             ),
                             const SizedBox(width: 5),
                             Text(

@@ -356,11 +356,17 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
         children: [
           // Background Thumbnail with Luxury Car Detailing imagery
           if (reel.thumbnailUrl.isNotEmpty)
-            Image.network(
-              reel.thumbnailUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _buildPlaceholderBackground(),
-            )
+            (reel.thumbnailUrl.startsWith('assets/')
+                ? Image.asset(
+                    reel.thumbnailUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _buildPlaceholderBackground(),
+                  )
+                : Image.network(
+                    reel.thumbnailUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _buildPlaceholderBackground(),
+                  ))
           else
             _buildPlaceholderBackground(),
 

@@ -155,66 +155,66 @@ class AutoCareAssets {
   static const List<Map<String, String>> curatedReelsPool = [
     {
       'id': 'reel-1',
-      'label': 'Reel 1: Active Snow Foam',
+      'label': 'Reel 1: Predator Pure Foam',
       'title': 'Active Snow Foam Cannon & Pre-Wash',
       'subtitle': 'Triple-action foaming & streak-free dirt lift • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_1.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7703232736168791303',
     },
     {
       'id': 'reel-2',
-      'label': 'Reel 2: Chassis Steam',
+      'label': 'Reel 2: Chassis Pressure Bay',
       'title': 'High-Pressure Chassis Steam Bay',
       'subtitle': 'Deep wheel-well & engine chassis steam care • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_2.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7703201662713728274',
     },
     {
       'id': 'reel-3',
-      'label': 'Reel 3: Ceramic Shield',
+      'label': 'Reel 3: Red Arrow Ceramic Shield',
       'title': 'Ceramic Shield & Paint Polish',
       'subtitle': 'Hydrophobic ceramic shield & ultimate gloss • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_3.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7701736769619905799',
     },
     {
       'id': 'reel-4',
-      'label': 'Reel 4: Interior Care',
+      'label': 'Reel 4: Classic Vintage Detailing',
       'title': 'Deep Interior & Leather Care',
       'subtitle': 'Anti-bacterial steam & luxury cabin detailing • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_4.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7700597195816357127',
     },
     {
       'id': 'reel-5',
-      'label': 'Reel 5: Tire Gloss',
+      'label': 'Reel 5: Tire Gloss & Blue Suds',
       'title': 'Wheel-Well & Tire Gloss Treatment',
       'subtitle': 'Brake-dust dissolve & deep satin tire dressing • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_5.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7699125432259464455',
     },
     {
       'id': 'reel-6',
-      'label': 'Reel 6: Engine Bay',
+      'label': 'Reel 6: Service Station Bay',
       'title': 'Engine Bay Detailing & Degrease',
       'subtitle': 'Precision dry-steam grease wipe & harness coat • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_6.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7698005404336573703',
     },
     {
       'id': 'reel-7',
-      'label': 'Reel 7: Water Beading',
+      'label': 'Reel 7: Trilingual Splash Poster',
       'title': 'Water-Beading Hydrophobic Rinse',
       'subtitle': 'Extreme water repelling & fast crystal dry coat • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_7.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash/video/7696533703924682002',
     },
     {
       'id': 'reel-8',
-      'label': 'Reel 8: Mobile Van',
+      'label': 'Reel 8: Circular Vector Emblem',
       'title': 'Mobile Van At-Home Service',
       'subtitle': 'Equipped generator & tank van right to your door • Watch Reel',
-      'url': 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&auto=format&fit=crop&q=80',
+      'url': 'assets/images/reel_8.jpg',
       'videoUrl': 'https://www.tiktok.com/@bishecarwash',
     },
   ];
@@ -430,16 +430,27 @@ class AutoCareAssets {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: fallbackColor.withOpacity(0.12),
-                child: Center(
-                  child: Icon(fallbackIcon, color: fallbackColor, size: width * 0.45),
-                ),
-              ),
-            ),
+            imageUrl.startsWith('assets/')
+                ? Image.asset(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: fallbackColor.withOpacity(0.12),
+                      child: Center(
+                        child: Icon(fallbackIcon, color: fallbackColor, size: width * 0.45),
+                      ),
+                    ),
+                  )
+                : Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: fallbackColor.withOpacity(0.12),
+                      child: Center(
+                        child: Icon(fallbackIcon, color: fallbackColor, size: width * 0.45),
+                      ),
+                    ),
+                  ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
