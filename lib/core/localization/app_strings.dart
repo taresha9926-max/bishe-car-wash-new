@@ -1052,6 +1052,108 @@ class AppStrings {
       AppLanguage.am: 'በዚህ ክፍል ውስጥ ምንም የደንበኛ አስተያየት የለም።',
     },
 
+    // Simplified Option 1 Customer Hub & 3-Step Booking Wizard
+    'pricesAreNegotiable': {
+      AppLanguage.en: 'Prices are negotiable',
+      AppLanguage.om: 'Gatiin mariin ni sirraa\'a',
+      AppLanguage.am: 'ዋጋዎች በድርድር የሚስተካከሉ ናቸው',
+    },
+    'whatToWashToday': {
+      AppLanguage.en: 'What would you like to wash today?',
+      AppLanguage.om: 'Har\'a maal dhiqachuu barbaaddu?',
+      AppLanguage.am: 'ዛሬ ምን ማሳጠብ ይፈልጋሉ?',
+    },
+    'washMyCarTitle': {
+      AppLanguage.en: 'Wash My Car',
+      AppLanguage.om: 'Konkolaataa Dhiqachuu',
+      AppLanguage.am: 'መኪና ማሳጠብ',
+    },
+    'washMyCarSub': {
+      AppLanguage.en: 'Choose a ready package or pick exact items in 3 easy steps',
+      AppLanguage.om: 'Paakeejii qophaa\'e ykn tajaajila barbaaddan tarkaanfii 3n filadhaa',
+      AppLanguage.am: 'የተዘጋጀ ፓኬጅ ወይም የሚፈልጉትን አገልግሎት በ3 ቀላል ደረጃ ይዘዙ',
+    },
+    'startCarBooking': {
+      AppLanguage.en: 'Start Car Booking',
+      AppLanguage.om: 'Ajaja Konkolaataa Jalqabi',
+      AppLanguage.am: 'የመኪና እጥበት ይዘዙ',
+    },
+    'washMyCarpetTitle': {
+      AppLanguage.en: 'Wash My Carpet',
+      AppLanguage.om: 'Karpeetii Dhiqachuu',
+      AppLanguage.am: 'ምንጣፍ ማሳጠብ',
+    },
+    'washMyCarpetSub': {
+      AppLanguage.en: 'At our station, driver pick-up, or cleaned right at your home',
+      AppLanguage.om: 'Buufata keenyatti, mana keessanii fuunee ykn manatti isiniif dhiqna',
+      AppLanguage.am: 'በማዕከላችን፣ ከቤትዎ ወስደን ወይም ቤትዎ ድረስ መጥተን እናጥባለን',
+    },
+    'startCarpetBooking': {
+      AppLanguage.en: 'Start Carpet Booking',
+      AppLanguage.om: 'Ajaja Karpeetii Jalqabi',
+      AppLanguage.am: 'የምንጣፍ እጥበት ይዘዙ',
+    },
+    'needHelpCallBanner': {
+      AppLanguage.en: 'New to the app? Call us and we will book for you in 30 seconds!',
+      AppLanguage.om: 'Appii fayyadamuun yoo isinitti ulfaate bilbilaa — sekoondii 30 keessatti isiniif ajajna!',
+      AppLanguage.am: 'መተግበሪያውን መጠቀም ካስቸገረዎት ይደውሉ — በ30 ሰከንድ እንመዘግብዎታለን!',
+    },
+    'step1CarInstruction': {
+      AppLanguage.en: 'Step 1 of 3: Pick vehicle size & wash service',
+      AppLanguage.om: 'Tarkaanfii 1/3: Gosa konkolaataa fi tajaajila filadhaa',
+      AppLanguage.am: 'ደረጃ 1 ከ 3፡ የመኪናውን አይነት እና አገልግሎት ይምረጡ',
+    },
+    'step1CarpetInstruction': {
+      AppLanguage.en: 'Step 1 of 3: Pick carpet type & size',
+      AppLanguage.om: 'Tarkaanfii 1/3: Gosa karpeetii fi bal\'ina filadhaa',
+      AppLanguage.am: 'ደረጃ 1 ከ 3፡ የምንጣፍ አይነት እና መጠን ይምረጡ',
+    },
+    'step2ModeInstruction': {
+      AppLanguage.en: 'Step 2 of 3: How should we serve you?',
+      AppLanguage.om: 'Tarkaanfii 2/3: Akkamitti isin tajaajillu?',
+      AppLanguage.am: 'ደረጃ 2 ከ 3፡ አገልግሎቱን እንዴት ማግኘት ይፈልጋሉ?',
+    },
+    'step3DetailsInstruction': {
+      AppLanguage.en: 'Step 3 of 3: Your name & phone to confirm',
+      AppLanguage.om: 'Tarkaanfii 3/3: Maqaa fi bilbila keessan galchaa',
+      AppLanguage.am: 'ደረጃ 3 ከ 3፡ ስም እና ስልክ ቁጥርዎን አስገብተው ያረጋግጡ',
+    },
+    'nextStep': {
+      AppLanguage.en: 'Next Step',
+      AppLanguage.om: 'Itti Fufi',
+      AppLanguage.am: 'ቀጥል',
+    },
+    'backStep': {
+      AppLanguage.en: 'Back',
+      AppLanguage.om: 'Duubatti',
+      AppLanguage.am: 'ተመለስ',
+    },
+    'estimatedTotalLabel': {
+      AppLanguage.en: 'Estimated Total',
+      AppLanguage.om: 'Tilmaama Waliigalaa',
+      AppLanguage.am: 'ግምታዊ ጠቅላላ ዋጋ',
+    },
+    'finalNegotiatedPriceEtb': {
+      AppLanguage.en: 'Final Negotiated Price (ETB)',
+      AppLanguage.om: 'Gatii Xumuraa Mariin Murtaa\'e (ETB)',
+      AppLanguage.am: 'በድርድር የጸደቀው የመጨረሻ ዋጋ (ብር)',
+    },
+    'bookedReferenceTariff': {
+      AppLanguage.en: 'Booked Reference Tariff',
+      AppLanguage.om: 'Gatii Jalqabaa Galmaa\'e',
+      AppLanguage.am: 'በትዕዛዝ የተመዘገበ መነሻ ዋጋ',
+    },
+    'bookingFailedPrefix': {
+      AppLanguage.en: 'Could not complete booking',
+      AppLanguage.om: 'Ajaja xumuruun hin danda\'amne',
+      AppLanguage.am: 'ትዕዛዙን ማጠናቀቅ አልተቻለም',
+    },
+    'callingStationPrefix': {
+      AppLanguage.en: 'Calling BISHE Station',
+      AppLanguage.om: 'Buufata BISHE\'tti bilbilamaa jira',
+      AppLanguage.am: 'ወደ ቢሼ ማዕከል እየተደወለ ነው',
+    },
+
     // Database / SQL Packages Localization
     'pkg_silver_name': {
       AppLanguage.en: 'Basic / Silver Package',

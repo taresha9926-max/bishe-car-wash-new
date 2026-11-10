@@ -35,6 +35,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   late PaymentMethod _selectedMethod;
   final _refCodeController = TextEditingController();
   final _tipController = TextEditingController();
+  final _agreedPriceController = TextEditingController();
   bool _isProcessing = false;
   String? _uploadedScreenshotName;
   String? _screenshotBase64;
@@ -44,6 +45,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   void initState() {
     super.initState();
     _selectedMethod = widget.booking.payment.method;
+    _agreedPriceController.text = widget.booking.totalPrice.toStringAsFixed(0);
     _tipAmount = widget.booking.payment.tipAmount;
     if (_tipAmount > 0) {
       _tipController.text = _tipAmount.toStringAsFixed(0);
@@ -54,6 +56,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   void dispose() {
     _refCodeController.dispose();
     _tipController.dispose();
+    _agreedPriceController.dispose();
     super.dispose();
   }
 
@@ -69,7 +72,8 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final amountDue = widget.booking.totalPrice;
+    final parsedAgreed = double.tryParse(_agreedPriceController.text.trim());
+    final amountDue = (parsedAgreed != null && parsedAgreed > 0) ? parsedAgreed : widget.booking.totalPrice;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -152,7 +156,24 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
+
+              // Cashier Negotiable Final Price Adjustment (matches customer "Prices are negotiable" flow)
+              TextField(
+                controller: _agreedPriceController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: state.tr('finalNegotiatedPriceEtb'),
+                  helperText: '${state.tr("bookedReferenceTariff")}: ${CurrencyFormatter.format(widget.booking.totalPrice)}',
+                  prefixIcon: const Icon(Icons.handshake_outlined, size: 18, color: AppColors.primary),
+                  isDense: true,
+                  filled: true,
+                  fillColor: AppColors.surfaceVariant.withOpacity(0.5),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 12),
 
               // Optional Washer Tip Box
               Container(
