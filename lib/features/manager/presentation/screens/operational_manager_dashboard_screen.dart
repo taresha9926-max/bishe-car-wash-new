@@ -6,9 +6,8 @@ import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
-import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
-import '../../../cashier/presentation/screens/daily_closing_dialog.dart';
+import '../../../cashier/presentation/widgets/station_money_tab.dart';
 import '../../../cashier/presentation/widgets/station_queue_tab.dart';
 
 /// Option 1 Operational Manager Action Desk:
@@ -95,7 +94,11 @@ class _OperationalManagerDashboardScreenState
                       isMobile: isMobile,
                     )
                   else if (_tabController.index == 1)
-                    _buildHandoverAndCloseTab(context, state, isMobile)
+                    StationMoneyTab(
+                      isManager: true,
+                      isMobile: isMobile,
+                      onSwitchToTeamTab: () => _tabController.animateTo(2),
+                    )
                   else
                     SharedWasherCommissionHub(
                       state: state,
@@ -117,6 +120,7 @@ class _OperationalManagerDashboardScreenState
   Widget _buildActionTabBar(dynamic state, int activeCount, bool isMobile) {
     final isCarpet = state.isCarpetDivisionActive as bool;
     final activeColor = isCarpet ? const Color(0xFF7C3AED) : AppColors.primary;
+    final undeposited = state.undepositedCashTodayETB as double;
 
     return Container(
       padding: const EdgeInsets.all(4),
@@ -143,8 +147,8 @@ class _OperationalManagerDashboardScreenState
             isMobile: isMobile,
           ),
           _buildCompactTab(
-            icon: Icons.swap_horiz_rounded,
-            label: state.tr('managerTabHandoverClose'),
+            icon: Icons.account_balance_wallet_rounded,
+            label: '${state.tr("managerTabHandoverClose")} (${CurrencyFormatter.formatShort(undeposited)})',
             isMobile: isMobile,
           ),
           _buildCompactTab(
@@ -423,7 +427,7 @@ class _OperationalManagerDashboardScreenState
 
   Future<void> _handleInlineManagerVerify(BuildContext context, dynamic state) async {
     final otp = _managerInlineOtpController.text.trim();
-    if (otp.isEmpty) {
+    if (otp.isEmpty || otp.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(backgroundColor: Colors.redAccent, content: Text(state.tr('enterFourDigitOtpError'))),
       );
@@ -447,173 +451,5 @@ class _OperationalManagerDashboardScreenState
         );
       }
     }
-  }
-
-  // ===========================================================================
-  // TAB 1: HANDOVER & NIGHT CLOSE + SAFE PAID HISTORY
-  // ===========================================================================
-
-  Widget _buildHandoverAndCloseTab(BuildContext context, dynamic state, bool isMobile) {
-    final carried = state.managerCarriedCashETB as double;
-    final nightAdded = state.nightShiftAdditionalCashETB as double;
-    final totalPhysicalToAdmin = carried + nightAdded;
-    final isNightClosed = state.isTodayNightShiftClosed as bool;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 1. Cash Custody Summary Card (Zero Double-Counting)
-        Container(
-          padding: EdgeInsets.all(isMobile ? 14 : 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      state.tr('cashierHandoverTitle'),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                    ),
-                  ),
-                ],
-              ),
-              if (state.pendingCashierHandover == null && carried == 0) ...[
-                const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${state.tr("awaitingHandoverLabel")}: ${state.tr("awaitingHandoverDesc")}',
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                  ),
-                ),
-              ],
-              const Divider(height: 20),
-              _buildCustodyRow(state.tr('dayShiftHandoverCashLabel'), CurrencyFormatter.format(carried), Colors.indigo),
-              const SizedBox(height: 6),
-              _buildCustodyRow(state.tr('nightShiftNetCashLabel'), CurrencyFormatter.format(nightAdded), AppColors.cashGreen),
-              const Divider(height: 18),
-              _buildCustodyRow(
-                state.tr('totalCashToAdminLabel'),
-                CurrencyFormatter.format(totalPhysicalToAdmin),
-                AppColors.primary,
-                isBold: true,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // 2. Night Shift Closing Card
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(isMobile ? 14 : 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isNightClosed ? AppColors.statusCompleted.withOpacity(0.4) : AppColors.cardBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    isNightClosed ? Icons.verified_rounded : Icons.nightlight_round,
-                    color: isNightClosed ? AppColors.statusCompleted : const Color(0xFFD97706),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      state.tr('nightClosingTitle'),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                state.tr('nightClosingSubDesc'),
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => DailyClosingDialog.show(context, isManagerClosing: true),
-                  icon: Icon(isNightClosed ? Icons.receipt_long_rounded : Icons.lock_clock_rounded, size: 18),
-                  label: Text(
-                    isNightClosed ? state.tr('nightClosingConfirmed') : state.tr('initiateNightShiftClosing'),
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isNightClosed ? AppColors.statusCompleted : AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // 3. Safe Paid History (No unprotected bulk delete for Operational Manager)
-        Text(
-          state.isCarpetDivisionActive ? state.tr('carpetWashHistoryTitle') : state.tr('carWashHistoryTitle'),
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 8),
-        VehicleHistoryScreen(
-          isEmbedded: true,
-          isCarpetFilter: state.isCarpetDivisionActive,
-          allowClearAll: false,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCustodyRow(String label, String value, Color valueColor, {bool isBold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: isBold ? 13 : 12,
-              fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-              color: isBold ? AppColors.textPrimary : AppColors.textSecondary,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isBold ? 15 : 13,
-            fontWeight: FontWeight.w900,
-            color: valueColor,
-          ),
-        ),
-      ],
-    );
   }
 }

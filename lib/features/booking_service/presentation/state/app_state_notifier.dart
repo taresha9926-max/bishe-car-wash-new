@@ -522,6 +522,8 @@ class AppStateNotifier extends ChangeNotifier {
     _pendingApprovals.clear();
     _consumables = List.from(InitialInventorySeed.getConsumables());
     _showerRecords.clear();
+    _isDailyCommissionDisbursedToday = false;
+    _disbursedCommissionPoolAmount = 0.0;
     notifyListeners();
     await _repository.clearAllBookings();
     try {
@@ -1021,10 +1023,30 @@ class AppStateNotifier extends ChangeNotifier {
 
   // Daily Commission Disbursement Idempotency Lock
   bool _isDailyCommissionDisbursedToday = false;
-  bool get isDailyCommissionDisbursedToday => _isDailyCommissionDisbursedToday;
+  double _disbursedCommissionPoolAmount = 0.0;
+
+  /// True when daily washer commissions were disbursed and no additional
+  /// undisbursed commission pool accrued afterwards (e.g. from night-shift washes).
+  bool get isDailyCommissionDisbursedToday {
+    if (!_isDailyCommissionDisbursedToday) return false;
+    return teamCommissionPoolTodayETB <= _disbursedCommissionPoolAmount + 0.01;
+  }
+
+  /// Remaining today's commission pool not yet disbursed to washers.
+  double get undisbursedCommissionPoolTodayETB {
+    if (!_isDailyCommissionDisbursedToday) return teamCommissionPoolTodayETB;
+    final extra = teamCommissionPoolTodayETB - _disbursedCommissionPoolAmount;
+    return extra > 0.01 ? extra : 0.0;
+  }
+
+  /// Strict shift-closing prerequisite: Cashier & Manager must disburse
+  /// today's daily commission pool before closing or handing over a shift.
+  bool get requiresDailyCommissionDisbursementBeforeClosing =>
+      undisbursedCommissionPoolTodayETB > 0.01;
 
   void markDailyCommissionDisbursed() {
     _isDailyCommissionDisbursedToday = true;
+    _disbursedCommissionPoolAmount = teamCommissionPoolTodayETB;
     final now = DateTime.now();
     final dividends = washerDividendsToday;
     final carsCount = bookings.where((b) => b.payment.isPaid).length;
@@ -1317,6 +1339,14 @@ class AppStateNotifier extends ChangeNotifier {
     return extra > 0 ? extra : 0.0;
   }
 
+  bool _verifyHandoverOtp(String? expectedOtp, String? enteredOtp) {
+    final expected = (expectedOtp ?? '').trim();
+    final actual = (enteredOtp ?? '').trim();
+    // Fail-closed: never accept when stored OTP is missing/empty or differs.
+    if (expected.isEmpty || actual.isEmpty) return false;
+    return expected == actual;
+  }
+
   Future<bool> acceptCashierHandover({
     required String managerName,
     String? enteredOtp,
@@ -1334,10 +1364,8 @@ class AppStateNotifier extends ChangeNotifier {
 
     if (index != -1) {
       final record = _dailyFinancialClosings[index];
-      if (record.handoverOtp != null && record.handoverOtp!.isNotEmpty) {
-        if (enteredOtp == null || enteredOtp.trim() != record.handoverOtp!.trim()) {
-          return false;
-        }
+      if (!_verifyHandoverOtp(record.handoverOtp, enteredOtp)) {
+        return false;
       }
       final updated = record.copyWith(
         isHandoverAccepted: true,
@@ -1362,29 +1390,48 @@ class AppStateNotifier extends ChangeNotifier {
     String? shiftType,
   }) async {
     final now = DateTime.now();
-    final index = _dailyFinancialClosings.indexWhere(
-      (c) =>
-          (shiftType == null
-              ? (c.shiftType == 'night' || c.shiftType == 'day')
-              : (shiftType == 'day' ? c.shiftType == 'day' : c.shiftType == 'night')) &&
-          !c.isHandoverAccepted &&
-          c.closingDate.year == now.year &&
-          c.closingDate.month == now.month &&
-          c.closingDate.day == now.day,
-    );
+    int index = -1;
+    if (shiftType == null) {
+      index = _dailyFinancialClosings.indexWhere(
+        (c) =>
+            c.shiftType == 'night' &&
+            !c.isHandoverAccepted &&
+            c.closingDate.year == now.year &&
+            c.closingDate.month == now.month &&
+            c.closingDate.day == now.day,
+      );
+      if (index == -1) {
+        index = _dailyFinancialClosings.indexWhere(
+          (c) =>
+              c.shiftType == 'day' &&
+              !c.isHandoverAccepted &&
+              c.closingDate.year == now.year &&
+              c.closingDate.month == now.month &&
+              c.closingDate.day == now.day,
+        );
+      }
+    } else {
+      index = _dailyFinancialClosings.indexWhere(
+        (c) =>
+            (shiftType == 'day' ? c.shiftType == 'day' : c.shiftType == 'night') &&
+            !c.isHandoverAccepted &&
+            c.closingDate.year == now.year &&
+            c.closingDate.month == now.month &&
+            c.closingDate.day == now.day,
+      );
+    }
 
     if (index != -1) {
       final record = _dailyFinancialClosings[index];
-      if (record.handoverOtp != null && record.handoverOtp!.isNotEmpty) {
-        if (enteredOtp == null || enteredOtp.trim() != record.handoverOtp!.trim()) {
-          return false;
-        }
+      if (!_verifyHandoverOtp(record.handoverOtp, enteredOtp)) {
+        return false;
       }
       final updated = record.copyWith(
         isHandoverAccepted: true,
         acceptedByName: adminName,
         acceptedAt: now,
-        handoverTo: shiftType == 'day' ? 'Admin / Owner' : record.handoverTo,
+        handoverTo: record.shiftType == 'day' ? 'Admin / Owner' : record.handoverTo,
+        handoverMethod: record.shiftType == 'day' ? 'admin_otp' : record.handoverMethod,
       );
       _dailyFinancialClosings[index] = updated;
       try {
@@ -1510,12 +1557,7 @@ class AppStateNotifier extends ChangeNotifier {
     });
 
     final carried = shiftType == 'night' ? managerCarriedCashETB : 0.0;
-    final nightAdded = shiftType == 'night'
-        ? ((remainingCash - carried) > 0 ? (remainingCash - carried) : 0.0)
-        : 0.0;
-    final totalCashToHandover = shiftType == 'night'
-        ? (carried + nightAdded)
-        : remainingCash;
+    final totalCashToHandover = remainingCash;
 
     // Determine OTP and Handover Target based on method
     String? otp;

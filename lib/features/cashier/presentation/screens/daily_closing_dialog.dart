@@ -65,6 +65,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
     final remainingCash = state.undepositedCashTodayETB;
     final dividends = state.washerDividendsToday;
     final isAlreadyClosed = widget.isManagerClosing ? state.isTodayNightShiftClosed : state.isTodayDayShiftClosed;
+    final needsCommissionDisbursement = !isAlreadyClosed && state.requiresDailyCommissionDisbursementBeforeClosing;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     return Dialog(
@@ -176,7 +177,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                       const SizedBox(height: 4),
                       _buildClosingRow('Night Shift Cash Collected:', CurrencyFormatter.format(state.nightShiftAdditionalCashETB), valueColor: AppColors.cashGreen),
                       const Divider(height: 16),
-                      _buildClosingRow('Total Physical Cash Handed to Admin:', CurrencyFormatter.format(state.managerCarriedCashETB + state.nightShiftAdditionalCashETB), isBold: true, valueColor: AppColors.primary),
+                      _buildClosingRow('Total Physical Cash Handed to Admin:', CurrencyFormatter.format(remainingCash), isBold: true, valueColor: AppColors.primary),
                     ] else ...[
                       _buildClosingRow('Petty Cash / Emergency Outflow:', CurrencyFormatter.format(petty), valueColor: Colors.deepOrange),
                       const SizedBox(height: 4),
@@ -540,6 +541,80 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               ),
               const SizedBox(height: 20),
 
+              // Strict Prerequisite Gate: Daily Washer Commissions must be disbursed first
+              if (needsCommissionDisbursement) ...[
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFD97706), width: 1.5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.lock_clock_rounded, color: Color(0xFFB45309), size: 22),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.tr('commissionDisburseRequiredTitle'),
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF92400E),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '${state.tr("commissionDisburseRequiredDesc")} (${state.tr("remainingCommissionPool")}: ${CurrencyFormatter.format(state.undisbursedCommissionPoolTodayETB)})',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.35),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isSubmitting
+                              ? null
+                              : () async {
+                                  final staffName = _cashierNameController.text.trim().isNotEmpty
+                                      ? _cashierNameController.text.trim()
+                                      : (widget.isManagerClosing ? 'Dawit Manager' : 'Cashier');
+                                  await state.disburseAndReportDailyCommissionToAdmin(cashierName: staffName);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(state.tr('dailyCommissionDisbursedReported')),
+                                        backgroundColor: AppColors.statusCompleted,
+                                      ),
+                                    );
+                                  }
+                                },
+                          icon: const Icon(Icons.payments_rounded, size: 17),
+                          label: Text(
+                            state.tr('disburseNowAndUnlockClosing'),
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFD97706),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               // Action Buttons
               if (isAlreadyClosed) ...[
                 CustomButton(
@@ -572,11 +647,13 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                 ],
               ] else
                 CustomButton(
-                  text: state.tr('confirmDailyClosing'),
-                  icon: Icons.check_circle_outline_rounded,
-                  backgroundColor: AppColors.cashGreen,
+                  text: needsCommissionDisbursement
+                      ? state.tr('commissionDisburseRequiredTitle')
+                      : state.tr('confirmDailyClosing'),
+                  icon: needsCommissionDisbursement ? Icons.lock_rounded : Icons.check_circle_outline_rounded,
+                  backgroundColor: needsCommissionDisbursement ? Colors.grey.shade500 : AppColors.cashGreen,
                   isLoading: _isSubmitting,
-                  onPressed: _isSubmitting ? null : _handleClosingConfirm,
+                  onPressed: (_isSubmitting || needsCommissionDisbursement) ? null : _handleClosingConfirm,
                 ),
             ],
           ),
@@ -669,6 +746,17 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
   }
 
   Future<void> _handleClosingConfirm() async {
+    final state = AppStateProvider.read(context);
+    if (state.requiresDailyCommissionDisbursementBeforeClosing) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('commissionDisburseRequiredDesc')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     final staffName = _cashierNameController.text.trim().isNotEmpty
         ? _cashierNameController.text.trim()
         : (widget.isManagerClosing ? 'Dawit Manager' : 'Cashier On Duty');
@@ -685,7 +773,6 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
         targetRecipient = 'Bank Deposit';
       }
 
-      final state = AppStateProvider.read(context);
       final closing = await state.confirmDailyClosing(
         cashierName: staffName,
         notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
@@ -698,11 +785,12 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
       );
 
       if (mounted) {
+        final parentContext = Navigator.of(context).context;
         Navigator.pop(context);
-        if (closing.handoverOtp != null && closing.handoverOtp!.isNotEmpty) {
-          _showOtpReceiptDialog(context, closing, state);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
+        if (closing.handoverOtp != null && closing.handoverOtp!.isNotEmpty && parentContext.mounted) {
+          _showOtpReceiptDialog(parentContext, closing, state);
+        } else if (parentContext.mounted) {
+          ScaffoldMessenger.of(parentContext).showSnackBar(
             SnackBar(
               content: Text(state.tr('bankDepositRecorded')),
               backgroundColor: AppColors.statusReady,

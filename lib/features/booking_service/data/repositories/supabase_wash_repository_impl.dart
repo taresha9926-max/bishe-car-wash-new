@@ -25,6 +25,98 @@ import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.d
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
 
 class SupabaseWashRepositoryImpl implements IWashRepository {
+  static const String _handoverMetaPrefix = '[HANDOVER_META:';
+
+  static String? extractCleanNotes(String? rawNotes) {
+    if (rawNotes == null) return null;
+    final idx = rawNotes.indexOf(_handoverMetaPrefix);
+    final trimmed = (idx == -1 ? rawNotes : rawNotes.substring(0, idx)).trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  static String encodeClosingNotesWithMeta(DailyFinancialClosing closing) {
+    final cleanNote = extractCleanNotes(closing.notes);
+    final meta = {
+      'shiftType': closing.shiftType,
+      'closedByRole': closing.closedByRole,
+      'handoverTo': closing.handoverTo,
+      'handoverCashAmount': closing.handoverCashAmount,
+      'isHandoverAccepted': closing.isHandoverAccepted,
+      'acceptedByName': closing.acceptedByName,
+      'acceptedAt': closing.acceptedAt?.toIso8601String(),
+      'carriedCashAmount': closing.carriedCashAmount,
+      'handoverMethod': closing.handoverMethod,
+      'handoverOtp': closing.handoverOtp,
+      'bankAccountName': closing.bankAccountName,
+      'bankAccountNumber': closing.bankAccountNumber,
+      'depositSlipRef': closing.depositSlipRef,
+      'carpetsCleanedCount': closing.carpetsCleanedCount,
+      'carpetRevenue': closing.carpetRevenue,
+      'showerUsersCount': closing.showerUsersCount,
+      'showerRevenue': closing.showerRevenue,
+      'totalTipsAmount': closing.totalTipsAmount,
+    };
+    final tag = '$_handoverMetaPrefix${jsonEncode(meta)}]';
+    return (cleanNote == null || cleanNote.isEmpty) ? tag : '$cleanNote\n$tag';
+  }
+
+  static DailyFinancialClosing applyHandoverMetaToClosing(
+    DailyFinancialClosing base,
+    String? rawNotes,
+  ) {
+    if (rawNotes == null) return base;
+    final startIdx = rawNotes.indexOf(_handoverMetaPrefix);
+    if (startIdx == -1) return base;
+    final jsonStart = startIdx + _handoverMetaPrefix.length;
+    final endIdx = rawNotes.lastIndexOf(']');
+    if (endIdx <= jsonStart) return base;
+    try {
+      final decoded = jsonDecode(rawNotes.substring(jsonStart, endIdx));
+      if (decoded is Map<String, dynamic>) {
+        return DailyFinancialClosing(
+          id: base.id,
+          closingDate: base.closingDate,
+          closedAt: base.closedAt,
+          cashierName: base.cashierName,
+          grossRevenue: base.grossRevenue,
+          cashRevenue: base.cashRevenue,
+          digitalRevenue: base.digitalRevenue,
+          providerBreakdown: base.providerBreakdown,
+          carsWashedCount: base.carsWashedCount,
+          carpetsCleanedCount: (decoded['carpetsCleanedCount'] as num?)?.toInt() ?? base.carpetsCleanedCount,
+          carpetRevenue: (decoded['carpetRevenue'] as num?)?.toDouble() ?? base.carpetRevenue,
+          showerUsersCount: (decoded['showerUsersCount'] as num?)?.toInt() ?? base.showerUsersCount,
+          showerRevenue: (decoded['showerRevenue'] as num?)?.toDouble() ?? base.showerRevenue,
+          totalTipsAmount: (decoded['totalTipsAmount'] as num?)?.toDouble() ?? base.totalTipsAmount,
+          commissionPool: base.commissionPool,
+          netStationProfit: base.netStationProfit,
+          cashDeposited: base.cashDeposited,
+          pettyCashExpenses: base.pettyCashExpenses,
+          cashRemaining: base.cashRemaining,
+          washerDividends: base.washerDividends,
+          notes: extractCleanNotes(rawNotes),
+          isConfirmed: base.isConfirmed,
+          shiftType: decoded['shiftType']?.toString() ?? base.shiftType,
+          closedByRole: decoded['closedByRole']?.toString() ?? base.closedByRole,
+          handoverTo: decoded['handoverTo']?.toString() ?? base.handoverTo,
+          handoverCashAmount: (decoded['handoverCashAmount'] as num?)?.toDouble() ?? base.handoverCashAmount,
+          isHandoverAccepted: decoded['isHandoverAccepted'] == true,
+          acceptedByName: decoded['acceptedByName']?.toString(),
+          acceptedAt: decoded['acceptedAt'] != null ? DateTime.tryParse(decoded['acceptedAt'].toString()) : null,
+          carriedCashAmount: (decoded['carriedCashAmount'] as num?)?.toDouble() ?? base.carriedCashAmount,
+          handoverMethod: decoded['handoverMethod']?.toString() ?? base.handoverMethod,
+          handoverOtp: decoded['handoverOtp']?.toString(),
+          bankAccountName: decoded['bankAccountName']?.toString(),
+          bankAccountNumber: decoded['bankAccountNumber']?.toString(),
+          depositSlipRef: decoded['depositSlipRef']?.toString(),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to decode closing handover meta: $e');
+    }
+    return base;
+  }
+
   final String supabaseUrl;
   final String anonKey;
   final WashRepositoryImpl _fallbackLocalRepo = WashRepositoryImpl();
@@ -944,7 +1036,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           final map = item as Map<String, dynamic>;
           final cDate = DateTime.tryParse(map['closing_date']?.toString() ?? '') ?? DateTime.now();
           final cClosed = DateTime.tryParse(map['closed_at']?.toString() ?? '') ?? cDate;
-          return DailyFinancialClosing(
+          final rawNotes = map['notes']?.toString();
+          final base = DailyFinancialClosing(
             id: map['id']?.toString() ?? '',
             closingDate: cDate,
             closedAt: cClosed,
@@ -964,10 +1057,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             washerDividends: map['washer_dividends'] is Map
                 ? Map<String, double>.from((map['washer_dividends'] as Map).map((k, v) => MapEntry(k.toString(), (v as num).toDouble())))
                 : {},
-            notes: map['notes']?.toString(),
+            notes: extractCleanNotes(rawNotes),
             isConfirmed: map['is_confirmed'] == true,
             shiftType: map['id']?.toString().endsWith('-night') == true ? 'night' : 'day',
           );
+          return applyHandoverMetaToClosing(base, rawNotes);
         }).where((c) => c.closedAt.isAfter(_dataPurgeEpoch)).toList();
       }
     } catch (e) {
@@ -994,7 +1088,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       'cash_remaining': closing.cashRemaining,
       'provider_breakdown': closing.providerBreakdown,
       'washer_dividends': closing.washerDividends,
-      'notes': closing.notes,
+      'notes': encodeClosingNotesWithMeta(closing),
       'is_confirmed': closing.isConfirmed,
     };
 

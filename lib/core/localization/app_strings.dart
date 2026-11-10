@@ -3915,6 +3915,296 @@ class AppStrings {
       AppLanguage.om: 'Yeroo kaashariin cufiinsa guyyaa OTP Maanaajaraatiin ergu asirratti mul\'ata.',
       AppLanguage.am: 'ገንዘብ ተቀባዩ የቀን ፈረቃን በስራ አስኪያጅ OTP ሲዘጋ ማረጋገጫው ከላይ ይታያል።',
     },
+    'commissionDisburseRequiredTitle': {
+      AppLanguage.en: 'Disburse Daily Commissions First',
+      AppLanguage.om: 'Koomishinii Guyyaa Dura Kaffali',
+      AppLanguage.am: 'በመጀመሪያ የቀን ኮሚሽን ይክፈሉ',
+    },
+    'commissionDisburseRequiredDesc': {
+      AppLanguage.en: 'You must disburse today\'s daily washer commission pool before closing or handing over this shift.',
+      AppLanguage.om: 'Shiftii kana cufuun ykn maallaqa wal-harkaa fuuchuun dura koomishinii dhiqxootaa har\'aa kaffaluun dirqama.',
+      AppLanguage.am: 'ይህንን ፈረቃ ከመዝጋትዎ ወይም ከማስረከብዎ በፊት የዛሬውን የአጣቢዎች የቀን ኮሚሽን መክፈል የግድ ነው።',
+    },
+    'goToTeamAndDisburse': {
+      AppLanguage.en: 'Go to Team & Disburse',
+      AppLanguage.om: 'Gara Garee Deemiitii Kaffali',
+      AppLanguage.am: 'ወደ ቡድን ሄደው ይክፈሉ',
+    },
+    'disburseNowAndUnlockClosing': {
+      AppLanguage.en: 'Disburse Pool Now & Unlock Closing',
+      AppLanguage.om: 'Amma Kaffaliitii Cufiinsa Bani',
+      AppLanguage.am: 'አሁን ከፍለው መዝጊያውን ይክፈቱ',
+    },
+    'remainingCommissionPool': {
+      AppLanguage.en: 'Undisbursed Pool',
+      AppLanguage.om: 'Koomishinii Hin Kaffalamin',
+      AppLanguage.am: 'ያልተከፈለ ኮሚሽን',
+    },
+    'enterFourDigitManagerOtpError': {
+      AppLanguage.en: 'Please enter the 4-digit Operational Manager OTP code.',
+      AppLanguage.om: 'Maaloo koodii OTP Hojii Geggeessaa lakkoofsa 4 galchaa.',
+      AppLanguage.am: 'እባክዎ ባለ 4 አሃዝ የኦፕሬሽን ስራ አስኪያጅ OTP ኮድ ያስገቡ።',
+    },
+    'otpMissingOrCorruptError': {
+      AppLanguage.en: 'Handover OTP could not be verified. Ask the sender to regenerate a fresh OTP.',
+      AppLanguage.om: 'Koodiin OTP mirkanaa\'uu hin dandeenye. Ergaan koodii haaraa akka uumu gaafadhu.',
+      AppLanguage.am: 'የOTP ኮዱን ማረጋገጥ አልተቻለም። ላኪው አዲስ ኮድ እንዲያወጣ ይጠይቁ።',
+    },
+    'adminTabOverviewCash': {
+      AppLanguage.en: 'Overview & Cash',
+      AppLanguage.om: 'Cuunfaa & Maallaqa',
+      AppLanguage.am: 'አጠቃላይ እና ገንዘብ',
+    },
+    'adminTabPricingTeam': {
+      AppLanguage.en: 'Pricing & Team',
+      AppLanguage.om: 'Gatii & Garee',
+      AppLanguage.am: 'ዋጋ እና ቡድን',
+    },
+    'adminTabCustomersAds': {
+      AppLanguage.en: 'Customers & Ads',
+      AppLanguage.om: 'Maamila & Beeksisa',
+      AppLanguage.am: 'ደንበኞች እና ማስታወቂያ',
+    },
+    'superAdminRoleBadge': {
+      AppLanguage.en: 'SUPER ADMIN',
+      AppLanguage.om: 'SUPPER ADMINII',
+      AppLanguage.am: 'ዋና አስተዳዳሪ',
+    },
+    'secondaryAdminRoleBadge': {
+      AppLanguage.en: 'SECONDARY ADMIN',
+      AppLanguage.om: 'ADMINII LAMAFFAA',
+      AppLanguage.am: 'ሁለተኛ አስተዳዳሪ',
+    },
+    'filterByDate': {
+      AppLanguage.en: 'Filter by Date',
+      AppLanguage.om: 'Guyyaadhaan Filadhu',
+      AppLanguage.am: 'በቀን ይምረጡ',
+    },
+    'executiveMetricsTitle': {
+      AppLanguage.en: 'Executive Real-Time Metrics',
+      AppLanguage.om: 'Raawwii Hojii Kallattii',
+      AppLanguage.am: 'ቀጥታ የስራ አፈጻጸም',
+    },
+    'netMarginLabel': {
+      AppLanguage.en: 'Net Margin',
+      AppLanguage.om: 'Bu\'aa Qulqulluu',
+      AppLanguage.am: 'የተጣራ ትርፍ %',
+    },
+    'digitalVsCashLabel': {
+      AppLanguage.en: 'Digital Transfers vs Cash',
+      AppLanguage.om: 'Dijitaala vs Kaashii',
+      AppLanguage.am: 'ዲጂታል እና ጥሬ ገንዘብ',
+    },
+    'washerCrewAttendanceLabel': {
+      AppLanguage.en: 'Washer Crew Attendance',
+      AppLanguage.om: 'Hirmaannaa Dhiqxootaa',
+      AppLanguage.am: 'የአጣቢዎች መገኘት',
+    },
+    'onDutyCountLabel': {
+      AppLanguage.en: 'On Duty',
+      AppLanguage.om: 'Hojii Irra',
+      AppLanguage.am: 'በስራ ላይ',
+    },
+    'totalWashersLabel': {
+      AppLanguage.en: 'total washers',
+      AppLanguage.om: 'dhiqxoota waliigalaa',
+      AppLanguage.am: 'ጠቅላላ አጣቢዎች',
+    },
+    'teamPoolLabel': {
+      AppLanguage.en: 'team pool',
+      AppLanguage.om: 'kuufama garee',
+      AppLanguage.am: 'የቡድን ኮሚሽን',
+    },
+    'pnlStatementTitle': {
+      AppLanguage.en: 'Financial Statement (P&L)',
+      AppLanguage.om: 'Gabaasa Bu\'aa fi Kasaaraa (P&L)',
+      AppLanguage.am: 'የትርፍ እና ኪሳራ መግለጫ (P&L)',
+    },
+    'pnlStatementSub': {
+      AppLanguage.en: 'Gross revenue, commission COGS, supplies & petty cash OpEx',
+      AppLanguage.om: 'Galii waliigalaa, koomishinii, meeshaalee fi baasii xixiqqaa',
+      AppLanguage.am: 'ጠቅላላ ገቢ፣ ኮሚሽን፣ የፍጆታ እቃዎች እና ጥቃቅን ወጪ',
+    },
+    'profitableBadge': {
+      AppLanguage.en: 'PROFITABLE',
+      AppLanguage.om: 'BU\'AA QABA',
+      AppLanguage.am: 'ትርፋማ',
+    },
+    'deficitBadge': {
+      AppLanguage.en: 'DEFICIT',
+      AppLanguage.om: 'HIR\'INA',
+      AppLanguage.am: 'ጉድለት',
+    },
+    'grossRevenueRow': {
+      AppLanguage.en: 'I. Gross Station Revenue',
+      AppLanguage.om: 'I. Galii Buufataa Waliigalaa',
+      AppLanguage.am: 'I. ጠቅላላ የጣቢያው ገቢ',
+    },
+    'cogsRow': {
+      AppLanguage.en: 'II. Cost of Goods Sold (COGS)',
+      AppLanguage.om: 'II. Baasii Tajaajilaa (COGS)',
+      AppLanguage.am: 'II. የአገልግሎት ወጪ (COGS)',
+    },
+    'washerCommissionSub': {
+      AppLanguage.en: 'Washer Team Commission Pool',
+      AppLanguage.om: 'Koomishinii Garee Dhiqxootaa',
+      AppLanguage.am: 'የአጣቢ ቡድን ኮሚሽን',
+    },
+    'consumablesSub': {
+      AppLanguage.en: 'Consumables Used & Soap Restocks',
+      AppLanguage.om: 'Saamunaa fi Meeshaalee Fayyadaman',
+      AppLanguage.am: 'የተጠቀሙ ፍጆታ ዕቃዎች እና ሳሙና',
+    },
+    'grossOperatingProfitRow': {
+      AppLanguage.en: 'Gross Operating Profit',
+      AppLanguage.om: 'Bu\'aa Hojii Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ የስራ ትርፍ',
+    },
+    'opexRow': {
+      AppLanguage.en: 'III. Operating Expenses (OpEx)',
+      AppLanguage.om: 'III. Baasii Hojii Guyyaa (OpEx)',
+      AppLanguage.am: 'III. የስራ ማስኬጃ ወጪ (OpEx)',
+    },
+    'pettyCashOpexSub': {
+      AppLanguage.en: 'Petty Cash Emergency Spends',
+      AppLanguage.om: 'Baasii Kaashii Hatattamaa',
+      AppLanguage.am: 'ጥቃቅን የአስቸኳይ ወጪዎች',
+    },
+    'netOperatingProfitRow': {
+      AppLanguage.en: 'Net Operating Profit (EBITDA)',
+      AppLanguage.om: 'Bu\'aa Qulqulluu (EBITDA)',
+      AppLanguage.am: 'የተጣራ የስራ ትርፍ (EBITDA)',
+    },
+    'salaryReserveRow': {
+      AppLanguage.en: 'IV. Guaranteed Base Salaries Reserve',
+      AppLanguage.om: 'IV. Mindaa Bu\'uuraa Ji\'aa',
+      AppLanguage.am: 'IV. የወር መሰረታዊ ደሞዝ መጠባበቂያ',
+    },
+    'netRetainedProfitRow': {
+      AppLanguage.en: 'Net Retained Cash Profit',
+      AppLanguage.om: 'Bu\'aa Kaashii Qulqulluu Hafe',
+      AppLanguage.am: 'የተጣራ የተረፈ ትርፍ',
+    },
+    'washHistoryAuditDesc': {
+      AppLanguage.en: 'Audit paid washes & receipts by date',
+      AppLanguage.om: 'Seenaa dhiqannaa kaffalamee sakatta\'i',
+      AppLanguage.am: 'የተከፈሉ እጥበቶችን እና ደረሰኞችን ይመልከቱ',
+    },
+    'financialReportsAuditDesc': {
+      AppLanguage.en: 'Shift closings, bank deposits & cash drawer',
+      AppLanguage.om: 'Cufiinsa shiftii, baankii fi kaashii',
+      AppLanguage.am: 'የፈረቃ መዝጊያ፣ የባንክ ገቢ እና የገንዘብ ሪፖርት',
+    },
+    'editTariffsInventorySub': {
+      AppLanguage.en: 'Car & carpet tariffs, consumables & equipment',
+      AppLanguage.om: 'Gatii konkolaataa fi kaarpeetii, meeshaalee',
+      AppLanguage.am: 'የመኪና እና ምንጣፍ ዋጋ፣ ዕቃዎች እና መሳሪያ',
+    },
+    'dailyTodayFilter': {
+      AppLanguage.en: 'Daily Today',
+      AppLanguage.om: 'Har\'a',
+      AppLanguage.am: 'የዛሬ ቀን',
+    },
+    'weeklyReportFilter': {
+      AppLanguage.en: 'Weekly Report',
+      AppLanguage.om: 'Torbanii',
+      AppLanguage.am: 'ሳምንታዊ ሪፖርት',
+    },
+    'periodReportFilter': {
+      AppLanguage.en: 'Selected Period',
+      AppLanguage.om: 'Yeroo Filatame',
+      AppLanguage.am: 'የተመረጠ ጊዜ',
+    },
+    'pendingDayOtpBadge': {
+      AppLanguage.en: 'PENDING CASHIER OTP',
+      AppLanguage.om: 'OTP KAASHARII EEGAA JIRA',
+      AppLanguage.am: 'የገንዘብ ተቀባይ OTP በመጠባበቅ ላይ',
+    },
+    'reconciledBadge': {
+      AppLanguage.en: 'RECONCILED',
+      AppLanguage.om: 'MIRKANAA\'EERA',
+      AppLanguage.am: 'ተረጋግጧል',
+    },
+    'dayShiftActiveBadge': {
+      AppLanguage.en: 'DAY SHIFT ACTIVE',
+      AppLanguage.om: 'SHIFTIIN GUYYAA HOJII IRRA',
+      AppLanguage.am: 'የቀን ፈረቃ ንቁ ነው',
+    },
+    'pendingVaultSealBadge': {
+      AppLanguage.en: 'PENDING VAULT SEAL',
+      AppLanguage.om: 'SAANDUQAAN EEGAMA',
+      AppLanguage.am: 'ካዝና ማረጋገጫ በመጠባበቅ ላይ',
+    },
+    'sealedInVaultBadge': {
+      AppLanguage.en: 'SEALED IN VAULT',
+      AppLanguage.om: 'SAANDUQATTI MIRKANAA\'E',
+      AppLanguage.am: 'በካዝና ተዘግቷል',
+    },
+    'nightShiftActiveBadge': {
+      AppLanguage.en: 'NIGHT SHIFT ACTIVE',
+      AppLanguage.om: 'SHIFTIIN HALKANII HOJII IRRA',
+      AppLanguage.am: 'የምሽት ፈረቃ ንቁ ነው',
+    },
+    'secondaryApprovalsAwaiting': {
+      AppLanguage.en: 'Secondary Admin Action(s) Awaiting Approval',
+      AppLanguage.om: 'Gochaa Adminii Lammaffaa Mirkaneessa Eegu',
+      AppLanguage.am: 'ማረጋገጫ የሚጠብቁ የሁለተኛ አስተዳዳሪ ተግባራት',
+    },
+    'submittedForSuperApproval': {
+      AppLanguage.en: 'Action(s) Submitted for Super Admin Approval',
+      AppLanguage.om: 'Gochaa Mirkaneessa Supper Adminiif Ergame',
+      AppLanguage.am: 'ለዋና አስተዳዳሪ ማረጋገጫ የቀረቡ ተግባራት',
+    },
+    'approveAction': {
+      AppLanguage.en: 'Approve',
+      AppLanguage.om: 'Mirkaneessi',
+      AppLanguage.am: 'አጽድቅ',
+    },
+    'rejectAction': {
+      AppLanguage.en: 'Reject',
+      AppLanguage.om: 'Kuffisi',
+      AppLanguage.am: 'ውድቅ አድርግ',
+    },
+    'pendingReviewBadge': {
+      AppLanguage.en: 'Pending Review',
+      AppLanguage.om: 'Sakatta\'ama Eegaa Jira',
+      AppLanguage.am: 'ግምገማ በመጠባበቅ ላይ',
+    },
+    'smsAndHotlineTitle': {
+      AppLanguage.en: 'Customer Hotline & Cashier SMS',
+      AppLanguage.om: 'Bilbila Maamilaafi SMS Kaasharii',
+      AppLanguage.am: 'የደንበኞች ስልክ እና የገንዘብ ተቀባይ SMS',
+    },
+    'hotlineBookingLabel': {
+      AppLanguage.en: 'Customer Hotline Booking Number',
+      AppLanguage.om: 'Lakkoofsa Bilbila Ajaja Maamilaa',
+      AppLanguage.am: 'የደንበኞች የስልክ ማዘዣ ቁጥር',
+    },
+    'cashierSmsPhoneLabel': {
+      AppLanguage.en: 'Cashier SMS Phone Number',
+      AppLanguage.om: 'Lakkoofsa Bilbila SMS Kaasharii',
+      AppLanguage.am: 'የገንዘብ ተቀባይ SMS ስልክ ቁጥር',
+    },
+    'updateAction': {
+      AppLanguage.en: 'Update',
+      AppLanguage.om: 'Haaromsi',
+      AppLanguage.am: 'አዘምን',
+    },
+    'tiktokReelsCardTitle': {
+      AppLanguage.en: 'Welcome Screen TikTok Reels',
+      AppLanguage.om: 'Viidiyoo TikTok Fuula Jalqabaa',
+      AppLanguage.am: 'የመግቢያ ገጽ የTikTok ማስታወቂያዎች',
+    },
+    'manageReelsBtn': {
+      AppLanguage.en: 'Manage Reels',
+      AppLanguage.om: 'Viidiyoowwan Bulchi',
+      AppLanguage.am: 'ቪዲዮዎችን ያስተዳድሩ',
+    },
+    'reelsActiveSuffix': {
+      AppLanguage.en: 'reels active',
+      AppLanguage.om: 'viidiyoowwan hojii irra',
+      AppLanguage.am: 'ንቁ ቪዲዮዎች',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
