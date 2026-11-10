@@ -919,7 +919,7 @@ class AppStrings {
     'feedbackTab': {
       AppLanguage.en: 'Feedback',
       AppLanguage.om: 'Yaada Maamilaa',
-      AppLanguage.am: 'አስተያየት',
+      AppLanguage.am: 'ስለ አገልግሎቶቻችን አስተያየት ይስጡ',
     },
     'customerFeedbackHeader': {
       AppLanguage.en: 'Customer Feedback & Ratings',
