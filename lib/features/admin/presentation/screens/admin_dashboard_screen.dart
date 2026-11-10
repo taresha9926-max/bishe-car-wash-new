@@ -4,11 +4,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
-import '../../../../core/widgets/animated_circular_ring.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/responsive_layout.dart';
-import '../../../../core/widgets/rounded_meter_bar.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
@@ -154,15 +152,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     final showerRevenue = filteredShowers.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
     final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue;
 
-    final bookingCash = paidBookings
-        .where((b) => b.payment.method == PaymentMethod.cash)
-        .fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
-    final showerCash = filteredShowers
-        .where((s) => s.paymentMethod == PaymentMethod.cash)
-        .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
-    final cashRevenue = bookingCash + showerCash;
-    final digitalRevenue = totalRevenue - cashRevenue;
-
     final totalPettyCash = state.pettyCashExpenses
         .where((e) => _matchesFilter(e.loggedAt))
         .fold<double>(0.0, (sum, e) => sum + e.amount);
@@ -231,8 +220,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       isMobile,
                       completedCars,
                       totalRevenue,
-                      cashRevenue,
-                      digitalRevenue,
                       commissionPool,
                       netProfit,
                       totalPettyCash,
@@ -522,8 +509,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     bool isMobile,
     int completedCars,
     double totalRevenue,
-    double cashRevenue,
-    double digitalRevenue,
     double commissionPool,
     double netProfit,
     double totalPettyCash,
@@ -538,91 +523,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         const SizedBox(height: 12),
 
         _buildTimeFilterBar(state),
-        const SizedBox(height: 12),
-
-        // Real-time Metrics Health Strip
-        Container(
-          padding: EdgeInsets.all(isMobile ? 12 : 16),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Row(
-            children: [
-              AnimatedCircularRing(
-                progress: totalRevenue > 0 ? (netProfit > 0 ? (netProfit / totalRevenue) : 0.0) : 0.0,
-                size: isMobile ? 72 : 82,
-                strokeWidth: 7,
-                primaryColor: const Color(0xFF10B981),
-                secondaryColor: const Color(0xFF34D399),
-                trackColor: const Color(0xFF0B1320),
-                centerValue: totalRevenue > 0 ? '${((netProfit / totalRevenue) * 100).clamp(-99, 100).toInt()}%' : '0%',
-                centerLabel: state.tr('netMarginLabel'),
-                valueStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
-                labelStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Color(0xFF34D399)),
-              ),
-              SizedBox(width: isMobile ? 12 : 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            state.tr('executiveMetricsTitle'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            '$completedCars ${state.tr("carsWashed")}',
-                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 7),
-                    RoundedMeterBar(
-                      progress: totalRevenue > 0 ? (digitalRevenue / totalRevenue) : 0.0,
-                      label: state.tr('digitalVsCashLabel'),
-                      valueText: CurrencyFormatter.formatShort(digitalRevenue),
-                      gradientColors: const [Color(0xFF38BDF8), Color(0xFF0284C7)],
-                      trackColor: const Color(0xFF0B1320),
-                      labelColor: Colors.white70,
-                      valueColor: const Color(0xFF38BDF8),
-                      height: 6,
-                    ),
-                    const SizedBox(height: 7),
-                    RoundedMeterBar(
-                      progress: (state.presentWashersCount / (state.totalWashersCount == 0 ? 1 : state.totalWashersCount)).clamp(0.0, 1.0),
-                      label: state.tr('washerCrewAttendanceLabel'),
-                      valueText: '${state.presentWashersCount} / ${state.totalWashersCount} ${state.tr("onDutyCountLabel")}',
-                      gradientColors: const [Color(0xFFFBBF24), Color(0xFFF59E0B)],
-                      trackColor: const Color(0xFF0B1320),
-                      labelColor: Colors.white70,
-                      valueColor: const Color(0xFFFBBF24),
-                      height: 6,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
         const SizedBox(height: 12),
 
         // 4 Financial & Operational KPIs
@@ -682,9 +582,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             );
           },
         ),
-        const SizedBox(height: 12),
-
-        _buildCashVsDigitalBar(state, totalRevenue, cashRevenue, digitalRevenue),
         const SizedBox(height: 12),
 
         // Quick Financial Reports & Wash History shortcuts
@@ -1255,104 +1152,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCashVsDigitalBar(dynamic state, double total, double cash, double digital) {
-    final cashPercent = total > 0 ? (cash / total) : 0.5;
-    final digitalPercent = total > 0 ? (digital / total) : 0.5;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.22), width: 1.2),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  state.tr('cashVsDigital'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                CurrencyFormatter.format(total),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: SizedBox(
-              height: 10,
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: (cashPercent * 100).toInt().clamp(1, 99),
-                    child: Container(color: Colors.green),
-                  ),
-                  Expanded(
-                    flex: (digitalPercent * 100).toInt().clamp(1, 99),
-                    child: Container(color: AppColors.telebirrBlue),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '${state.tr("payCash")}: ${CurrencyFormatter.format(cash)} (${(cashPercent * 100).toStringAsFixed(0)}%)',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.telebirrBlue, shape: BoxShape.circle)),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '${state.tr("digitalPay")}: ${CurrencyFormatter.format(digital)} (${(digitalPercent * 100).toStringAsFixed(0)}%)',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),

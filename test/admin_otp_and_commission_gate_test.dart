@@ -390,6 +390,10 @@ void main() {
       expect(find.text(state.tr('adminTabOverviewCash')), findsOneWidget);
       expect(find.text(state.tr('secondaryAdminRoleBadge')), findsOneWidget);
       expect(find.text(state.tr('superAdminRoleBadge')), findsNothing);
+      expect(find.text(state.tr('executiveMetricsTitle')), findsNothing);
+      expect(find.text(state.tr('digitalVsCashLabel')), findsNothing);
+      expect(find.text(state.tr('washerCrewAttendanceLabel')), findsNothing);
+      expect(find.text(state.tr('cashVsDigital')), findsNothing);
       expect(find.text(state.tr('pnlStatementTitle')), findsOneWidget);
 
       // Tab 1: Pricing & Team
