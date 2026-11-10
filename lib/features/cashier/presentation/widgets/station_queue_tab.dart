@@ -15,7 +15,7 @@ import '../screens/payment_process_dialog.dart';
 import '../screens/phone_booking_dialog.dart';
 import '../screens/walk_in_registration_screen.dart';
 
-enum QueueStageFilter { all, waiting, inProgress, payReady }
+enum QueueStageFilter { all, onlineBookers, waiting, inProgress, payReady }
 
 /// Shared two-button Walk-In & Phone intake bar used by Cashier & Operational Manager.
 class PrimaryIntakeActionRow extends StatelessWidget {
@@ -125,8 +125,12 @@ class _StationQueueTabState extends State<StationQueueTab> {
     super.dispose();
   }
 
+  bool _isOnlineWaiting(WashBooking b) =>
+      b.isOnlineBooking && b.status == WashStatus.pending;
+
   bool _isWaiting(WashBooking b) =>
-      b.status == WashStatus.pending || b.status == WashStatus.assignedToBay || b.status == WashStatus.confirmed;
+      !_isOnlineWaiting(b) &&
+      (b.status == WashStatus.pending || b.status == WashStatus.confirmed || b.status == WashStatus.assignedToBay);
 
   bool _isInProgress(WashBooking b) =>
       b.status == WashStatus.washing || b.status == WashStatus.drying;
@@ -139,6 +143,8 @@ class _StationQueueTabState extends State<StationQueueTab> {
       switch (_stageFilter) {
         case QueueStageFilter.all:
           return true;
+        case QueueStageFilter.onlineBookers:
+          return _isOnlineWaiting(b);
         case QueueStageFilter.waiting:
           return _isWaiting(b);
         case QueueStageFilter.inProgress:
@@ -161,6 +167,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isCarpet = state.isCarpetDivisionActive as bool;
+    final onlineCount = widget.divisionQueue.where(_isOnlineWaiting).length;
     final waitingCount = widget.divisionQueue.where(_isWaiting).length;
     final inProgressCount = widget.divisionQueue.where(_isInProgress).length;
     final payReadyCount = widget.divisionQueue.where(_isPayReady).length;
@@ -171,16 +178,16 @@ class _StationQueueTabState extends State<StationQueueTab> {
       children: [
         _buildStationCapacityBar(state),
         const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildFilterChip(QueueStageFilter.all, '${state.tr("cashierFilterAll")} (${widget.divisionQueue.length})', isCarpet),
-              _buildFilterChip(QueueStageFilter.waiting, '${state.tr("cashierFilterWaiting")} ($waitingCount)', isCarpet),
-              _buildFilterChip(QueueStageFilter.inProgress, '${state.tr("cashierFilterInProgress")} ($inProgressCount)', isCarpet),
-              _buildFilterChip(QueueStageFilter.payReady, '${state.tr("cashierFilterPayReady")} ($payReadyCount)', isCarpet),
-            ],
-          ),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _buildFilterChip(QueueStageFilter.all, '${state.tr("cashierFilterAll")} (${widget.divisionQueue.length})', isCarpet),
+            _buildFilterChip(QueueStageFilter.onlineBookers, '${state.tr("cashierFilterOnlineBookers")} ($onlineCount)', isCarpet),
+            _buildFilterChip(QueueStageFilter.waiting, '${state.tr("cashierFilterWaiting")} ($waitingCount)', isCarpet),
+            _buildFilterChip(QueueStageFilter.inProgress, '${state.tr("cashierFilterInProgress")} ($inProgressCount)', isCarpet),
+            _buildFilterChip(QueueStageFilter.payReady, '${state.tr("cashierFilterPayReady")} ($payReadyCount)', isCarpet),
+          ],
         ),
         const SizedBox(height: 10),
         TextField(
@@ -248,29 +255,28 @@ class _StationQueueTabState extends State<StationQueueTab> {
     final isSelected = _stageFilter == filter;
     final activeColor = filter == QueueStageFilter.payReady
         ? AppColors.cashGreen
-        : (isCarpet ? const Color(0xFF7C3AED) : AppColors.primary);
+        : (filter == QueueStageFilter.onlineBookers
+            ? const Color(0xFF4F46E5)
+            : (isCarpet ? const Color(0xFF7C3AED) : AppColors.primary));
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w800,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
-          ),
+    return ChoiceChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w800,
+          color: isSelected ? Colors.white : AppColors.textPrimary,
         ),
-        selected: isSelected,
-        selectedColor: activeColor,
-        backgroundColor: Colors.white,
-        showCheckmark: false,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: isSelected ? activeColor : AppColors.cardBorder),
-        ),
-        onSelected: (_) => setState(() => _stageFilter = filter),
       ),
+      selected: isSelected,
+      selectedColor: activeColor,
+      backgroundColor: Colors.white,
+      showCheckmark: false,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: isSelected ? activeColor : AppColors.cardBorder),
+      ),
+      onSelected: (_) => setState(() => _stageFilter = filter),
     );
   }
 
@@ -334,6 +340,12 @@ class _StationQueueTabState extends State<StationQueueTab> {
                           )
                         else
                           _buildMiniPill(b.carType.localizedName(langCode), AppColors.textSecondary, neutral: true),
+                        if (b.isOnlineBooking)
+                          _buildMiniPill(state.tr('onlineBookingBadge'), const Color(0xFF4F46E5), icon: Icons.phone_android_rounded),
+                        if (b.isPostponed)
+                          _buildMiniPill(state.tr('postponedCarryOverBadge'), const Color(0xFFD97706), icon: Icons.schedule_send_rounded),
+                        if (b.payment.isPaid && b.status != WashStatus.completed && b.status != WashStatus.readyForPickup)
+                          _buildMiniPill(state.tr('prepaidFinishWashBadge'), const Color(0xFF059669), icon: Icons.verified_rounded),
                         if (b.isPhoneBooking)
                           _buildMiniPill(state.tr('phoneOrderBadge'), AppColors.primary, icon: Icons.phone_in_talk_rounded),
                         if (b.serviceType == ServiceType.valetPickUp)
@@ -354,30 +366,45 @@ class _StationQueueTabState extends State<StationQueueTab> {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                     ),
+                    if (b.isPostponed && b.postponedReason != null && b.postponedReason!.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        b.postponedReason!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFFB45309)),
+                      ),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: b.status.color.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(8),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: widget.isMobile ? 116 : 150),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: b.status.color.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        b.status.localizedName(langCode),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: b.status.color),
+                      ),
                     ),
-                    child: Text(
-                      b.status.localizedName(langCode),
-                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: b.status.color),
+                    const SizedBox(height: 4),
+                    Text(
+                      CurrencyFormatter.format(b.totalPrice),
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    CurrencyFormatter.format(b.totalPrice),
-                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -475,6 +502,24 @@ class _StationQueueTabState extends State<StationQueueTab> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
                   ),
                 ),
+              if (!_isOnlineWaiting(b) &&
+                  b.status != WashStatus.completed &&
+                  b.status != WashStatus.readyForPickup)
+                OutlinedButton.icon(
+                  onPressed: () => _showPostponeDialog(context, state, b),
+                  icon: const Icon(Icons.schedule_send_rounded, size: 14, color: Color(0xFFD97706)),
+                  label: Text(
+                    state.tr('postponeNextDayAction'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFFB45309)),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFD97706)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                  ),
+                ),
               _buildNextStepButton(context, state, b, langCode),
             ],
           ),
@@ -484,6 +529,14 @@ class _StationQueueTabState extends State<StationQueueTab> {
   }
 
   Widget _buildNextStepButton(BuildContext context, dynamic state, WashBooking b, String langCode) {
+    if (_isOnlineWaiting(b)) {
+      return _actionButton(
+        color: const Color(0xFF4F46E5),
+        icon: Icons.how_to_reg_rounded,
+        label: state.tr('approveAndArrivedAction'),
+        onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.confirmed),
+      );
+    }
     if (_isWaiting(b)) {
       return _actionButton(
         color: b.isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
@@ -809,6 +862,65 @@ class _StationQueueTabState extends State<StationQueueTab> {
           ),
         ),
       );
+    }
+  }
+
+  Future<void> _showPostponeDialog(BuildContext context, dynamic state, WashBooking b) async {
+    final reasonCtrl = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Row(
+          children: [
+            const Icon(Icons.schedule_send_rounded, color: Color(0xFFD97706)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                state.tr('postponeDialogTitle'),
+                style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${b.licensePlate} • ${state.tr("postponeDialogDesc")}',
+              style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.35),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonCtrl,
+              decoration: InputDecoration(
+                hintText: state.tr('postponeReasonHint'),
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(state.tr('cancel'))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(state.tr('confirm')),
+          ),
+        ],
+      ),
+    );
+    final reason = reasonCtrl.text.trim();
+    reasonCtrl.dispose();
+    if (confirmed == true) {
+      await state.postponeBookingToNextDay(bookingId: b.id, reason: reason.isNotEmpty ? reason : null);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${b.licensePlate}: ${state.tr("postponedSuccessMsg")}'), backgroundColor: const Color(0xFFD97706)),
+        );
+      }
     }
   }
 

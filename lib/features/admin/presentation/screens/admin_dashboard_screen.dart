@@ -141,10 +141,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     }
 
     // Consistent period calculations across car washes, carpets, showers, tips & OpEx
+    // Attributed by actual collection date (paidAt ?? createdAt) for postponed carry-overs.
     final allBookings = state.bookings;
-    final filteredBookings = allBookings.where((b) => _matchesFilter(b.createdAt)).toList();
-    final paidBookings = filteredBookings.where((b) => b.payment.isPaid).toList();
-    final completedCars = filteredBookings.where((b) => b.status == WashStatus.completed).length;
+    final paidBookings = allBookings
+        .where((b) => b.payment.isPaid && _matchesFilter(b.payment.paidAt ?? b.createdAt))
+        .toList();
+    final completedCars = allBookings
+        .where((b) => b.status == WashStatus.completed && _matchesFilter(b.completedAt ?? b.createdAt))
+        .length;
 
     final filteredShowers = state.showerRecords.where((s) => _matchesFilter(s.recordedAt)).toList();
     final serviceRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
@@ -793,6 +797,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 ? '${CurrencyFormatter.format(nightClosing.handoverCashAmount)} • ${nightClosing.acceptedByName ?? "Admin"}'
                 : '${state.tr("dayShiftHandoverCashLabel")} ${CurrencyFormatter.format(state.managerCarriedCashETB)}',
           ),
+          if ((state.carryOverAuditBookings as List).isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildShiftStatusTile(
+              icon: Icons.schedule_send_rounded,
+              title: state.tr('carryOverAuditTitle'),
+              badge: '${(state.carryOverAuditBookings as List).length}',
+              color: const Color(0xFFD97706),
+              subtitle: (state.carryOverAuditBookings as List)
+                  .map((b) => '${b.licensePlate}${b.payment.isPaid ? " [PAID]" : ""}')
+                  .take(4)
+                  .join(', '),
+            ),
+          ],
         ],
       ),
     );

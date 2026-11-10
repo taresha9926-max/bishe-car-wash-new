@@ -32,6 +32,10 @@ class WashBooking {
   final String? carpetDimensions;
   final double? customTotalPrice;
   final List<String>? selectedServices;
+  final bool isOnlineBooking;
+  final bool isPostponed;
+  final String? postponedReason;
+  final DateTime? postponedAt;
 
   const WashBooking({
     required this.id,
@@ -59,6 +63,10 @@ class WashBooking {
     this.carpetDimensions,
     this.customTotalPrice,
     this.selectedServices,
+    this.isOnlineBooking = false,
+    this.isPostponed = false,
+    this.postponedReason,
+    this.postponedAt,
   });
 
   double get totalPrice => customTotalPrice ?? package.getPriceFor(carType);
@@ -120,6 +128,11 @@ class WashBooking {
     String? carpetDimensions,
     double? customTotalPrice,
     List<String>? selectedServices,
+    bool? isOnlineBooking,
+    bool? isPostponed,
+    String? postponedReason,
+    DateTime? postponedAt,
+    bool clearAssignedBay = false,
   }) {
     return WashBooking(
       id: id ?? this.id,
@@ -131,7 +144,7 @@ class WashBooking {
       licensePlate: licensePlate ?? this.licensePlate,
       package: package ?? this.package,
       status: status ?? this.status,
-      assignedBay: assignedBay ?? this.assignedBay,
+      assignedBay: clearAssignedBay ? null : (assignedBay ?? this.assignedBay),
       assignedWasherId: assignedWasherId ?? this.assignedWasherId,
       assignedWasherName: assignedWasherName ?? this.assignedWasherName,
       payment: payment ?? this.payment,
@@ -147,6 +160,10 @@ class WashBooking {
       carpetDimensions: carpetDimensions ?? this.carpetDimensions,
       customTotalPrice: customTotalPrice ?? this.customTotalPrice,
       selectedServices: selectedServices ?? this.selectedServices,
+      isOnlineBooking: isOnlineBooking ?? this.isOnlineBooking,
+      isPostponed: isPostponed ?? this.isPostponed,
+      postponedReason: postponedReason ?? this.postponedReason,
+      postponedAt: postponedAt ?? this.postponedAt,
     );
   }
 }

@@ -88,11 +88,12 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         break;
     }
 
-    // Filter paid bookings in the period
+    // Filter paid bookings in the period by cash/digital collection date (paidAt ?? createdAt)
     final periodBookings = state.bookings.where((b) {
       if (!b.payment.isPaid) return false;
-      return (b.createdAt.isAfter(rangeStart) || b.createdAt.isAtSameMomentAs(rangeStart)) &&
-          (b.createdAt.isBefore(rangeEnd) || b.createdAt.isAtSameMomentAs(rangeEnd));
+      final paidDate = b.payment.paidAt ?? b.createdAt;
+      return (paidDate.isAfter(rangeStart) || paidDate.isAtSameMomentAs(rangeStart)) &&
+          (paidDate.isBefore(rangeEnd) || paidDate.isAtSameMomentAs(rangeEnd));
     }).toList();
 
     // Financial Metrics for the period, strictly itemized by division

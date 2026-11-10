@@ -124,7 +124,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   const SizedBox(height: 16),
 
                   // 3. Active Wash Tracker OR Unified Plate/Carpet Lookup
-                  if (activeWash != null && activeWash.status.isOngoing)
+                  if (activeWash != null &&
+                      (activeWash.status.isOngoing ||
+                          activeWash.status == WashStatus.pending ||
+                          activeWash.status == WashStatus.confirmed))
                     _buildActiveWashCard(context, state, activeWash)
                   else
                     _buildVehicleLookupCard(context, state),

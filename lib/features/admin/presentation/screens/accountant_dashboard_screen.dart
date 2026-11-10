@@ -341,6 +341,106 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 ? _buildEmptyState('No petty cash expenses found for $_auditDateRange.', Icons.outbox_rounded)
                 : Column(children: filteredPetty.map((p) => _buildPettyCashCard(context, state, p, isMobile)).toList()),
           ),
+
+          // 5. Carry-Over, Postponed & Prepaid Unfinished Vehicles Audit
+          Builder(
+            builder: (context) {
+              final carryOverBookings = state.carryOverAuditBookings as List<WashBooking>;
+              return ExpandableActionCard(
+                icon: AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: AutoCareAssets.carSedanUrl,
+                  width: 44,
+                  height: 44,
+                  borderRadius: 10,
+                  fallbackIcon: Icons.schedule_send_rounded,
+                  fallbackColor: const Color(0xFFD97706),
+                ),
+                iconPadding: EdgeInsets.zero,
+                iconBackgroundColor: Colors.transparent,
+                borderColor: const Color(0xFFD97706),
+                title: state.tr('carryOverAuditTitle'),
+                subtitle: state.tr('carryOverAuditSub'),
+                badge: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD97706).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${carryOverBookings.length}',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFFB45309)),
+                  ),
+                ),
+                initiallyExpanded: carryOverBookings.isNotEmpty,
+                child: carryOverBookings.isEmpty
+                    ? _buildEmptyState(state.tr('noCarryOverVehicles'), Icons.schedule_send_rounded)
+                    : Column(
+                        children: carryOverBookings.map((b) {
+                          final statusLabel = b.status.localizedName(state.currentLang);
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    b.payment.isPaid ? Icons.verified_rounded : Icons.schedule_send_rounded,
+                                    color: b.payment.isPaid ? const Color(0xFF059669) : const Color(0xFFD97706),
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${b.licensePlate} • $statusLabel',
+                                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+                                        ),
+                                        Text(
+                                          '${b.createdAt.day}/${b.createdAt.month} • ${b.customerName}${b.postponedReason != null ? " • ${b.postponedReason}" : ""}',
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        CurrencyFormatter.format(b.totalPrice),
+                                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: (b.payment.isPaid ? const Color(0xFF059669) : const Color(0xFFD97706)).withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          b.payment.isPaid ? state.tr('prepaidFinishWashBadge') : state.tr('postponedCarryOverBadge'),
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w800,
+                                            color: b.payment.isPaid ? const Color(0xFF047857) : const Color(0xFFB45309),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -456,6 +556,21 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 ],
               ),
             ),
+            if (c.notes != null && c.notes!.trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  c.notes!,
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF312E81)),
+                ),
+              ),
+            ],
             if (c.providerBreakdown.isNotEmpty) ...[
               const SizedBox(height: 10),
               Row(

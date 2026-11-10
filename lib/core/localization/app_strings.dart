@@ -206,14 +206,14 @@ class AppStrings {
 
     // Wash Statuses (WashStatus)
     'statusPending': {
-      AppLanguage.en: 'Pending Approval',
-      AppLanguage.om: 'Eeyyama Eegaa',
-      AppLanguage.am: 'ፍቃድ በመጠባበቅ ላይ',
+      AppLanguage.en: 'Booking Approved',
+      AppLanguage.om: 'Ajajni Mirkanaa\'eera',
+      AppLanguage.am: 'ቦታ ማስያዝ ጸድቋል',
     },
     'statusConfirmed': {
-      AppLanguage.en: 'Confirmed',
-      AppLanguage.om: 'Mirkanaa\'e',
-      AppLanguage.am: 'ተረጋግጧል',
+      AppLanguage.en: 'Approved & Arrived at Station',
+      AppLanguage.om: 'Mirkanaa\'ee Buufata Gaheera',
+      AppLanguage.am: 'ጸድቆ ጣቢያ ደርሷል',
     },
     'statusAssignedToBay': {
       AppLanguage.en: 'Queued in Bay',
@@ -4204,6 +4204,101 @@ class AppStrings {
       AppLanguage.en: 'reels active',
       AppLanguage.om: 'viidiyoowwan hojii irra',
       AppLanguage.am: 'ንቁ ቪዲዮዎች',
+    },
+    'cashierFilterOnlineBookers': {
+      AppLanguage.en: 'Online Bookers',
+      AppLanguage.om: 'Ajaja Intarneetaa',
+      AppLanguage.am: 'በኦንላይን ያዘዙ',
+    },
+    'onlineBookingBadge': {
+      AppLanguage.en: 'ONLINE BOOKER',
+      AppLanguage.om: 'AJAJA INTARNEETAA',
+      AppLanguage.am: 'የኦንላይን ትዕዛዝ',
+    },
+    'approveAndArrivedAction': {
+      AppLanguage.en: 'Approve & Arrived at Station',
+      AppLanguage.om: 'Mirkaneessiitii Buufata Gahe',
+      AppLanguage.am: 'አጽድቅ እና ጣቢያ ደርሷል',
+    },
+    'postponeNextDayAction': {
+      AppLanguage.en: 'Postpone to Next Day',
+      AppLanguage.om: 'Guyyaa Itti Aanutti Dabarsi',
+      AppLanguage.am: 'ለሚቀጥለው ቀን አዛውር',
+    },
+    'postponedCarryOverBadge': {
+      AppLanguage.en: 'POSTPONED CARRY-OVER',
+      AppLanguage.om: 'BORUUTTI DARBE',
+      AppLanguage.am: 'ለነገ የተዛወረ',
+    },
+    'prepaidFinishWashBadge': {
+      AppLanguage.en: 'PAID — FINISH & DELIVER',
+      AppLanguage.om: 'KAFFALAMEERA — XUMURIITII KENNI',
+      AppLanguage.am: 'ተከፍሏል — አጥበህ አስረክብ',
+    },
+    'postponeDialogTitle': {
+      AppLanguage.en: 'Postpone Wash to Next Day',
+      AppLanguage.om: 'Dhiqannaa Boruutti Dabarsi',
+      AppLanguage.am: 'እጥበቱን ለሚቀጥለው ቀን አዛውር',
+    },
+    'postponeDialogDesc': {
+      AppLanguage.en: 'Keep this arrived vehicle active for tomorrow\'s queue and log the reason for Accountant & Admin audit.',
+      AppLanguage.om: 'Konkolaataan dhufe kun hiriira boruu keessatti akka turuu fi sababni oodiitiif akka galmaa\'u godhi.',
+      AppLanguage.am: 'የደረሰው ተሽከርካሪ ለነገው ሰልፍ እንዲቆይ እና ምክንያቱ ለሂሳብ እና ለአስተዳዳሪ ኦዲት እንዲመዘገብ ያድርጉ።',
+    },
+    'postponeReasonHint': {
+      AppLanguage.en: 'e.g. Customer pickup tomorrow morning',
+      AppLanguage.om: 'fkn. Maamilli ganama boruu fudhata',
+      AppLanguage.am: 'ለምሳሌ፡ ደንበኛው ነገ ጠዋት ይረከባል',
+    },
+    'postponedSuccessMsg': {
+      AppLanguage.en: 'Vehicle carried over to next day queue & logged for audit.',
+      AppLanguage.om: 'Konkolaataan gara boruutti dabarfamee oodiitidhaaf galmaa\'eera.',
+      AppLanguage.am: 'ተሽከርካሪው ወደ ቀጣዩ ቀን ተዛውሮ ለኦዲት ተመዝግቧል።',
+    },
+    'openVehiclesHandoverTitle': {
+      AppLanguage.en: 'Open Vehicles Handed Over',
+      AppLanguage.om: 'Konkolaattota Hojii Irraa Dabarfaman',
+      AppLanguage.am: 'በስራ ላይ ያሉ የተረከቡ ተሽከርካሪዎች',
+    },
+    'openVehiclesHandoverDesc': {
+      AppLanguage.en: 'Arrived vehicles still in bays or queue pass to the next shift with this handover.',
+      AppLanguage.om: 'Konkolaattonni buufata gahanii hin xumuramin gara shiftii itti aanuutti ni dabarfamu.',
+      AppLanguage.am: 'ጣቢያ የደረሱና ያልተጠናቀቁ ተሽከርካሪዎች ከዚህ ርክክብ ጋር ወደ ቀጣዩ ፈረቃ ይተላለፋሉ።',
+    },
+    'autoClearNoShowsNotice': {
+      AppLanguage.en: 'Unarrived online booking(s) will be automatically removed from the queue upon closing.',
+      AppLanguage.om: 'Ajajni intarneetaa hin dhufne yeroo cufiinsaa ofumaan hiriira keessaa ni haqamu.',
+      AppLanguage.am: 'ያልመጡ የኦንላይን ትዕዛዞች ሲዘጋ በራስ-ሰር ከሰልፉ ይሰረዛሉ።',
+    },
+    'unarrivedNoShowsClearedLabel': {
+      AppLanguage.en: 'Online no-shows cleared',
+      AppLanguage.om: 'Ajaja hin dhufne haqaman',
+      AppLanguage.am: 'ያልመጡ የተሰረዙ ትዕዛዞች',
+    },
+    'carryOverAuditTitle': {
+      AppLanguage.en: 'Carry-Over & Postponed Vehicles Audit',
+      AppLanguage.om: 'Oodiitii Konkolaattota Boruutti Darban',
+      AppLanguage.am: 'ወደ ቀጣይ ቀን የተዛወሩ ተሽከርካሪዎች ኦዲት',
+    },
+    'carryOverAuditSub': {
+      AppLanguage.en: 'Open, postponed & prepaid pending washes across shifts',
+      AppLanguage.om: 'Dhiqannaa hin xumuramin ykn boruutti darban',
+      AppLanguage.am: 'ያልተጠናቀቁ እና ለነገ የተዛወሩ እጥበቶች',
+    },
+    'noCarryOverVehicles': {
+      AppLanguage.en: 'No postponed or overdue carry-over vehicles pending.',
+      AppLanguage.om: 'Konkolaataan hin xumuramin ykn boruutti darbe hin jiru.',
+      AppLanguage.am: 'ምንም ያልተጠናቀቀ ወይም የተዛወረ ተሽከርካሪ የለም።',
+    },
+    'stepApprovedDesc': {
+      AppLanguage.en: 'Booking approved — drive in to the station when ready to start.',
+      AppLanguage.om: 'Ajajni mirkanaa\'eera — yeroo dhuftan buufatatti mirkaneessaa.',
+      AppLanguage.am: 'ቦታዎ ጸድቋል — ወደ ጣቢያው ሲመጡ መድረስዎን ያረጋግጡ።',
+    },
+    'stepArrivedDesc': {
+      AppLanguage.en: 'Cashier confirmed your arrival at station.',
+      AppLanguage.om: 'Qabaan qarshii buufata gahuu keessan mirkaneesseera.',
+      AppLanguage.am: 'ገንዘብ ተቀባዩ ጣቢያ መድረስዎን አረጋግጧል።',
     },
   };
 

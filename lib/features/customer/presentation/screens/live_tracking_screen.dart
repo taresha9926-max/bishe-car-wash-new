@@ -221,12 +221,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     children: [
                       const Icon(Icons.timeline, color: AppColors.primary, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        booking.isCarpet ? state.tr('carpetService') : state.tr('activeWashTitle'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                      Expanded(
+                        child: Text(
+                          booking.isCarpet ? state.tr('carpetService') : state.tr('activeWashTitle'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -316,13 +320,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 6,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -346,12 +353,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   children: [
                     Icon(booking.status.icon, size: 14, color: booking.status.color),
                     const SizedBox(width: 4),
-                    Text(
-                      booking.status.localizedName(state.currentLang),
-                      style: TextStyle(
-                        color: booking.status.color,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
+                    Flexible(
+                      child: Text(
+                        booking.status.localizedName(state.currentLang),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: booking.status.color,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ],
@@ -532,14 +543,19 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                state.tr('paymentMethod'),
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  state.tr('paymentMethod'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               StatusBadge(
                 label: isPaid ? 'PAID' : 'PENDING',
                 color: isPaid ? AppColors.statusReady : AppColors.statusPending,
@@ -551,12 +567,17 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                booking.isCarpet
-                    ? '${state.tr("carpetService")} (${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")})'
-                    : booking.localizedServiceDisplayName(state.currentLang),
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              Expanded(
+                child: Text(
+                  booking.isCarpet
+                      ? '${state.tr("carpetService")} (${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")})'
+                      : booking.localizedServiceDisplayName(state.currentLang),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 CurrencyFormatter.format(booking.totalPrice),
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
@@ -567,23 +588,35 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                state.tr('paymentMethod'),
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+              Expanded(
+                child: Text(
+                  state.tr('paymentMethod'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                ),
               ),
-              Row(
-                children: [
-                  Icon(payment.method.icon, size: 14, color: payment.method.color),
-                  const SizedBox(width: 4),
-                  Text(
-                    payment.method.localizedName(state.currentLang),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: payment.method.color,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(payment.method.icon, size: 14, color: payment.method.color),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        payment.method.localizedName(state.currentLang),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: payment.method.color,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -592,10 +625,22 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(state.tr('transactionRef'), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                Text(
-                  payment.transactionRef!,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                Expanded(
+                  child: Text(
+                    state.tr('transactionRef'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    payment.transactionRef!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                  ),
                 ),
               ],
             ),

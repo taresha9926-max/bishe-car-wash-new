@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
+import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class LiveWashStepper extends StatelessWidget {
   final WashStatus currentStatus;
@@ -13,6 +14,7 @@ class LiveWashStepper extends StatelessWidget {
   });
 
   static const List<WashStatus> _steps = [
+    WashStatus.pending,
     WashStatus.confirmed,
     WashStatus.assignedToBay,
     WashStatus.washing,
@@ -23,6 +25,8 @@ class LiveWashStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
+    final langCode = state.currentLang;
     final currentIndex = _steps.indexOf(currentStatus);
 
     return Column(
@@ -91,14 +95,18 @@ class LiveWashStepper extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          isCarpet && step == WashStatus.assignedToBay ? 'Assigned to Wash Floor' : step.displayName,
-                          style: TextStyle(
-                            fontSize: 14.5,
-                            fontWeight: isCurrent ? FontWeight.w800 : (isDone ? FontWeight.w700 : FontWeight.w500),
-                            color: isCurrent
-                                ? step.color
-                                : (isDone ? AppColors.textPrimary : AppColors.textMuted),
+                        Expanded(
+                          child: Text(
+                            isCarpet && step == WashStatus.assignedToBay
+                                ? state.tr('carpetWashFloor')
+                                : step.localizedName(langCode),
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: isCurrent ? FontWeight.w800 : (isDone ? FontWeight.w700 : FontWeight.w500),
+                              color: isCurrent
+                                  ? step.color
+                                  : (isDone ? AppColors.textPrimary : AppColors.textMuted),
+                            ),
                           ),
                         ),
                         if (isCurrent) ...[
@@ -106,12 +114,12 @@ class LiveWashStepper extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                             decoration: BoxDecoration(
-                              color: step.color.withOpacity(0.15),
+                              color: step.color.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Text(
-                              'CURRENT',
-                              style: TextStyle(
+                            child: Text(
+                              state.tr('statusCompleted').isNotEmpty ? 'CURRENT' : 'CURRENT',
+                              style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.primaryDark,
@@ -123,7 +131,7 @@ class LiveWashStepper extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _getStepSubtitle(step, isCurrent, isDone, isCarpet: isCarpet),
+                      _getStepSubtitle(state, step, isCurrent, isDone, isCarpet: isCarpet),
                       style: TextStyle(
                         fontSize: 12,
                         color: isCurrent ? AppColors.textSecondary : AppColors.textMuted,
@@ -139,12 +147,12 @@ class LiveWashStepper extends StatelessWidget {
     );
   }
 
-  String _getStepSubtitle(WashStatus status, bool isCurrent, bool isDone, {bool isCarpet = false}) {
-    if (isDone) return 'Completed successfully';
+  String _getStepSubtitle(dynamic state, WashStatus status, bool isCurrent, bool isDone, {bool isCarpet = false}) {
+    if (isDone) return state.tr('statusCompleted');
+    if (status == WashStatus.pending) return state.tr('stepApprovedDesc');
+    if (status == WashStatus.confirmed) return state.tr('stepArrivedDesc');
     if (isCarpet) {
       switch (status) {
-        case WashStatus.confirmed:
-          return 'Carpet received & registered into cleaning queue';
         case WashStatus.assignedToBay:
           return 'Carpet laid on dedicated wash floor for treatment';
         case WashStatus.washing:
@@ -160,8 +168,6 @@ class LiveWashStepper extends StatelessWidget {
       }
     }
     switch (status) {
-      case WashStatus.confirmed:
-        return 'Booking verified & added to queue';
       case WashStatus.assignedToBay:
         return 'Vehicle pulled into designated service bay';
       case WashStatus.washing:

@@ -539,7 +539,68 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                 hint: 'e.g. All vehicles washed and accounted for, cash counted.',
                 prefixIcon: Icons.edit_note_rounded,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
+
+              // Open Vehicles Handover & Online No-Show Auto-Cleanup Summary
+              Builder(
+                builder: (context) {
+                  final openVehicles = state.openArrivedQueueBookings;
+                  final unarrivedOnline = state.unarrivedOnlineBookingsToday;
+                  final willClearNoShows = widget.isManagerClosing || _handoverMethod != 'manager_otp';
+                  if (openVehicles.isEmpty && (!willClearNoShows || unarrivedOnline.isEmpty)) {
+                    return const SizedBox(height: 6);
+                  }
+                  return Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEEF2FF),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.4)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (openVehicles.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              const Icon(Icons.directions_car_filled_rounded, size: 17, color: Color(0xFF4338CA)),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  '${state.tr("openVehiclesHandoverTitle")} (${openVehicles.length})',
+                                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF312E81)),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${state.tr("openVehiclesHandoverDesc")} (${openVehicles.map((v) => "${v.licensePlate}${v.payment.isPaid ? " [PAID]" : ""}").take(5).join(", ")})',
+                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF3730A3), height: 1.3),
+                          ),
+                        ],
+                        if (willClearNoShows && unarrivedOnline.isNotEmpty) ...[
+                          if (openVehicles.isNotEmpty) const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.auto_delete_rounded, size: 16, color: Color(0xFFB45309)),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  '${unarrivedOnline.length} ${state.tr("autoClearNoShowsNotice")}',
+                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF92400E)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
 
               // Strict Prerequisite Gate: Daily Washer Commissions must be disbursed first
               if (needsCommissionDisbursement) ...[

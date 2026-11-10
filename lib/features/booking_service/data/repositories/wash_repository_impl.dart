@@ -178,7 +178,9 @@ class WashRepositoryImpl implements IWashRepository {
       assignedBay: bay,
       assignedWasherId: washerId,
       assignedWasherName: washerName,
-      status: booking.status == WashStatus.pending ? WashStatus.assignedToBay : booking.status,
+      status: (booking.status == WashStatus.pending || booking.status == WashStatus.confirmed)
+          ? WashStatus.assignedToBay
+          : booking.status,
     );
 
     _occupyBay(bay, booking);
@@ -223,6 +225,43 @@ class WashRepositoryImpl implements IWashRepository {
 
     _bookings[index] = updatedBooking;
     return updatedBooking;
+  }
+
+  @override
+  Future<WashBooking> postponeBooking({
+    required String bookingId,
+    required DateTime nextScheduledTime,
+    String? reason,
+  }) async {
+    final index = _bookings.indexWhere((b) => b.id == bookingId);
+    if (index == -1) {
+      throw Exception('Booking $bookingId not found');
+    }
+    final booking = _bookings[index];
+    if (booking.assignedBay != null && !booking.isCarpet) {
+      _freeBay(booking.assignedBay!);
+    }
+    final updated = booking.copyWith(
+      isPostponed: true,
+      postponedReason: (reason != null && reason.trim().isNotEmpty) ? reason.trim() : booking.postponedReason,
+      postponedAt: DateTime.now(),
+      scheduledTime: nextScheduledTime,
+      clearAssignedBay: true,
+    );
+    _bookings[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<void> deleteBooking(String bookingId) async {
+    final index = _bookings.indexWhere((b) => b.id == bookingId);
+    if (index != -1) {
+      final booking = _bookings[index];
+      if (booking.assignedBay != null && !booking.isCarpet) {
+        _freeBay(booking.assignedBay!);
+      }
+      _bookings.removeAt(index);
+    }
   }
 
   @override

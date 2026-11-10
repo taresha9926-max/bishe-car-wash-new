@@ -686,14 +686,68 @@ class AppStateNotifier extends ChangeNotifier {
   // Segmented Queues
   List<WashBooking> get carWashBookings => _bookings.where((b) => !b.isCarpet).toList();
   List<WashBooking> get carpetWashBookings => _bookings.where((b) => b.isCarpet).toList();
-  int get activeCarQueueCount => _bookings.where((b) => !b.isCarpet && (b.status.isOngoing || b.status == WashStatus.pending)).length;
-  int get activeCarpetQueueCount => _bookings.where((b) => b.isCarpet && (b.status.isOngoing || b.status == WashStatus.pending)).length;
+  int get activeCarQueueCount => _bookings
+      .where((b) => !b.isCarpet && (b.status.isOngoing || b.status == WashStatus.pending || b.status == WashStatus.confirmed))
+      .length;
+  int get activeCarpetQueueCount => _bookings
+      .where((b) => b.isCarpet && (b.status.isOngoing || b.status == WashStatus.pending || b.status == WashStatus.confirmed))
+      .length;
+
+  /// Online bookings scheduled for today (or earlier) whose customer has NOT checked in yet.
+  List<WashBooking> get unarrivedOnlineBookingsToday {
+    final now = DateTime.now();
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    return _bookings.where((b) {
+      if (!b.isOnlineBooking || b.status != WashStatus.pending || b.isPostponed || b.payment.isPaid) {
+        return false;
+      }
+      if (b.scheduledTime == null) return true;
+      return !b.scheduledTime!.isAfter(todayEnd);
+    }).toList();
+  }
+
+  /// Active arrived vehicles (in bays, drying, waiting, or unfinished completed) NOT yet finished & paid.
+  List<WashBooking> get openArrivedQueueBookings {
+    return _bookings.where((b) {
+      if (b.status == WashStatus.cancelled) return false;
+      final done = b.status == WashStatus.completed || b.status == WashStatus.readyForPickup;
+      if (done && b.payment.isPaid) return false;
+      if (b.isOnlineBooking && b.status == WashStatus.pending) return false;
+      return true;
+    }).toList();
+  }
+
+  /// Carry-over / postponed / prepaid unfinished orders surfaced in Accountant & Admin audits.
+  List<WashBooking> get carryOverAuditBookings {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    return _bookings.where((b) {
+      if (b.status == WashStatus.cancelled) return false;
+      final done = b.status == WashStatus.completed || b.status == WashStatus.readyForPickup;
+      if (done && b.payment.isPaid) return false;
+      if (b.isOnlineBooking && b.status == WashStatus.pending && !b.isPostponed && !b.payment.isPaid) {
+        return false;
+      }
+      final createdDay = DateTime(b.createdAt.year, b.createdAt.month, b.createdAt.day);
+      final isFromEarlierDay = createdDay.isBefore(todayStart);
+      final isPrepaidUnfinished = b.payment.isPaid && !done;
+      return b.isPostponed || isFromEarlierDay || isPrepaidUnfinished;
+    }).toList();
+  }
+
+  DateTime _bookingRevenueDate(WashBooking b) => b.payment.paidAt ?? b.createdAt;
+
+  bool _isBookingPaidOnDate(WashBooking b, DateTime target) {
+    if (!b.payment.isPaid) return false;
+    final d = _bookingRevenueDate(b);
+    return d.year == target.year && d.month == target.month && d.day == target.day;
+  }
 
   // Computed Properties for Dashboard & Metrics
   int get totalCompletedCarsToday {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final d = b.createdAt;
+      final d = b.completedAt ?? b.createdAt;
       return !b.isCarpet && b.status == WashStatus.completed && d.year == now.year && d.month == now.month && d.day == now.day;
     }).length;
   }
@@ -701,7 +755,7 @@ class AppStateNotifier extends ChangeNotifier {
   int get totalCompletedCarpetsToday {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final d = b.createdAt;
+      final d = b.completedAt ?? b.createdAt;
       return b.isCarpet && b.status == WashStatus.completed && d.year == now.year && d.month == now.month && d.day == now.day;
     }).length;
   }
@@ -709,7 +763,9 @@ class AppStateNotifier extends ChangeNotifier {
   int get todayCarpetCleanedCount => totalCompletedCarpetsToday;
 
   int get activeQueueCount {
-    return _bookings.where((b) => b.status.isOngoing || b.status == WashStatus.pending).length;
+    return _bookings
+        .where((b) => b.status.isOngoing || b.status == WashStatus.pending || b.status == WashStatus.confirmed)
+        .length;
   }
 
   int get todayShowerUserCount {
@@ -746,51 +802,43 @@ class AppStateNotifier extends ChangeNotifier {
 
   double get todayCustomerTipsETB {
     final now = DateTime.now();
-    return _bookings.where((b) {
-      final d = b.createdAt;
-      return b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
-    }).fold(0.0, (sum, b) => sum + b.payment.tipAmount);
+    return _bookings
+        .where((b) => _isBookingPaidOnDate(b, now))
+        .fold(0.0, (sum, b) => sum + b.payment.tipAmount);
   }
 
   double get todayCashTipsETB {
     final now = DateTime.now();
-    return _bookings.where((b) {
-      final d = b.createdAt;
-      return b.payment.isPaid && b.payment.method == PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
-    }).fold(0.0, (sum, b) => sum + b.payment.tipAmount);
+    return _bookings
+        .where((b) => b.payment.method == PaymentMethod.cash && _isBookingPaidOnDate(b, now))
+        .fold(0.0, (sum, b) => sum + b.payment.tipAmount);
   }
 
   double get todayDigitalTipsETB {
     final now = DateTime.now();
-    return _bookings.where((b) {
-      final d = b.createdAt;
-      return b.payment.isPaid && b.payment.method != PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
-    }).fold(0.0, (sum, b) => sum + b.payment.tipAmount);
+    return _bookings
+        .where((b) => b.payment.method != PaymentMethod.cash && _isBookingPaidOnDate(b, now))
+        .fold(0.0, (sum, b) => sum + b.payment.tipAmount);
   }
 
   double get todayCarpetRevenueETB {
     final now = DateTime.now();
-    return _bookings.where((b) {
-      final d = b.createdAt;
-      return b.isCarpet && b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
-    }).fold(0.0, (sum, b) => sum + b.totalPrice);
+    return _bookings
+        .where((b) => b.isCarpet && _isBookingPaidOnDate(b, now))
+        .fold(0.0, (sum, b) => sum + b.totalPrice);
   }
 
   double get todayVehicleRevenueETB {
     final now = DateTime.now();
-    return _bookings.where((b) {
-      final d = b.createdAt;
-      return !b.isCarpet && b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
-    }).fold(0.0, (sum, b) => sum + b.totalPrice);
+    return _bookings
+        .where((b) => !b.isCarpet && _isBookingPaidOnDate(b, now))
+        .fold(0.0, (sum, b) => sum + b.totalPrice);
   }
 
   double get serviceRevenueTodayETB {
     final now = DateTime.now();
     return _bookings
-        .where((b) {
-          final d = b.createdAt;
-          return b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
-        })
+        .where((b) => _isBookingPaidOnDate(b, now))
         .fold(0.0, (sum, b) => sum + b.totalPrice);
   }
 
@@ -801,10 +849,7 @@ class AppStateNotifier extends ChangeNotifier {
   double get totalCashRevenueETB {
     final now = DateTime.now();
     final bookCash = _bookings
-        .where((b) {
-          final d = b.createdAt;
-          return b.payment.isPaid && b.payment.method == PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
-        })
+        .where((b) => b.payment.method == PaymentMethod.cash && _isBookingPaidOnDate(b, now))
         .fold(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
     return bookCash + todayShowerCashETB;
   }
@@ -815,10 +860,7 @@ class AppStateNotifier extends ChangeNotifier {
   double get totalDigitalRevenueETB {
     final now = DateTime.now();
     final bookDig = _bookings
-        .where((b) {
-          final d = b.createdAt;
-          return b.payment.isPaid && b.payment.method != PaymentMethod.cash && d.year == now.year && d.month == now.month && d.day == now.day;
-        })
+        .where((b) => b.payment.method != PaymentMethod.cash && _isBookingPaidOnDate(b, now))
         .fold(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
     return bookDig + todayShowerDigitalETB;
   }
@@ -1189,8 +1231,9 @@ class AppStateNotifier extends ChangeNotifier {
     };
     for (final b in _bookings) {
       if (!b.payment.isPaid) continue;
-      if (start != null && b.createdAt.isBefore(start)) continue;
-      if (end != null && b.createdAt.isAfter(end)) continue;
+      final paidDate = _bookingRevenueDate(b);
+      if (start != null && paidDate.isBefore(start)) continue;
+      if (end != null && paidDate.isAfter(end)) continue;
       result[b.payment.method] = (result[b.payment.method] ?? 0.0) + b.totalPrice + b.payment.tipAmount;
     }
     for (final s in _showerRecords) {
@@ -1208,8 +1251,9 @@ class AppStateNotifier extends ChangeNotifier {
     };
     for (final b in _bookings) {
       if (!b.payment.isPaid) continue;
-      if (start != null && b.createdAt.isBefore(start)) continue;
-      if (end != null && b.createdAt.isAfter(end)) continue;
+      final paidDate = _bookingRevenueDate(b);
+      if (start != null && paidDate.isBefore(start)) continue;
+      if (end != null && paidDate.isAfter(end)) continue;
       result[b.payment.method] = (result[b.payment.method] ?? 0) + 1;
     }
     for (final s in _showerRecords) {
@@ -1510,10 +1554,21 @@ class AppStateNotifier extends ChangeNotifier {
     String? bankReferenceSlip,
   }) async {
     final now = DateTime.now();
-    final paidToday = _bookings.where((b) {
-      final d = b.createdAt;
-      return b.payment.isPaid && d.year == now.year && d.month == now.month && d.day == now.day;
-    }).toList();
+    final paidToday = _bookings.where((b) => _isBookingPaidOnDate(b, now)).toList();
+
+    final openArrivedSnapshot = List<WashBooking>.from(openArrivedQueueBookings);
+    final isEndOfBusinessDay = shiftType == 'night' || handoverMethod != 'manager_otp';
+    int clearedOnlineNoShows = 0;
+    if (isEndOfBusinessDay) {
+      final expiredNoShows = List<WashBooking>.from(unarrivedOnlineBookingsToday);
+      for (final b in expiredNoShows) {
+        await _repository.deleteBooking(b.id);
+      }
+      clearedOnlineNoShows = expiredNoShows.length;
+      if (clearedOnlineNoShows > 0) {
+        await _refreshBookingsAndBays();
+      }
+    }
 
     final vehiclePaid = paidToday.where((b) => !b.isCarpet).toList();
     final carpetPaid = paidToday.where((b) => b.isCarpet).toList();
@@ -1600,6 +1655,24 @@ class AppStateNotifier extends ChangeNotifier {
       }
     }
 
+    final auditParts = <String>[];
+    if (openArrivedSnapshot.isNotEmpty) {
+      final platesPreview = openArrivedSnapshot.map((b) => b.licensePlate).take(5).join(', ');
+      auditParts.add(
+        isEndOfBusinessDay
+            ? 'Carry-over open vehicles (${openArrivedSnapshot.length}): $platesPreview'
+            : 'Open vehicles handed to Night Shift (${openArrivedSnapshot.length}): $platesPreview',
+      );
+    }
+    if (clearedOnlineNoShows > 0) {
+      auditParts.add('Expired online no-shows cleared: $clearedOnlineNoShows');
+    }
+    final cleanUserNotes = notes?.trim();
+    final combinedClosingNotes = [
+      if (cleanUserNotes != null && cleanUserNotes.isNotEmpty) cleanUserNotes,
+      ...auditParts,
+    ].join(' • ');
+
     final closing = DailyFinancialClosing(
       id: 'closing-${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}-$shiftType',
       closingDate: now,
@@ -1621,7 +1694,7 @@ class AppStateNotifier extends ChangeNotifier {
       pettyCashExpenses: petty,
       cashRemaining: finalRemainingCash,
       washerDividends: divSummary,
-      notes: notes,
+      notes: combinedClosingNotes.isNotEmpty ? combinedClosingNotes : null,
       isConfirmed: true,
       shiftType: shiftType,
       closedByRole: closedByRole,
@@ -1663,7 +1736,8 @@ class AppStateNotifier extends ChangeNotifier {
     final startOfWeek = DateTime(monday.year, monday.month, monday.day);
 
     final weeklyPaid = _bookings.where((b) {
-      return b.payment.isPaid && (b.createdAt.isAfter(startOfWeek) || b.createdAt.isAtSameMomentAs(startOfWeek));
+      final paidDate = _bookingRevenueDate(b);
+      return b.payment.isPaid && (paidDate.isAfter(startOfWeek) || paidDate.isAtSameMomentAs(startOfWeek));
     }).toList();
 
     final weeklyGross = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
@@ -1685,7 +1759,8 @@ class AppStateNotifier extends ChangeNotifier {
     final startOfWeek = DateTime(monday.year, monday.month, monday.day);
 
     final weeklyPaid = _bookings.where((b) {
-      return b.payment.isPaid && (b.createdAt.isAfter(startOfWeek) || b.createdAt.isAtSameMomentAs(startOfWeek));
+      final paidDate = _bookingRevenueDate(b);
+      return b.payment.isPaid && (paidDate.isAfter(startOfWeek) || paidDate.isAtSameMomentAs(startOfWeek));
     }).toList();
 
     final weeklyGross = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
@@ -1942,6 +2017,7 @@ class AppStateNotifier extends ChangeNotifier {
       carpetDimensions: carpetDimensions,
       customTotalPrice: customTotalPrice,
       selectedServices: selectedServices,
+      isOnlineBooking: !isPhoneBooking,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -2013,6 +2089,7 @@ class AppStateNotifier extends ChangeNotifier {
       carpetDimensions: carpetDimensions,
       customTotalPrice: customTotalPrice,
       selectedServices: selectedServices,
+      isOnlineBooking: false,
     );
 
     final created = await _repository.createBooking(newBooking);
@@ -2127,6 +2204,26 @@ class AppStateNotifier extends ChangeNotifier {
       }
     }
     return true;
+  }
+
+  /// Cashier or Operational Manager approves online booking arrival at station
+  Future<void> approveOnlineBookingArrival(String bookingId) async {
+    await updateWashStatus(bookingId, WashStatus.confirmed);
+  }
+
+  /// Postpones an arrived unfinished vehicle to the next day's morning queue
+  Future<void> postponeBookingToNextDay({
+    required String bookingId,
+    String? reason,
+  }) async {
+    final now = DateTime.now();
+    final nextMorning = DateTime(now.year, now.month, now.day + 1, 8, 0);
+    await _repository.postponeBooking(
+      bookingId: bookingId,
+      nextScheduledTime: nextMorning,
+      reason: reason,
+    );
+    await _refreshBookingsAndBays();
   }
 
   /// Cashier updates wash status (e.g. Assigned -> Washing -> Drying -> Completed)

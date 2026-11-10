@@ -37,6 +37,12 @@ abstract class IBookingRepository {
     String? transactionRef,
     String? receiptScreenshot,
   });
+  Future<WashBooking> postponeBooking({
+    required String bookingId,
+    required DateTime nextScheduledTime,
+    String? reason,
+  });
+  Future<void> deleteBooking(String bookingId);
   Future<void> clearAllBookings();
   Future<List<StationBay>> getBays();
 }

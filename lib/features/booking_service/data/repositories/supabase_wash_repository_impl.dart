@@ -117,6 +117,52 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     return base;
   }
 
+  static const String _bookingMetaPrefix = '[BOOKING_META:';
+
+  static String? extractCleanDeliveryLocation(String? raw) {
+    if (raw == null) return null;
+    final idx = raw.indexOf(_bookingMetaPrefix);
+    final trimmed = (idx == -1 ? raw : raw.substring(0, idx)).trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  static Map<String, dynamic> decodeBookingMeta(String? raw) {
+    if (raw == null) return const {};
+    final startIdx = raw.indexOf(_bookingMetaPrefix);
+    if (startIdx == -1) return const {};
+    final jsonStart = startIdx + _bookingMetaPrefix.length;
+    final endIdx = raw.lastIndexOf(']');
+    if (endIdx <= jsonStart) return const {};
+    try {
+      final decoded = jsonDecode(raw.substring(jsonStart, endIdx));
+      if (decoded is Map<String, dynamic>) return decoded;
+    } catch (_) {}
+    return const {};
+  }
+
+  static String? encodeDeliveryLocationWithMeta({
+    required String? baseText,
+    required bool isOnlineBooking,
+    required bool isPostponed,
+    String? postponedReason,
+    DateTime? postponedAt,
+    DateTime? paidAt,
+  }) {
+    final clean = extractCleanDeliveryLocation(baseText);
+    if (!isOnlineBooking && !isPostponed && paidAt == null) {
+      return clean;
+    }
+    final meta = <String, dynamic>{
+      if (isOnlineBooking) 'isOnline': true,
+      if (isPostponed) 'isPostponed': true,
+      if (postponedReason != null && postponedReason.isNotEmpty) 'postponedReason': postponedReason,
+      if (postponedAt != null) 'postponedAt': postponedAt.toIso8601String(),
+      if (paidAt != null) 'paidAt': paidAt.toIso8601String(),
+    };
+    final tag = '$_bookingMetaPrefix${jsonEncode(meta)}]';
+    return (clean == null || clean.isEmpty) ? tag : '$clean\n$tag';
+  }
+
   final String supabaseUrl;
   final String anonKey;
   final WashRepositoryImpl _fallbackLocalRepo = WashRepositoryImpl();
@@ -487,6 +533,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             ? double.tryParse(json['custom_total_price'].toString())
             : (isCarpet && json['total_amount'] != null ? double.tryParse(json['total_amount'].toString()) : null);
 
+        final rawLoc = json['delivery_location']?.toString();
+        final cleanLoc = extractCleanDeliveryLocation(rawLoc);
+        final bookingMeta = decodeBookingMeta(rawLoc);
+
         List<String>? selectedServices;
         if (json['selected_services'] != null) {
           if (json['selected_services'] is List) {
@@ -498,19 +548,25 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             } catch (_) {}
           }
         }
-        if (selectedServices == null && json['delivery_location'] != null) {
-          final loc = json['delivery_location'].toString();
-          if (loc.startsWith('Services: ')) {
-            selectedServices = loc.substring('Services: '.length).split(', ').map((s) => s.trim()).toList();
+        if (selectedServices == null && cleanLoc != null) {
+          if (cleanLoc.startsWith('Services: ')) {
+            selectedServices = cleanLoc.substring('Services: '.length).split(', ').map((s) => s.trim()).toList();
           }
         }
+
+        final paidAt = bookingMeta['paidAt'] != null
+            ? DateTime.tryParse(bookingMeta['paidAt'].toString())
+            : null;
+        final postponedAt = bookingMeta['postponedAt'] != null
+            ? DateTime.tryParse(bookingMeta['postponedAt'].toString())
+            : null;
 
         return WashBooking(
           id: json['id'].toString(),
           customerName: json['owner_name'] ?? 'Customer',
           customerPhone: json['customer_phone'] ?? '',
           serviceType: serviceType,
-          deliveryLocation: json['delivery_location'],
+          deliveryLocation: cleanLoc,
           carType: carType,
           licensePlate: rawPlate,
           package: pkg,
@@ -524,8 +580,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             amount: double.tryParse(json['total_amount']?.toString() ?? '300') ?? 300.0,
             transactionRef: json['transaction_ref'],
             receiptScreenshot: json['receipt_url'],
+            paidAt: paidAt,
           ),
           createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+          scheduledTime: json['scheduled_time'] != null ? DateTime.tryParse(json['scheduled_time'].toString()) : null,
           completedAt: json['completed_at'] != null ? DateTime.tryParse(json['completed_at']) : null,
           commissionLogged: json['commission_logged'] ?? false,
           isPhoneBooking: isPhone,
@@ -535,6 +593,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           carpetDimensions: carpetDimensions,
           customTotalPrice: customTotalPrice,
           selectedServices: selectedServices,
+          isOnlineBooking: bookingMeta['isOnline'] == true || json['booking_origin'] == 'customer_app',
+          isPostponed: bookingMeta['isPostponed'] == true,
+          postponedReason: bookingMeta['postponedReason']?.toString(),
+          postponedAt: postponedAt,
         );
       }).toList();
     } catch (e) {
@@ -564,6 +626,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
                   ? 'b0000000-0000-0000-0000-000000000003'
                   : null));
 
+      final baseLoc = booking.deliveryLocation ??
+          (booking.selectedServices != null && booking.selectedServices!.isNotEmpty
+              ? 'Services: ${booking.selectedServices!.join(", ")}'
+              : booking.gpsCoordinates);
+
       final payload = {
         'owner_name': booking.customerName,
         'customer_phone': booking.customerPhone,
@@ -572,15 +639,19 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'package_id': _isUuid(booking.package.id) ? booking.package.id : null,
         'assigned_bay_id': bayId,
         'license_plate': booking.licensePlate,
-        'delivery_location': booking.deliveryLocation ??
-            (booking.selectedServices != null && booking.selectedServices!.isNotEmpty
-                ? 'Services: ${booking.selectedServices!.join(", ")}'
-                : booking.gpsCoordinates),
+        'delivery_location': encodeDeliveryLocationWithMeta(
+          baseText: baseLoc,
+          isOnlineBooking: booking.isOnlineBooking,
+          isPostponed: booking.isPostponed,
+          postponedReason: booking.postponedReason,
+          postponedAt: booking.postponedAt,
+          paidAt: booking.payment.paidAt,
+        ),
         'status': booking.status.name,
         'is_paid': booking.payment.isPaid,
         'payment_method': booking.payment.method.name,
         'total_amount': booking.totalPrice,
-        'booking_origin': booking.isPhoneBooking ? 'phone_booking' : (booking.assignedBay != null ? 'gate_walk_in' : 'customer_app'),
+        'booking_origin': booking.isPhoneBooking ? 'phone_booking' : (booking.isOnlineBooking ? 'customer_app' : 'gate_walk_in'),
         'washer_1_name': booking.assignedWasherName,
         'washer_1_id': _isUuid(booking.assignedWasherId) ? booking.assignedWasherId : null,
         'scheduled_time': booking.scheduledTime?.toIso8601String(),
@@ -763,12 +834,26 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   }) async {
     try {
       if (_isUuid(bookingId)) {
+        final now = DateTime.now();
+        final existing = await getBookingById(bookingId);
         await _patch('wash_bookings?id=eq.$bookingId', {
           'is_paid': true,
           'payment_method': method.name,
           'total_amount': amount,
           'transaction_ref': transactionRef,
           'receipt_url': receiptScreenshot,
+          if (existing != null)
+            'delivery_location': encodeDeliveryLocationWithMeta(
+              baseText: existing.deliveryLocation ??
+                  (existing.selectedServices != null && existing.selectedServices!.isNotEmpty
+                      ? 'Services: ${existing.selectedServices!.join(", ")}'
+                      : existing.gpsCoordinates),
+              isOnlineBooking: existing.isOnlineBooking,
+              isPostponed: existing.isPostponed,
+              postponedReason: existing.postponedReason,
+              postponedAt: existing.postponedAt,
+              paidAt: now,
+            ),
         });
 
         final booking = await getBookingById(bookingId);
@@ -834,6 +919,90 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
     );
+  }
+
+  @override
+  Future<WashBooking> postponeBooking({
+    required String bookingId,
+    required DateTime nextScheduledTime,
+    String? reason,
+  }) async {
+    final now = DateTime.now();
+    try {
+      if (_isUuid(bookingId)) {
+        final existing = await getBookingById(bookingId);
+        if (existing != null) {
+          if (existing.assignedBay != null && !existing.isCarpet) {
+            final bayNum = existing.assignedBay == BayType.bay1 ? 1 : (existing.assignedBay == BayType.bay2 ? 2 : 3);
+            await _patch('station_bays?bay_number=eq.$bayNum', {
+              'is_occupied': false,
+              'current_booking_id': null,
+              'active_license_plate': null,
+              'assigned_washer_name': null,
+            });
+          }
+          await _patch('wash_bookings?id=eq.$bookingId', {
+            'assigned_bay_id': null,
+            'scheduled_time': nextScheduledTime.toIso8601String(),
+            'delivery_location': encodeDeliveryLocationWithMeta(
+              baseText: existing.deliveryLocation ??
+                  (existing.selectedServices != null && existing.selectedServices!.isNotEmpty
+                      ? 'Services: ${existing.selectedServices!.join(", ")}'
+                      : existing.gpsCoordinates),
+              isOnlineBooking: existing.isOnlineBooking,
+              isPostponed: true,
+              postponedReason: (reason != null && reason.trim().isNotEmpty) ? reason.trim() : existing.postponedReason,
+              postponedAt: now,
+              paidAt: existing.payment.paidAt,
+            ),
+          });
+          final updated = existing.copyWith(
+            isPostponed: true,
+            postponedReason: (reason != null && reason.trim().isNotEmpty) ? reason.trim() : existing.postponedReason,
+            postponedAt: now,
+            scheduledTime: nextScheduledTime,
+            clearAssignedBay: true,
+          );
+          try {
+            await _fallbackLocalRepo.postponeBooking(
+              bookingId: bookingId,
+              nextScheduledTime: nextScheduledTime,
+              reason: reason,
+            );
+          } catch (_) {}
+          return updated;
+        }
+      }
+    } catch (e) {
+      debugPrint('Supabase postponeBooking exception: $e');
+    }
+    return await _fallbackLocalRepo.postponeBooking(
+      bookingId: bookingId,
+      nextScheduledTime: nextScheduledTime,
+      reason: reason,
+    );
+  }
+
+  @override
+  Future<void> deleteBooking(String bookingId) async {
+    try {
+      if (_isUuid(bookingId)) {
+        final existing = await getBookingById(bookingId);
+        if (existing?.assignedBay != null && !(existing?.isCarpet ?? false)) {
+          final bayNum = existing!.assignedBay == BayType.bay1 ? 1 : (existing.assignedBay == BayType.bay2 ? 2 : 3);
+          await _patch('station_bays?bay_number=eq.$bayNum', {
+            'is_occupied': false,
+            'current_booking_id': null,
+            'active_license_plate': null,
+            'assigned_washer_name': null,
+          });
+        }
+        await _delete('wash_bookings?id=eq.$bookingId');
+      }
+    } catch (e) {
+      debugPrint('Supabase deleteBooking exception: $e');
+    }
+    await _fallbackLocalRepo.deleteBooking(bookingId);
   }
 
   @override
