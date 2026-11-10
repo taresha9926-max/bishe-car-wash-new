@@ -8,6 +8,7 @@ import '../../../auth_roles/domain/models/user_role.dart';
 import '../../../auth_roles/presentation/widgets/role_auth_dialog.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../widgets/ad_video_showcase_card.dart';
+import '../widgets/customer_feedback_sheet.dart';
 import '../widgets/welcome_service_carousel_banner.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -536,27 +537,38 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                           ],
                                         ),
                                         const SizedBox(height: 12),
-                                        // Full-width mobile tap button
-                                        SizedBox(
-                                          width: double.infinity,
-                                          child: ElevatedButton.icon(
-                                            onPressed: () {
-                                              state.switchRole(UserRole.customer);
-                                              widget.onEnterCustomer?.call();
-                                            },
-                                            icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                                            label: Text(
-                                              state.tr('enterCustomerPortal'),
-                                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                                        // Full-width mobile side-by-side Portal & Feedback tabs
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 3,
+                                              child: ElevatedButton.icon(
+                                                onPressed: () {
+                                                  state.switchRole(UserRole.customer);
+                                                  widget.onEnterCustomer?.call();
+                                                },
+                                                icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                                                label: Text(
+                                                  state.tr('enterCustomerPortal'),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5),
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: AppColors.primary,
+                                                  foregroundColor: Colors.white,
+                                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                  elevation: 0,
+                                                ),
+                                              ),
                                             ),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppColors.primary,
-                                              foregroundColor: Colors.white,
-                                              padding: const EdgeInsets.symmetric(vertical: 12),
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                              elevation: 0,
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              flex: 2,
+                                              child: _buildFeedbackTabButton(context, state, compact: true),
                                             ),
-                                          ),
+                                          ],
                                         ),
                                       ],
                                     )
@@ -577,12 +589,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                             children: [
                                               Row(
                                                 children: [
-                                                  Text(
-                                                    state.tr('customerPortal'),
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w900,
-                                                      color: AppColors.textPrimary,
+                                                  Flexible(
+                                                    child: Text(
+                                                      state.tr('customerPortal'),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight: FontWeight.w900,
+                                                        color: AppColors.textPrimary,
+                                                      ),
                                                     ),
                                                   ),
                                                   const SizedBox(width: 8),
@@ -618,12 +634,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                                 children: [
                                                   const Icon(Icons.check_circle_rounded, size: 13, color: AppColors.statusReady),
                                                   const SizedBox(width: 4),
-                                                  Text(
-                                                    state.tr('customerTrustPill'),
-                                                    style: const TextStyle(
-                                                      fontSize: 11,
-                                                      fontWeight: FontWeight.w700,
-                                                      color: AppColors.primary,
+                                                  Expanded(
+                                                    child: Text(
+                                                      state.tr('customerTrustPill'),
+                                                      style: const TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: AppColors.primary,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
@@ -632,23 +650,31 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                           ),
                                         ),
                                         const SizedBox(width: 12),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            state.switchRole(UserRole.customer);
-                                            widget.onEnterCustomer?.call();
-                                          },
-                                          icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                                          label: Text(
-                                            state.tr('enterCustomerPortal'),
-                                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.primary,
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                            elevation: 0,
-                                          ),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          alignment: WrapAlignment.end,
+                                          children: [
+                                            ElevatedButton.icon(
+                                              onPressed: () {
+                                                state.switchRole(UserRole.customer);
+                                                widget.onEnterCustomer?.call();
+                                              },
+                                              icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                                              label: Text(
+                                                state.tr('enterCustomerPortal'),
+                                                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppColors.primary,
+                                                foregroundColor: Colors.white,
+                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                elevation: 0,
+                                              ),
+                                            ),
+                                            _buildFeedbackTabButton(context, state),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -783,5 +809,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     );
   }
 
-
+  Widget _buildFeedbackTabButton(BuildContext context, dynamic state, {bool compact = false}) {
+    final approvedCount = (state.approvedCustomerFeedback as List).length;
+    return OutlinedButton.icon(
+      onPressed: () => CustomerFeedbackSheet.show(context),
+      icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
+      label: Text(
+        approvedCount > 0 ? '${state.tr('feedbackTab')} ($approvedCount)' : state.tr('feedbackTab'),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontWeight: FontWeight.w800, fontSize: compact ? 12 : 13, color: const Color(0xFF92400E)),
+      ),
+      style: OutlinedButton.styleFrom(
+        backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
+        side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 14, vertical: compact ? 12 : 13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
 }

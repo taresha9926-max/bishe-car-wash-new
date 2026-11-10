@@ -24,6 +24,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booki
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/customer_feedback.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
@@ -325,6 +326,82 @@ class AppStateNotifier extends ChangeNotifier {
       } catch (e) {
         debugPrint('Failed to save TikTok reels to repository: $e');
       }
+    }
+  }
+
+  // Customer Satisfaction & Feedback Moderation State
+  List<CustomerFeedback> _customerFeedback = [];
+  DateTime? _lastFeedbackSubmitAt;
+
+  List<CustomerFeedback> get allCustomerFeedback => List.unmodifiable(_customerFeedback);
+  List<CustomerFeedback> get pendingCustomerFeedback =>
+      _customerFeedback.where((f) => f.status == FeedbackStatus.pending).toList();
+  List<CustomerFeedback> get approvedCustomerFeedback =>
+      _customerFeedback.where((f) => f.status == FeedbackStatus.approved).toList();
+  List<CustomerFeedback> get ignoredCustomerFeedback =>
+      _customerFeedback.where((f) => f.status == FeedbackStatus.ignored).toList();
+
+  double get averageApprovedRating {
+    final approved = approvedCustomerFeedback;
+    if (approved.isEmpty) return 0.0;
+    return approved.fold<int>(0, (sum, f) => sum + f.stars) / approved.length;
+  }
+
+  /// Submits new customer feedback to the Admin pending moderation queue.
+  /// Returns an AppStrings error key if spam-blocked or rate-limited, else null.
+  Future<String?> submitCustomerFeedback({
+    required int stars,
+    String comment = '',
+    String customerName = '',
+  }) async {
+    final linkError = CustomerFeedback.validateOpinion(comment);
+    if (linkError != null) return linkError;
+
+    if (_lastFeedbackSubmitAt != null &&
+        DateTime.now().difference(_lastFeedbackSubmitAt!).inSeconds < 15) {
+      return 'feedbackCooldownError';
+    }
+
+    final entry = CustomerFeedback(
+      id: 'FDB-${DateTime.now().millisecondsSinceEpoch}',
+      stars: stars.clamp(1, 4),
+      comment: comment.trim(),
+      customerName: customerName.trim(),
+      createdAt: DateTime.now(),
+      status: FeedbackStatus.pending,
+    );
+
+    _customerFeedback.insert(0, entry);
+    _lastFeedbackSubmitAt = DateTime.now();
+    notifyListeners();
+    try {
+      await _repository.saveCustomerFeedback(_customerFeedback);
+    } catch (e) {
+      debugPrint('Failed to persist customer feedback: $e');
+    }
+    return null;
+  }
+
+  /// Admin approves or ignores a customer feedback submission.
+  Future<void> moderateCustomerFeedback(String id, FeedbackStatus newStatus) async {
+    final idx = _customerFeedback.indexWhere((f) => f.id == id);
+    if (idx == -1) return;
+    _customerFeedback[idx] = _customerFeedback[idx].copyWith(status: newStatus);
+    notifyListeners();
+    try {
+      await _repository.saveCustomerFeedback(_customerFeedback);
+    } catch (e) {
+      debugPrint('Failed to persist moderated feedback: $e');
+    }
+  }
+
+  Future<void> deleteCustomerFeedback(String id) async {
+    _customerFeedback.removeWhere((f) => f.id == id);
+    notifyListeners();
+    try {
+      await _repository.saveCustomerFeedback(_customerFeedback);
+    } catch (e) {
+      debugPrint('Failed to delete customer feedback: $e');
     }
   }
 
@@ -1738,6 +1815,10 @@ class AppStateNotifier extends ChangeNotifier {
         if (hotline.isNotEmpty) {
           _customerPhoneBookingNumber = hotline;
         }
+      } catch (_) {}
+
+      try {
+        _customerFeedback = List.from(await _repository.getCustomerFeedback());
       } catch (_) {}
 
       try {

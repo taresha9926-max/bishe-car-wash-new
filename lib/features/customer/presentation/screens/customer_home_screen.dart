@@ -20,6 +20,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_statu
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
+import 'package:bishe_car_wash/features/welcome/presentation/widgets/customer_feedback_sheet.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -116,7 +117,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 14)),
+              const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 12)),
+              _buildFeedbackShortcutCard(context, state),
+              const SizedBox(height: 12),
 
               if (state.isCarWashDivisionActive) ...[
                 // 1. Promotional Rotating Banner
@@ -1934,6 +1937,57 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.4),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFeedbackShortcutCard(BuildContext context, dynamic state) {
+    final approvedCount = (state.approvedCustomerFeedback as List).length;
+    return InkWell(
+      onTap: () => CustomerFeedbackSheet.show(context),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEF3C7).withOpacity(0.55),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.65)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.star_rounded, color: Color(0xFFD97706), size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    state.tr('customerFeedbackHeader'),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
+                  ),
+                  Text(
+                    state.tr('rateExperienceQuestion'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, color: Color(0xFFB45309)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD97706),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                approvedCount > 0 ? '${state.tr('feedbackTab')} ($approvedCount)' : state.tr('feedbackTab'),
+                style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -17,6 +17,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_packa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/customer_feedback.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
@@ -1113,6 +1114,66 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       debugPrint('Supabase saveCustomerPhoneBookingNumber exception: $e');
     }
     await _fallbackLocalRepo.saveCustomerPhoneBookingNumber(phone);
+  }
+
+  Future<String?> _getStaffConfigPayload(String key) async {
+    try {
+      final dynamic data = await _get('staff_credentials?username=eq.$key&select=*');
+      if (data is List && data.isNotEmpty) {
+        final raw = data.first['full_name']?.toString() ?? '';
+        if (raw.isNotEmpty) return raw;
+      }
+    } catch (e) {
+      debugPrint('Supabase get config [$key] exception: $e');
+    }
+    return null;
+  }
+
+  Future<void> _saveStaffConfigPayload(String key, String payload) async {
+    try {
+      final dynamic existing = await _get('staff_credentials?username=eq.$key&select=id');
+      if (existing is List && existing.isNotEmpty) {
+        await _patch('staff_credentials?username=eq.$key', {
+          'full_name': payload,
+          'is_active': true,
+        });
+      } else {
+        await _post('staff_credentials', {
+          'username': key,
+          'pin_hash': '4450',
+          'role': 'admin',
+          'full_name': payload,
+          'is_active': true,
+        });
+      }
+    } catch (e) {
+      debugPrint('Supabase save config [$key] exception: $e');
+    }
+  }
+
+  @override
+  Future<List<CustomerFeedback>> getCustomerFeedback() async {
+    final rawJson = await _getStaffConfigPayload('app_config_customer_feedback');
+    if (rawJson != null) {
+      try {
+        final dynamic decoded = jsonDecode(rawJson);
+        if (decoded is List) {
+          return decoded
+              .map((e) => CustomerFeedback.fromMap(Map<String, dynamic>.from(e as Map)))
+              .toList();
+        }
+      } catch (e) {
+        debugPrint('Supabase decode customer feedback exception: $e');
+      }
+    }
+    return _fallbackLocalRepo.getCustomerFeedback();
+  }
+
+  @override
+  Future<void> saveCustomerFeedback(List<CustomerFeedback> feedbackList) async {
+    final jsonPayload = jsonEncode(feedbackList.map((f) => f.toMap()).toList());
+    await _saveStaffConfigPayload('app_config_customer_feedback', jsonPayload);
+    await _fallbackLocalRepo.saveCustomerFeedback(feedbackList);
   }
 
   @override

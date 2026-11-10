@@ -10,6 +10,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/payment_in
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
+import 'package:bishe_car_wash/features/welcome/domain/models/customer_feedback.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
@@ -75,6 +76,8 @@ abstract class IMarketingRepository {
   Future<void> saveTikTokReels(List<TikTokAdVideo> reels);
   Future<String> getCustomerPhoneBookingNumber();
   Future<void> saveCustomerPhoneBookingNumber(String phone);
+  Future<List<CustomerFeedback>> getCustomerFeedback();
+  Future<void> saveCustomerFeedback(List<CustomerFeedback> feedbackList);
 }
 
 /// Domain port for fixed assets, consumables stock, and washer team daily handovers.

@@ -19,6 +19,7 @@ import '../../../booking_service/presentation/screens/vehicle_history_screen.dar
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/weekly_commission_report.dart';
 import '../../../inventory/domain/models/stock_transaction.dart';
+import '../widgets/admin_feedback_moderation_card.dart';
 import '../widgets/commission_item_card.dart';
 import '../widgets/pricing_matrix_editor.dart';
 import 'commission_logs_screen.dart';
@@ -320,6 +321,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               // Pending Approval Queue (from Secondary Admin actions)
               _buildPendingApprovalsBanner(context, state),
 
+              if ((state.pendingCustomerFeedback as List).isNotEmpty) ...[
+                const AdminFeedbackModerationCard(),
+                const SizedBox(height: 14),
+              ],
+
               // 1. Executive Banner (Responsive)
               _buildExecutiveBanner(state, isMobile),
               const SizedBox(height: 14),
@@ -569,6 +575,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 totalFixedAssets,
                 digitalBookings,
               ),
+              if ((state.pendingCustomerFeedback as List).isEmpty) ...[
+                const SizedBox(height: 18),
+                const AdminFeedbackModerationCard(),
+              ],
               const SizedBox(height: 36),
 
               const SizedBox(height: 40),

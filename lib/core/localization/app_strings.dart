@@ -915,6 +915,143 @@ class AppStrings {
       AppLanguage.am: 'የተዘጋጁ የአገልግሎት ፓኬጆች',
     },
 
+    // Customer Feedback & Admin Moderation
+    'feedbackTab': {
+      AppLanguage.en: 'Feedback',
+      AppLanguage.om: 'Yaada Maamilaa',
+      AppLanguage.am: 'አስተያየት',
+    },
+    'customerFeedbackHeader': {
+      AppLanguage.en: 'Customer Feedback & Ratings',
+      AppLanguage.om: 'Yaada fi Sadarkaa Qulqullinaa',
+      AppLanguage.am: 'የደንበኞች አስተያየት እና ደረጃ',
+    },
+    'rateExperienceQuestion': {
+      AppLanguage.en: 'How satisfied are you with our service?',
+      AppLanguage.om: 'Tajaajila keenyaan hammam gammaddan?',
+      AppLanguage.am: 'በአገልግሎታችን ምን ያህል ረክተዋል?',
+    },
+    'star1Good': {
+      AppLanguage.en: '1 Star — Good',
+      AppLanguage.om: 'Urjii 1 — Gaarii',
+      AppLanguage.am: '1 ኮከብ — ጥሩ',
+    },
+    'star2Satisfactory': {
+      AppLanguage.en: '2 Stars — Satisfactory',
+      AppLanguage.om: 'Urjii 2 — Quubsaa',
+      AppLanguage.am: '2 ኮከብ — አጥጋቢ',
+    },
+    'star3Excellent': {
+      AppLanguage.en: '3 Stars — Excellent',
+      AppLanguage.om: 'Urjii 3 — Baay\'ee Gaarii',
+      AppLanguage.am: '3 ኮከብ — በጣም ጥሩ',
+    },
+    'star4SuperSatisfied': {
+      AppLanguage.en: '4 Stars — Super Satisfied',
+      AppLanguage.om: 'Urjii 4 — Hedduu Gammadeera',
+      AppLanguage.am: '4 ኮከብ — እጅግ በጣም አርኪ',
+    },
+    'feedbackNameOptional': {
+      AppLanguage.en: 'Your Name (Optional)',
+      AppLanguage.om: 'Maqaa Keessan (Dirqama Miti)',
+      AppLanguage.am: 'ስምዎ (አማራጭ)',
+    },
+    'feedbackOpinionHint': {
+      AppLanguage.en: 'Write your personal opinion (Optional)',
+      AppLanguage.om: 'Yaada dhuunfaa keessan barreessaa (Dirqama Miti)',
+      AppLanguage.am: 'የግል አስተያየትዎን ይጻፉ (አማራጭ)',
+    },
+    'sendFeedback': {
+      AppLanguage.en: 'Send Feedback',
+      AppLanguage.om: 'Yaada Ergi',
+      AppLanguage.am: 'አስተያየት ላክ',
+    },
+    'feedbackSentForApproval': {
+      AppLanguage.en: 'Thank you! Your feedback has been sent to management for review.',
+      AppLanguage.om: 'Galatoomaa! Yaadni keessan mirkaneessa bulchiinsaaf ergameera.',
+      AppLanguage.am: 'እናመሰግናለን! አስተያየትዎ ለማጽደቅ ወደ አስተዳዳሪ ተልኳል።',
+    },
+    'selectStarRatingFirst': {
+      AppLanguage.en: 'Please select a star rating (1–4) before sending.',
+      AppLanguage.om: 'Erguun dura sadarkaa urjii (1–4) filadhaa.',
+      AppLanguage.am: 'ከመላክዎ በፊት እባክዎ የኮከብ ደረጃ (1–4) ይምረጡ።',
+    },
+    'feedbackLinksBlocked': {
+      AppLanguage.en: 'Links or web addresses are not allowed in feedback.',
+      AppLanguage.om: 'Liinkiiwwan ykn teessoon weebsaayitii yaada keessatti hin hayyamamu.',
+      AppLanguage.am: 'በአስተያየት ውስጥ ሊንኮች ወይም የድረ-ገጽ አድራሻዎች አይፈቀዱም።',
+    },
+    'feedbackCooldownError': {
+      AppLanguage.en: 'Please wait a moment before sending another feedback.',
+      AppLanguage.om: 'Yaada biroo erguuf yeroo xiqqoo eegaa.',
+      AppLanguage.am: 'ሌላ አስተያየት ከመላክዎ በፊት እባክዎ ትንሽ ይጠብቁ።',
+    },
+    'showCustomersSuggestions': {
+      AppLanguage.en: 'Show Customers Suggestions',
+      AppLanguage.om: 'Yaada Maamiltootaa Agarsiisi',
+      AppLanguage.am: 'የደንበኞችን አስተያየት አሳይ',
+    },
+    'noApprovedFeedbackYet': {
+      AppLanguage.en: 'No approved customer feedback yet. Share your thoughts above!',
+      AppLanguage.om: 'Hanga ammaatti yaadni mirkanaa\'e hin jiru. Yaada keessan qooddadhaa!',
+      AppLanguage.am: 'እስካሁን የጸደቀ የደንበኛ አስተያየት የለም። አስተያየትዎን ከላይ ይላኩ!',
+    },
+    'anonymousCustomer': {
+      AppLanguage.en: 'Anonymous Customer',
+      AppLanguage.om: 'Maamila',
+      AppLanguage.am: 'ደንበኛ',
+    },
+    'averageRatingLabel': {
+      AppLanguage.en: 'Avg Rating',
+      AppLanguage.om: 'Giddugaleessa',
+      AppLanguage.am: 'አማካይ ደረጃ',
+    },
+    'adminFeedbackModeration': {
+      AppLanguage.en: 'Customer Feedback Moderation',
+      AppLanguage.om: 'To\'annoo Yaada Maamiltootaa',
+      AppLanguage.am: 'የደንበኞች አስተያየት ማጽደቂያ',
+    },
+    'adminFeedbackModerationSub': {
+      AppLanguage.en: 'Approve genuine ratings or ignore spam & inappropriate comments',
+      AppLanguage.om: 'Yaada dhugaa mirkaneessaa ykn spam dhiisaa',
+      AppLanguage.am: 'ትክክለኛ አስተያየቶችን ያጽድቁ ወይም አላስፈላጊዎችን ይተዉ',
+    },
+    'approveFeedback': {
+      AppLanguage.en: 'Approve',
+      AppLanguage.om: 'Mirkaneessi',
+      AppLanguage.am: 'አጽድቅ',
+    },
+    'ignoreFeedback': {
+      AppLanguage.en: 'Ignore',
+      AppLanguage.om: 'Dhiisi',
+      AppLanguage.am: 'ተወው',
+    },
+    'removeFeedback': {
+      AppLanguage.en: 'Remove',
+      AppLanguage.om: 'Haqi',
+      AppLanguage.am: 'አስወግድ',
+    },
+    'pendingReviewLabel': {
+      AppLanguage.en: 'Pending Review',
+      AppLanguage.om: 'Mirkaneessa Eeggataa',
+      AppLanguage.am: 'ማጽደቅ የሚጠባበቅ',
+    },
+    'approvedLabel': {
+      AppLanguage.en: 'Approved',
+      AppLanguage.om: 'Mirkanaa\'e',
+      AppLanguage.am: 'የጸደቀ',
+    },
+    'ignoredLabel': {
+      AppLanguage.en: 'Ignored',
+      AppLanguage.om: 'Kan Dhiifame',
+      AppLanguage.am: 'የተተወ',
+    },
+    'feedbackModerationEmpty': {
+      AppLanguage.en: 'No customer feedback in this category.',
+      AppLanguage.om: 'Kutaa kana keessa yaadni maamilaa hin jiru.',
+      AppLanguage.am: 'በዚህ ክፍል ውስጥ ምንም የደንበኛ አስተያየት የለም።',
+    },
+
     // Database / SQL Packages Localization
     'pkg_silver_name': {
       AppLanguage.en: 'Basic / Silver Package',
