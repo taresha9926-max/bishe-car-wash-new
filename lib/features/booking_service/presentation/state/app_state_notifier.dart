@@ -1921,6 +1921,7 @@ class AppStateNotifier extends ChangeNotifier {
     double? customTotalPrice,
     List<String>? selectedServices,
     double tipAmount = 0.0,
+    ServiceType? serviceType,
   }) async {
     final bookingId = isCarpet
         ? 'CPT-${(100 + _bookings.length + 1)}'
@@ -1936,7 +1937,7 @@ class AppStateNotifier extends ChangeNotifier {
       id: bookingId,
       customerName: finalName,
       customerPhone: customerPhone,
-      serviceType: assignedBay == BayType.mobileVan ? ServiceType.atHomeMobile : ServiceType.walkInStation,
+      serviceType: serviceType ?? (assignedBay == BayType.mobileVan ? ServiceType.atHomeMobile : ServiceType.walkInStation),
       carType: carType,
       licensePlate: licensePlate.toUpperCase(),
       package: package,
@@ -2162,6 +2163,7 @@ class AppStateNotifier extends ChangeNotifier {
     double? customTotalPrice,
     List<String>? selectedServices,
     double tipAmount = 0.0,
+    ServiceType? serviceType,
   }) => registerWalkInGate(
     customerName: customerName,
     licensePlate: licensePlate,
@@ -2183,6 +2185,7 @@ class AppStateNotifier extends ChangeNotifier {
     customTotalPrice: customTotalPrice,
     selectedServices: selectedServices,
     tipAmount: tipAmount,
+    serviceType: serviceType,
   );
 
   /// Admin edits service pricing by car type

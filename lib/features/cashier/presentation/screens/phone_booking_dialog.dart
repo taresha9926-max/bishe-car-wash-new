@@ -326,7 +326,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                       ),
                                       const SizedBox(height: 6),
                                       Text(state.tr('carpetTypeA'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
-                                      Text('${state.carpetTypeAPricePerSqM.toStringAsFixed(0)} ETB/m²', style: const TextStyle(fontSize: 10.5, color: Color(0xFF7C3AED), fontWeight: FontWeight.w700)),
+                                      Text('${state.getCarpetPricePerSqM('type_a', _serviceType).toStringAsFixed(0)} ETB/m²', style: const TextStyle(fontSize: 10.5, color: Color(0xFF7C3AED), fontWeight: FontWeight.w700)),
                                     ],
                                   ),
                                 ),
@@ -358,7 +358,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                       ),
                                       const SizedBox(height: 6),
                                       Text(state.tr('carpetTypeB'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
-                                      Text('${state.carpetTypeBPricePerSqM.toStringAsFixed(0)} ETB/m²', style: const TextStyle(fontSize: 10.5, color: Color(0xFF7C3AED), fontWeight: FontWeight.w700)),
+                                      Text('${state.getCarpetPricePerSqM('type_b', _serviceType).toStringAsFixed(0)} ETB/m²', style: const TextStyle(fontSize: 10.5, color: Color(0xFF7C3AED), fontWeight: FontWeight.w700)),
                                     ],
                                   ),
                                 ),
@@ -432,7 +432,10 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         // Car Type Selector
                         CarTypeSelector(
                           selectedType: _carType,
-                          onSelected: (t) => setState(() => _carType = t),
+                          onSelected: (t) => setState(() {
+                            _carType = t;
+                            _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                          }),
                         ),
                         const SizedBox(height: 14),
 

@@ -21,9 +21,20 @@ class WeeklyCommissionReportDialog extends StatefulWidget {
 }
 
 class _WeeklyCommissionReportDialogState extends State<WeeklyCommissionReportDialog> {
-  final _cashierController = TextEditingController(text: 'Abebech Tadesse');
+  final _cashierController = TextEditingController();
   final _notesController = TextEditingController();
   bool _isSubmitting = false;
+  bool _initializedName = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initializedName) {
+      _initializedName = true;
+      final staffName = AppStateProvider.of(context).activeStaffFullName;
+      _cashierController.text = (staffName != null && staffName.trim().isNotEmpty) ? staffName : 'Abebech Tadesse';
+    }
+  }
 
   @override
   void dispose() {

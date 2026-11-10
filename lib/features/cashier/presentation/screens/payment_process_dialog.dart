@@ -88,15 +88,21 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.point_of_sale_rounded, color: AppColors.primary, size: 24),
-                      const SizedBox(width: 8),
-                      Text(
-                        state.tr('paymentDialogTitle'),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                      ),
-                    ],
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(Icons.point_of_sale_rounded, color: AppColors.primary, size: 24),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            state.tr('paymentDialogTitle'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -130,11 +136,15 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                           fallbackIcon: widget.booking.isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          widget.booking.isCarpet
-                              ? '${state.tr("carpetService")}: ${widget.booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                              : '${state.tr("licensePlate")}: ${widget.booking.licensePlate}',
-                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        Flexible(
+                          child: Text(
+                            widget.booking.isCarpet
+                                ? '${state.tr("carpetService")}: ${widget.booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+                                : '${state.tr("licensePlate")}: ${widget.booking.licensePlate}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          ),
                         ),
                       ],
                     ),
@@ -191,56 +201,59 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                       children: [
                         Icon(Icons.volunteer_activism_rounded, size: 16, color: Colors.amber.shade900),
                         const SizedBox(width: 6),
-                        Text(
-                          state.tr('washersTip'),
-                          style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.amber.shade900),
+                        Expanded(
+                          child: Text(
+                            state.tr('washersTip'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.amber.shade900),
+                          ),
                         ),
-                        const Spacer(),
-                        if (_tipAmount > 0)
+                        if (_tipAmount > 0) ...[
+                          const SizedBox(width: 6),
                           Text(
                             '+ETB ${_tipAmount.toStringAsFixed(0)}',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
                           ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Row(
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        for (final tipVal in [50, 100, 200]) ...[
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: ChoiceChip(
-                              label: Text('+$tipVal'),
-                              selected: _tipAmount == tipVal.toDouble(),
-                              onSelected: (selected) {
-                                setState(() {
-                                  _tipAmount = selected ? tipVal.toDouble() : 0.0;
-                                  _tipController.text = _tipAmount > 0 ? _tipAmount.toStringAsFixed(0) : '';
-                                });
-                              },
-                              visualDensity: VisualDensity.compact,
-                            ),
+                        for (final tipVal in [50, 100, 200])
+                          ChoiceChip(
+                            label: Text('+$tipVal'),
+                            selected: _tipAmount == tipVal.toDouble(),
+                            onSelected: (selected) {
+                              setState(() {
+                                _tipAmount = selected ? tipVal.toDouble() : 0.0;
+                                _tipController.text = _tipAmount > 0 ? _tipAmount.toStringAsFixed(0) : '';
+                              });
+                            },
+                            visualDensity: VisualDensity.compact,
                           ),
-                        ],
-                        Expanded(
-                          child: SizedBox(
-                            height: 38,
-                            child: TextField(
-                              controller: _tipController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: state.tr('customTip'),
-                                hintStyle: const TextStyle(fontSize: 11),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                isDense: true,
-                              ),
-                              onChanged: (val) {
-                                setState(() {
-                                  _tipAmount = double.tryParse(val) ?? 0.0;
-                                });
-                              },
+                        SizedBox(
+                          width: 110,
+                          height: 38,
+                          child: TextField(
+                            controller: _tipController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              hintText: state.tr('customTip'),
+                              hintStyle: const TextStyle(fontSize: 11),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              isDense: true,
                             ),
+                            onChanged: (val) {
+                              setState(() {
+                                _tipAmount = double.tryParse(val) ?? 0.0;
+                              });
+                            },
                           ),
                         ),
                       ],
@@ -260,9 +273,9 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               _buildOption(PaymentMethod.cash, state.tr('payCash')),
               _buildOption(PaymentMethod.telebirr, state.tr('payTelebirr')),
               _buildOption(PaymentMethod.cbeBirr, state.tr('payCbeBirr')),
-              _buildOption(PaymentMethod.bankOfAbyssinia, 'Bank of Abyssinia (BoA)'),
-              _buildOption(PaymentMethod.awashBank, 'Awash Bank'),
-              _buildOption(PaymentMethod.dashenBank, 'Dashen Bank (Amole)'),
+              _buildOption(PaymentMethod.bankOfAbyssinia, state.tr('payBankOfAbyssinia')),
+              _buildOption(PaymentMethod.awashBank, state.tr('payAwashBank')),
+              _buildOption(PaymentMethod.dashenBank, state.tr('payDashenBank')),
               _buildOption(PaymentMethod.otherBankTransfer, state.tr('payBank')),
 
               // Digital Payment Fields

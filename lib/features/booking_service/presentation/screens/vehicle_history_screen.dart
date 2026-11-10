@@ -37,11 +37,13 @@ enum HistoryDateFilter {
 class VehicleHistoryScreen extends StatefulWidget {
   final bool isEmbedded;
   final bool? isCarpetFilter;
+  final bool allowClearAll;
 
   const VehicleHistoryScreen({
     super.key,
     this.isEmbedded = false,
     this.isCarpetFilter,
+    this.allowClearAll = true,
   });
 
   @override
@@ -394,21 +396,47 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         const SizedBox(height: 10),
 
         if (state.bookings.isNotEmpty) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 '${historyList.length} ${_viewCarpetMode ? "Carpet Orders" : "Vehicle Washes"} Recorded',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
               ),
-              TextButton.icon(
-                icon: const Icon(Icons.delete_sweep_rounded, size: 16, color: Colors.red),
-                label: Text(
-                  state.tr('clearAllBookings'),
-                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red),
+              if (widget.allowClearAll)
+                TextButton.icon(
+                  icon: const Icon(Icons.delete_sweep_rounded, size: 16, color: Colors.red),
+                  label: Text(
+                    state.tr('clearAllBookings'),
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red),
+                  ),
+                  onPressed: () => _confirmClearAllBookings(context, state),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.statusReady.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.shield_rounded, size: 13, color: AppColors.statusReady),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          state.tr('safeCashierModeNotice'),
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.statusReady),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                onPressed: () => _confirmClearAllBookings(context, state),
-              ),
             ],
           ),
           const SizedBox(height: 8),

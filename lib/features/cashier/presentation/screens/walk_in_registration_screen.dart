@@ -980,6 +980,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
         carpetDimensions: _isCarpetMode ? '${_lengthController.text.trim()}m x ${_widthController.text.trim()}m' : null,
         customTotalPrice: _isCarpetMode ? calculatedCarpetPrice : (_useCustomChecklist ? negotiatedPrice : null),
         selectedServices: selectedServiceNames,
+        serviceType: _isCarpetMode ? _carpetDeliveryMethod : null,
       );
 
       if (_isCarpetMode) {
@@ -994,7 +995,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
             content: Text('$label registered successfully!'),
             action: _isCarpetMode
                 ? SnackBarAction(
-                    label: 'Copy SMS',
+                    label: state.tr('copySms'),
                     textColor: Colors.amberAccent,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(booking)));

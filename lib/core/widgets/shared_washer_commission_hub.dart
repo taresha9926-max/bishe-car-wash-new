@@ -14,6 +14,7 @@ class SharedWasherCommissionHub extends StatefulWidget {
   final WasherHubRole role;
   final bool isMobile;
   final bool initiallyExpanded;
+  final bool respectInitiallyExpanded;
 
   const SharedWasherCommissionHub({
     super.key,
@@ -21,6 +22,7 @@ class SharedWasherCommissionHub extends StatefulWidget {
     required this.role,
     required this.isMobile,
     this.initiallyExpanded = true,
+    this.respectInitiallyExpanded = false,
   });
 
   @override
@@ -38,7 +40,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
   @override
   void initState() {
     super.initState();
-    _isExpanded = widget.isMobile ? false : widget.initiallyExpanded;
+    _isExpanded = (widget.respectInitiallyExpanded || !widget.isMobile) ? widget.initiallyExpanded : false;
     _animController = AnimationController(
       duration: const Duration(milliseconds: 220),
       vsync: this,
@@ -507,33 +509,42 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        div.isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                        size: 13,
-                        color: div.isPresent ? AppColors.statusCompleted : Colors.red,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        div.washerName,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: div.isPresent ? FontWeight.w700 : FontWeight.w500,
-                          color: div.isPresent ? AppColors.textPrimary : AppColors.textMuted,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          div.isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                          size: 13,
+                          color: div.isPresent ? AppColors.statusCompleted : Colors.red,
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
-                        child: Text(
-                          div.customTierName ?? '',
-                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            div.washerName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: div.isPresent ? FontWeight.w700 : FontWeight.w500,
+                              color: div.isPresent ? AppColors.textPrimary : AppColors.textMuted,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        if (div.customTierName != null && div.customTierName!.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                            child: Text(
+                              div.customTierName!,
+                              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     div.isPresent
                         ? '${div.percentageShare.toStringAsFixed(1)}% • ${CurrencyFormatter.format(div.earnedETB)}'

@@ -3705,6 +3705,151 @@ class AppStrings {
       AppLanguage.om: 'Tajaajiloota Dhiqannaa Filataman',
       AppLanguage.am: 'የተመረጡ የእጥበት አገልግሎቶች',
     },
+    'cashierTabQueue': {
+      AppLanguage.en: 'Queue',
+      AppLanguage.om: 'Tartiiba',
+      AppLanguage.am: 'ወረፋ',
+    },
+    'cashierTabMoney': {
+      AppLanguage.en: 'Money',
+      AppLanguage.om: 'Maallaqa',
+      AppLanguage.am: 'ገንዘብ',
+    },
+    'cashierTabTeamShower': {
+      AppLanguage.en: 'Team & Shower',
+      AppLanguage.om: 'Garee & Shaaworii',
+      AppLanguage.am: 'ቡድን እና ሻወር',
+    },
+    'cashierFilterAll': {
+      AppLanguage.en: 'All',
+      AppLanguage.om: 'Hunda',
+      AppLanguage.am: 'ሁሉም',
+    },
+    'cashierFilterWaiting': {
+      AppLanguage.en: 'Waiting',
+      AppLanguage.om: 'Eegamaa',
+      AppLanguage.am: 'በመጠባበቅ ላይ',
+    },
+    'cashierFilterInProgress': {
+      AppLanguage.en: 'In Progress',
+      AppLanguage.om: 'Hojii Irra',
+      AppLanguage.am: 'በሂደት ላይ',
+    },
+    'cashierFilterPayReady': {
+      AppLanguage.en: 'Ready to Pay',
+      AppLanguage.om: 'Kaffaltiif Qophii',
+      AppLanguage.am: 'ለክፍያ ዝግጁ',
+    },
+    'searchQueueHint': {
+      AppLanguage.en: 'Search plate, tag, customer or phone...',
+      AppLanguage.om: 'Lakkoofsa gabatee, taagii, maqaa ykn bilbila barbaadi...',
+      AppLanguage.am: 'ሰሌዳ፣ ታግ፣ ስም ወይም ስልክ ይፈልጉ...',
+    },
+    'waitingForAdminOtp': {
+      AppLanguage.en: 'WAITING FOR ADMIN',
+      AppLanguage.om: 'ADMIN EEGAMAA JIRA',
+      AppLanguage.am: 'አስተዳዳሪን በመጠባበቅ ላይ',
+    },
+    'physicalCashInDrawer': {
+      AppLanguage.en: 'Physical Cash in Drawer (Awaiting Deposit)',
+      AppLanguage.om: 'Maallaqa Kaashii Harkaa (Baankiitti Hin Galin)',
+      AppLanguage.am: 'በመሳቢያ ያለ ጥሬ ገንዘብ (ወደ ባንክ ያልገባ)',
+    },
+    'expenseAmount': {
+      AppLanguage.en: 'Expense Amount (ETB)',
+      AppLanguage.om: 'Hamma Baasii (ETB)',
+      AppLanguage.am: 'የወጪ መጠን (ብር)',
+    },
+    'copySms': {
+      AppLanguage.en: 'Copy SMS',
+      AppLanguage.om: 'SMS Garagalchi',
+      AppLanguage.am: 'SMS ቅዳ',
+    },
+    'smsCopiedClipboard': {
+      AppLanguage.en: 'Customer SMS copied to clipboard!',
+      AppLanguage.om: 'Ergaan maamilaa gara clipboard garagalfameera!',
+      AppLanguage.am: 'የደንበኛ SMS ወደ ክሊፕቦርድ ተቀድቷል!',
+    },
+    'settledPaidBadge': {
+      AppLanguage.en: 'PAID',
+      AppLanguage.om: 'KAFFALAMEERA',
+      AppLanguage.am: 'ተከፍሏል',
+    },
+    'phoneOrderBadge': {
+      AppLanguage.en: 'Phone',
+      AppLanguage.om: 'Bilbila',
+      AppLanguage.am: 'ስልክ',
+    },
+    'carpetTypeBadgeA': {
+      AppLanguage.en: 'CARPET A',
+      AppLanguage.om: 'KARPEETII A',
+      AppLanguage.am: 'ምንጣፍ A',
+    },
+    'carpetTypeBadgeB': {
+      AppLanguage.en: 'CARPET B',
+      AppLanguage.om: 'KARPEETII B',
+      AppLanguage.am: 'ምንጣፍ B',
+    },
+    'tipBadgePrefix': {
+      AppLanguage.en: 'Tip',
+      AppLanguage.om: 'Gumaata',
+      AppLanguage.am: 'ቲፕ',
+    },
+    'bayAndWasherLabel': {
+      AppLanguage.en: 'Bay / Washer',
+      AppLanguage.om: 'Bakka / Dhiqaa',
+      AppLanguage.am: 'ቦታ / አጣቢ',
+    },
+    'unassignedBay': {
+      AppLanguage.en: 'Assign Bay',
+      AppLanguage.om: 'Bakka Ramadi',
+      AppLanguage.am: 'ቦታ መድብ',
+    },
+    'busyLabel': {
+      AppLanguage.en: 'Busy',
+      AppLanguage.om: 'Qabameera',
+      AppLanguage.am: 'ተይዟል',
+    },
+    'activeLabel': {
+      AppLanguage.en: 'Active',
+      AppLanguage.om: 'Hojii Irra',
+      AppLanguage.am: 'በስራ ላይ',
+    },
+    'commissionShort': {
+      AppLanguage.en: 'Commission',
+      AppLanguage.om: 'Komishiinii',
+      AppLanguage.am: 'ኮሚሽን',
+    },
+    'dutyWorkers': {
+      AppLanguage.en: 'Duty',
+      AppLanguage.om: 'Hojii Irra',
+      AppLanguage.am: 'በስራ ላይ',
+    },
+    'dailyFinancialReportsTab': {
+      AppLanguage.en: 'Shift Logs & Deposits',
+      AppLanguage.om: 'Galmee Cufiinsaafi Baankii',
+      AppLanguage.am: 'የፈረቃ መዝገብ እና ተቀማጭ',
+    },
+    'safeCashierModeNotice': {
+      AppLanguage.en: 'Safe Mode: Bulk delete disabled for Cashier',
+      AppLanguage.om: 'Eegumsa: Haqumsii waliigalaa dhorkameera',
+      AppLanguage.am: 'ደህንነት፡ የጅምላ ማጥፊያ ተሰናክሏል',
+    },
+    'showerRecordedToast': {
+      AppLanguage.en: 'Recorded shower entry',
+      AppLanguage.om: 'Tajaajilli shaaworii galmaa\'eera',
+      AppLanguage.am: 'የሻወር አገልግሎት ተመዝግቧል',
+    },
+    'viewVoucher': {
+      AppLanguage.en: 'View Voucher',
+      AppLanguage.om: 'Ragaalee Ilaali',
+      AppLanguage.am: 'ደረሰኝ እይ',
+    },
+    'shiftLockedLabel': {
+      AppLanguage.en: 'Shift Locked',
+      AppLanguage.om: 'Shiffitiin Cufameera',
+      AppLanguage.am: 'ፈረቃ ተቆልፏል',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

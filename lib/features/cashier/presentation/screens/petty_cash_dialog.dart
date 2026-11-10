@@ -178,7 +178,7 @@ class _PettyCashDialogState extends State<PettyCashDialog> {
               // Expense Amount
               CustomTextField(
                 controller: _amountController,
-                label: '${state.tr('depositAmount')} *',
+                label: '${state.tr('expenseAmount')} *',
                 hint: 'e.g. 350',
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 prefixIcon: Icons.attach_money_rounded,
