@@ -1311,6 +1311,12 @@ class AppStateNotifier extends ChangeNotifier {
     return 0.0;
   }
 
+  /// Cash collected after subtracting day-shift carried cash already counted inside undepositedCashTodayETB.
+  double get nightShiftAdditionalCashETB {
+    final extra = undepositedCashTodayETB - managerCarriedCashETB;
+    return extra > 0 ? extra : 0.0;
+  }
+
   Future<bool> acceptCashierHandover({
     required String managerName,
     String? enteredOtp,
@@ -1504,8 +1510,11 @@ class AppStateNotifier extends ChangeNotifier {
     });
 
     final carried = shiftType == 'night' ? managerCarriedCashETB : 0.0;
+    final nightAdded = shiftType == 'night'
+        ? ((remainingCash - carried) > 0 ? (remainingCash - carried) : 0.0)
+        : 0.0;
     final totalCashToHandover = shiftType == 'night'
-        ? (carried + remainingCash)
+        ? (carried + nightAdded)
         : remainingCash;
 
     // Determine OTP and Handover Target based on method

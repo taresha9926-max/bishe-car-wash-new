@@ -530,42 +530,53 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  AutoCareAssets.buildPhotoThumbnail(
-                    imageUrl: isCarpet
-                        ? (b.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
-                        : AutoCareAssets.getCarTypeImage(b.carType),
-                    width: 38,
-                    height: 38,
-                    borderRadius: 8,
-                    fallbackIcon: isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    b.licensePlate,
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: isCarpet ? const Color(0xFF7C3AED).withOpacity(0.12) : AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(6),
+              Expanded(
+                child: Row(
+                  children: [
+                    AutoCareAssets.buildPhotoThumbnail(
+                      imageUrl: isCarpet
+                          ? (b.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+                          : AutoCareAssets.getCarTypeImage(b.carType),
+                      width: 38,
+                      height: 38,
+                      borderRadius: 8,
+                      fallbackIcon: isCarpet ? Icons.texture_rounded : Icons.directions_car_rounded,
                     ),
-                    child: Text(
-                      isCarpet
-                          ? (b.carpetType == 'type_b' ? state.tr('carpetTypeB') : state.tr('carpetTypeA'))
-                          : b.carType.displayName,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: isCarpet ? const Color(0xFF7C3AED) : AppColors.textSecondary,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        b.licensePlate,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.textPrimary),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isCarpet ? const Color(0xFF7C3AED).withOpacity(0.12) : AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          isCarpet
+                              ? (b.carpetType == 'type_b' ? state.tr('carpetTypeB') : state.tr('carpetTypeA'))
+                              : b.carType.localizedName(state.currentLanguage),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: isCarpet ? const Color(0xFF7C3AED) : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 CurrencyFormatter.format(b.totalPrice),
                 style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppColors.primary),
@@ -576,12 +587,17 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                isCarpet
-                    ? '${b.carpetDimensions != null && b.carpetDimensions!.isNotEmpty ? '${b.carpetDimensions} m² • ' : ''}${b.serviceType.localizedName(state.currentLanguage)}'
-                    : b.package.name,
-                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              Expanded(
+                child: Text(
+                  isCarpet
+                      ? '${b.carpetDimensions != null && b.carpetDimensions!.isNotEmpty ? '${b.carpetDimensions} m² • ' : ''}${b.serviceType.localizedName(state.currentLanguage)}'
+                      : b.localizedServiceDisplayName(state.currentLanguage),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -603,10 +619,15 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Customer: ${b.customerName} (${b.customerPhone})',
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              Expanded(
+                child: Text(
+                  '${b.customerName} (${b.customerPhone})',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 DateFormatter.formatDate(b.createdAt),
                 style: const TextStyle(fontSize: 11, color: AppColors.textMuted),

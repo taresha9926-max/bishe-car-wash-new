@@ -82,38 +82,46 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      AutoCareAssets.buildPhotoThumbnail(
-                        imageUrl: widget.isManagerClosing ? AutoCareAssets.packageTireRimUrl : AutoCareAssets.welcomeHeroUrl,
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        fallbackIcon: Icons.fact_check_rounded,
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.isManagerClosing ? state.tr('nightClosingTitle') : state.tr('dailyClosing'),
-                            style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: widget.isManagerClosing ? AutoCareAssets.packageTireRimUrl : AutoCareAssets.welcomeHeroUrl,
+                          width: 44,
+                          height: 44,
+                          borderRadius: 12,
+                          fallbackIcon: Icons.fact_check_rounded,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.isManagerClosing ? state.tr('nightClosingTitle') : state.tr('dailyClosing'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              Text(
+                                isAlreadyClosed
+                                    ? 'Shift Already Closed & Confirmed'
+                                    : (widget.isManagerClosing
+                                        ? 'Night shift closing & total payout to Admin'
+                                        : 'Day shift closing & handover to Operational Manager'),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: isAlreadyClosed ? AppColors.statusCompleted : AppColors.textSecondary,
+                                  fontWeight: isAlreadyClosed ? FontWeight.w700 : FontWeight.normal,
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            isAlreadyClosed
-                                ? 'Shift Already Closed & Confirmed'
-                                : (widget.isManagerClosing
-                                    ? 'Night shift closing & total payout to Admin'
-                                    : 'Day shift closing & handover to Operational Manager'),
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              color: isAlreadyClosed ? AppColors.statusCompleted : AppColors.textSecondary,
-                              fontWeight: isAlreadyClosed ? FontWeight.w700 : FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
@@ -166,9 +174,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                     if (widget.isManagerClosing) ...[
                       _buildClosingRow('Carried Cash from Cashier Handover:', CurrencyFormatter.format(state.managerCarriedCashETB), isBold: true, valueColor: Colors.indigo),
                       const SizedBox(height: 4),
-                      _buildClosingRow('Night Shift Cash in Drawer:', CurrencyFormatter.format(remainingCash), valueColor: AppColors.cashGreen),
+                      _buildClosingRow('Night Shift Cash Collected:', CurrencyFormatter.format(state.nightShiftAdditionalCashETB), valueColor: AppColors.cashGreen),
                       const Divider(height: 16),
-                      _buildClosingRow('Total Physical Cash Handed to Admin:', CurrencyFormatter.format(state.managerCarriedCashETB + remainingCash), isBold: true, valueColor: AppColors.primary),
+                      _buildClosingRow('Total Physical Cash Handed to Admin:', CurrencyFormatter.format(state.managerCarriedCashETB + state.nightShiftAdditionalCashETB), isBold: true, valueColor: AppColors.primary),
                     ] else ...[
                       _buildClosingRow('Petty Cash / Emergency Outflow:', CurrencyFormatter.format(petty), valueColor: Colors.deepOrange),
                       const SizedBox(height: 4),
@@ -192,10 +200,15 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${state.tr('teamCommissionDistribution')}:',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  Expanded(
+                    child: Text(
+                      '${state.tr('teamCommissionDistribution')}:',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     '${state.presentWashersCount} On Duty',
                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.oromiaGold),
@@ -241,36 +254,49 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      div.isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                                      size: 14,
-                                      color: div.isPresent ? AppColors.statusCompleted : Colors.red,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      div.washerName,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: div.isPresent ? FontWeight.w700 : FontWeight.w500,
-                                        color: div.isPresent ? AppColors.textPrimary : AppColors.textMuted,
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        div.isPresent ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                                        size: 14,
+                                        color: div.isPresent ? AppColors.statusCompleted : Colors.red,
                                       ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.surfaceVariant,
-                                        borderRadius: BorderRadius.circular(4),
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: Text(
+                                          div.washerName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: div.isPresent ? FontWeight.w700 : FontWeight.w500,
+                                            color: div.isPresent ? AppColors.textPrimary : AppColors.textMuted,
+                                          ),
+                                        ),
                                       ),
-                                      child: Text(
-                                        div.customTierName ?? '',
-                                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                                      ),
-                                    ),
-                                  ],
+                                      if (div.customTierName != null && div.customTierName!.isNotEmpty) ...[
+                                        const SizedBox(width: 4),
+                                        Flexible(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.surfaceVariant,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              div.customTierName!,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
+                                const SizedBox(width: 8),
                                 Text(
                                   div.isPresent
                                       ? '${div.percentageShare.toStringAsFixed(1)}% • ${CurrencyFormatter.format(div.earnedETB)}'
@@ -562,21 +588,32 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
   Widget _buildClosingRow(String label, String value, {bool isBold = false, Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isBold ? 13 : 12,
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
-            color: isBold ? AppColors.textPrimary : AppColors.textSecondary,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: isBold ? 13 : 12,
+              fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
+              color: isBold ? AppColors.textPrimary : AppColors.textSecondary,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isBold ? 13.5 : 12,
-            fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
-            color: valueColor ?? AppColors.textPrimary,
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: isBold ? 13.5 : 12,
+              fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
+              color: valueColor ?? AppColors.textPrimary,
+            ),
           ),
         ),
       ],

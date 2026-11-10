@@ -3850,6 +3850,71 @@ class AppStrings {
       AppLanguage.om: 'Shiffitiin Cufameera',
       AppLanguage.am: 'ፈረቃ ተቆልፏል',
     },
+    'managerTabHandoverClose': {
+      AppLanguage.en: 'Handover & Close',
+      AppLanguage.om: 'Wal-harkaa & Cufiinsa',
+      AppLanguage.am: 'ርክክብ እና መዝጊያ',
+    },
+    'managerTabTeam': {
+      AppLanguage.en: 'Team',
+      AppLanguage.om: 'Garee',
+      AppLanguage.am: 'ቡድን',
+    },
+    'cashierOtpSubmitPrompt': {
+      AppLanguage.en: 'submitted physical cash. Count drawer cash and enter the 4-digit Cashier OTP below:',
+      AppLanguage.om: 'maallaqa kaashii dhiheesseera. Maallaqa lakkaa\'iitii koodii OTP lakkoofsa 4 gadi galchi:',
+      AppLanguage.am: 'ጥሬ ገንዘብ አስገብቷል። ገንዘቡን ቆጥረው ባለ 4 አሃዝ የOTP ኮድ ከታች ያስገቡ:',
+    },
+    'enterFourDigitOtpError': {
+      AppLanguage.en: 'Please enter the 4-digit Cashier OTP code.',
+      AppLanguage.om: 'Maaloo koodii OTP kaasharii lakkoofsa 4 galchaa.',
+      AppLanguage.am: 'እባክዎ ባለ 4 አሃዝ የገንዘብ ተቀባይ OTP ኮድ ያስገቡ።',
+    },
+    'dayShiftHandoverCashLabel': {
+      AppLanguage.en: 'Day Shift Carried Cash:',
+      AppLanguage.om: 'Maallaqa Shiftii Guyyaa Wal-harkaa:',
+      AppLanguage.am: 'ከቀን ፈረቃ የተረከቡት ገንዘብ:',
+    },
+    'nightShiftNetCashLabel': {
+      AppLanguage.en: 'Night Shift Cash Collected:',
+      AppLanguage.om: 'Maallaqa Shiftii Halkanii Sassaabame:',
+      AppLanguage.am: 'በምሽት ፈረቃ የተሰበሰበ ገንዘብ:',
+    },
+    'totalCashToAdminLabel': {
+      AppLanguage.en: 'Total Physical Cash to Admin:',
+      AppLanguage.om: 'Maallaqa Kaashii Waliigalaa Adminiif:',
+      AppLanguage.am: 'ለአስተዳዳሪ የሚረከብ ጠቅላላ ጥሬ ገንዘብ:',
+    },
+    'initiateNightShiftClosing': {
+      AppLanguage.en: 'Initiate Night Shift Closing',
+      AppLanguage.om: 'Cufiinsa Shiftii Halkanii Jalqabi',
+      AppLanguage.am: 'የምሽት ፈረቃ መዝጊያ ጀምር',
+    },
+    'nightClosingConfirmed': {
+      AppLanguage.en: 'Night Closing Confirmed',
+      AppLanguage.om: 'Cufiinsi Halkanii Mirkanaa\'eera',
+      AppLanguage.am: 'የምሽት ፈረቃ መዝጊያ ተረጋግጧል',
+    },
+    'nightClosingSubDesc': {
+      AppLanguage.en: 'Reconciles night shift cash & washer pool and issues Admin handover OTP.',
+      AppLanguage.om: 'Maallaqaafi komishinii shiftii halkanii walitti qabee koodii OTP Adminiif kenna.',
+      AppLanguage.am: 'የምሽት ፈረቃ ገንዘብን እና የአጣቢዎችን ኮሚሽን አስልቶ ለአስተዳዳሪ የOTP ኮድ ይሰጣል።',
+    },
+    'cashToAdminSuffix': {
+      AppLanguage.en: 'cash to Admin',
+      AppLanguage.om: 'Adminiif',
+      AppLanguage.am: 'ለአስተዳዳሪ',
+    },
+    'awaitingHandoverLabel': {
+      AppLanguage.en: 'No Day Handover Yet',
+      AppLanguage.om: 'Wal-harkaan Guyyaa Hin Jiru',
+      AppLanguage.am: 'እስካሁን የቀን ርክክብ የለም',
+    },
+    'awaitingHandoverDesc': {
+      AppLanguage.en: 'When Cashier submits Day closing via Manager OTP, verification appears above.',
+      AppLanguage.om: 'Yeroo kaashariin cufiinsa guyyaa OTP Maanaajaraatiin ergu asirratti mul\'ata.',
+      AppLanguage.am: 'ገንዘብ ተቀባዩ የቀን ፈረቃን በስራ አስኪያጅ OTP ሲዘጋ ማረጋገጫው ከላይ ይታያል።',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
