@@ -232,6 +232,7 @@ class WashRepositoryImpl implements IWashRepository {
     required String bookingId,
     required DateTime nextScheduledTime,
     String? reason,
+    String? postponedByRole,
   }) async {
     final index = _bookings.indexWhere((b) => b.id == bookingId);
     if (index == -1) {
@@ -245,8 +246,30 @@ class WashRepositoryImpl implements IWashRepository {
       isPostponed: true,
       postponedReason: (reason != null && reason.trim().isNotEmpty) ? reason.trim() : booking.postponedReason,
       postponedAt: DateTime.now(),
+      postponedByRole: postponedByRole ?? booking.postponedByRole,
       scheduledTime: nextScheduledTime,
       clearAssignedBay: true,
+    );
+    _bookings[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<WashBooking> handoverBookingToManager({
+    required String bookingId,
+    required String handedOverBy,
+    String? note,
+  }) async {
+    final index = _bookings.indexWhere((b) => b.id == bookingId);
+    if (index == -1) {
+      throw Exception('Booking $bookingId not found');
+    }
+    final booking = _bookings[index];
+    final updated = booking.copyWith(
+      isHandedOverToManager: true,
+      handedOverBy: handedOverBy.trim().isNotEmpty ? handedOverBy.trim() : 'Cashier',
+      handoverNote: (note != null && note.trim().isNotEmpty) ? note.trim() : booking.handoverNote,
+      handedOverAt: DateTime.now(),
     );
     _bookings[index] = updated;
     return updated;

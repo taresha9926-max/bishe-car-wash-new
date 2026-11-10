@@ -100,6 +100,7 @@ class StationQueueTab extends StatefulWidget {
   final StationBay bay2;
   final StationBay van;
   final bool isMobile;
+  final bool isManager;
 
   const StationQueueTab({
     super.key,
@@ -108,6 +109,7 @@ class StationQueueTab extends StatefulWidget {
     required this.bay2,
     required this.van,
     required this.isMobile,
+    this.isManager = false,
   });
 
   @override
@@ -342,8 +344,20 @@ class _StationQueueTabState extends State<StationQueueTab> {
                           _buildMiniPill(b.carType.localizedName(langCode), AppColors.textSecondary, neutral: true),
                         if (b.isOnlineBooking)
                           _buildMiniPill(state.tr('onlineBookingBadge'), const Color(0xFF4F46E5), icon: Icons.phone_android_rounded),
+                        if (b.isHandedOverToManager && !b.isPostponed)
+                          _buildMiniPill(
+                            widget.isManager ? state.tr('fromDayCashierBadge') : state.tr('handedOverToManagerBadge'),
+                            const Color(0xFF4338CA),
+                            icon: Icons.swap_horiz_rounded,
+                          ),
                         if (b.isPostponed)
-                          _buildMiniPill(state.tr('postponedCarryOverBadge'), const Color(0xFFD97706), icon: Icons.schedule_send_rounded),
+                          _buildMiniPill(
+                            b.postponedByRole == 'Operational Manager'
+                                ? state.tr('postponedByManagerBadge')
+                                : state.tr('postponedCarryOverBadge'),
+                            const Color(0xFFD97706),
+                            icon: Icons.schedule_send_rounded,
+                          ),
                         if (b.payment.isPaid && b.status != WashStatus.completed && b.status != WashStatus.readyForPickup)
                           _buildMiniPill(state.tr('prepaidFinishWashBadge'), const Color(0xFF059669), icon: Icons.verified_rounded),
                         if (b.isPhoneBooking)
@@ -366,10 +380,22 @@ class _StationQueueTabState extends State<StationQueueTab> {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                     ),
+                    if (b.isHandedOverToManager &&
+                        !b.isPostponed &&
+                        b.handoverNote != null &&
+                        b.handoverNote!.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        '${b.handedOverBy != null ? "${b.handedOverBy}: " : ""}${b.handoverNote!}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF4338CA)),
+                      ),
+                    ],
                     if (b.isPostponed && b.postponedReason != null && b.postponedReason!.isNotEmpty) ...[
                       const SizedBox(height: 3),
                       Text(
-                        b.postponedReason!,
+                        '${b.postponedByRole != null ? "${b.postponedByRole}: " : ""}${b.postponedReason!}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFFB45309)),
@@ -496,6 +522,30 @@ class _StationQueueTabState extends State<StationQueueTab> {
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFF7C3AED)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                  ),
+                ),
+              if (!widget.isManager && !_isOnlineWaiting(b))
+                OutlinedButton.icon(
+                  onPressed: () => _showHandoverToManagerDialog(context, state, b),
+                  icon: Icon(
+                    b.isHandedOverToManager ? Icons.published_with_changes_rounded : Icons.swap_horiz_rounded,
+                    size: 14,
+                    color: const Color(0xFF4338CA),
+                  ),
+                  label: Text(
+                    state.tr('handoverToOpManagerAction'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF3730A3)),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: const Color(0xFF4338CA),
+                      width: b.isHandedOverToManager ? 1.5 : 1.0,
+                    ),
+                    backgroundColor: b.isHandedOverToManager ? const Color(0xFFEEF2FF) : null,
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -865,19 +915,19 @@ class _StationQueueTabState extends State<StationQueueTab> {
     }
   }
 
-  Future<void> _showPostponeDialog(BuildContext context, dynamic state, WashBooking b) async {
-    final reasonCtrl = TextEditingController();
+  Future<void> _showHandoverToManagerDialog(BuildContext context, dynamic state, WashBooking b) async {
+    String note = b.handoverNote ?? '';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Row(
           children: [
-            const Icon(Icons.schedule_send_rounded, color: Color(0xFFD97706)),
+            const Icon(Icons.swap_horiz_rounded, color: Color(0xFF4338CA)),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                state.tr('postponeDialogTitle'),
+                state.tr('handoverDialogTitle'),
                 style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
               ),
             ),
@@ -888,14 +938,15 @@ class _StationQueueTabState extends State<StationQueueTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${b.licensePlate} • ${state.tr("postponeDialogDesc")}',
+              '${b.licensePlate} (${b.status.localizedName(state.currentLang)}${b.payment.isPaid ? " • PAID" : ""}) • ${state.tr("handoverDialogDesc")}',
               style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.35),
             ),
             const SizedBox(height: 12),
-            TextField(
-              controller: reasonCtrl,
+            TextFormField(
+              initialValue: note,
+              onChanged: (v) => note = v,
               decoration: InputDecoration(
-                hintText: state.tr('postponeReasonHint'),
+                hintText: state.tr('handoverNoteHint'),
                 isDense: true,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -905,17 +956,102 @@ class _StationQueueTabState extends State<StationQueueTab> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(state.tr('cancel'))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4338CA), foregroundColor: Colors.white),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(state.tr('confirm')),
           ),
         ],
       ),
     );
-    final reason = reasonCtrl.text.trim();
-    reasonCtrl.dispose();
+    final trimmedNote = note.trim();
     if (confirmed == true) {
-      await state.postponeBookingToNextDay(bookingId: b.id, reason: reason.isNotEmpty ? reason : null);
+      await state.handoverBookingToManager(bookingId: b.id, note: trimmedNote.isNotEmpty ? trimmedNote : null);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${b.licensePlate}: ${state.tr("handoverSuccessMsg")}'), backgroundColor: const Color(0xFF4338CA)),
+        );
+      }
+    }
+  }
+
+  Future<void> _showPostponeDialog(BuildContext context, dynamic state, WashBooking b) async {
+    String reason = '';
+    final requireReason = widget.isManager;
+    String? errorMsg;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: Row(
+            children: [
+              const Icon(Icons.schedule_send_rounded, color: Color(0xFFD97706)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.tr('postponeDialogTitle'),
+                  style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${b.licensePlate} • ${state.tr("postponeDialogDesc")}',
+                style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.35),
+              ),
+              if (requireReason) ...[
+                const SizedBox(height: 8),
+                Text(
+                  state.tr('postponeReasonRequiredLabel'),
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Color(0xFFB45309)),
+                ),
+              ],
+              const SizedBox(height: 10),
+              TextFormField(
+                initialValue: reason,
+                onChanged: (v) {
+                  reason = v;
+                  if (errorMsg != null) {
+                    setDialogState(() => errorMsg = null);
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: state.tr('postponeReasonHint'),
+                  errorText: errorMsg,
+                  isDense: true,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(state.tr('cancel'))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
+              onPressed: () {
+                if (requireReason && reason.trim().isEmpty) {
+                  setDialogState(() => errorMsg = state.tr('postponeReasonRequiredError'));
+                  return;
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: Text(state.tr('confirm')),
+            ),
+          ],
+        ),
+      ),
+    );
+    final trimmedReason = reason.trim();
+    if (confirmed == true) {
+      await state.postponeBookingToNextDay(
+        bookingId: b.id,
+        reason: trimmedReason.isNotEmpty ? trimmedReason : null,
+        postponedByRole: widget.isManager ? 'Operational Manager' : 'Cashier',
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${b.licensePlate}: ${state.tr("postponedSuccessMsg")}'), backgroundColor: const Color(0xFFD97706)),

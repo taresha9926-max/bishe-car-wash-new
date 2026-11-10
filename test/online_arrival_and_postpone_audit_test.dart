@@ -16,6 +16,7 @@ import 'package:bishe_car_wash/features/booking_service/presentation/state/app_s
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
+import 'package:bishe_car_wash/features/manager/presentation/screens/operational_manager_dashboard_screen.dart';
 
 class _SeededAuditRepository extends WashRepositoryImpl {
   final List<WashBooking> seededBookings;
@@ -169,21 +170,27 @@ void main() {
       await state.approveOnlineBookingArrival(inProgressArrived.id);
       await state.updateWashStatus(inProgressArrived.id, WashStatus.washing);
 
-      // Day Shift Closing (handover to Manager) preserves unarrived online booking + records arrived handover
+      // Day Shift Closing (handover to Manager) auto-tags open vehicle + preserves unarrived online booking
       final dayClosing = await state.confirmDailyClosing(
         cashierName: 'Day Cashier',
         shiftType: 'day',
         handoverMethod: 'manager_otp',
       );
-      expect(dayClosing.notes, contains('Open vehicles handed to Night Shift (1): AR-0002'));
+      expect(dayClosing.notes, contains('Handed over to Operational Manager (1): AR-0002'));
+      expect(state.bookings.firstWhere((b) => b.id == inProgressArrived.id).isHandedOverToManager, isTrue);
       expect(state.bookings.any((b) => b.id == unarrivedNoShow.id), isTrue);
       expect(state.bookings.any((b) => b.id == inProgressArrived.id), isTrue);
 
-      // Postpone arrived unfinished vehicle to tomorrow morning before Night Closing
-      await state.postponeBookingToNextDay(bookingId: inProgressArrived.id, reason: 'Customer pickup tomorrow');
+      // Operational Manager postpones arrived unfinished vehicle to tomorrow morning before Night Closing
+      await state.postponeBookingToNextDay(
+        bookingId: inProgressArrived.id,
+        reason: 'Customer pickup tomorrow',
+        postponedByRole: 'Operational Manager',
+      );
       final postponedCar = state.bookings.firstWhere((b) => b.id == inProgressArrived.id);
       expect(postponedCar.isPostponed, isTrue);
       expect(postponedCar.postponedReason, 'Customer pickup tomorrow');
+      expect(postponedCar.postponedByRole, 'Operational Manager');
 
       // Night Shift Closing auto-deletes unarrived online no-show, preserves postponed arrived car!
       final nightClosing = await state.confirmDailyClosing(
@@ -193,9 +200,117 @@ void main() {
         handoverTo: 'Admin / Owner',
       );
       expect(nightClosing.notes, contains('Expired online no-shows cleared: 1'));
-      expect(nightClosing.notes, contains('Carry-over open vehicles (1): AR-0002'));
+      expect(nightClosing.notes, contains('Postponed to next morning (1): AR-0002'));
       expect(state.bookings.any((b) => b.id == unarrivedNoShow.id), isFalse);
       expect(state.bookings.any((b) => b.id == inProgressArrived.id), isTrue);
+    });
+
+    testWidgets('Cashier Handover to Op Manager + Manager mandatory-reason Postpone + Accountant Custody Trail', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      final state = AppStateNotifier(repository: WashRepositoryImpl());
+      await state.loadData();
+      state.switchRole(UserRole.cashier);
+
+      final car = await state.registerWalkIn(
+        customerName: 'Selamawit Handover',
+        licensePlate: 'HO-77777',
+        customerPhone: '+251933445566',
+        carType: CarType.automobile,
+        package: state.packages.first,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.cash,
+      );
+      await state.updateWashStatus(car.id, WashStatus.washing);
+
+      // 1. Cashier Queue shows BOTH "Handover to Operational Manager" AND "Postpone to Next Day"
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(theme: AppTheme.lightTheme, home: const CashierDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(state.tr('handoverToOpManagerAction')), findsOneWidget);
+      expect(find.text(state.tr('postponeNextDayAction')), findsOneWidget);
+
+      await tester.ensureVisible(find.text(state.tr('handoverToOpManagerAction')));
+      await tester.tap(find.text(state.tr('handoverToOpManagerAction')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).last, 'Half-washed interior remaining');
+      await tester.tap(find.text(state.tr('confirm')));
+      await tester.pumpAndSettle();
+
+      final handed = state.bookings.firstWhere((b) => b.id == car.id);
+      expect(handed.isHandedOverToManager, isTrue);
+      expect(handed.handoverNote, 'Half-washed interior remaining');
+      expect(handed.isPostponed, isFalse);
+      expect(handed.status, WashStatus.washing);
+      expect(find.text(state.tr('handedOverToManagerBadge')), findsOneWidget);
+
+      // Cashier submits Day Closing (Manager OTP) so Manager banner also displays handed-over vehicle
+      await state.confirmDailyClosing(
+        cashierName: 'Day Cashier',
+        shiftType: 'day',
+        handoverMethod: 'manager_otp',
+      );
+
+      // 2. Switch to Operational Manager Dashboard
+      state.switchRole(UserRole.manager);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(theme: AppTheme.lightTheme, home: const OperationalManagerDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Pending Cashier OTP card lists handed-over vehicle HO-77777; Queue shows FROM DAY CASHIER & hides Handover button
+      expect(find.textContaining('HO-77777'), findsAtLeastNWidgets(2));
+      expect(find.text(state.tr('fromDayCashierBadge')), findsOneWidget);
+      expect(find.text(state.tr('handoverToOpManagerAction')), findsNothing);
+      expect(find.text(state.tr('postponeNextDayAction')), findsOneWidget);
+
+      // Manager taps Postpone to Next Day -> Empty reason MUST be blocked
+      await tester.ensureVisible(find.text(state.tr('postponeNextDayAction')));
+      await tester.tap(find.text(state.tr('postponeNextDayAction')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(state.tr('confirm')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('postponeReasonRequiredError')), findsOneWidget);
+      expect(state.bookings.firstWhere((b) => b.id == car.id).isPostponed, isFalse);
+
+      // Manager enters valid reason -> Postpone succeeds & frees bay!
+      await tester.enterText(find.byType(TextField).last, 'Water outage at night');
+      await tester.tap(find.text(state.tr('confirm')));
+      await tester.pumpAndSettle();
+
+      final postponed = state.bookings.firstWhere((b) => b.id == car.id);
+      expect(postponed.isPostponed, isTrue);
+      expect(postponed.postponedByRole, 'Operational Manager');
+      expect(postponed.postponedReason, 'Water outage at night');
+      expect(postponed.assignedBay, isNull);
+      expect(find.text(state.tr('postponedByManagerBadge')), findsOneWidget);
+
+      // 3. Accountant Carry-Over Audit shows full Day Cashier -> Op. Manager -> Postponed by Op. Manager custody trail
+      state.switchRole(UserRole.accountant);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(theme: AppTheme.lightTheme, home: const AccountantDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.textContaining('Water outage at night'));
+      expect(find.textContaining(state.tr('handoffCustodyArrow')), findsOneWidget);
+      expect(find.textContaining('Operational Manager'), findsAtLeastNWidgets(1));
+      expect(find.textContaining('Water outage at night'), findsOneWidget);
     });
 
     testWidgets('Postponed & Prepaid carry-over accounting attributes revenue by paidAt and shows in Accountant Audit', (tester) async {
@@ -263,7 +378,7 @@ void main() {
       expect(find.textContaining('PRE-WASH'), findsOneWidget);
     });
 
-    test('Supabase booking [BOOKING_META] round-trip preserves online/postpone/paidAt fields', () {
+    test('Supabase booking [BOOKING_META] round-trip preserves online/postpone/handover/paidAt fields', () {
       final now = DateTime.now();
       final encoded = SupabaseWashRepositoryImpl.encodeDeliveryLocationWithMeta(
         baseText: 'Services: Wax, Interior',
@@ -271,6 +386,11 @@ void main() {
         isPostponed: true,
         postponedReason: 'Morning pickup',
         postponedAt: now,
+        postponedByRole: 'Operational Manager',
+        isHandedOverToManager: true,
+        handedOverBy: 'Meron Cashier',
+        handoverNote: 'Wax finished',
+        handedOverAt: now,
         paidAt: now,
       );
       expect(SupabaseWashRepositoryImpl.extractCleanDeliveryLocation(encoded), 'Services: Wax, Interior');
@@ -278,6 +398,11 @@ void main() {
       expect(decoded['isOnline'], isTrue);
       expect(decoded['isPostponed'], isTrue);
       expect(decoded['postponedReason'], 'Morning pickup');
+      expect(decoded['postponedByRole'], 'Operational Manager');
+      expect(decoded['isHandedOverToManager'], isTrue);
+      expect(decoded['handedOverBy'], 'Meron Cashier');
+      expect(decoded['handoverNote'], 'Wax finished');
+      expect(DateTime.tryParse(decoded['handedOverAt'] as String), isNotNull);
       expect(DateTime.tryParse(decoded['paidAt'] as String), isNotNull);
     });
 
@@ -304,6 +429,20 @@ void main() {
         'noCarryOverVehicles',
         'stepApprovedDesc',
         'stepArrivedDesc',
+        'handoverToOpManagerAction',
+        'handedOverToManagerBadge',
+        'fromDayCashierBadge',
+        'postponedByManagerBadge',
+        'handoverDialogTitle',
+        'handoverDialogDesc',
+        'handoverNoteHint',
+        'handoverSuccessMsg',
+        'postponeReasonRequiredError',
+        'postponeReasonRequiredLabel',
+        'handedOverVehiclesTitle',
+        'postponedByLabel',
+        'custodyChainLabel',
+        'handoffCustodyArrow',
       ];
       for (final key in keys) {
         final en = AppStrings.get(key, AppLanguage.en);

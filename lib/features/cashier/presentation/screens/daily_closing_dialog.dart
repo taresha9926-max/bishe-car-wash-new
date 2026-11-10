@@ -569,7 +569,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
-                                  '${state.tr("openVehiclesHandoverTitle")} (${openVehicles.length})',
+                                  (!widget.isManagerClosing && _handoverMethod == 'manager_otp')
+                                      ? '${state.tr("handedOverVehiclesTitle")} (${openVehicles.length})'
+                                      : '${state.tr("openVehiclesHandoverTitle")} (${openVehicles.length})',
                                   style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF312E81)),
                                 ),
                               ),
@@ -577,7 +579,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${state.tr("openVehiclesHandoverDesc")} (${openVehicles.map((v) => "${v.licensePlate}${v.payment.isPaid ? " [PAID]" : ""}").take(5).join(", ")})',
+                            '${state.tr("openVehiclesHandoverDesc")} (${openVehicles.map((v) => "${v.licensePlate}${v.isPostponed ? " [POSTPONED]" : ""}${v.payment.isPaid ? " [PAID]" : ""}").take(5).join(", ")})',
                             style: const TextStyle(fontSize: 11.5, color: Color(0xFF3730A3), height: 1.3),
                           ),
                         ],

@@ -146,10 +146,15 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     required bool isPostponed,
     String? postponedReason,
     DateTime? postponedAt,
+    String? postponedByRole,
+    bool isHandedOverToManager = false,
+    String? handedOverBy,
+    String? handoverNote,
+    DateTime? handedOverAt,
     DateTime? paidAt,
   }) {
     final clean = extractCleanDeliveryLocation(baseText);
-    if (!isOnlineBooking && !isPostponed && paidAt == null) {
+    if (!isOnlineBooking && !isPostponed && !isHandedOverToManager && paidAt == null) {
       return clean;
     }
     final meta = <String, dynamic>{
@@ -157,10 +162,35 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (isPostponed) 'isPostponed': true,
       if (postponedReason != null && postponedReason.isNotEmpty) 'postponedReason': postponedReason,
       if (postponedAt != null) 'postponedAt': postponedAt.toIso8601String(),
+      if (postponedByRole != null && postponedByRole.isNotEmpty) 'postponedByRole': postponedByRole,
+      if (isHandedOverToManager) 'isHandedOverToManager': true,
+      if (handedOverBy != null && handedOverBy.isNotEmpty) 'handedOverBy': handedOverBy,
+      if (handoverNote != null && handoverNote.isNotEmpty) 'handoverNote': handoverNote,
+      if (handedOverAt != null) 'handedOverAt': handedOverAt.toIso8601String(),
       if (paidAt != null) 'paidAt': paidAt.toIso8601String(),
     };
     final tag = '$_bookingMetaPrefix${jsonEncode(meta)}]';
     return (clean == null || clean.isEmpty) ? tag : '$clean\n$tag';
+  }
+
+  static String? _encodeMetaFromBooking(WashBooking b) {
+    final baseLoc = b.deliveryLocation ??
+        (b.selectedServices != null && b.selectedServices!.isNotEmpty
+            ? 'Services: ${b.selectedServices!.join(", ")}'
+            : b.gpsCoordinates);
+    return encodeDeliveryLocationWithMeta(
+      baseText: baseLoc,
+      isOnlineBooking: b.isOnlineBooking,
+      isPostponed: b.isPostponed,
+      postponedReason: b.postponedReason,
+      postponedAt: b.postponedAt,
+      postponedByRole: b.postponedByRole,
+      isHandedOverToManager: b.isHandedOverToManager,
+      handedOverBy: b.handedOverBy,
+      handoverNote: b.handoverNote,
+      handedOverAt: b.handedOverAt,
+      paidAt: b.payment.paidAt,
+    );
   }
 
   final String supabaseUrl;
@@ -560,6 +590,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         final postponedAt = bookingMeta['postponedAt'] != null
             ? DateTime.tryParse(bookingMeta['postponedAt'].toString())
             : null;
+        final handedOverAt = bookingMeta['handedOverAt'] != null
+            ? DateTime.tryParse(bookingMeta['handedOverAt'].toString())
+            : null;
 
         return WashBooking(
           id: json['id'].toString(),
@@ -597,6 +630,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           isPostponed: bookingMeta['isPostponed'] == true,
           postponedReason: bookingMeta['postponedReason']?.toString(),
           postponedAt: postponedAt,
+          postponedByRole: bookingMeta['postponedByRole']?.toString(),
+          isHandedOverToManager: bookingMeta['isHandedOverToManager'] == true,
+          handedOverBy: bookingMeta['handedOverBy']?.toString(),
+          handoverNote: bookingMeta['handoverNote']?.toString(),
+          handedOverAt: handedOverAt,
         );
       }).toList();
     } catch (e) {
@@ -626,11 +664,6 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
                   ? 'b0000000-0000-0000-0000-000000000003'
                   : null));
 
-      final baseLoc = booking.deliveryLocation ??
-          (booking.selectedServices != null && booking.selectedServices!.isNotEmpty
-              ? 'Services: ${booking.selectedServices!.join(", ")}'
-              : booking.gpsCoordinates);
-
       final payload = {
         'owner_name': booking.customerName,
         'customer_phone': booking.customerPhone,
@@ -639,14 +672,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'package_id': _isUuid(booking.package.id) ? booking.package.id : null,
         'assigned_bay_id': bayId,
         'license_plate': booking.licensePlate,
-        'delivery_location': encodeDeliveryLocationWithMeta(
-          baseText: baseLoc,
-          isOnlineBooking: booking.isOnlineBooking,
-          isPostponed: booking.isPostponed,
-          postponedReason: booking.postponedReason,
-          postponedAt: booking.postponedAt,
-          paidAt: booking.payment.paidAt,
-        ),
+        'delivery_location': _encodeMetaFromBooking(booking),
         'status': booking.status.name,
         'is_paid': booking.payment.isPaid,
         'payment_method': booking.payment.method.name,
@@ -843,16 +869,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           'transaction_ref': transactionRef,
           'receipt_url': receiptScreenshot,
           if (existing != null)
-            'delivery_location': encodeDeliveryLocationWithMeta(
-              baseText: existing.deliveryLocation ??
-                  (existing.selectedServices != null && existing.selectedServices!.isNotEmpty
-                      ? 'Services: ${existing.selectedServices!.join(", ")}'
-                      : existing.gpsCoordinates),
-              isOnlineBooking: existing.isOnlineBooking,
-              isPostponed: existing.isPostponed,
-              postponedReason: existing.postponedReason,
-              postponedAt: existing.postponedAt,
-              paidAt: now,
+            'delivery_location': _encodeMetaFromBooking(
+              existing.copyWith(payment: existing.payment.copyWith(paidAt: now)),
             ),
         });
 
@@ -926,6 +944,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     required String bookingId,
     required DateTime nextScheduledTime,
     String? reason,
+    String? postponedByRole,
   }) async {
     final now = DateTime.now();
     try {
@@ -941,33 +960,25 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               'assigned_washer_name': null,
             });
           }
-          await _patch('wash_bookings?id=eq.$bookingId', {
-            'assigned_bay_id': null,
-            'scheduled_time': nextScheduledTime.toIso8601String(),
-            'delivery_location': encodeDeliveryLocationWithMeta(
-              baseText: existing.deliveryLocation ??
-                  (existing.selectedServices != null && existing.selectedServices!.isNotEmpty
-                      ? 'Services: ${existing.selectedServices!.join(", ")}'
-                      : existing.gpsCoordinates),
-              isOnlineBooking: existing.isOnlineBooking,
-              isPostponed: true,
-              postponedReason: (reason != null && reason.trim().isNotEmpty) ? reason.trim() : existing.postponedReason,
-              postponedAt: now,
-              paidAt: existing.payment.paidAt,
-            ),
-          });
           final updated = existing.copyWith(
             isPostponed: true,
             postponedReason: (reason != null && reason.trim().isNotEmpty) ? reason.trim() : existing.postponedReason,
             postponedAt: now,
+            postponedByRole: postponedByRole ?? existing.postponedByRole,
             scheduledTime: nextScheduledTime,
             clearAssignedBay: true,
           );
+          await _patch('wash_bookings?id=eq.$bookingId', {
+            'assigned_bay_id': null,
+            'scheduled_time': nextScheduledTime.toIso8601String(),
+            'delivery_location': _encodeMetaFromBooking(updated),
+          });
           try {
             await _fallbackLocalRepo.postponeBooking(
               bookingId: bookingId,
               nextScheduledTime: nextScheduledTime,
               reason: reason,
+              postponedByRole: postponedByRole,
             );
           } catch (_) {}
           return updated;
@@ -980,6 +991,47 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       bookingId: bookingId,
       nextScheduledTime: nextScheduledTime,
       reason: reason,
+      postponedByRole: postponedByRole,
+    );
+  }
+
+  @override
+  Future<WashBooking> handoverBookingToManager({
+    required String bookingId,
+    required String handedOverBy,
+    String? note,
+  }) async {
+    final now = DateTime.now();
+    try {
+      if (_isUuid(bookingId)) {
+        final existing = await getBookingById(bookingId);
+        if (existing != null) {
+          final updated = existing.copyWith(
+            isHandedOverToManager: true,
+            handedOverBy: handedOverBy.trim().isNotEmpty ? handedOverBy.trim() : 'Cashier',
+            handoverNote: (note != null && note.trim().isNotEmpty) ? note.trim() : existing.handoverNote,
+            handedOverAt: now,
+          );
+          await _patch('wash_bookings?id=eq.$bookingId', {
+            'delivery_location': _encodeMetaFromBooking(updated),
+          });
+          try {
+            await _fallbackLocalRepo.handoverBookingToManager(
+              bookingId: bookingId,
+              handedOverBy: handedOverBy,
+              note: note,
+            );
+          } catch (_) {}
+          return updated;
+        }
+      }
+    } catch (e) {
+      debugPrint('Supabase handoverBookingToManager exception: $e');
+    }
+    return await _fallbackLocalRepo.handoverBookingToManager(
+      bookingId: bookingId,
+      handedOverBy: handedOverBy,
+      note: note,
     );
   }
 

@@ -307,8 +307,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             controller: _adminCashierOtpController,
             title: state.tr('cashierHandoverVerification'),
             badgeText: state.tr('pendingDayOtpBadge'),
-            subtitle:
-                '${anyPendingDay.cashierName} • ${CurrencyFormatter.format(anyPendingDay.handoverCashAmount > 0 ? anyPendingDay.handoverCashAmount : anyPendingDay.cashRemaining)}',
+            subtitle: [
+              '${anyPendingDay.cashierName} • ${CurrencyFormatter.format(anyPendingDay.handoverCashAmount > 0 ? anyPendingDay.handoverCashAmount : anyPendingDay.cashRemaining)}',
+              if (anyPendingDay.notes != null && anyPendingDay.notes.toString().trim().isNotEmpty)
+                anyPendingDay.notes.toString().trim(),
+            ].join('\n'),
             buttonLabel: state.tr('confirmCashierHandover'),
             accentColor: const Color(0xFFD97706),
             icon: Icons.wb_sunny_rounded,
@@ -322,8 +325,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             controller: _adminNightOtpController,
             title: state.tr('managerHandoverVerification'),
             badgeText: state.tr('pendingVaultSealBadge'),
-            subtitle:
-                '${pendingNight.cashierName} • ${CurrencyFormatter.format(pendingNight.handoverCashAmount)}',
+            subtitle: [
+              '${pendingNight.cashierName} • ${CurrencyFormatter.format(pendingNight.handoverCashAmount)}',
+              if (pendingNight.notes != null && pendingNight.notes.toString().trim().isNotEmpty)
+                pendingNight.notes.toString().trim(),
+            ].join('\n'),
             buttonLabel: state.tr('confirmManagerNightCash'),
             accentColor: const Color(0xFF4338CA),
             icon: Icons.shield_moon_rounded,

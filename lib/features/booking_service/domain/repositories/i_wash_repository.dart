@@ -41,6 +41,12 @@ abstract class IBookingRepository {
     required String bookingId,
     required DateTime nextScheduledTime,
     String? reason,
+    String? postponedByRole,
+  });
+  Future<WashBooking> handoverBookingToManager({
+    required String bookingId,
+    required String handedOverBy,
+    String? note,
   });
   Future<void> deleteBooking(String bookingId);
   Future<void> clearAllBookings();

@@ -4300,6 +4300,76 @@ class AppStrings {
       AppLanguage.om: 'Qabaan qarshii buufata gahuu keessan mirkaneesseera.',
       AppLanguage.am: 'ገንዘብ ተቀባዩ ጣቢያ መድረስዎን አረጋግጧል።',
     },
+    'handoverToOpManagerAction': {
+      AppLanguage.en: 'Handover to Operational Manager',
+      AppLanguage.om: 'Hogganaa Hojiitti Kenni',
+      AppLanguage.am: 'ለኦፕሬሽን ማናጀር አስረክብ',
+    },
+    'handedOverToManagerBadge': {
+      AppLanguage.en: 'HANDED TO OP. MANAGER',
+      AppLanguage.om: 'HOGGANAA HOJIITTI KENNAME',
+      AppLanguage.am: 'ለኦፕሬሽን ማናጀር የተረከበ',
+    },
+    'fromDayCashierBadge': {
+      AppLanguage.en: 'FROM DAY CASHIER',
+      AppLanguage.om: 'KAASHIYARA GUYAA IRRAA',
+      AppLanguage.am: 'ከቀን ካሸር የመጣ',
+    },
+    'postponedByManagerBadge': {
+      AppLanguage.en: 'POSTPONED BY OP. MANAGER',
+      AppLanguage.om: 'HOGGANAA HOJIIN BORUUTTI DARBE',
+      AppLanguage.am: 'በኦፕሬሽን ማናጀር ለነገ የተዛወረ',
+    },
+    'handoverDialogTitle': {
+      AppLanguage.en: 'Handover to Operational Manager',
+      AppLanguage.om: 'Hogganaa Hojiitti Dabarsi',
+      AppLanguage.am: 'ለኦፕሬሽን ማናጀር ማስረከብ',
+    },
+    'handoverDialogDesc': {
+      AppLanguage.en: 'Keep this vehicle active for Night Shift continuation under the Operational Manager. Current wash stage, bay & payment status stay preserved.',
+      AppLanguage.om: 'Konkolaataan kun shiftii halkaniitti hogganaa hojiitiin akka itti fufu godhi. Sadarkaan dhiqannaa, booxinii fi haalli kaffaltii ni eegama.',
+      AppLanguage.am: 'ይህ ተሽከርካሪ በምሽት ፈረቃ በኦፕሬሽን ማናጀር ስር እንዲቀጥል ያስረክቡ። የእጥበት ደረጃው፣ ቦታው እና የክፍያ ሁኔታው እንደተጠበቀ ይቆያል።',
+    },
+    'handoverNoteHint': {
+      AppLanguage.en: 'Optional note (e.g. half-washed, prepaid)...',
+      AppLanguage.om: 'Yaada dabalataa (fkn. walakkaan dhiqame, kaffalameera)...',
+      AppLanguage.am: 'ተጨማሪ ማስታወሻ (ለምሳሌ፡ ግማሽ የታጠበ፣ የተከፈለ)...',
+    },
+    'handoverSuccessMsg': {
+      AppLanguage.en: 'Vehicle handed over to Operational Manager for Night Shift.',
+      AppLanguage.om: 'Konkolaataan shiftii halkaniif Hogganaa Hojiitti dabarfameera.',
+      AppLanguage.am: 'ተሽከርካሪው ለምሽት ፈረቃ ለኦፕሬሽን ማናጀር ተሰጥቷል።',
+    },
+    'postponeReasonRequiredError': {
+      AppLanguage.en: 'Operational Manager must enter a reason before postponing to next day.',
+      AppLanguage.om: 'Hogganaan Hojii gara boruutti dabarsuun dura sababa barreessuu qaba.',
+      AppLanguage.am: 'ኦፕሬሽን ማናጀር ለነገ ከማዘዋወሩ በፊት ምክንያት መጻፍ አለበት።',
+    },
+    'postponeReasonRequiredLabel': {
+      AppLanguage.en: 'Reason required for Accountant & Admin audit *',
+      AppLanguage.om: 'Sababa dirqama oodiitiif barreeffamu *',
+      AppLanguage.am: 'ለሂሳብ እና ለአስተዳዳሪ ኦዲት የሚያስፈልግ የግድ ምክንያት *',
+    },
+    'handedOverVehiclesTitle': {
+      AppLanguage.en: 'Handed-Over Vehicles from Day Cashier',
+      AppLanguage.om: 'Konkolaattota Kaashiyara Guyyaa Irraa Kennaman',
+      AppLanguage.am: 'ከቀን ካሸር የተረከቡ ተሽከርካሪዎች',
+    },
+    'postponedByLabel': {
+      AppLanguage.en: 'Postponed by',
+      AppLanguage.om: 'Kan dabarse',
+      AppLanguage.am: 'ያዘዋወረው',
+    },
+    'custodyChainLabel': {
+      AppLanguage.en: 'Custody',
+      AppLanguage.om: 'Harkaa-Harkatti',
+      AppLanguage.am: 'የርክክብ ሰንሰለት',
+    },
+    'handoffCustodyArrow': {
+      AppLanguage.en: 'Day Cashier → Op. Manager',
+      AppLanguage.om: 'Kaashiyara Guyyaa → Hogganaa Hojii',
+      AppLanguage.am: 'ቀን ካሸር → ኦፕሬሽን ማናጀር',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

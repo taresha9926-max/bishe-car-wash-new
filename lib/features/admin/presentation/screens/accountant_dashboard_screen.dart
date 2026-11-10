@@ -399,7 +399,13 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                                           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
                                         ),
                                         Text(
-                                          '${b.createdAt.day}/${b.createdAt.month} • ${b.customerName}${b.postponedReason != null ? " • ${b.postponedReason}" : ""}',
+                                          [
+                                            '${b.createdAt.day}/${b.createdAt.month} • ${b.customerName}',
+                                            if (b.isHandedOverToManager) state.tr('handoffCustodyArrow'),
+                                            if (b.postponedByRole != null && b.postponedByRole!.isNotEmpty)
+                                              '${state.tr("postponedByLabel")}: ${b.postponedByRole}',
+                                            if (b.postponedReason != null && b.postponedReason!.isNotEmpty) b.postponedReason!,
+                                          ].join(' • '),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),

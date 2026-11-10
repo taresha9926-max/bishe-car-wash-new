@@ -92,6 +92,7 @@ class _OperationalManagerDashboardScreenState
                       bay2: bay2,
                       van: van,
                       isMobile: isMobile,
+                      isManager: true,
                     )
                   else if (_tabController.index == 1)
                     StationMoneyTab(
@@ -252,6 +253,28 @@ class _OperationalManagerDashboardScreenState
             '${pending.cashierName} • ${state.tr("cashierOtpSubmitPrompt")}',
             style: const TextStyle(fontSize: 11.5, color: Color(0xFF78350F), fontWeight: FontWeight.w600),
           ),
+          if ((state.handedOverToManagerBookings as List).isNotEmpty ||
+              (pending.notes != null && pending.notes.toString().trim().isNotEmpty)) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.72),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.45)),
+              ),
+              child: Text(
+                (state.handedOverToManagerBookings as List).isNotEmpty
+                    ? '${state.tr("handedOverVehiclesTitle")} (${(state.handedOverToManagerBookings as List).length}): '
+                        '${(state.handedOverToManagerBookings as List).map((v) => "${v.licensePlate}${v.payment.isPaid ? " [PAID]" : ""}").take(5).join(", ")}'
+                    : pending.notes.toString(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Row(
             children: [

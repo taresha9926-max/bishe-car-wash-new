@@ -717,6 +717,11 @@ class AppStateNotifier extends ChangeNotifier {
     }).toList();
   }
 
+  /// Active vehicles explicitly or automatically handed over from Day Cashier to Operational Manager.
+  List<WashBooking> get handedOverToManagerBookings {
+    return openArrivedQueueBookings.where((b) => b.isHandedOverToManager && !b.isPostponed).toList();
+  }
+
   /// Carry-over / postponed / prepaid unfinished orders surfaced in Accountant & Admin audits.
   List<WashBooking> get carryOverAuditBookings {
     final now = DateTime.now();
@@ -1558,6 +1563,22 @@ class AppStateNotifier extends ChangeNotifier {
 
     final openArrivedSnapshot = List<WashBooking>.from(openArrivedQueueBookings);
     final isEndOfBusinessDay = shiftType == 'night' || handoverMethod != 'manager_otp';
+    if (shiftType == 'day' && handoverMethod == 'manager_otp') {
+      bool autoHandedOver = false;
+      for (final b in openArrivedSnapshot) {
+        if (!b.isHandedOverToManager && !b.isPostponed) {
+          await _repository.handoverBookingToManager(
+            bookingId: b.id,
+            handedOverBy: cashierName,
+            note: 'Handed over at Day Shift closing',
+          );
+          autoHandedOver = true;
+        }
+      }
+      if (autoHandedOver) {
+        await _refreshBookingsAndBays();
+      }
+    }
     int clearedOnlineNoShows = 0;
     if (isEndOfBusinessDay) {
       final expiredNoShows = List<WashBooking>.from(unarrivedOnlineBookingsToday);
@@ -1657,12 +1678,26 @@ class AppStateNotifier extends ChangeNotifier {
 
     final auditParts = <String>[];
     if (openArrivedSnapshot.isNotEmpty) {
-      final platesPreview = openArrivedSnapshot.map((b) => b.licensePlate).take(5).join(', ');
-      auditParts.add(
-        isEndOfBusinessDay
-            ? 'Carry-over open vehicles (${openArrivedSnapshot.length}): $platesPreview'
-            : 'Open vehicles handed to Night Shift (${openArrivedSnapshot.length}): $platesPreview',
-      );
+      final postponedList = openArrivedSnapshot.where((b) => b.isPostponed).toList();
+      final unpostponedList = openArrivedSnapshot.where((b) => !b.isPostponed).toList();
+      if (isEndOfBusinessDay) {
+        if (postponedList.isNotEmpty) {
+          final platesPreview = postponedList.map((b) => '${b.licensePlate}${b.payment.isPaid ? " [PAID]" : ""}').take(5).join(', ');
+          auditParts.add('Postponed to next morning (${postponedList.length}): $platesPreview');
+        }
+        if (unpostponedList.isNotEmpty) {
+          final platesPreview = unpostponedList.map((b) => b.licensePlate).take(5).join(', ');
+          auditParts.add('Carry-over open vehicles (${unpostponedList.length}): $platesPreview');
+        }
+      } else {
+        final activeHandover = unpostponedList.isNotEmpty ? unpostponedList : openArrivedSnapshot;
+        final platesPreview = activeHandover.map((b) => '${b.licensePlate}${b.payment.isPaid ? " [PAID]" : ""}').take(5).join(', ');
+        auditParts.add('Handed over to Operational Manager (${activeHandover.length}): $platesPreview');
+        if (postponedList.isNotEmpty && unpostponedList.isNotEmpty) {
+          final postPreview = postponedList.map((b) => b.licensePlate).take(3).join(', ');
+          auditParts.add('Postponed carry-over (${postponedList.length}): $postPreview');
+        }
+      }
     }
     if (clearedOnlineNoShows > 0) {
       auditParts.add('Expired online no-shows cleared: $clearedOnlineNoShows');
@@ -2211,17 +2246,34 @@ class AppStateNotifier extends ChangeNotifier {
     await updateWashStatus(bookingId, WashStatus.confirmed);
   }
 
+  /// Cashier hands over an unfinished arrived vehicle to Operational Manager for Night Shift continuation
+  Future<void> handoverBookingToManager({
+    required String bookingId,
+    String? note,
+  }) async {
+    await _repository.handoverBookingToManager(
+      bookingId: bookingId,
+      handedOverBy: activeStaffFullName ?? 'Cashier',
+      note: note,
+    );
+    await _refreshBookingsAndBays();
+  }
+
   /// Postpones an arrived unfinished vehicle to the next day's morning queue
   Future<void> postponeBookingToNextDay({
     required String bookingId,
     String? reason,
+    String? postponedByRole,
   }) async {
     final now = DateTime.now();
     final nextMorning = DateTime(now.year, now.month, now.day + 1, 8, 0);
+    final roleLabel = postponedByRole ??
+        (currentRole == UserRole.manager ? 'Operational Manager' : 'Cashier');
     await _repository.postponeBooking(
       bookingId: bookingId,
       nextScheduledTime: nextMorning,
       reason: reason,
+      postponedByRole: roleLabel,
     );
     await _refreshBookingsAndBays();
   }

@@ -36,6 +36,11 @@ class WashBooking {
   final bool isPostponed;
   final String? postponedReason;
   final DateTime? postponedAt;
+  final String? postponedByRole;
+  final bool isHandedOverToManager;
+  final String? handedOverBy;
+  final String? handoverNote;
+  final DateTime? handedOverAt;
 
   const WashBooking({
     required this.id,
@@ -67,6 +72,11 @@ class WashBooking {
     this.isPostponed = false,
     this.postponedReason,
     this.postponedAt,
+    this.postponedByRole,
+    this.isHandedOverToManager = false,
+    this.handedOverBy,
+    this.handoverNote,
+    this.handedOverAt,
   });
 
   double get totalPrice => customTotalPrice ?? package.getPriceFor(carType);
@@ -132,6 +142,11 @@ class WashBooking {
     bool? isPostponed,
     String? postponedReason,
     DateTime? postponedAt,
+    String? postponedByRole,
+    bool? isHandedOverToManager,
+    String? handedOverBy,
+    String? handoverNote,
+    DateTime? handedOverAt,
     bool clearAssignedBay = false,
   }) {
     return WashBooking(
@@ -164,6 +179,11 @@ class WashBooking {
       isPostponed: isPostponed ?? this.isPostponed,
       postponedReason: postponedReason ?? this.postponedReason,
       postponedAt: postponedAt ?? this.postponedAt,
+      postponedByRole: postponedByRole ?? this.postponedByRole,
+      isHandedOverToManager: isHandedOverToManager ?? this.isHandedOverToManager,
+      handedOverBy: handedOverBy ?? this.handedOverBy,
+      handoverNote: handoverNote ?? this.handoverNote,
+      handedOverAt: handedOverAt ?? this.handedOverAt,
     );
   }
 }
