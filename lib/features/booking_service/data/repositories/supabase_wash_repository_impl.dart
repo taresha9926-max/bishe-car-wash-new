@@ -206,6 +206,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   String? get lastClosingSyncError => _lastClosingSyncError;
 
+  @override
+  void clearClosingSyncError() {
+    _lastClosingSyncError = null;
+  }
+
   SupabaseWashRepositoryImpl({
     required this.supabaseUrl,
     required this.anonKey,
@@ -1084,6 +1089,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<void> clearAllBookings() async {
     _dataPurgeEpoch = DateTime.now();
+    _lastClosingSyncError = null;
     try {
       // 1. Invoke server-side RPC function (truncates bookings, logs, sms, and resets bays)
       await _post('rpc/clear_all_bookings', {});
@@ -1376,6 +1382,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> deleteDailyFinancialClosing(String id) async {
+    _lastClosingSyncError = null;
     try {
       await _delete('daily_closings?id=eq.$id');
     } catch (e) {

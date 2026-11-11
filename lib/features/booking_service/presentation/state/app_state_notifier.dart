@@ -410,6 +410,11 @@ class AppStateNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get closingCloudSyncError => _repository.lastClosingSyncError;
 
+  void clearClosingCloudSyncError() {
+    _repository.clearClosingSyncError();
+    notifyListeners();
+  }
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
@@ -525,6 +530,9 @@ class AppStateNotifier extends ChangeNotifier {
     _showerRecords.clear();
     _isDailyCommissionDisbursedToday = false;
     _disbursedCommissionPoolAmount = 0.0;
+    _hasNewCashierClosingAlert = false;
+    _latestClosingAlert = null;
+    _repository.clearClosingSyncError();
     notifyListeners();
     await _repository.clearAllBookings();
     try {
@@ -1559,6 +1567,9 @@ class AppStateNotifier extends ChangeNotifier {
 
     if (index != -1) {
       final closing = _dailyFinancialClosings.removeAt(index);
+      _repository.clearClosingSyncError();
+      _hasNewCashierClosingAlert = false;
+      _latestClosingAlert = null;
       try {
         await _repository.deleteDailyFinancialClosing(closing.id);
       } catch (e) {
@@ -1979,6 +1990,7 @@ class AppStateNotifier extends ChangeNotifier {
   Future<void> loadData() async {
     _isLoading = true;
     _errorMessage = null;
+    _repository.clearClosingSyncError();
     notifyListeners();
 
     try {

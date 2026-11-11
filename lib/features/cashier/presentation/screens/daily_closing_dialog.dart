@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/closing_sync_warning_banner.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
@@ -851,7 +852,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
         if (state.closingCloudSyncError != null && parentContext.mounted) {
           ScaffoldMessenger.of(parentContext).showSnackBar(
             SnackBar(
-              content: Text(state.tr('closingCloudSyncRlsWarning')),
+              content: Text(
+                resolveClosingSyncWarningMessage(state, state.closingCloudSyncError!),
+              ),
               backgroundColor: const Color(0xFFD97706),
               duration: const Duration(seconds: 7),
               behavior: SnackBarBehavior.floating,

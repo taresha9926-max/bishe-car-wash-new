@@ -5,6 +5,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/receipt_image_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/closing_sync_warning_banner.dart';
 import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/financial_pnl_statement_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
@@ -567,30 +568,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         _buildTimeFilterBar(state),
         const SizedBox(height: 12),
 
-        if (state.closingCloudSyncError != null) ...[
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEF3C7),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFD97706)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309), size: 19),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    state.tr('closingCloudSyncRlsWarning'),
-                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF92400E)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        const ClosingSyncWarningBanner(),
 
         // Quick Financial Reports & Wash History shortcuts
         _buildActionPairRow(
@@ -821,13 +799,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   }
 
   void _showClosingSyncToast(BuildContext context, dynamic state) {
-    final syncErr = state.closingCloudSyncError;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(syncErr != null ? state.tr('closingCloudSyncRlsWarning') : state.tr('handoverSuccess')),
-        backgroundColor: syncErr != null ? const Color(0xFFD97706) : AppColors.statusCompleted,
-        duration: Duration(seconds: syncErr != null ? 7 : 4),
-      ),
+    showClosingSyncResultSnackBar(
+      context,
+      state,
+      successMessage: state.tr('handoverSuccess'),
     );
   }
 

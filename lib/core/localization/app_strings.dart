@@ -4375,6 +4375,11 @@ class AppStrings {
       AppLanguage.om: 'Naannotti olkaa\'ameera, garuu haaromsi daily_closings Supabase keessaa seera RLS (42501) tiin uggurame. Migration 20261111_fix_rls_closings_and_bookings.sql Supabase SQL Editor keessatti hojisiisaa.',
       AppLanguage.am: 'በመሣሪያው ላይ ተቀምጧል፣ ነገር ግን የSupabase daily_closings ማሻሻያ በRLS ፖሊሲ (42501) ታግዷል። እባክዎ 20261111_fix_rls_closings_and_bookings.sql በSupabase SQL Editor ያስኪዱ።',
     },
+    'closingCloudSyncNetworkWarning': {
+      AppLanguage.en: 'Saved locally, but cloud sync to Supabase daily_closings failed. Check connection or verify Supabase policies and refresh.',
+      AppLanguage.om: 'Naannotti olkaa\'ameera, garuu erguun gara Supabase daily_closings hin milkoofne. Interneetii yookaan seera Supabase mirkaneeffadhaatii haaromsaa.',
+      AppLanguage.am: 'በመሣሪያው ላይ ተቀምጧል፣ ነገር ግን ወደ Supabase daily_closings መላክ አልተቻለም። ኢንተርኔት ወይም የSupabase ፖሊሲዎችን አረጋግጠው ያድሱ።',
+    },
     'exactHomePlaceLabel': {
       AppLanguage.en: 'Exact Customer Home / Place Address',
       AppLanguage.om: 'Teessoo Sirrii Manaa / Bakka Maamilaa',

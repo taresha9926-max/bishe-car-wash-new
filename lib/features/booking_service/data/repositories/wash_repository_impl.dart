@@ -403,6 +403,9 @@ class WashRepositoryImpl implements IWashRepository {
   String? get lastClosingSyncError => null;
 
   @override
+  void clearClosingSyncError() {}
+
+  @override
   Future<List<DailyFinancialClosing>> getDailyFinancialClosings() async {
     return List.unmodifiable(_dailyClosings);
   }

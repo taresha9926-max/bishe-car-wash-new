@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
+import '../../../../core/widgets/closing_sync_warning_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
@@ -81,29 +82,7 @@ class _OperationalManagerDashboardScreenState
                 children: [
                   const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 12)),
                   _buildHandoverStatusBanners(context, state, isMobile),
-                  if (state.closingCloudSyncError != null)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEF3C7),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFD97706)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309), size: 19),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              state.tr('closingCloudSyncRlsWarning'),
-                              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF92400E)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  const ClosingSyncWarningBanner(),
                   PrimaryIntakeActionRow(isMobile: isMobile),
                   const SizedBox(height: 12),
                   _buildActionTabBar(state, activeDivisionQueue.length, isMobile),
@@ -430,13 +409,11 @@ class _OperationalManagerDashboardScreenState
     if (context.mounted) {
       if (ok) {
         _managerInlineOtpController.clear();
-        final syncErr = state.closingCloudSyncError;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: syncErr != null ? const Color(0xFFD97706) : const Color(0xFF059669),
-            duration: Duration(seconds: syncErr != null ? 7 : 4),
-            content: Text(syncErr != null ? state.tr('closingCloudSyncRlsWarning') : state.tr('handoverVerifiedSuccess')),
-          ),
+        showClosingSyncResultSnackBar(
+          context,
+          state,
+          successMessage: state.tr('handoverVerifiedSuccess'),
+          successColor: const Color(0xFF059669),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

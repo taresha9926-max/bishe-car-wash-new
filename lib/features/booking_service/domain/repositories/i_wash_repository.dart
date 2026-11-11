@@ -78,6 +78,7 @@ abstract class IStaffRepository {
 
   // Daily Financial Closings & Audit Broadcast
   String? get lastClosingSyncError => null;
+  void clearClosingSyncError() {}
   Future<List<DailyFinancialClosing>> getDailyFinancialClosings();
   Future<void> saveDailyFinancialClosing(DailyFinancialClosing closing);
   Future<void> deleteDailyFinancialClosing(String id);

@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
+import 'package:bishe_car_wash/core/widgets/closing_sync_warning_banner.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/supabase_wash_repository_impl.dart';
+import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 
 DailyFinancialClosing _sampleClosing(String id) {
   final now = DateTime(2026, 11, 11, 18, 0);
@@ -111,15 +113,70 @@ void main() {
       expect(local.any((c) => c.id == 'closing-2026-11-10-day'), isTrue);
     });
 
-    test('closingCloudSyncRlsWarning translation is complete in EN, OM, AM', () {
-      final en = AppStrings.get('closingCloudSyncRlsWarning', AppLanguage.en);
-      final om = AppStrings.get('closingCloudSyncRlsWarning', AppLanguage.om);
-      final am = AppStrings.get('closingCloudSyncRlsWarning', AppLanguage.am);
-      expect(en, isNot('closingCloudSyncRlsWarning'));
-      expect(om, isNot('closingCloudSyncRlsWarning'));
-      expect(am, isNot('closingCloudSyncRlsWarning'));
-      expect(om, isNot(en));
-      expect(am, isNot(en));
+    test('closingCloudSyncRlsWarning & NetworkWarning translations are complete in EN, OM, AM', () {
+      for (final key in ['closingCloudSyncRlsWarning', 'closingCloudSyncNetworkWarning']) {
+        final en = AppStrings.get(key, AppLanguage.en);
+        final om = AppStrings.get(key, AppLanguage.om);
+        final am = AppStrings.get(key, AppLanguage.am);
+        expect(en, isNot(key));
+        expect(om, isNot(key));
+        expect(am, isNot(key));
+        expect(om, isNot(en));
+        expect(am, isNot(en));
+      }
+    });
+
+    test('Stale closing sync error clears on dismiss, clearAllBookings, and loadData, and messages distinguish error cause', () async {
+      final client = MockClient((req) async {
+        if (req.url.path.contains('/rpc/clear_all_bookings')) {
+          return http.Response('', 204);
+        }
+        if (req.url.path.contains('daily_closings')) {
+          if (req.method == 'GET' && req.url.query.contains('id=eq.')) {
+            return http.Response('[{"id":"closing-2026-11-11-day"}]', 200);
+          }
+          if (req.method == 'PATCH') {
+            return http.Response('[]', 200);
+          }
+        }
+        return http.Response('[]', 200);
+      });
+
+      final repo = SupabaseWashRepositoryImpl(
+        supabaseUrl: 'https://example.supabase.co',
+        anonKey: 'test-key',
+        httpClient: client,
+      );
+      final notifier = AppStateNotifier(repository: repo);
+
+      await repo.saveDailyFinancialClosing(_sampleClosing('closing-2026-11-11-day'));
+      expect(notifier.closingCloudSyncError, isNotNull);
+      expect(
+        resolveClosingSyncWarningMessage(notifier, notifier.closingCloudSyncError!),
+        notifier.tr('closingCloudSyncRlsWarning'),
+      );
+      expect(
+        resolveClosingSyncWarningMessage(notifier, 'Supabase daily_closings cloud sync failed; saved locally.'),
+        notifier.tr('closingCloudSyncNetworkWarning'),
+      );
+
+      notifier.clearClosingCloudSyncError();
+      expect(notifier.closingCloudSyncError, isNull);
+
+      await repo.saveDailyFinancialClosing(_sampleClosing('closing-2026-11-11-day'));
+      expect(notifier.closingCloudSyncError, isNotNull);
+      await repo.deleteDailyFinancialClosing('closing-2026-11-11-day');
+      expect(notifier.closingCloudSyncError, isNull);
+
+      await repo.saveDailyFinancialClosing(_sampleClosing('closing-2026-11-11-day'));
+      expect(notifier.closingCloudSyncError, isNotNull);
+      await notifier.clearAllBookings();
+      expect(notifier.closingCloudSyncError, isNull);
+
+      await repo.saveDailyFinancialClosing(_sampleClosing('closing-2026-11-11-day'));
+      expect(notifier.closingCloudSyncError, isNotNull);
+      await notifier.loadData();
+      expect(notifier.closingCloudSyncError, isNull);
     });
 
     test('Empty HTTP 200 [] from daily_closings returns empty list cleanly', () async {
