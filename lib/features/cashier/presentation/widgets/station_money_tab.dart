@@ -44,7 +44,6 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
     final isNightClosed = state.isTodayNightShiftClosed;
     final isClosed = widget.isManager ? isNightClosed : isDayClosed;
     final activePendingOtp = widget.isManager ? pendingNightOtp : pendingCashierOtp;
-    final carriedCash = widget.isManager ? state.managerCarriedCashETB : 0.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,13 +99,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
         _buildShiftSummaryBanner(state, widget.isMobile),
         const SizedBox(height: 12),
 
-        // 3. Manager-specific Day Custody summary (only after Cashier OTP handover is accepted)
-        if (widget.isManager && carriedCash > 0) ...[
-          _buildManagerCustodyCard(state, undepositedCash, widget.isMobile),
-          const SizedBox(height: 12),
-        ],
-
-        // 4. Handover Policy & Action Buttons (Bank Deposit, Petty Cash, Prerequisite-Gated Shift Closing) + Digital Breakdown
+        // 3. Closing & Financial Actions (Bank Deposit, Petty Cash, Prerequisite-Gated Shift Closing) + Digital Breakdown
         _buildFinancialActionDesk(
           context,
           state,
@@ -161,77 +154,6 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
                   child: FinancialReportsView(isEmbedded: true, isCashierMode: true),
                 ),
             ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildManagerCustodyCard(dynamic state, double undepositedCash, bool isMobile) {
-    final carried = state.managerCarriedCashETB as double;
-    final nightAdded = state.nightShiftAdditionalCashETB as double;
-
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 14 : 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.account_balance_wallet_rounded, color: AppColors.primary, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  state.tr('cashierHandoverTitle'),
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-              ),
-            ],
-          ),
-          const Divider(height: 20),
-          _buildCustodyRow(state.tr('dayShiftHandoverCashLabel'), CurrencyFormatter.format(carried), Colors.indigo),
-          const SizedBox(height: 6),
-          _buildCustodyRow(state.tr('nightShiftNetCashLabel'), CurrencyFormatter.format(nightAdded), AppColors.cashGreen),
-          const Divider(height: 18),
-          _buildCustodyRow(
-            state.tr('totalCashToAdminLabel'),
-            CurrencyFormatter.format(undepositedCash),
-            AppColors.primary,
-            isBold: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCustodyRow(String label, String value, Color valueColor, {bool isBold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: isBold ? 13 : 12,
-              fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-              color: isBold ? AppColors.textPrimary : AppColors.textSecondary,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isBold ? 14 : 12.5,
-            fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
-            color: valueColor,
           ),
         ),
       ],
@@ -500,29 +422,6 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.isManager && !isClosed) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.cardBorder),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.nightlight_round, size: 16, color: Color(0xFFD97706)),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      state.tr('nightClosingSubDesc'),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
           if (isMobile) ...[
             SizedBox(width: double.infinity, child: actions[0]),
             const SizedBox(height: 8),

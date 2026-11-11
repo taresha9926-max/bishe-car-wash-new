@@ -121,5 +121,23 @@ void main() {
       expect(om, isNot(en));
       expect(am, isNot(en));
     });
+
+    test('Empty HTTP 200 [] from daily_closings returns empty list cleanly', () async {
+      final client = MockClient((req) async {
+        if (req.method == 'GET') {
+          return http.Response('[]', 200);
+        }
+        return http.Response('[]', 200);
+      });
+
+      final repo = SupabaseWashRepositoryImpl(
+        supabaseUrl: 'https://example.supabase.co',
+        anonKey: 'test-key',
+        httpClient: client,
+      );
+
+      final closings = await repo.getDailyFinancialClosings();
+      expect(closings, isEmpty);
+    });
   });
 }

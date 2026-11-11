@@ -565,9 +565,9 @@ class AppStrings {
       AppLanguage.am: 'የካሺየር ጥሬ ገንዘብ ርክክብ',
     },
     'acceptCashierHandover': {
-      AppLanguage.en: 'Accept & Verify Cashier Handover',
-      AppLanguage.om: 'Dabarsa Qarshii Fudhadhu & Mirkaneessi',
-      AppLanguage.am: 'የካሺየሩን ጥሬ ገንዘብ ተረክበው ያረጋግጡ',
+      AppLanguage.en: 'Verify Cashier Closing (OTP)',
+      AppLanguage.om: 'Cufiinsa Kaasharii OTPn Mirkaneessi',
+      AppLanguage.am: 'የገንዘብ ተቀባይ መዝጊያን በOTP ያረጋግጡ',
     },
     'handoverPending': {
       AppLanguage.en: 'Pending Manager Acceptance',
@@ -600,19 +600,19 @@ class AppStrings {
       AppLanguage.am: 'ለአስተዳዳሪው የሚሰጥ ጠቅላላ ጥሬ ገንዘብ',
     },
     'handoverMethod': {
-      AppLanguage.en: 'Cash Handover Method',
-      AppLanguage.om: 'Akkaataa Dabarsoo Qarshii',
-      AppLanguage.am: 'የጥሬ ገንዘብ ርክክብ ዘዴ',
+      AppLanguage.en: 'Shift Closing & Verification Method',
+      AppLanguage.om: 'Akkaataa Cufiinsa & Mirkaneessa',
+      AppLanguage.am: 'የፈረቃ መዝጊያ እና ማረጋገጫ ዘዴ',
     },
     'handoverToManagerOption': {
-      AppLanguage.en: 'Handover to Operational Manager',
-      AppLanguage.om: 'Hojii Geggeessaatti Dabarsuu',
-      AppLanguage.am: 'ለስራ አስኪያጅ ማስረከብ',
+      AppLanguage.en: 'Send OTP Request to Operational Manager',
+      AppLanguage.om: 'Gaaffii OTP Hojii Geggeessaatti Ergi',
+      AppLanguage.am: 'ለኦፕሬሽን ስራ አስኪያጅ የOTP ጥያቄ ላክ',
     },
     'handoverToAdminOption': {
-      AppLanguage.en: 'Handover directly to Admin / Owner',
-      AppLanguage.om: 'Kallattiin Bulchaatti Dabarsuu',
-      AppLanguage.am: 'ቀጥታ ለአስተዳዳሪው ማስረከብ',
+      AppLanguage.en: 'Send OTP Request to Admin / Owner',
+      AppLanguage.om: 'Gaaffii OTP Bulchaatti Ergi',
+      AppLanguage.am: 'ለአስተዳዳሪ የOTP ጥያቄ ላክ',
     },
     'handoverToAdminSub': {
       AppLanguage.en: 'If Operational Manager is absent, off-duty, or on leave',
@@ -630,9 +630,9 @@ class AppStrings {
       AppLanguage.am: 'ስራ አስኪያጁ ከሌለ ወይም ከቀኑ 11 ሰዓት በፊት',
     },
     'transferOtpCode': {
-      AppLanguage.en: 'Handover Verification Code',
-      AppLanguage.om: 'Koodii Mirkaneessa Dabarsoo',
-      AppLanguage.am: 'የርክክብ ማረጋገጫ ኮድ',
+      AppLanguage.en: 'Shift Verification OTP Code',
+      AppLanguage.om: 'Koodii Mirkaneessa OTP',
+      AppLanguage.am: 'የፈረቃ ማረጋገጫ OTP ኮድ',
     },
     'enterHandoverOtp': {
       AppLanguage.en: 'Enter 4-Digit Handover Code',
@@ -2837,9 +2837,9 @@ class AppStrings {
       AppLanguage.am: 'የፈረቃ ርክክብ መዝገቦች',
     },
     'handoverOtpCode': {
-      AppLanguage.en: 'HANDOVER OTP CODE:',
-      AppLanguage.om: 'KOODII DABARSAA OTP:',
-      AppLanguage.am: 'የርክክብ OTP ኮድ:',
+      AppLanguage.en: 'ACTIVE SHIFT OTP CODE:',
+      AppLanguage.om: 'KOODII OTP CUFINSAA:',
+      AppLanguage.am: 'ንቁ የመዝጊያ OTP ኮድ:',
     },
     'waitingForManager': {
       AppLanguage.en: 'WAITING FOR MANAGER',
@@ -2852,9 +2852,9 @@ class AppStrings {
       AppLanguage.am: 'OTP ያስገቡ',
     },
     'adminNightHandoverCode': {
-      AppLanguage.en: 'ADMIN NIGHT HANDOVER CODE:',
-      AppLanguage.om: 'KOODII DABARSA BULCHAA HALKAN:',
-      AppLanguage.am: 'የሌሊት ርክክብ አስተዳዳሪ OTP ኮድ:',
+      AppLanguage.en: 'NIGHT CLOSING ADMIN OTP CODE:',
+      AppLanguage.om: 'KOODII OTP BULCHAA HALKAN:',
+      AppLanguage.am: 'የምሽት መዝጊያ አስተዳዳሪ OTP ኮድ:',
     },
     'pendingAdminReceipt': {
       AppLanguage.en: 'PENDING ADMIN RECEIPT',
@@ -2942,9 +2942,9 @@ class AppStrings {
       AppLanguage.am: 'ለሳምንታዊ ክፍያ ሪፖርት የተደረገ • ከዕለታዊ ካሽ የማይቀነስ',
     },
     'confirmCashierHandover': {
-      AppLanguage.en: 'Confirm Cashier Handover',
-      AppLanguage.om: 'Dabarsa Qabaa Qarshii Mirkaneessi',
-      AppLanguage.am: 'የገንዘብ ያዡን ርክክብ አረጋግጥ',
+      AppLanguage.en: 'Verify Cashier Closing OTP',
+      AppLanguage.om: 'OTP Kaasharii Mirkaneessi',
+      AppLanguage.am: 'የገንዘብ ተቀባይ OTP አረጋግጥ',
     },
     'confirmManagerNightCash': {
       AppLanguage.en: 'Confirm & Seal in Vault',
@@ -2962,9 +2962,9 @@ class AppStrings {
       AppLanguage.am: 'የቀን ፈረቃን ክፈት እና ቀጥል',
     },
     'cancelHandoverAndAddCars': {
-      AppLanguage.en: 'Cancel Handover & Add Cars',
-      AppLanguage.om: 'Dabarsuu Haki & Konkolaataa Dabaladhu',
-      AppLanguage.am: 'ማስተላለፍን ሰርዝ እና መኪና ጨምር',
+      AppLanguage.en: 'Cancel OTP Request & Add Cars',
+      AppLanguage.om: 'Gaaffii OTP Haqii Konkolaataa Dabali',
+      AppLanguage.am: 'የOTP ጥያቄን ሰርዝ እና መኪና ጨምር',
     },
     'unlockWithManagerPin': {
       AppLanguage.en: 'Unlock Shift (Manager / Admin PIN)',
@@ -3007,14 +3007,14 @@ class AppStrings {
       AppLanguage.am: 'አዎ፣ ፈረቃውን ክፈት',
     },
     'cashierHandoverVerification': {
-      AppLanguage.en: '1. Cashier Handover Verification (Day Shift)',
-      AppLanguage.om: '1. Mirkaneessa Dabarsoo Qabaa Qarshii (Garee Guyyaa)',
-      AppLanguage.am: '1. የገንዘብ ያዥ ርክክብ ማረጋገጫ (የቀን ፈረቃ)',
+      AppLanguage.en: '1. Cashier Day Closing Verification (OTP)',
+      AppLanguage.om: '1. Mirkaneessa Cufiinsa Kaasharii (OTP)',
+      AppLanguage.am: '1. የገንዘብ ተቀባይ የቀን መዝጊያ ማረጋገጫ (OTP)',
     },
     'managerHandoverVerification': {
-      AppLanguage.en: '2. Operational Manager Handover Verification (Night Vault)',
-      AppLanguage.om: '2. Mirkaneessa Dabarsoo Hoggansa Hojii (Saanduqa Halkan)',
-      AppLanguage.am: '2. የስራ አስኪያጅ ርክክብ ማረጋገጫ (የምሽት ካዝና)',
+      AppLanguage.en: '2. Night Shift Closing Verification (OTP)',
+      AppLanguage.om: '2. Mirkaneessa Cufiinsa Shiftii Halkanii (OTP)',
+      AppLanguage.am: '2. የምሽት ፈረቃ መዝጊያ ማረጋገጫ (OTP)',
     },
     'noPendingClosingToVerify': {
       AppLanguage.en: 'No pending closing found. The staff must submit daily closing first.',
@@ -3851,9 +3851,9 @@ class AppStrings {
       AppLanguage.am: 'ፈረቃ ተቆልፏል',
     },
     'managerTabHandoverClose': {
-      AppLanguage.en: 'Handover & Close',
-      AppLanguage.om: 'Wal-harkaa & Cufiinsa',
-      AppLanguage.am: 'ርክክብ እና መዝጊያ',
+      AppLanguage.en: 'Money & Closing',
+      AppLanguage.om: 'Maallaqa & Cufiinsa',
+      AppLanguage.am: 'ገንዘብ እና መዝጊያ',
     },
     'managerTabTeam': {
       AppLanguage.en: 'Team',
@@ -3896,9 +3896,9 @@ class AppStrings {
       AppLanguage.am: 'የምሽት ፈረቃ መዝጊያ ተረጋግጧል',
     },
     'nightClosingSubDesc': {
-      AppLanguage.en: 'Reconciles night shift cash & washer pool and issues Admin handover OTP.',
-      AppLanguage.om: 'Maallaqaafi komishinii shiftii halkanii walitti qabee koodii OTP Adminiif kenna.',
-      AppLanguage.am: 'የምሽት ፈረቃ ገንዘብን እና የአጣቢዎችን ኮሚሽን አስልቶ ለአስተዳዳሪ የOTP ኮድ ይሰጣል።',
+      AppLanguage.en: 'Reconciles night shift cash & washer pool before closing.',
+      AppLanguage.om: 'Cufiinsa dura maallaqaafi komishinii shiftii halkanii walitti qaba.',
+      AppLanguage.am: 'ከመዝጋቱ በፊት የምሽት ፈረቃ ገንዘብን እና የአጣቢዎችን ኮሚሽን ያስላል።',
     },
     'cashToAdminSuffix': {
       AppLanguage.en: 'cash to Admin',
@@ -4256,14 +4256,14 @@ class AppStrings {
       AppLanguage.am: 'ተሽከርካሪው ወደ ቀጣዩ ቀን ተዛውሮ ለኦዲት ተመዝግቧል።',
     },
     'openVehiclesHandoverTitle': {
-      AppLanguage.en: 'Open Vehicles Handed Over',
-      AppLanguage.om: 'Konkolaattota Hojii Irraa Dabarfaman',
-      AppLanguage.am: 'በስራ ላይ ያሉ የተረከቡ ተሽከርካሪዎች',
+      AppLanguage.en: 'Active Vehicles Continuing to Next Shift',
+      AppLanguage.om: 'Konkolaattota Shiftii Itti Aanutti Darban',
+      AppLanguage.am: 'ወደ ቀጣዩ ፈረቃ የሚቀጥሉ ተሽከርካሪዎች',
     },
     'openVehiclesHandoverDesc': {
-      AppLanguage.en: 'Arrived vehicles still in bays or queue pass to the next shift with this handover.',
-      AppLanguage.om: 'Konkolaattonni buufata gahanii hin xumuramin gara shiftii itti aanuutti ni dabarfamu.',
-      AppLanguage.am: 'ጣቢያ የደረሱና ያልተጠናቀቁ ተሽከርካሪዎች ከዚህ ርክክብ ጋር ወደ ቀጣዩ ፈረቃ ይተላለፋሉ።',
+      AppLanguage.en: 'Arrived vehicles still in bays or queue continue automatically to the next shift.',
+      AppLanguage.om: 'Konkolaattonni buufata gahanii hin xumuramin gara shiftii itti aanuutti ofumaan itti fufu.',
+      AppLanguage.am: 'ጣቢያ የደረሱና ያልተጠናቀቁ ተሽከርካሪዎች በራስ-ሰር ወደ ቀጣዩ ፈረቃ ይቀጥላሉ።',
     },
     'autoClearNoShowsNotice': {
       AppLanguage.en: 'Unarrived online booking(s) will be automatically removed from the queue upon closing.',
@@ -4351,9 +4351,9 @@ class AppStrings {
       AppLanguage.am: 'ለሂሳብ እና ለአስተዳዳሪ ኦዲት የሚያስፈልግ የግድ ምክንያት *',
     },
     'handedOverVehiclesTitle': {
-      AppLanguage.en: 'Handed-Over Vehicles from Day Cashier',
-      AppLanguage.om: 'Konkolaattota Kaashiyara Guyyaa Irraa Kennaman',
-      AppLanguage.am: 'ከቀን ካሸር የተረከቡ ተሽከርካሪዎች',
+      AppLanguage.en: 'Active Vehicles from Day Shift',
+      AppLanguage.om: 'Konkolaattota Shiftii Guyyaa',
+      AppLanguage.am: 'ከቀን ፈረቃ የቀጠሉ ተሽከርካሪዎች',
     },
     'postponedByLabel': {
       AppLanguage.en: 'Postponed by',
@@ -4489,6 +4489,21 @@ class AppStrings {
       AppLanguage.en: 'Professional Carpet Cleaning • Fast Drying & Delivery',
       AppLanguage.om: 'Dhiqannaa Firaashii Qulqullina Qabu • Gogsuu fi Geessuu Saffisaa',
       AppLanguage.am: 'ፕሮፌሽናል የምንጣፍ እጥበት • ፈጣን ማድረቅና ማድረስ',
+    },
+    'dayShiftClosingSubtitle': {
+      AppLanguage.en: 'Reconcile day shift sales, commissions & cash drawer',
+      AppLanguage.om: 'Gurgurtaa guyyaa, komishinii fi saanduqaa wal-simsiisi',
+      AppLanguage.am: 'የቀን ፈረቃ ሽያጭን፣ ኮሚሽንን እና የጥሬ ገንዘብ መሳቢያውን ያስታርቁ',
+    },
+    'remainingCashInDrawerLabel': {
+      AppLanguage.en: 'Remaining Cash Balance in Drawer:',
+      AppLanguage.om: 'Qarshii Saanduqaa Keessaa Hafe:',
+      AppLanguage.am: 'በመሳቢያ ውስጥ የቀረ ጥሬ ገንዘብ:',
+    },
+    'sendManagerOtpSub': {
+      AppLanguage.en: 'Generates a 4-digit OTP request for Operational Manager to verify drawer cash.',
+      AppLanguage.om: 'Koodii OTP dijitii 4 Hojii Geggeessaan qarshii akka mirkaneessuuf uuma.',
+      AppLanguage.am: 'ስራ አስኪያጁ ጥሬ ገንዘቡን እንዲያረጋግጥ ባለ 4 አሃዝ OTP ጥያቄ ያመነጫል።',
     },
   };
 

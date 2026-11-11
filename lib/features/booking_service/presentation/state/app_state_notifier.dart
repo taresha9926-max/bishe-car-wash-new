@@ -2018,9 +2018,14 @@ class AppStateNotifier extends ChangeNotifier {
 
       try {
         final closings = await _repository.getDailyFinancialClosings();
-        if (closings.isNotEmpty) {
-          _dailyFinancialClosings.clear();
-          _dailyFinancialClosings.addAll(closings);
+        _dailyFinancialClosings
+          ..clear()
+          ..addAll(closings);
+        if (pendingCashierHandover == null &&
+            pendingCashierAdminHandover == null &&
+            pendingAdminNightHandover == null) {
+          _hasNewCashierClosingAlert = false;
+          _latestClosingAlert = null;
         }
       } catch (_) {}
 

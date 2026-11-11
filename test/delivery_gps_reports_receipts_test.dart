@@ -17,6 +17,7 @@ import 'package:bishe_car_wash/features/booking_service/presentation/screens/fin
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
+import 'package:bishe_car_wash/features/cashier/presentation/screens/daily_closing_dialog.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/phone_booking_dialog.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
@@ -34,7 +35,7 @@ void main() {
   });
 
   group('Service Delivery Options, Exact Home Location & Live GPS', () {
-    testWidgets('CustomerHomeScreen shows 3 car delivery options in Car mode and 3 carpet options in Carpet mode without leakage', (tester) async {
+    testWidgets('CustomerHomeScreen stays clean 2-button Option 1 hub and NewBookingScreen Step 2 presents all 3 isolated delivery options', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -47,25 +48,43 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text(state.tr('chooseDeliveryQuick')));
-      expect(find.text(state.tr('chooseDeliveryQuick')), findsOneWidget);
+      // Home stays clean Option 1 hub (delivery choices moved purely into Step 2 of booking)
+      expect(find.text(state.tr('washMyCarTitle')), findsOneWidget);
+      expect(find.text(state.tr('chooseDeliveryQuick')), findsNothing);
+      expect(find.text(state.tr('washMyCarpetTitle')), findsNothing);
+
+      // Tap Car CTA -> Step 1 -> Step 2 shows all 3 Car delivery modes
+      await tester.tap(find.text(state.tr('startCarBooking')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text(state.tr('nextStep')));
+      await tester.tap(find.text(state.tr('nextStep')));
+      await tester.pumpAndSettle();
+
       expect(find.text(state.tr('driveInStation')), findsOneWidget);
       expect(find.text(state.tr('atHomeMobile')), findsOneWidget);
       expect(find.text(state.tr('serviceValetPickUp')), findsOneWidget);
-      expect(find.text(state.tr('washMyCarpetTitle')), findsNothing);
+      expect(find.text(state.tr('carpetStationService')), findsNothing);
 
-      // Switch to Carpet Washing Service tab -> zero Car Wash UI, 3 Carpet delivery cards shown
-      await tester.ensureVisible(find.text(state.tr('carpetWashingService')));
-      await tester.tap(find.text(state.tr('carpetWashingService')));
+      // Carpet guided flow Step 2 shows all 3 Carpet delivery modes with zero Car text
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(
+            key: const ValueKey('carpet-step2-app'),
+            theme: AppTheme.lightTheme,
+            home: const NewBookingScreen(isCarpet: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text(state.tr('nextStep')));
+      await tester.tap(find.text(state.tr('nextStep')));
       await tester.pumpAndSettle();
 
-      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsOneWidget);
       expect(find.text(state.tr('carpetStationService')), findsOneWidget);
       expect(find.text(state.tr('carpetHomeTitle')), findsOneWidget);
       expect(find.text(state.tr('carpetValetTitle')), findsOneWidget);
       expect(find.text(state.tr('driveInStation')), findsNothing);
-      expect(find.text(state.tr('washMyCarTitle')), findsNothing);
-      expect(find.text(state.tr('stationBaysTitle')), findsNothing);
     });
 
     testWidgets('PhoneBookingDialog shows 3 full delivery options & reveals exact address + live GPS for Home Van / VIP', (tester) async {
@@ -175,12 +194,29 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(find.textContaining('Money & Closing ('), findsOneWidget);
+      expect(find.textContaining('Handover & Close'), findsNothing);
       expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
       await tester.tap(find.byType(Tab).at(1));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('cashierHandoverTitle')), findsNothing);
+      expect(find.text(state.tr('nightClosingSubDesc')), findsNothing);
 
       state.switchRole(UserRole.admin);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(body: DailyClosingDialog(isManagerClosing: false)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Handover to Operational Manager'), findsNothing);
+      expect(find.text(state.tr('handoverToManagerOption')), findsOneWidget);
+      expect(find.text(state.tr('handoverToAdminOption')), findsOneWidget);
+
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,
@@ -221,7 +257,7 @@ void main() {
       expect(find.text(state.tr('acceptCashierHandover')), findsOneWidget);
       expect(find.text(state.tr('verifyAndTakeCustody')), findsOneWidget);
 
-      // 3. Manager verifies exact OTP -> disappears immediately on BOTH Manager & Cashier
+      // 3. Manager verifies exact OTP -> disappears immediately on BOTH Manager & Cashier + no custody card remains on Money Tab
       await tester.enterText(find.byType(TextField).first, closing.handoverOtp!);
       await tester.tap(find.text(state.tr('verifyAndTakeCustody')));
       await tester.pumpAndSettle();
@@ -229,6 +265,10 @@ void main() {
       expect(state.pendingCashierHandover, isNull);
       expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
       expect(find.text(state.tr('handoverVerifiedTitle')), findsNothing);
+      await tester.tap(find.byType(Tab).at(1));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('cashierHandoverTitle')), findsNothing);
+      expect(find.text(state.tr('nightClosingSubDesc')), findsNothing);
 
       state.switchRole(UserRole.cashier);
       await tester.pumpWidget(
@@ -554,6 +594,9 @@ void main() {
       'reconcileAndCloseShift',
       'carpetDeliveryOptionsTitle',
       'carpetTrustFooter',
+      'dayShiftClosingSubtitle',
+      'remainingCashInDrawerLabel',
+      'sendManagerOtpSub',
     ];
 
     for (final k in newKeys) {

@@ -37,19 +37,20 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Car Wash active: only Car Wash UI visible, zero Carpet booking content
+      // Car Wash active: only ultra-clean Option 1 Car Wash hub (3 delivery tiles live cleanly inside Step 2)
       expect(find.text('What would you like to wash today?'), findsOneWidget);
       expect(find.text('Wash My Car'), findsOneWidget);
       expect(find.text('Prices are negotiable'), findsOneWidget);
+      expect(find.text(state.tr('chooseDeliveryQuick')), findsNothing);
       expect(find.text('Wash My Carpet'), findsNothing);
       expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsNothing);
 
-      // Switch to Carpet Washing Service tab: only Carpet UI visible, zero Car Wash content
+      // Switch to Carpet Washing Service tab: only clean Carpet hub, zero Car Wash or home delivery clutter
       await tester.tap(find.text(state.tr('carpetWashingService')));
       await tester.pumpAndSettle();
       expect(find.text('Wash My Carpet'), findsOneWidget);
-      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsOneWidget);
       expect(find.text('Prices are negotiable'), findsOneWidget);
+      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsNothing);
       expect(find.text('Wash My Car'), findsNothing);
       expect(find.text(state.tr('stationBaysTitle')), findsNothing);
       expect(find.text(state.tr('trackMyCar')), findsNothing);

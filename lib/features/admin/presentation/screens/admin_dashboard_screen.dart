@@ -764,9 +764,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     if (!context.mounted) return;
     if (success) {
       _adminCashierOtpController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.tr('handoverSuccess')), backgroundColor: AppColors.statusCompleted),
-      );
+      _showClosingSyncToast(context, state);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(state.tr('invalidOtpCode')), backgroundColor: Colors.redAccent),
@@ -814,14 +812,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     if (!context.mounted) return;
     if (success) {
       _adminNightOtpController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.tr('handoverSuccess')), backgroundColor: AppColors.statusCompleted),
-      );
+      _showClosingSyncToast(context, state);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(state.tr('invalidOtpCode')), backgroundColor: Colors.redAccent),
       );
     }
+  }
+
+  void _showClosingSyncToast(BuildContext context, dynamic state) {
+    final syncErr = state.closingCloudSyncError;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(syncErr != null ? state.tr('closingCloudSyncRlsWarning') : state.tr('handoverSuccess')),
+        backgroundColor: syncErr != null ? const Color(0xFFD97706) : AppColors.statusCompleted,
+        duration: Duration(seconds: syncErr != null ? 7 : 4),
+      ),
+    );
   }
 
   // ===========================================================================

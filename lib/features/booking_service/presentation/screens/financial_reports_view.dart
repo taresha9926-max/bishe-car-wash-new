@@ -619,7 +619,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                 Text('Closed At: ${c.closedAt.toString().substring(0, 16)}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
                 const Divider(height: 18),
                 _buildModalStatRow('Daily Gross Revenue:', CurrencyFormatter.format(c.grossRevenue), isBold: true, color: AppColors.primary),
-                _buildModalStatRow('  • Cash Handover:', CurrencyFormatter.format(c.cashRevenue)),
+                _buildModalStatRow('  • Cash Revenue:', CurrencyFormatter.format(c.cashRevenue)),
                 _buildModalStatRow('  • Digital Channels:', CurrencyFormatter.format(c.digitalRevenue)),
                 _buildModalStatRow('Washer Commission (15%):', '- ${CurrencyFormatter.format(c.commissionPool)}', color: AppColors.oromiaGold),
                 if (!widget.isCashierMode)

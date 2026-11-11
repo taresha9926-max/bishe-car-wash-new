@@ -1276,7 +1276,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<List<DailyFinancialClosing>> getDailyFinancialClosings() async {
     try {
       final res = await _get('daily_closings?order=closing_date.desc&limit=30');
-      if (res is List && res.isNotEmpty) {
+      if (res is List) {
         return res.map((item) {
           final map = item as Map<String, dynamic>;
           final cDate = DateTime.tryParse(map['closing_date']?.toString() ?? '') ?? DateTime.now();

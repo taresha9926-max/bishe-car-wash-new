@@ -261,9 +261,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Pending Cashier OTP card lists handed-over vehicle HO-77777; Queue shows FROM DAY CASHIER & hides Handover button
+      // Pending Cashier OTP card lists active day-shift vehicle HO-77777; Queue hides Handover/From Day Cashier pills
       expect(find.textContaining('HO-77777'), findsAtLeastNWidgets(2));
-      expect(find.text(state.tr('fromDayCashierBadge')), findsOneWidget);
+      expect(find.text(state.tr('fromDayCashierBadge')), findsNothing);
+      expect(find.text(state.tr('handedOverToManagerBadge')), findsNothing);
       expect(find.text(state.tr('handoverToOpManagerAction')), findsNothing);
       expect(find.text(state.tr('postponeNextDayAction')), findsOneWidget);
 

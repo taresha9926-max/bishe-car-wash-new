@@ -108,8 +108,8 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 isAlreadyClosed
                                     ? 'Shift Already Closed & Confirmed'
                                     : (widget.isManagerClosing
-                                        ? 'Night shift closing & total payout to Admin'
-                                        : 'Day shift closing & handover to Operational Manager'),
+                                        ? state.tr('nightClosingSubDesc')
+                                        : state.tr('dayShiftClosingSubtitle')),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -173,15 +173,15 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                     _buildClosingRow('Remaining Station Net Profit:', CurrencyFormatter.format(net), isBold: true, valueColor: AppColors.statusCompleted),
                     const Divider(height: 16),
                     if (widget.isManagerClosing) ...[
-                      _buildClosingRow('Carried Cash from Cashier Handover:', CurrencyFormatter.format(state.managerCarriedCashETB), isBold: true, valueColor: Colors.indigo),
+                      _buildClosingRow('Carried Cash from Day Shift:', CurrencyFormatter.format(state.managerCarriedCashETB), isBold: true, valueColor: Colors.indigo),
                       const SizedBox(height: 4),
                       _buildClosingRow('Night Shift Cash Collected:', CurrencyFormatter.format(state.nightShiftAdditionalCashETB), valueColor: AppColors.cashGreen),
                       const Divider(height: 16),
-                      _buildClosingRow('Total Physical Cash Handed to Admin:', CurrencyFormatter.format(remainingCash), isBold: true, valueColor: AppColors.primary),
+                      _buildClosingRow('Total Physical Cash Verified:', CurrencyFormatter.format(remainingCash), isBold: true, valueColor: AppColors.primary),
                     ] else ...[
                       _buildClosingRow('Petty Cash / Emergency Outflow:', CurrencyFormatter.format(petty), valueColor: Colors.deepOrange),
                       const SizedBox(height: 4),
-                      _buildClosingRow('Cash Balance to Handover to Manager:', CurrencyFormatter.format(remainingCash), isBold: true, valueColor: remainingCash > 0 ? AppColors.primary : AppColors.textSecondary),
+                      _buildClosingRow(state.tr('remainingCashInDrawerLabel'), CurrencyFormatter.format(remainingCash), isBold: true, valueColor: remainingCash > 0 ? AppColors.primary : AppColors.textSecondary),
                     ],
                   ],
                 ),
@@ -357,9 +357,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              const Text(
-                                'Generates 4-digit code for Operational Manager to count and verify.',
-                                style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                              Text(
+                                state.tr('sendManagerOtpSub'),
+                                style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                               ),
                             ],
                           ),
@@ -569,9 +569,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
-                                  (!widget.isManagerClosing && _handoverMethod == 'manager_otp')
-                                      ? '${state.tr("handedOverVehiclesTitle")} (${openVehicles.length})'
-                                      : '${state.tr("openVehiclesHandoverTitle")} (${openVehicles.length})',
+                                  '${state.tr("openVehiclesHandoverTitle")} (${openVehicles.length})',
                                   style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF312E81)),
                                 ),
                               ),
@@ -1078,8 +1076,8 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               const SizedBox(height: 6),
               Text(
                 widget.isManagerClosing || _handoverMethod == 'admin_otp'
-                    ? 'Give this 4-digit code to Admin after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} physical cash.'
-                    : 'Give this 4-digit code to Operational Manager after handing over ${CurrencyFormatter.format(closing.handoverCashAmount)} physical cash.',
+                    ? 'Give this 4-digit OTP code to Admin for closing verification (${CurrencyFormatter.format(closing.handoverCashAmount)}).'
+                    : 'Give this 4-digit OTP code to Operational Manager for closing verification (${CurrencyFormatter.format(closing.handoverCashAmount)}).',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),

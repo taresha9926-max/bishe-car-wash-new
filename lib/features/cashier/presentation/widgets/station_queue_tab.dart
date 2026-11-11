@@ -344,12 +344,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
                           _buildMiniPill(b.carType.localizedName(langCode), AppColors.textSecondary, neutral: true),
                         if (b.isOnlineBooking)
                           _buildMiniPill(state.tr('onlineBookingBadge'), const Color(0xFF4F46E5), icon: Icons.phone_android_rounded),
-                        if (b.isHandedOverToManager && !b.isPostponed)
-                          _buildMiniPill(
-                            widget.isManager ? state.tr('fromDayCashierBadge') : state.tr('handedOverToManagerBadge'),
-                            const Color(0xFF4338CA),
-                            icon: Icons.swap_horiz_rounded,
-                          ),
                         if (b.isPostponed)
                           _buildMiniPill(
                             b.postponedByRole == 'Operational Manager'
@@ -380,18 +374,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                     ),
-                    if (b.isHandedOverToManager &&
-                        !b.isPostponed &&
-                        b.handoverNote != null &&
-                        b.handoverNote!.isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                        '${b.handedOverBy != null ? "${b.handedOverBy}: " : ""}${b.handoverNote!}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF4338CA)),
-                      ),
-                    ],
                     if (b.isPostponed && b.postponedReason != null && b.postponedReason!.isNotEmpty) ...[
                       const SizedBox(height: 3),
                       Text(

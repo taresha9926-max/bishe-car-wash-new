@@ -38,14 +38,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   void _startGuidedBooking(
     BuildContext context, {
     required bool isCarpet,
-    ServiceType? initialServiceType,
   }) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => NewBookingScreen(
           isCarpet: isCarpet,
-          initialServiceType: initialServiceType,
         ),
       ),
     );
@@ -99,7 +97,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   const SizedBox(height: 10),
 
                   if (isCarDivision) ...[
-                    // Strictly Car Wash only (no Carpet UI or strings)
+                    // Strictly Car Wash only (3 delivery choices live cleanly in Step 2)
                     _buildCompactLiveStatusCard(state, queueAhead),
                     const SizedBox(height: 14),
                     _buildDivisionHubCard(
@@ -112,40 +110,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       accentColor: AppColors.primary,
                       onTap: () => _startGuidedBooking(context, isCarpet: false),
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      state.tr('chooseDeliveryQuick'),
-                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildQuickDeliveryTile(
-                      context: context,
-                      title: state.tr('driveInStation'),
-                      subtitle: state.tr('driveInSub'),
-                      icon: Icons.local_car_wash_rounded,
-                      color: AppColors.bay1Color,
-                      onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.walkInStation),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildQuickDeliveryTile(
-                      context: context,
-                      title: state.tr('atHomeMobile'),
-                      subtitle: state.tr('atHomeSub'),
-                      icon: Icons.rv_hookup_rounded,
-                      color: AppColors.mobileVanColor,
-                      onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.atHomeMobile),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildQuickDeliveryTile(
-                      context: context,
-                      title: state.tr('serviceValetPickUp'),
-                      subtitle: state.tr('serviceValetPickUpSub'),
-                      icon: Icons.car_rental_rounded,
-                      color: const Color(0xFF7C3AED),
-                      onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.valetPickUp),
-                    ),
                   ] else ...[
-                    // Strictly Carpet Cleaning only (no Car Wash bays, van ETA, or car UI)
+                    // Strictly Carpet Cleaning only (3 delivery choices live cleanly in Step 2)
                     _buildDivisionHubCard(
                       context: context,
                       title: state.tr('washMyCarpetTitle'),
@@ -155,38 +121,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       fallbackIcon: Icons.texture_rounded,
                       accentColor: const Color(0xFF4F46E5),
                       onTap: () => _startGuidedBooking(context, isCarpet: true),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      state.tr('carpetDeliveryOptionsTitle'),
-                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 8),
-                    _buildQuickDeliveryTile(
-                      context: context,
-                      title: state.tr('carpetStationService'),
-                      subtitle: state.tr('carpetStationSub'),
-                      icon: Icons.wash_rounded,
-                      color: const Color(0xFF4F46E5),
-                      onTap: () => _startGuidedBooking(context, isCarpet: true, initialServiceType: ServiceType.walkInStation),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildQuickDeliveryTile(
-                      context: context,
-                      title: state.tr('carpetHomeTitle'),
-                      subtitle: state.tr('carpetHomeSub'),
-                      icon: Icons.home_repair_service_rounded,
-                      color: const Color(0xFF0D9488),
-                      onTap: () => _startGuidedBooking(context, isCarpet: true, initialServiceType: ServiceType.atHomeMobile),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildQuickDeliveryTile(
-                      context: context,
-                      title: state.tr('carpetValetTitle'),
-                      subtitle: state.tr('carpetValetSub'),
-                      icon: Icons.local_shipping_rounded,
-                      color: const Color(0xFF7C3AED),
-                      onTap: () => _startGuidedBooking(context, isCarpet: true, initialServiceType: ServiceType.valetPickUp),
                     ),
                   ],
                   const SizedBox(height: 16),
@@ -473,65 +407,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickDeliveryTile({
-    required BuildContext context,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withValues(alpha: 0.28)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 18, color: color),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: color),
-                    ),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.25),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 6),
-              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: color),
             ],
           ),
         ),
