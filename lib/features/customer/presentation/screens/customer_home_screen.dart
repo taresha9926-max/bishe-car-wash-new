@@ -33,11 +33,18 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     super.dispose();
   }
 
-  void _startGuidedBooking(BuildContext context, {required bool isCarpet}) {
+  void _startGuidedBooking(
+    BuildContext context, {
+    required bool isCarpet,
+    ServiceType? initialServiceType,
+  }) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => NewBookingScreen(isCarpet: isCarpet),
+        builder: (_) => NewBookingScreen(
+          isCarpet: isCarpet,
+          initialServiceType: initialServiceType,
+        ),
       ),
     );
   }
@@ -120,6 +127,44 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                         ],
                       );
                     },
+                  ),
+                  const SizedBox(height: 14),
+
+                  // 2b. Car Wash Service Delivery Options (At Station • At Home Van • VIP Driver)
+                  Text(
+                    state.tr('chooseDeliveryQuick'),
+                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: [
+                      _buildQuickDeliveryTile(
+                        context: context,
+                        title: state.tr('driveInStation'),
+                        subtitle: state.tr('driveInSub'),
+                        icon: Icons.local_car_wash_rounded,
+                        color: AppColors.bay1Color,
+                        onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.walkInStation),
+                      ),
+                      const SizedBox(height: 6),
+                      _buildQuickDeliveryTile(
+                        context: context,
+                        title: state.tr('atHomeMobile'),
+                        subtitle: state.tr('atHomeSub'),
+                        icon: Icons.rv_hookup_rounded,
+                        color: AppColors.mobileVanColor,
+                        onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.atHomeMobile),
+                      ),
+                      const SizedBox(height: 6),
+                      _buildQuickDeliveryTile(
+                        context: context,
+                        title: state.tr('serviceValetPickUp'),
+                        subtitle: state.tr('serviceValetPickUpSub'),
+                        icon: Icons.car_rental_rounded,
+                        color: const Color(0xFF7C3AED),
+                        onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.valetPickUp),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
@@ -372,6 +417,65 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickDeliveryTile({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.28)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 18, color: color),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: color),
+                    ),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.25),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: color),
             ],
           ),
         ),

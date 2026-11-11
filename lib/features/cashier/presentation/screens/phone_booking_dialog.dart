@@ -6,8 +6,8 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/service_location_picker_card.dart';
 import '../../../booking_service/domain/models/car_type.dart';
-import '../../../booking_service/domain/models/car_wash_service_item.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_package.dart';
@@ -39,6 +39,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
   final _plateController = TextEditingController();
   final _arrivalSlotController = TextEditingController(text: 'Today within 30 mins');
   final _addressController = TextEditingController();
+  final _gpsController = TextEditingController();
   final _lengthController = TextEditingController(text: '3.0');
   final _widthController = TextEditingController(text: '4.0');
 
@@ -72,6 +73,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
     _plateController.dispose();
     _arrivalSlotController.dispose();
     _addressController.dispose();
+    _gpsController.dispose();
     _lengthController.dispose();
     _widthController.dispose();
     _negotiatedPriceController.dispose();
@@ -152,7 +154,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         Text(
                           _isCarpetMode
                               ? 'Phone intake for carpet cleaning (Station / Valet / Home)'
-                              : 'Phone intake for vehicle wash (Drive-in / Mobile Van)',
+                              : state.tr('phoneIntakeDeliverySub'),
                           style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                         ),
                       ],
@@ -517,8 +519,10 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
-                            child: ListView(
-                              shrinkWrap: true,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: ListView(
+                                shrinkWrap: true,
                               padding: const EdgeInsets.symmetric(vertical: 4),
                               children: state.activeServiceItems.map((item) {
                                 final isChecked = _selectedServiceIds.contains(item.id);
@@ -572,6 +576,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                   },
                                 );
                               }).toList(),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -684,77 +689,47 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         ],
                       ],
 
-                      // 3. Service Mode (Station vs Valet vs Mobile)
+                      // 3. Service Delivery Mode (At Station vs At Home Van vs VIP Driver Pick-up & Return)
                       Text(
                         state.tr('serviceMode'),
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                       ),
+                      const SizedBox(height: 8),
+                      _buildPhoneDeliveryOptionCard(
+                        type: ServiceType.walkInStation,
+                        title: _isCarpetMode ? state.tr('atStationService') : state.tr('driveInStation'),
+                        subtitle: _isCarpetMode ? state.tr('carpetStationSub') : state.tr('driveInSub'),
+                        icon: Icons.local_car_wash_rounded,
+                        color: _isCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
+                      ),
                       const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          ChoiceChip(
-                            label: Text(_isCarpetMode ? state.tr('atStationService') : state.tr('driveInStationBays')),
-                            selected: _serviceType == ServiceType.walkInStation,
-                            selectedColor: _isCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
-                            labelStyle: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: _serviceType == ServiceType.walkInStation ? Colors.white : AppColors.textPrimary,
-                            ),
-                            onSelected: (_) => setState(() => _serviceType = ServiceType.walkInStation),
-                          ),
-                          ChoiceChip(
-                            label: Text(_isCarpetMode ? state.tr('valetPickupReturn') : state.tr('serviceValetPickUp')),
-                            selected: _serviceType == ServiceType.valetPickUp,
-                            selectedColor: const Color(0xFF7C3AED),
-                            labelStyle: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: _serviceType == ServiceType.valetPickUp ? Colors.white : AppColors.textPrimary,
-                            ),
-                            onSelected: (_) => setState(() => _serviceType = ServiceType.valetPickUp),
-                          ),
-                          ChoiceChip(
-                            label: Text(_isCarpetMode ? state.tr('atHomeService') : state.tr('atHomeMobileVan')),
-                            selected: _serviceType == ServiceType.atHomeMobile,
-                            selectedColor: AppColors.mobileVanColor,
-                            labelStyle: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: _serviceType == ServiceType.atHomeMobile ? Colors.white : AppColors.textPrimary,
-                            ),
-                            onSelected: (_) => setState(() => _serviceType = ServiceType.atHomeMobile),
-                          ),
-                        ],
+                      _buildPhoneDeliveryOptionCard(
+                        type: ServiceType.atHomeMobile,
+                        title: _isCarpetMode ? state.tr('atHomeService') : state.tr('atHomeMobile'),
+                        subtitle: _isCarpetMode ? state.tr('carpetHomeSub') : state.tr('atHomeSub'),
+                        icon: Icons.rv_hookup_rounded,
+                        color: AppColors.mobileVanColor,
+                      ),
+                      const SizedBox(height: 6),
+                      _buildPhoneDeliveryOptionCard(
+                        type: ServiceType.valetPickUp,
+                        title: _isCarpetMode ? state.tr('valetPickupReturn') : state.tr('serviceValetPickUp'),
+                        subtitle: _isCarpetMode ? state.tr('carpetValetSub') : state.tr('serviceValetPickUpSub'),
+                        icon: Icons.car_rental_rounded,
+                        color: const Color(0xFF7C3AED),
                       ),
                       const SizedBox(height: 14),
 
-                      // Address if Mobile Van or Valet Pick-up
+                      // Exact Home/Place Address + Live GPS Locator when Home Van or VIP Driver
                       if (_serviceType.requiresLocation) ...[
-                        DropdownButtonFormField<String>(
-                          value: _selectedBishoftuArea,
-                          decoration: InputDecoration(
-                            labelText: state.tr('locationArea'),
-                            filled: true,
-                            fillColor: AppColors.surfaceVariant,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          ),
-                          items: AppConstants.bishoftuAreas.map((area) {
-                            return DropdownMenuItem(value: area, child: Text(area, style: const TextStyle(fontSize: 12)));
-                          }).toList(),
-                          onChanged: (val) {
-                            if (val != null) setState(() => _selectedBishoftuArea = val);
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        CustomTextField(
-                          controller: _addressController,
-                          label: state.tr('houseOrLandmark'),
-                          hint: state.tr('landmarkHintExample'),
-                          prefixIcon: Icons.home,
+                        ServiceLocationPickerCard(
+                          state: state,
+                          serviceType: _serviceType,
+                          isCarpet: _isCarpetMode,
+                          selectedArea: _selectedBishoftuArea,
+                          onAreaChanged: (val) => setState(() => _selectedBishoftuArea = val),
+                          addressController: _addressController,
+                          gpsController: _gpsController,
                         ),
                         const SizedBox(height: 14),
                       ],
@@ -813,8 +788,68 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
     );
   }
 
+  Widget _buildPhoneDeliveryOptionCard({
+    required ServiceType type,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+  }) {
+    final selected = _serviceType == type;
+    return InkWell(
+      onTap: () => setState(() => _serviceType = type),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+        decoration: BoxDecoration(
+          color: selected ? color.withValues(alpha: 0.08) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: selected ? color : AppColors.cardBorder, width: selected ? 1.6 : 1),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+              size: 18,
+              color: selected ? color : AppColors.textMuted,
+            ),
+            const SizedBox(width: 8),
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: selected ? color : AppColors.textPrimary),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary, height: 1.25),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _submitPhoneBooking(BuildContext context, dynamic state) async {
     if (!_formKey.currentState!.validate()) return;
+    if (_serviceType.requiresLocation &&
+        _addressController.text.trim().isEmpty &&
+        _gpsController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange.shade800,
+          content: Text(state.tr('deliveryModeRequiredAddress')),
+        ),
+      );
+      return;
+    }
     if (!_isCarpetMode && !_useCustomChecklist && _selectedPackage == null) return;
     if (!_isCarpetMode && _useCustomChecklist && _selectedServiceIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -831,8 +866,12 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
     try {
       String? deliveryLoc;
       if (_serviceType.requiresLocation) {
-        deliveryLoc = '$_selectedBishoftuArea - ${_addressController.text.trim()}';
+        final street = _addressController.text.trim();
+        deliveryLoc = street.isNotEmpty ? '$_selectedBishoftuArea - $street' : _selectedBishoftuArea;
       }
+      final gpsCoords = _serviceType.requiresLocation && _gpsController.text.trim().isNotEmpty
+          ? _gpsController.text.trim()
+          : null;
 
       final carpetRate = state.getCarpetPricePerSqM(_carpetType, _serviceType);
       final carpetPrice = _carpetArea * carpetRate;
@@ -855,7 +894,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
         package: _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null)!,
         deliveryLocation: deliveryLoc,
         paymentMethod: PaymentMethod.cash,
-        gpsCoordinates: null,
+        gpsCoordinates: gpsCoords,
         isPhoneBooking: true,
         isCarpet: _isCarpetMode,
         carpetType: _isCarpetMode ? _carpetType : null,

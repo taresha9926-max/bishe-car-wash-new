@@ -1,21 +1,20 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/receipt_image_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/combined_service_header_banner.dart';
+import '../../../../core/widgets/financial_pnl_statement_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
-import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/screens/financial_reports_view.dart';
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../welcome/domain/models/tiktok_ad_video.dart';
-import '../../domain/models/weekly_commission_report.dart';
 import '../widgets/admin_feedback_moderation_card.dart';
 import 'credentials_management_screen.dart';
 import 'pricing_management_screen.dart';
@@ -25,9 +24,9 @@ enum AdminTimeFilter {
   today,
   thisWeek,
   thisMonth,
-  customDate;
+  customRange;
 
-  String localizedLabel(dynamic state, [DateTime? selectedCustomDate]) {
+  String localizedLabel(dynamic state, [DateTimeRange? selectedRange]) {
     switch (this) {
       case AdminTimeFilter.today:
         return state.tr('filterToday');
@@ -35,11 +34,11 @@ enum AdminTimeFilter {
         return state.tr('filterThisWeek');
       case AdminTimeFilter.thisMonth:
         return state.tr('filterThisMonth');
-      case AdminTimeFilter.customDate:
-        if (selectedCustomDate != null) {
-          return '${selectedCustomDate.day}/${selectedCustomDate.month}/${selectedCustomDate.year}';
+      case AdminTimeFilter.customRange:
+        if (selectedRange != null) {
+          return '${selectedRange.start.day}/${selectedRange.start.month} - ${selectedRange.end.day}/${selectedRange.end.month}';
         }
-        return state.tr('filterByDate');
+        return state.tr('filterCustomRange');
     }
   }
 }
@@ -80,8 +79,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   AdminTimeFilter _selectedFilter = AdminTimeFilter.today;
-  DateTime? _selectedCustomDate;
-  String _washerCommissionFilter = 'Weekly'; // Daily, Weekly, Date Range
+  DateTimeRange? _selectedCustomRange;
   late final TextEditingController _cashierPhoneController;
   late final TextEditingController _customerPhoneController;
   final _adminCashierOtpController = TextEditingController();
@@ -119,12 +117,51 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       case AdminTimeFilter.thisWeek:
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         final startMonday = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-        return !dt.isBefore(startMonday);
+        final endSunday = startMonday.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+        return !dt.isBefore(startMonday) && !dt.isAfter(endSunday);
       case AdminTimeFilter.thisMonth:
         return dt.year == now.year && dt.month == now.month;
-      case AdminTimeFilter.customDate:
-        final target = _selectedCustomDate ?? now;
-        return dt.year == target.year && dt.month == target.month && dt.day == target.day;
+      case AdminTimeFilter.customRange:
+        final range = _selectedCustomRange ??
+            DateTimeRange(
+              start: DateTime(now.year, now.month, now.day),
+              end: DateTime(now.year, now.month, now.day),
+            );
+        final rangeStart = DateTime(range.start.year, range.start.month, range.start.day);
+        final rangeEnd = DateTime(range.end.year, range.end.month, range.end.day, 23, 59, 59);
+        return !dt.isBefore(rangeStart) && !dt.isAfter(rangeEnd);
+    }
+  }
+
+  FinancialReportFilter get _mappedFinancialFilter {
+    switch (_selectedFilter) {
+      case AdminTimeFilter.today:
+        return FinancialReportFilter.today;
+      case AdminTimeFilter.thisWeek:
+        return FinancialReportFilter.thisWeek;
+      case AdminTimeFilter.thisMonth:
+        return FinancialReportFilter.thisMonth;
+      case AdminTimeFilter.customRange:
+        return FinancialReportFilter.customRange;
+    }
+  }
+
+  String _selectedRangeSubtitle(dynamic state) {
+    final now = DateTime.now();
+    switch (_selectedFilter) {
+      case AdminTimeFilter.today:
+        return '${state.tr("filterToday")} (${now.day}/${now.month}/${now.year})';
+      case AdminTimeFilter.thisWeek:
+        final mon = now.subtract(Duration(days: now.weekday - 1));
+        final sun = mon.add(const Duration(days: 6));
+        return '${state.tr("filterThisWeek")} (${mon.day}/${mon.month} - ${sun.day}/${sun.month}/${sun.year})';
+      case AdminTimeFilter.thisMonth:
+        return '${state.tr("filterThisMonth")} (${now.month}/${now.year})';
+      case AdminTimeFilter.customRange:
+        final r = _selectedCustomRange;
+        return r == null
+            ? state.tr('filterToday')
+            : '${r.start.day}/${r.start.month}/${r.start.year} - ${r.end.day}/${r.end.month}/${r.end.year}';
     }
   }
 
@@ -165,15 +202,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             (t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
         .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
     final commissionPool = (serviceRevenue * state.teamCommissionRate) + tipsRevenue;
-    final netProfit = totalRevenue - commissionPool - totalPettyCash;
 
-    final digitalBookings = paidBookings.where((b) => b.payment.method.isDigital).toList();
+    final digitalBookings = allBookings.where((b) => b.payment.isPaid && b.payment.method.isDigital).toList();
 
-    final anyPendingDay = state.pendingCashierAdminHandover ?? state.pendingCashierHandover;
+    // Show Cashier Handover card ONLY when Cashier requested Admin verification (admin_otp)
+    // and Manager Night Handover card ONLY when Manager submitted Night Closing OTP.
+    final anyPendingDay = state.pendingCashierAdminHandover;
     final pendingNight = state.pendingAdminNightHandover;
-    final hasActiveOtpPending =
-        (anyPendingDay != null && !anyPendingDay.isHandoverAccepted) ||
-        (pendingNight != null && !pendingNight.isHandoverAccepted);
+    final hasActiveOtpPending = anyPendingDay != null || pendingNight != null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -225,11 +261,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       completedCars,
                       totalRevenue,
                       commissionPool,
-                      netProfit,
                       totalPettyCash,
                       totalSupplies,
-                      anyPendingDay,
-                      pendingNight,
                     )
                   else if (_tabController.index == 1)
                     _buildPricingAndTeamTab(context, state, isMobile)
@@ -520,11 +553,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     int completedCars,
     double totalRevenue,
     double commissionPool,
-    double netProfit,
     double totalPettyCash,
     double totalSupplies,
-    dynamic anyPendingDay,
-    dynamic pendingNight,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,64 +565,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         _buildTimeFilterBar(state),
         const SizedBox(height: 12),
 
-        // 4 Financial & Operational KPIs
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= 900;
-            final isMedium = constraints.maxWidth >= 550 && !isWide;
-            final childAspectRatio = isWide
-                ? 1.65
-                : (isMedium ? 1.55 : (constraints.maxWidth < 360 ? 1.25 : 1.38));
-
-            return GridView.count(
-              crossAxisCount: isWide ? 4 : 2,
-              crossAxisSpacing: isMobile ? 10 : 12,
-              mainAxisSpacing: isMobile ? 10 : 12,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: childAspectRatio,
+        if (state.closingCloudSyncError != null) ...[
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFD97706)),
+            ),
+            child: Row(
               children: [
-                _buildMetricCard(
-                  state.tr('totalRevenueAdmin'),
-                  CurrencyFormatter.formatShort(totalRevenue),
-                  '$completedCars ${state.tr("carsWashed")}',
-                  Icons.account_balance_wallet_rounded,
-                  AppColors.primary,
-                  imageUrl: AutoCareAssets.stationBayUrl,
-                  isMobile: isMobile,
-                ),
-                _buildMetricCard(
-                  state.tr('commissionsPaid'),
-                  CurrencyFormatter.formatShort(commissionPool),
-                  '${(state.teamCommissionRate * 100).toStringAsFixed(0)}% ${state.tr("teamPoolLabel")}',
-                  Icons.handshake_rounded,
-                  AppColors.oromiaGold,
-                  imageUrl: AutoCareAssets.packageFoamUrl,
-                  isMobile: isMobile,
-                ),
-                _buildMetricCard(
-                  state.tr('netStationProfit'),
-                  CurrencyFormatter.formatShort(netProfit > 0 ? netProfit : 0),
-                  state.tr('afterPayrollCuts'),
-                  Icons.trending_up_rounded,
-                  AppColors.statusReady,
-                  imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
-                  isMobile: isMobile,
-                ),
-                _buildMetricCard(
-                  state.tr('activeWashers'),
-                  '${state.presentWashersCount} ${state.tr("onDutyCountLabel")}',
-                  '${state.totalWashersCount} ${state.tr("totalWashersLabel")}',
-                  Icons.groups_rounded,
-                  AppColors.secondary,
-                  imageUrl: AutoCareAssets.valetDriverUrl,
-                  isMobile: isMobile,
+                const Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309), size: 19),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    state.tr('closingCloudSyncRlsWarning'),
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF92400E)),
+                  ),
                 ),
               ],
-            );
-          },
-        ),
-        const SizedBox(height: 12),
+            ),
+          ),
+        ],
 
         // Quick Financial Reports & Wash History shortcuts
         _buildActionPairRow(
@@ -605,7 +601,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               imageUrl: AutoCareAssets.packageTireRimUrl,
               color: AppColors.cashGreen,
               badge: '${state.dailyFinancialClosings.length}',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FinancialReportsView())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FinancialReportsView(
+                    initialFilter: _mappedFinancialFilter,
+                    initialCustomRange: _selectedCustomRange,
+                  ),
+                ),
+              ),
             ),
             _AdminActionItem(
               title: state.tr('washHistory'),
@@ -620,19 +624,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         ),
         const SizedBox(height: 12),
 
-        // Shift Custody Audit Summary (replaces redundant idle OTP walls)
-        _buildShiftCustodyAuditCard(context, state, anyPendingDay, pendingNight),
-        const SizedBox(height: 12),
-
-        // Full Profit & Loss Statement directly visible on Overview
-        _buildStandardFinancialStatementCard(
-          context,
-          state,
-          isMobile,
-          totalRevenue,
-          commissionPool,
-          totalPettyCash,
-          totalSupplies,
+        // Full Profit & Loss Statement synchronized with selected Date / Date Range filter
+        FinancialPnlStatementCard(
+          state: state,
+          isMobile: isMobile,
+          periodSubtitle: _selectedRangeSubtitle(state),
+          totalRevenue: totalRevenue,
+          commissionPool: commissionPool,
+          totalPettyCash: totalPettyCash,
+          totalSupplies: totalSupplies,
         ),
       ],
     );
@@ -694,8 +694,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           initiallyExpanded: true,
           respectInitiallyExpanded: true,
         ),
-        const SizedBox(height: 14),
-        _buildWeeklyWasherCommissionReportSection(context, state, isMobile),
       ],
     );
   }
@@ -724,154 +722,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     );
   }
 
-  // ===========================================================================
-  // SHIFT CUSTODY SUMMARY & STRICT OTP VERIFICATION
-  // ===========================================================================
-
-  Widget _buildShiftCustodyAuditCard(
-    BuildContext context,
-    dynamic state,
-    dynamic anyPendingDay,
-    dynamic pendingNight,
-  ) {
-    final dayClosing = state.latestDayClosing;
-    final nightClosing = state.latestNightClosing;
-
-    final isDayPending = anyPendingDay != null && !anyPendingDay.isHandoverAccepted;
-    final isDayReconciled = dayClosing != null && dayClosing.isHandoverAccepted;
-    final isNightPending = pendingNight != null && !pendingNight.isHandoverAccepted;
-    final isNightReconciled = nightClosing != null && nightClosing.isHandoverAccepted;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.shield_rounded, size: 18, color: AppColors.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  state.tr('shiftHandoverDesk'),
-                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  state.tr('threePartyCustody'),
-                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFF047857)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _buildShiftStatusTile(
-            icon: Icons.wb_sunny_rounded,
-            title: state.tr('cashierHandoverVerification'),
-            badge: isDayPending
-                ? state.tr('pendingDayOtpBadge')
-                : (isDayReconciled ? state.tr('reconciledBadge') : state.tr('dayShiftActiveBadge')),
-            color: isDayPending
-                ? const Color(0xFFD97706)
-                : (isDayReconciled ? const Color(0xFF047857) : AppColors.textSecondary),
-            subtitle: isDayReconciled
-                ? '${CurrencyFormatter.format(dayClosing.cashRemaining)} • ${dayClosing.acceptedByName ?? "Admin"}'
-                : '${state.tr("physicalCashInDrawer")}: ${CurrencyFormatter.format(state.undepositedCashTodayETB)}',
-          ),
-          const SizedBox(height: 8),
-          _buildShiftStatusTile(
-            icon: Icons.shield_moon_rounded,
-            title: state.tr('managerHandoverVerification'),
-            badge: isNightPending
-                ? state.tr('pendingVaultSealBadge')
-                : (isNightReconciled ? state.tr('sealedInVaultBadge') : state.tr('nightShiftActiveBadge')),
-            color: isNightPending
-                ? const Color(0xFF4338CA)
-                : (isNightReconciled ? const Color(0xFF047857) : AppColors.textSecondary),
-            subtitle: isNightReconciled
-                ? '${CurrencyFormatter.format(nightClosing.handoverCashAmount)} • ${nightClosing.acceptedByName ?? "Admin"}'
-                : '${state.tr("dayShiftHandoverCashLabel")} ${CurrencyFormatter.format(state.managerCarriedCashETB)}',
-          ),
-          if ((state.carryOverAuditBookings as List).isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _buildShiftStatusTile(
-              icon: Icons.schedule_send_rounded,
-              title: state.tr('carryOverAuditTitle'),
-              badge: '${(state.carryOverAuditBookings as List).length}',
-              color: const Color(0xFFD97706),
-              subtitle: (state.carryOverAuditBookings as List)
-                  .map((b) => '${b.licensePlate}${b.payment.isPaid ? " [PAID]" : ""}')
-                  .take(4)
-                  .join(', '),
-            ),
-          ],
-          if (state.closingCloudSyncError != null) ...[
-            const SizedBox(height: 8),
-            _buildShiftStatusTile(
-              icon: Icons.warning_amber_rounded,
-              title: 'Supabase RLS',
-              badge: '42501',
-              color: const Color(0xFFB45309),
-              subtitle: state.tr('closingCloudSyncRlsWarning'),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildShiftStatusTile({
-    required IconData icon,
-    required String title,
-    required String badge,
-    required Color color,
-    required String subtitle,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 17, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(badge, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: color)),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _handleInlineAdminVerifyCashier(BuildContext context, dynamic state) async {
     final entered = _adminCashierOtpController.text.trim();
     if (entered.length != 4) {
@@ -881,7 +731,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       return;
     }
 
-    final anyPending = state.pendingCashierAdminHandover ?? state.pendingCashierHandover;
+    final anyPending = state.pendingCashierAdminHandover;
     if (anyPending == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1063,17 +913,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               color: Colors.transparent,
               child: InkWell(
                 onTap: () async {
-                  if (filter == AdminTimeFilter.customDate) {
-                    final picked = await showDatePicker(
+                  if (filter == AdminTimeFilter.customRange) {
+                    final now = DateTime.now();
+                    final picked = await showDateRangePicker(
                       context: context,
-                      initialDate: _selectedCustomDate ?? DateTime.now(),
                       firstDate: DateTime(2022),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                      lastDate: now.add(const Duration(days: 365)),
+                      initialDateRange: _selectedCustomRange ??
+                          DateTimeRange(
+                            start: now.subtract(const Duration(days: 7)),
+                            end: now,
+                          ),
                     );
                     if (picked != null && mounted) {
                       setState(() {
-                        _selectedCustomDate = picked;
-                        _selectedFilter = AdminTimeFilter.customDate;
+                        _selectedCustomRange = picked;
+                        _selectedFilter = AdminTimeFilter.customRange;
                       });
                     }
                   } else {
@@ -1095,16 +950,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (filter == AdminTimeFilter.customDate) ...[
+                      if (filter == AdminTimeFilter.customRange) ...[
                         Icon(
-                          Icons.calendar_month_rounded,
+                          Icons.date_range_rounded,
                           size: 15,
                           color: isSelected ? Colors.white : AppColors.primary,
                         ),
                         const SizedBox(width: 6),
                       ],
                       Text(
-                        filter.localizedLabel(state, _selectedCustomDate),
+                        filter.localizedLabel(state, _selectedCustomRange),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
@@ -1118,212 +973,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             ),
           );
         }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildMetricCard(
-    String title,
-    String value,
-    String subtitle,
-    IconData icon,
-    Color color, {
-    String? imageUrl,
-    required bool isMobile,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 11 : 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              imageUrl != null
-                  ? AutoCareAssets.buildPhotoThumbnail(
-                      imageUrl: imageUrl,
-                      width: isMobile ? 32 : 36,
-                      height: isMobile ? 32 : 36,
-                      borderRadius: 9,
-                      fallbackIcon: icon,
-                      fallbackColor: color,
-                    )
-                  : Icon(icon, color: color, size: 22),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: isMobile ? 11 : 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 2),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  value,
-                  style: TextStyle(fontSize: isMobile ? 16.5 : 18, fontWeight: FontWeight.w900, color: color),
-                ),
-              ),
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStandardFinancialStatementCard(
-    BuildContext context,
-    dynamic state,
-    bool isMobile,
-    double totalRevenue,
-    double commissionPool,
-    double totalPettyCash,
-    double totalSupplies,
-  ) {
-    final cogs = commissionPool + totalSupplies;
-    final grossProfit = totalRevenue - cogs;
-    final netOperatingProfit = grossProfit - totalPettyCash;
-    final monthlySalaryObligation = state.monthlyTotalBaseSalary as double;
-    final netRetainedProfit = netOperatingProfit - monthlySalaryObligation;
-
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 14 : 18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: AutoCareAssets.cashMoneyUrl,
-                width: 38,
-                height: 38,
-                borderRadius: 10,
-                fallbackIcon: Icons.account_balance_wallet_rounded,
-                fallbackColor: AppColors.primary,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.tr('pnlStatementTitle'),
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                    ),
-                    Text(
-                      state.tr('pnlStatementSub'),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: (netOperatingProfit >= 0 ? AppColors.statusReady : AppColors.statusCancelled).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  netOperatingProfit >= 0 ? state.tr('profitableBadge') : state.tr('deficitBadge'),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    color: netOperatingProfit >= 0 ? AppColors.statusReady : AppColors.statusCancelled,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const Divider(height: 1, color: AppColors.cardBorder),
-          const SizedBox(height: 12),
-          _buildStatementRow(state.tr('grossRevenueRow'), CurrencyFormatter.format(totalRevenue), Colors.green.shade800, isHeader: true),
-          const SizedBox(height: 6),
-          _buildStatementRow(state.tr('cogsRow'), '- ${CurrencyFormatter.format(cogs)}', Colors.orange.shade900, isHeader: true),
-          _buildStatementSubRow('• ${state.tr("washerCommissionSub")}', '- ${CurrencyFormatter.format(commissionPool)}'),
-          _buildStatementSubRow('• ${state.tr("consumablesSub")}', '- ${CurrencyFormatter.format(totalSupplies)}'),
-          const Divider(height: 12),
-          _buildStatementRow(state.tr('grossOperatingProfitRow'), CurrencyFormatter.format(grossProfit), grossProfit >= 0 ? Colors.green.shade700 : Colors.red, isBold: true),
-          const SizedBox(height: 8),
-          _buildStatementRow(state.tr('opexRow'), '- ${CurrencyFormatter.format(totalPettyCash)}', Colors.deepOrange.shade900, isHeader: true),
-          _buildStatementSubRow('• ${state.tr("pettyCashOpexSub")}', '- ${CurrencyFormatter.format(totalPettyCash)}'),
-          const Divider(thickness: 1.5, height: 16),
-          _buildStatementRow(state.tr('netOperatingProfitRow'), CurrencyFormatter.format(netOperatingProfit), netOperatingProfit >= 0 ? Colors.teal.shade800 : Colors.red, isBold: true, isLarge: true),
-          const Divider(height: 16),
-          _buildStatementRow(state.tr('salaryReserveRow'), CurrencyFormatter.format(monthlySalaryObligation), Colors.blueGrey, isHeader: true),
-          const SizedBox(height: 4),
-          _buildStatementRow(state.tr('netRetainedProfitRow'), CurrencyFormatter.format(netRetainedProfit), netRetainedProfit >= 0 ? Colors.indigo.shade800 : Colors.red, isBold: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatementRow(String label, String value, Color color, {bool isHeader = false, bool isBold = false, bool isLarge = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: isLarge ? 14 : (isHeader || isBold ? 13 : 12),
-              fontWeight: isHeader || isBold || isLarge ? FontWeight.w800 : FontWeight.w600,
-              color: isLarge ? color : AppColors.textPrimary,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isLarge ? 15 : 13,
-            fontWeight: FontWeight.w900,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatementSubRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 3, left: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(label, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-          ),
-          const SizedBox(width: 8),
-          Text(value, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-        ],
       ),
     );
   }
@@ -1524,222 +1173,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     );
   }
 
-  Widget _buildWeeklyWasherCommissionReportSection(BuildContext context, dynamic state, bool isMobile) {
-    final latestReport = state.latestWeeklyCommissionReport as WeeklyCommissionReport?;
-
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 14 : 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.oromiaGold.withValues(alpha: 0.4), width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: AutoCareAssets.packageDeluxeSpaUrl,
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                fallbackIcon: Icons.receipt_long_rounded,
-                fallbackColor: AppColors.oromiaGold,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.tr('weeklyCommissionReport'),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                    ),
-                    Text(
-                      state.tr('weeklyCommissionReportSub'),
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              if (!isMobile)
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StaffManagementScreen())),
-                  icon: const Icon(Icons.manage_accounts_rounded, size: 14),
-                  label: Text(state.tr('staffAndSalaries'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11)),
-                ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ChoiceChip(
-                  label: Text(state.tr('dailyTodayFilter')),
-                  selected: _washerCommissionFilter == 'Daily',
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: _washerCommissionFilter == 'Daily' ? Colors.white : AppColors.textPrimary),
-                  onSelected: (_) => setState(() => _washerCommissionFilter = 'Daily'),
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text(state.tr('weeklyReportFilter')),
-                  selected: _washerCommissionFilter == 'Weekly',
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: _washerCommissionFilter == 'Weekly' ? Colors.white : AppColors.textPrimary),
-                  onSelected: (_) => setState(() => _washerCommissionFilter = 'Weekly'),
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text(state.tr('periodReportFilter')),
-                  selected: _washerCommissionFilter == 'Date Range',
-                  selectedColor: AppColors.primary,
-                  labelStyle: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: _washerCommissionFilter == 'Date Range' ? Colors.white : AppColors.textPrimary),
-                  onSelected: (_) => setState(() => _washerCommissionFilter = 'Date Range'),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 20, color: AppColors.cardBorder),
-          if (_washerCommissionFilter == 'Daily') ...[
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: (state.availableWashers as List).length,
-              separatorBuilder: (_, __) => const SizedBox(height: 6),
-              itemBuilder: (context, index) {
-                final w = (state.availableWashers as List)[index];
-                final isPresent = state.isWasherPresentToday(w.id);
-                final div = state.washerDividendsToday[w.id];
-                final earned = (isPresent && div != null) ? div.earnedETB : 0.0;
-                return _buildWasherDividendRow(
-                  name: w.name,
-                  subtitle: isPresent ? state.tr('onDutyCountLabel') : state.tr('absent'),
-                  amount: earned,
-                  isPositive: isPresent,
-                );
-              },
-            ),
-          ] else if (_washerCommissionFilter == 'Weekly') ...[
-            if (latestReport == null)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: Center(
-                  child: Text(
-                    state.tr('noWeeklyCommissionReports'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              )
-            else ...[
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${latestReport.weekStartDate.day}/${latestReport.weekStartDate.month} - ${latestReport.weekEndDate.day}/${latestReport.weekEndDate.month}/${latestReport.weekEndDate.year}',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
-                          ),
-                          Text(
-                            '${state.tr("reportedByCashier")}: ${latestReport.cashierName}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      CurrencyFormatter.format(latestReport.totalWeeklyPool),
-                      style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w900, color: AppColors.primary),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: latestReport.washerCommissions.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 6),
-                itemBuilder: (context, index) {
-                  final entry = latestReport.washerCommissions.entries.toList()[index];
-                  return _buildWasherDividendRow(name: entry.key, amount: entry.value, isPositive: true);
-                },
-              ),
-            ],
-          ] else ...[
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: (state.availableWashers as List).length,
-              separatorBuilder: (_, __) => const SizedBox(height: 6),
-              itemBuilder: (context, index) {
-                final w = (state.availableWashers as List)[index];
-                final earned = (state.weeklyWasherCommissions as Map<String, double>)[w.name] ?? 0.0;
-                return _buildWasherDividendRow(name: w.name, amount: earned, isPositive: earned > 0);
-              },
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWasherDividendRow({
-    required String name,
-    String? subtitle,
-    required double amount,
-    required bool isPositive,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          AutoCareAssets.buildPhotoThumbnail(
-            imageUrl: AutoCareAssets.spongeBucketUrl,
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            fallbackIcon: Icons.badge_rounded,
-            fallbackColor: AppColors.primary,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800)),
-                if (subtitle != null)
-                  Text(subtitle, style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: isPositive ? Colors.green.shade800 : Colors.red.shade700)),
-              ],
-            ),
-          ),
-          Text(
-            CurrencyFormatter.format(amount),
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: isPositive ? AppColors.statusCompleted : AppColors.textMuted),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ===========================================================================
   // CUSTOMERS & ADS SECTION: DIGITAL RECEIPTS, HOTLINE/SMS & TIKTOK REELS
   // ===========================================================================
@@ -1805,28 +1238,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: bookings.take(6).length,
+              itemCount: bookings.take(10).length,
               separatorBuilder: (_, __) => const Divider(height: 14, color: AppColors.cardBorder),
               itemBuilder: (context, index) {
                 final b = bookings[index];
-                final hasScreenshot = b.payment.receiptScreenshot != null && b.payment.receiptScreenshot!.isNotEmpty;
+                final hasScreenshot = b.payment.receiptScreenshot != null && b.payment.receiptScreenshot!.trim().isNotEmpty;
                 return Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: b.payment.method.color.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
+                    GestureDetector(
+                      onTap: hasScreenshot ? () => _showScreenshotDialog(context, state, b) : null,
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: BoxDecoration(
+                          color: b.payment.method.color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: hasScreenshot ? Border.all(color: AppColors.telebirrBlue.withValues(alpha: 0.45)) : null,
+                        ),
+                        child: hasScreenshot
+                            ? ReceiptImageHelper.buildImage(
+                                b.payment.receiptScreenshot,
+                                width: 42,
+                                height: 42,
+                                fit: BoxFit.cover,
+                                fallback: Icon(b.payment.method.icon, color: b.payment.method.color, size: 19),
+                              )
+                            : Icon(b.payment.method.icon, color: b.payment.method.color, size: 19),
                       ),
-                      child: Icon(b.payment.method.icon, color: b.payment.method.color, size: 18),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(b.licensePlate, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                          Text(
+                            '${b.licensePlate} • ${b.payment.method.localizedName(state.currentLang)}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                          ),
                           Text(
                             'Ref: ${b.payment.transactionRef ?? 'N/A'} • ${CurrencyFormatter.format(b.payment.amount)}',
                             maxLines: 1,
@@ -1868,17 +1319,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   }
 
   void _showScreenshotDialog(BuildContext context, dynamic state, WashBooking booking) {
-    final screenshot = booking.payment.receiptScreenshot!;
-    Widget imageWidget;
-    try {
-      if (screenshot.startsWith('http://') || screenshot.startsWith('https://')) {
-        imageWidget = Image.network(screenshot, fit: BoxFit.contain);
-      } else {
-        imageWidget = Image.memory(base64Decode(screenshot), fit: BoxFit.contain);
-      }
-    } catch (_) {
-      imageWidget = Center(child: Text(state.tr('noReceipt'), style: const TextStyle(color: AppColors.textMuted)));
-    }
+    final screenshot = booking.payment.receiptScreenshot;
+    final imageWidget = ReceiptImageHelper.buildImage(
+      screenshot,
+      fit: BoxFit.contain,
+      fallback: Center(child: Text(state.tr('noReceipt'), style: const TextStyle(color: AppColors.textMuted))),
+    );
 
     showDialog(
       context: context,

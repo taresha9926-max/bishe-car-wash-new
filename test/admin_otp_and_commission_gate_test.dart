@@ -195,12 +195,15 @@ void main() {
   });
 
   group('Requirement 2: Strict Fail-Closed OTP Verification & Cloud Meta Persistence', () {
-    test('Rejects any OTP when stored handoverOtp is null/empty (no auto-approval)', () async {
+    test('Hides pending OTP prompt and rejects any OTP when stored handoverOtp is null/empty (no auto-approval)', () async {
       final state = AppStateNotifier(repository: _MissingOtpClosingRepository());
       await state.loadData();
 
-      expect(state.pendingAdminNightHandover, isNotNull);
-      expect(state.pendingAdminNightHandover!.handoverOtp, isNull);
+      // Without a non-empty OTP, Admin dashboard must NOT show a pending handover banner
+      expect(state.pendingAdminNightHandover, isNull);
+      expect(state.latestNightClosing, isNotNull);
+      expect(state.latestNightClosing!.handoverOtp, isNull);
+      expect(state.latestNightClosing!.isHandoverAccepted, isFalse);
 
       final wrongAttempt = await state.acceptAdminHandover(
         adminName: 'Admin Owner',
@@ -208,7 +211,7 @@ void main() {
         shiftType: 'night',
       );
       expect(wrongAttempt, isFalse);
-      expect(state.pendingAdminNightHandover, isNotNull);
+      expect(state.latestNightClosing!.isHandoverAccepted, isFalse);
 
       final blankAttempt = await state.acceptAdminHandover(
         adminName: 'Admin Owner',
@@ -216,7 +219,7 @@ void main() {
         shiftType: 'night',
       );
       expect(blankAttempt, isFalse);
-      expect(state.pendingAdminNightHandover, isNotNull);
+      expect(state.latestNightClosing!.isHandoverAccepted, isFalse);
     });
 
     test('Supabase closing [HANDOVER_META] notes encoding preserves OTP & custody metadata round-trip', () {
@@ -401,7 +404,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(state.tr('masterPricingAndInventory')), findsOneWidget);
       expect(find.text(state.tr('clearAllBookings')), findsNothing); // Hidden for Secondary Admin
-      expect(find.text(state.tr('weeklyCommissionReport')), findsOneWidget);
+      // Redundant Weekly Washer Commission Report card below matrix is intentionally removed
+      expect(find.text(state.tr('weeklyCommissionReport')), findsNothing);
+      expect(find.text(state.tr('adminWasherHubTitle')), findsOneWidget);
 
       // Tab 2: Customers & Ads
       await tester.tap(find.byType(Tab).at(2));

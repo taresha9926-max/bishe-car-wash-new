@@ -26,7 +26,7 @@ class PrimaryIntakeActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final isCarpet = state.isCarpetDivisionActive as bool;
+    final isCarpet = state.isCarpetDivisionActive;
     final walkInColor = isCarpet ? const Color(0xFF7C3AED) : AppColors.primary;
 
     return Row(
@@ -168,7 +168,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final isCarpet = state.isCarpetDivisionActive as bool;
+    final isCarpet = state.isCarpetDivisionActive;
     final onlineCount = widget.divisionQueue.where(_isOnlineWaiting).length;
     final waitingCount = widget.divisionQueue.where(_isWaiting).length;
     final inProgressCount = widget.divisionQueue.where(_isInProgress).length;
@@ -528,31 +528,8 @@ class _StationQueueTabState extends State<StationQueueTab> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
                   ),
                 ),
-              if (!widget.isManager && !_isOnlineWaiting(b))
-                OutlinedButton.icon(
-                  onPressed: () => _showHandoverToManagerDialog(context, state, b),
-                  icon: Icon(
-                    b.isHandedOverToManager ? Icons.published_with_changes_rounded : Icons.swap_horiz_rounded,
-                    size: 14,
-                    color: const Color(0xFF4338CA),
-                  ),
-                  label: Text(
-                    state.tr('handoverToOpManagerAction'),
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF3730A3)),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: const Color(0xFF4338CA),
-                      width: b.isHandedOverToManager ? 1.5 : 1.0,
-                    ),
-                    backgroundColor: b.isHandedOverToManager ? const Color(0xFFEEF2FF) : null,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
-                  ),
-                ),
-              if (!_isOnlineWaiting(b) &&
+              if (widget.isManager &&
+                  !_isOnlineWaiting(b) &&
                   b.status != WashStatus.completed &&
                   b.status != WashStatus.readyForPickup)
                 OutlinedButton.icon(
@@ -912,65 +889,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
           ),
         ),
       );
-    }
-  }
-
-  Future<void> _showHandoverToManagerDialog(BuildContext context, dynamic state, WashBooking b) async {
-    String note = b.handoverNote ?? '';
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Row(
-          children: [
-            const Icon(Icons.swap_horiz_rounded, color: Color(0xFF4338CA)),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                state.tr('handoverDialogTitle'),
-                style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${b.licensePlate} (${b.status.localizedName(state.currentLang)}${b.payment.isPaid ? " • PAID" : ""}) • ${state.tr("handoverDialogDesc")}',
-              style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, height: 1.35),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              initialValue: note,
-              onChanged: (v) => note = v,
-              decoration: InputDecoration(
-                hintText: state.tr('handoverNoteHint'),
-                isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(state.tr('cancel'))),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4338CA), foregroundColor: Colors.white),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(state.tr('confirm')),
-          ),
-        ],
-      ),
-    );
-    final trimmedNote = note.trim();
-    if (confirmed == true) {
-      await state.handoverBookingToManager(bookingId: b.id, note: trimmedNote.isNotEmpty ? trimmedNote : null);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${b.licensePlate}: ${state.tr("handoverSuccessMsg")}'), backgroundColor: const Color(0xFF4338CA)),
-        );
-      }
     }
   }
 

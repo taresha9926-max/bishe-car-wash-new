@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/receipt_image_helper.dart';
+import '../../../../core/widgets/financial_pnl_statement_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../admin/domain/models/bank_deposit_record.dart';
 import '../../../admin/domain/models/daily_financial_closing.dart';
 import '../../domain/models/payment_info.dart';
-import '../../domain/models/wash_booking.dart';
 import '../state/app_state_provider.dart';
 
 enum FinancialReportFilter {
@@ -30,18 +30,20 @@ enum FinancialReportFilter {
         return state.tr('filterCustomRange');
     }
   }
-
-  String get displayName => 'Today';
 }
 
 class FinancialReportsView extends StatefulWidget {
   final bool isEmbedded;
   final bool isCashierMode;
+  final FinancialReportFilter? initialFilter;
+  final DateTimeRange? initialCustomRange;
 
   const FinancialReportsView({
     super.key,
     this.isEmbedded = false,
     this.isCashierMode = false,
+    this.initialFilter,
+    this.initialCustomRange,
   });
 
   @override
@@ -49,8 +51,32 @@ class FinancialReportsView extends StatefulWidget {
 }
 
 class _FinancialReportsViewState extends State<FinancialReportsView> {
-  FinancialReportFilter _periodFilter = FinancialReportFilter.today;
+  late FinancialReportFilter _periodFilter;
   DateTimeRange? _customRange;
+
+  @override
+  void initState() {
+    super.initState();
+    _periodFilter = widget.initialFilter ?? FinancialReportFilter.today;
+    _customRange = widget.initialCustomRange;
+  }
+
+  String _formatDate(DateTime d) => '${d.day}/${d.month}/${d.year}';
+
+  String _consolidatedTitle(dynamic state, DateTime rangeStart, DateTime rangeEnd) {
+    switch (_periodFilter) {
+      case FinancialReportFilter.today:
+      case FinancialReportFilter.yesterday:
+        return state.tr('consolidatedDailyTitle');
+      case FinancialReportFilter.thisWeek:
+        return state.tr('consolidatedWeeklyTitle');
+      case FinancialReportFilter.thisMonth:
+        return state.tr('consolidatedMonthlyTitle');
+      case FinancialReportFilter.customRange:
+        final label = '${_formatDate(rangeStart)} - ${_formatDate(rangeEnd)}';
+        return '${state.tr("consolidatedCustomPrefix")} [$label] ${state.tr("consolidatedCustomSuffix")}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +85,13 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     final isDesktop = ResponsiveLayout.isDesktop(context);
 
     final now = DateTime.now();
-    DateTime rangeStart;
-    DateTime rangeEnd = now;
+    late DateTime rangeStart;
+    late DateTime rangeEnd;
 
     switch (_periodFilter) {
       case FinancialReportFilter.today:
         rangeStart = DateTime(now.year, now.month, now.day);
+        rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
         break;
       case FinancialReportFilter.yesterday:
         final y = now.subtract(const Duration(days: 1));
@@ -74,107 +101,136 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
       case FinancialReportFilter.thisWeek:
         final monday = now.subtract(Duration(days: now.weekday - 1));
         rangeStart = DateTime(monday.year, monday.month, monday.day);
+        rangeEnd = rangeStart.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
         break;
       case FinancialReportFilter.thisMonth:
         rangeStart = DateTime(now.year, now.month, 1);
+        rangeEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
         break;
       case FinancialReportFilter.customRange:
         if (_customRange != null) {
-          rangeStart = _customRange!.start;
+          rangeStart = DateTime(_customRange!.start.year, _customRange!.start.month, _customRange!.start.day);
           rangeEnd = DateTime(_customRange!.end.year, _customRange!.end.month, _customRange!.end.day, 23, 59, 59);
         } else {
           rangeStart = DateTime(now.year, now.month, now.day);
+          rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
         }
         break;
     }
 
-    // Filter paid bookings in the period by cash/digital collection date (paidAt ?? createdAt)
-    final periodBookings = state.bookings.where((b) {
-      if (!b.payment.isPaid) return false;
-      final paidDate = b.payment.paidAt ?? b.createdAt;
-      return (paidDate.isAfter(rangeStart) || paidDate.isAtSameMomentAs(rangeStart)) &&
-          (paidDate.isBefore(rangeEnd) || paidDate.isAtSameMomentAs(rangeEnd));
-    }).toList();
+    bool inRange(DateTime dt) =>
+        (dt.isAfter(rangeStart) || dt.isAtSameMomentAs(rangeStart)) &&
+        (dt.isBefore(rangeEnd) || dt.isAtSameMomentAs(rangeEnd));
 
-    // Financial Metrics for the period, strictly itemized by division
+    final periodBookings = state.bookings
+        .where((b) => b.payment.isPaid && inRange(b.payment.paidAt ?? b.createdAt))
+        .toList();
+
     final periodCarBookings = periodBookings.where((b) => !b.isCarpet).toList();
     final periodCarpetBookings = periodBookings.where((b) => b.isCarpet).toList();
+    final periodShowers = state.showerRecords.where((s) => inRange(s.recordedAt)).toList();
 
     final carRevenue = periodCarBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final carpetRevenue = periodCarpetBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final totalTips = periodBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
-    final showerRevenue = state.todayShowerRevenueETB as double;
+    final showerRevenue = periodShowers.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final showerCount = periodShowers.fold<int>(0, (sum, s) => sum + s.userCount);
+    final showerCash = periodShowers
+        .where((s) => s.paymentMethod == PaymentMethod.cash)
+        .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
 
-    final grossRevenue = periodBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice) + showerRevenue;
-    final cashRevenue = periodBookings
+    final grossRevenue = carRevenue + carpetRevenue + totalTips + showerRevenue;
+    final serviceCash = periodBookings
         .where((b) => b.payment.method == PaymentMethod.cash)
-        .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+        .fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+    final cashRevenue = serviceCash + showerCash;
     final digitalRevenue = grossRevenue - cashRevenue;
-    // Shower has 0% washer commission; wash services pay team commission rate
-    final commissionDeducted = (carRevenue + carpetRevenue) * state.teamCommissionRate;
+    final commissionDeducted = ((carRevenue + carpetRevenue) * state.teamCommissionRate) + totalTips;
     final netStationProfit = grossRevenue - commissionDeducted;
 
-    // Filter bank deposits in period
-    final periodDeposits = state.bankDeposits.where((d) {
-      return (d.depositedAt.isAfter(rangeStart) || d.depositedAt.isAtSameMomentAs(rangeStart)) &&
-          (d.depositedAt.isBefore(rangeEnd) || d.depositedAt.isAtSameMomentAs(rangeEnd));
-    }).toList();
+    final periodPettyCash = state.pettyCashExpenses
+        .where((e) => inRange(e.loggedAt))
+        .fold<double>(0.0, (sum, e) => sum + e.amount);
+    final periodSupplies = state.stockTransactions
+        .where((t) =>
+            inRange(t.date) &&
+            (t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
+        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
+
+    final periodDeposits = state.bankDeposits.where((d) => inRange(d.depositedAt)).toList();
     final totalCashDeposited = periodDeposits.fold<double>(0.0, (sum, d) => sum + d.amount);
 
-    // Filter daily closings in period
-    final periodClosings = state.dailyFinancialClosings.where((c) {
-      return (c.closingDate.isAfter(rangeStart) || c.closingDate.isAtSameMomentAs(rangeStart)) &&
-          (c.closingDate.isBefore(rangeEnd) || c.closingDate.isAtSameMomentAs(rangeEnd));
-    }).toList();
+    final periodClosings = state.dailyFinancialClosings.where((c) => inRange(c.closingDate)).toList();
+
+    final dynamicTitle = _consolidatedTitle(state, rangeStart, rangeEnd);
+    final rangeCaption = '${_formatDate(rangeStart)} - ${_formatDate(rangeEnd)}';
 
     final bodyContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Time Filter Chips
         _buildFilterBar(context, state),
         const SizedBox(height: 14),
 
-        // 2. Division-by-Division Segmented Reconciliation Banner
-        _buildDivisionReconciliationBanner(
-          state: state,
-          carRevenue: carRevenue,
-          carCount: periodCarBookings.length,
-          carpetRevenue: carpetRevenue,
-          carpetCount: periodCarpetBookings.length,
-          showerRevenue: showerRevenue,
-          showerCount: state.todayShowerUserCount,
-          tipsTotal: totalTips,
-          isMobile: isMobile,
+        // Header & Service Division Revenue Table
+        _buildTabularSectionCard(
+          title: dynamicTitle,
+          badge: rangeCaption,
+          icon: Icons.assessment_rounded,
+          accentColor: AppColors.primary,
+          table: _buildDivisionTable(
+            state: state,
+            carRevenue: carRevenue,
+            carCount: periodCarBookings.length,
+            carpetRevenue: carpetRevenue,
+            carpetCount: periodCarpetBookings.length,
+            showerRevenue: showerRevenue,
+            showerCount: showerCount,
+            tipsTotal: totalTips,
+          ),
         ),
         const SizedBox(height: 14),
 
-        // 3. Financial KPI Grid
-        _buildKPIGrid(
-          state: state,
-          grossRevenue: grossRevenue,
-          cashRevenue: cashRevenue,
-          digitalRevenue: digitalRevenue,
-          commissionDeducted: commissionDeducted,
-          netStationProfit: netStationProfit,
-          totalCashDeposited: totalCashDeposited,
-          carCount: periodCarBookings.length,
-          carpetCount: periodCarpetBookings.length,
-          isMobile: isMobile,
-          isDesktop: isDesktop,
+        // Collections & Profit Summary Table (replaces old grid cards)
+        _buildTabularSectionCard(
+          title: state.tr('paymentSummaryTableTitle'),
+          badge: '${periodBookings.length} ${state.tr("carsWashed")}',
+          icon: Icons.table_chart_rounded,
+          accentColor: AppColors.cashGreen,
+          table: _buildCollectionsTable(
+            state: state,
+            grossRevenue: grossRevenue,
+            cashRevenue: cashRevenue,
+            digitalRevenue: digitalRevenue,
+            commissionDeducted: commissionDeducted,
+            netStationProfit: netStationProfit,
+            totalCashDeposited: totalCashDeposited,
+            carCount: periodCarBookings.length,
+            carpetCount: periodCarpetBookings.length,
+            depositCount: periodDeposits.length,
+          ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 14),
 
-        // 3. Daily Closing Summaries Table
-        _buildDailyClosingsSection(context, state, periodClosings, isMobile),
-        const SizedBox(height: 18),
-
-        // 5. Cash Bank Deposits Log (Owner Accounts A & B)
-        _buildBankDepositsSection(context, periodDeposits, isMobile, state),
+        // Financial Statement (P&L) synchronized with selected date range (hidden for Cashier mode)
         if (!widget.isCashierMode) ...[
-          const SizedBox(height: 18),
-          // 6. Washer Payroll Policy (Weekly Commission + Monthly Salary)
-          _buildWasherPayrollSection(state, isMobile),
+          FinancialPnlStatementCard(
+            state: state,
+            isMobile: isMobile,
+            periodSubtitle: rangeCaption,
+            totalRevenue: grossRevenue,
+            commissionPool: commissionDeducted,
+            totalPettyCash: periodPettyCash,
+            totalSupplies: periodSupplies,
+          ),
+          const SizedBox(height: 16),
         ],
+
+        // Shift Closings Table
+        _buildDailyClosingsTableCard(context, state, periodClosings),
+        const SizedBox(height: 16),
+
+        // Bank Deposits Table
+        _buildBankDepositsTableCard(context, state, periodDeposits),
         const SizedBox(height: 30),
       ],
     );
@@ -186,17 +242,17 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(state.tr('consolidatedStationClosing'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5)),
+        title: Text(dynamicTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1100),
+          constraints: const BoxConstraints(maxWidth: 1120),
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 28 : (isMobile ? 14 : 20),
+              horizontal: isDesktop ? 28 : (isMobile ? 12 : 20),
               vertical: 16,
             ),
             child: bodyContent,
@@ -218,7 +274,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
             child: ChoiceChip(
               label: Text(
                 filter == FinancialReportFilter.customRange && _customRange != null
-                    ? '${_customRange!.start.month}/${_customRange!.start.day} - ${_customRange!.end.month}/${_customRange!.end.day}'
+                    ? '${_customRange!.start.day}/${_customRange!.start.month} - ${_customRange!.end.day}/${_customRange!.end.month}'
                     : filter.localizedLabel(state),
                 style: TextStyle(
                   fontSize: 12,
@@ -246,16 +302,14 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                       end: now,
                     ),
                   );
-                  if (picked != null) {
+                  if (picked != null && mounted) {
                     setState(() {
                       _periodFilter = filter;
                       _customRange = picked;
                     });
                   }
                 } else {
-                  setState(() {
-                    _periodFilter = filter;
-                  });
+                  setState(() => _periodFilter = filter);
                 }
               },
             ),
@@ -265,7 +319,75 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     );
   }
 
-  Widget _buildDivisionReconciliationBanner({
+  Widget _buildTabularSectionCard({
+    required String title,
+    required String badge,
+    required IconData icon,
+    required Color accentColor,
+    required Widget table,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: accentColor, size: 19),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  badge,
+                  style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: accentColor),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.cardBorder),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: table,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivisionTable({
     required dynamic state,
     required double carRevenue,
     required int carCount,
@@ -274,165 +396,38 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     required double showerRevenue,
     required int showerCount,
     required double tipsTotal,
-    required bool isMobile,
   }) {
-    final carCard = _buildDivisionMiniCard(
-      imageUrl: AutoCareAssets.carSedanUrl,
-      title: state.tr('carWashSubtotal'),
-      value: CurrencyFormatter.formatShort(carRevenue),
-      sub: '$carCount ${state.tr("carsWashed")}',
-      color: const Color(0xFF1E3A8A),
-    );
-    final carpetCard = _buildDivisionMiniCard(
-      imageUrl: AutoCareAssets.carpetTypeAUrl,
-      title: state.tr('carpetWashSubtotal'),
-      value: CurrencyFormatter.formatShort(carpetRevenue),
-      sub: '$carpetCount ${state.tr("myCarpetCleanings")}',
-      color: const Color(0xFF7C3AED),
-    );
-    final showerCard = _buildDivisionMiniCard(
-      imageUrl: AutoCareAssets.publicShowerUrl,
-      title: state.tr('showerSubtotal'),
-      value: CurrencyFormatter.formatShort(showerRevenue),
-      sub: '$showerCount ${state.tr("showerUsers")}',
-      color: const Color(0xFF0284C7),
-    );
-    final tipsCard = tipsTotal > 0
-        ? _buildDivisionMiniCard(
-            icon: Icons.stars_rounded,
-            title: state.tr('washerTipsSubtotal'),
-            value: CurrencyFormatter.formatShort(tipsTotal),
-            sub: '100% to Washers',
-            color: Colors.amber.shade900,
-          )
-        : null;
+    final rows = [
+      (label: state.tr('carWashSubtotal'), detail: '$carCount ${state.tr("carsWashed")}', amount: CurrencyFormatter.format(carRevenue), color: const Color(0xFF1E3A8A)),
+      (label: state.tr('carpetWashSubtotal'), detail: '$carpetCount ${state.tr("myCarpetCleanings")}', amount: CurrencyFormatter.format(carpetRevenue), color: const Color(0xFF7C3AED)),
+      (label: state.tr('showerSubtotal'), detail: '$showerCount ${state.tr("showerUsers")}', amount: CurrencyFormatter.format(showerRevenue), color: const Color(0xFF0284C7)),
+      if (tipsTotal > 0)
+        (label: state.tr('washerTipsSubtotal'), detail: '100% Washers', amount: CurrencyFormatter.format(tipsTotal), color: Colors.amber.shade900),
+    ];
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
+        columnSpacing: 18,
+        horizontalMargin: 12,
+        columns: [
+          DataColumn(label: Text(state.tr('categoryColLabel'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+          DataColumn(label: Text(state.tr('countColLabel'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+          DataColumn(label: Text(state.tr('amountColLabel'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
         ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  state.tr('consolidatedStationClosing'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  state.tr('allServices'),
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (isMobile) ...[
-            Row(
-              children: [
-                Expanded(child: carCard),
-                const SizedBox(width: 8),
-                Expanded(child: carpetCard),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(child: showerCard),
-                if (tipsCard != null) ...[
-                  const SizedBox(width: 8),
-                  Expanded(child: tipsCard),
-                ],
-              ],
-            ),
-          ] else
-            Row(
-              children: [
-                Expanded(child: carCard),
-                const SizedBox(width: 8),
-                Expanded(child: carpetCard),
-                const SizedBox(width: 8),
-                Expanded(child: showerCard),
-                if (tipsCard != null) ...[
-                  const SizedBox(width: 8),
-                  Expanded(child: tipsCard),
-                ],
-              ],
-            ),
-        ],
+        rows: rows
+            .map((r) => DataRow(cells: [
+                  DataCell(Text(r.label, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: r.color))),
+                  DataCell(Text(r.detail, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
+                  DataCell(Text(r.amount, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, color: r.color))),
+                ]))
+            .toList(),
       ),
     );
   }
 
-  Widget _buildDivisionMiniCard({
-    String? imageUrl,
-    IconData? icon,
-    required String title,
-    required String value,
-    required String sub,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              if (imageUrl != null)
-                AutoCareAssets.buildPhotoThumbnail(imageUrl: imageUrl, width: 20, height: 20, borderRadius: 4)
-              else if (icon != null)
-                Icon(icon, size: 16, color: color),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: color),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: color),
-          ),
-          Text(sub, style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted), overflow: TextOverflow.ellipsis),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildKPIGrid({
+  Widget _buildCollectionsTable({
     required dynamic state,
     required double grossRevenue,
     required double cashRevenue,
@@ -442,302 +437,159 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     required double totalCashDeposited,
     required int carCount,
     required int carpetCount,
-    required bool isMobile,
-    required bool isDesktop,
+    required int depositCount,
   }) {
-    final subLabel = carpetCount > 0
-        ? '$carCount Cars • $carpetCount Carpets'
-        : '$carCount ${state.tr("carsWashed")}';
-
-    final items = [
-      (
-        title: state.tr('totalRevenue'),
-        value: CurrencyFormatter.format(grossRevenue),
-        sub: subLabel,
-        icon: Icons.account_balance_wallet_rounded,
-        color: AppColors.primary,
-      ),
-      (
-        title: state.tr('washerCommissionDeducted'),
-        value: CurrencyFormatter.format(commissionDeducted),
-        sub: state.tr('disburseCommission'),
-        icon: Icons.stars_rounded,
-        color: AppColors.oromiaGold,
-      ),
+    final rows = [
+      (label: state.tr('totalRevenue'), detail: '$carCount Cars • $carpetCount Carpets', amount: CurrencyFormatter.format(grossRevenue), color: AppColors.primary),
+      (label: state.tr('cashCollected'), detail: state.tr('cashCollected'), amount: CurrencyFormatter.format(cashRevenue), color: AppColors.cashGreen),
+      (label: state.tr('digitalPay'), detail: 'Telebirr / CBE / Bank', amount: CurrencyFormatter.format(digitalRevenue), color: AppColors.telebirrBlue),
+      (label: state.tr('washerCommissionDeducted'), detail: state.tr('disburseCommission'), amount: '- ${CurrencyFormatter.format(commissionDeducted)}', color: AppColors.oromiaGold),
       if (!widget.isCashierMode)
-        (
-          title: state.tr('netStationProfit'),
-          value: CurrencyFormatter.format(netStationProfit),
-          sub: state.tr('netStationProfit'),
-          icon: Icons.verified_rounded,
-          color: AppColors.statusCompleted,
-        ),
-      (
-        title: state.tr('cashCollected'),
-        value: CurrencyFormatter.format(cashRevenue),
-        sub: state.tr('cashCollected'),
-        icon: Icons.payments_rounded,
-        color: AppColors.cashGreen,
-      ),
-      (
-        title: state.tr('digitalPay'),
-        value: CurrencyFormatter.format(digitalRevenue),
-        sub: 'Telebirr, CBE, BoA, Awash...',
-        icon: Icons.phone_android_rounded,
-        color: AppColors.telebirrBlue,
-      ),
-      (
-        title: state.tr('bankDepositsLog'),
-        value: CurrencyFormatter.format(totalCashDeposited),
-        sub: state.tr('bankDepositsLog'),
-        icon: Icons.account_balance_rounded,
-        color: Colors.indigo,
-      ),
+        (label: state.tr('netStationProfit'), detail: state.tr('afterPayrollCuts'), amount: CurrencyFormatter.format(netStationProfit), color: AppColors.statusCompleted),
+      (label: state.tr('bankDepositsLog'), detail: '$depositCount Deposits', amount: CurrencyFormatter.format(totalCashDeposited), color: Colors.indigo),
     ];
 
-    final crossAxisCount = isDesktop ? 3 : (isMobile ? 2 : 3);
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-        childAspectRatio: isMobile ? 1.45 : 1.7,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
+        columnSpacing: 18,
+        horizontalMargin: 12,
+        columns: [
+          DataColumn(label: Text(state.tr('categoryColLabel'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+          DataColumn(label: Text(state.tr('countColLabel'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+          DataColumn(label: Text(state.tr('amountColLabel'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+        ],
+        rows: rows
+            .map((r) => DataRow(cells: [
+                  DataCell(Text(r.label, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: r.color))),
+                  DataCell(Text(r.detail, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
+                  DataCell(Text(r.amount, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, color: r.color))),
+                ]))
+            .toList(),
       ),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.cardBorder),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      item.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                    ),
-                  ),
-                  Icon(item.icon, color: item.color, size: 18),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: isMobile ? 14.5 : 16, fontWeight: FontWeight.w900, color: item.color),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.sub,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
-  Widget _buildDailyClosingsSection(
+  Widget _buildDailyClosingsTableCard(
     BuildContext context,
     dynamic state,
     List<DailyFinancialClosing> closings,
-    bool isMobile,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.fact_check_rounded, color: AppColors.statusCompleted, size: 18),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        state.tr('closingAndFinancialReports'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.statusCompleted.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  '${closings.length} Shift Reports',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (closings.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Center(
+    return _buildTabularSectionCard(
+      title: state.tr('closingAndFinancialReports'),
+      badge: '${closings.length} Shift Reports',
+      icon: Icons.fact_check_rounded,
+      accentColor: AppColors.statusCompleted,
+      table: closings.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(
                 child: Text(
                   'No closed shifts recorded in this time range.',
                   style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
                 ),
               ),
             )
-          else
-            Column(
-              children: closings.map((c) => _buildClosingItemCard(context, c, isMobile)).toList(),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildClosingItemCard(BuildContext context, DailyFinancialClosing c, bool isMobile) {
-    final dateStr = '${c.closingDate.year}-${c.closingDate.month.toString().padLeft(2, '0')}-${c.closingDate.day.toString().padLeft(2, '0')}';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      dateStr,
-                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.primary),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'by ${c.cashierName}',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                  ),
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
+                columnSpacing: 14,
+                horizontalMargin: 12,
+                columns: [
+                  const DataColumn(label: Text('Date', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Shift / Cashier', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Cars', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Gross', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Cash', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Digital', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Comm.', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  if (!widget.isCashierMode)
+                    const DataColumn(label: Text('Net', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Bank Dep.', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  const DataColumn(label: Text('Action', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
                 ],
+                rows: closings.map((c) {
+                  final dateStr =
+                      '${c.closingDate.year}-${c.closingDate.month.toString().padLeft(2, '0')}-${c.closingDate.day.toString().padLeft(2, '0')}';
+                  return DataRow(cells: [
+                    DataCell(Text(dateStr, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary))),
+                    DataCell(Text('${c.shiftType.toUpperCase()} • ${c.cashierName}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600))),
+                    DataCell(Text('${c.carsWashedCount}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700))),
+                    DataCell(Text(CurrencyFormatter.formatShort(c.grossRevenue), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.primary))),
+                    DataCell(Text(CurrencyFormatter.formatShort(c.cashRevenue), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.cashGreen))),
+                    DataCell(Text(CurrencyFormatter.formatShort(c.digitalRevenue), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.telebirrBlue))),
+                    DataCell(Text('- ${CurrencyFormatter.formatShort(c.commissionPool)}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.oromiaGold))),
+                    if (!widget.isCashierMode)
+                      DataCell(Text(CurrencyFormatter.formatShort(c.netStationProfit), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.statusCompleted))),
+                    DataCell(Text(CurrencyFormatter.formatShort(c.cashDeposited), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.indigo))),
+                    DataCell(
+                      TextButton(
+                        onPressed: () => _showClosingDetailModal(context, c),
+                        child: const Text('Details', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                      ),
+                    ),
+                  ]);
+                }).toList(),
               ),
-              InkWell(
-                onTap: () => _showClosingDetailModal(context, c),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: AppColors.primary),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('View Details', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                      SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_ios_rounded, size: 10, color: AppColors.primary),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _buildClosingSubStat('Gross Revenue', CurrencyFormatter.format(c.grossRevenue), AppColors.primary),
-              ),
-              Expanded(
-                child: _buildClosingSubStat('Commission', '- ${CurrencyFormatter.format(c.commissionPool)}', AppColors.oromiaGold),
-              ),
-              Expanded(
-                child: _buildClosingSubStat('Net Profit', CurrencyFormatter.format(c.netStationProfit), AppColors.statusCompleted),
-              ),
-              if (!isMobile)
-                Expanded(
-                  child: _buildClosingSubStat('Bank Deposit', CurrencyFormatter.format(c.cashDeposited), Colors.indigo),
-                ),
-            ],
-          ),
-          if (c.notes != null && c.notes!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              'Remarks: ${c.notes}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.textMuted),
             ),
-          ],
-        ],
-      ),
     );
   }
 
-  Widget _buildClosingSubStat(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-        const SizedBox(height: 1),
-        Text(value, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: color)),
-      ],
+  Widget _buildBankDepositsTableCard(
+    BuildContext context,
+    dynamic state,
+    List<BankDepositRecord> deposits,
+  ) {
+    return _buildTabularSectionCard(
+      title: state.tr('bankDepositsLog'),
+      badge: '${deposits.length} Deposits',
+      icon: Icons.account_balance_rounded,
+      accentColor: Colors.indigo,
+      table: deposits.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(
+                child: Text(
+                  'No bank deposits recorded in this date range.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                ),
+              ),
+            )
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
+                columnSpacing: 14,
+                horizontalMargin: 12,
+                columns: const [
+                  DataColumn(label: Text('Account', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  DataColumn(label: Text('Slip Ref', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  DataColumn(label: Text('By', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  DataColumn(label: Text('Date', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  DataColumn(label: Text('Amount', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                  DataColumn(label: Text('Receipt', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5))),
+                ],
+                rows: deposits.map((d) {
+                  final isAccountB = d.accountKey == 'account_b';
+                  return DataRow(cells: [
+                    DataCell(Text(isAccountB ? 'Account B (Awash)' : 'Account A (CBE)', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700))),
+                    DataCell(Text(d.referenceSlipNumber, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600))),
+                    DataCell(Text(d.cashierName, style: const TextStyle(fontSize: 11.5))),
+                    DataCell(Text(d.depositedAt.toString().substring(0, 16), style: const TextStyle(fontSize: 11, color: AppColors.textSecondary))),
+                    DataCell(Text(CurrencyFormatter.format(d.amount), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.cashGreen))),
+                    DataCell(
+                      TextButton.icon(
+                        onPressed: () => _showReceiptSlipModal(context, d),
+                        icon: const Icon(Icons.image_outlined, size: 13),
+                        label: Text(state.tr('viewDepositReceipt'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                  ]);
+                }).toList(),
+              ),
+            ),
     );
   }
 
@@ -770,7 +622,8 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                 _buildModalStatRow('  • Cash Handover:', CurrencyFormatter.format(c.cashRevenue)),
                 _buildModalStatRow('  • Digital Channels:', CurrencyFormatter.format(c.digitalRevenue)),
                 _buildModalStatRow('Washer Commission (15%):', '- ${CurrencyFormatter.format(c.commissionPool)}', color: AppColors.oromiaGold),
-                _buildModalStatRow('Net Station Profit:', CurrencyFormatter.format(c.netStationProfit), isBold: true, color: AppColors.statusCompleted),
+                if (!widget.isCashierMode)
+                  _buildModalStatRow('Net Station Profit:', CurrencyFormatter.format(c.netStationProfit), isBold: true, color: AppColors.statusCompleted),
                 _buildModalStatRow('Deposited to Bank:', CurrencyFormatter.format(c.cashDeposited), color: Colors.indigo),
                 _buildModalStatRow('Remaining Drawer Cash:', CurrencyFormatter.format(c.cashRemaining)),
                 const Divider(height: 18),
@@ -817,163 +670,29 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     );
   }
 
-  Widget _buildBankDepositsSection(BuildContext context, List<BankDepositRecord> deposits, bool isMobile, dynamic state) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.account_balance_rounded, color: Colors.indigo, size: 18),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        state.tr('bankDepositsLog'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${deposits.length} Deposits',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.indigo),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (deposits.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Center(
-                child: Text(
-                  'No bank deposits recorded in this date range.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
-                ),
-              ),
-            )
-          else
-            Column(
-              children: deposits.map((d) => _buildDepositItemCard(context, d, isMobile, state)).toList(),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDepositItemCard(BuildContext context, BankDepositRecord d, bool isMobile, dynamic state) {
-    final isAccountB = d.accountKey == 'account_b';
-    final accountColor = isAccountB ? const Color(0xFFEA580C) : AppColors.cbeBirrPurple;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: accountColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.account_balance_rounded, color: accountColor, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: accountColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        isAccountB ? 'ACCOUNT B (AWASH)' : 'ACCOUNT A (CBE)',
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: accountColor),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Slip: ${d.referenceSlipNumber}',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${d.bankName} • Acc: ${d.accountNumber}',
-                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Deposited by ${d.cashierName} on ${d.depositedAt.toString().substring(0, 16)}',
-                  style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                CurrencyFormatter.format(d.amount),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.cashGreen),
-              ),
-              const SizedBox(height: 4),
-              InkWell(
-                onTap: () => _showReceiptSlipModal(context, d),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.indigo),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.image_outlined, size: 12, color: Colors.indigo),
-                      const SizedBox(width: 4),
-                      Text(state.tr('viewDepositReceipt'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Colors.indigo)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showReceiptSlipModal(BuildContext context, BankDepositRecord d) {
+    final fallbackInfo = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.verified_rounded, size: 48, color: AppColors.cashGreen),
+        const SizedBox(height: 8),
+        Text(
+          'Official Deposit Slip: ${d.referenceSlipNumber}',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Amount: ${CurrencyFormatter.format(d.amount)}',
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.cashGreen),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Deposited to: ${d.accountName}',
+          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        ),
+      ],
+    );
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -982,7 +701,9 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           children: [
             const Icon(Icons.receipt_long_rounded, color: Colors.indigo, size: 22),
             const SizedBox(width: 8),
-            Text('Bank Slip: ${d.referenceSlipNumber}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            Expanded(
+              child: Text('Bank Slip: ${d.referenceSlipNumber}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            ),
           ],
         ),
         content: SizedBox(
@@ -999,32 +720,10 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
-                child: d.receiptScreenshot != null && d.receiptScreenshot!.startsWith('data:image')
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(d.receiptScreenshot!, fit: BoxFit.cover),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.verified_rounded, size: 48, color: AppColors.cashGreen),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Official Deposit Slip: ${d.referenceSlipNumber}',
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Amount: ${CurrencyFormatter.format(d.amount)}',
-                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.cashGreen),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Deposited to: ${d.accountName}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(11),
+                  child: ReceiptImageHelper.buildImage(d.receiptScreenshot, fallback: fallbackInfo),
+                ),
               ),
               const SizedBox(height: 12),
               Text('Deposited By: ${d.cashierName}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
@@ -1040,113 +739,6 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Close', style: TextStyle(fontWeight: FontWeight.w700)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWasherPayrollSection(dynamic state, bool isMobile) {
-    final weeklyCommissions = state.weeklyWasherCommissions as Map<String, double>;
-    final weeklyPool = state.weeklyTotalCommissionPool as double;
-    final monthlySalary = state.monthlyTotalBaseSalary as double;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.schedule_rounded, color: AppColors.oromiaGold, size: 18),
-                  SizedBox(width: 8),
-                  Text(
-                    'Washer Payroll Policy (Weekly Commission • Monthly Salary)',
-                    style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Washers receive team wash commission WEEKLY, while their contracted base salary is paid MONTHLY.',
-            style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.oromiaGold.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.oromiaGold.withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Current Week Commission Accrual', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                      const SizedBox(height: 4),
-                      Text(CurrencyFormatter.format(weeklyPool), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.oromiaGold)),
-                      const SizedBox(height: 2),
-                      const Text('Paid Every Sunday Evening', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Total Monthly Base Salary Pool', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                      const SizedBox(height: 4),
-                      Text(CurrencyFormatter.format(monthlySalary), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary)),
-                      const SizedBox(height: 2),
-                      const Text('Paid Monthly on 30th', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Text('Washer Weekly Commission Breakdown:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: weeklyCommissions.entries.map((e) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Text(
-                  '${e.key}: ${CurrencyFormatter.format(e.value)}',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                ),
-              );
-            }).toList(),
           ),
         ],
       ),

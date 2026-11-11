@@ -5,6 +5,7 @@ import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/widgets/custom_button.dart';
 import 'package:bishe_car_wash/core/widgets/custom_text_field.dart';
+import 'package:bishe_car_wash/core/widgets/service_location_picker_card.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -67,11 +68,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   final _phoneController = TextEditingController(text: '+251 9');
   final _plateController = TextEditingController();
   final _addressController = TextEditingController();
+  final _gpsController = TextEditingController();
   final _tipController = TextEditingController();
   double _tipAmount = 0.0;
   String _selectedBishoftuArea = AppConstants.bishoftuAreas.first;
-  String? _pinnedGpsCoordinates;
-  bool _isPinningGps = false;
   bool _isSubmitting = false;
 
   @override
@@ -104,6 +104,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     _phoneController.dispose();
     _plateController.dispose();
     _addressController.dispose();
+    _gpsController.dispose();
     _lengthController.dispose();
     _widthController.dispose();
     _tipController.dispose();
@@ -152,11 +153,13 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   }
 
   void _advanceFromStep2(dynamic state) {
-    if (_selectedServiceType.requiresLocation && _addressController.text.trim().isEmpty) {
+    if (_selectedServiceType.requiresLocation &&
+        _addressController.text.trim().isEmpty &&
+        _gpsController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.orange.shade800,
-          content: Text(state.tr('streetLandmarkRequired')),
+          content: Text(state.tr('deliveryModeRequiredAddress')),
         ),
       );
       return;
@@ -724,88 +727,14 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
 
         if (_selectedServiceType.requiresLocation) ...[
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: AppColors.primary, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _isCarpet
-                            ? state.tr('carpetPickUpLocation')
-                            : (_selectedServiceType == ServiceType.valetPickUp
-                                ? state.tr('driverPickUpLocation')
-                                : state.tr('locationArea')),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _selectedBishoftuArea,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.surfaceVariant,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  ),
-                  items: AppConstants.bishoftuAreas.map((area) {
-                    return DropdownMenuItem(value: area, child: Text(area));
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedBishoftuArea = val);
-                  },
-                ),
-                const SizedBox(height: 12),
-                CustomTextField(
-                  controller: _addressController,
-                  label: state.tr('streetLandmark'),
-                  hint: state.tr('streetLandmarkHint'),
-                  prefixIcon: Icons.home,
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: _pinnedGpsCoordinates != null ? AppColors.statusCompleted : AppColors.primary,
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    icon: _isPinningGps
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : Icon(
-                            _pinnedGpsCoordinates != null ? Icons.check_circle : Icons.my_location,
-                            color: _pinnedGpsCoordinates != null ? AppColors.statusCompleted : AppColors.primary,
-                            size: 18,
-                          ),
-                    label: Text(
-                      _pinnedGpsCoordinates != null
-                          ? '${state.tr("gpsLocationPinned")}: $_pinnedGpsCoordinates'
-                          : state.tr('useGpsLocation'),
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: _pinnedGpsCoordinates != null ? AppColors.statusCompleted : AppColors.primary,
-                      ),
-                    ),
-                    onPressed: _pinGpsLocation,
-                  ),
-                ),
-              ],
-            ),
+          ServiceLocationPickerCard(
+            state: state,
+            serviceType: _selectedServiceType,
+            isCarpet: _isCarpet,
+            selectedArea: _selectedBishoftuArea,
+            onAreaChanged: (val) => setState(() => _selectedBishoftuArea = val),
+            addressController: _addressController,
+            gpsController: _gpsController,
           ),
         ],
         const SizedBox(height: 20),
@@ -1065,8 +994,12 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     try {
       String? fullAddress;
       if (_selectedServiceType.requiresLocation) {
-        fullAddress = '$_selectedBishoftuArea - ${_addressController.text.trim()}';
+        final street = _addressController.text.trim();
+        fullAddress = street.isNotEmpty ? '$_selectedBishoftuArea - $street' : _selectedBishoftuArea;
       }
+      final gpsCoords = _selectedServiceType.requiresLocation && _gpsController.text.trim().isNotEmpty
+          ? _gpsController.text.trim()
+          : null;
 
       final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
       final carPrice = _useCustomChecklist
@@ -1091,7 +1024,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         package: activePackage ?? state.packages.first,
         deliveryLocation: fullAddress,
         paymentMethod: PaymentMethod.cash,
-        gpsCoordinates: _pinnedGpsCoordinates,
+        gpsCoordinates: gpsCoords,
         isCarpet: _isCarpet,
         carpetType: _isCarpet ? _carpetType : null,
         carpetAreaSqMeters: _isCarpet ? _carpetArea : null,
@@ -1121,20 +1054,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
-    }
-  }
-
-  Future<void> _pinGpsLocation() async {
-    setState(() => _isPinningGps = true);
-    await Future.delayed(const Duration(milliseconds: 500));
-    final randomOffset = (DateTime.now().millisecond % 50) / 10000.0;
-    final lat = (8.7523 + randomOffset).toStringAsFixed(4);
-    final lng = (38.9785 + randomOffset).toStringAsFixed(4);
-    if (mounted) {
-      setState(() {
-        _pinnedGpsCoordinates = '$lat, $lng';
-        _isPinningGps = false;
-      });
     }
   }
 }

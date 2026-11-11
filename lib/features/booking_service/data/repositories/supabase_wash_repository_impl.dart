@@ -151,10 +151,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     String? handedOverBy,
     String? handoverNote,
     DateTime? handedOverAt,
+    String? gpsCoordinates,
     DateTime? paidAt,
   }) {
     final clean = extractCleanDeliveryLocation(baseText);
-    if (!isOnlineBooking && !isPostponed && !isHandedOverToManager && paidAt == null) {
+    if (!isOnlineBooking && !isPostponed && !isHandedOverToManager && paidAt == null && (gpsCoordinates == null || gpsCoordinates.isEmpty)) {
       return clean;
     }
     final meta = <String, dynamic>{
@@ -167,6 +168,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (handedOverBy != null && handedOverBy.isNotEmpty) 'handedOverBy': handedOverBy,
       if (handoverNote != null && handoverNote.isNotEmpty) 'handoverNote': handoverNote,
       if (handedOverAt != null) 'handedOverAt': handedOverAt.toIso8601String(),
+      if (gpsCoordinates != null && gpsCoordinates.isNotEmpty) 'gps': gpsCoordinates,
       if (paidAt != null) 'paidAt': paidAt.toIso8601String(),
     };
     final tag = '$_bookingMetaPrefix${jsonEncode(meta)}]';
@@ -189,6 +191,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       handedOverBy: b.handedOverBy,
       handoverNote: b.handoverNote,
       handedOverAt: b.handedOverAt,
+      gpsCoordinates: b.gpsCoordinates,
       paidAt: b.payment.paidAt,
     );
   }
@@ -640,6 +643,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           completedAt: json['completed_at'] != null ? DateTime.tryParse(json['completed_at']) : null,
           commissionLogged: json['commission_logged'] ?? false,
           isPhoneBooking: isPhone,
+          gpsCoordinates: bookingMeta['gps']?.toString(),
           isCarpet: isCarpet,
           carpetType: carpetType,
           carpetAreaSqMeters: carpetAreaSqMeters,

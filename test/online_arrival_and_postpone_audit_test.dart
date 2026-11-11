@@ -225,7 +225,8 @@ void main() {
       );
       await state.updateWashStatus(car.id, WashStatus.washing);
 
-      // 1. Cashier Queue shows BOTH "Handover to Operational Manager" AND "Postpone to Next Day"
+      // 1. Cashier Queue no longer exposes "Handover to Operational Manager" or "Postpone to Next Day" buttons
+      // because Cashier Day Shift closing automatically hands over open vehicles by default.
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,
@@ -234,30 +235,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text(state.tr('handoverToOpManagerAction')), findsOneWidget);
-      expect(find.text(state.tr('postponeNextDayAction')), findsOneWidget);
+      expect(find.text(state.tr('handoverToOpManagerAction')), findsNothing);
+      expect(find.text(state.tr('postponeNextDayAction')), findsNothing);
 
-      await tester.ensureVisible(find.text(state.tr('handoverToOpManagerAction')));
-      await tester.tap(find.text(state.tr('handoverToOpManagerAction')));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField).last, 'Half-washed interior remaining');
-      await tester.tap(find.text(state.tr('confirm')));
-      await tester.pumpAndSettle();
-
-      final handed = state.bookings.firstWhere((b) => b.id == car.id);
-      expect(handed.isHandedOverToManager, isTrue);
-      expect(handed.handoverNote, 'Half-washed interior remaining');
-      expect(handed.isPostponed, isFalse);
-      expect(handed.status, WashStatus.washing);
-      expect(find.text(state.tr('handedOverToManagerBadge')), findsOneWidget);
-
-      // Cashier submits Day Closing (Manager OTP) so Manager banner also displays handed-over vehicle
+      // Cashier submits Day Closing (Manager OTP) -> automatically hands over open vehicle HO-77777 to Op Manager!
       await state.confirmDailyClosing(
         cashierName: 'Day Cashier',
         shiftType: 'day',
         handoverMethod: 'manager_otp',
       );
+
+      final handed = state.bookings.firstWhere((b) => b.id == car.id);
+      expect(handed.isHandedOverToManager, isTrue);
+      expect(handed.handoverNote, 'Handed over at Day Shift closing');
+      expect(handed.isPostponed, isFalse);
+      expect(handed.status, WashStatus.washing);
 
       // 2. Switch to Operational Manager Dashboard
       state.switchRole(UserRole.manager);

@@ -112,24 +112,24 @@ class AppStrings {
       AppLanguage.am: 'የአገልግሎት ዓይነት ይምረጡ',
     },
     'driveInStation': {
-      AppLanguage.en: 'Drive-in Station',
-      AppLanguage.om: 'Kutaa Dhiqannaa',
-      AppLanguage.am: 'የማጠቢያ ክፍል (ጣቢያ)',
+      AppLanguage.en: 'At Station',
+      AppLanguage.om: 'Buufata Keessatti',
+      AppLanguage.am: 'በጣቢያው ውስጥ',
     },
     'driveInSub': {
-      AppLanguage.en: '2 Pressure Wash Bays',
-      AppLanguage.om: 'Kutaalee dhiqannaa 2',
-      AppLanguage.am: '2 የማጠቢያ ክፍሎች አሉ',
+      AppLanguage.en: 'Drive in to Bishoftu Station bays',
+      AppLanguage.om: 'Buufata Bishooftuutti dhiqadhaa',
+      AppLanguage.am: 'ወደ ቢሾፍቱ ጣቢያ ማጠቢያ ክፍሎች በመምጣት',
     },
     'atHomeMobile': {
-      AppLanguage.en: 'At-Home Mobile Van',
-      AppLanguage.om: 'Makiinaa Socho\'aa',
-      AppLanguage.am: 'ተንቀሳቃሽ ቫን (ቤት ድረስ)',
+      AppLanguage.en: 'At Customer Home (Van Wash)',
+      AppLanguage.om: 'Mana Maamilaatti (Makiinaa Socho\'aa)',
+      AppLanguage.am: 'በደንበኛ ቤት (ተንቀሳቃሽ ቫን)',
     },
     'atHomeSub': {
-      AppLanguage.en: 'Doorstep in Bishoftu',
-      AppLanguage.om: 'Mana keessanitti',
-      AppLanguage.am: 'ቢሾፍቱ ውስጥ ቤትዎ ድረስ',
+      AppLanguage.en: 'Equipped mobile van washes the vehicle at customer home',
+      AppLanguage.om: 'Makiinaan bishaanii fi jeneretara qabu mana keessanitti dhiqa',
+      AppLanguage.am: 'የውሃ ታንከር እና ጄነሬተር የታጠቀ ቫን እቤትዎ ድረስ መጥቶ ያጥባል',
     },
     'availableNow': {
       AppLanguage.en: 'Available',
@@ -258,14 +258,14 @@ class AppStrings {
       AppLanguage.am: 'ተንቀሳቃሽ የቤት ለቤት አገልግሎት',
     },
     'serviceValetPickUp': {
-      AppLanguage.en: 'Driver Pick-up & Return',
-      AppLanguage.om: 'Konkolaachisaan Fuudhuu & Deebisuu',
-      AppLanguage.am: 'በአሽከርካሪ መኪናን መውሰድና ማድረስ',
+      AppLanguage.en: 'VIP Driver Pick-up & Return',
+      AppLanguage.om: 'Konkolaachisaa VIP (Fuudhee Deebisa)',
+      AppLanguage.am: 'የቪአይፒ ሹፌር መውሰድና መመለስ (VIP)',
     },
     'serviceValetPickUpSub': {
-      AppLanguage.en: 'Driver picks up your car, washes at station, and returns it safely to your door.',
-      AppLanguage.om: 'Konkolaachisaan makiinaa keessan dhufee fuudhee, dhiqee mana keessanitti deebisa.',
-      AppLanguage.am: 'አሽከርካሪ መጥቶ መኪናዎን ተረክቦ ካጠበ በኋላ በታማኝነት ደጃፍዎ ይመልሳል።',
+      AppLanguage.en: 'Driver from BISHE Car Wash takes vehicle from home to the station, washes, and returns it back.',
+      AppLanguage.om: 'Konkolaachisaan BISHE makiinaa mana keessanii fuudhee, buufatatti dhiqee mana keessanitti deebisa.',
+      AppLanguage.am: 'የቢሼ አሽከርካሪ መኪናውን ከቤት ወስዶ ጣቢያ ካጠበ በኋላ መልሶ ያደርሳል።',
     },
     'servicePhoneCall': {
       AppLanguage.en: 'Phone Reservation',
@@ -4374,6 +4374,106 @@ class AppStrings {
       AppLanguage.en: 'Saved locally, but Supabase daily_closings UPDATE was blocked by RLS (42501). Run migration 20261111_fix_rls_closings_and_bookings.sql in Supabase SQL Editor.',
       AppLanguage.om: 'Naannotti olkaa\'ameera, garuu haaromsi daily_closings Supabase keessaa seera RLS (42501) tiin uggurame. Migration 20261111_fix_rls_closings_and_bookings.sql Supabase SQL Editor keessatti hojisiisaa.',
       AppLanguage.am: 'በመሣሪያው ላይ ተቀምጧል፣ ነገር ግን የSupabase daily_closings ማሻሻያ በRLS ፖሊሲ (42501) ታግዷል። እባክዎ 20261111_fix_rls_closings_and_bookings.sql በSupabase SQL Editor ያስኪዱ።',
+    },
+    'exactHomePlaceLabel': {
+      AppLanguage.en: 'Exact Customer Home / Place Address',
+      AppLanguage.om: 'Teessoo Sirrii Manaa / Bakka Maamilaa',
+      AppLanguage.am: 'የደንበኛው ቤት / ቦታ ትክክለኛ አድራሻ',
+    },
+    'exactHomePlaceHint': {
+      AppLanguage.en: 'e.g. Kebele 04, Near Kuriftu Gate, Villa #12',
+      AppLanguage.om: 'fkn. Ganda 04, Karra Kuriftu bira, Mana #12',
+      AppLanguage.am: 'ለምሳሌ፡ ቀበሌ 04፣ ኩሪፍቱ በር አጠገብ፣ ቤት ቁጥር 12',
+    },
+    'liveGpsLocatorBtn': {
+      AppLanguage.en: 'Live GPS',
+      AppLanguage.om: 'GPS Ammaa',
+      AppLanguage.am: 'ቀጥታ ጂፒኤስ',
+    },
+    'liveGpsFetching': {
+      AppLanguage.en: 'Locating...',
+      AppLanguage.om: 'Barbaadaa...',
+      AppLanguage.am: 'በመፈለግ...',
+    },
+    'gpsCoordinatesLabel': {
+      AppLanguage.en: 'Live GPS Coordinates (Lat, Lng)',
+      AppLanguage.om: 'Koordinaatii GPS (Lat, Lng)',
+      AppLanguage.am: 'የጂፒኤስ መጋጠሚያ (Lat, Lng)',
+    },
+    'gpsUnavailableMsg': {
+      AppLanguage.en: 'Allow location access in browser or enter address / coordinates manually.',
+      AppLanguage.om: 'Hayyama bakkaa banaa ykn teessoo/GPS harkaan galchaa.',
+      AppLanguage.am: 'የአካባቢ ፈቃድ ይስጡ ወይም አድራሻውን በእጅ ያስገቡ።',
+    },
+    'phoneIntakeDeliverySub': {
+      AppLanguage.en: 'Phone intake: At Station, At Home Van, or VIP Driver Pick-up & Return',
+      AppLanguage.om: 'Ajaja bilbilaa: Buufata, Mana Maamilaa (Van), ykn Konkolaachisaa VIP',
+      AppLanguage.am: 'የስልክ ትዕዛዝ፡ በጣቢያ፣ በቤት ቫን ወይም በቪአይፒ ሹፌር መውሰድና መመለስ',
+    },
+    'deliveryModeRequiredAddress': {
+      AppLanguage.en: 'Please enter the exact home/place address or live GPS coordinates.',
+      AppLanguage.om: 'Mee teessoo sirrii manaa ykn GPS galchaa.',
+      AppLanguage.am: 'እባክዎ ትክክለኛ የቤት አድራሻ ወይም ጂፒኤስ ያስገቡ።',
+    },
+    'chooseDeliveryQuick': {
+      AppLanguage.en: 'Car Wash Delivery Options',
+      AppLanguage.om: 'Filannoo Tajaajila Dhiqannaa',
+      AppLanguage.am: 'የመኪና እጥበት አገልግሎት አማራጮች',
+    },
+    'consolidatedDailyTitle': {
+      AppLanguage.en: 'Consolidated Daily Financial Report',
+      AppLanguage.om: 'Gabaasa Faayinaansii Guyyaa Walitti Qabame',
+      AppLanguage.am: 'የተጠቃለለ ዕለታዊ የፋይናንስ ሪፖርት',
+    },
+    'consolidatedWeeklyTitle': {
+      AppLanguage.en: 'Consolidated Weekly Financial Report',
+      AppLanguage.om: 'Gabaasa Faayinaansii Torbanii Walitti Qabame',
+      AppLanguage.am: 'የተጠቃለለ ሳምንታዊ የፋይናንስ ሪፖርት',
+    },
+    'consolidatedMonthlyTitle': {
+      AppLanguage.en: 'Consolidated Monthly Financial Report',
+      AppLanguage.om: 'Gabaasa Faayinaansii Ji\'aa Walitti Qabame',
+      AppLanguage.am: 'የተጠቃለለ ወርሃዊ የፋይናንስ ሪፖርት',
+    },
+    'consolidatedCustomPrefix': {
+      AppLanguage.en: 'Consolidated',
+      AppLanguage.om: 'Walitti Qabama',
+      AppLanguage.am: 'የተጠቃለለ',
+    },
+    'consolidatedCustomSuffix': {
+      AppLanguage.en: 'Financial Report',
+      AppLanguage.om: 'Gabaasa Faayinaansii',
+      AppLanguage.am: 'የፋይናንስ ሪፖርት',
+    },
+    'divisionSummaryTableTitle': {
+      AppLanguage.en: 'Service Division Revenue Summary',
+      AppLanguage.om: 'Cuunfaa Galii Kutaa Tajaajilaa',
+      AppLanguage.am: 'የአገልግሎት ክፍሎች የገቢ ማጠቃለያ',
+    },
+    'paymentSummaryTableTitle': {
+      AppLanguage.en: 'Collections & Profit Ledger Table',
+      AppLanguage.om: 'Gabatee Kaffaltii fi Bu\'aa',
+      AppLanguage.am: 'የክፍያ እና ትርፍ መዝገብ ሰንጠረዥ',
+    },
+    'categoryColLabel': {
+      AppLanguage.en: 'Category',
+      AppLanguage.om: 'Gosa',
+      AppLanguage.am: 'ምድብ',
+    },
+    'countColLabel': {
+      AppLanguage.en: 'Count / Detail',
+      AppLanguage.om: 'Lakkoofsa',
+      AppLanguage.am: 'ብዛት / ዝርዝር',
+    },
+    'amountColLabel': {
+      AppLanguage.en: 'Amount (ETB)',
+      AppLanguage.om: 'Hanga (ETB)',
+      AppLanguage.am: 'መጠን (ETB)',
+    },
+    'weeklyTotalLabel': {
+      AppLanguage.en: 'Weekly Total',
+      AppLanguage.om: 'Ida\'ama Torbanii',
+      AppLanguage.am: 'ሳምንታዊ ድምር',
     },
   };
 

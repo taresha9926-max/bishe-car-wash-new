@@ -189,7 +189,6 @@ class _OperationalManagerDashboardScreenState
   Widget _buildHandoverStatusBanners(BuildContext context, dynamic state, bool isMobile) {
     final pendingCashier = state.pendingCashierHandover;
     final pendingAdmin = state.pendingAdminNightHandover;
-    final carriedCash = state.managerCarriedCashETB as double;
 
     return Column(
       children: [
@@ -199,10 +198,6 @@ class _OperationalManagerDashboardScreenState
         ],
         if (pendingAdmin != null) ...[
           _buildPendingAdminNightOtpCard(state, pendingAdmin, isMobile),
-          const SizedBox(height: 12),
-        ],
-        if (pendingCashier == null && carriedCash > 0) ...[
-          _buildCarriedCashVerifiedCard(state, carriedCash, isMobile),
           const SizedBox(height: 12),
         ],
       ],
@@ -388,59 +383,6 @@ class _OperationalManagerDashboardScreenState
                   ],
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCarriedCashVerifiedCard(dynamic state, double carriedCash, bool isMobile) {
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 12 : 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(9),
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.verified_user_rounded, color: Color(0xFF059669), size: 22),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  state.tr('carriedCashierCash'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted),
-                ),
-                Text(
-                  CurrencyFormatter.format(carriedCash),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              state.tr('handoverConfirmed'),
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF059669)),
             ),
           ),
         ],

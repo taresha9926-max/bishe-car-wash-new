@@ -694,12 +694,12 @@ class AppStateNotifier extends ChangeNotifier {
       .where((b) => b.isCarpet && (b.status.isOngoing || b.status == WashStatus.pending || b.status == WashStatus.confirmed))
       .length;
 
-  /// Online bookings scheduled for today (or earlier) whose customer has NOT checked in yet.
+  /// Unarrived online or phone bookings scheduled for today (or earlier) whose customer has NOT checked in yet.
   List<WashBooking> get unarrivedOnlineBookingsToday {
     final now = DateTime.now();
     final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
     return _bookings.where((b) {
-      if (!b.isOnlineBooking || b.status != WashStatus.pending || b.isPostponed || b.payment.isPaid) {
+      if (!(b.isOnlineBooking || b.isPhoneBooking) || b.status != WashStatus.pending || b.isPostponed || b.payment.isPaid) {
         return false;
       }
       if (b.scheduledTime == null) return true;
@@ -1140,13 +1140,58 @@ class AppStateNotifier extends ChangeNotifier {
         .fold(0.0, (sum, a) => sum + a.commissionEarnedETB);
   }
 
+  bool isWasherPresentOnDate(String washerId, DateTime date) {
+    final now = DateTime.now();
+    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+      return isWasherPresentToday(washerId);
+    }
+    final record = getWasherAttendanceForDate(washerId, date);
+    if (record != null) return record.isPresent;
+
+    // Reconcile from stored DailyFinancialClosing dividends on that date across reloads.
+    final dayClosings = _dailyFinancialClosings.where(
+      (c) => c.closingDate.year == date.year && c.closingDate.month == date.month && c.closingDate.day == date.day,
+    );
+    final washer = _staff.where((s) => s.id == washerId).firstOrNull;
+    if (washer != null) {
+      for (final c in dayClosings) {
+        if (c.washerDividends.isNotEmpty) {
+          return (c.washerDividends[washer.name] ?? 0.0) > 0;
+        }
+      }
+    }
+    return true;
+  }
+
   double getWasherCommissionForDate(String washerId, DateTime date) {
     final now = DateTime.now();
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      return washerDividendsToday[washerId]?.earnedETB ?? 0.0;
+      return isWasherPresentToday(washerId) ? (washerDividendsToday[washerId]?.earnedETB ?? 0.0) : 0.0;
     }
     final record = getWasherAttendanceForDate(washerId, date);
-    return record?.commissionEarnedETB ?? 0.0;
+    if (record != null) {
+      return record.isPresent ? record.commissionEarnedETB : 0.0;
+    }
+    final washer = _staff.where((s) => s.id == washerId).firstOrNull;
+    if (washer == null) return 0.0;
+
+    final dayClosings = _dailyFinancialClosings.where(
+      (c) => c.closingDate.year == date.year && c.closingDate.month == date.month && c.closingDate.day == date.day,
+    );
+    for (final c in dayClosings) {
+      if (c.washerDividends.containsKey(washer.name)) {
+        return c.washerDividends[washer.name] ?? 0.0;
+      }
+    }
+
+    // Fallback: compute from paid washes attributed to that date when closing dividends weren't stored.
+    final paidOnDate = _bookings.where((b) => _isBookingPaidOnDate(b, date)).toList();
+    if (paidOnDate.isEmpty) return 0.0;
+    final grossOnDate = paidOnDate.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final tipsOnDate = paidOnDate.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+    final poolOnDate = (grossOnDate * teamCommissionRate) + tipsOnDate;
+    if (poolOnDate <= 0 || availableWashers.isEmpty) return 0.0;
+    return poolOnDate / availableWashers.length;
   }
 
   // Petty Cash Expenses (Cashier emergency operational spends)
@@ -1304,6 +1349,7 @@ class AppStateNotifier extends ChangeNotifier {
       if (c.shiftType == 'day' &&
           c.handoverMethod == 'manager_otp' &&
           !c.isHandoverAccepted &&
+          (c.handoverOtp ?? '').trim().isNotEmpty &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
           c.closingDate.day == now.day) {
@@ -1319,6 +1365,7 @@ class AppStateNotifier extends ChangeNotifier {
       if (c.shiftType == 'day' &&
           c.handoverMethod == 'admin_otp' &&
           !c.isHandoverAccepted &&
+          (c.handoverOtp ?? '').trim().isNotEmpty &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
           c.closingDate.day == now.day) {
@@ -1333,6 +1380,7 @@ class AppStateNotifier extends ChangeNotifier {
     for (final c in _dailyFinancialClosings) {
       if (c.shiftType == 'night' &&
           !c.isHandoverAccepted &&
+          (c.handoverOtp ?? '').trim().isNotEmpty &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
           c.closingDate.day == now.day) {
@@ -1650,7 +1698,6 @@ class AppStateNotifier extends ChangeNotifier {
     } else {
       if (handoverMethod == 'bank_deposit') {
         final accName = bankAccountKey == 'account_b' ? ownerAccountBName : ownerAccountAName;
-        final accNum = bankAccountKey == 'account_b' ? ownerAccountBNumber : ownerAccountANumber;
         targetRecipient = 'Bank Deposit ($accName)';
         isAccepted = true;
         otp = null;
@@ -2832,17 +2879,6 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   Future<void> _refreshCredentials() async {
-    _credentials = await _repository.getStaffCredentials();
-    notifyListeners();
-  }
-
-  Future<void> _refreshData() async {
-    _packages = await _repository.getPackages();
-    _serviceItems = await _repository.getServiceItems();
-    _staff = await _repository.getStaffMembers();
-    _bays = await _repository.getBays();
-    _bookings = await _repository.getBookings();
-    _commissionLogs = await _repository.getCommissionLogs();
     _credentials = await _repository.getStaffCredentials();
     notifyListeners();
   }

@@ -191,8 +191,8 @@ void main() {
       expect(ServiceType.valetPickUp.requiresLocation, isTrue);
 
       // Verify Afaan Oromo and Amharic localizations
-      expect(ServiceType.valetPickUp.localizedName('OM'), 'Konkolaachisaan Fuudhuu & Deebisuu');
-      expect(ServiceType.valetPickUp.localizedName('AM'), 'በአሽከርካሪ መኪናን መውሰድና ማድረስ');
+      expect(ServiceType.valetPickUp.localizedName('OM'), 'Konkolaachisaa VIP (Fuudhee Deebisa)');
+      expect(ServiceType.valetPickUp.localizedName('AM'), 'የቪአይፒ ሹፌር መውሰድና መመለስ (VIP)');
       expect(ServiceType.valetPickUp.localizedCapacity('OM'), contains('Konkolaachisaan'));
       expect(ServiceType.valetPickUp.localizedCapacity('AM'), contains('አሽከርካሪ'));
       expect(ServiceType.valetPickUp.localizedDescription('OM'), contains('mana keessanitti'));
