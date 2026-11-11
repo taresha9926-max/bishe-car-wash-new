@@ -921,7 +921,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 4),
               Text(
                 _isCarpet
-                    ? '${_carpetArea.toStringAsFixed(1)} m² (${_lengthController.text.trim()}m × ${_widthController.text.trim()}m) • ${_selectedServiceType.localizedName(state.currentLang)}'
+                    ? '${_carpetArea.toStringAsFixed(1)} m² (${_lengthController.text.trim()}m × ${_widthController.text.trim()}m) • ${_selectedServiceType.localizedName(state.currentLang, isCarpet: true)}'
                     : '${_selectedCarType.localizedName(state.currentLang)} • ${_selectedServiceType.localizedName(state.currentLang)}',
                 style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),

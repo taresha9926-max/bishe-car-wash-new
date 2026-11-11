@@ -9,8 +9,13 @@ import 'live_tracking_screen.dart';
 
 class BookingHistoryScreen extends StatefulWidget {
   final bool? initialCarpetFilter;
+  final bool lockDivision;
 
-  const BookingHistoryScreen({super.key, this.initialCarpetFilter});
+  const BookingHistoryScreen({
+    super.key,
+    this.initialCarpetFilter,
+    this.lockDivision = false,
+  });
 
   @override
   State<BookingHistoryScreen> createState() => _BookingHistoryScreenState();
@@ -34,15 +39,20 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(state.tr('historyTitle')),
+        title: Text(
+          !widget.lockDivision
+              ? state.tr('historyTitle')
+              : (_isCarpetTab ? state.tr('myCarpetCleanings') : state.tr('myCarWashes')),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
       ),
       body: Column(
         children: [
-          // Segmented Tabs: [ 🚗 My Car Washes ] | [ 🧼 My Carpet Cleanings ]
-          Container(
+          if (!widget.lockDivision) ...[
+            // Segmented Tabs: [ 🚗 My Car Washes ] | [ 🧼 My Carpet Cleanings ]
+            Container(
             color: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Container(
@@ -121,6 +131,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
               ),
             ),
           ),
+          ],
 
           // Orders List
           Expanded(

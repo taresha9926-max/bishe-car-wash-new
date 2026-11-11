@@ -537,11 +537,12 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   /// Privacy-safe lookup for a customer's specific vehicle
-  WashBooking? findBookingByPhoneOrPlate(String query) {
+  WashBooking? findBookingByPhoneOrPlate(String query, {bool? isCarpet}) {
     final clean = query.trim().toUpperCase().replaceAll(' ', '').replaceAll('-', '');
     if (clean.isEmpty) return null;
     try {
       return _bookings.firstWhere((b) {
+        if (isCarpet != null && b.isCarpet != isCarpet) return false;
         final pPlate = b.licensePlate.toUpperCase().replaceAll(' ', '').replaceAll('-', '');
         final pPhone = b.customerPhone.replaceAll(' ', '').replaceAll('-', '');
         return pPlate.contains(clean) || clean.contains(pPlate) || pPhone.contains(clean) || clean.contains(pPhone);
@@ -1471,6 +1472,8 @@ class AppStateNotifier extends ChangeNotifier {
         acceptedAt: now,
       );
       _dailyFinancialClosings[index] = updated;
+      _hasNewCashierClosingAlert = false;
+      _latestClosingAlert = null;
       try {
         await _repository.saveDailyFinancialClosing(updated);
       } catch (e) {
@@ -1532,6 +1535,8 @@ class AppStateNotifier extends ChangeNotifier {
         handoverMethod: record.shiftType == 'day' ? 'admin_otp' : record.handoverMethod,
       );
       _dailyFinancialClosings[index] = updated;
+      _hasNewCashierClosingAlert = false;
+      _latestClosingAlert = null;
       try {
         await _repository.saveDailyFinancialClosing(updated);
       } catch (e) {

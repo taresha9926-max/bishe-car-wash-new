@@ -237,7 +237,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     padding: const EdgeInsets.only(bottom: 12),
                   ),
 
-                  if (state.hasNewCashierClosingAlert && state.latestClosingAlert != null)
+                  if (state.hasNewCashierClosingAlert &&
+                      state.latestClosingAlert != null &&
+                      state.latestClosingAlert!.isHandoverAccepted)
                     _buildClosingAlertBanner(context, state),
 
                   // Actionable Handover OTP Card(s) — only pinned at top when verification is pending

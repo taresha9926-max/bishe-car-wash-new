@@ -133,8 +133,8 @@ void main() {
       await tester.tap(find.byType(Tab).at(1));
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text(state.tr('confirmDailyClosingOtp')));
-      await tester.tap(find.text(state.tr('confirmDailyClosingOtp')));
+      await tester.ensureVisible(find.text(state.tr('confirmDailyClosing')));
+      await tester.tap(find.text(state.tr('confirmDailyClosing')));
       await tester.pumpAndSettle();
 
       expect(find.text(state.tr('commissionDisburseRequiredTitle')), findsWidgets);
@@ -361,7 +361,8 @@ void main() {
       expect(find.text(state.tr('logPettyCash')), findsOneWidget);
       expect(find.text(state.tr('digitalMoneyTransfer')), findsOneWidget);
       expect(find.text(state.tr('dailyFinancialReportsTab')), findsOneWidget);
-      expect(find.text(state.tr('dayShiftHandoverCashLabel')), findsOneWidget);
+      // Handover custody card stays hidden until Cashier actually hands over cash
+      expect(find.text(state.tr('dayShiftHandoverCashLabel')), findsNothing);
       expect(find.text(state.tr('stationShowerService')), findsNothing);
 
       // Switch to Tab 2 (Team) -> Washer hub visible, Station Shower absent

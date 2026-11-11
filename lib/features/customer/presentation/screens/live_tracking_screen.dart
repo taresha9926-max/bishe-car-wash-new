@@ -42,10 +42,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     super.dispose();
   }
 
-  void _performSearch(dynamic state) {
+  void _performSearch(dynamic state, {bool? isCarpet}) {
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
-    final found = state.findBookingByPhoneOrPlate(query);
+    final found = state.findBookingByPhoneOrPlate(query, isCarpet: isCarpet);
     if (found != null) {
       setState(() {
         _queriedBookingId = found.id;
@@ -114,13 +114,13 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                       filled: true,
                       fillColor: Colors.white,
                     ),
-                    onSubmitted: (_) => _performSearch(state),
+                    onSubmitted: (_) => _performSearch(state, isCarpet: !state.isCarWashDivisionActive),
                   ),
                   const SizedBox(height: 14),
                   CustomButton(
                     text: state.tr('trackNow'),
                     icon: Icons.search,
-                    onPressed: () => _performSearch(state),
+                    onPressed: () => _performSearch(state, isCarpet: !state.isCarWashDivisionActive),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
@@ -135,9 +135,11 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       );
     }
 
+    final isCarpetBooking = booking.isCarpet;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('${booking.isCarpet ? state.tr("carpetTrackingTitle") : state.tr("liveTrackingTitle")} • ${booking.licensePlate}'),
+        title: Text('${isCarpetBooking ? state.tr("carpetTrackingTitle") : state.tr("liveTrackingTitle")} • ${booking.licensePlate}'),
         actions: [
           IconButton(
             icon: Icon(_showSearchHeader ? Icons.close : Icons.search_rounded),
@@ -174,13 +176,13 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         controller: _searchController,
                         textCapitalization: TextCapitalization.characters,
                         decoration: InputDecoration(
-                          hintText: state.tr('plateOrPhoneHint'),
+                          hintText: isCarpetBooking ? state.tr('carpetTagOrPhoneHint') : state.tr('plateOrPhoneHint'),
                           hintStyle: const TextStyle(fontSize: 12),
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                         ),
-                        onSubmitted: (_) => _performSearch(state),
+                        onSubmitted: (_) => _performSearch(state, isCarpet: isCarpetBooking),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -191,7 +193,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () => _performSearch(state),
+                      onPressed: () => _performSearch(state, isCarpet: isCarpetBooking),
                       child: Text(state.tr('trackNow'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
                   ],

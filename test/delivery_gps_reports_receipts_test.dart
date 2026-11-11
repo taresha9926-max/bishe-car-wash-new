@@ -34,7 +34,7 @@ void main() {
   });
 
   group('Service Delivery Options, Exact Home Location & Live GPS', () {
-    testWidgets('CustomerHomeScreen displays all 3 car wash service delivery options', (tester) async {
+    testWidgets('CustomerHomeScreen shows 3 car delivery options in Car mode and 3 carpet options in Carpet mode without leakage', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -52,6 +52,20 @@ void main() {
       expect(find.text(state.tr('driveInStation')), findsOneWidget);
       expect(find.text(state.tr('atHomeMobile')), findsOneWidget);
       expect(find.text(state.tr('serviceValetPickUp')), findsOneWidget);
+      expect(find.text(state.tr('washMyCarpetTitle')), findsNothing);
+
+      // Switch to Carpet Washing Service tab -> zero Car Wash UI, 3 Carpet delivery cards shown
+      await tester.ensureVisible(find.text(state.tr('carpetWashingService')));
+      await tester.tap(find.text(state.tr('carpetWashingService')));
+      await tester.pumpAndSettle();
+
+      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsOneWidget);
+      expect(find.text(state.tr('carpetStationService')), findsOneWidget);
+      expect(find.text(state.tr('carpetHomeTitle')), findsOneWidget);
+      expect(find.text(state.tr('carpetValetTitle')), findsOneWidget);
+      expect(find.text(state.tr('driveInStation')), findsNothing);
+      expect(find.text(state.tr('washMyCarTitle')), findsNothing);
+      expect(find.text(state.tr('stationBaysTitle')), findsNothing);
     });
 
     testWidgets('PhoneBookingDialog shows 3 full delivery options & reveals exact address + live GPS for Home Van / VIP', (tester) async {
@@ -135,10 +149,36 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      // 1. Before any handover request -> neither Admin nor Manager shows OTP verification prompt
+      // 1. Before any handover request -> zero OTP/handover cards anywhere on Admin, Manager, or Cashier Money Tab!
       expect(state.pendingCashierHandover, isNull);
       expect(state.pendingCashierAdminHandover, isNull);
       expect(state.pendingAdminNightHandover, isNull);
+
+      state.switchRole(UserRole.cashier);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(theme: AppTheme.lightTheme, home: const CashierDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Tab).at(1));
+      await tester.pumpAndSettle();
+      expect(find.textContaining(state.tr('shiftHandoverMethodTitle')), findsNothing);
+      expect(find.text(state.tr('confirmDailyClosingOtp')), findsNothing);
+
+      state.switchRole(UserRole.manager);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(theme: AppTheme.lightTheme, home: const OperationalManagerDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
+      await tester.tap(find.byType(Tab).at(1));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('cashierHandoverTitle')), findsNothing);
 
       state.switchRole(UserRole.admin);
       await tester.pumpWidget(
@@ -199,6 +239,71 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text(closing.handoverOtp!), findsNothing);
+
+      // 4. Cashier sends Admin OTP -> visible on Admin & Cashier, hidden on Manager -> Admin verifies -> disappears on BOTH + clears closing alert!
+      final adminDayClosing = await state.confirmDailyClosing(
+        cashierName: 'Day Cashier',
+        shiftType: 'day',
+        handoverMethod: 'admin_otp',
+      );
+      expect(adminDayClosing.handoverOtp, isNotNull);
+
+      state.switchRole(UserRole.manager);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(key: const ValueKey('mgr-admin-otp'), theme: AppTheme.lightTheme, home: const OperationalManagerDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
+
+      state.switchRole(UserRole.admin);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(key: const ValueKey('adm-day-otp'), theme: AppTheme.lightTheme, home: const AdminDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('confirmCashierHandover')), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).first, adminDayClosing.handoverOtp!);
+      await tester.tap(find.text(state.tr('confirmCashierHandover')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('confirmCashierHandover')), findsNothing);
+      expect(state.hasNewCashierClosingAlert, isFalse);
+
+      // 5. Manager submits Night Closing -> Night OTP visible on Manager & Admin -> Admin verifies -> disappears on BOTH!
+      final nightClosing = await state.confirmDailyClosing(
+        cashierName: 'Night Manager',
+        shiftType: 'night',
+        closedByRole: 'manager',
+      );
+      expect(nightClosing.handoverOtp, isNotNull);
+
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(key: const ValueKey('adm-night-otp'), theme: AppTheme.lightTheme, home: const AdminDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('confirmManagerNightCash')), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, nightClosing.handoverOtp!);
+      await tester.tap(find.text(state.tr('confirmManagerNightCash')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('confirmManagerNightCash')), findsNothing);
+
+      state.switchRole(UserRole.manager);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(key: const ValueKey('mgr-after-night'), theme: AppTheme.lightTheme, home: const OperationalManagerDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining(nightClosing.handoverOtp!), findsNothing);
     });
 
     test('Night Closing cancels both unarrived online and unarrived phone pending bookings', () async {
@@ -446,6 +551,9 @@ void main() {
       'atHomeSub',
       'serviceValetPickUp',
       'serviceValetPickUpSub',
+      'reconcileAndCloseShift',
+      'carpetDeliveryOptionsTitle',
+      'carpetTrustFooter',
     ];
 
     for (final k in newKeys) {

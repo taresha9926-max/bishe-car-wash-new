@@ -44,6 +44,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
     final isNightClosed = state.isTodayNightShiftClosed;
     final isClosed = widget.isManager ? isNightClosed : isDayClosed;
     final activePendingOtp = widget.isManager ? pendingNightOtp : pendingCashierOtp;
+    final carriedCash = widget.isManager ? state.managerCarriedCashETB : 0.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,8 +100,8 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
         _buildShiftSummaryBanner(state, widget.isMobile),
         const SizedBox(height: 12),
 
-        // 3. Manager-specific Day Custody -> Night Cash Summary Card (Zero Double-Counting)
-        if (widget.isManager) ...[
+        // 3. Manager-specific Day Custody summary (only after Cashier OTP handover is accepted)
+        if (widget.isManager && carriedCash > 0) ...[
           _buildManagerCustodyCard(state, undepositedCash, widget.isMobile),
           const SizedBox(height: 12),
         ],
@@ -192,21 +193,6 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
               ),
             ],
           ),
-          if (state.pendingCashierHandover == null && carried == 0) ...[
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '${state.tr("awaitingHandoverLabel")}: ${state.tr("awaitingHandoverDesc")}',
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-              ),
-            ),
-          ],
           const Divider(height: 20),
           _buildCustodyRow(state.tr('dayShiftHandoverCashLabel'), CurrencyFormatter.format(carried), Colors.indigo),
           const SizedBox(height: 6),
@@ -464,7 +450,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
         ? 'OTP: [ ${pendingHandover.handoverOtp} ]'
         : (isClosed
             ? (widget.isManager ? state.tr('nightClosingConfirmed') : state.tr('dailyClosingConfirmed'))
-            : (widget.isManager ? state.tr('initiateNightShiftClosing') : state.tr('confirmDailyClosingOtp')));
+            : (widget.isManager ? state.tr('initiateNightShiftClosing') : state.tr('confirmDailyClosing')));
 
     final closingSubtitle = pendingHandover != null
         ? state.tr('viewVoucher')
@@ -472,7 +458,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
             ? state.tr('shiftLockedLabel')
             : (needsDisburse
                 ? state.tr('commissionDisburseRequiredTitle')
-                : state.tr('reconcileAndGenerateOtp')));
+                : state.tr('reconcileAndCloseShift')));
 
     final actions = [
       _buildDeskActionButton(
@@ -514,29 +500,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!widget.isManager && pendingHandover == null && !(isClosed && latestDayClosing?.isHandoverAccepted == true)) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.cardBorder),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.vpn_key_rounded, size: 16, color: AppColors.primary),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '${state.tr("shiftHandoverMethodTitle")}: ${state.tr("shiftHandoverMethodDesc")}',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-          ] else if (widget.isManager && !isClosed) ...[
+          if (widget.isManager && !isClosed) ...[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(

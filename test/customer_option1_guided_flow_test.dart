@@ -22,7 +22,7 @@ void main() {
       await state.loadData();
     });
 
-    testWidgets('CustomerHomeScreen displays 2-button hub + negotiable badge on mobile without overflow', (tester) async {
+    testWidgets('CustomerHomeScreen strictly separates Car Wash and Carpet Cleaning divisions without cross-leakage', (tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -37,10 +37,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Car Wash active: only Car Wash UI visible, zero Carpet booking content
       expect(find.text('What would you like to wash today?'), findsOneWidget);
       expect(find.text('Wash My Car'), findsOneWidget);
+      expect(find.text('Prices are negotiable'), findsOneWidget);
+      expect(find.text('Wash My Carpet'), findsNothing);
+      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsNothing);
+
+      // Switch to Carpet Washing Service tab: only Carpet UI visible, zero Car Wash content
+      await tester.tap(find.text(state.tr('carpetWashingService')));
+      await tester.pumpAndSettle();
       expect(find.text('Wash My Carpet'), findsOneWidget);
-      expect(find.text('Prices are negotiable'), findsNWidgets(2));
+      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsOneWidget);
+      expect(find.text('Prices are negotiable'), findsOneWidget);
+      expect(find.text('Wash My Car'), findsNothing);
+      expect(find.text(state.tr('stationBaysTitle')), findsNothing);
+      expect(find.text(state.tr('trackMyCar')), findsNothing);
       tester.view.reset();
     });
 

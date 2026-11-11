@@ -4475,6 +4475,21 @@ class AppStrings {
       AppLanguage.om: 'Ida\'ama Torbanii',
       AppLanguage.am: 'ሳምንታዊ ድምር',
     },
+    'reconcileAndCloseShift': {
+      AppLanguage.en: 'Reconcile cash drawer & close shift',
+      AppLanguage.om: 'Herrega saanduqaa wal-simsii cufi',
+      AppLanguage.am: 'የጥሬ ገንዘብ መሳቢያውን አስታርቅና ፈረቃውን ዝጋ',
+    },
+    'carpetDeliveryOptionsTitle': {
+      AppLanguage.en: 'Carpet Cleaning Service Options',
+      AppLanguage.om: 'Filannoo Tajaajila Dhiqannaa Firaashii',
+      AppLanguage.am: 'የምንጣፍ እጥበት አገልግሎት አማራጮች',
+    },
+    'carpetTrustFooter': {
+      AppLanguage.en: 'Professional Carpet Cleaning • Fast Drying & Delivery',
+      AppLanguage.om: 'Dhiqannaa Firaashii Qulqullina Qabu • Gogsuu fi Geessuu Saffisaa',
+      AppLanguage.am: 'ፕሮፌሽናል የምንጣፍ እጥበት • ፈጣን ማድረቅና ማድረስ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

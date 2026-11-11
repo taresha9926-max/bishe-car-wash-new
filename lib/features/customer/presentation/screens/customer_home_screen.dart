@@ -4,6 +4,7 @@ import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/core/widgets/app_role_header.dart';
+import 'package:bishe_car_wash/core/widgets/dual_service_entrance_tab_bar.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/core/widgets/status_badge.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
@@ -11,6 +12,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booki
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
+import 'package:bishe_car_wash/features/customer/presentation/screens/booking_history_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable_price_badge.dart';
@@ -52,15 +54,28 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
+    final isCarDivision = state.isCarWashDivisionActive;
     final activeWash = state.activeTrackingBooking;
+    final matchingActiveWash = (activeWash != null &&
+            activeWash.isCarpet == !isCarDivision &&
+            (activeWash.status.isOngoing ||
+                activeWash.status == WashStatus.pending ||
+                activeWash.status == WashStatus.confirmed))
+        ? activeWash
+        : null;
     final isDesktop = ResponsiveLayout.isDesktop(context);
     final queueAhead = state.bookings
-        .where((b) => b.status != WashStatus.completed && b.status != WashStatus.cancelled)
+        .where((b) =>
+            !b.isCarpet &&
+            b.status != WashStatus.completed &&
+            b.status != WashStatus.cancelled)
         .toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppRoleHeader(title: state.tr('appName')),
+      appBar: AppRoleHeader(
+        title: isCarDivision ? state.tr('appName') : state.tr('carpetWashingService'),
+      ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
         child: SingleChildScrollView(
@@ -72,11 +87,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Live Station Availability Bar (1 simple glance)
-                  _buildCompactLiveStatusCard(state, queueAhead),
-                  const SizedBox(height: 14),
-
-                  // 2. Main Hub Title + 2 Big Action Cards ("Wash My Car" vs "Wash My Carpet")
+                  const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 12)),
                   Text(
                     state.tr('whatToWashToday'),
                     style: const TextStyle(
@@ -86,96 +97,141 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final carCard = _buildDivisionHubCard(
-                        context: context,
-                        title: state.tr('washMyCarTitle'),
-                        subtitle: state.tr('washMyCarSub'),
-                        ctaLabel: state.tr('startCarBooking'),
-                        imageUrl: AutoCareAssets.carSedanUrl,
-                        fallbackIcon: Icons.directions_car_filled_rounded,
-                        accentColor: AppColors.primary,
-                        onTap: () => _startGuidedBooking(context, isCarpet: false),
-                      );
-                      final carpetCard = _buildDivisionHubCard(
-                        context: context,
-                        title: state.tr('washMyCarpetTitle'),
-                        subtitle: state.tr('washMyCarpetSub'),
-                        ctaLabel: state.tr('startCarpetBooking'),
-                        imageUrl: AutoCareAssets.carpetTypeAUrl,
-                        fallbackIcon: Icons.texture_rounded,
-                        accentColor: const Color(0xFF4F46E5),
-                        onTap: () => _startGuidedBooking(context, isCarpet: true),
-                      );
 
-                      if (constraints.maxWidth >= 680) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: carCard),
-                            const SizedBox(width: 14),
-                            Expanded(child: carpetCard),
-                          ],
-                        );
-                      }
-                      return Column(
-                        children: [
-                          carCard,
-                          const SizedBox(height: 12),
-                          carpetCard,
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 14),
-
-                  // 2b. Car Wash Service Delivery Options (At Station • At Home Van • VIP Driver)
-                  Text(
-                    state.tr('chooseDeliveryQuick'),
-                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 8),
-                  Column(
-                    children: [
-                      _buildQuickDeliveryTile(
-                        context: context,
-                        title: state.tr('driveInStation'),
-                        subtitle: state.tr('driveInSub'),
-                        icon: Icons.local_car_wash_rounded,
-                        color: AppColors.bay1Color,
-                        onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.walkInStation),
-                      ),
-                      const SizedBox(height: 6),
-                      _buildQuickDeliveryTile(
-                        context: context,
-                        title: state.tr('atHomeMobile'),
-                        subtitle: state.tr('atHomeSub'),
-                        icon: Icons.rv_hookup_rounded,
-                        color: AppColors.mobileVanColor,
-                        onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.atHomeMobile),
-                      ),
-                      const SizedBox(height: 6),
-                      _buildQuickDeliveryTile(
-                        context: context,
-                        title: state.tr('serviceValetPickUp'),
-                        subtitle: state.tr('serviceValetPickUpSub'),
-                        icon: Icons.car_rental_rounded,
-                        color: const Color(0xFF7C3AED),
-                        onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.valetPickUp),
-                      ),
-                    ],
-                  ),
+                  if (isCarDivision) ...[
+                    // Strictly Car Wash only (no Carpet UI or strings)
+                    _buildCompactLiveStatusCard(state, queueAhead),
+                    const SizedBox(height: 14),
+                    _buildDivisionHubCard(
+                      context: context,
+                      title: state.tr('washMyCarTitle'),
+                      subtitle: state.tr('washMyCarSub'),
+                      ctaLabel: state.tr('startCarBooking'),
+                      imageUrl: AutoCareAssets.carSedanUrl,
+                      fallbackIcon: Icons.directions_car_filled_rounded,
+                      accentColor: AppColors.primary,
+                      onTap: () => _startGuidedBooking(context, isCarpet: false),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      state.tr('chooseDeliveryQuick'),
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildQuickDeliveryTile(
+                      context: context,
+                      title: state.tr('driveInStation'),
+                      subtitle: state.tr('driveInSub'),
+                      icon: Icons.local_car_wash_rounded,
+                      color: AppColors.bay1Color,
+                      onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.walkInStation),
+                    ),
+                    const SizedBox(height: 6),
+                    _buildQuickDeliveryTile(
+                      context: context,
+                      title: state.tr('atHomeMobile'),
+                      subtitle: state.tr('atHomeSub'),
+                      icon: Icons.rv_hookup_rounded,
+                      color: AppColors.mobileVanColor,
+                      onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.atHomeMobile),
+                    ),
+                    const SizedBox(height: 6),
+                    _buildQuickDeliveryTile(
+                      context: context,
+                      title: state.tr('serviceValetPickUp'),
+                      subtitle: state.tr('serviceValetPickUpSub'),
+                      icon: Icons.car_rental_rounded,
+                      color: const Color(0xFF7C3AED),
+                      onTap: () => _startGuidedBooking(context, isCarpet: false, initialServiceType: ServiceType.valetPickUp),
+                    ),
+                  ] else ...[
+                    // Strictly Carpet Cleaning only (no Car Wash bays, van ETA, or car UI)
+                    _buildDivisionHubCard(
+                      context: context,
+                      title: state.tr('washMyCarpetTitle'),
+                      subtitle: state.tr('washMyCarpetSub'),
+                      ctaLabel: state.tr('startCarpetBooking'),
+                      imageUrl: AutoCareAssets.carpetTypeAUrl,
+                      fallbackIcon: Icons.texture_rounded,
+                      accentColor: const Color(0xFF4F46E5),
+                      onTap: () => _startGuidedBooking(context, isCarpet: true),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      state.tr('carpetDeliveryOptionsTitle'),
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildQuickDeliveryTile(
+                      context: context,
+                      title: state.tr('carpetStationService'),
+                      subtitle: state.tr('carpetStationSub'),
+                      icon: Icons.wash_rounded,
+                      color: const Color(0xFF4F46E5),
+                      onTap: () => _startGuidedBooking(context, isCarpet: true, initialServiceType: ServiceType.walkInStation),
+                    ),
+                    const SizedBox(height: 6),
+                    _buildQuickDeliveryTile(
+                      context: context,
+                      title: state.tr('carpetHomeTitle'),
+                      subtitle: state.tr('carpetHomeSub'),
+                      icon: Icons.home_repair_service_rounded,
+                      color: const Color(0xFF0D9488),
+                      onTap: () => _startGuidedBooking(context, isCarpet: true, initialServiceType: ServiceType.atHomeMobile),
+                    ),
+                    const SizedBox(height: 6),
+                    _buildQuickDeliveryTile(
+                      context: context,
+                      title: state.tr('carpetValetTitle'),
+                      subtitle: state.tr('carpetValetSub'),
+                      icon: Icons.local_shipping_rounded,
+                      color: const Color(0xFF7C3AED),
+                      onTap: () => _startGuidedBooking(context, isCarpet: true, initialServiceType: ServiceType.valetPickUp),
+                    ),
+                  ],
                   const SizedBox(height: 16),
 
-                  // 3. Active Wash Tracker OR Unified Plate/Carpet Lookup
-                  if (activeWash != null &&
-                      (activeWash.status.isOngoing ||
-                          activeWash.status == WashStatus.pending ||
-                          activeWash.status == WashStatus.confirmed))
-                    _buildActiveWashCard(context, state, activeWash)
+                  // 3. Active Division Wash Tracker OR Division-Scoped Lookup
+                  if (matchingActiveWash != null)
+                    _buildActiveWashCard(context, state, matchingActiveWash)
                   else
-                    _buildVehicleLookupCard(context, state),
+                    _buildVehicleLookupCard(context, state, isCarpet: !isCarDivision),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BookingHistoryScreen(
+                              initialCarpetFilter: !isCarDivision,
+                              lockDivision: true,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: Icon(
+                        isCarDivision ? Icons.history_rounded : Icons.texture_rounded,
+                        size: 16,
+                        color: isCarDivision ? AppColors.primary : const Color(0xFF4F46E5),
+                      ),
+                      label: Text(
+                        isCarDivision ? state.tr('myCarWashes') : state.tr('myCarpetCleanings'),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          color: isCarDivision ? AppColors.primary : const Color(0xFF4F46E5),
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: AppColors.cardBorder),
+                        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 14),
 
                   // 4. Community Help: Call to Book Card
@@ -226,8 +282,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 6. Simple Bishoftu Station Footer
-                  _buildBishoftuLocationFooter(state),
+                  // 6. Simple Bishoftu Division-Isolated Footer
+                  _buildBishoftuLocationFooter(state, isCarpet: !isCarDivision),
                   const SizedBox(height: 18),
                 ],
               ),
@@ -483,7 +539,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildVehicleLookupCard(BuildContext context, dynamic state) {
+  Widget _buildVehicleLookupCard(BuildContext context, dynamic state, {bool isCarpet = false}) {
+    final accent = isCarpet ? const Color(0xFF4F46E5) : AppColors.primary;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -499,7 +556,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: accent.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.search_rounded, color: AppColors.primary, size: 18),
@@ -510,11 +567,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      state.tr('trackMyCar'),
+                      isCarpet ? state.tr('trackMyCarpet') : state.tr('trackMyCar'),
                       style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: AppColors.textPrimary),
                     ),
                     Text(
-                      state.tr('trackVehiclePrompt'),
+                      isCarpet ? state.tr('trackCarpetPrompt') : state.tr('trackVehiclePrompt'),
                       style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                     ),
                   ],
@@ -533,16 +590,20 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     textCapitalization: TextCapitalization.characters,
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                     decoration: InputDecoration(
-                      hintText: state.tr('plateOrPhoneHint'),
+                      hintText: isCarpet ? state.tr('carpetTagOrPhoneHint') : state.tr('plateOrPhoneHint'),
                       hintStyle: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
-                      prefixIcon: const Icon(Icons.directions_car_outlined, size: 18, color: AppColors.textMuted),
+                      prefixIcon: Icon(
+                        isCarpet ? Icons.texture_rounded : Icons.directions_car_outlined,
+                        size: 18,
+                        color: AppColors.textMuted,
+                      ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.cardBorder)),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.cardBorder)),
                       fillColor: AppColors.surfaceVariant,
                       filled: true,
                     ),
-                    onSubmitted: (_) => _handleTrackVehicle(context, state),
+                    onSubmitted: (_) => _handleTrackVehicle(context, state, isCarpet: isCarpet),
                   ),
                 ),
               ),
@@ -550,11 +611,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               SizedBox(
                 height: 42,
                 child: ElevatedButton.icon(
-                  onPressed: () => _handleTrackVehicle(context, state),
+                  onPressed: () => _handleTrackVehicle(context, state, isCarpet: isCarpet),
                   icon: const Icon(Icons.radar_rounded, size: 16),
                   label: Text(state.tr('trackNow'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: accent,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -569,10 +630,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  void _handleTrackVehicle(BuildContext context, dynamic state) {
+  void _handleTrackVehicle(BuildContext context, dynamic state, {bool isCarpet = false}) {
     final query = _trackController.text.trim();
     if (query.isEmpty) return;
-    final found = state.findBookingByPhoneOrPlate(query);
+    final found = state.findBookingByPhoneOrPlate(query, isCarpet: isCarpet);
     if (found != null) {
       state.setActiveTrackingBooking(found.id);
       Navigator.push(
@@ -722,7 +783,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     );
   }
 
-  Widget _buildBishoftuLocationFooter(dynamic state) {
+  Widget _buildBishoftuLocationFooter(dynamic state, {bool isCarpet = false}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -732,7 +793,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
         border: Border.all(color: AppColors.cardBorder),
       ),
       child: Text(
-        '${state.tr("appName")} • ${state.tr("bishoftu")}\n${state.tr("customerTrustPill")} • ${state.customerPhoneBookingNumber}',
+        '${isCarpet ? state.tr("carpetWashingService") : state.tr("appName")} • ${state.tr("bishoftu")}\n${isCarpet ? state.tr("carpetTrustFooter") : state.tr("customerTrustPill")} • ${state.customerPhoneBookingNumber}',
         style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.4),
       ),
     );
