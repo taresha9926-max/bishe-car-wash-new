@@ -4370,6 +4370,11 @@ class AppStrings {
       AppLanguage.om: 'Kaashiyara Guyyaa → Hogganaa Hojii',
       AppLanguage.am: 'ቀን ካሸር → ኦፕሬሽን ማናጀር',
     },
+    'closingCloudSyncRlsWarning': {
+      AppLanguage.en: 'Saved locally, but Supabase daily_closings UPDATE was blocked by RLS (42501). Run migration 20261111_fix_rls_closings_and_bookings.sql in Supabase SQL Editor.',
+      AppLanguage.om: 'Naannotti olkaa\'ameera, garuu haaromsi daily_closings Supabase keessaa seera RLS (42501) tiin uggurame. Migration 20261111_fix_rls_closings_and_bookings.sql Supabase SQL Editor keessatti hojisiisaa.',
+      AppLanguage.am: 'በመሣሪያው ላይ ተቀምጧል፣ ነገር ግን የSupabase daily_closings ማሻሻያ በRLS ፖሊሲ (42501) ታግዷል። እባክዎ 20261111_fix_rls_closings_and_bookings.sql በSupabase SQL Editor ያስኪዱ።',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

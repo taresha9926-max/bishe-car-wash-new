@@ -816,6 +816,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   .join(', '),
             ),
           ],
+          if (state.closingCloudSyncError != null) ...[
+            const SizedBox(height: 8),
+            _buildShiftStatusTile(
+              icon: Icons.warning_amber_rounded,
+              title: 'Supabase RLS',
+              badge: '42501',
+              color: const Color(0xFFB45309),
+              subtitle: state.tr('closingCloudSyncRlsWarning'),
+            ),
+          ],
         ],
       ),
     );

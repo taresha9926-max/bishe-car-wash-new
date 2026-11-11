@@ -77,6 +77,7 @@ abstract class IStaffRepository {
   Future<void> deleteStaffCredential(String id);
 
   // Daily Financial Closings & Audit Broadcast
+  String? get lastClosingSyncError => null;
   Future<List<DailyFinancialClosing>> getDailyFinancialClosings();
   Future<void> saveDailyFinancialClosing(DailyFinancialClosing closing);
   Future<void> deleteDailyFinancialClosing(String id);

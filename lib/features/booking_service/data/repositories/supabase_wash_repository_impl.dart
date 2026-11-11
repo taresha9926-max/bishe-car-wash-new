@@ -195,13 +195,19 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   final String supabaseUrl;
   final String anonKey;
+  final http.Client? _httpClient;
   final WashRepositoryImpl _fallbackLocalRepo = WashRepositoryImpl();
   static DateTime _dataPurgeEpoch = DateTime.parse('2026-11-06T16:25:00Z');
+  String? _lastClosingSyncError;
+
+  @override
+  String? get lastClosingSyncError => _lastClosingSyncError;
 
   SupabaseWashRepositoryImpl({
     required this.supabaseUrl,
     required this.anonKey,
-  });
+    http.Client? httpClient,
+  }) : _httpClient = httpClient;
 
   Map<String, String> get _headers => {
         'apikey': anonKey,
@@ -219,7 +225,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<dynamic> _get(String endpoint) async {
     try {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
-      final response = await http.get(uri, headers: _headers);
+      final client = _httpClient;
+      final response = client != null
+          ? await client.get(uri, headers: _headers)
+          : await http.get(uri, headers: _headers);
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return jsonDecode(response.body);
       }
@@ -234,7 +243,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<dynamic> _post(String endpoint, Map<String, dynamic> data) async {
     try {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
-      final response = await http.post(uri, headers: _headers, body: jsonEncode(data));
+      final encodedBody = jsonEncode(data);
+      final client = _httpClient;
+      final response = client != null
+          ? await client.post(uri, headers: _headers, body: encodedBody)
+          : await http.post(uri, headers: _headers, body: encodedBody);
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return response.body.isNotEmpty ? jsonDecode(response.body) : [];
       }
@@ -249,7 +262,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<dynamic> _patch(String endpoint, Map<String, dynamic> data) async {
     try {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
-      final response = await http.patch(uri, headers: _headers, body: jsonEncode(data));
+      final encodedBody = jsonEncode(data);
+      final client = _httpClient;
+      final response = client != null
+          ? await client.patch(uri, headers: _headers, body: encodedBody)
+          : await http.patch(uri, headers: _headers, body: encodedBody);
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return response.body.isNotEmpty ? jsonDecode(response.body) : [];
       }
@@ -264,7 +281,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<bool> _delete(String endpoint) async {
     try {
       final uri = Uri.parse('$supabaseUrl/rest/v1/$endpoint');
-      final response = await http.delete(uri, headers: _headers);
+      final client = _httpClient;
+      final response = client != null
+          ? await client.delete(uri, headers: _headers)
+          : await http.delete(uri, headers: _headers);
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return true;
       }
@@ -1313,26 +1333,39 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       'is_confirmed': closing.isConfirmed,
     };
 
+    final encodedId = Uri.encodeComponent(closing.id);
     try {
-      // Use PostgREST upsert to seamlessly handle repeat/shift closings without 409 conflict
-      final upsertUri = Uri.parse('$supabaseUrl/rest/v1/daily_closings?on_conflict=id');
-      final upsertHeaders = Map<String, String>.from(_headers)
-        ..['Prefer'] = 'resolution=merge-duplicates';
-      final response = await http.post(upsertUri, headers: upsertHeaders, body: jsonEncode(payload));
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        // Upsert succeeded
-      } else if (response.statusCode == 409 || response.statusCode == 400) {
-        // Fallback: patch existing closing record by ID
-        await _patch('daily_closings?id=eq.${closing.id}', payload);
+      // Check existence first so new rows use plain INSERT (never failing UPDATE RLS check on on_conflict=id),
+      // and existing rows verify PATCH actually modified a row under return=representation.
+      final existing = await _get('daily_closings?id=eq.$encodedId&select=id');
+      if (existing is List && existing.isEmpty) {
+        final inserted = await _post('daily_closings', payload);
+        if (inserted is List && inserted.isNotEmpty) {
+          _lastClosingSyncError = null;
+        } else {
+          _lastClosingSyncError =
+              'Supabase daily_closings INSERT failed. Apply supabase/migrations/20261111_fix_rls_closings_and_bookings.sql.';
+          debugPrint('Supabase daily_closings insert failed for ${closing.id}');
+        }
+      } else if (existing is List && existing.isNotEmpty) {
+        final patched = await _patch('daily_closings?id=eq.$encodedId', payload);
+        if (patched is List && patched.isNotEmpty) {
+          _lastClosingSyncError = null;
+        } else {
+          _lastClosingSyncError =
+              'Supabase daily_closings UPDATE blocked by RLS policy (0 rows updated). Run supabase/migrations/20261111_fix_rls_closings_and_bookings.sql in Supabase SQL Editor.';
+          debugPrint(_lastClosingSyncError);
+        }
       } else {
-        debugPrint('Supabase daily_closings upsert returned ${response.statusCode}: ${response.body}');
-        await _patch('daily_closings?id=eq.${closing.id}', payload);
+        // Network/SELECT error fallback: attempt plain POST
+        final inserted = await _post('daily_closings', payload);
+        _lastClosingSyncError = (inserted is List && inserted.isNotEmpty)
+            ? null
+            : 'Supabase daily_closings cloud sync failed; saved locally.';
       }
     } catch (e) {
-      debugPrint('Supabase saveDailyFinancialClosing exception: $e');
-      try {
-        await _patch('daily_closings?id=eq.${closing.id}', payload);
-      } catch (_) {}
+      _lastClosingSyncError = 'Supabase saveDailyFinancialClosing exception: $e';
+      debugPrint(_lastClosingSyncError);
     }
     await _fallbackLocalRepo.saveDailyFinancialClosing(closing);
   }

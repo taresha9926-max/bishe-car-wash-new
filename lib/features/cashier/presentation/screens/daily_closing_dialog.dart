@@ -850,9 +850,19 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
       if (mounted) {
         final parentContext = Navigator.of(context).context;
         Navigator.pop(context);
+        if (state.closingCloudSyncError != null && parentContext.mounted) {
+          ScaffoldMessenger.of(parentContext).showSnackBar(
+            SnackBar(
+              content: Text(state.tr('closingCloudSyncRlsWarning')),
+              backgroundColor: const Color(0xFFD97706),
+              duration: const Duration(seconds: 7),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
         if (closing.handoverOtp != null && closing.handoverOtp!.isNotEmpty && parentContext.mounted) {
           _showOtpReceiptDialog(parentContext, closing, state);
-        } else if (parentContext.mounted) {
+        } else if (state.closingCloudSyncError == null && parentContext.mounted) {
           ScaffoldMessenger.of(parentContext).showSnackBar(
             SnackBar(
               content: Text(state.tr('bankDepositRecorded')),

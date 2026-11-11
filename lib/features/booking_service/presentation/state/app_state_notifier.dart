@@ -408,6 +408,7 @@ class AppStateNotifier extends ChangeNotifier {
   // Repository Data Caches
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  String? get closingCloudSyncError => _repository.lastClosingSyncError;
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
