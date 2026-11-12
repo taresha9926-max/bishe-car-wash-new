@@ -48,7 +48,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Home stays clean Option 1 hub (delivery choices live cleanly inside Step 1 of booking)
+      // Step 0 shows division tabs only -> tap Car Washing Service -> reveals Wash My Car hub
+      expect(find.text(state.tr('whatToWashToday')), findsOneWidget);
+      expect(find.text(state.tr('washMyCarTitle')), findsNothing);
+      await tester.tap(find.text(state.tr('carWashingService')));
+      await tester.pumpAndSettle();
+
+      // Division hub stays clean (delivery choices live cleanly inside Step 1 of booking)
       expect(find.text(state.tr('washMyCarTitle')), findsOneWidget);
       expect(find.text(state.tr('chooseDeliveryQuick')), findsNothing);
       expect(find.text(state.tr('washMyCarpetTitle')), findsNothing);

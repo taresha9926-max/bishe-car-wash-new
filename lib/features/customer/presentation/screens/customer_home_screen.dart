@@ -4,28 +4,183 @@ import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/core/widgets/app_role_header.dart';
-import 'package:bishe_car_wash/core/widgets/dual_service_entrance_tab_bar.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/core/widgets/status_badge.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
+import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable_price_badge.dart';
 import 'package:bishe_car_wash/features/welcome/presentation/widgets/customer_feedback_sheet.dart';
 
-/// Simplified Option 1 Customer Hub: 2 big service choices + live status + 1-tap help.
-class CustomerHomeScreen extends StatefulWidget {
+/// Step 0 Customer Entry: asks "What would you like to wash today?" with ONLY
+/// the Car Washing Service and Carpet Washing Service tabs, then navigates to
+/// the selected service screen ("Wash My Car" or "Wash My Carpet").
+class CustomerHomeScreen extends StatelessWidget {
   const CustomerHomeScreen({super.key});
 
+  void _openDivisionScreen(
+    BuildContext context, {
+    required bool isCarpet,
+  }) {
+    final state = AppStateProvider.read(context);
+    state.setActiveServiceDivision(
+      isCarpet ? ActiveServiceDivision.carpetWash : ActiveServiceDivision.carWash,
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _CustomerDivisionHubScreen(isCarpet: isCarpet),
+      ),
+    );
+  }
+
   @override
-  State<CustomerHomeScreen> createState() => _CustomerHomeScreenState();
+  Widget build(BuildContext context) {
+    final state = AppStateProvider.of(context);
+    final isDesktop = ResponsiveLayout.isDesktop(context);
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppRoleHeader(title: state.tr('appName')),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  state.tr('whatToWashToday'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: AppColors.cardBorder, width: 1.4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildServiceChoiceTab(
+                          label: state.tr('carWashingService'),
+                          imageUrl: AutoCareAssets.carSedanUrl,
+                          fallbackIcon: Icons.local_car_wash_rounded,
+                          colors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
+                          onTap: () => _openDivisionScreen(context, isCarpet: false),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildServiceChoiceTab(
+                          label: state.tr('carpetWashingService'),
+                          imageUrl: AutoCareAssets.carpetTypeAUrl,
+                          fallbackIcon: Icons.texture_rounded,
+                          colors: const [Color(0xFF7C3AED), Color(0xFF6D28D9)],
+                          onTap: () => _openDivisionScreen(context, isCarpet: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServiceChoiceTab({
+    required String label,
+    required String imageUrl,
+    required IconData fallbackIcon,
+    required List<Color> colors,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: colors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: colors.first.withOpacity(0.28),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: imageUrl,
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                fallbackIcon: fallbackIcon,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
+class _CustomerDivisionHubScreen extends StatefulWidget {
+  final bool isCarpet;
+
+  const _CustomerDivisionHubScreen({required this.isCarpet});
+
+  @override
+  State<_CustomerDivisionHubScreen> createState() => _CustomerDivisionHubScreenState();
+}
+
+class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> {
   final TextEditingController _trackController = TextEditingController();
 
   @override
@@ -34,16 +189,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     super.dispose();
   }
 
-  void _startGuidedBooking(
-    BuildContext context, {
-    required bool isCarpet,
-  }) {
+  void _startGuidedBooking(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => NewBookingScreen(
-          isCarpet: isCarpet,
-        ),
+        builder: (_) => NewBookingScreen(isCarpet: widget.isCarpet),
       ),
     );
   }
@@ -51,10 +201,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final isCarDivision = state.isCarWashDivisionActive;
+    final isCarpet = widget.isCarpet;
     final activeWash = state.activeTrackingBooking;
     final matchingActiveWash = (activeWash != null &&
-            activeWash.isCarpet == !isCarDivision &&
+            activeWash.isCarpet == isCarpet &&
             (activeWash.status.isOngoing ||
                 activeWash.status == WashStatus.pending ||
                 activeWash.status == WashStatus.confirmed))
@@ -71,7 +221,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
-        title: isCarDivision ? state.tr('appName') : state.tr('carpetWashingService'),
+        title: isCarpet ? state.tr('carpetWashingService') : state.tr('carWashingService'),
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
@@ -84,19 +234,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 12)),
-                  Text(
-                    state.tr('whatToWashToday'),
-                    style: const TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  if (isCarDivision) ...[
-                    // Strictly Car Wash only (3 delivery choices live cleanly in Step 2)
+                  if (!isCarpet) ...[
                     _buildCompactLiveStatusCard(state, queueAhead),
                     const SizedBox(height: 14),
                     _buildDivisionHubCard(
@@ -107,10 +245,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       imageUrl: AutoCareAssets.carSedanUrl,
                       fallbackIcon: Icons.directions_car_filled_rounded,
                       accentColor: AppColors.primary,
-                      onTap: () => _startGuidedBooking(context, isCarpet: false),
+                      onTap: () => _startGuidedBooking(context),
                     ),
                   ] else ...[
-                    // Strictly Carpet Cleaning only (3 delivery choices live cleanly in Step 2)
                     _buildDivisionHubCard(
                       context: context,
                       title: state.tr('washMyCarpetTitle'),
@@ -119,23 +256,20 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                       imageUrl: AutoCareAssets.carpetTypeAUrl,
                       fallbackIcon: Icons.texture_rounded,
                       accentColor: const Color(0xFF4F46E5),
-                      onTap: () => _startGuidedBooking(context, isCarpet: true),
+                      onTap: () => _startGuidedBooking(context),
                     ),
                   ],
                   const SizedBox(height: 16),
 
-                  // 3. Active Division Wash Tracker OR Division-Scoped Lookup
                   if (matchingActiveWash != null)
                     _buildActiveWashCard(context, state, matchingActiveWash)
                   else
-                    _buildVehicleLookupCard(context, state, isCarpet: !isCarDivision),
+                    _buildVehicleLookupCard(context, state, isCarpet: isCarpet),
                   const SizedBox(height: 14),
 
-                  // 4. Community Help: Call to Book Card
                   _buildPhoneBookingCard(context, state),
                   const SizedBox(height: 12),
 
-                  // 5. Google Maps + Feedback Row
                   Row(
                     children: [
                       Expanded(
@@ -179,8 +313,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 6. Simple Bishoftu Division-Isolated Footer
-                  _buildBishoftuLocationFooter(state, isCarpet: !isCarDivision),
+                  _buildBishoftuLocationFooter(state, isCarpet: isCarpet),
                   const SizedBox(height: 18),
                 ],
               ),

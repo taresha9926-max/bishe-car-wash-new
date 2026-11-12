@@ -148,6 +148,11 @@ void main() {
 
       expect(find.text(state.tr('myCarWashes')), findsNothing);
       expect(find.text(state.tr('myCarpetCleanings')), findsNothing);
+      await tester.tap(find.text(state.tr('carWashingService')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('washMyCarTitle')), findsOneWidget);
+      expect(find.text(state.tr('myCarWashes')), findsNothing);
+      expect(find.text(state.tr('myCarpetCleanings')), findsNothing);
 
       // Verify NewBookingScreen automatically adds delivery fee for VIP Driver
       await state.updateDeliveryAddonFee(isCarpet: false, mode: ServiceType.valetPickUp, fee: 250.0);
@@ -155,6 +160,7 @@ void main() {
         AppStateProvider(
           notifier: state,
           child: const MaterialApp(
+            key: ValueKey('new-booking-screen'),
             home: NewBookingScreen(
               initialServiceType: ServiceType.valetPickUp,
             ),

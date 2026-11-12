@@ -22,7 +22,7 @@ void main() {
       await state.loadData();
     });
 
-    testWidgets('CustomerHomeScreen strictly separates Car Wash and Carpet Cleaning divisions without cross-leakage', (tester) async {
+    testWidgets('CustomerHomeScreen displays only division selector first, then opens Wash My Car or Wash My Carpet screen', (tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -37,15 +37,29 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Car Wash active: only ultra-clean Option 1 Car Wash hub (3 delivery tiles live cleanly inside Step 2)
+      // Step 0: ONLY "What would you like to wash today?" with Car & Carpet tabs
       expect(find.text('What would you like to wash today?'), findsOneWidget);
+      expect(find.text(state.tr('carWashingService')), findsOneWidget);
+      expect(find.text(state.tr('carpetWashingService')), findsOneWidget);
+      expect(find.text('Wash My Car'), findsNothing);
+      expect(find.text('Wash My Carpet'), findsNothing);
+      expect(find.text(state.tr('stationBaysTitle')), findsNothing);
+      expect(find.text(state.tr('trackMyCar')), findsNothing);
+
+      // Tap Car Washing Service -> navigates to Wash My Car screen
+      await tester.tap(find.text(state.tr('carWashingService')));
+      await tester.pumpAndSettle();
       expect(find.text('Wash My Car'), findsOneWidget);
       expect(find.text('Prices are negotiable'), findsOneWidget);
       expect(find.text(state.tr('chooseDeliveryQuick')), findsNothing);
       expect(find.text('Wash My Carpet'), findsNothing);
       expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsNothing);
 
-      // Switch to Carpet Washing Service tab: only clean Carpet hub, zero Car Wash or home delivery clutter
+      // Navigate back -> tap Carpet Washing Service -> navigates to Wash My Carpet screen
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('What would you like to wash today?'), findsOneWidget);
+
       await tester.tap(find.text(state.tr('carpetWashingService')));
       await tester.pumpAndSettle();
       expect(find.text('Wash My Carpet'), findsOneWidget);
