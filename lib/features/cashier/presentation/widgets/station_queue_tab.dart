@@ -494,22 +494,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
                   ),
                 ),
-              if (b.isCarpet && _isWaiting(b))
-                OutlinedButton.icon(
-                  onPressed: () => _sendCarpetIntakeSms(context, state, b),
-                  icon: const Icon(Icons.sms_rounded, size: 14, color: Color(0xFF7C3AED)),
-                  label: Text(
-                    state.tr('sendCarpetIntakeSms'),
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF7C3AED)),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF7C3AED)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
-                  ),
-                ),
               if (widget.isManager &&
                   !_isOnlineWaiting(b) &&
                   b.status != WashStatus.completed &&
@@ -796,25 +780,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
     );
   }
 
-  Future<void> _sendCarpetIntakeSms(BuildContext context, dynamic state, WashBooking b) async {
-    await state.sendCarpetRegistrationSms(b);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.tr('carpetIntakeSmsSent')),
-          backgroundColor: const Color(0xFF7C3AED),
-          action: SnackBarAction(
-            label: state.tr('copySms'),
-            textColor: Colors.amberAccent,
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: state.getCarpetRegistrationSmsText(b)));
-            },
-          ),
-        ),
-      );
-    }
-  }
-
   Future<void> _advanceBookingStatus(
     BuildContext context,
     WashBooking booking, {
@@ -827,7 +792,15 @@ class _StationQueueTabState extends State<StationQueueTab> {
             : WashDispatcher.nextStatus(booking.status));
     if (next == null) return;
 
-    await state.updateWashStatus(booking.id, next);
+    final isOnlineArrivalApproval = targetStatus == WashStatus.confirmed && booking.isOnlineBooking;
+    final isCarpetArrivalSms = isOnlineArrivalApproval && booking.isCarpet;
+    final sendsSms = next == WashStatus.completed || isCarpetArrivalSms;
+
+    if (isOnlineArrivalApproval) {
+      await state.approveOnlineBookingArrival(booking.id);
+    } else {
+      await state.updateWashStatus(booking.id, next);
+    }
     if (next == WashStatus.completed) {
       await state.sendCustomerCompletionSms(booking);
     }
@@ -836,18 +809,24 @@ class _StationQueueTabState extends State<StationQueueTab> {
       final nextLabel = next.localizedName(state.currentLang);
       final msg = next == WashStatus.completed && booking.isCarpet
           ? '${booking.licensePlate}: ${state.tr("carpetCompletionSmsSent")}'
-          : '${booking.licensePlate}: $nextLabel';
+          : isCarpetArrivalSms
+              ? '${booking.licensePlate}: ${state.tr("carpetIntakeSmsSent")}'
+              : '${booking.licensePlate}: $nextLabel';
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(seconds: 5),
-          backgroundColor: next == WashStatus.completed ? AppColors.cashGreen : next.color,
-          action: next == WashStatus.completed
+          backgroundColor: isCarpetArrivalSms
+              ? const Color(0xFF7C3AED)
+              : (next == WashStatus.completed ? AppColors.cashGreen : next.color),
+          action: sendsSms
               ? SnackBarAction(
                   label: state.tr('copySms'),
                   textColor: Colors.amberAccent,
                   onPressed: () {
-                    final sms = state.getCustomerCompletionSmsText(booking);
+                    final sms = isCarpetArrivalSms
+                        ? state.getCarpetRegistrationSmsText(booking)
+                        : state.getCustomerCompletionSmsText(booking);
                     Clipboard.setData(ClipboardData(text: sms));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -861,7 +840,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
           content: Row(
             children: [
               Icon(
-                next == WashStatus.completed ? Icons.sms_rounded : Icons.check_circle_outline_rounded,
+                sendsSms ? Icons.sms_rounded : Icons.check_circle_outline_rounded,
                 color: Colors.white,
                 size: 18,
               ),

@@ -3550,11 +3550,6 @@ class AppStrings {
       AppLanguage.om: 'Ergaan xumura dhiqa karpeetii maamilaaf ergameera!',
       AppLanguage.am: 'የምንጣፍ እጥበት መጠናቀቅ ኤስኤምኤስ ለደንበኛው ተልኳል!',
     },
-    'sendCarpetIntakeSms': {
-      AppLanguage.en: 'Send Tag SMS',
-      AppLanguage.om: 'Ergaa Koodii Ergi',
-      AppLanguage.am: 'የመለያ ኤስኤምኤስ ላክ',
-    },
     'sendCarpetCompletionSms': {
       AppLanguage.en: 'Send Completion SMS',
       AppLanguage.om: 'Ergaa Xumuraa Ergi',

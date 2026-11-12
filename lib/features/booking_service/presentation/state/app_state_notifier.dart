@@ -2478,9 +2478,17 @@ class AppStateNotifier extends ChangeNotifier {
     return true;
   }
 
-  /// Cashier or Operational Manager approves online booking arrival at station
+  /// Cashier or Operational Manager approves online booking arrival at station.
+  /// Carpet arrivals automatically dispatch their registration tag SMS immediately.
   Future<void> approveOnlineBookingArrival(String bookingId) async {
+    final idxBefore = _bookings.indexWhere((b) => b.id == bookingId);
+    final before = idxBefore >= 0 ? _bookings[idxBefore] : null;
     await updateWashStatus(bookingId, WashStatus.confirmed);
+    final idxAfter = _bookings.indexWhere((b) => b.id == bookingId);
+    final booking = idxAfter >= 0 ? _bookings[idxAfter] : before;
+    if (booking != null && booking.isCarpet) {
+      await sendCarpetRegistrationSms(booking);
+    }
   }
 
   /// Cashier hands over an unfinished arrived vehicle to Operational Manager for Night Shift continuation

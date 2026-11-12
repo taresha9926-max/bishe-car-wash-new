@@ -322,10 +322,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         ),
         const SizedBox(height: 12),
 
+        // Car Wash Delivery Add-on Fees (Once Per Order) always visible in Car Wash Tariffs
+        _buildDeliveryAddonsCard(context, state, isCarpet: false),
+
         if (_showCarWashPackages) ...[
           // Package Presets view
-          _buildDeliveryAddonsCard(context, state, isCarpet: false),
-        ...state.packages.map((pkg) => _buildPackageCard(context, state, pkg, state.packages)),
+          ...state.packages.map((pkg) => _buildPackageCard(context, state, pkg, state.packages)),
         ] else ...[
           // Atomic Car Wash Detailing Services List
           if (filtered.isEmpty)

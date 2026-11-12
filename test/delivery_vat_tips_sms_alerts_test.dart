@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bishe_car_wash/features/admin/presentation/screens/pricing_management_screen.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -7,6 +9,7 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/service_ty
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
+import 'package:bishe_car_wash/features/cashier/presentation/widgets/station_queue_tab.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
 
@@ -169,6 +172,90 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.textContaining('250'), findsWidgets);
+    });
+
+    testWidgets('Admin PricingManagementScreen shows Car Wash delivery add-on fees immediately on default tab', (tester) async {
+      await state.updateDeliveryAddonFee(isCarpet: false, mode: ServiceType.valetPickUp, fee: 320.0);
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: const MaterialApp(home: PricingManagementScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(state.tr('carWashDeliveryFeesTitle')), findsOneWidget);
+      expect(find.text(state.tr('oncePerOrderTag')), findsOneWidget);
+      expect(find.textContaining('320'), findsWidgets);
+    });
+
+    testWidgets('Carpet Approve & Arrived immediately sends customer tag SMS and hides manual Send Tag SMS button', (tester) async {
+      String? launchedUrl;
+      const urlChannel = MethodChannel('plugins.flutter.io/url_launcher');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(urlChannel, (call) async {
+        if (call.method == 'launch' || call.method == 'launchUrl') {
+          final args = call.arguments as Map?;
+          launchedUrl = args?['url']?.toString();
+          return true;
+        }
+        return false;
+      });
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async => null);
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(urlChannel, null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(SystemChannels.platform, null);
+      });
+
+      final onlineCarpet = await state.bookNewWash(
+        customerName: 'Bekele',
+        customerPhone: '0911554433',
+        serviceType: ServiceType.walkInStation,
+        carType: CarType.automobile,
+        licensePlate: 'CPT-777',
+        package: state.packages.first,
+        isCarpet: true,
+        carpetType: 'type_a',
+        carpetAreaSqMeters: 5.0,
+        carpetDimensions: '2m x 2.5m',
+        customTotalPrice: 600.0,
+        isPhoneBooking: false,
+      );
+
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: StationQueueTab(
+                  divisionQueue: [onlineCarpet],
+                  bay1: state.bays[0],
+                  bay2: state.bays[1],
+                  van: state.bays[2],
+                  isMobile: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Send Tag SMS'), findsNothing);
+      await tester.ensureVisible(find.text(state.tr('approveAndArrivedAction')));
+      await tester.tap(find.text(state.tr('approveAndArrivedAction')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(state.bookings.firstWhere((b) => b.id == onlineCarpet.id).status, WashStatus.confirmed);
+      expect(launchedUrl, isNotNull);
+      expect(launchedUrl!, startsWith('sms:0911554433?body='));
+      expect(launchedUrl!, contains('CPT-777'));
+      expect(find.textContaining(state.tr('carpetIntakeSmsSent')), findsOneWidget);
     });
   });
 }
