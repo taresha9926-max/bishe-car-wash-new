@@ -60476,9 +60476,9 @@ break
 case 1:return A.u(q,r)}})
 return A.v($async$AK,r)},
 a10(){var s=this.r
-if(s==="OM")return"\n\n\ud83d\udcf2 \ud83c\udf10 AJAJA TOORA INTERNEETII FI YAADAAF LINKII ARMAAN GADII TUQAA \ud83d\udc47\nhttps://bishecarwash.vercel.app"
-else if(s==="AM")return"\n\n\ud83d\udcf2 \ud83c\udf10 \u1208\u12a6\u1295\u120b\u12ed\u1295 \u1275\u12d5\u12db\u12dd \u12a5\u1293 \u12a0\u1235\u1270\u12eb\u12e8\u1275 \u12a8\u1273\u127d \u12eb\u1208\u12cd\u1295 \u120a\u1295\u12ad \u12ed\u132b\u1291 \ud83d\udc47\nhttps://bishecarwash.vercel.app"
-return"\n\n\ud83d\udcf2 \ud83c\udf10 TAP LINK BELOW TO BOOK ONLINE & SEND FEEDBACK \ud83d\udc47\nhttps://bishecarwash.vercel.app"},
+if(s==="OM")return"\n\nAJAJA ONLINE FI YAADA:\nhttps://bishecarwash.vercel.app"
+else if(s==="AM")return"\n\n\u12a6\u1295\u120b\u12ed\u1295 \u1275\u12d5\u12db\u12dd \u12a5\u1293 \u12a0\u1235\u1270\u12eb\u12e8\u1275:\nhttps://bishecarwash.vercel.app"
+return"\n\nBOOK ONLINE & FEEDBACK:\nhttps://bishecarwash.vercel.app"},
 Bi(a){var s,r,q,p,o,n,m=a.b
 m=m.length!==0?m:"Valued Customer"
 s=a.r
@@ -60489,9 +60489,9 @@ p=q!=null&&q.length!==0?" ("+q+")":""
 o="ETB "+B.j.S(a.gde(),2)
 n=this.a10()
 q=this.r
-if(q==="OM")return"Kabajamaa "+m+", ajajni qulqulleessuu kiliimii keessanii (Koodii Galmee: "+s+", "+r+p+") galmaa'eera. Gatiin waliigalaa: "+o+". Yommuu xumuramu isin beeksifna. - Bishe Service"+n
-else if(q==="AM")return"\u12cd\u12f5 "+m+"\u1363 \u12e8\u12ab\u122d\u1354\u1275 \u121b\u1320\u1262\u12eb \u1275\u12d5\u12db\u12dd\u12ce (\u1218\u1208\u12eb: "+s+"\u1363 "+r+p+") \u1270\u1218\u12dd\u130d\u1267\u120d\u1362 \u1320\u1245\u120b\u120b \u12cb\u130b: "+o+"\u1362 \u1232\u1320\u1293\u1240\u1245 \u12a5\u1293\u1233\u12cd\u1245\u12ce\u1273\u1208\u1295\u1362 - \u1262\u123c"+n
-return"Dear "+m+", your carpet cleaning order is registered (Tag: "+s+", "+r+p+"). Estimated Total: "+o+". We will notify you once ready. - Bishe Carpet Cleaning Service"+n},
+if(q==="OM")return"Kabajamaa "+m+", kiliimii ("+s+", "+r+p+") galmaa'eera. Gatiin: "+o+"."+n
+else if(q==="AM")return"\u12cd\u12f5 "+m+"\u1363 \u12e8\u12ab\u122d\u1354\u1275 ("+s+"\u1363 "+r+p+") \u1270\u1218\u12dd\u130d\u1267\u120d\u1362 \u12cb\u130b: "+o+"\u1362"+n
+return"Dear "+m+", carpet ("+s+", "+r+p+") registered. Total: "+o+"."+n},
 qp(a){return this.aaI(a)},
 aaI(a){var s=0,r=A.w(t.y),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f,e,d
 var $async$qp=A.x(function(b,c){if(b===1){o.push(c)
@@ -60546,8 +60546,8 @@ break
 case 1:return A.u(q,r)
 case 2:return A.t(o.at(-1),r)}})
 return A.v($async$qp,r)},
-SM(a){var s,r,q,p,o,n,m,l,k=" kaffaluun fudhadhaa. Galatoomaa!",j=a.b
-j=j.length!==0?j:"Valued Customer"
+SM(a){var s,r,q,p,o,n,m,l,k=a.b
+k=k.length!==0?k:"Valued Customer"
 s="ETB "+B.j.S(a.gde(),2)
 r=this.a10()
 if(a.cy){q=a.r
@@ -60556,14 +60556,14 @@ p=a.db==="type_b"?"Deep Clean (Type B)":"Standard Clean (Type A)"
 o=a.dy
 n=o!=null&&o.length!==0?" ("+o+")":""
 o=this.r
-if(o==="OM")return"Kabajamaa "+j+", dhiqamuun kiliimii keessanii (Koodii: "+q+", "+p+n+") guutummaatti xumuramee qophii ta'eera. Maaloo "+s+k+r
-else if(o==="AM")return"\u12cd\u12f5 "+j+"\u1363 \u12e8\u12ab\u122d\u1354\u1275 \u121b\u1320\u1262\u12eb \u12a0\u1308\u120d\u130d\u120e\u1275\u12ce (\u1218\u1208\u12eb: "+q+"\u1363 "+p+n+") \u1270\u1320\u1293\u1246 \u12dd\u130d\u1301 \u1206\u1297\u120d\u1362 \u12a5\u1263\u12ad\u12ce "+s+" \u12a8\u134d\u1208\u12cd \u12ed\u1228\u12a8\u1261\u1362 \u12a5\u1293\u1218\u1230\u130d\u1293\u1208\u1295!"+r
-return"Dear "+j+", your carpet cleaning (Tag: "+q+", "+p+n+") is completed and ready for pickup. Please pay "+s+" upon collection. Thank you for choosing Bishe!"+r}m=a.gaaM()
+if(o==="OM")return"Kabajamaa "+k+", kiliimii ("+q+", "+p+n+") guutummaatti xumuramee qophiida. Maaloo "+s+" kaffalaa."+r
+else if(o==="AM")return"\u12cd\u12f5 "+k+"\u1363 \u12e8\u12ab\u122d\u1354\u1275 ("+q+"\u1363 "+p+n+") \u1270\u1320\u1293\u1246 \u12dd\u130d\u1301 \u1206\u1297\u120d\u1362 \u12a5\u1263\u12ad\u12ce "+s+" \u12ed\u12ad\u1348\u1209\u1362"+r
+return"Dear "+k+", carpet ("+q+", "+p+n+") is completed and ready. Pay "+s+"."+r}m=a.gaaM()
 l=a.r
 o=this.r
-if(o==="OM")return"Kabajamaa "+j+", tajaajilli dhiqaa konkolaataa keessanii ("+m+", Gabatee: "+l+") xumuramee qophii ta'eera. Maaloo "+s+k+r
-else if(o==="AM")return"\u12cd\u12f5 "+j+"\u1363 \u12e8\u1218\u12aa\u1293 \u121b\u1320\u1265 \u12a0\u1308\u120d\u130d\u120e\u1275\u12ce ("+m+"\u1363 \u1273\u122d\u130b: "+l+") \u1270\u1320\u1293\u1246 \u12dd\u130d\u1301 \u1290\u12cd\u1362 \u12a5\u1263\u12ad\u12ce "+s+" \u12a8\u134d\u1208\u12cd \u1218\u12aa\u1293\u12ce\u1295 \u12ed\u1228\u12a8\u1261\u1362 \u12a5\u1293\u1218\u1230\u130d\u1293\u1208\u1295!"+r
-return"Dear "+j+", your car wash ("+m+") for vehicle "+l+" is complete and ready for pickup. Please pay "+s+" upon collection. Thank you for choosing Bishe Car Wash!"+r},
+if(o==="OM")return"Kabajamaa "+k+", dhiqaan ("+m+", "+l+") xumurameera. Maaloo "+s+" kaffalaa."+r
+else if(o==="AM")return"\u12cd\u12f5 "+k+"\u1363 \u1218\u12aa\u1293 ("+m+"\u1363 "+l+") \u1270\u1320\u1293\u124b\u120d\u1362 \u12a5\u1263\u12ad\u12ce "+s+" \u12ed\u12ad\u1348\u1209\u1362"+r
+return"Dear "+k+", car wash ("+m+", "+l+") is ready. Pay "+s+"."+r},
 wt(a){return this.aaJ(a)},
 aaJ(a){var s=0,r=A.w(t.y),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f,e,d
 var $async$wt=A.x(function(b,c){if(b===1){o.push(c)

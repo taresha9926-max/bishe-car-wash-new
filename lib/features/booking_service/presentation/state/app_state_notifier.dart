@@ -2360,11 +2360,11 @@ class AppStateNotifier extends ChangeNotifier {
 
   String _smsWebLinkFooter() {
     if (currentLang == 'OM') {
-      return '\n\n📲 🌐 AJAJA TOORA INTERNEETII FI YAADAAF LINKII ARMAAN GADII TUQAA 👇\n$webAppUrl';
+      return '\n\nAJAJA ONLINE FI YAADA:\n$webAppUrl';
     } else if (currentLang == 'AM') {
-      return '\n\n📲 🌐 ለኦንላይን ትዕዛዝ እና አስተያየት ከታች ያለውን ሊንክ ይጫኑ 👇\n$webAppUrl';
+      return '\n\nኦንላይን ትዕዛዝ እና አስተያየት:\n$webAppUrl';
     }
-    return '\n\n📲 🌐 TAP LINK BELOW TO BOOK ONLINE & SEND FEEDBACK 👇\n$webAppUrl';
+    return '\n\nBOOK ONLINE & FEEDBACK:\n$webAppUrl';
   }
 
   /// Registration & Intake SMS notifying customer of their carpet tracking tag
@@ -2377,12 +2377,12 @@ class AppStateNotifier extends ChangeNotifier {
     final footer = _smsWebLinkFooter();
 
     if (currentLang == 'OM') {
-      return 'Kabajamaa $customerName, ajajni qulqulleessuu kiliimii keessanii (Koodii Galmee: $tag, $cType$dims) galmaa\'eera. Gatiin waliigalaa: $amountStr. Yommuu xumuramu isin beeksifna. - Bishe Service$footer';
+      return 'Kabajamaa $customerName, kiliimii ($tag, $cType$dims) galmaa\'eera. Gatiin: $amountStr.$footer';
     } else if (currentLang == 'AM') {
-      return 'ውድ $customerName፣ የካርፔት ማጠቢያ ትዕዛዝዎ (መለያ: $tag፣ $cType$dims) ተመዝግቧል። ጠቅላላ ዋጋ: $amountStr። ሲጠናቀቅ እናሳውቅዎታለን። - ቢሼ$footer';
+      return 'ውድ $customerName፣ የካርፔት ($tag፣ $cType$dims) ተመዝግቧል። ዋጋ: $amountStr።$footer';
     }
 
-    return 'Dear $customerName, your carpet cleaning order is registered (Tag: $tag, $cType$dims). Estimated Total: $amountStr. We will notify you once ready. - Bishe Carpet Cleaning Service$footer';
+    return 'Dear $customerName, carpet ($tag, $cType$dims) registered. Total: $amountStr.$footer';
   }
 
   /// Dispatches intake/registration SMS to customer with carpet tag number
@@ -2427,23 +2427,23 @@ class AppStateNotifier extends ChangeNotifier {
       final dims = booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? ' (${booking.carpetDimensions})' : '';
 
       if (currentLang == 'OM') {
-        return 'Kabajamaa $customerName, dhiqamuun kiliimii keessanii (Koodii: $tag, $cType$dims) guutummaatti xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Galatoomaa!$footer';
+        return 'Kabajamaa $customerName, kiliimii ($tag, $cType$dims) guutummaatti xumuramee qophiida. Maaloo $amountStr kaffalaa.$footer';
       } else if (currentLang == 'AM') {
-        return 'ውድ $customerName፣ የካርፔት ማጠቢያ አገልግሎትዎ (መለያ: $tag፣ $cType$dims) ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው ይረከቡ። እናመሰግናለን!$footer';
+        return 'ውድ $customerName፣ የካርፔት ($tag፣ $cType$dims) ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ይክፈሉ።$footer';
       }
 
-      return 'Dear $customerName, your carpet cleaning (Tag: $tag, $cType$dims) is completed and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe!$footer';
+      return 'Dear $customerName, carpet ($tag, $cType$dims) is completed and ready. Pay $amountStr.$footer';
     }
     final pkgName = booking.serviceDisplayName;
     final plate = booking.licensePlate;
 
     if (currentLang == 'OM') {
-      return 'Kabajamaa $customerName, tajaajilli dhiqaa konkolaataa keessanii ($pkgName, Gabatee: $plate) xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Galatoomaa!$footer';
+      return 'Kabajamaa $customerName, dhiqaan ($pkgName, $plate) xumurameera. Maaloo $amountStr kaffalaa.$footer';
     } else if (currentLang == 'AM') {
-      return 'ውድ $customerName፣ የመኪና ማጠብ አገልግሎትዎ ($pkgName፣ ታርጋ: $plate) ተጠናቆ ዝግጁ ነው። እባክዎ $amountStr ከፍለው መኪናዎን ይረከቡ። እናመሰግናለን!$footer';
+      return 'ውድ $customerName፣ መኪና ($pkgName፣ $plate) ተጠናቋል። እባክዎ $amountStr ይክፈሉ።$footer';
     }
 
-    return 'Dear $customerName, your car wash ($pkgName) for vehicle $plate is complete and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe Car Wash!$footer';
+    return 'Dear $customerName, car wash ($pkgName, $plate) is ready. Pay $amountStr.$footer';
   }
 
   /// Dispatches completion SMS to customer using cashier's personal device SIM / SMS app

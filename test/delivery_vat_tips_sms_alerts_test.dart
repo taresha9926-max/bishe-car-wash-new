@@ -106,8 +106,13 @@ void main() {
 
       for (final lang in ['EN', 'OM', 'AM']) {
         state.setLanguage(lang);
-        expect(state.getCustomerCompletionSmsText(b), endsWith('\nhttps://bishecarwash.vercel.app'));
-        expect(state.getCarpetRegistrationSmsText(b), endsWith('\nhttps://bishecarwash.vercel.app'));
+        final completionSms = state.getCustomerCompletionSmsText(b);
+        final carpetSms = state.getCarpetRegistrationSmsText(b);
+        expect(completionSms, endsWith('\nhttps://bishecarwash.vercel.app'));
+        expect(carpetSms, endsWith('\nhttps://bishecarwash.vercel.app'));
+        final footer = completionSms.substring(completionSms.indexOf('\n\n'));
+        expect(footer.length, lessThanOrEqualTo(70));
+        expect(RegExp(r'[\uD800-\uDFFF]').hasMatch(completionSms), isFalse);
       }
     });
 
