@@ -1098,25 +1098,30 @@ class AppStrings {
       AppLanguage.om: 'Appii fayyadamuun yoo isinitti ulfaate bilbilaa — sekoondii 30 keessatti isiniif ajajna!',
       AppLanguage.am: 'መተግበሪያውን መጠቀም ካስቸገረዎት ይደውሉ — በ30 ሰከንድ እንመዘግብዎታለን!',
     },
-    'step1CarInstruction': {
-      AppLanguage.en: 'Step 1 of 3: Pick vehicle size & wash service',
-      AppLanguage.om: 'Tarkaanfii 1/3: Gosa konkolaataa fi tajaajila filadhaa',
-      AppLanguage.am: 'ደረጃ 1 ከ 3፡ የመኪናውን አይነት እና አገልግሎት ይምረጡ',
+    'step1ModeInstruction': {
+      AppLanguage.en: 'Step 1 of 3: How should we serve you?',
+      AppLanguage.om: 'Tarkaanfii 1/3: Akkamitti isin tajaajillu?',
+      AppLanguage.am: 'ደረጃ 1 ከ 3፡ አገልግሎቱን እንዴት ማግኘት ይፈልጋሉ?',
     },
-    'step1CarpetInstruction': {
-      AppLanguage.en: 'Step 1 of 3: Pick carpet type & size',
-      AppLanguage.om: 'Tarkaanfii 1/3: Gosa karpeetii fi bal\'ina filadhaa',
-      AppLanguage.am: 'ደረጃ 1 ከ 3፡ የምንጣፍ አይነት እና መጠን ይምረጡ',
+    'step2CarInstruction': {
+      AppLanguage.en: 'Step 2 of 3: Pick vehicle size & wash service',
+      AppLanguage.om: 'Tarkaanfii 2/3: Gosa konkolaataa fi tajaajila filadhaa',
+      AppLanguage.am: 'ደረጃ 2 ከ 3፡ የመኪናውን አይነት እና አገልግሎት ይምረጡ',
     },
-    'step2ModeInstruction': {
-      AppLanguage.en: 'Step 2 of 3: How should we serve you?',
-      AppLanguage.om: 'Tarkaanfii 2/3: Akkamitti isin tajaajillu?',
-      AppLanguage.am: 'ደረጃ 2 ከ 3፡ አገልግሎቱን እንዴት ማግኘት ይፈልጋሉ?',
+    'step2CarpetInstruction': {
+      AppLanguage.en: 'Step 2 of 3: Pick carpet type & size',
+      AppLanguage.om: 'Tarkaanfii 2/3: Gosa karpeetii fi bal\'ina filadhaa',
+      AppLanguage.am: 'ደረጃ 2 ከ 3፡ የምንጣፍ አይነት እና መጠን ይምረጡ',
     },
     'step3DetailsInstruction': {
-      AppLanguage.en: 'Step 3 of 3: Your name & phone to confirm',
-      AppLanguage.om: 'Tarkaanfii 3/3: Maqaa fi bilbila keessan galchaa',
-      AppLanguage.am: 'ደረጃ 3 ከ 3፡ ስም እና ስልክ ቁጥርዎን አስገብተው ያረጋግጡ',
+      AppLanguage.en: 'Step 3 of 3: Your name, phone and plate number',
+      AppLanguage.om: 'Tarkaanfii 3/3: Maqaa, bilbila fi lakkoofsa taargaa keessan',
+      AppLanguage.am: 'ደረጃ 3 ከ 3፡ ስም፣ ስልክ እና የሰሌዳ ቁጥርዎን ያስገቡ',
+    },
+    'step3CarpetDetailsInstruction': {
+      AppLanguage.en: 'Step 3 of 3: Your name, phone & carpet tag',
+      AppLanguage.om: 'Tarkaanfii 3/3: Maqaa, bilbila fi koodii karpeetii keessan',
+      AppLanguage.am: 'ደረጃ 3 ከ 3፡ ስም፣ ስልክ እና የምንጣፍ መለያ ቁጥርዎን ያስገቡ',
     },
     'nextStep': {
       AppLanguage.en: 'Next Step',

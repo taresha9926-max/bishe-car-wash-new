@@ -18,8 +18,8 @@ import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable
 import 'package:bishe_car_wash/features/customer/presentation/widgets/station_type_card.dart';
 
 /// Guided 3-step customer booking wizard:
-/// Step 1: Pick vehicle/carpet & services (with standard ETB prices + "Prices are negotiable")
-/// Step 2: Pick service delivery mode (+ location if Pick-up / Mobile Van)
+/// Step 1: Pick service delivery mode (+ location if Pick-up / Mobile Van)
+/// Step 2: Pick vehicle/carpet & services (with standard ETB prices + "Prices are negotiable")
 /// Step 3: Enter Name, Phone & Plate/Tag -> Confirm
 class NewBookingScreen extends StatefulWidget {
   final ServiceType? initialServiceType;
@@ -140,11 +140,13 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   }
 
   void _advanceFromStep1(dynamic state) {
-    if (!_isCarpet && _useCustomChecklist && _selectedServiceIds.isEmpty) {
+    if (_selectedServiceType.requiresLocation &&
+        _addressController.text.trim().isEmpty &&
+        _gpsController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.orange.shade800,
-          content: Text(state.tr('selectAtLeastOneService')),
+          content: Text(state.tr('deliveryModeRequiredAddress')),
         ),
       );
       return;
@@ -153,13 +155,11 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   }
 
   void _advanceFromStep2(dynamic state) {
-    if (_selectedServiceType.requiresLocation &&
-        _addressController.text.trim().isEmpty &&
-        _gpsController.text.trim().isEmpty) {
+    if (!_isCarpet && _useCustomChecklist && _selectedServiceIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.orange.shade800,
-          content: Text(state.tr('deliveryModeRequiredAddress')),
+          content: Text(state.tr('selectAtLeastOneService')),
         ),
       );
       return;
@@ -198,8 +198,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   _buildStepProgressHeader(state),
                   const SizedBox(height: 16),
 
-                  if (_currentStep == 1) _buildStep1ServiceSelection(context, state, effectivePackage, currentPrice),
-                  if (_currentStep == 2) _buildStep2ServiceMode(context, state),
+                  if (_currentStep == 1) _buildStep1ServiceMode(context, state),
+                  if (_currentStep == 2) _buildStep2ServiceSelection(context, state, effectivePackage, currentPrice),
                   if (_currentStep == 3) _buildStep3CustomerAndSummary(context, state, effectivePackage, currentPrice, grandTotal),
                   const SizedBox(height: 28),
                 ],
@@ -214,11 +214,11 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   Widget _buildStepProgressHeader(dynamic state) {
     String title;
     if (_currentStep == 1) {
-      title = state.tr(_isCarpet ? 'step1CarpetInstruction' : 'step1CarInstruction');
+      title = state.tr('step1ModeInstruction');
     } else if (_currentStep == 2) {
-      title = state.tr('step2ModeInstruction');
+      title = state.tr(_isCarpet ? 'step2CarpetInstruction' : 'step2CarInstruction');
     } else {
-      title = state.tr('step3DetailsInstruction');
+      title = state.tr(_isCarpet ? 'step3CarpetDetailsInstruction' : 'step3DetailsInstruction');
     }
 
     return Container(
@@ -257,7 +257,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     );
   }
 
-  Widget _buildStep1ServiceSelection(
+  Widget _buildStep2ServiceSelection(
     BuildContext context,
     dynamic state,
     WashPackage? effectivePackage,
@@ -350,10 +350,27 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         ),
         const SizedBox(height: 16),
 
-        CustomButton(
-          text: state.tr('nextStep'),
-          icon: Icons.arrow_forward_rounded,
-          onPressed: () => _advanceFromStep1(state),
+        Row(
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => _setStep(1),
+              icon: const Icon(Icons.arrow_back_rounded, size: 17),
+              label: Text(state.tr('backStep'), style: const TextStyle(fontWeight: FontWeight.w700)),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: CustomButton(
+                text: state.tr('nextStep'),
+                icon: Icons.arrow_forward_rounded,
+                onPressed: () => _advanceFromStep2(state),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -697,7 +714,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     );
   }
 
-  Widget _buildStep2ServiceMode(BuildContext context, dynamic state) {
+  Widget _buildStep1ServiceMode(BuildContext context, dynamic state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -739,27 +756,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         ],
         const SizedBox(height: 20),
 
-        Row(
-          children: [
-            OutlinedButton.icon(
-              onPressed: () => _setStep(1),
-              icon: const Icon(Icons.arrow_back_rounded, size: 17),
-              label: Text(state.tr('backStep'), style: const TextStyle(fontWeight: FontWeight.w700)),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: CustomButton(
-                text: state.tr('nextStep'),
-                icon: Icons.arrow_forward_rounded,
-                onPressed: () => _advanceFromStep2(state),
-              ),
-            ),
-          ],
+        CustomButton(
+          text: state.tr('nextStep'),
+          icon: Icons.arrow_forward_rounded,
+          onPressed: () => _advanceFromStep1(state),
         ),
       ],
     );

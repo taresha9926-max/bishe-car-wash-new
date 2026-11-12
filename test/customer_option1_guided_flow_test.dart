@@ -57,7 +57,7 @@ void main() {
       tester.view.reset();
     });
 
-    testWidgets('NewBookingScreen navigates Step 1 -> Step 2 -> Step 3 cleanly with negotiable badge', (tester) async {
+    testWidgets('NewBookingScreen navigates Step 1 -> Step 2 -> Step 3 cleanly for Car Wash and Carpet Washing', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -72,21 +72,49 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 1 of 3: Pick vehicle size & wash service'), findsOneWidget);
+      expect(find.text('Step 1 of 3: How should we serve you?'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Next Step'));
+      await tester.tap(find.text('Next Step'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Step 2 of 3: Pick vehicle size & wash service'), findsOneWidget);
       expect(find.text('Prices are negotiable'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Next Step'));
       await tester.tap(find.text('Next Step'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 2 of 3: How should we serve you?'), findsOneWidget);
+      expect(find.text('Step 3 of 3: Your name, phone and plate number'), findsOneWidget);
+      expect(find.text('Prices are negotiable'), findsOneWidget);
+
+      // Same Step 1 -> Step 2 -> Step 3 sequence applies to Carpet Washing Service
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(
+            key: const ValueKey('carpet-guided-flow'),
+            theme: AppTheme.lightTheme,
+            home: const NewBookingScreen(isCarpet: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Step 1 of 3: How should we serve you?'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Next Step'));
       await tester.tap(find.text('Next Step'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 3 of 3: Your name & phone to confirm'), findsOneWidget);
+      expect(find.text('Step 2 of 3: Pick carpet type & size'), findsOneWidget);
       expect(find.text('Prices are negotiable'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Next Step'));
+      await tester.tap(find.text('Next Step'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Step 3 of 3: Your name, phone & carpet tag'), findsOneWidget);
       tester.view.reset();
     });
 
@@ -134,9 +162,11 @@ void main() {
         expect(state.tr('whatToWashToday'), isNotEmpty);
         expect(state.tr('washMyCarTitle'), isNotEmpty);
         expect(state.tr('washMyCarpetTitle'), isNotEmpty);
-        expect(state.tr('step1CarInstruction'), isNotEmpty);
-        expect(state.tr('step2ModeInstruction'), isNotEmpty);
+        expect(state.tr('step1ModeInstruction'), isNotEmpty);
+        expect(state.tr('step2CarInstruction'), isNotEmpty);
+        expect(state.tr('step2CarpetInstruction'), isNotEmpty);
         expect(state.tr('step3DetailsInstruction'), isNotEmpty);
+        expect(state.tr('step3CarpetDetailsInstruction'), isNotEmpty);
         expect(state.tr('finalNegotiatedPriceEtb'), isNotEmpty);
       }
     });

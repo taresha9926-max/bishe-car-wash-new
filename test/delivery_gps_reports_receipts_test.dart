@@ -35,7 +35,7 @@ void main() {
   });
 
   group('Service Delivery Options, Exact Home Location & Live GPS', () {
-    testWidgets('CustomerHomeScreen stays clean 2-button Option 1 hub and NewBookingScreen Step 2 presents all 3 isolated delivery options', (tester) async {
+    testWidgets('CustomerHomeScreen stays clean 2-button Option 1 hub and NewBookingScreen Step 1 presents all 3 isolated delivery options', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -48,16 +48,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Home stays clean Option 1 hub (delivery choices moved purely into Step 2 of booking)
+      // Home stays clean Option 1 hub (delivery choices live cleanly inside Step 1 of booking)
       expect(find.text(state.tr('washMyCarTitle')), findsOneWidget);
       expect(find.text(state.tr('chooseDeliveryQuick')), findsNothing);
       expect(find.text(state.tr('washMyCarpetTitle')), findsNothing);
 
-      // Tap Car CTA -> Step 1 -> Step 2 shows all 3 Car delivery modes
+      // Tap Car CTA -> Step 1 shows all 3 Car delivery modes
       await tester.tap(find.text(state.tr('startCarBooking')));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text(state.tr('nextStep')));
-      await tester.tap(find.text(state.tr('nextStep')));
       await tester.pumpAndSettle();
 
       expect(find.text(state.tr('driveInStation')), findsOneWidget);
@@ -65,20 +62,17 @@ void main() {
       expect(find.text(state.tr('serviceValetPickUp')), findsOneWidget);
       expect(find.text(state.tr('carpetStationService')), findsNothing);
 
-      // Carpet guided flow Step 2 shows all 3 Carpet delivery modes with zero Car text
+      // Carpet guided flow Step 1 shows all 3 Carpet delivery modes with zero Car text
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,
           child: MaterialApp(
-            key: const ValueKey('carpet-step2-app'),
+            key: const ValueKey('carpet-step1-app'),
             theme: AppTheme.lightTheme,
             home: const NewBookingScreen(isCarpet: true),
           ),
         ),
       );
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text(state.tr('nextStep')));
-      await tester.tap(find.text(state.tr('nextStep')));
       await tester.pumpAndSettle();
 
       expect(find.text(state.tr('carpetStationService')), findsOneWidget);
@@ -123,7 +117,7 @@ void main() {
       expect(find.byType(ServiceLocationPickerCard), findsOneWidget);
     });
 
-    testWidgets('NewBookingScreen Step 2 displays ServiceLocationPickerCard with Live GPS for VIP Driver', (tester) async {
+    testWidgets('NewBookingScreen Step 1 displays ServiceLocationPickerCard with Live GPS for VIP Driver', (tester) async {
       tester.view.physicalSize = const Size(440, 960);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -137,11 +131,6 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
-
-      // Advance from Step 1 -> Step 2
-      await tester.ensureVisible(find.text('Next Step'));
-      await tester.tap(find.text('Next Step'));
       await tester.pumpAndSettle();
 
       expect(find.text(state.tr('serviceValetPickUp')), findsAtLeastNWidgets(1));
