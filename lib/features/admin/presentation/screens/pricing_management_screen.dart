@@ -324,7 +324,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
 
         if (_showCarWashPackages) ...[
           // Package Presets view
-          ...state.packages.map((pkg) => _buildPackageCard(context, state, pkg, state.packages)),
+          _buildDeliveryAddonsCard(context, state, isCarpet: false),
+        ...state.packages.map((pkg) => _buildPackageCard(context, state, pkg, state.packages)),
         ] else ...[
           // Atomic Car Wash Detailing Services List
           if (filtered.isEmpty)
@@ -971,31 +972,9 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 state,
                 imageUrl: AutoCareAssets.carpetStationWashUrl,
                 title: state.tr('carpetTypeAStation'),
-                subtitle: state.tr('atStationService'),
+                subtitle: '${state.tr("atStationService")} • ${state.tr("baseStationRatePerSqm")}',
                 price: state.carpetTypeAStationPrice,
                 onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_a', mode: ServiceType.walkInStation, label: state.tr('carpetTypeAStation')),
-              ),
-              const Divider(height: 14),
-
-              _buildMatrixRow(
-                context,
-                state,
-                imageUrl: AutoCareAssets.carpetHomeWashUrl,
-                title: state.tr('carpetTypeAHome'),
-                subtitle: state.tr('atHomeService'),
-                price: state.carpetTypeAHomePrice,
-                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_a', mode: ServiceType.atHomeMobile, label: state.tr('carpetTypeAHome')),
-              ),
-              const Divider(height: 14),
-
-              _buildMatrixRow(
-                context,
-                state,
-                imageUrl: AutoCareAssets.carpetValetPickupUrl,
-                title: state.tr('carpetTypeAValet'),
-                subtitle: state.tr('valetPickupReturn'),
-                price: state.carpetTypeAValetPrice,
-                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_a', mode: ServiceType.valetPickUp, label: state.tr('carpetTypeAValet')),
               ),
               const SizedBox(height: 18),
 
@@ -1024,32 +1003,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 state,
                 imageUrl: AutoCareAssets.carpetStationWashUrl,
                 title: state.tr('carpetTypeBStation'),
-                subtitle: state.tr('atStationService'),
+                subtitle: '${state.tr("atStationService")} • ${state.tr("baseStationRatePerSqm")}',
                 price: state.carpetTypeBStationPrice,
                 onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_b', mode: ServiceType.walkInStation, label: state.tr('carpetTypeBStation')),
               ),
-              const Divider(height: 14),
-
-              _buildMatrixRow(
-                context,
-                state,
-                imageUrl: AutoCareAssets.carpetHomeWashUrl,
-                title: state.tr('carpetTypeBHome'),
-                subtitle: state.tr('atHomeService'),
-                price: state.carpetTypeBHomePrice,
-                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_b', mode: ServiceType.atHomeMobile, label: state.tr('carpetTypeBHome')),
-              ),
-              const Divider(height: 14),
-
-              _buildMatrixRow(
-                context,
-                state,
-                imageUrl: AutoCareAssets.carpetValetPickupUrl,
-                title: state.tr('carpetTypeBValet'),
-                subtitle: state.tr('valetPickupReturn'),
-                price: state.carpetTypeBValetPrice,
-                onEdit: () => _editCarpetMatrixDialog(context, state, type: 'type_b', mode: ServiceType.valetPickUp, label: state.tr('carpetTypeBValet')),
-              ),
+              const SizedBox(height: 18),
+              _buildDeliveryAddonsCard(context, state, isCarpet: true),
             ],
           ),
         ),
@@ -2255,6 +2214,138 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Updated $label price to $newPrice ETB/m²'),
+                    backgroundColor: AppColors.statusCompleted,
+                  ),
+                );
+              }
+            },
+            child: Text(state.tr('save')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeliveryAddonsCard(BuildContext context, dynamic state, {required bool isCarpet}) {
+    final valetFee = isCarpet ? state.carpetValetDeliveryFee as double : state.carValetDeliveryFee as double;
+    final homeFee = isCarpet ? state.carpetHomeDeliveryFee as double : state.carHomeDeliveryFee as double;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.local_shipping_outlined, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  isCarpet ? state.tr('carpetDeliveryFeesTitle') : state.tr('carWashDeliveryFeesTitle'),
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  state.tr('oncePerOrderTag'),
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+          _buildMatrixRow(
+            context,
+            state,
+            imageUrl: isCarpet ? AutoCareAssets.carpetValetPickupUrl : AutoCareAssets.valetDriverUrl,
+            title: isCarpet ? state.tr('carpetValetTitle') : state.tr('serviceValetPickUp'),
+            subtitle: '+ ${state.tr("oncePerOrderTag")}',
+            price: valetFee,
+            onEdit: () => _editDeliveryAddonDialog(
+              context,
+              state,
+              isCarpet: isCarpet,
+              mode: ServiceType.valetPickUp,
+              label: isCarpet ? state.tr('carpetValetTitle') : state.tr('serviceValetPickUp'),
+            ),
+          ),
+          const Divider(height: 14),
+          _buildMatrixRow(
+            context,
+            state,
+            imageUrl: isCarpet ? AutoCareAssets.carpetHomeWashUrl : AutoCareAssets.mobileVanUrl,
+            title: isCarpet ? state.tr('carpetHomeTitle') : state.tr('atHomeMobile'),
+            subtitle: '+ ${state.tr("oncePerOrderTag")}',
+            price: homeFee,
+            onEdit: () => _editDeliveryAddonDialog(
+              context,
+              state,
+              isCarpet: isCarpet,
+              mode: ServiceType.atHomeMobile,
+              label: isCarpet ? state.tr('carpetHomeTitle') : state.tr('atHomeMobile'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editDeliveryAddonDialog(
+    BuildContext context,
+    dynamic state, {
+    required bool isCarpet,
+    required ServiceType mode,
+    required String label,
+  }) {
+    final currentFee = state.getDeliveryAddonFee(mode, isCarpet: isCarpet) as double;
+    final controller = TextEditingController(text: currentFee.toStringAsFixed(0));
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('${state.tr("editPrice")}: $label'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: '${state.tr("priceInEtb")} (${state.tr("oncePerOrderTag")})',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(state.tr('cancel')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              final newFee = double.tryParse(controller.text.trim());
+              if (newFee != null && newFee >= 0) {
+                Navigator.pop(dialogCtx);
+                AppStateProvider.read(context).updateDeliveryAddonFee(
+                  isCarpet: isCarpet,
+                  mode: mode,
+                  fee: newFee,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Updated $label add-on fee to $newFee ETB'),
                     backgroundColor: AppColors.statusCompleted,
                   ),
                 );

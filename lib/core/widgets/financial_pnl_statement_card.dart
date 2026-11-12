@@ -10,6 +10,7 @@ class FinancialPnlStatementCard extends StatelessWidget {
   final bool isMobile;
   final String? periodSubtitle;
   final double totalRevenue;
+  final double vatDeducted;
   final double commissionPool;
   final double totalPettyCash;
   final double totalSupplies;
@@ -20,6 +21,7 @@ class FinancialPnlStatementCard extends StatelessWidget {
     required this.isMobile,
     this.periodSubtitle,
     required this.totalRevenue,
+    this.vatDeducted = 0.0,
     required this.commissionPool,
     required this.totalPettyCash,
     required this.totalSupplies,
@@ -27,8 +29,9 @@ class FinancialPnlStatementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final netAfterVat = totalRevenue - vatDeducted;
     final cogs = commissionPool + totalSupplies;
-    final grossProfit = totalRevenue - cogs;
+    final grossProfit = netAfterVat - cogs;
     final netOperatingProfit = grossProfit - totalPettyCash;
     final monthlySalaryObligation = state.monthlyTotalBaseSalary as double;
     final netRetainedProfit = netOperatingProfit - monthlySalaryObligation;
@@ -90,6 +93,11 @@ class FinancialPnlStatementCard extends StatelessWidget {
           const Divider(height: 1, color: AppColors.cardBorder),
           const SizedBox(height: 12),
           _buildRow(state.tr('grossRevenueRow'), CurrencyFormatter.format(totalRevenue), Colors.green.shade800, isHeader: true),
+          if (vatDeducted > 0) ...[
+            _buildSubRow('• ${state.tr("vatDeduction15Label")}', '- ${CurrencyFormatter.format(vatDeducted)}'),
+            const SizedBox(height: 4),
+            _buildRow(state.tr('netTaxableWashRevenue'), CurrencyFormatter.format(netAfterVat), Colors.teal.shade800, isBold: true),
+          ],
           const SizedBox(height: 6),
           _buildRow(state.tr('cogsRow'), '- ${CurrencyFormatter.format(cogs)}', Colors.orange.shade900, isHeader: true),
           _buildSubRow('• ${state.tr("washerCommissionSub")}', '- ${CurrencyFormatter.format(commissionPool)}'),

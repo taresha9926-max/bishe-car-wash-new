@@ -4,6 +4,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
+import '../../../../core/widgets/online_booking_alert_banner.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
@@ -81,6 +82,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 12)),
+                  const OnlineBookingAlertBanner(),
                   if (pendingHandover != null)
                     _buildPendingOtpBanner(context, state, pendingHandover, isMobile),
                   PrimaryIntakeActionRow(isMobile: isMobile),

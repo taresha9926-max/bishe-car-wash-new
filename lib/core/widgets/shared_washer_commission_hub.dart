@@ -628,9 +628,17 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                         ],
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        'Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% • Earned: ${isPresent && dividends[w.id] != null ? CurrencyFormatter.format(dividends[w.id]!.earnedETB) : "0 ETB"} • ${w.phone}',
-                        style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                      Builder(
+                        builder: (context) {
+                          final earnedVal = dividends[w.id]?.earnedETB ?? 0.0;
+                          final directTip = state.getTodayDirectTipsForWasher(w.id) as double;
+                          final displayEarned = isPresent || directTip > 0 ? CurrencyFormatter.format(earnedVal) : '0 ETB';
+                          final tipTag = directTip > 0 ? ' (${state.tr("directAssignedTip")}: ${CurrencyFormatter.format(directTip)})' : '';
+                          return Text(
+                            'Base: ${(w.commissionRate * 100).toStringAsFixed(1)}% • Earned: $displayEarned$tipTag • ${w.phone}',
+                            style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                          );
+                        },
                       ),
                     ],
                   ),

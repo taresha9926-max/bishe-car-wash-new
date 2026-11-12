@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
@@ -138,6 +139,25 @@ class StationTypeCard extends StatelessWidget {
                       height: 1.35,
                     ),
                   ),
+                  if ((state.getDeliveryAddonFee(serviceType, isCarpet: isCarpet) as double) > 0) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: primaryAccent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: primaryAccent.withOpacity(0.28)),
+                      ),
+                      child: Text(
+                        '+ ${CurrencyFormatter.format(state.getDeliveryAddonFee(serviceType, isCarpet: isCarpet) as double)} (${state.tr("deliveryAddonFeeLabel")})',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: primaryAccent,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

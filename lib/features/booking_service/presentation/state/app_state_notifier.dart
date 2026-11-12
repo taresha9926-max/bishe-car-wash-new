@@ -592,60 +592,154 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- VAT & Post-VAT Revenue Helpers ---
+  static const double vatRate = 0.15;
+
+  /// Deducts 15% VAT from collected wash + delivery revenue prior to washer commission.
+  /// Shower & customer tips are 100% VAT-exempt.
+  double netWashRevenueAfterVat(double grossWashAmount) =>
+      grossWashAmount * (1.0 - vatRate);
+
+  // --- Admin-Editable Once-Per-Order Delivery Mode Add-on Fees ---
+  double _carValetDeliveryFee = 200.0;
+  double _carHomeDeliveryFee = 300.0;
+  double _carpetHomeDeliveryFee = 150.0;
+  double _carpetValetDeliveryFee = 200.0;
+
+  double get carValetDeliveryFee => _carValetDeliveryFee;
+  double get carHomeDeliveryFee => _carHomeDeliveryFee;
+  double get carpetHomeDeliveryFee => _carpetHomeDeliveryFee;
+  double get carpetValetDeliveryFee => _carpetValetDeliveryFee;
+
+  /// Returns the once-per-order surcharge added on top of base At-Station rates
+  /// when VIP Driver / Valet Pickup & Return or At Customer Home is chosen.
+  double getDeliveryAddonFee(ServiceType mode, {bool isCarpet = false}) {
+    switch (mode) {
+      case ServiceType.walkInStation:
+      case ServiceType.phoneCallBooking:
+        return 0.0;
+      case ServiceType.valetPickUp:
+        return isCarpet ? _carpetValetDeliveryFee : _carValetDeliveryFee;
+      case ServiceType.atHomeMobile:
+        return isCarpet ? _carpetHomeDeliveryFee : _carHomeDeliveryFee;
+    }
+  }
+
+  Future<void> updateDeliveryAddonFee({
+    required bool isCarpet,
+    required ServiceType mode,
+    required double fee,
+  }) async {
+    if (mode == ServiceType.walkInStation) return;
+    final sanitized = fee < 0 ? 0.0 : fee;
+    if (isCarpet) {
+      if (mode == ServiceType.atHomeMobile) {
+        _carpetHomeDeliveryFee = sanitized;
+      } else if (mode == ServiceType.valetPickUp) {
+        _carpetValetDeliveryFee = sanitized;
+      }
+    } else {
+      if (mode == ServiceType.valetPickUp) {
+        _carValetDeliveryFee = sanitized;
+      } else if (mode == ServiceType.atHomeMobile) {
+        _carHomeDeliveryFee = sanitized;
+      }
+    }
+    notifyListeners();
+    await _persistPricingConfig();
+  }
+
+  Future<void> _persistPricingConfig() async {
+    await _repository.savePricingAndCommissionConfig({
+      'carValetDeliveryFee': _carValetDeliveryFee,
+      'carHomeDeliveryFee': _carHomeDeliveryFee,
+      'carpetHomeDeliveryFee': _carpetHomeDeliveryFee,
+      'carpetValetDeliveryFee': _carpetValetDeliveryFee,
+      'carpetTypeAPrice': _carpetTypeAStationPrice,
+      'carpetTypeBPrice': _carpetTypeBStationPrice,
+      'teamCommissionRate': _teamCommissionRate,
+    });
+  }
+
+  // --- Live Online Booking Notifier State (Cashier & Operational Manager) ---
+  final Set<String> _knownOnlineBookingIds = {};
+  bool _hasOnlineAlertBaseline = false;
+  final List<WashBooking> _pendingOnlineAlerts = [];
+  int _onlineBookingAlertEpoch = 0;
+
+  List<WashBooking> get pendingOnlineAlerts => List.unmodifiable(_pendingOnlineAlerts);
+  int get onlineBookingAlertEpoch => _onlineBookingAlertEpoch;
+
+  void _syncOnlineBookingAlerts(List<WashBooking> bookings, {bool notify = false}) {
+    final onlineBookings = bookings.where((b) => b.isOnlineBooking).toList();
+    if (!_hasOnlineAlertBaseline) {
+      _knownOnlineBookingIds.addAll(onlineBookings.map((b) => b.id));
+      _hasOnlineAlertBaseline = true;
+      return;
+    }
+    var addedNew = false;
+    for (final b in onlineBookings) {
+      if (!_knownOnlineBookingIds.contains(b.id)) {
+        _knownOnlineBookingIds.add(b.id);
+        _pendingOnlineAlerts.insert(0, b);
+        _onlineBookingAlertEpoch++;
+        addedNew = true;
+      }
+    }
+    if (addedNew && notify) {
+      notifyListeners();
+    }
+  }
+
+  void acknowledgeOnlineAlerts() {
+    if (_pendingOnlineAlerts.isEmpty) return;
+    _pendingOnlineAlerts.clear();
+    notifyListeners();
+  }
+
   // Carpet Cleaning Pricing (ETB per m²) Matrix across 3 delivery modes
   double _carpetTypeAStationPrice = 120.0;
-  double _carpetTypeAHomePrice = 160.0;
-  double _carpetTypeAValetPrice = 190.0;
-
   double _carpetTypeBStationPrice = 180.0;
-  double _carpetTypeBHomePrice = 230.0;
-  double _carpetTypeBValetPrice = 260.0;
 
   double get carpetTypeAStationPrice => _carpetTypeAStationPrice;
-  double get carpetTypeAHomePrice => _carpetTypeAHomePrice;
-  double get carpetTypeAValetPrice => _carpetTypeAValetPrice;
+  double get carpetTypeAHomePrice => _carpetHomeDeliveryFee;
+  double get carpetTypeAValetPrice => _carpetValetDeliveryFee;
 
   double get carpetTypeBStationPrice => _carpetTypeBStationPrice;
-  double get carpetTypeBHomePrice => _carpetTypeBHomePrice;
-  double get carpetTypeBValetPrice => _carpetTypeBValetPrice;
+  double get carpetTypeBHomePrice => _carpetHomeDeliveryFee;
+  double get carpetTypeBValetPrice => _carpetValetDeliveryFee;
 
   double get carpetTypeAPricePerSqM => _carpetTypeAStationPrice;
   double get carpetTypeBPricePerSqM => _carpetTypeBStationPrice;
 
+  /// Base per-m² rate is uniform At-Station pricing; delivery modes add a flat per-order fee.
   double getCarpetPricePerSqM(String carpetType, ServiceType serviceType) {
-    final isTypeB = carpetType == 'type_b';
-    switch (serviceType) {
-      case ServiceType.walkInStation:
-        return isTypeB ? _carpetTypeBStationPrice : _carpetTypeAStationPrice;
-      case ServiceType.atHomeMobile:
-        return isTypeB ? _carpetTypeBHomePrice : _carpetTypeAHomePrice;
-      case ServiceType.valetPickUp:
-      case ServiceType.phoneCallBooking:
-        return isTypeB ? _carpetTypeBValetPrice : _carpetTypeAValetPrice;
-    }
+    return carpetType == 'type_b' ? _carpetTypeBStationPrice : _carpetTypeAStationPrice;
   }
 
-  void updateCarpetPackagePrice({
+  Future<void> updateCarpetPackagePrice({
     required String type,
     required ServiceType mode,
     required double price,
-  }) {
-    if (type == 'type_a') {
-      if (mode == ServiceType.walkInStation) _carpetTypeAStationPrice = price;
-      if (mode == ServiceType.atHomeMobile) _carpetTypeAHomePrice = price;
-      if (mode == ServiceType.valetPickUp || mode == ServiceType.phoneCallBooking) _carpetTypeAValetPrice = price;
+  }) async {
+    if (mode == ServiceType.walkInStation) {
+      if (type == 'type_a') {
+        _carpetTypeAStationPrice = price;
+      } else {
+        _carpetTypeBStationPrice = price;
+      }
+      notifyListeners();
+      await _persistPricingConfig();
     } else {
-      if (mode == ServiceType.walkInStation) _carpetTypeBStationPrice = price;
-      if (mode == ServiceType.atHomeMobile) _carpetTypeBHomePrice = price;
-      if (mode == ServiceType.valetPickUp || mode == ServiceType.phoneCallBooking) _carpetTypeBValetPrice = price;
+      await updateDeliveryAddonFee(isCarpet: true, mode: mode, fee: price);
     }
-    notifyListeners();
   }
 
-  void updateCarpetPricing({double? typeAPrice, double? typeBPrice}) {
+  Future<void> updateCarpetPricing({double? typeAPrice, double? typeBPrice}) async {
     if (typeAPrice != null) _carpetTypeAStationPrice = typeAPrice;
     if (typeBPrice != null) _carpetTypeBStationPrice = typeBPrice;
     notifyListeners();
+    await _persistPricingConfig();
   }
 
   // Carpet Specialty Add-on Services (Editable by Super Admin)
@@ -850,12 +944,23 @@ class AppStateNotifier extends ChangeNotifier {
         .fold(0.0, (sum, b) => sum + b.totalPrice);
   }
 
-  double get serviceRevenueTodayETB {
+  List<WashBooking> get _paidBookingsToday {
     final now = DateTime.now();
-    return _bookings
-        .where((b) => _isBookingPaidOnDate(b, now))
-        .fold(0.0, (sum, b) => sum + b.totalPrice);
+    return _bookings.where((b) => _isBookingPaidOnDate(b, now)).toList();
   }
+
+  double get serviceRevenueTodayETB {
+    return _paidBookingsToday.fold(0.0, (sum, b) => sum + b.totalPrice);
+  }
+
+  /// 15% VAT payable from collected wash + delivery fees (Shower & Tips exempt).
+  double get vatDeductedTodayETB => serviceRevenueTodayETB * vatRate;
+
+  /// Wash revenue after deducting 15% VAT (commission base).
+  double get netServiceRevenueTodayETB => netWashRevenueAfterVat(serviceRevenueTodayETB);
+
+  /// Net collected business revenue excl. VAT & tips (Net Wash + Shower).
+  double get netBusinessRevenueTodayETB => netServiceRevenueTodayETB + todayShowerRevenueETB;
 
   double get totalRevenueTodayETB {
     return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB;
@@ -888,13 +993,17 @@ class AppStateNotifier extends ChangeNotifier {
   double _teamCommissionRate = 0.15; // Default 15%, editable by Admin
   double get teamCommissionRate => _teamCommissionRate;
 
-  void setTeamCommissionRate(double rate) {
+  Future<void> setTeamCommissionRate(double rate) async {
     _teamCommissionRate = rate;
     notifyListeners();
+    await _persistPricingConfig();
   }
 
-  // Shower has 0% washer commission; tips pass 100% to washers
-  double get teamCommissionPoolTodayETB => (serviceRevenueTodayETB * _teamCommissionRate) + todayCustomerTipsETB;
+  /// Post-15%-VAT wash commission shared across present washers (excludes direct tips).
+  double get teamWashCommissionTodayETB => netServiceRevenueTodayETB * _teamCommissionRate;
+
+  // Shower has 0% VAT and 0% washer commission; tips go 100% directly to each booking's assigned washer
+  double get teamCommissionPoolTodayETB => teamWashCommissionTodayETB + todayCustomerTipsETB;
 
   // Daily Washer Attendance: washerId -> isPresent (defaults to true)
   final Map<String, bool> _washerAttendanceToday = {};
@@ -944,14 +1053,40 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  double getDirectTipsForWasher(String washerId, List<WashBooking> bookings) {
+    return bookings
+        .where((b) => b.payment.isPaid && b.payment.tipAmount > 0 && b.assignedWasherId == washerId)
+        .fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+  }
+
+  double getTodayDirectTipsForWasher(String washerId) =>
+      getDirectTipsForWasher(washerId, _paidBookingsToday);
+
   /// Calculates individual dividend for each active washer based on their assigned commission percentage
-  /// and today's attendance. Only washers PRESENT today divide the 100% commission pool.
-  /// If some washers are absent, their assigned percentage is automatically redistributed
-  /// proportionally across present washers.
-  /// Sum of percentage shares for present washers is mathematically GUARANTEED to sum to 100.0%.
-  Map<String, WasherDividend> calculateWasherDividends(double pool) {
+  /// and today's attendance. Only washers PRESENT today divide the shared wash commission pool.
+  /// When [tipBookings] is supplied, 100% of each paid booking's tip is credited directly and solely
+  /// to its assigned washer (`assignedWasherId`) instead of being split across the team.
+  Map<String, WasherDividend> calculateWasherDividends(
+    double pool, {
+    List<WashBooking>? tipBookings,
+  }) {
     final washers = availableWashers;
-    if (washers.isEmpty || pool <= 0) {
+    final directTipsByWasher = <String, double>{};
+    double attributedTipsTotal = 0.0;
+    if (tipBookings != null) {
+      final washerIds = washers.map((w) => w.id).toSet();
+      for (final b in tipBookings) {
+        if (b.payment.isPaid && b.payment.tipAmount > 0 && b.assignedWasherId != null && washerIds.contains(b.assignedWasherId)) {
+          directTipsByWasher[b.assignedWasherId!] =
+              (directTipsByWasher[b.assignedWasherId!] ?? 0.0) + b.payment.tipAmount;
+          attributedTipsTotal += b.payment.tipAmount;
+        }
+      }
+    }
+
+    final sharedPool = (pool - attributedTipsTotal).clamp(0.0, double.infinity);
+
+    if (washers.isEmpty || (sharedPool <= 0 && attributedTipsTotal <= 0)) {
       final Map<String, WasherDividend> emptyResult = {};
       for (final w in washers) {
         final basePct = (w.commissionRate > 0 ? w.commissionRate : (1.0 / (washers.isEmpty ? 1 : washers.length))) * 100.0;
@@ -979,7 +1114,7 @@ class AppStateNotifier extends ChangeNotifier {
           skillLevel: w.skillSeniorityLevel,
           isPresent: false,
           percentageShare: 0.0,
-          earnedETB: 0.0,
+          earnedETB: directTipsByWasher[w.id] ?? 0.0,
           customTierName: '${basePct.toStringAsFixed(1)}% Base',
         );
       }
@@ -1001,6 +1136,7 @@ class AppStateNotifier extends ChangeNotifier {
       final isPresent = isWasherPresentToday(w.id);
       final baseRate = (w.commissionRate > 0 ? w.commissionRate : (1.0 / washers.length));
       final basePct = baseRate * 100.0;
+      final personalTip = directTipsByWasher[w.id] ?? 0.0;
 
       if (!isPresent) {
         result[w.id] = WasherDividend(
@@ -1009,14 +1145,14 @@ class AppStateNotifier extends ChangeNotifier {
           skillLevel: w.skillSeniorityLevel,
           isPresent: false,
           percentageShare: 0.0,
-          earnedETB: 0.0,
+          earnedETB: personalTip,
           customTierName: '${basePct.toStringAsFixed(1)}% Base',
         );
       } else {
-        // Relative Proportional Redistribution:
+        // Relative Proportional Redistribution for shared commission, plus 100% personal tips:
         final shareFraction = baseRate / totalPresentWeight;
         final percent = shareFraction * 100.0;
-        final amount = shareFraction * pool;
+        final amount = (shareFraction * sharedPool) + personalTip;
 
         result[w.id] = WasherDividend(
           washerId: w.id,
@@ -1033,7 +1169,8 @@ class AppStateNotifier extends ChangeNotifier {
     return result;
   }
 
-  Map<String, WasherDividend> get washerDividendsToday => calculateWasherDividends(teamCommissionPoolTodayETB);
+  Map<String, WasherDividend> get washerDividendsToday =>
+      calculateWasherDividends(teamCommissionPoolTodayETB, tipBookings: _paidBookingsToday);
 
   // --- Owner Bank Accounts for Cash Deposits ---
   static const String ownerAccountAName = 'Commercial Bank of Ethiopia (CBE)';
@@ -1197,10 +1334,10 @@ class AppStateNotifier extends ChangeNotifier {
     final paidOnDate = _bookings.where((b) => _isBookingPaidOnDate(b, date)).toList();
     if (paidOnDate.isEmpty) return 0.0;
     final grossOnDate = paidOnDate.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final tipsOnDate = paidOnDate.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
-    final poolOnDate = (grossOnDate * teamCommissionRate) + tipsOnDate;
-    if (poolOnDate <= 0 || availableWashers.isEmpty) return 0.0;
-    return poolOnDate / availableWashers.length;
+    final poolOnDate = netWashRevenueAfterVat(grossOnDate) * teamCommissionRate;
+    final directTipOnDate = getDirectTipsForWasher(washerId, paidOnDate);
+    if (availableWashers.isEmpty) return directTipOnDate;
+    return (poolOnDate / availableWashers.length) + directTipOnDate;
   }
 
   // Petty Cash Expenses (Cashier emergency operational spends)
@@ -1671,8 +1808,9 @@ class AppStateNotifier extends ChangeNotifier {
     final cash = serviceCash + todayShowerCashETB;
     final digital = gross - cash;
 
-    final comm = (serviceGross * teamCommissionRate) + tipsRev;
-    final net = (serviceGross - (serviceGross * teamCommissionRate)) + showerRev;
+    final netServiceRev = netWashRevenueAfterVat(serviceGross);
+    final comm = (netServiceRev * teamCommissionRate) + tipsRev;
+    final net = (netServiceRev - (netServiceRev * teamCommissionRate)) + showerRev;
     final deposited = totalCashDepositedTodayETB;
     final petty = todayPettyCashExpensesETB;
     final remainingCash = cash > (deposited + petty) ? cash - (deposited + petty) : 0.0;
@@ -1689,7 +1827,7 @@ class AppStateNotifier extends ChangeNotifier {
       }
     }
 
-    final divMap = calculateWasherDividends(comm);
+    final divMap = calculateWasherDividends(comm, tipBookings: paidToday);
     final divSummary = <String, double>{};
     divMap.forEach((id, div) {
       if (div.isPresent && div.earnedETB > 0) {
@@ -1841,9 +1979,9 @@ class AppStateNotifier extends ChangeNotifier {
 
     final weeklyGross = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final weeklyTips = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
-    final weeklyPool = (weeklyGross * teamCommissionRate) + weeklyTips;
+    final weeklyPool = (netWashRevenueAfterVat(weeklyGross) * teamCommissionRate) + weeklyTips;
 
-    final dividends = calculateWasherDividends(weeklyPool);
+    final dividends = calculateWasherDividends(weeklyPool, tipBookings: weeklyPaid);
     final result = <String, double>{};
     for (final entry in dividends.entries) {
       result[entry.value.washerName] = entry.value.earnedETB;
@@ -1864,7 +2002,7 @@ class AppStateNotifier extends ChangeNotifier {
 
     final weeklyGross = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final weeklyTips = weeklyPaid.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
-    return (weeklyGross * teamCommissionRate) + weeklyTips;
+    return (netWashRevenueAfterVat(weeklyGross) * teamCommissionRate) + weeklyTips;
   }
 
   /// Total monthly base salary obligation for active washers (Salaries are paid monthly)
@@ -2006,11 +2144,13 @@ class AppStateNotifier extends ChangeNotifier {
         _repository.getConsumables(),
         _repository.getDailyHandovers(),
         _repository.getStockTransactions(),
+        _repository.getPricingAndCommissionConfig(),
       ]);
       _packages = List.from(results[0] as List<WashPackage>);
       _staff = List.from(results[1] as List<StaffMember>);
       _bays = List.from(results[2] as List<StationBay>);
       _bookings = List.from(results[3] as List<WashBooking>);
+      _syncOnlineBookingAlerts(_bookings);
       _commissionLogs = List.from(results[4] as List<CommissionLog>);
       _credentials = List.from(results[5] as List<StaffCredential>);
       final reels = results[6] as List<TikTokAdVideo>;
@@ -2027,6 +2167,16 @@ class AppStateNotifier extends ChangeNotifier {
       }
       _dailyHandovers = List.from(results[9] as List<DailyHandover>);
       _stockTransactions = List.from(results[10] as List<StockTransaction>);
+      final pricingConfig = results[11] as Map<String, dynamic>;
+      if (pricingConfig.isNotEmpty) {
+        _carValetDeliveryFee = (pricingConfig['carValetDeliveryFee'] as num?)?.toDouble() ?? _carValetDeliveryFee;
+        _carHomeDeliveryFee = (pricingConfig['carHomeDeliveryFee'] as num?)?.toDouble() ?? _carHomeDeliveryFee;
+        _carpetHomeDeliveryFee = (pricingConfig['carpetHomeDeliveryFee'] as num?)?.toDouble() ?? _carpetHomeDeliveryFee;
+        _carpetValetDeliveryFee = (pricingConfig['carpetValetDeliveryFee'] as num?)?.toDouble() ?? _carpetValetDeliveryFee;
+        _carpetTypeAStationPrice = (pricingConfig['carpetTypeAPrice'] as num?)?.toDouble() ?? _carpetTypeAStationPrice;
+        _carpetTypeBStationPrice = (pricingConfig['carpetTypeBPrice'] as num?)?.toDouble() ?? _carpetTypeBStationPrice;
+        _teamCommissionRate = (pricingConfig['teamCommissionRate'] as num?)?.toDouble() ?? _teamCommissionRate;
+      }
 
       try {
         final closings = await _repository.getDailyFinancialClosings();
@@ -2090,6 +2240,8 @@ class AppStateNotifier extends ChangeNotifier {
     double? customTotalPrice,
     List<String>? selectedServices,
     double tipAmount = 0.0,
+    String? assignedWasherId,
+    String? assignedWasherName,
   }) async {
     final bookingId = isCarpet
         ? 'CPT-${(100 + _bookings.length + 1)}'
@@ -2106,6 +2258,8 @@ class AppStateNotifier extends ChangeNotifier {
       licensePlate: licensePlate.toUpperCase(),
       package: package,
       status: WashStatus.pending,
+      assignedWasherId: assignedWasherId,
+      assignedWasherName: assignedWasherName,
       payment: PaymentInfo(
         isPaid: false,
         method: paymentMethod,
@@ -2202,6 +2356,8 @@ class AppStateNotifier extends ChangeNotifier {
     return created;
   }
 
+  static const String webAppUrl = 'https://bishecarwash.vercel.app';
+
   /// Registration & Intake SMS notifying customer of their carpet tracking tag
   String getCarpetRegistrationSmsText(WashBooking booking) {
     final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
@@ -2211,12 +2367,12 @@ class AppStateNotifier extends ChangeNotifier {
     final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
 
     if (currentLang == 'OM') {
-      return 'Kabajamaa $customerName, ajajni qulqulleessuu kiliimii keessanii (Koodii Galmee: $tag, Gosa: $cType$dims) qophaa\'eera. Gatiin waliigalaa: $amountStr. Yommuu dhiqamee xumuramu ergaan biraa isiniif ergama. Bishe Car Wash & Carpet Cleaning Service!';
+      return 'Kabajamaa $customerName, ajajni qulqulleessuu kiliimii keessanii (Koodii Galmee: $tag, $cType$dims) galmaa\'eera. Gatiin waliigalaa: $amountStr. Yommuu xumuramu isin beeksifna. Ajaja toora interneetii fi yaadaaf: $webAppUrl - Bishe Car Wash & Carpet Cleaning!';
     } else if (currentLang == 'AM') {
-      return 'ውድ $customerName፣ የካርፔት ማጠቢያ ትዕዛዝዎ (የምዝገባ መለያ ቁጥር: $tag፣ ዓይነት: $cType$dims) ተመዝግቧል። ጠቅላላ ዋጋ: $amountStr። እጥበቱ ተጠናቆ ሲደርቅ ተጨማሪ መልዕክት ይደርስዎታል። ስለመረጡን እናመሰግናለን! ቢሼ ካርፔት ማጠቢያ';
+      return 'ውድ $customerName፣ የካርፔት ማጠቢያ ትዕዛዝዎ (መለያ: $tag፣ $cType$dims) ተመዝግቧል። ጠቅላላ ዋጋ: $amountStr። ሲጠናቀቅ እናሳውቅዎታለን። ለኦንላይን ትዕዛዝ እና አስተያየት: $webAppUrl - ቢሼ ካርፔት ማጠቢያ!';
     }
 
-    return 'Dear $customerName, your carpet cleaning order has been registered (Registration Tag: $tag, Type: $cType$dims). Estimated Total: $amountStr. We will notify you once washing and drying are complete. Thank you for choosing Bishe Carpet Cleaning Service!';
+    return 'Dear $customerName, your carpet cleaning order is registered (Tag: $tag, $cType$dims). Estimated Total: $amountStr. We will notify you once ready. Book online & share feedback: $webAppUrl — Bishe Carpet Cleaning Service!';
   }
 
   /// Dispatches intake/registration SMS to customer with carpet tag number
@@ -2260,23 +2416,23 @@ class AppStateNotifier extends ChangeNotifier {
       final dims = booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? ' (${booking.carpetDimensions})' : '';
 
       if (currentLang == 'OM') {
-        return 'Kabajamaa $customerName, dhiqamuun kiliimii keessanii (Koodii: $tag, $cType$dims) guutummaatti xumuramee qophii ta\'eera. Maaloo kaffaltii $amountStr kaffaluun fudhadhaa. Bishe Car Wash & Carpet Cleaning Service!';
+        return 'Kabajamaa $customerName, dhiqamuun kiliimii keessanii (Koodii: $tag, $cType$dims) guutummaatti xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Ajaja toora interneetii fi yaadaaf: $webAppUrl - Bishe Service!';
       } else if (currentLang == 'AM') {
-        return 'ውድ $customerName፣ የካርፔት ማጠቢያ አገልግሎትዎ (መለያ: $tag፣ $cType$dims) ሙሉ በሙሉ ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው ይረከቡ። ስለመረጡን እናመሰግናለን! ቢሼ ካርፔት ማጠቢያ';
+        return 'ውድ $customerName፣ የካርፔት ማጠቢያ አገልግሎትዎ (መለያ: $tag፣ $cType$dims) ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው ይረከቡ። ለኦንላይን ትዕዛዝ እና አስተያየት: $webAppUrl - ቢሼ!';
       }
 
-      return 'Dear $customerName, your carpet cleaning service (Tag: $tag, $cType$dims) is completed and ready. Please pay $amountStr. Thank you for choosing Bishe Car Wash & Carpet Cleaning Service!';
+      return 'Dear $customerName, your carpet cleaning (Tag: $tag, $cType$dims) is completed and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe! Book online & leave feedback: $webAppUrl';
     }
     final pkgName = booking.serviceDisplayName;
     final plate = booking.licensePlate;
 
     if (currentLang == 'OM') {
-      return 'Kabajamaa $customerName, tajaajilli dhiqaa konkolaataa keessanii ($pkgName, Gabatee: $plate) xumuramee qophii ta\'eera. Maaloo kaffaltii $amountStr kaffaluun fudhadhaa. Galatoomaa!';
+      return 'Kabajamaa $customerName, tajaajilli dhiqaa konkolaataa keessanii ($pkgName, Gabatee: $plate) xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Ajaja toora interneetii fi yaadaaf: $webAppUrl - Galatoomaa!';
     } else if (currentLang == 'AM') {
-      return 'ውድ $customerName፣ የተሽከርካሪዎ ($pkgName፣ ታርጋ: $plate) የመኪና ማጠብ አገልግሎት ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው መኪናዎን ይረከቡ። እናመሰግናለን!';
+      return 'ውድ $customerName፣ የመኪና ማጠብ አገልግሎትዎ ($pkgName፣ ታርጋ: $plate) ተጠናቆ ዝግጁ ነው። እባክዎ $amountStr ከፍለው መኪናዎን ይረከቡ። ለኦንላይን ትዕዛዝ እና አስተያየት: $webAppUrl - እናመሰግናለን!';
     }
 
-    return 'Dear $customerName, your car washing service ($pkgName) for vehicle $plate is completed and ready to pickup. Please pay $amountStr and pick up your vehicle. Thank you for choosing Bishe Car Wash Service!';
+    return 'Dear $customerName, your car wash ($pkgName) for vehicle $plate is complete and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe Car Wash! Book online & leave feedback: $webAppUrl';
   }
 
   /// Dispatches completion SMS to customer using cashier's personal device SIM / SMS app
@@ -2658,8 +2814,20 @@ class AppStateNotifier extends ChangeNotifier {
   Future<void> _refreshBookingsAndBays() async {
     _bays = await _repository.getBays();
     _bookings = await _repository.getBookings();
+    _syncOnlineBookingAlerts(_bookings);
     _commissionLogs = await _repository.getCommissionLogs();
     notifyListeners();
+  }
+
+  /// Lightweight silent poll used by Cashier & Operational Manager dashboards to detect new online bookings.
+  Future<void> pollNewOnlineBookings() async {
+    try {
+      final latest = await _repository.getBookings();
+      _bookings = latest;
+      _syncOnlineBookingAlerts(_bookings, notify: true);
+    } catch (e) {
+      debugPrint('Online booking poll error: $e');
+    }
   }
 
   // --- Inventory & Stock Management (Option B Audited) ---

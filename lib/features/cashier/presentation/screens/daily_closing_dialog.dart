@@ -155,9 +155,13 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                     _buildClosingRow('  • Carpet Cleaning Revenue:', '${CurrencyFormatter.format(state.todayCarpetRevenueETB)} (${state.todayCarpetCleanedCount} carpets)', valueColor: const Color(0xFF6366F1)),
                     const SizedBox(height: 3),
                     _buildClosingRow('  • Station Shower Revenue:', '${CurrencyFormatter.format(state.todayShowerRevenueETB)} (${state.todayShowerUserCount} users, 0% comm)', valueColor: const Color(0xFF0284C7)),
+                    if ((state.vatDeductedTodayETB as double) > 0) ...[
+                      const SizedBox(height: 3),
+                      _buildClosingRow('  • ${state.tr("vatDeduction15Label")}:', '- ${CurrencyFormatter.format(state.vatDeductedTodayETB)}', valueColor: Colors.deepPurple),
+                    ],
                     if (state.todayCustomerTipsETB > 0) ...[
                       const SizedBox(height: 3),
-                      _buildClosingRow('  • Customer Tips to Washers:', '+ ${CurrencyFormatter.format(state.todayCustomerTipsETB)} (100% to pool)', valueColor: Colors.amber.shade900),
+                      _buildClosingRow('  • Customer Tips to Washers:', '+ ${CurrencyFormatter.format(state.todayCustomerTipsETB)} (100% to assigned washer)', valueColor: Colors.amber.shade900),
                     ],
                     const Divider(height: 16),
                     _buildClosingRow('  • Cash Collected at Station:', CurrencyFormatter.format(cash), valueColor: AppColors.cashGreen),

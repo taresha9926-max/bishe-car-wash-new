@@ -202,7 +202,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             _matchesFilter(t.date) &&
             (t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
         .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
-    final commissionPool = (serviceRevenue * state.teamCommissionRate) + tipsRevenue;
+    final vatDeducted = serviceRevenue * 0.15;
+    final netServiceRevenue = serviceRevenue - vatDeducted;
+    final commissionPool = (netServiceRevenue * state.teamCommissionRate) + tipsRevenue;
 
     final digitalBookings = allBookings.where((b) => b.payment.isPaid && b.payment.method.isDigital).toList();
 
@@ -266,6 +268,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       commissionPool,
                       totalPettyCash,
                       totalSupplies,
+                      vatDeducted: vatDeducted,
                     )
                   else if (_tabController.index == 1)
                     _buildPricingAndTeamTab(context, state, isMobile)
@@ -557,8 +560,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     double totalRevenue,
     double commissionPool,
     double totalPettyCash,
-    double totalSupplies,
-  ) {
+    double totalSupplies, {
+    double vatDeducted = 0.0,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -610,6 +614,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           isMobile: isMobile,
           periodSubtitle: _selectedRangeSubtitle(state),
           totalRevenue: totalRevenue,
+          vatDeducted: vatDeducted,
           commissionPool: commissionPool,
           totalPettyCash: totalPettyCash,
           totalSupplies: totalSupplies,

@@ -14,6 +14,7 @@ import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_package.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/car_type_selector.dart';
+import '../widgets/staff_intake_helpers.dart';
 
 class WalkInRegistrationScreen extends StatefulWidget {
   final BayType? preselectedBay;
@@ -52,6 +53,8 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
   bool _useCustomChecklist = true;
   final Set<String> _selectedServiceIds = {'srv_body_wash', 'srv_tire_clean'};
   final _negotiatedPriceController = TextEditingController();
+  String? _selectedWasherId;
+  String? _selectedWasherName;
 
   bool _isPaidNow = false;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
@@ -95,8 +98,20 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
     return (l * w);
   }
 
-  double _calculateCarpetPrice(double ratePerSqM) {
-    return _carpetArea * ratePerSqM;
+  double _calculateCarpetPrice(double ratePerSqM, {double addonFee = 0.0}) {
+    return (_carpetArea * ratePerSqM) + addonFee;
+  }
+
+  double _baseCarWashSuggested(dynamic state) {
+    return _useCustomChecklist
+        ? _calculateSuggestedServicesTotal(state)
+        : (_package?.getPriceFor(_carType) ?? 0.0);
+  }
+
+  void _syncNegotiatedPriceController(dynamic state) {
+    final base = _baseCarWashSuggested(state);
+    final deliveryAddon = state.getDeliveryAddonFee(_carpetDeliveryMethod, isCarpet: false) as double;
+    _negotiatedPriceController.text = (base + deliveryAddon).toStringAsFixed(0);
   }
 
   @override
@@ -108,11 +123,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
       _package = packages.first;
     }
 
-    final suggestedServicesTotal = _calculateSuggestedServicesTotal(state);
+    final baseWashSuggested = _baseCarWashSuggested(state);
+    final carDeliveryFee = state.getDeliveryAddonFee(_carpetDeliveryMethod, isCarpet: false) as double;
+    final carpetDeliveryFee = state.getDeliveryAddonFee(_carpetDeliveryMethod, isCarpet: true) as double;
+    final suggestedServicesTotal = baseWashSuggested + carDeliveryFee;
     final enteredNegotiated = double.tryParse(_negotiatedPriceController.text.trim());
-    final effectiveWashPrice = _useCustomChecklist
-        ? (enteredNegotiated ?? suggestedServicesTotal)
-        : (_package?.getPriceFor(_carType) ?? 0.0);
+    final effectiveWashPrice = enteredNegotiated ?? suggestedServicesTotal;
     final price = effectiveWashPrice;
 
     return Scaffold(
@@ -292,11 +308,21 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                   onSelected: (type) {
                     setState(() {
                       _carType = type;
-                      if (_useCustomChecklist) {
-                        _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
-                      } else if (_package != null) {
-                        _negotiatedPriceController.text = _package!.getPriceFor(type).toStringAsFixed(0);
-                      }
+                      _syncNegotiatedPriceController(state);
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // 2b. Car Wash Delivery Mode (At Station / VIP Driver / At Home)
+                StaffDeliveryModeSelector(
+                  state: state,
+                  selectedMode: _carpetDeliveryMethod,
+                  isCarpet: false,
+                  onChanged: (mode) {
+                    setState(() {
+                      _carpetDeliveryMethod = mode;
+                      _syncNegotiatedPriceController(state);
                     });
                   },
                 ),
@@ -320,7 +346,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                         onTap: () {
                           setState(() {
                             _useCustomChecklist = true;
-                            _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                            _syncNegotiatedPriceController(state);
                           });
                         },
                         child: Container(
@@ -362,9 +388,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                             if (_package == null && packages.isNotEmpty) {
                               _package = packages.first;
                             }
-                            if (_package != null) {
-                              _negotiatedPriceController.text = _package!.getPriceFor(_carType).toStringAsFixed(0);
-                            }
+                            _syncNegotiatedPriceController(state);
                           });
                         },
                         child: Container(
@@ -472,78 +496,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                             } else {
                               _selectedServiceIds.remove(item.id);
                             }
-                            _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                            _syncNegotiatedPriceController(state);
                           });
                         },
                       ),
                     );
                   }),
-                  const SizedBox(height: 10),
-
-                  // Negotiated Price Card
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.cardBorder),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${state.tr("suggestedTariffTotal")}:',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                            ),
-                            Text(
-                              CurrencyFormatter.format(suggestedServicesTotal),
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: CustomTextField(
-                                controller: _negotiatedPriceController,
-                                label: state.tr('negotiatedTotalPrice'),
-                                hint: suggestedServicesTotal.toStringAsFixed(0),
-                                keyboardType: TextInputType.number,
-                                prefixIcon: Icons.handshake_outlined,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: AppColors.primaryDark,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  side: const BorderSide(color: AppColors.cardBorder),
-                                ),
-                              ),
-                              icon: const Icon(Icons.sync, size: 15),
-                              label: Text(
-                                state.tr('useSuggestedPrice'),
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _negotiatedPriceController.text = suggestedServicesTotal.toStringAsFixed(0);
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
                 ] else ...[
                   ...packages.map((pkg) {
                     final isSelected = pkg.id == _package?.id;
@@ -552,7 +510,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                       onTap: () {
                         setState(() {
                           _package = pkg;
-                          _negotiatedPriceController.text = pkgPrice.toStringAsFixed(0);
+                          _syncNegotiatedPriceController(state);
                         });
                       },
                       child: Container(
@@ -576,7 +534,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                               onChanged: (_) {
                                 setState(() {
                                   _package = pkg;
-                                  _negotiatedPriceController.text = pkgPrice.toStringAsFixed(0);
+                                  _syncNegotiatedPriceController(state);
                                 });
                               },
                             ),
@@ -637,6 +595,15 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                     );
                   }),
                 ],
+                const SizedBox(height: 12),
+                StaffNegotiatedPriceCard(
+                  state: state,
+                  controller: _negotiatedPriceController,
+                  baseSuggestedPrice: baseWashSuggested,
+                  deliveryAddonFee: carDeliveryFee,
+                  onUseSuggested: () => setState(() => _syncNegotiatedPriceController(state)),
+                  onChanged: () => setState(() {}),
+                ),
               ] else ...[
                 // Carpet Specific Configuration
                 Text(
@@ -812,7 +779,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF4338CA)),
                             ),
                             Text(
-                              'ETB ${(_calculateCarpetPrice(_carpetType == "type_b" ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM)).toStringAsFixed(2)}',
+                              'ETB ${(_calculateCarpetPrice(_carpetType == "type_b" ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM, addonFee: carpetDeliveryFee)).toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF312E81)),
                             ),
                           ],
@@ -823,38 +790,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                 ),
                 const SizedBox(height: 14),
 
-                // Delivery Provision Method
-                Text(
-                  state.tr('serviceProvisionMode'),
-                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ChoiceChip(
-                      label: Text(state.tr('atStationService')),
-                      selected: _carpetDeliveryMethod == ServiceType.walkInStation,
-                      onSelected: (val) {
-                        if (val) setState(() => _carpetDeliveryMethod = ServiceType.walkInStation);
-                      },
-                    ),
-                    ChoiceChip(
-                      label: Text(state.tr('atHomeService')),
-                      selected: _carpetDeliveryMethod == ServiceType.atHomeMobile,
-                      onSelected: (val) {
-                        if (val) setState(() => _carpetDeliveryMethod = ServiceType.atHomeMobile);
-                      },
-                    ),
-                    ChoiceChip(
-                      label: Text(state.tr('valetPickupReturn')),
-                      selected: _carpetDeliveryMethod == ServiceType.valetPickUp,
-                      onSelected: (val) {
-                        if (val) setState(() => _carpetDeliveryMethod = ServiceType.valetPickUp);
-                      },
-                    ),
-                  ],
+                // Delivery Provision Method (with automatic once-per-order add-on fee)
+                StaffDeliveryModeSelector(
+                  state: state,
+                  selectedMode: _carpetDeliveryMethod,
+                  isCarpet: true,
+                  onChanged: (mode) => setState(() => _carpetDeliveryMethod = mode),
                 ),
               ],
               const SizedBox(height: 18),
@@ -918,9 +859,21 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                 const SizedBox(height: 18),
               ],
 
+              // Assign Washer During Booking (Customer tips go 100% to assigned washer)
+              StaffWasherPickerCard(
+                state: state,
+                washers: state.availableWashers,
+                selectedWasherId: _selectedWasherId,
+                onChanged: (washer) => setState(() {
+                  _selectedWasherId = washer?.id;
+                  _selectedWasherName = washer?.name;
+                }),
+              ),
+              const SizedBox(height: 16),
+
               // Submit Action
               CustomButton(
-                text: 'Book Now • ${CurrencyFormatter.format(_isCarpetMode ? _calculateCarpetPrice(_carpetType == "type_b" ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM) : price)}',
+                text: 'Book Now • ${CurrencyFormatter.format(_isCarpetMode ? _calculateCarpetPrice(_carpetType == "type_b" ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM, addonFee: carpetDeliveryFee) : price)}',
                 icon: Icons.bookmark_added_rounded,
                 isLoading: _isSubmitting,
                 onPressed: () => _handleSubmitWalkIn(context),
@@ -943,7 +896,11 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
     try {
       final effectivePackage = _package ?? (state.packages.isNotEmpty ? state.packages.first : null);
       if (effectivePackage == null) return;
-      final calculatedCarpetPrice = _calculateCarpetPrice(_carpetType == 'type_b' ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM);
+      final carpetAddon = state.getDeliveryAddonFee(_carpetDeliveryMethod, isCarpet: true) as double;
+      final calculatedCarpetPrice = _calculateCarpetPrice(
+        _carpetType == 'type_b' ? state.carpetTypeBPricePerSqM : state.carpetTypeAPricePerSqM,
+        addonFee: carpetAddon,
+      );
 
       if (!_isCarpetMode && _useCustomChecklist && _selectedServiceIds.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -955,7 +912,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
         return;
       }
 
-      final suggestedServicesTotal = _calculateSuggestedServicesTotal(state);
+      final baseSuggested = _baseCarWashSuggested(state);
+      final carAddon = state.getDeliveryAddonFee(_carpetDeliveryMethod, isCarpet: false) as double;
+      final suggestedServicesTotal = baseSuggested + carAddon;
       final negotiatedPrice = double.tryParse(_negotiatedPriceController.text.trim()) ?? suggestedServicesTotal;
       final selectedServiceNames = _useCustomChecklist
           ? state.activeServiceItems
@@ -971,6 +930,8 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
         carType: _isCarpetMode ? CarType.automobile : _carType,
         package: effectivePackage,
         assignedBay: _isCarpetMode ? null : _bayType,
+        assignedWasherId: _selectedWasherId,
+        assignedWasherName: _selectedWasherName,
         paymentMethod: PaymentMethod.cash,
         markPaid: false,
         transactionRef: null,
@@ -978,9 +939,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
         carpetType: _isCarpetMode ? _carpetType : null,
         carpetAreaSqMeters: _isCarpetMode ? _carpetArea : null,
         carpetDimensions: _isCarpetMode ? '${_lengthController.text.trim()}m x ${_widthController.text.trim()}m' : null,
-        customTotalPrice: _isCarpetMode ? calculatedCarpetPrice : (_useCustomChecklist ? negotiatedPrice : null),
+        customTotalPrice: _isCarpetMode ? calculatedCarpetPrice : negotiatedPrice,
         selectedServices: selectedServiceNames,
-        serviceType: _isCarpetMode ? _carpetDeliveryMethod : null,
+        serviceType: _carpetDeliveryMethod,
       );
 
       if (_isCarpetMode) {

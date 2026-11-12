@@ -462,7 +462,8 @@ class WashRepositoryImpl implements IWashRepository {
         ? booking.assignedWasherName!.trim()
         : (staffIndex != -1 ? _staff[staffIndex].name : 'Washer Team Pool');
     final commissionRate = staffIndex != -1 ? _staff[staffIndex].commissionRate : 0.15;
-    final commissionEarned = booking.totalPrice * commissionRate;
+    // Deduct 15% VAT before calculating washer commission
+    final commissionEarned = (booking.totalPrice * 0.85) * commissionRate;
 
     final log = CommissionLog(
       id: 'COM-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
@@ -489,6 +490,18 @@ class WashRepositoryImpl implements IWashRepository {
         totalCommissionEarnedETB: staff.totalCommissionEarnedETB + commissionEarned,
       );
     }
+  }
+
+  Map<String, dynamic> _pricingConfig = {};
+
+  @override
+  Future<Map<String, dynamic>> getPricingAndCommissionConfig() async {
+    return Map<String, dynamic>.from(_pricingConfig);
+  }
+
+  @override
+  Future<void> savePricingAndCommissionConfig(Map<String, dynamic> config) async {
+    _pricingConfig = Map<String, dynamic>.from(config);
   }
 
   String _customerPhoneBookingNumber = '0910046553';

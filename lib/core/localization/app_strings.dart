@@ -4515,6 +4515,86 @@ class AppStrings {
       AppLanguage.om: 'Koodii OTP dijitii 4 Hojii Geggeessaan qarshii akka mirkaneessuuf uuma.',
       AppLanguage.am: 'ስራ አስኪያጁ ጥሬ ገንዘቡን እንዲያረጋግጥ ባለ 4 አሃዝ OTP ጥያቄ ያመነጫል።',
     },
+    'basePrice': {
+      AppLanguage.en: 'Base Price',
+      AppLanguage.om: 'Gatii Bu\'uuraa',
+      AppLanguage.am: 'መሰረታዊ ዋጋ',
+    },
+    'deliveryAddonFeeLabel': {
+      AppLanguage.en: 'Delivery / Service Add-on',
+      AppLanguage.om: 'Kaffaltii Dabalataa Geessuu',
+      AppLanguage.am: 'የማድረስ ተጨማሪ ክፍያ',
+    },
+    'deliveryAddonIncluded': {
+      AppLanguage.en: 'Includes delivery add-on',
+      AppLanguage.om: 'Kaffaltiin geessuu itti dabalameera',
+      AppLanguage.am: 'የማድረስ ተጨማሪ ክፍያ ተካትቷል',
+    },
+    'carWashDeliveryFeesTitle': {
+      AppLanguage.en: 'Car Wash Delivery Add-on Fees',
+      AppLanguage.om: 'Kaffaltii Dabalataa Geessuu Konkolaataa',
+      AppLanguage.am: 'የመኪና ማጠብ የማድረስ ተጨማሪ ክፍያዎች',
+    },
+    'carpetDeliveryFeesTitle': {
+      AppLanguage.en: 'Carpet Delivery Add-on Fees (Once Per Order)',
+      AppLanguage.om: 'Kaffaltii Dabalataa Geessuu Firaashii (Ajaja Tokkotti)',
+      AppLanguage.am: 'የምንጣፍ ማድረስ ተጨማሪ ክፍያዎች (በአንድ ትዕዛዝ)',
+    },
+    'oncePerOrderTag': {
+      AppLanguage.en: 'Once per order',
+      AppLanguage.om: 'Ajaja tokkotti al tokko',
+      AppLanguage.am: 'በአንድ ትዕዛዝ አንድ ጊዜ',
+    },
+    'baseStationRatePerSqm': {
+      AppLanguage.en: 'Base At-Station Rate / m²',
+      AppLanguage.om: 'Gatii Bu\'uuraa Buufataa / m²',
+      AppLanguage.am: 'መሰረታዊ የጣቢያ ዋጋ / ካሬ ሜትር',
+    },
+    'negotiatedTotalPriceTitle': {
+      AppLanguage.en: 'Negotiated Final Price (ETB)',
+      AppLanguage.om: 'Gatii Xumuraa Waliigaltee (ETB)',
+      AppLanguage.am: 'የተስማሙበት የመጨረሻ ዋጋ (ብር)',
+    },
+    'assignWasherDuringBooking': {
+      AppLanguage.en: 'Assign Washer (Tips go 100% to assigned washer)',
+      AppLanguage.om: 'Dhiqaa Ramadi (Tippiin 100% isaaf kenna)',
+      AppLanguage.am: 'አጣቢ ይመድቡ (ቲፕ 100% ለተመደበው አጣቢ ይሆናል)',
+    },
+    'noWasherAssignedOption': {
+      AppLanguage.en: 'Assign Later / No Washer Selected',
+      AppLanguage.om: 'Booda Ramadi / Hin Filatamne',
+      AppLanguage.am: 'በኋላ ይመደብ / አጣቢ አልተመረጠም',
+    },
+    'vatDeduction15Label': {
+      AppLanguage.en: 'Less: 15% VAT (Wash & Delivery)',
+      AppLanguage.om: 'Hir\'isa: VAT 15% (Dhiqaa fi Geessuu)',
+      AppLanguage.am: 'ተቀናሽ: 15% ተ.እ.ታ (እጥበት እና ማድረስ)',
+    },
+    'netTaxableWashRevenue': {
+      AppLanguage.en: 'Net Revenue (Excl. 15% VAT)',
+      AppLanguage.om: 'Galii Qulqulluu (VAT 15% Booda)',
+      AppLanguage.am: 'የተጣራ ገቢ (15% ተ.እ.ታ ከተቀነሰ በኋላ)',
+    },
+    'directAssignedTip': {
+      AppLanguage.en: 'Direct Tip',
+      AppLanguage.om: 'Tippii Kallattii',
+      AppLanguage.am: 'ቀጥተኛ ቲፕ',
+    },
+    'newOnlineBookingAlertTitle': {
+      AppLanguage.en: 'New Online Booking Received!',
+      AppLanguage.om: 'Ajajni Toora Interneetii Haaraan Dhufeera!',
+      AppLanguage.am: 'አዲስ የኦንላይን ትዕዛዝ ደርሷል!',
+    },
+    'acknowledgeAlert': {
+      AppLanguage.en: 'Dismiss',
+      AppLanguage.om: 'Cufi',
+      AppLanguage.am: 'አጥፋ',
+    },
+    'deliveryModeLabel': {
+      AppLanguage.en: 'Service Delivery Mode',
+      AppLanguage.om: 'Haala Kenniinsa Tajaajilaa',
+      AppLanguage.am: 'የአገልግሎት አሰጣጥ ሁኔታ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

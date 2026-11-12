@@ -171,10 +171,11 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final effectivePackage = _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null);
-    final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
-    final carPrice = _useCustomChecklist
+    final deliveryAddonFee = state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double;
+    final carpetPrice = (_carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType)) + deliveryAddonFee;
+    final carPrice = (_useCustomChecklist
         ? _calculateCustomTotal(state)
-        : (effectivePackage?.getPriceFor(_selectedCarType) ?? 0.0);
+        : (effectivePackage?.getPriceFor(_selectedCarType) ?? 0.0)) + deliveryAddonFee;
     final currentPrice = widget.initialCustomPrice ?? (_isCarpet ? carpetPrice : carPrice);
     final grandTotal = currentPrice + _tipAmount;
 
@@ -343,6 +344,13 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   ),
                 ],
               ),
+              if ((state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double) > 0) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '${state.tr("deliveryAddonIncluded")}: +${CurrencyFormatter.format(state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double)}',
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary),
+                ),
+              ],
               const SizedBox(height: 8),
               const NegotiablePriceBadge(),
             ],
@@ -1001,10 +1009,11 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
           ? _gpsController.text.trim()
           : null;
 
-      final carpetPrice = _carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType);
-      final carPrice = _useCustomChecklist
+      final deliveryAddonFee = state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double;
+      final carpetPrice = (_carpetArea * state.getCarpetPricePerSqM(_carpetType, _selectedServiceType)) + deliveryAddonFee;
+      final carPrice = (_useCustomChecklist
           ? _calculateCustomTotal(state)
-          : (activePackage?.getPriceFor(_selectedCarType) ?? 0.0);
+          : (activePackage?.getPriceFor(_selectedCarType) ?? 0.0)) + deliveryAddonFee;
       final totalPrice = widget.initialCustomPrice ?? (_isCarpet ? carpetPrice : carPrice);
 
       List<String>? selectedServiceNames;

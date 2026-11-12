@@ -12,7 +12,6 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booki
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
-import 'package:bishe_car_wash/features/customer/presentation/screens/booking_history_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable_price_badge.dart';
@@ -130,42 +129,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
                     _buildActiveWashCard(context, state, matchingActiveWash)
                   else
                     _buildVehicleLookupCard(context, state, isCarpet: !isCarDivision),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BookingHistoryScreen(
-                              initialCarpetFilter: !isCarDivision,
-                              lockDivision: true,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: Icon(
-                        isCarDivision ? Icons.history_rounded : Icons.texture_rounded,
-                        size: 16,
-                        color: isCarDivision ? AppColors.primary : const Color(0xFF4F46E5),
-                      ),
-                      label: Text(
-                        isCarDivision ? state.tr('myCarWashes') : state.tr('myCarpetCleanings'),
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w800,
-                          color: isCarDivision ? AppColors.primary : const Color(0xFF4F46E5),
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(color: AppColors.cardBorder),
-                        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 14),
 
                   // 4. Community Help: Call to Book Card

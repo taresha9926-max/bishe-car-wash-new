@@ -145,8 +145,10 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         .fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
     final cashRevenue = serviceCash + showerCash;
     final digitalRevenue = grossRevenue - cashRevenue;
-    final commissionDeducted = ((carRevenue + carpetRevenue) * state.teamCommissionRate) + totalTips;
-    final netStationProfit = grossRevenue - commissionDeducted;
+    final vatDeducted = (carRevenue + carpetRevenue) * 0.15;
+    final netServiceRevenue = (carRevenue + carpetRevenue) - vatDeducted;
+    final commissionDeducted = (netServiceRevenue * state.teamCommissionRate) + totalTips;
+    final netStationProfit = (grossRevenue - vatDeducted) - commissionDeducted;
 
     final periodPettyCash = state.pettyCashExpenses
         .where((e) => inRange(e.loggedAt))
@@ -199,6 +201,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           table: _buildCollectionsTable(
             state: state,
             grossRevenue: grossRevenue,
+            vatDeducted: vatDeducted,
             cashRevenue: cashRevenue,
             digitalRevenue: digitalRevenue,
             commissionDeducted: commissionDeducted,
@@ -218,6 +221,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
             isMobile: isMobile,
             periodSubtitle: rangeCaption,
             totalRevenue: grossRevenue,
+            vatDeducted: vatDeducted,
             commissionPool: commissionDeducted,
             totalPettyCash: periodPettyCash,
             totalSupplies: periodSupplies,
@@ -430,6 +434,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   Widget _buildCollectionsTable({
     required dynamic state,
     required double grossRevenue,
+    required double vatDeducted,
     required double cashRevenue,
     required double digitalRevenue,
     required double commissionDeducted,
@@ -441,6 +446,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   }) {
     final rows = [
       (label: state.tr('totalRevenue'), detail: '$carCount Cars • $carpetCount Carpets', amount: CurrencyFormatter.format(grossRevenue), color: AppColors.primary),
+      (label: state.tr('vatDeduction15Label'), detail: '15% Wash & Delivery VAT', amount: '- ${CurrencyFormatter.format(vatDeducted)}', color: Colors.deepPurple),
       (label: state.tr('cashCollected'), detail: state.tr('cashCollected'), amount: CurrencyFormatter.format(cashRevenue), color: AppColors.cashGreen),
       (label: state.tr('digitalPay'), detail: 'Telebirr / CBE / Bank', amount: CurrencyFormatter.format(digitalRevenue), color: AppColors.telebirrBlue),
       (label: state.tr('washerCommissionDeducted'), detail: state.tr('disburseCommission'), amount: '- ${CurrencyFormatter.format(commissionDeducted)}', color: AppColors.oromiaGold),

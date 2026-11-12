@@ -59,6 +59,8 @@ abstract class IPricingRepository {
   Future<void> updatePackagePrice(String packageId, CarType carType, double newPrice);
   Future<List<CarWashServiceItem>> getServiceItems();
   Future<void> saveServiceItems(List<CarWashServiceItem> items);
+  Future<Map<String, dynamic>> getPricingAndCommissionConfig();
+  Future<void> savePricingAndCommissionConfig(Map<String, dynamic> config);
 }
 
 /// Domain port for staff personnel, commission ledgers, and role credentials.

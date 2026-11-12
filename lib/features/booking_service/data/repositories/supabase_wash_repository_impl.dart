@@ -778,7 +778,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           final washerName = (booking.assignedWasherName != null && booking.assignedWasherName!.trim().isNotEmpty)
               ? booking.assignedWasherName!.trim()
               : 'Team Washers';
-          final commissionEarned = booking.totalPrice * 0.15;
+          final commissionEarned = (booking.totalPrice * 0.85) * 0.15;
 
           await _post('commission_logs', {
             'booking_id': _isUuid(booking.id) ? booking.id : null,
@@ -909,7 +909,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             final washerName = (booking.assignedWasherName != null && booking.assignedWasherName!.trim().isNotEmpty)
                 ? booking.assignedWasherName!.trim()
                 : 'Team Washers';
-            final commissionEarned = (amount * 0.15) + tipAmount;
+            final commissionEarned = ((amount * 0.85) * 0.15) + tipAmount;
 
             try {
               await _post('commission_logs', {
@@ -1533,6 +1533,28 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     final jsonPayload = jsonEncode(feedbackList.map((f) => f.toMap()).toList());
     await _saveStaffConfigPayload('app_config_customer_feedback', jsonPayload);
     await _fallbackLocalRepo.saveCustomerFeedback(feedbackList);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getPricingAndCommissionConfig() async {
+    final rawJson = await _getStaffConfigPayload('app_config_pricing_rules');
+    if (rawJson != null) {
+      try {
+        final dynamic decoded = jsonDecode(rawJson);
+        if (decoded is Map) {
+          return Map<String, dynamic>.from(decoded);
+        }
+      } catch (e) {
+        debugPrint('Supabase decode pricing config exception: $e');
+      }
+    }
+    return _fallbackLocalRepo.getPricingAndCommissionConfig();
+  }
+
+  @override
+  Future<void> savePricingAndCommissionConfig(Map<String, dynamic> config) async {
+    await _saveStaffConfigPayload('app_config_pricing_rules', jsonEncode(config));
+    await _fallbackLocalRepo.savePricingAndCommissionConfig(config);
   }
 
   @override

@@ -4,6 +4,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/closing_sync_warning_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
+import '../../../../core/widgets/online_booking_alert_banner.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
@@ -194,6 +195,7 @@ class _OperationalManagerDashboardScreenState
 
     return Column(
       children: [
+        const OnlineBookingAlertBanner(),
         if (pendingCashier != null) ...[
           _buildPendingCashierOtpCard(context, state, pendingCashier, isMobile),
           const SizedBox(height: 12),

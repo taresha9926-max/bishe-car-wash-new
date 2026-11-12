@@ -71,7 +71,8 @@ void main() {
       await state.updateWashStatus(b1.id, WashStatus.completed);
       await state.processPayment(bookingId: b1.id, method: PaymentMethod.cash, amount: 1000);
 
-      expect(state.teamCommissionPoolTodayETB, 150.0);
+      // Post-15%-VAT commission: 1000 * 0.85 * 0.15 = 127.5
+      expect(state.teamCommissionPoolTodayETB, 127.5);
       expect(state.requiresDailyCommissionDisbursementBeforeClosing, isTrue);
 
       state.markDailyCommissionDisbursed();
@@ -91,8 +92,9 @@ void main() {
       await state.updateWashStatus(b2.id, WashStatus.completed);
       await state.processPayment(bookingId: b2.id, method: PaymentMethod.cash, amount: 500);
 
-      expect(state.teamCommissionPoolTodayETB, 225.0);
-      expect(state.undisbursedCommissionPoolTodayETB, 75.0);
+      // Post-15%-VAT total: 1500 * 0.85 * 0.15 = 191.25 (additional 63.75)
+      expect(state.teamCommissionPoolTodayETB, 191.25);
+      expect(state.undisbursedCommissionPoolTodayETB, 63.75);
       expect(state.requiresDailyCommissionDisbursementBeforeClosing, isTrue);
 
       state.markDailyCommissionDisbursed();

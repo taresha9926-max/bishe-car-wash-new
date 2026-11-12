@@ -13,6 +13,7 @@ import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_package.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../customer/presentation/widgets/car_type_selector.dart';
+import '../widgets/staff_intake_helpers.dart';
 
 class PhoneBookingDialog extends StatefulWidget {
   final bool? initialCarpetMode;
@@ -53,6 +54,18 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
   bool _useCustomChecklist = true;
   final Set<String> _selectedServiceIds = {'srv_body_wash', 'srv_tire_clean'};
   final _negotiatedPriceController = TextEditingController();
+  String? _selectedWasherId;
+  String? _selectedWasherName;
+
+  double _baseWashSuggested(dynamic state) => _useCustomChecklist
+      ? _calculateSuggestedServicesTotal(state)
+      : (_selectedPackage?.getPriceFor(_carType) ?? 0.0);
+
+  void _syncNegotiatedPriceController(dynamic state) {
+    final base = _baseWashSuggested(state);
+    final addon = state.getDeliveryAddonFee(_serviceType, isCarpet: false) as double;
+    _negotiatedPriceController.text = (base + addon).toStringAsFixed(0);
+  }
 
   String _selectedBishoftuArea = AppConstants.bishoftuAreas.first;
   bool _isSubmitting = false;
@@ -105,12 +118,13 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
     }
 
     final carpetRate = state.getCarpetPricePerSqM(_carpetType, _serviceType);
-    final carpetPrice = _carpetArea * carpetRate;
-    final suggestedServicesTotal = _calculateSuggestedServicesTotal(state);
+    final carpetAddonFee = state.getDeliveryAddonFee(_serviceType, isCarpet: true) as double;
+    final carAddonFee = state.getDeliveryAddonFee(_serviceType, isCarpet: false) as double;
+    final carpetPrice = (_carpetArea * carpetRate) + carpetAddonFee;
+    final baseWashSuggested = _baseWashSuggested(state);
+    final suggestedServicesTotal = baseWashSuggested + carAddonFee;
     final enteredNegotiated = double.tryParse(_negotiatedPriceController.text.trim());
-    final washPrice = _useCustomChecklist
-        ? (enteredNegotiated ?? suggestedServicesTotal)
-        : (_selectedPackage?.getPriceFor(_carType) ?? 0.0);
+    final washPrice = enteredNegotiated ?? suggestedServicesTotal;
     final price = _isCarpetMode ? carpetPrice : washPrice;
 
     return Dialog(
@@ -436,7 +450,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           selectedType: _carType,
                           onSelected: (t) => setState(() {
                             _carType = t;
-                            _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                            _syncNegotiatedPriceController(state);
                           }),
                         ),
                         const SizedBox(height: 14),
@@ -446,7 +460,10 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           children: [
                             Expanded(
                               child: GestureDetector(
-                                onTap: () => setState(() => _useCustomChecklist = true),
+                                onTap: () => setState(() {
+                                  _useCustomChecklist = true;
+                                  _syncNegotiatedPriceController(state);
+                                }),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(vertical: 8),
                                   decoration: BoxDecoration(
@@ -478,7 +495,13 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                             const SizedBox(width: 6),
                             Expanded(
                               child: GestureDetector(
-                                onTap: () => setState(() => _useCustomChecklist = false),
+                                onTap: () => setState(() {
+                                  _useCustomChecklist = false;
+                                  if (_selectedPackage == null && packages.isNotEmpty) {
+                                    _selectedPackage = packages.first;
+                                  }
+                                  _syncNegotiatedPriceController(state);
+                                }),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(vertical: 8),
                                   decoration: BoxDecoration(
@@ -571,59 +594,12 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                       } else {
                                         _selectedServiceIds.remove(item.id);
                                       }
-                                      _negotiatedPriceController.text = _calculateSuggestedServicesTotal(state).toStringAsFixed(0);
+                                      _syncNegotiatedPriceController(state);
                                     });
                                   },
                                 );
                               }).toList(),
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Negotiated Price Card
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceVariant,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.cardBorder),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: CustomTextField(
-                                    controller: _negotiatedPriceController,
-                                    label: state.tr('negotiatedTotalPrice'),
-                                    hint: suggestedServicesTotal.toStringAsFixed(0),
-                                    keyboardType: TextInputType.number,
-                                    prefixIcon: Icons.handshake_outlined,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: AppColors.primaryDark,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: const BorderSide(color: AppColors.cardBorder),
-                                    ),
-                                  ),
-                                  icon: const Icon(Icons.sync, size: 14),
-                                  label: Text(
-                                    state.tr('useSuggestedPrice'),
-                                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _negotiatedPriceController.text = suggestedServicesTotal.toStringAsFixed(0);
-                                    });
-                                  },
-                                ),
-                              ],
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -679,14 +655,24 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                         (p) => p.id == id,
                                         orElse: () => packages.first,
                                       );
+                                      _syncNegotiatedPriceController(state);
                                     });
                                   }
                                 },
                               ),
                             ),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 12),
                         ],
+                        StaffNegotiatedPriceCard(
+                          state: state,
+                          controller: _negotiatedPriceController,
+                          baseSuggestedPrice: baseWashSuggested,
+                          deliveryAddonFee: carAddonFee,
+                          onUseSuggested: () => setState(() => _syncNegotiatedPriceController(state)),
+                          onChanged: () => setState(() {}),
+                        ),
+                        const SizedBox(height: 14),
                       ],
 
                       // 3. Service Delivery Mode (At Station vs At Home Van vs VIP Driver Pick-up & Return)
@@ -743,6 +729,18 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Assign Washer During Booking (Customer tips go 100% to assigned washer)
+                      StaffWasherPickerCard(
+                        state: state,
+                        washers: state.availableWashers,
+                        selectedWasherId: _selectedWasherId,
+                        onChanged: (washer) => setState(() {
+                          _selectedWasherId = washer?.id;
+                          _selectedWasherName = washer?.name;
+                        }),
+                      ),
+                      const SizedBox(height: 14),
+
                       // Summary Price Card
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -796,8 +794,15 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
     required Color color,
   }) {
     final selected = _serviceType == type;
+    final state = AppStateProvider.of(context);
+    final addonFee = state.getDeliveryAddonFee(type, isCarpet: _isCarpetMode) as double;
     return InkWell(
-      onTap: () => setState(() => _serviceType = type),
+      onTap: () => setState(() {
+        _serviceType = type;
+        if (!_isCarpetMode) {
+          _syncNegotiatedPriceController(state);
+        }
+      }),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
@@ -828,6 +833,13 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                     subtitle,
                     style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary, height: 1.25),
                   ),
+                  if (addonFee > 0) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      '+ ${CurrencyFormatter.format(addonFee)} (${state.tr("oncePerOrderTag")})',
+                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: color),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -874,9 +886,12 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
           : null;
 
       final carpetRate = state.getCarpetPricePerSqM(_carpetType, _serviceType);
-      final carpetPrice = _carpetArea * carpetRate;
+      final carpetAddonFee = state.getDeliveryAddonFee(_serviceType, isCarpet: true) as double;
+      final carpetPrice = (_carpetArea * carpetRate) + carpetAddonFee;
 
-      final suggestedServicesTotal = _calculateSuggestedServicesTotal(state);
+      final carAddonFee = state.getDeliveryAddonFee(_serviceType, isCarpet: false) as double;
+      final baseWashSuggested = _baseWashSuggested(state);
+      final suggestedServicesTotal = baseWashSuggested + carAddonFee;
       final negotiatedPrice = double.tryParse(_negotiatedPriceController.text.trim()) ?? suggestedServicesTotal;
       final selectedServiceNames = _useCustomChecklist
           ? state.activeServiceItems
@@ -900,8 +915,10 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
         carpetType: _isCarpetMode ? _carpetType : null,
         carpetAreaSqMeters: _isCarpetMode ? _carpetArea : null,
         carpetDimensions: _isCarpetMode ? '${_lengthController.text.trim()}m x ${_widthController.text.trim()}m' : null,
-        customTotalPrice: _isCarpetMode ? carpetPrice : (_useCustomChecklist ? negotiatedPrice : null),
+        customTotalPrice: _isCarpetMode ? carpetPrice : negotiatedPrice,
         selectedServices: selectedServiceNames,
+        assignedWasherId: _selectedWasherId,
+        assignedWasherName: _selectedWasherName,
       );
 
       if (_isCarpetMode) {

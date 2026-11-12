@@ -306,8 +306,8 @@ void main() {
         amount: price,
       );
 
-      // 1. Total commission pool automatically updates (15% of price)
-      final expectedCommission = price * 0.15;
+      // 1. Total commission pool automatically updates (15% of post-15%-VAT price)
+      final expectedCommission = price * 0.85 * 0.15;
       expect(state.teamCommissionPoolTodayETB, equals(expectedCommission));
 
       // 2. Commission log is automatically recorded
