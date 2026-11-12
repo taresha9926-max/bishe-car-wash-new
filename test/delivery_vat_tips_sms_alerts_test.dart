@@ -106,8 +106,8 @@ void main() {
 
       for (final lang in ['EN', 'OM', 'AM']) {
         state.setLanguage(lang);
-        expect(state.getCustomerCompletionSmsText(b), contains('https://bishecarwash.vercel.app'));
-        expect(state.getCarpetRegistrationSmsText(b), contains('https://bishecarwash.vercel.app'));
+        expect(state.getCustomerCompletionSmsText(b), endsWith('\nhttps://bishecarwash.vercel.app'));
+        expect(state.getCarpetRegistrationSmsText(b), endsWith('\nhttps://bishecarwash.vercel.app'));
       }
     });
 

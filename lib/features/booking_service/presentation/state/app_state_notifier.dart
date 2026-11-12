@@ -2358,6 +2358,15 @@ class AppStateNotifier extends ChangeNotifier {
 
   static const String webAppUrl = 'https://bishecarwash.vercel.app';
 
+  String _smsWebLinkFooter() {
+    if (currentLang == 'OM') {
+      return '\n\n📲 🌐 AJAJA TOORA INTERNEETII FI YAADAAF LINKII ARMAAN GADII TUQAA 👇\n$webAppUrl';
+    } else if (currentLang == 'AM') {
+      return '\n\n📲 🌐 ለኦንላይን ትዕዛዝ እና አስተያየት ከታች ያለውን ሊንክ ይጫኑ 👇\n$webAppUrl';
+    }
+    return '\n\n📲 🌐 TAP LINK BELOW TO BOOK ONLINE & SEND FEEDBACK 👇\n$webAppUrl';
+  }
+
   /// Registration & Intake SMS notifying customer of their carpet tracking tag
   String getCarpetRegistrationSmsText(WashBooking booking) {
     final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
@@ -2365,14 +2374,15 @@ class AppStateNotifier extends ChangeNotifier {
     final cType = booking.carpetType == 'type_b' ? 'Deep Clean (Type B)' : 'Standard Clean (Type A)';
     final dims = booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? ' (${booking.carpetDimensions})' : '';
     final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
+    final footer = _smsWebLinkFooter();
 
     if (currentLang == 'OM') {
-      return 'Kabajamaa $customerName, ajajni qulqulleessuu kiliimii keessanii (Koodii Galmee: $tag, $cType$dims) galmaa\'eera. Gatiin waliigalaa: $amountStr. Yommuu xumuramu isin beeksifna. Ajaja toora interneetii fi yaadaaf: $webAppUrl - Bishe Car Wash & Carpet Cleaning!';
+      return 'Kabajamaa $customerName, ajajni qulqulleessuu kiliimii keessanii (Koodii Galmee: $tag, $cType$dims) galmaa\'eera. Gatiin waliigalaa: $amountStr. Yommuu xumuramu isin beeksifna. - Bishe Service$footer';
     } else if (currentLang == 'AM') {
-      return 'ውድ $customerName፣ የካርፔት ማጠቢያ ትዕዛዝዎ (መለያ: $tag፣ $cType$dims) ተመዝግቧል። ጠቅላላ ዋጋ: $amountStr። ሲጠናቀቅ እናሳውቅዎታለን። ለኦንላይን ትዕዛዝ እና አስተያየት: $webAppUrl - ቢሼ ካርፔት ማጠቢያ!';
+      return 'ውድ $customerName፣ የካርፔት ማጠቢያ ትዕዛዝዎ (መለያ: $tag፣ $cType$dims) ተመዝግቧል። ጠቅላላ ዋጋ: $amountStr። ሲጠናቀቅ እናሳውቅዎታለን። - ቢሼ$footer';
     }
 
-    return 'Dear $customerName, your carpet cleaning order is registered (Tag: $tag, $cType$dims). Estimated Total: $amountStr. We will notify you once ready. Book online & share feedback: $webAppUrl — Bishe Carpet Cleaning Service!';
+    return 'Dear $customerName, your carpet cleaning order is registered (Tag: $tag, $cType$dims). Estimated Total: $amountStr. We will notify you once ready. - Bishe Carpet Cleaning Service$footer';
   }
 
   /// Dispatches intake/registration SMS to customer with carpet tag number
@@ -2410,29 +2420,30 @@ class AppStateNotifier extends ChangeNotifier {
   String getCustomerCompletionSmsText(WashBooking booking) {
     final customerName = booking.customerName.isNotEmpty ? booking.customerName : 'Valued Customer';
     final amountStr = 'ETB ${booking.totalPrice.toStringAsFixed(2)}';
+    final footer = _smsWebLinkFooter();
     if (booking.isCarpet) {
       final tag = booking.licensePlate.isNotEmpty ? booking.licensePlate : booking.id;
       final cType = booking.carpetType == 'type_b' ? 'Deep Clean (Type B)' : 'Standard Clean (Type A)';
       final dims = booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? ' (${booking.carpetDimensions})' : '';
 
       if (currentLang == 'OM') {
-        return 'Kabajamaa $customerName, dhiqamuun kiliimii keessanii (Koodii: $tag, $cType$dims) guutummaatti xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Ajaja toora interneetii fi yaadaaf: $webAppUrl - Bishe Service!';
+        return 'Kabajamaa $customerName, dhiqamuun kiliimii keessanii (Koodii: $tag, $cType$dims) guutummaatti xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Galatoomaa!$footer';
       } else if (currentLang == 'AM') {
-        return 'ውድ $customerName፣ የካርፔት ማጠቢያ አገልግሎትዎ (መለያ: $tag፣ $cType$dims) ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው ይረከቡ። ለኦንላይን ትዕዛዝ እና አስተያየት: $webAppUrl - ቢሼ!';
+        return 'ውድ $customerName፣ የካርፔት ማጠቢያ አገልግሎትዎ (መለያ: $tag፣ $cType$dims) ተጠናቆ ዝግጁ ሆኗል። እባክዎ $amountStr ከፍለው ይረከቡ። እናመሰግናለን!$footer';
       }
 
-      return 'Dear $customerName, your carpet cleaning (Tag: $tag, $cType$dims) is completed and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe! Book online & leave feedback: $webAppUrl';
+      return 'Dear $customerName, your carpet cleaning (Tag: $tag, $cType$dims) is completed and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe!$footer';
     }
     final pkgName = booking.serviceDisplayName;
     final plate = booking.licensePlate;
 
     if (currentLang == 'OM') {
-      return 'Kabajamaa $customerName, tajaajilli dhiqaa konkolaataa keessanii ($pkgName, Gabatee: $plate) xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Ajaja toora interneetii fi yaadaaf: $webAppUrl - Galatoomaa!';
+      return 'Kabajamaa $customerName, tajaajilli dhiqaa konkolaataa keessanii ($pkgName, Gabatee: $plate) xumuramee qophii ta\'eera. Maaloo $amountStr kaffaluun fudhadhaa. Galatoomaa!$footer';
     } else if (currentLang == 'AM') {
-      return 'ውድ $customerName፣ የመኪና ማጠብ አገልግሎትዎ ($pkgName፣ ታርጋ: $plate) ተጠናቆ ዝግጁ ነው። እባክዎ $amountStr ከፍለው መኪናዎን ይረከቡ። ለኦንላይን ትዕዛዝ እና አስተያየት: $webAppUrl - እናመሰግናለን!';
+      return 'ውድ $customerName፣ የመኪና ማጠብ አገልግሎትዎ ($pkgName፣ ታርጋ: $plate) ተጠናቆ ዝግጁ ነው። እባክዎ $amountStr ከፍለው መኪናዎን ይረከቡ። እናመሰግናለን!$footer';
     }
 
-    return 'Dear $customerName, your car wash ($pkgName) for vehicle $plate is complete and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe Car Wash! Book online & leave feedback: $webAppUrl';
+    return 'Dear $customerName, your car wash ($pkgName) for vehicle $plate is complete and ready for pickup. Please pay $amountStr upon collection. Thank you for choosing Bishe Car Wash!$footer';
   }
 
   /// Dispatches completion SMS to customer using cashier's personal device SIM / SMS app
