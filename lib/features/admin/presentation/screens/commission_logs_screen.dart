@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../widgets/commission_item_card.dart';
 
@@ -29,6 +30,9 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(state.tr('commissionLogsTitle')),
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -90,39 +94,34 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
             const SizedBox(height: 18),
 
             // Washer Filter Bar
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  FilterChip(
-                    selected: _selectedWasherId == 'ALL',
-                    label: Text(state.tr('all')),
-                    onSelected: (_) => setState(() => _selectedWasherId = 'ALL'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilterChip(
+                  selected: _selectedWasherId == 'ALL',
+                  label: Text(state.tr('all')),
+                  onSelected: (_) => setState(() => _selectedWasherId = 'ALL'),
+                  selectedColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: _selectedWasherId == 'ALL' ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+                ...washers.map((w) {
+                  final isSel = _selectedWasherId == w.id;
+                  return FilterChip(
+                    selected: isSel,
+                    label: Text(w.name),
+                    onSelected: (_) => setState(() => _selectedWasherId = w.id),
                     selectedColor: AppColors.primary,
                     labelStyle: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: _selectedWasherId == 'ALL' ? Colors.white : AppColors.textPrimary,
+                      color: isSel ? Colors.white : AppColors.textPrimary,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  ...washers.map((w) {
-                    final isSel = _selectedWasherId == w.id;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        selected: isSel,
-                        label: Text(w.name),
-                        onSelected: (_) => setState(() => _selectedWasherId = w.id),
-                        selectedColor: AppColors.primary,
-                        labelStyle: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: isSel ? Colors.white : AppColors.textPrimary,
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              ),
+                  );
+                }),
+              ],
             ),
             const SizedBox(height: 16),
 

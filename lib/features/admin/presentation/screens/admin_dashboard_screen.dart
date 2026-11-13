@@ -890,79 +890,74 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   }
 
   Widget _buildTimeFilterBar(dynamic state) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: AdminTimeFilter.values.map((filter) {
-          final isSelected = filter == _selectedFilter;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () async {
-                  if (filter == AdminTimeFilter.customRange) {
-                    final now = DateTime.now();
-                    final picked = await showDateRangePicker(
-                      context: context,
-                      firstDate: DateTime(2022),
-                      lastDate: now.add(const Duration(days: 365)),
-                      initialDateRange: _selectedCustomRange ??
-                          DateTimeRange(
-                            start: now.subtract(const Duration(days: 7)),
-                            end: now,
-                          ),
-                    );
-                    if (picked != null && mounted) {
-                      setState(() {
-                        _selectedCustomRange = picked;
-                        _selectedFilter = AdminTimeFilter.customRange;
-                      });
-                    }
-                  } else {
-                    setState(() => _selectedFilter = filter);
-                  }
-                },
-                borderRadius: BorderRadius.circular(10),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected ? AppColors.primary : AppColors.cardBorder,
-                      width: isSelected ? 1.4 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (filter == AdminTimeFilter.customRange) ...[
-                        Icon(
-                          Icons.date_range_rounded,
-                          size: 15,
-                          color: isSelected ? Colors.white : AppColors.primary,
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      Text(
-                        filter.localizedLabel(state, _selectedCustomRange),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                          color: isSelected ? Colors.white : AppColors.textPrimary,
-                        ),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: AdminTimeFilter.values.map((filter) {
+        final isSelected = filter == _selectedFilter;
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () async {
+              if (filter == AdminTimeFilter.customRange) {
+                final now = DateTime.now();
+                final picked = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2022),
+                  lastDate: now.add(const Duration(days: 365)),
+                  initialDateRange: _selectedCustomRange ??
+                      DateTimeRange(
+                        start: now.subtract(const Duration(days: 7)),
+                        end: now,
                       ),
-                    ],
-                  ),
+                );
+                if (picked != null && mounted) {
+                  setState(() {
+                    _selectedCustomRange = picked;
+                    _selectedFilter = AdminTimeFilter.customRange;
+                  });
+                }
+              } else {
+                setState(() => _selectedFilter = filter);
+              }
+            },
+            borderRadius: BorderRadius.circular(10),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isSelected ? AppColors.primary : AppColors.cardBorder,
+                  width: isSelected ? 1.4 : 1,
                 ),
               ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (filter == AdminTimeFilter.customRange) ...[
+                    Icon(
+                      Icons.date_range_rounded,
+                      size: 15,
+                      color: isSelected ? Colors.white : AppColors.primary,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    filter.localizedLabel(state, _selectedCustomRange),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          );
-        }).toList(),
-      ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -1572,28 +1567,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             ),
           ],
           const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: reels.map((reel) {
-                return Container(
-                  margin: const EdgeInsets.only(right: 10),
-                  width: 130,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.cardBorder),
-                  ),
-                  child: Text(
-                    reel.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                  ),
-                );
-              }).toList(),
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: reels.map((reel) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: Text(
+                  reel.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),

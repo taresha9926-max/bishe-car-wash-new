@@ -1,8 +1,10 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/receipt_image_helper.dart';
 import '../../../../core/widgets/financial_pnl_statement_card.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../admin/domain/models/bank_deposit_record.dart';
 import '../../../admin/domain/models/daily_financial_closing.dart';
@@ -180,6 +182,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           icon: Icons.assessment_rounded,
           accentColor: AppColors.primary,
           table: _buildDivisionTable(
+            context: context,
             state: state,
             carRevenue: carRevenue,
             carCount: periodCarBookings.length,
@@ -199,6 +202,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           icon: Icons.table_chart_rounded,
           accentColor: AppColors.cashGreen,
           table: _buildCollectionsTable(
+            context: context,
             state: state,
             grossRevenue: grossRevenue,
             vatDeducted: vatDeducted,
@@ -250,6 +254,9 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
       ),
       body: Center(
         child: ConstrainedBox(
@@ -267,18 +274,18 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   }
 
   Widget _buildFilterBar(BuildContext context, dynamic state) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
         children: FinancialReportFilter.values.map((filter) {
           final isSelected = filter == _periodFilter;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
+          return ChoiceChip(
               label: Text(
                 filter == FinancialReportFilter.customRange && _customRange != null
-                    ? '${_customRange!.start.day}/${_customRange!.start.month} - ${_customRange!.end.day}/${_customRange!.end.month}'
+                    ? '${_customRange!.start.day}/${_customRange!.start.month}/${_customRange!.start.year} - ${_customRange!.end.day}/${_customRange!.end.month}/${_customRange!.end.year}'
                     : filter.localizedLabel(state),
                 style: TextStyle(
                   fontSize: 12,
@@ -316,11 +323,10 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                   setState(() => _periodFilter = filter);
                 }
               },
-            ),
-          );
-        }).toList(),
-      ),
-    );
+            );
+          }).toList(),
+        ),
+      );
   }
 
   Widget _buildTabularSectionCard({
@@ -392,6 +398,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   }
 
   Widget _buildDivisionTable({
+    required BuildContext context,
     required dynamic state,
     required double carRevenue,
     required int carCount,
@@ -408,6 +415,35 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
       if (tipsTotal > 0)
         (label: state.tr('washerTipsSubtotal'), detail: '100% Washers', amount: CurrencyFormatter.format(tipsTotal), color: Colors.amber.shade900),
     ];
+
+    final isMobile = ResponsiveLayout.isMobile(context);
+    if (isMobile) {
+      return Column(
+        children: rows.map((r) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: AppColors.cardBorder, width: 0.6)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(r.label, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: r.color)),
+                    const SizedBox(height: 2),
+                    Text(r.detail, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(r.amount, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: r.color)),
+            ],
+          ),
+        )).toList(),
+      );
+    }
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -432,6 +468,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   }
 
   Widget _buildCollectionsTable({
+    required BuildContext context,
     required dynamic state,
     required double grossRevenue,
     required double vatDeducted,
@@ -454,6 +491,35 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         (label: state.tr('netStationProfit'), detail: state.tr('afterPayrollCuts'), amount: CurrencyFormatter.format(netStationProfit), color: AppColors.statusCompleted),
       (label: state.tr('bankDepositsLog'), detail: '$depositCount Deposits', amount: CurrencyFormatter.format(totalCashDeposited), color: Colors.indigo),
     ];
+
+    final isMobile = ResponsiveLayout.isMobile(context);
+    if (isMobile) {
+      return Column(
+        children: rows.map((r) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: AppColors.cardBorder, width: 0.6)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(r.label, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: r.color)),
+                    const SizedBox(height: 2),
+                    Text(r.detail, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(r.amount, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: r.color)),
+            ],
+          ),
+        )).toList(),
+      );
+    }
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -497,7 +563,70 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                 ),
               ),
             )
-          : SingleChildScrollView(
+          : ResponsiveLayout.isMobile(context)
+              ? Column(
+                  children: closings.map((c) {
+                    final dateStr =
+                        '${c.closingDate.year}-${c.closingDate.month.toString().padLeft(2, '0')}-${c.closingDate.day.toString().padLeft(2, '0')}';
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceVariant.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.cardBorder, width: 0.8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(dateStr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text('${c.shiftType.toUpperCase()} • ${c.cashierName}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Gross: ${CurrencyFormatter.formatShort(c.grossRevenue)} (${c.carsWashedCount} cars)', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                              Text('Cash: ${CurrencyFormatter.formatShort(c.cashRevenue)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.cashGreen)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Digital: ${CurrencyFormatter.formatShort(c.digitalRevenue)}', style: const TextStyle(fontSize: 11.5, color: AppColors.telebirrBlue, fontWeight: FontWeight.w600)),
+                              Text('Comm: -${CurrencyFormatter.formatShort(c.commissionPool)}', style: const TextStyle(fontSize: 11.5, color: AppColors.oromiaGold, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Bank Dep: ${CurrencyFormatter.formatShort(c.cashDeposited)}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.indigo)),
+                              TextButton(
+                                onPressed: () => _showClosingDetailModal(context, c),
+                                style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2)),
+                                child: const Text('View Details →', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                )
+              : SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
@@ -563,7 +692,49 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                 ),
               ),
             )
-          : SingleChildScrollView(
+          : ResponsiveLayout.isMobile(context)
+              ? Column(
+                  children: deposits.map((d) {
+                    final isAccountB = d.accountKey == 'account_b';
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceVariant.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.cardBorder, width: 0.8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(isAccountB ? 'Account B (Awash)' : 'Account A (CBE)', style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.indigo)),
+                              Text(CurrencyFormatter.format(d.amount), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.cashGreen)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text('Slip Ref: ${d.referenceSlipNumber} • By ${d.cashierName}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(d.depositedAt.toString().substring(0, 16), style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                              TextButton.icon(
+                                onPressed: () => _showReceiptSlipModal(context, d),
+                                style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: EdgeInsets.zero),
+                                icon: const Icon(Icons.image_outlined, size: 13),
+                                label: Text(state.tr('viewDepositReceipt'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                )
+              : SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),
@@ -615,7 +786,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           ],
         ),
         content: SizedBox(
-          width: 480,
+          width: math.min(480.0, MediaQuery.sizeOf(ctx).width - 32),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -713,7 +884,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
           ],
         ),
         content: SizedBox(
-          width: 440,
+          width: math.min(440.0, MediaQuery.sizeOf(ctx).width - 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

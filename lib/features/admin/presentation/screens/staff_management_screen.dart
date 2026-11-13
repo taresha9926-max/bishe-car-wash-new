@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../admin/domain/models/staff_member.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
@@ -17,6 +18,9 @@ class StaffManagementScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(state.tr('staffManagementTitle')),
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primary,

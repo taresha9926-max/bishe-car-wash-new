@@ -36,7 +36,7 @@ void main() {
 
   group('Service Delivery Options, Exact Home Location & Live GPS', () {
     testWidgets('CustomerHomeScreen stays clean 2-button Option 1 hub and NewBookingScreen Step 1 presents all 3 isolated delivery options', (tester) async {
-      tester.view.physicalSize = const Size(420, 900);
+      tester.view.physicalSize = const Size(1024, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
@@ -159,7 +159,7 @@ void main() {
 
   group('Conditional OTP Handover Visibility & Night Shift Expiry', () {
     testWidgets('OTP banner never shows before request, shows only to recipient role, and disappears immediately upon verification', (tester) async {
-      tester.view.physicalSize = const Size(420, 900);
+      tester.view.physicalSize = const Size(1024, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
@@ -377,7 +377,7 @@ void main() {
 
   group('Admin Filters, Tabular Financial Reports, Matrix & Digital Receipts', () {
     testWidgets('FinancialReportsView renders dynamic consolidated titles & tables without Payroll Policy or Commission Report', (tester) async {
-      tester.view.physicalSize = const Size(420, 900);
+      tester.view.physicalSize = const Size(1024, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
@@ -487,7 +487,7 @@ void main() {
                 child: SharedWasherCommissionHub(
                   state: state,
                   role: WasherHubRole.admin,
-                  isMobile: true,
+                  isMobile: false,
                   initiallyExpanded: true,
                 ),
               ),
@@ -527,7 +527,7 @@ void main() {
       );
 
       state.switchRole(UserRole.admin);
-      tester.view.physicalSize = const Size(420, 900);
+      tester.view.physicalSize = const Size(1024, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 

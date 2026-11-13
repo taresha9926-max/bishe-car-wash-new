@@ -5,6 +5,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../admin/domain/models/staff_member.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/car_type.dart';
@@ -134,6 +135,9 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(state.tr('walkInTitle')),
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
       ),
       body: Form(
         key: _formKey,

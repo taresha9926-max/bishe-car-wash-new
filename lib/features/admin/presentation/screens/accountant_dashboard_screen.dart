@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -214,27 +215,23 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           const SizedBox(height: 14),
 
           // Date Filter Toolbar
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: ['All', 'Today', 'This Week', 'This Month'].map((range) {
-                final isSel = _auditDateRange == range;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(range == 'All' ? 'All Time' : range),
-                    selected: isSel,
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w700,
-                      color: isSel ? Colors.white : AppColors.textPrimary,
-                    ),
-                    onSelected: (_) => setState(() => _auditDateRange = range),
-                  ),
-                );
-              }).toList(),
-            ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: ['All', 'Today', 'This Week', 'This Month'].map((range) {
+              final isSel = _auditDateRange == range;
+              return ChoiceChip(
+                label: Text(range == 'All' ? 'All Time' : range),
+                selected: isSel,
+                selectedColor: AppColors.primary,
+                labelStyle: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: isSel ? Colors.white : AppColors.textPrimary,
+                ),
+                onSelected: (_) => setState(() => _auditDateRange = range),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 16),
 
@@ -773,7 +770,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       builder: (ctx) => AlertDialog(
         title: Text('Digital Receipts (${date.day}/${date.month}/${date.year})', style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800)),
         content: SizedBox(
-          width: 450,
+          width: math.min(450.0, MediaQuery.sizeOf(ctx).width - 32),
           child: bookings.isEmpty
               ? const Padding(padding: EdgeInsets.all(16), child: Text('No digital payments recorded for this date.'))
               : ListView.separated(

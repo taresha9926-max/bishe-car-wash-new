@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import '../../../../core/widgets/expandable_action_card.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -363,7 +364,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               ],
             ),
             content: SizedBox(
-              width: 440,
+              width: math.min(440.0, MediaQuery.sizeOf(ctx).width - 32),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -991,10 +992,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           ),
         ),
         // Filter chips
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Row(
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
             children: ['All', 'operational', 'needsService', 'underRepair', 'decommissioned'].map((cond) {
               final isSel = _assetFilter == cond;
               String label = cond;
@@ -1003,15 +1005,12 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               if (cond == 'underRepair') label = 'Under Repair';
               if (cond == 'decommissioned') label = 'Decommissioned';
 
-              return Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: FilterChip(
-                  label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600)),
-                  selected: isSel,
-                  onSelected: (_) => setState(() => _assetFilter = cond),
-                  selectedColor: AppColors.primary.withOpacity(0.18),
-                  checkmarkColor: AppColors.primary,
-                ),
+              return FilterChip(
+                label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600)),
+                selected: isSel,
+                onSelected: (_) => setState(() => _assetFilter = cond),
+                selectedColor: AppColors.primary.withOpacity(0.18),
+                checkmarkColor: AppColors.primary,
               );
             }).toList(),
           ),
@@ -1171,7 +1170,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Morning Handover to Team Leader', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
         content: SizedBox(
-          width: 480,
+          width: math.min(480.0, MediaQuery.sizeOf(ctx).width - 32),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1259,7 +1258,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           ],
         ),
         content: SizedBox(
-          width: 480,
+          width: math.min(480.0, MediaQuery.sizeOf(ctx).width - 32),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1398,7 +1397,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               ],
             ),
             content: SizedBox(
-              width: 440,
+              width: math.min(440.0, MediaQuery.sizeOf(ctx).width - 32),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

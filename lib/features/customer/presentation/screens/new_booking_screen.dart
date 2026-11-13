@@ -5,6 +5,7 @@ import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/widgets/custom_button.dart';
 import 'package:bishe_car_wash/core/widgets/custom_text_field.dart';
+import 'package:bishe_car_wash/core/widgets/language_switcher_action.dart';
 import 'package:bishe_car_wash/core/widgets/service_location_picker_card.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_wash_service_item.dart';
@@ -183,6 +184,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(_isCarpet ? state.tr('washMyCarpetTitle') : state.tr('washMyCarTitle')),
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
         elevation: 0,
       ),
       body: Form(

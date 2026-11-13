@@ -784,13 +784,105 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
         const SizedBox(height: 10),
 
         // Always render 7-Day Matrix in Tabular Mon-Sun form (daily commission ETB or 'A' if absent)
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: SingleChildScrollView(
+        isMobile
+            ? Column(
+                children: washers.map((w) {
+                  final dailyValues = List.generate(7, (dayIdx) {
+                    final dayDate = weekDays[dayIdx];
+                    final isPresent = state.isWasherPresentOnDate(w.id, dayDate) as bool;
+                    final earned = isPresent ? (state.getWasherCommissionForDate(w.id, dayDate) as double) : 0.0;
+                    return (isPresent: isPresent, earned: earned);
+                  });
+                  final computedWeekSum = dailyValues.fold<double>(0.0, (sum, d) => sum + d.earned);
+                  final weeklyComm = (_selectedWeekOffset == 0 && computedWeekSum <= 0)
+                      ? ((state.weeklyWasherCommissions as Map<String, double>)[w.name] ?? 0.0)
+                      : computedWeekSum;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.cardBorder),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundColor: AppColors.primary.withOpacity(0.1),
+                              child: Text(w.name.isNotEmpty ? w.name[0] : 'W', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Flexible(child: Text(w.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5), overflow: TextOverflow.ellipsis)),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                    decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(4)),
+                                    child: Text('T${w.skillSeniorityLevel}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.blue.shade900)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(CurrencyFormatter.format(weeklyComm), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Colors.green)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: List.generate(7, (i) {
+                            final d = dailyValues[i];
+                            return Expanded(
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: !d.isPresent ? Colors.red.shade50 : Colors.green.shade50,
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: !d.isPresent ? Colors.red.shade200 : Colors.green.shade200,
+                                    width: 0.6,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      dayLabels[i],
+                                      style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w700, color: Colors.grey.shade700),
+                                    ),
+                                    const SizedBox(height: 1),
+                                    Text(
+                                      !d.isPresent ? 'A' : CurrencyFormatter.formatShort(d.earned),
+                                      style: TextStyle(
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w900,
+                                        color: !d.isPresent ? Colors.red.shade800 : Colors.green.shade800,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              )
+            : Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
               headingRowColor: WidgetStateProperty.all(AppColors.surfaceVariant),

@@ -4,6 +4,7 @@ import '../../../../core/localization/app_strings.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../booking_service/domain/models/car_type.dart';
 import '../../../booking_service/domain/models/car_wash_service_item.dart';
 import '../../../booking_service/domain/models/service_type.dart';
@@ -50,6 +51,9 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(state.tr('masterPricingAndInventory')),
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
         elevation: 0,
       ),
       body: Column(
@@ -103,48 +107,45 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: List.generate(tabs.length, (index) {
-            final isSelected = _activeTab == index;
-            final item = tabs[index];
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                showCheckmark: false,
-                avatar: Icon(
-                  item['icon'] as IconData,
-                  size: 16,
-                  color: isSelected ? Colors.white : AppColors.primary,
-                ),
-                label: Text(
-                  '${item['label']} (${item['count']})',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                    color: isSelected ? Colors.white : AppColors.textPrimary,
-                  ),
-                ),
-                selected: isSelected,
-                selectedColor: AppColors.primary,
-                backgroundColor: AppColors.surfaceVariant,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(
-                    color: isSelected ? AppColors.primary : AppColors.cardBorder,
-                  ),
-                ),
-                onSelected: (_) {
-                  setState(() {
-                    _activeTab = index;
-                    _searchQuery = '';
-                  });
-                },
+      width: double.infinity,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: List.generate(tabs.length, (index) {
+          final isSelected = _activeTab == index;
+          final item = tabs[index];
+          return ChoiceChip(
+            showCheckmark: false,
+            avatar: Icon(
+              item['icon'] as IconData,
+              size: 16,
+              color: isSelected ? Colors.white : AppColors.primary,
+            ),
+            label: Text(
+              '${item['label']} (${item['count']})',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
               ),
-            );
-          }),
-        ),
+            ),
+            selected: isSelected,
+            selectedColor: AppColors.primary,
+            backgroundColor: AppColors.surfaceVariant,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(
+                color: isSelected ? AppColors.primary : AppColors.cardBorder,
+              ),
+            ),
+            onSelected: (_) {
+              setState(() {
+                _activeTab = index;
+                _searchQuery = '';
+              });
+            },
+          );
+        }),
       ),
     );
   }

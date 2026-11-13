@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'live_tracking_screen.dart';
@@ -47,6 +48,9 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0.5,
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
       ),
       body: Column(
         children: [

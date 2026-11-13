@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/widgets/language_switcher_action.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
@@ -404,6 +405,9 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
       ),
       body: credentials.isEmpty
           ? const Center(child: CircularProgressIndicator())

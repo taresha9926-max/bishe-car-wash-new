@@ -6,6 +6,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
@@ -75,7 +76,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
 
     if (booking == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(state.tr('liveTrackingTitle'))),
+        appBar: AppBar(
+          title: Text(state.tr('liveTrackingTitle')),
+          actions: const [
+            LanguageSwitcherAction(isDark: false),
+          ],
+        ),
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -141,6 +147,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       appBar: AppBar(
         title: Text('${isCarpetBooking ? state.tr("carpetTrackingTitle") : state.tr("liveTrackingTitle")} • ${booking.licensePlate}'),
         actions: [
+          const LanguageSwitcherAction(isDark: false),
           IconButton(
             icon: Icon(_showSearchHeader ? Icons.close : Icons.search_rounded),
             tooltip: state.tr('trackAnother'),

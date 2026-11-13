@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/widgets/language_switcher_action.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/auth_roles/presentation/widgets/role_auth_dialog.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
@@ -40,7 +41,6 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final currentRole = state.currentRole;
-    final currentLang = state.currentLang;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
     final roleAccent = _getRoleAccentColor(currentRole);
 
@@ -154,30 +154,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
 
         // Language Switcher Dropdown (EN / OM / AM)
-        Container(
-          margin: EdgeInsets.symmetric(vertical: isMobile ? 14 : 14, horizontal: 4),
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFF334155)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: currentLang,
-              dropdownColor: const Color(0xFF1E293B),
-              icon: Icon(Icons.language_rounded, size: 15, color: roleAccent),
-              items: const [
-                DropdownMenuItem(value: 'EN', child: Text('EN', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.white))),
-                DropdownMenuItem(value: 'OM', child: Text('OM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.white))),
-                DropdownMenuItem(value: 'AM', child: Text('AM', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: Colors.white))),
-              ],
-              onChanged: (lang) {
-                if (lang != null) state.setLanguage(lang);
-              },
-            ),
-          ),
-        ),
+        const LanguageSwitcherAction(isDark: true),
 
         // Role Switcher
         if (showRoleSwitcher) ...[

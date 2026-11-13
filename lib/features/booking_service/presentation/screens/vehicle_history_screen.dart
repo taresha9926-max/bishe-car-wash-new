@@ -4,6 +4,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
+import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../domain/models/payment_info.dart';
@@ -228,67 +229,62 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         ],
 
         // Date Filter Bar
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: HistoryDateFilter.values.map((filter) {
-              final isSelected = filter == _dateFilter;
-              String chipLabel = filter.localizedLabel(state);
-              if (filter == HistoryDateFilter.customRange && _customDateRange != null) {
-                final s = _customDateRange!.start;
-                final e = _customDateRange!.end;
-                chipLabel = '${s.day}/${s.month} - ${e.day}/${e.month}';
-              }
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: HistoryDateFilter.values.map((filter) {
+            final isSelected = filter == _dateFilter;
+            String chipLabel = filter.localizedLabel(state);
+            if (filter == HistoryDateFilter.customRange && _customDateRange != null) {
+              final s = _customDateRange!.start;
+              final e = _customDateRange!.end;
+              chipLabel = '${s.day}/${s.month} - ${e.day}/${e.month}';
+            }
 
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  avatar: filter == HistoryDateFilter.customRange
-                      ? Icon(Icons.date_range_rounded, size: 15, color: isSelected ? Colors.white : AppColors.primary)
-                      : null,
-                  label: Text(
-                    chipLabel,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                    ),
-                  ),
-                  selected: isSelected,
-                  selectedColor: _viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
-                  backgroundColor: Colors.white,
-                  showCheckmark: false,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: isSelected ? (_viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary) : AppColors.cardBorder),
-                  ),
-                  onSelected: (_) async {
-                    if (filter == HistoryDateFilter.customRange) {
-                      final picked = await showDateRangePicker(
-                        context: context,
-                        firstDate: DateTime(2022),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                        initialDateRange: _customDateRange ??
-                            DateTimeRange(
-                              start: DateTime.now().subtract(const Duration(days: 7)),
-                              end: DateTime.now(),
-                            ),
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _customDateRange = picked;
-                          _dateFilter = HistoryDateFilter.customRange;
-                        });
-                      }
-                    } else {
-                      setState(() => _dateFilter = filter);
-                    }
-                  },
+            return ChoiceChip(
+              avatar: filter == HistoryDateFilter.customRange
+                  ? Icon(Icons.date_range_rounded, size: 15, color: isSelected ? Colors.white : AppColors.primary)
+                  : null,
+              label: Text(
+                chipLabel,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color: isSelected ? Colors.white : AppColors.textPrimary,
                 ),
-              );
-            }).toList(),
-          ),
+              ),
+              selected: isSelected,
+              selectedColor: _viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
+              backgroundColor: Colors.white,
+              showCheckmark: false,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(color: isSelected ? (_viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary) : AppColors.cardBorder),
+              ),
+              onSelected: (_) async {
+                if (filter == HistoryDateFilter.customRange) {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2022),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                    initialDateRange: _customDateRange ??
+                        DateTimeRange(
+                          start: DateTime.now().subtract(const Duration(days: 7)),
+                          end: DateTime.now(),
+                        ),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _customDateRange = picked;
+                      _dateFilter = HistoryDateFilter.customRange;
+                    });
+                  }
+                } else {
+                  setState(() => _dateFilter = filter);
+                }
+              },
+            );
+          }).toList(),
         ),
         const SizedBox(height: 12),
 
@@ -489,6 +485,9 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        actions: const [
+          LanguageSwitcherAction(isDark: false),
+        ],
       ),
       body: Center(
         child: ConstrainedBox(
