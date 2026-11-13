@@ -119,6 +119,7 @@ class StationQueueTab extends StatefulWidget {
 class _StationQueueTabState extends State<StationQueueTab> {
   QueueStageFilter _stageFilter = QueueStageFilter.all;
   final TextEditingController _searchController = TextEditingController();
+  final Set<String> _expandedOrderIds = {};
   String _searchQuery = '';
 
   @override
@@ -286,6 +287,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
     final langCode = state.currentLang as String;
     final bayLabel = b.assignedBay != null ? b.assignedBay!.localizedName(langCode) : state.tr('unassignedBay');
     final washerLabel = b.assignedWasherName != null && b.assignedWasherName!.isNotEmpty ? ' • ${b.assignedWasherName}' : '';
+    final isExpanded = !widget.isMobile || _expandedOrderIds.contains(b.id) || _isPayReady(b);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -308,162 +310,128 @@ class _StationQueueTabState extends State<StationQueueTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: b.isCarpet
-                    ? (b.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
-                    : AutoCareAssets.getPackageImage(b.package),
-                width: widget.isMobile ? 40 : 46,
-                height: widget.isMobile ? 40 : 46,
-                borderRadius: 10,
-                fallbackIcon: b.isCarpet ? Icons.texture_rounded : Icons.local_car_wash_rounded,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          b.licensePlate,
-                          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5, color: AppColors.textPrimary),
-                        ),
-                        if (b.isCarpet)
-                          _buildMiniPill(
-                            b.carpetType == 'type_b' ? state.tr('carpetTypeBadgeB') : state.tr('carpetTypeBadgeA'),
-                            const Color(0xFF6366F1),
-                            icon: Icons.texture_rounded,
-                          )
-                        else
-                          _buildMiniPill(b.carType.localizedName(langCode), AppColors.textSecondary, neutral: true),
-                        if (b.isOnlineBooking)
-                          _buildMiniPill(state.tr('onlineBookingBadge'), const Color(0xFF4F46E5), icon: Icons.phone_android_rounded),
-                        if (b.isPostponed)
-                          _buildMiniPill(
-                            b.postponedByRole == 'Operational Manager'
-                                ? state.tr('postponedByManagerBadge')
-                                : state.tr('postponedCarryOverBadge'),
-                            const Color(0xFFD97706),
-                            icon: Icons.schedule_send_rounded,
-                          ),
-                        if (b.payment.isPaid && b.status != WashStatus.completed && b.status != WashStatus.readyForPickup)
-                          _buildMiniPill(state.tr('prepaidFinishWashBadge'), const Color(0xFF059669), icon: Icons.verified_rounded),
-                        if (b.isPhoneBooking)
-                          _buildMiniPill(state.tr('phoneOrderBadge'), AppColors.primary, icon: Icons.phone_in_talk_rounded),
-                        if (b.serviceType == ServiceType.valetPickUp)
-                          _buildMiniPill(state.tr('valetBadge'), const Color(0xFF7C3AED), icon: Icons.car_rental_rounded),
-                        if (b.payment.tipAmount > 0)
-                          _buildMiniPill(
-                            '+${CurrencyFormatter.formatShort(b.payment.tipAmount)} ${state.tr("tipBadgePrefix")}',
-                            Colors.amber.shade900,
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      b.isCarpet
-                          ? '${b.carpetDimensions ?? "${b.carpetAreaSqMeters ?? 0.0} m²"}${b.customerName.isNotEmpty ? " • ${b.customerName}" : ""} • ${b.customerPhone}'
-                          : '${b.localizedServiceDisplayName(langCode)}${b.customerName.isNotEmpty ? " • ${b.customerName}" : ""} • ${b.customerPhone}',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                    ),
-                    if (b.isPostponed && b.postponedReason != null && b.postponedReason!.isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                        '${b.postponedByRole != null ? "${b.postponedByRole}: " : ""}${b.postponedReason!}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFFB45309)),
-                      ),
-                    ],
-                  ],
+          InkWell(
+            onTap: widget.isMobile
+                ? () {
+                    setState(() {
+                      if (_expandedOrderIds.contains(b.id)) {
+                        _expandedOrderIds.remove(b.id);
+                      } else {
+                        _expandedOrderIds.add(b.id);
+                      }
+                    });
+                  }
+                : null,
+            borderRadius: BorderRadius.circular(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: b.isCarpet
+                      ? (b.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
+                      : AutoCareAssets.getPackageImage(b.package),
+                  width: widget.isMobile ? 40 : 46,
+                  height: widget.isMobile ? 40 : 46,
+                  borderRadius: 10,
+                  fallbackIcon: b.isCarpet ? Icons.texture_rounded : Icons.local_car_wash_rounded,
                 ),
-              ),
-              const SizedBox(width: 8),
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: widget.isMobile ? 116 : 150),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: b.status.color.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            b.licensePlate,
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5, color: AppColors.textPrimary),
+                          ),
+                          if (b.isCarpet)
+                            _buildMiniPill(
+                              b.carpetType == 'type_b' ? state.tr('carpetTypeBadgeB') : state.tr('carpetTypeBadgeA'),
+                              const Color(0xFF6366F1),
+                              icon: Icons.texture_rounded,
+                            )
+                          else
+                            _buildMiniPill(b.carType.localizedName(langCode), AppColors.textSecondary, neutral: true),
+                          if (b.isOnlineBooking)
+                            _buildMiniPill(state.tr('onlineBookingBadge'), const Color(0xFF4F46E5), icon: Icons.phone_android_rounded),
+                          if (b.isPostponed)
+                            _buildMiniPill(
+                              b.postponedByRole == 'Operational Manager'
+                                  ? state.tr('postponedByManagerBadge')
+                                  : state.tr('postponedCarryOverBadge'),
+                              const Color(0xFFD97706),
+                              icon: Icons.schedule_send_rounded,
+                            ),
+                          if (b.payment.isPaid && b.status != WashStatus.completed && b.status != WashStatus.readyForPickup)
+                            _buildMiniPill(state.tr('prepaidFinishWashBadge'), const Color(0xFF059669), icon: Icons.verified_rounded),
+                          if (b.isPhoneBooking)
+                            _buildMiniPill(state.tr('phoneOrderBadge'), AppColors.primary, icon: Icons.phone_in_talk_rounded),
+                          if (b.serviceType == ServiceType.valetPickUp)
+                            _buildMiniPill(state.tr('valetBadge'), const Color(0xFF7C3AED), icon: Icons.car_rental_rounded),
+                          if (b.payment.tipAmount > 0)
+                            _buildMiniPill(
+                              '+${CurrencyFormatter.formatShort(b.payment.tipAmount)} ${state.tr("tipBadgePrefix")}',
+                              Colors.amber.shade900,
+                            ),
+                        ],
                       ),
-                      child: Text(
-                        b.status.localizedName(langCode),
+                      const SizedBox(height: 4),
+                      Text(
+                        b.isCarpet
+                            ? '${b.carpetDimensions ?? "${b.carpetAreaSqMeters ?? 0.0} m²"}${b.customerName.isNotEmpty ? " • ${b.customerName}" : ""} • ${b.customerPhone}'
+                            : '${b.localizedServiceDisplayName(langCode)}${b.customerName.isNotEmpty ? " • ${b.customerName}" : ""} • ${b.customerPhone}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.end,
-                        style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: b.status.color),
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      CurrencyFormatter.format(b.totalPrice),
-                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (b.serviceType.requiresLocation) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on_rounded,
-                  size: 14,
-                  color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? state.tr('valetPickupInBishoftu') : state.tr('bishoftuMobileVan')),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                InkWell(
-                  onTap: () => _openMapLocation(b),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.map_rounded, size: 12, color: AppColors.primary),
-                        const SizedBox(width: 3),
+                      if (b.isPostponed && b.postponedReason != null && b.postponedReason!.isNotEmpty) ...[
+                        const SizedBox(height: 3),
                         Text(
-                          state.tr('openInMaps'),
-                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primary),
+                          '${b.postponedByRole != null ? "${b.postponedByRole}: " : ""}${b.postponedReason!}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFFB45309)),
                         ),
                       ],
-                    ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: widget.isMobile ? 116 : 150),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: b.status.color.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          b.status.localizedName(langCode),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: b.status.color),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        CurrencyFormatter.format(b.totalPrice),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ],
+          ),
           const SizedBox(height: 10),
           const Divider(height: 1, color: AppColors.cardBorder),
           const SizedBox(height: 10),
@@ -516,6 +484,54 @@ class _StationQueueTabState extends State<StationQueueTab> {
               _buildNextStepButton(context, state, b, langCode),
             ],
           ),
+          if (b.serviceType.requiresLocation) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.location_on_rounded,
+                  size: 14,
+                  color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    b.deliveryLocation ?? b.gpsCoordinates ?? (b.serviceType == ServiceType.valetPickUp ? state.tr('valetPickupInBishoftu') : state.tr('bishoftuMobileVan')),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: b.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                InkWell(
+                  onTap: () => _openMapLocation(b),
+                  borderRadius: BorderRadius.circular(6),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.map_rounded, size: 12, color: AppColors.primary),
+                        const SizedBox(width: 3),
+                        Text(
+                          state.tr('openInMaps'),
+                          style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

@@ -137,7 +137,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
         ),
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textSecondary,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 2),
         tabs: [
           _buildCompactTab(
             icon: Icons.directions_car_filled_rounded,
@@ -168,10 +168,10 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: isMobile ? 15 : 16),
-            const SizedBox(width: 5),
+            const SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 11.5 : 12.5),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 12 : 12.5),
             ),
           ],
         ),

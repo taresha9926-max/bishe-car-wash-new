@@ -76,12 +76,13 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                       Flexible(
                         child: Text(
                           state.tr('carWashingService'),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w800,
                             color: isCarWash ? Colors.white : AppColors.textPrimary,
+                            height: 1.15,
                           ),
                         ),
                       ),
@@ -133,12 +134,13 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                       Flexible(
                         child: Text(
                           state.tr('carpetWashingService'),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12.5,
                             fontWeight: FontWeight.w800,
                             color: !isCarWash ? Colors.white : AppColors.textPrimary,
+                            height: 1.15,
                           ),
                         ),
                       ),

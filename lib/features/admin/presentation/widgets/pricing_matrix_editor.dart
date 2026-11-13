@@ -27,6 +27,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final packages = widget.packages;
+    final isMobile = MediaQuery.sizeOf(context).width < 650;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,38 +41,39 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Table Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    state.tr('pricingMatrix').toUpperCase(),
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
-                  ),
+          // Table Header (Desktop Only)
+          if (!isMobile)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: const BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
                 ),
-                ...CarType.values.map((carType) {
-                  return Expanded(
-                    flex: 2,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
                     child: Text(
-                      carType.localizedName(state.currentLang).split(' ').first.toUpperCase(),
-                      textAlign: TextAlign.center,
+                      state.tr('pricingMatrix').toUpperCase(),
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
                     ),
-                  );
-                }),
-              ],
+                  ),
+                  ...CarType.values.map((carType) {
+                    return Expanded(
+                      flex: 2,
+                      child: Text(
+                        carType.localizedName(state.currentLang).split(' ').first.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+                      ),
+                    );
+                  }),
+                ],
+              ),
             ),
-          ),
 
           // Dropdown package selector
           if (packages.isNotEmpty)
@@ -131,92 +133,181 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedPackageId = isSelected ? null : pkg.id;
-                      });
-                    },
-                    child: Container(
-                      color: isSelected ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                  isMobile
+                      ? Container(
+                          color: isSelected ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedPackageId = isSelected ? null : pkg.id;
+                                  });
+                                },
+                                child: Row(
                                   children: [
                                     Icon(
                                       isSelected ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                                      size: 16,
+                                      size: 18,
                                       color: isSelected ? AppColors.primary : AppColors.textMuted,
                                     ),
-                                    const SizedBox(width: 4),
+                                    const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         pkg.localizedName(state.currentLang),
                                         style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w800,
                                           color: isSelected ? AppColors.primary : AppColors.textPrimary,
                                         ),
                                       ),
                                     ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surfaceVariant,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        '${pkg.durationMinutes} min',
+                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 20),
-                                  child: Text(
-                                    '${pkg.durationMinutes} min wash',
-                                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          ...CarType.values.map((carType) {
-                            final price = pkg.getPriceFor(carType);
-
-                            return Expanded(
-                              flex: 2,
-                              child: InkWell(
-                                onTap: () => _showEditPriceDialog(context, pkg, carType, price),
-                                borderRadius: BorderRadius.circular(8),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surfaceVariant.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: AppColors.cardBorder.withOpacity(0.5)),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        CurrencyFormatter.formatShort(price),
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.primaryDark,
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: CarType.values.map((carType) {
+                                  final price = pkg.getPriceFor(carType);
+                                  final carTypeName = carType.localizedName(state.currentLang);
+                                  return SizedBox(
+                                    width: (MediaQuery.sizeOf(context).width - 60) / 2,
+                                    child: InkWell(
+                                      onTap: () => _showEditPriceDialog(context, pkg, carType, price),
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 8),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.surfaceVariant.withOpacity(0.6),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                carTypeName,
+                                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              CurrencyFormatter.formatShort(price),
+                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      const Text(
-                                        'edit',
-                                        style: TextStyle(fontSize: 9, color: AppColors.textMuted),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        )
+                      : InkWell(
+                          onTap: () {
+                            setState(() {
+                              _selectedPackageId = isSelected ? null : pkg.id;
+                            });
+                          },
+                          child: Container(
+                            color: isSelected ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            isSelected ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                                            size: 16,
+                                            color: isSelected ? AppColors.primary : AppColors.textMuted,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              pkg.localizedName(state.currentLang),
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20),
+                                        child: Text(
+                                          '${pkg.durationMinutes} min wash',
+                                          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                  ),
+                                ...CarType.values.map((carType) {
+                                  final price = pkg.getPriceFor(carType);
+
+                                  return Expanded(
+                                    flex: 2,
+                                    child: InkWell(
+                                      onTap: () => _showEditPriceDialog(context, pkg, carType, price),
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.surfaceVariant.withOpacity(0.5),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: AppColors.cardBorder.withOpacity(0.5)),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              CurrencyFormatter.formatShort(price),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w800,
+                                                color: AppColors.primaryDark,
+                                              ),
+                                            ),
+                                            const Text(
+                                              'edit',
+                                              style: TextStyle(fontSize: 9, color: AppColors.textMuted),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                        ),
 
                   // Detail services expanded view
                   if (isSelected)

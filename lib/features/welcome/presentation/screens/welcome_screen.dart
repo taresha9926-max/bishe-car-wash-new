@@ -537,11 +537,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                           ],
                                         ),
                                         const SizedBox(height: 12),
-                                        // Full-width mobile side-by-side Portal & Feedback tabs
-                                        Row(
+                                        // Full-width stacked Portal & Feedback actions on mobile
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
                                           children: [
-                                            Expanded(
-                                              flex: 3,
+                                            SizedBox(
+                                              width: double.infinity,
                                               child: ElevatedButton.icon(
                                                 onPressed: () {
                                                   state.switchRole(UserRole.customer);
@@ -550,23 +551,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                                 icon: const Icon(Icons.arrow_forward_rounded, size: 16),
                                                 label: Text(
                                                   state.tr('enterCustomerPortal'),
-                                                  maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5),
+                                                  maxLines: 2,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
                                                 ),
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor: AppColors.primary,
                                                   foregroundColor: Colors.white,
-                                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                                  padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                                   elevation: 0,
                                                 ),
                                               ),
                                             ),
-                                            const SizedBox(width: 8),
-                                            Expanded(
-                                              flex: 2,
-                                              child: _buildFeedbackTabButton(context, state, compact: true),
+                                            const SizedBox(height: 8),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: _buildFeedbackTabButton(context, state, compact: false),
                                             ),
                                           ],
                                         ),
@@ -715,77 +716,150 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                             ),
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(9),
-                              decoration: BoxDecoration(
-                                color: AppColors.statusPending.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(Icons.location_on_rounded, size: 22, color: AppColors.statusPending),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        child: isMobile
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   Row(
                                     children: [
-                                      Flexible(
-                                        child: Text(
-                                          AppConstants.stationName,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: isMobile ? 13.5 : 14.5,
-                                            fontWeight: FontWeight.w900,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                        padding: const EdgeInsets.all(9),
                                         decoration: BoxDecoration(
-                                          color: Colors.green.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(6),
+                                          color: AppColors.statusPending.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
-                                        child: Text(
-                                          state.tr('openBadge'),
-                                          style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.green),
+                                        child: const Icon(Icons.location_on_rounded, size: 22, color: AppColors.statusPending),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    AppConstants.stationName,
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w900,
+                                                      color: AppColors.textPrimary,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.green.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                  child: Text(
+                                                    state.tr('openBadge'),
+                                                    style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.green),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              state.tr('stationBishoftuLocation'),
+                                              style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    state.tr('stationBishoftuLocation'),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                                  const SizedBox(height: 10),
+                                  ElevatedButton.icon(
+                                    onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
+                                    icon: const Icon(Icons.navigation_rounded, size: 14),
+                                    label: Text(
+                                      state.tr('openGoogleMaps'),
+                                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 11),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      elevation: 0,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(9),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.statusPending.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(Icons.location_on_rounded, size: 22, color: AppColors.statusPending),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                AppConstants.stationName,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: isMobile ? 13.5 : 14.5,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: AppColors.textPrimary,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                              decoration: BoxDecoration(
+                                                color: Colors.green.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                state.tr('openBadge'),
+                                                style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Colors.green),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          state.tr('stationBishoftuLocation'),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
+                                    icon: const Icon(Icons.navigation_rounded, size: 14),
+                                    label: Text(
+                                      state.tr('openGoogleMaps'),
+                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 11.5 : 12.5),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 15, vertical: isMobile ? 10 : 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      elevation: 0,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            ElevatedButton.icon(
-                              onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                              icon: const Icon(Icons.navigation_rounded, size: 14),
-                              label: Text(
-                                state.tr('openGoogleMaps'),
-                                style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 11.5 : 12.5),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 15, vertical: isMobile ? 10 : 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                elevation: 0,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                   ),
@@ -816,8 +890,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
       icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
       label: Text(
         approvedCount > 0 ? '${state.tr('feedbackTab')} ($approvedCount)' : state.tr('feedbackTab'),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+        textAlign: TextAlign.center,
         style: TextStyle(fontWeight: FontWeight.w800, fontSize: compact ? 12 : 13, color: const Color(0xFF92400E)),
       ),
       style: OutlinedButton.styleFrom(

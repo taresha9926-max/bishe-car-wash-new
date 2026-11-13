@@ -337,7 +337,7 @@ void main() {
   });
 
   group('Requirement 3 & 4: Operational Manager Mirror & Streamlined Admin 3-Tab Desk', () {
-    testWidgets('Operational Manager mirrors Cashier Money Tab fields without Station Shower', (tester) async {
+    testWidgets('Operational Manager mirrors Cashier Money Tab and includes Station Shower in Team Tab', (tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -367,11 +367,11 @@ void main() {
       expect(find.text(state.tr('dayShiftHandoverCashLabel')), findsNothing);
       expect(find.text(state.tr('stationShowerService')), findsNothing);
 
-      // Switch to Tab 2 (Team) -> Washer hub visible, Station Shower absent
+      // Switch to Tab 2 (Team & Shower) -> Washer hub visible, Station Shower present
       await tester.tap(find.byType(Tab).at(2));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('markAllPresent')), findsOneWidget);
-      expect(find.text(state.tr('stationShowerService')), findsNothing);
+      expect(find.text(state.tr('stationShowerService')), findsOneWidget);
     });
 
     testWidgets('Streamlined 3-Tab Admin renders cleanly on mobile without Secondary Admin badge leaks', (tester) async {

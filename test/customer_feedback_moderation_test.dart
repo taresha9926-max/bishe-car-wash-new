@@ -78,7 +78,7 @@ void main() {
       expect(state.tr('star4SuperSatisfied'), equals('Urjii 4 — Hedduu Gammadeera'));
 
       state.setLanguage('AM');
-      expect(state.tr('feedbackTab'), equals('ስለ አገልግሎቶቻችን አስተያየት ይስጡ'));
+      expect(state.tr('feedbackTab'), equals('የደንበኞች አስተያየት'));
       expect(state.tr('star4SuperSatisfied'), equals('4 ኮከብ — እጅግ በጣም አርኪ'));
     });
 

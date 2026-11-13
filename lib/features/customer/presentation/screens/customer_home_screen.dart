@@ -43,6 +43,7 @@ class CustomerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isDesktop = ResponsiveLayout.isDesktop(context);
+    final isMobile = ResponsiveLayout.isMobile(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -211,6 +212,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
         ? activeWash
         : null;
     final isDesktop = ResponsiveLayout.isDesktop(context);
+    final isMobile = ResponsiveLayout.isMobile(context);
     final queueAhead = state.bookings
         .where((b) =>
             !b.isCarpet &&
@@ -305,47 +307,82 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                   _buildPhoneBookingCard(context, state),
                   const SizedBox(height: 12),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                          icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
-                          label: Text(
-                            state.tr('openGoogleMaps'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(color: AppColors.cardBorder),
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
+                  isMobile
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
+                              icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
+                              label: Text(
+                                state.tr('openGoogleMaps'),
+                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                side: const BorderSide(color: AppColors.cardBorder),
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            OutlinedButton.icon(
+                              onPressed: () => CustomerFeedbackSheet.show(context),
+                              icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
+                              label: Text(
+                                state.tr('feedbackTab'),
+                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
+                                side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
+                                icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
+                                label: Text(
+                                  state.tr('openGoogleMaps'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(color: AppColors.cardBorder),
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => CustomerFeedbackSheet.show(context),
+                                icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
+                                label: Text(
+                                  state.tr('feedbackTab'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
+                                  side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => CustomerFeedbackSheet.show(context),
-                          icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
-                          label: Text(
-                            state.tr('feedbackTab'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
-                            side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 16),
 
                   _buildBishoftuLocationFooter(state, isCarpet: isCarpet),

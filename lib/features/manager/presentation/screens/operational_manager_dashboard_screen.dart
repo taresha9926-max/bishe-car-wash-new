@@ -3,11 +3,13 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/closing_sync_warning_banner.dart';
+import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/online_booking_alert_banner.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
+import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../cashier/presentation/widgets/station_money_tab.dart';
 import '../../../cashier/presentation/widgets/station_queue_tab.dart';
@@ -28,6 +30,8 @@ class _OperationalManagerDashboardScreenState
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   final TextEditingController _managerInlineOtpController = TextEditingController();
+  int _showerCount = 1;
+  PaymentMethod _showerPaymentMethod = PaymentMethod.cash;
 
   @override
   void initState() {
@@ -104,13 +108,7 @@ class _OperationalManagerDashboardScreenState
                       onSwitchToTeamTab: () => _tabController.animateTo(2),
                     )
                   else
-                    SharedWasherCommissionHub(
-                      state: state,
-                      role: WasherHubRole.cashier,
-                      isMobile: isMobile,
-                      initiallyExpanded: true,
-                      respectInitiallyExpanded: true,
-                    ),
+                    _buildTeamAndShowerTab(context, state, isMobile),
                   const SizedBox(height: 28),
                 ],
               ),
@@ -143,7 +141,7 @@ class _OperationalManagerDashboardScreenState
         ),
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textSecondary,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 2),
         tabs: [
           _buildCompactTab(
             icon: Icons.directions_car_filled_rounded,
@@ -157,7 +155,7 @@ class _OperationalManagerDashboardScreenState
           ),
           _buildCompactTab(
             icon: Icons.groups_rounded,
-            label: '${state.tr("managerTabTeam")} (${state.presentWashersCount})',
+            label: state.tr('cashierTabTeamShower'),
             isMobile: isMobile,
           ),
         ],
@@ -174,13 +172,254 @@ class _OperationalManagerDashboardScreenState
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: isMobile ? 15 : 16),
-            const SizedBox(width: 5),
+            const SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 11.5 : 12.5),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 12 : 12.5),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ===========================================================================
+  // TAB 2: TEAM ATTENDANCE & STATION PUBLIC SHOWER
+  // ===========================================================================
+
+  Widget _buildTeamAndShowerTab(BuildContext context, dynamic state, bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildStationShowerCard(context, state),
+        const SizedBox(height: 14),
+        SharedWasherCommissionHub(
+          state: state,
+          role: WasherHubRole.cashier,
+          isMobile: isMobile,
+          initiallyExpanded: true,
+          respectInitiallyExpanded: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStationShowerCard(BuildContext context, dynamic state) {
+    final showerPrice = state.showerPricePerPerson as double;
+    final totalToPay = _showerCount * showerPrice;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.shower_rounded, color: Colors.white, size: 24),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.tr('stationShowerService'),
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white),
+                      ),
+                      Text(
+                        '${showerPrice.toStringAsFixed(0)} ETB ${state.tr("perPerson")} • ${state.tr("showerCommissionNotice")}',
+                        style: const TextStyle(fontSize: 11, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${state.todayShowerUserCount} ${state.tr("showerUsers")}',
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            state.tr('numberOfPersons'),
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              IconButton(
+                onPressed: _showerCount > 1 ? () => setState(() => _showerCount--) : null,
+                icon: const Icon(Icons.remove_circle_outline, color: AppColors.primary),
+              ),
+              Container(
+                width: 48,
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$_showerCount',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                ),
+              ),
+              IconButton(
+                onPressed: () => setState(() => _showerCount++),
+                icon: const Icon(Icons.add_circle_outline, color: AppColors.primary),
+              ),
+              for (final n in [1, 2, 5])
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () => setState(() => _showerCount += n),
+                  child: Text('+$n'),
+                ),
+              if (_showerCount > 1)
+                TextButton(
+                  onPressed: () => setState(() => _showerCount = 1),
+                  child: Text(state.tr('clear'), style: const TextStyle(fontSize: 11)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: ChoiceChip(
+                  label: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.payments_rounded, size: 15),
+                      const SizedBox(width: 5),
+                      Flexible(child: Text(state.tr('payCash'), overflow: TextOverflow.ellipsis)),
+                    ],
+                  ),
+                  selected: _showerPaymentMethod == PaymentMethod.cash,
+                  onSelected: (val) {
+                    if (val) setState(() => _showerPaymentMethod = PaymentMethod.cash);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ChoiceChip(
+                  label: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.phone_android_rounded, size: 15),
+                      const SizedBox(width: 5),
+                      Flexible(child: Text(state.tr('payTelebirr'), overflow: TextOverflow.ellipsis)),
+                    ],
+                  ),
+                  selected: _showerPaymentMethod == PaymentMethod.telebirr,
+                  onSelected: (val) {
+                    if (val) setState(() => _showerPaymentMethod = PaymentMethod.telebirr);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          CustomButton(
+            text: '${state.tr("recordShowerEntry")} • ${CurrencyFormatter.format(totalToPay)}',
+            icon: Icons.check_circle_rounded,
+            backgroundColor: const Color(0xFF0284C7),
+            onPressed: () async {
+              final recordedCount = _showerCount;
+              final managerName = state.activeStaffFullName ?? 'Operational Manager';
+              await state.recordShowerEntry(
+                userCount: recordedCount,
+                paymentMethod: _showerPaymentMethod,
+                cashierName: managerName,
+              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: AppColors.statusCompleted,
+                    content: Text('${state.tr("showerRecordedToast")}: $recordedCount (${CurrencyFormatter.format(totalToPay)})'),
+                  ),
+                );
+                setState(() => _showerCount = 1);
+              }
+            },
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildShowerStatTile(
+                  state.tr('showerTotalRevenue'),
+                  CurrencyFormatter.format(state.todayShowerRevenueETB as double),
+                  const Color(0xFF0284C7),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildShowerStatTile(
+                  state.tr('cashCollected'),
+                  CurrencyFormatter.format(state.todayShowerCashETB as double),
+                  AppColors.cashGreen,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildShowerStatTile(
+                  state.tr('digitalPay'),
+                  CurrencyFormatter.format(state.todayShowerDigitalETB as double),
+                  AppColors.telebirrBlue,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShowerStatTile(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: color),
+            ),
+          ),
+        ],
       ),
     );
   }
