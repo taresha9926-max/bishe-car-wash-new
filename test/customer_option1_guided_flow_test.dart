@@ -68,6 +68,14 @@ void main() {
       expect(find.text('Wash My Car'), findsNothing);
       expect(find.text(state.tr('stationBaysTitle')), findsNothing);
       expect(find.text(state.tr('trackMyCar')), findsNothing);
+
+      // Verify Home button in header actively navigates back from division screen to root
+      final homeBtn = find.byIcon(Icons.home_rounded);
+      expect(homeBtn, findsOneWidget);
+      await tester.tap(homeBtn);
+      await tester.pumpAndSettle();
+      expect(find.text('What would you like to wash today?'), findsOneWidget);
+
       tester.view.reset();
     });
 

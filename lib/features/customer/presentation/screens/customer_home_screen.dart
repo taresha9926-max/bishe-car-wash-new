@@ -222,6 +222,9 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: isCarpet ? state.tr('carpetWashingService') : state.tr('carWashingService'),
+        onHomePressed: () {
+          Navigator.of(context).pop();
+        },
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
@@ -234,6 +237,38 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.cardBorder),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.arrow_back_rounded, size: 15, color: AppColors.primary),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              state.tr('whatToWashToday'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   if (!isCarpet) ...[
                     _buildCompactLiveStatusCard(state, queueAhead),
                     const SizedBox(height: 14),
