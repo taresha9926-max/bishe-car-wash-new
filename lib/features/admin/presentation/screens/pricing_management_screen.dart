@@ -126,7 +126,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? Colors.white : AppColors.textSecondary,
               ),
             ),
             selected: isSelected,
@@ -249,7 +249,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: const Color(0xFF0F172A),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.cardBorder),
           ),
@@ -268,7 +268,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.checklist_rounded, size: 16, color: !_showCarWashPackages ? Colors.white : AppColors.textPrimary),
+                        Icon(Icons.checklist_rounded, size: 16, color: !_showCarWashPackages ? Colors.white : AppColors.textSecondary),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
@@ -276,7 +276,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                             style: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
-                              color: !_showCarWashPackages ? Colors.white : AppColors.textPrimary,
+                              color: !_showCarWashPackages ? Colors.white : AppColors.textSecondary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -300,7 +300,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inventory_2_outlined, size: 16, color: _showCarWashPackages ? Colors.white : AppColors.textPrimary),
+                        Icon(Icons.inventory_2_outlined, size: 16, color: _showCarWashPackages ? Colors.white : AppColors.textSecondary),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
@@ -308,7 +308,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                             style: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
-                              color: _showCarWashPackages ? Colors.white : AppColors.textPrimary,
+                              color: _showCarWashPackages ? Colors.white : AppColors.textSecondary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),

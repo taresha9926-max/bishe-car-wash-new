@@ -103,9 +103,14 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
                   label: Text(state.tr('all')),
                   onSelected: (_) => setState(() => _selectedWasherId = 'ALL'),
                   selectedColor: AppColors.primary,
+                  backgroundColor: const Color(0xFF1E293B),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: _selectedWasherId == 'ALL' ? AppColors.primary : AppColors.cardBorder),
+                  ),
                   labelStyle: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: _selectedWasherId == 'ALL' ? Colors.white : AppColors.textPrimary,
+                    color: _selectedWasherId == 'ALL' ? Colors.white : AppColors.textSecondary,
                   ),
                 ),
                 ...washers.map((w) {
@@ -115,9 +120,14 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
                     label: Text(w.name),
                     onSelected: (_) => setState(() => _selectedWasherId = w.id),
                     selectedColor: AppColors.primary,
+                    backgroundColor: const Color(0xFF1E293B),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: isSel ? AppColors.primary : AppColors.cardBorder),
+                    ),
                     labelStyle: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: isSel ? Colors.white : AppColors.textPrimary,
+                      color: isSel ? Colors.white : AppColors.textSecondary,
                     ),
                   );
                 }),

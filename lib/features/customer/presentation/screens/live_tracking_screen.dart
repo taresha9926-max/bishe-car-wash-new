@@ -119,7 +119,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                       prefixIcon: Icon(!state.isCarWashDivisionActive ? Icons.texture_rounded : Icons.directions_car_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: const Color(0xFF1E293B),
                     ),
                     onSubmitted: (_) => _performSearch(state, isCarpet: !state.isCarWashDivisionActive),
                   ),

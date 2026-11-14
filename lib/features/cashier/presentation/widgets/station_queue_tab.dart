@@ -208,7 +208,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
                   )
                 : null,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: const Color(0xFF1E293B),
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
             border: OutlineInputBorder(
@@ -314,12 +314,12 @@ class _StationQueueTabState extends State<StationQueueTab> {
         style: TextStyle(
           fontSize: 11.5,
           fontWeight: FontWeight.w800,
-          color: isSelected ? Colors.white : AppColors.textPrimary,
+          color: isSelected ? Colors.white : AppColors.textSecondary,
         ),
       ),
       selected: isSelected,
       selectedColor: activeColor,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF1E293B),
       showCheckmark: false,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),

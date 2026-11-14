@@ -34,16 +34,16 @@ class CarTypeSelector extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                    color: isSelected ? AppColors.primary.withOpacity(0.22) : const Color(0xFF111827),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isSelected ? AppColors.primary : AppColors.cardBorder,
-                      width: isSelected ? 2 : 1,
+                      color: isSelected ? AppColors.liquidCyanNeon : AppColors.cardBorder,
+                      width: isSelected ? 2 : 1.2,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: AppColors.primary.withOpacity(0.12),
+                              color: AppColors.primary.withOpacity(0.35),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -59,7 +59,7 @@ class CarTypeSelector extends StatelessWidget {
                         height: 38,
                         borderRadius: 12,
                         fallbackIcon: type.icon,
-                        fallbackColor: isSelected ? AppColors.primary : AppColors.textSecondary,
+                        fallbackColor: isSelected ? AppColors.liquidCyanNeon : AppColors.textSecondary,
                       ),
                       const SizedBox(height: 10),
                       Text(
@@ -68,7 +68,7 @@ class CarTypeSelector extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                          color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                          color: isSelected ? AppColors.liquidCyanNeon : Colors.white,
                         ),
                       ),
                       const SizedBox(height: 4),

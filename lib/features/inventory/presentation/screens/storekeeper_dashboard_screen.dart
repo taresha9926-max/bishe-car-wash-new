@@ -691,11 +691,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: AppColors.cardBorder),
                 ),
-                child: Text('$name: ${e.value} $unit', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                child: Text('$name: ${e.value} $unit', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               );
             }).toList(),
           ),
@@ -720,7 +720,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
         boxShadow: [
@@ -983,14 +983,14 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 if (item.isDecommissioned)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(6)),
-                    child: const Text('DECOMMISSIONED', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Colors.black54)),
+                    decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.white24)),
+                    child: const Text('DECOMMISSIONED', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Colors.white70)),
                   )
                 else if (isLow)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.red.shade300)),
-                    child: Text('REORDER ALERT', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Colors.red.shade800)),
+                    decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.red.withValues(alpha: 0.45))),
+                    child: const Text('REORDER ALERT', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Colors.redAccent)),
                   ),
               ],
             ),
@@ -1106,11 +1106,16 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               if (cond == 'decommissioned') label = 'Decommissioned';
 
               return FilterChip(
-                label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600)),
+                label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600, color: isSel ? Colors.white : AppColors.textSecondary)),
                 selected: isSel,
                 onSelected: (_) => setState(() => _assetFilter = cond),
-                selectedColor: AppColors.primary.withOpacity(0.18),
-                checkmarkColor: AppColors.primary,
+                selectedColor: AppColors.primary,
+                backgroundColor: const Color(0xFF1E293B),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: isSel ? AppColors.primary : AppColors.cardBorder),
+                ),
+                checkmarkColor: Colors.white,
               );
             }).toList(),
           ),
@@ -1617,9 +1622,9 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         decoration: BoxDecoration(
-                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.08) : Colors.grey.shade100,
+                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF1E293B),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: invoiceName != null ? Colors.green : Colors.grey.shade300),
+                          border: Border.all(color: invoiceName != null ? Colors.green : AppColors.cardBorder),
                         ),
                         child: Row(
                           children: [
@@ -1999,15 +2004,15 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.cardBorder),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 36, color: Colors.grey.shade400),
+          Icon(icon, size: 36, color: AppColors.textSecondary),
           const SizedBox(height: 10),
-          Text(msg, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(msg, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
         ],
       ),
     );

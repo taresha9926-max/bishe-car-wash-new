@@ -140,7 +140,7 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
                     margin: EdgeInsets.only(right: bayType != BayType.values.last ? 8 : 0),
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? bayType.color.withOpacity(0.08) : Colors.white,
+                      color: isSelected ? bayType.color.withOpacity(0.20) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected ? bayType.color : AppColors.cardBorder,
@@ -156,7 +156,7 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                            color: isSelected ? bayType.color : AppColors.textPrimary,
+                            color: isSelected ? bayType.color : Colors.white,
                           ),
                         ),
                         const SizedBox(height: 2),

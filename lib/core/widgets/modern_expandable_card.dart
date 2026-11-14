@@ -85,7 +85,7 @@ class _ModernExpandableCardState extends State<ModernExpandableCard>
     return Container(
       margin: widget.margin,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: widget.gradientColors.first.withValues(alpha: _isExpanded ? 0.40 : 0.22),

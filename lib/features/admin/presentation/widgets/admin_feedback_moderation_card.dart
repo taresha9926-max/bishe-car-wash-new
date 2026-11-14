@@ -119,7 +119,7 @@ class _AdminFeedbackModerationCardState extends State<AdminFeedbackModerationCar
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: selected ? Colors.white : AppColors.textPrimary,
+                          color: selected ? Colors.white : AppColors.textSecondary,
                         ),
                       ),
                     ),

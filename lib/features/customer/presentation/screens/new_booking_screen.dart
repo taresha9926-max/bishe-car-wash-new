@@ -252,7 +252,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   height: 6,
                   margin: EdgeInsets.only(right: step < 3 ? 6 : 0),
                   decoration: BoxDecoration(
-                    color: (isDone || isCurrent) ? AppColors.primary : Colors.grey.shade200,
+                    color: (isDone || isCurrent) ? AppColors.primary : const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -290,8 +290,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: const Color(0xFF0F172A),
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.cardBorder),
             ),
             child: Row(
               children: [
@@ -383,7 +384,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               icon: const Icon(Icons.arrow_back_rounded, size: 17),
               label: Text(state.tr('backStep'), style: const TextStyle(fontWeight: FontWeight.w700)),
               style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: const Color(0xFF1E293B),
+                side: const BorderSide(color: AppColors.cardBorder),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -421,7 +423,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: selected ? Colors.white : AppColors.textPrimary),
+              Icon(icon, size: 16, color: selected ? Colors.white : AppColors.textSecondary),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
@@ -431,7 +433,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
-                    color: selected ? Colors.white : AppColors.textPrimary,
+                    color: selected ? Colors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -448,10 +450,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isChecked ? AppColors.primary.withOpacity(0.05) : Colors.white,
+        color: isChecked ? AppColors.primary.withOpacity(0.18) : const Color(0xFF111827),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isChecked ? AppColors.primary : AppColors.cardBorder,
+          color: isChecked ? AppColors.liquidCyanNeon : AppColors.cardBorder,
           width: isChecked ? 1.5 : 1,
         ),
       ),
@@ -472,7 +474,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
-                    color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                    color: isChecked ? AppColors.liquidCyanNeon : Colors.white,
                   ),
                 ),
               ),
@@ -516,10 +518,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.white,
+          color: isSelected ? AppColors.primary.withOpacity(0.18) : const Color(0xFF111827),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.cardBorder,
+            color: isSelected ? AppColors.liquidCyanNeon : AppColors.cardBorder,
             width: isSelected ? 1.8 : 1,
           ),
         ),
@@ -529,7 +531,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             Radio<String>(
               value: pkg.id,
               groupValue: activePkg?.id,
-              activeColor: AppColors.primary,
+              activeColor: AppColors.liquidCyanNeon,
               onChanged: (_) => setState(() => _selectedPackage = pkg),
             ),
             AutoCareAssets.buildPhotoThumbnail(
@@ -549,7 +551,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                     style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                      color: isSelected ? AppColors.liquidCyanNeon : Colors.white,
                     ),
                   ),
                   Text(
@@ -628,7 +630,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: selected ? accent.withOpacity(0.08) : Colors.white,
+            color: selected ? accent.withOpacity(0.20) : const Color(0xFF111827),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: selected ? accent : AppColors.cardBorder, width: selected ? 2 : 1),
           ),
@@ -648,7 +650,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   Expanded(
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: selected ? accent : AppColors.textPrimary),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: selected ? accent : Colors.white),
                     ),
                   ),
                 ],
@@ -1003,7 +1005,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               icon: const Icon(Icons.arrow_back_rounded, size: 17),
               label: Text(state.tr('backStep'), style: const TextStyle(fontWeight: FontWeight.w700)),
               style: OutlinedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: const Color(0xFF1E293B),
+                side: const BorderSide(color: AppColors.cardBorder),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),

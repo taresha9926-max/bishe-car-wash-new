@@ -182,7 +182,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
@@ -208,7 +208,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.directions_car_rounded, size: 18, color: !_isCarpetMode ? Colors.white : AppColors.textPrimary),
+                              Icon(Icons.directions_car_rounded, size: 18, color: !_isCarpetMode ? Colors.white : AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
@@ -218,7 +218,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
-                                    color: !_isCarpetMode ? Colors.white : AppColors.textPrimary,
+                                    color: !_isCarpetMode ? Colors.white : AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -249,7 +249,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.texture_rounded, size: 18, color: _isCarpetMode ? Colors.white : AppColors.textPrimary),
+                              Icon(Icons.texture_rounded, size: 18, color: _isCarpetMode ? Colors.white : AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
@@ -259,7 +259,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w700,
-                                    color: _isCarpetMode ? Colors.white : AppColors.textPrimary,
+                                    color: _isCarpetMode ? Colors.white : AppColors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -365,7 +365,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.checklist_rounded, size: 16, color: _useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                              Icon(Icons.checklist_rounded, size: 16, color: _useCustomChecklist ? Colors.white : AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
@@ -373,7 +373,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
-                                    color: _useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                    color: _useCustomChecklist ? Colors.white : AppColors.textSecondary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -407,7 +407,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.inventory_2_outlined, size: 16, color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                              Icon(Icons.inventory_2_outlined, size: 16, color: !_useCustomChecklist ? Colors.white : AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
@@ -415,7 +415,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
-                                    color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                    color: !_useCustomChecklist ? Colors.white : AppColors.textSecondary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -436,10 +436,10 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 6),
                       decoration: BoxDecoration(
-                        color: isChecked ? AppColors.primary.withOpacity(0.05) : Colors.white,
+                        color: isChecked ? AppColors.primary.withOpacity(0.18) : const Color(0xFF111827),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isChecked ? AppColors.primary : AppColors.cardBorder,
+                          color: isChecked ? AppColors.liquidCyanNeon : AppColors.cardBorder,
                           width: isChecked ? 1.5 : 1,
                         ),
                       ),
@@ -459,7 +459,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
-                                      color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                                      color: isChecked ? AppColors.liquidCyanNeon : Colors.white,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -521,10 +521,10 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.white,
+                          color: isSelected ? AppColors.primary.withOpacity(0.18) : const Color(0xFF111827),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? AppColors.primary : AppColors.cardBorder,
+                            color: isSelected ? AppColors.liquidCyanNeon : AppColors.cardBorder,
                             width: isSelected ? 1.8 : 1,
                           ),
                         ),
@@ -534,7 +534,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                             Radio<String>(
                               value: pkg.id,
                               groupValue: _package?.id,
-                              activeColor: AppColors.primary,
+                              activeColor: AppColors.liquidCyanNeon,
                               onChanged: (_) {
                                 setState(() {
                                   _package = pkg;
@@ -559,7 +559,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                     style: TextStyle(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
-                                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                      color: isSelected ? AppColors.liquidCyanNeon : Colors.white,
                                     ),
                                   ),
                                   Text(
@@ -623,10 +623,10 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: _carpetType == 'type_a' ? const Color(0xFF6366F1).withOpacity(0.08) : Colors.white,
+                            color: _carpetType == 'type_a' ? const Color(0xFF6366F1).withOpacity(0.20) : const Color(0xFF111827),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _carpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.cardBorder,
+                              color: _carpetType == 'type_a' ? const Color(0xFF818CF8) : AppColors.cardBorder,
                               width: _carpetType == 'type_a' ? 2 : 1,
                             ),
                           ),
@@ -649,7 +649,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
-                                        color: _carpetType == 'type_a' ? const Color(0xFF6366F1) : AppColors.textPrimary,
+                                        color: _carpetType == 'type_a' ? const Color(0xFF818CF8) : Colors.white,
                                       ),
                                     ),
                                   ),
@@ -673,10 +673,10 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: _carpetType == 'type_b' ? const Color(0xFFDC2626).withOpacity(0.08) : Colors.white,
+                            color: _carpetType == 'type_b' ? const Color(0xFFDC2626).withOpacity(0.20) : const Color(0xFF111827),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: _carpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.cardBorder,
+                              color: _carpetType == 'type_b' ? const Color(0xFFF87171) : AppColors.cardBorder,
                               width: _carpetType == 'type_b' ? 2 : 1,
                             ),
                           ),
@@ -699,7 +699,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
-                                        color: _carpetType == 'type_b' ? const Color(0xFFDC2626) : AppColors.textPrimary,
+                                        color: _carpetType == 'type_b' ? const Color(0xFFF87171) : Colors.white,
                                       ),
                                     ),
                                   ),
@@ -833,7 +833,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           margin: EdgeInsets.only(right: bay != BayType.values.last ? 8 : 0),
                           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
                           decoration: BoxDecoration(
-                            color: isSelected ? bay.color.withOpacity(0.1) : Colors.white,
+                            color: isSelected ? bay.color.withOpacity(0.20) : const Color(0xFF111827),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected ? bay.color : AppColors.cardBorder,
@@ -849,7 +849,7 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                  color: isSelected ? bay.color : AppColors.textPrimary,
+                                  color: isSelected ? bay.color : Colors.white,
                                 ),
                               ),
                               Text(

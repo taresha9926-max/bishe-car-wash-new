@@ -114,12 +114,15 @@ class _OnlineBookingAlertBannerState extends State<OnlineBookingAlertBanner> {
           const SizedBox(width: 8),
           TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primaryDark,
+              backgroundColor: const Color(0xFF1E293B),
+              foregroundColor: AppColors.liquidCyanNeon,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(color: AppColors.cardBorder),
+              ),
             ),
             onPressed: () => AppStateProvider.read(context).acknowledgeOnlineAlerts(),
             child: Text(

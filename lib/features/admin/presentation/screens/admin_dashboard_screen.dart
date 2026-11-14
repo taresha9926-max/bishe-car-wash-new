@@ -443,12 +443,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   keyboardType: TextInputType.number,
                   maxLength: 4,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: 4),
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: 4, color: Colors.white),
                   decoration: InputDecoration(
                     counterText: '',
                     hintText: state.tr('enterOtp'),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: const Color(0xFF1E293B),
                     contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     focusedBorder: OutlineInputBorder(
@@ -947,7 +947,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.white,
+                color: isSelected ? AppColors.primary : const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: isSelected ? AppColors.primary : AppColors.cardBorder,
@@ -970,7 +970,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                      color: isSelected ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -1325,7 +1325,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     else
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-                        decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
+                        decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(6)),
                         child: Text(state.tr('noReceipt'), style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
                       ),
                   ],
@@ -1350,7 +1350,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF111827),
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         builder: (ctx) => SafeArea(
           child: ConstrainedBox(
@@ -1364,7 +1364,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     height: 4,
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: Colors.white24,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

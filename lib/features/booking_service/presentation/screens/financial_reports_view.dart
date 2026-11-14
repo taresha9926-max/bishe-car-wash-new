@@ -290,7 +290,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
                 ),
               ),
               selected: isSelected,

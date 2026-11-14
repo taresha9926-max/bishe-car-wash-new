@@ -76,7 +76,7 @@ class StaffNegotiatedPriceCard extends StatelessWidget {
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.white,
+              fillColor: const Color(0xFF1E293B),
               suffixText: 'ETB',
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

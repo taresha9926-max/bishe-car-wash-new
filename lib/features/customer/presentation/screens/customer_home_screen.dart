@@ -323,7 +323,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                                 style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                               ),
                               style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.white,
+                                backgroundColor: const Color(0xFF1E293B),
                                 side: const BorderSide(color: AppColors.cardBorder),
                                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -359,7 +359,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                                 ),
                                 style: OutlinedButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: const Color(0xFF1E293B),
                                   side: const BorderSide(color: AppColors.cardBorder),
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

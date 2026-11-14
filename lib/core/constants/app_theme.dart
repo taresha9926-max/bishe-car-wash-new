@@ -9,6 +9,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       primaryColor: AppColors.liquidCyanNeon,
+      canvasColor: AppColors.slateGlass,
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.liquidCyanNeon,
@@ -73,6 +74,16 @@ class AppTheme {
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textSecondary,
         indicatorSize: TabBarIndicatorSize.tab,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: const Color(0xFF1E293B),
+        selectedColor: AppColors.primary,
+        disabledColor: const Color(0xFF0F172A),
+        labelStyle: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+        secondaryLabelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+        brightness: Brightness.dark,
+        side: const BorderSide(color: AppColors.cardBorder, width: 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

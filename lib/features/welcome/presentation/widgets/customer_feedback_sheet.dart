@@ -120,7 +120,7 @@ class _CustomerFeedbackSheetState extends State<CustomerFeedbackSheet> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: Colors.white24,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),

@@ -94,7 +94,7 @@ class _ExpandableActionCardState extends State<ExpandableActionCard>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _isExpanded

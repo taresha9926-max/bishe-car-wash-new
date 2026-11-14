@@ -215,14 +215,14 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.directions_car_rounded, size: 16, color: !_isCarpetMode ? Colors.white : AppColors.textPrimary),
+                              Icon(Icons.directions_car_rounded, size: 16, color: !_isCarpetMode ? Colors.white : AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Text(
                                 state.tr('carWash'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 12,
-                                  color: !_isCarpetMode ? Colors.white : AppColors.textPrimary,
+                                  color: !_isCarpetMode ? Colors.white : AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -252,14 +252,14 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.texture_rounded, size: 16, color: _isCarpetMode ? Colors.white : AppColors.textPrimary),
+                              Icon(Icons.texture_rounded, size: 16, color: _isCarpetMode ? Colors.white : AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Text(
                                 state.tr('carpetDropOff'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 12,
-                                  color: _isCarpetMode ? Colors.white : AppColors.textPrimary,
+                                  color: _isCarpetMode ? Colors.white : AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -323,10 +323,10 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: _carpetType == 'type_a' ? const Color(0xFF7C3AED).withOpacity(0.08) : Colors.white,
+                                    color: _carpetType == 'type_a' ? const Color(0xFF7C3AED).withOpacity(0.18) : const Color(0xFF1E293B),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: _carpetType == 'type_a' ? const Color(0xFF7C3AED) : AppColors.cardBorder,
+                                      color: _carpetType == 'type_a' ? const Color(0xFFA78BFA) : AppColors.cardBorder,
                                       width: _carpetType == 'type_a' ? 2 : 1,
                                     ),
                                   ),
@@ -355,10 +355,10 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: _carpetType == 'type_b' ? const Color(0xFF7C3AED).withOpacity(0.08) : Colors.white,
+                                    color: _carpetType == 'type_b' ? const Color(0xFF7C3AED).withOpacity(0.18) : const Color(0xFF1E293B),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
-                                      color: _carpetType == 'type_b' ? const Color(0xFF7C3AED) : AppColors.cardBorder,
+                                      color: _carpetType == 'type_b' ? const Color(0xFFA78BFA) : AppColors.cardBorder,
                                       width: _carpetType == 'type_b' ? 2 : 1,
                                     ),
                                   ),
@@ -474,7 +474,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.checklist_rounded, size: 15, color: _useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                                      Icon(Icons.checklist_rounded, size: 15, color: _useCustomChecklist ? Colors.white : AppColors.textSecondary),
                                       const SizedBox(width: 4),
                                       Flexible(
                                         child: Text(
@@ -482,7 +482,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w700,
-                                            color: _useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                            color: _useCustomChecklist ? Colors.white : AppColors.textSecondary,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -512,7 +512,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.inventory_2_outlined, size: 15, color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary),
+                                      Icon(Icons.inventory_2_outlined, size: 15, color: !_useCustomChecklist ? Colors.white : AppColors.textSecondary),
                                       const SizedBox(width: 4),
                                       Flexible(
                                         child: Text(
@@ -520,7 +520,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w700,
-                                            color: !_useCustomChecklist ? Colors.white : AppColors.textPrimary,
+                                            color: !_useCustomChecklist ? Colors.white : AppColors.textSecondary,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -808,7 +808,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.08) : Colors.white,
+          color: selected ? color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: selected ? color : AppColors.cardBorder, width: selected ? 1.6 : 1),
         ),
@@ -828,7 +828,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: selected ? color : AppColors.textPrimary),
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: selected ? color : Colors.white),
                   ),
                   Text(
                     subtitle,

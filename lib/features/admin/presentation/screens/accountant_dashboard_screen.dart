@@ -253,10 +253,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 label: Text(range == 'All' ? 'All Time' : range),
                 selected: isSel,
                 selectedColor: AppColors.primary,
+                backgroundColor: const Color(0xFF1E293B),
+                showCheckmark: false,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: isSel ? AppColors.primary : AppColors.cardBorder),
+                ),
                 labelStyle: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
-                  color: isSel ? Colors.white : AppColors.textPrimary,
+                  color: isSel ? Colors.white : AppColors.textSecondary,
                 ),
                 onSelected: (_) => setState(() => _auditDateRange = range),
               );
@@ -668,8 +674,8 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 children: c.providerBreakdown.entries.map((e) {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
-                    child: Text('${e.key}: ${CurrencyFormatter.format(e.value)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                    decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.cardBorder)),
+                    child: Text('${e.key}: ${CurrencyFormatter.format(e.value)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                   );
                 }).toList(),
               ),
@@ -841,10 +847,10 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             : Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Text('No photo', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                child: const Text('No photo', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
               ),
       ),
     );
@@ -1330,15 +1336,15 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 36, color: Colors.grey.shade400),
+          Icon(icon, size: 36, color: AppColors.textSecondary),
           const SizedBox(height: 8),
-          Text(msg, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+          Text(msg, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
         ],
       ),
     );

@@ -66,15 +66,15 @@ class StationTypeCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? primaryAccent.withOpacity(0.06) : Colors.white,
+          color: isSelected ? primaryAccent.withOpacity(0.18) : const Color(0xFF111827),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? primaryAccent : AppColors.cardBorder,
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 2 : 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withOpacity(0.4),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

@@ -250,12 +250,12 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
                 ),
               ),
               selected: isSelected,
               selectedColor: _viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
-              backgroundColor: Colors.white,
+              backgroundColor: const Color(0xFF1E293B),
               showCheckmark: false,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -377,7 +377,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 : null,
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: const Color(0xFF1E293B),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.cardBorder),

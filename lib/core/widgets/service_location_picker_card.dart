@@ -61,7 +61,7 @@ class _ServiceLocationPickerCardState extends State<ServiceLocationPickerCard> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.32)),
       ),
