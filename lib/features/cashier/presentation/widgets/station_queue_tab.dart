@@ -248,8 +248,47 @@ class _StationQueueTabState extends State<StationQueueTab> {
               ],
             ),
           )
-        else
+        else ...[
           ...filtered.map((b) => _buildQueueOrderCard(context, state, b)),
+          if (state.hasMoreOlderBookings)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Center(
+                child: state.isLoadingOlderBookings
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      )
+                    : OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
+                          side: BorderSide(
+                            color: (isCarpet ? const Color(0xFF7C3AED) : AppColors.primary).withOpacity(0.5),
+                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        ),
+                        icon: const Icon(Icons.history_rounded, size: 18),
+                        label: Text(
+                          state.tr('loadOlderBookings'),
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                        ),
+                        onPressed: () async {
+                          final count = await state.loadOlderBookings();
+                          if (context.mounted && count > 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${state.tr("loadedOlderBookingsPrefix")} $count ${state.tr("loadedOlderBookingsSuffix")}'),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+              ),
+            ),
+        ],
       ],
     );
   }

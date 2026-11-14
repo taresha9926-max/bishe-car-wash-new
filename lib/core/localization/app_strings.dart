@@ -4605,6 +4605,26 @@ class AppStrings {
       AppLanguage.om: 'Haala Kenniinsa Tajaajilaa',
       AppLanguage.am: 'የአገልግሎት አሰጣጥ ሁኔታ',
     },
+    'loadOlderBookings': {
+      AppLanguage.en: 'Load Older Bookings',
+      AppLanguage.om: 'Galmee Dursa Dhufe Fe\'i',
+      AppLanguage.am: 'የቀደሙ መዝገቦችን ጫን',
+    },
+    'loadedOlderBookingsPrefix': {
+      AppLanguage.en: 'Loaded',
+      AppLanguage.om: 'Fe\'ameera',
+      AppLanguage.am: 'ተጭነዋል',
+    },
+    'loadedOlderBookingsSuffix': {
+      AppLanguage.en: 'older bookings',
+      AppLanguage.om: 'galmeewwan dursa',
+      AppLanguage.am: 'የቀደሙ መዝገቦች',
+    },
+    'noMoreOlderBookings': {
+      AppLanguage.en: 'All historical bookings loaded',
+      AppLanguage.om: 'Galmeen seenaa hundi fe\'ameera',
+      AppLanguage.am: 'ሁሉም ታሪካዊ መዝገቦች ተጭነዋል',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

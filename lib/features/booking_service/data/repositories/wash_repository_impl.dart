@@ -112,6 +112,20 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<List<WashBooking>> getOlderBookings({required int offset, int limit = 50}) async {
+    if (offset >= _bookings.length) return [];
+    return _bookings.skip(offset).take(limit).toList();
+  }
+
+  @override
+  Future<List<WashBooking>> getBookingsForDateRange(DateTime start, DateTime end) async {
+    return _bookings.where((b) {
+      final t = b.payment.paidAt ?? b.createdAt;
+      return !t.isBefore(start) && !t.isAfter(end);
+    }).toList();
+  }
+
+  @override
   Future<WashBooking?> getBookingById(String id) async {
     try {
       return _bookings.firstWhere((b) => b.id == id);

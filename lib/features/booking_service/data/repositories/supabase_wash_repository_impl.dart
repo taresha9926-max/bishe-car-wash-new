@@ -744,6 +744,44 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<List<WashBooking>> getOlderBookings({required int offset, int limit = 50}) async {
+    try {
+      final dynamic data = await _get(
+        'wash_bookings?select=*&order=created_at.desc&offset=$offset&limit=$limit',
+      );
+      if (data == null || data is! List || data.isEmpty) {
+        return await _fallbackLocalRepo.getOlderBookings(offset: offset, limit: limit);
+      }
+
+      final packages = await getPackages();
+      return data.map((json) => _mapBookingFromJson(json, packages)).toList();
+    } catch (e) {
+      debugPrint('Supabase getOlderBookings exception: $e');
+      return await _fallbackLocalRepo.getOlderBookings(offset: offset, limit: limit);
+    }
+  }
+
+  @override
+  Future<List<WashBooking>> getBookingsForDateRange(DateTime start, DateTime end) async {
+    try {
+      final startIso = start.toUtc().toIso8601String();
+      final endIso = end.toUtc().toIso8601String();
+      final dynamic data = await _get(
+        'wash_bookings?select=*&created_at=gte.$startIso&created_at=lte.$endIso&order=created_at.desc&limit=500',
+      );
+      if (data == null || data is! List || data.isEmpty) {
+        return await _fallbackLocalRepo.getBookingsForDateRange(start, end);
+      }
+
+      final packages = await getPackages();
+      return data.map((json) => _mapBookingFromJson(json, packages)).toList();
+    } catch (e) {
+      debugPrint('Supabase getBookingsForDateRange exception: $e');
+      return await _fallbackLocalRepo.getBookingsForDateRange(start, end);
+    }
+  }
+
+  @override
   Future<WashBooking?> getBookingById(String id) async {
     final all = await getBookings();
     try {

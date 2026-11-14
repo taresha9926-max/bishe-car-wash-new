@@ -510,6 +510,7 @@ class AppStateNotifier extends ChangeNotifier {
   /// Clears all booked vehicles from queue, history, and bays, along with all operational history across the app
   Future<void> clearAllBookings() async {
     _bookings = [];
+    _hasMoreOlderBookings = false;
     _commissionLogs = [];
     _activeTrackingBookingId = null;
     _bays = _bays.map((b) => b.copyWith(
@@ -666,9 +667,13 @@ class AppStateNotifier extends ChangeNotifier {
   bool _hasOnlineAlertBaseline = false;
   final List<WashBooking> _pendingOnlineAlerts = [];
   int _onlineBookingAlertEpoch = 0;
+  bool _isLoadingOlderBookings = false;
+  bool _hasMoreOlderBookings = true;
 
   List<WashBooking> get pendingOnlineAlerts => List.unmodifiable(_pendingOnlineAlerts);
   int get onlineBookingAlertEpoch => _onlineBookingAlertEpoch;
+  bool get isLoadingOlderBookings => _isLoadingOlderBookings;
+  bool get hasMoreOlderBookings => _hasMoreOlderBookings;
 
   void _syncOnlineBookingAlerts(List<WashBooking> bookings, {bool notify = false}) {
     final onlineBookings = bookings.where((b) => b.isOnlineBooking).toList();
@@ -2893,6 +2898,62 @@ class AppStateNotifier extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Online booking poll error: $e');
+    }
+  }
+
+  /// On-demand pagination: fetches next batch of 50 older historical bookings from Supabase.
+  Future<int> loadOlderBookings() async {
+    if (_isLoadingOlderBookings || !_hasMoreOlderBookings) return 0;
+    _isLoadingOlderBookings = true;
+    notifyListeners();
+    try {
+      final older = await _repository.getOlderBookings(
+        offset: _bookings.length,
+        limit: 50,
+      );
+      if (older.isEmpty) {
+        _hasMoreOlderBookings = false;
+        _isLoadingOlderBookings = false;
+        notifyListeners();
+        return 0;
+      }
+      int addedCount = 0;
+      for (final b in older) {
+        if (!_bookings.any((existing) => existing.id == b.id)) {
+          _bookings.add(b);
+          addedCount++;
+        }
+      }
+      if (older.length < 50) {
+        _hasMoreOlderBookings = false;
+      }
+      _isLoadingOlderBookings = false;
+      notifyListeners();
+      return addedCount;
+    } catch (e) {
+      debugPrint('Error loading older bookings: $e');
+      _isLoadingOlderBookings = false;
+      notifyListeners();
+      return 0;
+    }
+  }
+
+  /// On-demand date range lookup for Admin Dashboard: loads exact historical range without truncation.
+  Future<List<WashBooking>> fetchBookingsForDateRange(DateTime start, DateTime end) async {
+    try {
+      final list = await _repository.getBookingsForDateRange(start, end);
+      bool anyAdded = false;
+      for (final b in list) {
+        if (!_bookings.any((existing) => existing.id == b.id)) {
+          _bookings.add(b);
+          anyAdded = true;
+        }
+      }
+      if (anyAdded) notifyListeners();
+      return list;
+    } catch (e) {
+      debugPrint('Error fetching date range bookings: $e');
+      return [];
     }
   }
 

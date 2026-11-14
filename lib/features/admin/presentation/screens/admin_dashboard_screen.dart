@@ -916,9 +916,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     _selectedCustomRange = picked;
                     _selectedFilter = AdminTimeFilter.customRange;
                   });
+                  final start = DateTime(picked.start.year, picked.start.month, picked.start.day);
+                  final end = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+                  state.fetchBookingsForDateRange(start, end);
                 }
               } else {
                 setState(() => _selectedFilter = filter);
+                final now = DateTime.now();
+                if (filter == AdminTimeFilter.thisWeek) {
+                  final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+                  final start = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+                  final end = start.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+                  state.fetchBookingsForDateRange(start, end);
+                } else if (filter == AdminTimeFilter.thisMonth) {
+                  final start = DateTime(now.year, now.month, 1);
+                  final end = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+                  state.fetchBookingsForDateRange(start, end);
+                }
               }
             },
             borderRadius: BorderRadius.circular(10),

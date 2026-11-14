@@ -21,6 +21,8 @@ import 'package:bishe_car_wash/features/inventory/domain/models/stock_transactio
 abstract class IBookingRepository {
   Future<List<WashBooking>> getBookings();
   Future<List<WashBooking>> getPendingOnlineAlerts();
+  Future<List<WashBooking>> getOlderBookings({required int offset, int limit = 50});
+  Future<List<WashBooking>> getBookingsForDateRange(DateTime start, DateTime end);
   Future<WashBooking?> getBookingById(String id);
   Future<WashBooking> createBooking(WashBooking booking);
   Future<WashBooking> updateWashStatus(String bookingId, WashStatus newStatus);
