@@ -1,16 +1,16 @@
--- ====================================================================
--- BISHE Car Wash Service - Zero-Leakage Financial Architecture
--- Migration: 20261113_financial_engine_handovers_and_vat.sql
--- ====================================================================
+/* ====================================================================
+   BISHE Car Wash Service - Zero-Leakage Financial Architecture
+   Migration: 20261113_financial_engine_handovers_and_vat.sql
+   ==================================================================== */
 
--- 1. UPGRADE wash_bookings WITH TAX & NET REVENUE COLUMNS
+/* 1. UPGRADE wash_bookings WITH TAX & NET REVENUE COLUMNS */
 ALTER TABLE IF EXISTS public.wash_bookings
 ADD COLUMN IF NOT EXISTS is_vat_applicable BOOLEAN DEFAULT TRUE,
 ADD COLUMN IF NOT EXISTS vat_rate NUMERIC(4, 2) DEFAULT 0.15,
 ADD COLUMN IF NOT EXISTS vat_amount NUMERIC(10, 2) DEFAULT 0.00,
 ADD COLUMN IF NOT EXISTS net_base_revenue NUMERIC(10, 2) DEFAULT 0.00;
 
--- Backfill existing bookings (Shower is exempt 0.00, car wash & carpet is 15%)
+/* Backfill existing bookings (Shower is exempt 0.00, car wash & carpet is 15%) */
 UPDATE public.wash_bookings
 SET 
   is_vat_applicable = CASE 
@@ -31,7 +31,7 @@ SET
   END
 WHERE net_base_revenue = 0.00 OR net_base_revenue IS NULL;
 
--- 2. CREATE cash_handovers TABLE (FREEZES THE EXACT BIRR ON OTP)
+/* 2. CREATE cash_handovers TABLE (FREEZES THE EXACT BIRR ON OTP) */
 CREATE TABLE IF NOT EXISTS public.cash_handovers (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
     from_role TEXT NOT NULL DEFAULT 'cashier',
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS public.cash_handovers (
 CREATE INDEX IF NOT EXISTS idx_cash_handovers_otp_status 
 ON public.cash_handovers(otp_code, status);
 
--- 3. CREATE urgent_cash_expenses TABLE (DRAWER CASH DEDUCTIONS)
+/* 3. CREATE urgent_cash_expenses TABLE (DRAWER CASH DEDUCTIONS) */
 CREATE TABLE IF NOT EXISTS public.urgent_cash_expenses (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
     handover_id TEXT REFERENCES public.cash_handovers(id) ON DELETE SET NULL,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS public.urgent_cash_expenses (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 4. CREATE bank_deposits TABLE (PHYSICAL CASH -> ADMIN BANK PROOF)
+/* 4. CREATE bank_deposits TABLE (PHYSICAL CASH -> ADMIN BANK PROOF) */
 CREATE TABLE IF NOT EXISTS public.bank_deposits (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
     deposited_by_name TEXT NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS public.bank_deposits (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 5. UPGRADE daily_closings TABLE FOR SHIFT-AWARE STATUS
+/* 5. UPGRADE daily_closings TABLE FOR SHIFT-AWARE STATUS */
 ALTER TABLE IF EXISTS public.daily_closings
 ADD COLUMN IF NOT EXISTS shift_type TEXT DEFAULT 'day_shift',
 ADD COLUMN IF NOT EXISTS vat_collected NUMERIC(10, 2) DEFAULT 0.00,
@@ -91,7 +91,7 @@ ADD COLUMN IF NOT EXISTS handover_id TEXT REFERENCES public.cash_handovers(id) O
 ADD COLUMN IF NOT EXISTS is_cash_handed_over BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS cash_in_drawer_current NUMERIC(10, 2) DEFAULT 0.00;
 
--- 6. RPC: ATOMIC OTP VERIFICATION & HANDOVER ACCEPTANCE
+/* 6. RPC: ATOMIC OTP VERIFICATION & HANDOVER ACCEPTANCE */
 CREATE OR REPLACE FUNCTION public.accept_cash_handover(
     p_otp_code TEXT,
     p_receiver_name TEXT,
@@ -145,7 +145,7 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.accept_cash_handover(TEXT, TEXT, TEXT) TO anon, authenticated, service_role;
 
--- 7. ENABLE ROW LEVEL SECURITY (RLS) & POLICIES
+/* 7. ENABLE ROW LEVEL SECURITY (RLS) & POLICIES */
 ALTER TABLE public.cash_handovers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.urgent_cash_expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bank_deposits ENABLE ROW LEVEL SECURITY;
@@ -169,6 +169,17 @@ CREATE POLICY "Public insert bank_deposits" ON public.bank_deposits FOR INSERT W
 DROP POLICY IF EXISTS "Public update bank_deposits" ON public.bank_deposits;
 CREATE POLICY "Public update bank_deposits" ON public.bank_deposits FOR UPDATE USING (true);
 
--- Enable Supabase Realtime publication
-ALTER PUBLICATION supabase_realtime ADD TABLE public.cash_handovers;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.bank_deposits;
+/* 8. Enable Supabase Realtime publication */
+DO $$
+BEGIN
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.cash_handovers;
+    EXCEPTION WHEN duplicate_object THEN
+        -- already added
+    END;
+    BEGIN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.bank_deposits;
+    EXCEPTION WHEN duplicate_object THEN
+        -- already added
+    END;
+END $$;
