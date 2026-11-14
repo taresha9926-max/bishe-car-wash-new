@@ -12,12 +12,10 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 /// ambient hydro-particles, Bishoftu location, social dock, and auto-transition.
 class EntranceSplashScreen extends StatefulWidget {
   final VoidCallback? onProceed;
-  final Duration autoTransitionDuration;
 
   const EntranceSplashScreen({
     super.key,
     this.onProceed,
-    this.autoTransitionDuration = const Duration(milliseconds: 3200),
   });
 
   @override
@@ -33,14 +31,13 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
   late final Animation<double> _contentFade;
   late final Animation<Offset> _contentSlide;
 
-  Timer? _autoTransitionTimer;
   bool _hasProceeded = false;
 
   @override
   void initState() {
     super.initState();
 
-    // 1. Repeating Shockwave Ripple Controller
+    // 1. Repeating Shockwave Ripple & Particles (continuous animation until clicked)
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2400),
@@ -84,18 +81,10 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
     );
 
     _logoController.forward();
-
-    // 3. Auto-transition Timer (gracefully cancels on touch/navigation)
-    _autoTransitionTimer = Timer(widget.autoTransitionDuration, () {
-      if (mounted && !_hasProceeded) {
-        _proceed();
-      }
-    });
   }
 
   @override
   void dispose() {
-    _autoTransitionTimer?.cancel();
     _pulseController.dispose();
     _logoController.dispose();
     super.dispose();
@@ -104,7 +93,6 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
   void _proceed() {
     if (_hasProceeded) return;
     _hasProceeded = true;
-    _autoTransitionTimer?.cancel();
 
     if (widget.onProceed != null) {
       widget.onProceed!();

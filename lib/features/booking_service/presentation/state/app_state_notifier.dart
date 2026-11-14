@@ -57,6 +57,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   void completeEntranceSplash() {
     _hasSeenEntranceSplash = true;
+    _isWelcomeActive = true;
     notifyListeners();
   }
 

@@ -25,7 +25,6 @@ void main() {
           theme: AppTheme.lightTheme,
           home: EntranceSplashScreen(
             onProceed: () => proceeded = true,
-            autoTransitionDuration: const Duration(seconds: 10),
           ),
         ),
       ),

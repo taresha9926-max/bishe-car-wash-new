@@ -66,29 +66,56 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       title: isMobile
-          ? Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: -0.3,
-              ),
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.45)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.liquidCyanNeon.withValues(alpha: 0.25),
+                        blurRadius: 6,
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Image.asset(
+                    'assets/images/bishe_logo.jpg',
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Icon(Icons.local_car_wash, color: roleAccent, size: 18),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ),
+              ],
             )
           : Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [roleAccent, AppColors.secondary],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: Colors.black,
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.45)),
                     boxShadow: [
                       BoxShadow(
                         color: roleAccent.withValues(alpha: 0.35),
@@ -97,7 +124,12 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.local_car_wash, color: Colors.white, size: 22),
+                  clipBehavior: Clip.antiAlias,
+                  child: Image.asset(
+                    'assets/images/bishe_logo.jpg',
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.local_car_wash, color: Colors.white, size: 22),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Flexible(
@@ -200,7 +232,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
                   return;
                 }
                 final authenticated = await RoleAuthDialog.show(context, role);
-                if (authenticated) {
+                if (authenticated && context.mounted) {
                   Navigator.of(context).popUntil((route) => route.isFirst);
                   state.switchRole(role);
                 }

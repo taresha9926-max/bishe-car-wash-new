@@ -98,18 +98,18 @@ class _ExpandableActionCardState extends State<ExpandableActionCard>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _isExpanded
-              ? (widget.borderColor ?? AppColors.primary).withOpacity(0.55)
-              : effectiveBorderColor,
-          width: _isExpanded ? 1.5 : 1.0,
+              ? (widget.borderColor ?? AppColors.primary).withValues(alpha: 0.6)
+              : effectiveBorderColor.withValues(alpha: 0.65),
+          width: _isExpanded ? 1.6 : 1.0,
         ),
         boxShadow: [
           BoxShadow(
             color: (_isExpanded
                     ? (widget.borderColor ?? AppColors.primary)
                     : Colors.black)
-                .withOpacity(_isExpanded ? 0.08 : 0.025),
-            blurRadius: _isExpanded ? 12 : 6,
-            offset: const Offset(0, 2),
+                .withValues(alpha: _isExpanded ? 0.09 : 0.03),
+            blurRadius: _isExpanded ? 14 : 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -133,8 +133,12 @@ class _ExpandableActionCardState extends State<ExpandableActionCard>
                         padding: widget.iconPadding ?? const EdgeInsets.all(9),
                         decoration: BoxDecoration(
                           color: widget.iconBackgroundColor ??
-                              AppColors.primary.withOpacity(0.12),
+                              (widget.borderColor ?? AppColors.primary).withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: (widget.borderColor ?? AppColors.primary).withValues(alpha: 0.25),
+                            width: 1,
+                          ),
                         ),
                         child: widget.icon,
                       ),

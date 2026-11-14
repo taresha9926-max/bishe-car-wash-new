@@ -60,20 +60,48 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           ),
           // Sub-header tabs
           Container(
-            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: TabBar(
               controller: _tabController,
               isScrollable: isMobile,
               tabAlignment: isMobile ? TabAlignment.start : TabAlignment.fill,
-              labelColor: AppColors.primary,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              indicator: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0D9488).withValues(alpha: 0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              labelColor: Colors.white,
               unselectedLabelColor: AppColors.textSecondary,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
+              labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
               tabs: const [
-                Tab(icon: Icon(Icons.autorenew_rounded, size: 18), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
-                Tab(icon: Icon(Icons.inventory_2_rounded, size: 18), text: 'Consumables (አላቂ)'),
-                Tab(icon: Icon(Icons.build_circle_rounded, size: 18), text: 'Fixed Assets (ቋሚ)'),
+                Tab(icon: Icon(Icons.autorenew_rounded, size: 17), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
+                Tab(icon: Icon(Icons.inventory_2_rounded, size: 17), text: 'Consumables (አላቂ)'),
+                Tab(icon: Icon(Icons.build_circle_rounded, size: 17), text: 'Fixed Assets (ቋሚ)'),
               ],
             ),
           ),
@@ -156,9 +184,20 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             child: exchanges.isEmpty
                 ? _buildEmptyState('No empty container refill exchanges logged yet.', Icons.autorenew_rounded)
                 : Column(
-                    children: exchanges.map((ex) => Card(
+                    children: exchanges.map((ex) => Container(
                       margin: const EdgeInsets.only(bottom: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
                       child: ListTile(
                         leading: AutoCareAssets.buildPhotoThumbnail(
                           imageUrl: AutoCareAssets.getInventoryImage(ex.itemName),
@@ -677,10 +716,20 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   }
 
   Widget _buildHandoverHistoryCard(BuildContext context, dynamic state, DailyHandover h, bool isMobile) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      elevation: 1,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -816,14 +865,26 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   Widget _buildConsumableCard(BuildContext context, dynamic state, ConsumableItem item, bool isMobile) {
     final isLow = item.isLowStock && !item.isDecommissioned;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: item.isDecommissioned ? Colors.grey.shade400 : (isLow ? Colors.red.shade300 : Colors.transparent),
-          width: isLow ? 1.5 : 1,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: item.isDecommissioned
+              ? Colors.grey.shade300
+              : (isLow ? Colors.red.shade400 : AppColors.cardBorder),
+          width: isLow ? 1.6 : 1.0,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isLow
+                ? Colors.red.withValues(alpha: 0.1)
+                : Colors.black.withValues(alpha: 0.03),
+            blurRadius: isLow ? 10 : 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -862,15 +923,15 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                             ),
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                             decoration: BoxDecoration(
                               color: item.name.toLowerCase().contains('carpet')
-                                  ? const Color(0xFF7C3AED).withOpacity(0.1)
-                                  : const Color(0xFF0284C7).withOpacity(0.1),
+                                  ? const Color(0xFF7C3AED).withValues(alpha: 0.1)
+                                  : const Color(0xFF0284C7).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              item.name.toLowerCase().contains('carpet') ? '🧼 Carpet' : '🚗 Car Wash',
+                              item.name.toLowerCase().contains('carpet') ? 'Carpet Care' : 'Car Detailing',
                               style: TextStyle(
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w700,
@@ -1046,9 +1107,25 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         break;
     }
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: asset.condition == AssetCondition.decommissioned
+              ? Colors.grey.shade300
+              : condColor.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
