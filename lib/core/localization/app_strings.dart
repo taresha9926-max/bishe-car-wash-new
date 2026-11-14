@@ -408,6 +408,43 @@ class AppStrings {
       AppLanguage.am: 'እባክዎ የደዋዩን ስም ያስገቡ',
     },
 
+    // Entrance Splash Screen
+    'entranceGreeting': {
+      AppLanguage.en: 'Welcome to BISHE Car Wash',
+      AppLanguage.om: 'Baga Nagaan Dhuftan Giddugala BISHE',
+      AppLanguage.am: 'ወደ ቢሼ የመኪና ማጠቢያ በደህና መጡ',
+    },
+    'entranceTagline': {
+      AppLanguage.en: 'Crater Lake Auto Detailing & Care Studio',
+      AppLanguage.om: 'Istudiyoo Dhiqannaa fi Kunuunsa Konkolaataa Bishooftuu',
+      AppLanguage.am: 'የቢሾፍቱ ሃይቆች መኪና እጥበትና ዲቴይሊንግ ስቱዲዮ',
+    },
+    'entranceLocation': {
+      AppLanguage.en: 'Bishoftu / Debre Zeit • Near Lake Hora, Oromia',
+      AppLanguage.om: 'Bishooftuu • Haroo Hoolaa cinaa, Oromiyaa',
+      AppLanguage.am: 'ቢሾፍቱ / ደብረ ዘይት • ሆራ ሐይቅ አጠገብ፣ ኦሮሚያ',
+    },
+    'enterStationPortal': {
+      AppLanguage.en: 'Enter Station Portal',
+      AppLanguage.om: 'Gara Giddugalaatti Seenaa',
+      AppLanguage.am: 'ወደ ማዕከሉ ይግቡ',
+    },
+    'tapToContinue': {
+      AppLanguage.en: 'Tap anywhere to continue',
+      AppLanguage.om: 'Itti fufuuf tuqaa',
+      AppLanguage.am: 'ለመቀጠል ይንኩ',
+    },
+    'socialConnect': {
+      AppLanguage.en: 'Connect With Us',
+      AppLanguage.om: 'Nu Qunnamaa',
+      AppLanguage.am: 'ያግኙን',
+    },
+    'callUs': {
+      AppLanguage.en: 'Direct Call',
+      AppLanguage.om: 'Bilbila Kallattii',
+      AppLanguage.am: 'ቀጥታ ስልክ',
+    },
+
     // Welcome Screen & Portal
     'welcomeTitle': {
       AppLanguage.en: 'BISHE Car Wash Hub',

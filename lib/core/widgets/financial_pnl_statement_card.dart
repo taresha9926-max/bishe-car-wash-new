@@ -92,7 +92,51 @@ class FinancialPnlStatementCard extends StatelessWidget {
           const SizedBox(height: 14),
           const Divider(height: 1, color: AppColors.cardBorder),
           const SizedBox(height: 12),
-          _buildRow(state.tr('grossRevenueRow'), CurrencyFormatter.format(totalRevenue), Colors.green.shade800, isHeader: true),
+          // Daily Gross Revenue KPI with subtle gradient depth and crisp white typography
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF090D14), Color(0xFF111827)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.cardGlassBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    state.tr('grossRevenueRow'),
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ),
+                Text(
+                  CurrencyFormatter.format(totalRevenue),
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
           if (vatDeducted > 0) ...[
             _buildSubRow('• ${state.tr("vatDeduction15Label")}', '- ${CurrencyFormatter.format(vatDeducted)}'),
             const SizedBox(height: 4),

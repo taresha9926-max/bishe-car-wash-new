@@ -750,12 +750,33 @@ class _StationQueueTabState extends State<StationQueueTab> {
     final isBay2Free = active2 == null && widget.bay2.isVacant;
     final isVanFree = activeVan == null && widget.van.isVacant;
 
+    Color getBayStatusColor(bool isFree, WashBooking? activeBooking) {
+      if (isFree || activeBooking == null) return AppColors.statusReady;
+      switch (activeBooking.status) {
+        case WashStatus.washing:
+          return AppColors.statusWashing;
+        case WashStatus.drying:
+          return AppColors.statusDrying;
+        case WashStatus.readyForPickup:
+          return const Color(0xFF10B981);
+        default:
+          return const Color(0xFF0284C7);
+      }
+    }
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 10 : 14, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -765,6 +786,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
               isFree: isBay1Free,
               statusText: bayStatusText(isBay1Free, active1?.licensePlate ?? widget.bay1.activeLicensePlate),
               icon: BayType.bay1.icon,
+              statusColor: getBayStatusColor(isBay1Free, active1),
             ),
           ),
           const SizedBox(width: 8),
@@ -774,6 +796,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
               isFree: isBay2Free,
               statusText: bayStatusText(isBay2Free, active2?.licensePlate ?? widget.bay2.activeLicensePlate),
               icon: BayType.bay2.icon,
+              statusColor: getBayStatusColor(isBay2Free, active2),
             ),
           ),
           const SizedBox(width: 8),
@@ -783,6 +806,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
               isFree: isVanFree,
               statusText: bayStatusText(isVanFree, activeVan?.licensePlate ?? widget.van.activeLicensePlate),
               icon: BayType.mobileVan.icon,
+              statusColor: getBayStatusColor(isVanFree, activeVan),
             ),
           ),
         ],
@@ -795,14 +819,15 @@ class _StationQueueTabState extends State<StationQueueTab> {
     required bool isFree,
     required String statusText,
     required IconData icon,
+    Color? statusColor,
   }) {
-    final color = isFree ? AppColors.statusReady : AppColors.statusWashing;
+    final color = statusColor ?? (isFree ? AppColors.statusReady : AppColors.statusWashing);
     return Container(
       padding: EdgeInsets.symmetric(vertical: widget.isMobile ? 7 : 8, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -810,14 +835,32 @@ class _StationQueueTabState extends State<StationQueueTab> {
         children: [
           Row(
             children: [
-              Container(width: 7, height: 7, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-              const SizedBox(width: 4),
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.6),
+                      blurRadius: 5,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 5),
               Expanded(
                 child: Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: widget.isMobile ? 10.5 : 11.5, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: widget.isMobile ? 10.5 : 11.5,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
               Icon(icon, size: 13, color: color),
@@ -828,7 +871,11 @@ class _StationQueueTabState extends State<StationQueueTab> {
             statusText,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: widget.isMobile ? 9.5 : 10.5, fontWeight: FontWeight.w800, color: color),
+            style: TextStyle(
+              fontSize: widget.isMobile ? 9.5 : 10.5,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
           ),
         ],
       ),

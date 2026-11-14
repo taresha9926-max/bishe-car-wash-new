@@ -6,6 +6,7 @@ import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/core/widgets/app_role_header.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/core/widgets/status_badge.dart';
+import 'package:bishe_car_wash/core/widgets/tactile_bounce.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
@@ -120,52 +121,48 @@ class CustomerHomeScreen extends StatelessWidget {
     required List<Color> colors,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: colors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+    return BounceTappable(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: colors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: colors.first.withValues(alpha: 0.28),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: colors.first.withOpacity(0.28),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: imageUrl,
+              width: 48,
+              height: 48,
+              borderRadius: 12,
+              fallbackIcon: fallbackIcon,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: imageUrl,
-                width: 48,
-                height: 48,
-                borderRadius: 12,
-                fallbackIcon: fallbackIcon,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -495,88 +492,84 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     required Color accentColor,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: accentColor.withOpacity(0.35), width: 1.6),
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withOpacity(0.07),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  AutoCareAssets.buildPhotoThumbnail(
-                    imageUrl: imageUrl,
-                    width: 62,
-                    height: 62,
-                    borderRadius: 14,
-                    fallbackIcon: fallbackIcon,
-                    fallbackColor: accentColor,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.textPrimary,
-                          ),
+    return BounceTappable(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.6),
+          boxShadow: [
+            BoxShadow(
+              color: accentColor.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                AutoCareAssets.buildPhotoThumbnail(
+                  imageUrl: imageUrl,
+                  width: 62,
+                  height: 62,
+                  borderRadius: 14,
+                  fallbackIcon: fallbackIcon,
+                  fallbackColor: accentColor,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          subtitle,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                            height: 1.3,
-                          ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                          height: 1.3,
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              const NegotiablePriceBadge(),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton.icon(
-                  onPressed: onTap,
-                  icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                  label: Text(
-                    ctaLabel,
-                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accentColor,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ],
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            const NegotiablePriceBadge(),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: onTap,
+                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                label: Text(
+                  ctaLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentColor,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -627,7 +620,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
             children: [
               Expanded(
                 child: SizedBox(
-                  height: 42,
+                  height: 48,
                   child: TextField(
                     controller: _trackController,
                     textCapitalization: TextCapitalization.characters,
@@ -640,7 +633,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                         size: 18,
                         color: AppColors.textMuted,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.cardBorder)),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.cardBorder)),
                       fillColor: AppColors.surfaceVariant,
@@ -652,7 +645,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
               ),
               const SizedBox(width: 8),
               SizedBox(
-                height: 42,
+                height: 48,
                 child: ElevatedButton.icon(
                   onPressed: () => _handleTrackVehicle(context, state, isCarpet: isCarpet),
                   icon: const Icon(Icons.radar_rounded, size: 16),

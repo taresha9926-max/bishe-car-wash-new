@@ -10,9 +10,29 @@ import '../../../booking_service/presentation/state/app_state_notifier.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class BankDepositDialog extends StatefulWidget {
-  const BankDepositDialog({super.key});
+  final bool isBottomSheet;
+
+  const BankDepositDialog({super.key, this.isBottomSheet = false});
 
   static Future<void> show(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    if (isMobile) {
+      return showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(_).viewInsets.bottom,
+          ),
+          child: const BankDepositDialog(isBottomSheet: true),
+        ),
+      );
+    }
     return showDialog(
       context: context,
       barrierDismissible: true,
@@ -68,18 +88,27 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
     final availableCash = state.undepositedCashTodayETB;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(isMobile ? 14 : 22),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
+    final content = ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 520),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(isMobile ? 14 : 22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.isBottomSheet)
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -319,7 +348,16 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
             ],
           ),
         ),
-      ),
+      );
+
+    if (widget.isBottomSheet) {
+      return SafeArea(child: content);
+    }
+
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: content,
     );
   }
 

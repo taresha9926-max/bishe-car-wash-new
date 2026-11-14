@@ -9,6 +9,7 @@ import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_das
 import 'package:bishe_car_wash/features/manager/presentation/screens/operational_manager_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
 import 'package:bishe_car_wash/features/welcome/presentation/screens/welcome_screen.dart';
+import 'package:bishe_car_wash/features/welcome/presentation/screens/entrance_splash_screen.dart';
 import 'package:bishe_car_wash/features/inventory/presentation/screens/storekeeper_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/accountant_dashboard_screen.dart';
 
@@ -18,6 +19,9 @@ class RoleShellScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
+    if (!state.hasSeenEntranceSplash) {
+      return const EntranceSplashScreen();
+    }
     if (state.isWelcomeActive) {
       return const WelcomeScreen();
     }

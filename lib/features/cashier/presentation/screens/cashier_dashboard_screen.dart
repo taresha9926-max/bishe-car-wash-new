@@ -124,16 +124,36 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: TabBar(
         controller: _tabController,
         dividerColor: Colors.transparent,
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: activeColor,
-          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(
+            colors: isCarpet
+                ? const [Color(0xFF7C3AED), Color(0xFF6D28D9)]
+                : const [Color(0xFF007791), Color(0xFF004D61)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: (isCarpet ? const Color(0xFF7C3AED) : AppColors.primary).withValues(alpha: 0.35),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textSecondary,
@@ -427,16 +447,27 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
       margin: const EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(isMobile ? 12 : 14),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF090D14), Color(0xFF111827)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.7), width: 1.5),
+        border: Border.all(color: AppColors.warmAmberSunset.withValues(alpha: 0.8), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.warmAmberSunset.withValues(alpha: 0.22),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.pin_rounded, color: Color(0xFFF59E0B), size: 22),
+              const Icon(Icons.pin_rounded, color: AppColors.warmAmberSunset, size: 22),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -445,37 +476,60 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(6),
+                  color: AppColors.warmAmberSunset.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.warmAmberSunset.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   isAdmin ? state.tr('waitingForAdminOtp') : state.tr('waitingForManager'),
-                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFFF59E0B)),
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.warmAmberSunset),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           Row(
             children: [
-              Text(
-                '[ ${pendingHandover.handoverOtp ?? '----'} ]',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 4, color: Color(0xFFF59E0B)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.slateGlass,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: AppColors.warmAmberSunset.withValues(alpha: 0.6),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.warmAmberSunset.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  pendingHandover.handoverOtp ?? '----',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 4,
+                    color: AppColors.warmAmberSunset,
+                  ),
+                ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   '${CurrencyFormatter.format(pendingHandover.handoverCashAmount)} ${state.tr("physicalCash")}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w800),
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 6,

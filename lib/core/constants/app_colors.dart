@@ -26,6 +26,12 @@ class AppColors {
   static const Color cbeBirrPurple = Color(0xFF701A75);
   static const Color cashGreen = Color(0xFF16A34A);
 
+  // Obsidian Automotive Studio Design Tokens
+  static const Color midnightCanvas = Color(0xFF090D14);
+  static const Color slateGlass = Color(0xFF111827);
+  static const Color liquidCyanNeon = Color(0xFF00E5FF);
+  static const Color warmAmberSunset = Color(0xFFFFB020);
+
   // Status Colors
   static const Color statusPending = Color(0xFFEAB308); // Amber
   static const Color statusConfirmed = Color(0xFF3B82F6); // Blue

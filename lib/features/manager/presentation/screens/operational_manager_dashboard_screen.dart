@@ -522,40 +522,43 @@ class _OperationalManagerDashboardScreenState
             children: [
               SizedBox(
                 width: 120,
+                height: 48,
                 child: TextField(
                   controller: _managerInlineOtpController,
                   keyboardType: TextInputType.number,
                   maxLength: 4,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 4),
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: 4),
                   decoration: InputDecoration(
                     hintText: state.tr('enterOtp'),
                     counterText: '',
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     isDense: true,
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _handleInlineManagerVerify(context, state),
-                  icon: const Icon(Icons.verified_rounded, size: 17),
-                  label: Text(
-                    state.tr('verifyAndTakeCustody'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF047857),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _handleInlineManagerVerify(context, state),
+                    icon: const Icon(Icons.verified_rounded, size: 18),
+                    label: Text(
+                      state.tr('verifyAndTakeCustody'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF047857),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
                   ),
                 ),
               ),

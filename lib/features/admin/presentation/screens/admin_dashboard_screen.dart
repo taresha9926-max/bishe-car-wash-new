@@ -1324,6 +1324,65 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       fallback: Center(child: Text(state.tr('noReceipt'), style: const TextStyle(color: AppColors.textMuted))),
     );
 
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    if (isMobile) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        builder: (ctx) => SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(booking.payment.method.icon, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '${booking.licensePlate} • ${CurrencyFormatter.format(booking.payment.amount)}',
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: Container(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    child: InteractiveViewer(maxScale: 3.0, child: imageWidget),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (ctx) => Dialog(

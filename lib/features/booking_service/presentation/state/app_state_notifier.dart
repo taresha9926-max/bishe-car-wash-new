@@ -52,6 +52,19 @@ class AppStateNotifier extends ChangeNotifier {
   bool _isWelcomeActive = true;
   bool get isWelcomeActive => _isWelcomeActive;
 
+  bool _hasSeenEntranceSplash = false;
+  bool get hasSeenEntranceSplash => _hasSeenEntranceSplash;
+
+  void completeEntranceSplash() {
+    _hasSeenEntranceSplash = true;
+    notifyListeners();
+  }
+
+  void resetEntranceSplash() {
+    _hasSeenEntranceSplash = false;
+    notifyListeners();
+  }
+
   // Dual Service Division: Car Wash vs Carpet Cleaning
   ActiveServiceDivision _activeServiceDivision = ActiveServiceDivision.carWash;
   ActiveServiceDivision get activeServiceDivision => _activeServiceDivision;
@@ -154,6 +167,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   void goToWelcome() {
     _isWelcomeActive = true;
+    _hasSeenEntranceSplash = true;
     notifyListeners();
   }
 
@@ -167,6 +181,7 @@ class AppStateNotifier extends ChangeNotifier {
   void switchRole(UserRole role) {
     _currentRole = role;
     _isWelcomeActive = false;
+    _hasSeenEntranceSplash = true;
     notifyListeners();
   }
 
