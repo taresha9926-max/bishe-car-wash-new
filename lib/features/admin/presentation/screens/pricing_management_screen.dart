@@ -105,7 +105,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     ];
 
     return Container(
-      color: Colors.white,
+      color: const Color(0xFF111827),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       width: double.infinity,
       child: Wrap(
@@ -152,7 +152,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
 
   Widget _buildSearchBar(dynamic state) {
     return Container(
-      color: Colors.white,
+      color: const Color(0xFF111827),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: TextField(
         decoration: InputDecoration(
@@ -345,14 +345,14 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: item.isActive ? AppColors.cardBorder : Colors.grey.shade300),
+        border: Border.all(color: item.isActive ? AppColors.cardBorder : Colors.white24, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -911,11 +911,11 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2)),
+              BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 12, offset: const Offset(0, 3)),
             ],
           ),
           child: Column(
@@ -1021,9 +1021,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.cardBorder, width: 1.2),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 10, offset: const Offset(0, 3)),
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1076,9 +1079,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFF111827),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.cardBorder, width: 1.2),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 8, offset: const Offset(0, 2)),
+                ],
               ),
               child: Row(
                 children: [
@@ -1266,9 +1272,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.cardBorder, width: 1.2),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 10, offset: const Offset(0, 3)),
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1330,14 +1339,14 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: item.isLowStock ? Colors.orange.shade300 : AppColors.cardBorder,
-          width: item.isLowStock ? 1.4 : 1.0,
+          color: item.isLowStock ? Colors.orange.shade400 : AppColors.cardBorder,
+          width: item.isLowStock ? 1.4 : 1.2,
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 10, offset: const Offset(0, 3)),
         ],
       ),
       child: Column(
@@ -1661,9 +1670,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.cardBorder, width: 1.2),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 10, offset: const Offset(0, 3)),
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1725,11 +1737,11 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 6, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 10, offset: const Offset(0, 3)),
         ],
       ),
       child: Column(
@@ -2237,9 +2249,12 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.35), width: 1.2),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 10, offset: const Offset(0, 3)),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2416,12 +2431,19 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.cardBorder,
-          width: isSelected ? 1.8 : 1.0,
+          color: isSelected ? AppColors.liquidCyanNeon : AppColors.cardBorder,
+          width: isSelected ? 1.8 : 1.2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isSelected ? AppColors.liquidCyanNeon.withValues(alpha: 0.25) : Colors.black.withOpacity(0.35),
+            blurRadius: isSelected ? 16 : 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

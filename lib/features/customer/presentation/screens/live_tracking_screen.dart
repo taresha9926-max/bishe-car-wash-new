@@ -8,6 +8,7 @@ import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../../core/widgets/status_badge.dart';
+import '../../../../core/widgets/automotive_3d_car_view.dart';
 import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
@@ -207,6 +208,17 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 ),
               ),
             ],
+            // 3D Automotive Live Wash Perspective
+            if (!booking.isCarpet) ...[
+              Automotive3DCarView(
+                status: booking.status,
+                licensePlate: booking.licensePlate,
+                vehicleCategory: booking.carType.name,
+                height: 190,
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Status Header Card
             _buildStatusHeaderCard(context, state, booking),
             const SizedBox(height: 16),
@@ -219,9 +231,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFF111827),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder),
+                border: Border.all(color: AppColors.cardBorder, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,9 +427,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -542,9 +568,16 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

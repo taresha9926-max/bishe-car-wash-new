@@ -490,9 +490,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        color: const Color(0xFF111827),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TabBar(
         controller: _tabController,
@@ -1013,9 +1020,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.amber.shade200),
+                border: Border.all(color: Colors.amber.shade400.withValues(alpha: 0.5)),
               ),
               child: Row(
                 children: [
@@ -1108,7 +1115,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   Widget _buildActionCard(_AdminActionItem op, bool isMobile) {
     return Material(
-      color: Colors.white,
+      color: const Color(0xFF111827),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: op.onTap,
@@ -1117,7 +1124,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           padding: EdgeInsets.all(isMobile ? 12 : 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: op.color.withValues(alpha: 0.25), width: 1.2),
+            border: Border.all(color: op.color.withValues(alpha: 0.35), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1183,9 +1197,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       padding: EdgeInsets.all(isMobile ? 14 : 16),
       child: Column(
@@ -1443,9 +1464,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 14 : 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1557,9 +1585,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 14 : 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFE2C55).withValues(alpha: 0.35)),
+        border: Border.all(color: const Color(0xFFFE2C55).withValues(alpha: 0.45), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

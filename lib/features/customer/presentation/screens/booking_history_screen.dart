@@ -45,11 +45,11 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
               ? state.tr('historyTitle')
               : (_isCarpetTab ? state.tr('myCarpetCleanings') : state.tr('myCarWashes')),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.midnightCanvas,
+        foregroundColor: Colors.white,
         elevation: 0.5,
         actions: const [
-          LanguageSwitcherAction(isDark: false),
+          LanguageSwitcherAction(isDark: true),
         ],
       ),
       body: Column(
@@ -57,7 +57,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
           if (!widget.lockDivision) ...[
             // Segmented Tabs: [ 🚗 My Car Washes ] | [ 🧼 My Carpet Cleanings ]
             Container(
-            color: Colors.white,
+            color: const Color(0xFF111827),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Container(
               padding: const EdgeInsets.all(4),
@@ -167,9 +167,16 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: const Color(0xFF111827),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.cardBorder),
+                            border: Border.all(color: AppColors.cardBorder, width: 1.2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,

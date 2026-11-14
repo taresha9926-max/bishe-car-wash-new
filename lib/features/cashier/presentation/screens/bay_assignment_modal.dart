@@ -56,10 +56,13 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Color(0xFF111827),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
+        ),
+        border: Border(
+          top: BorderSide(color: AppColors.cardBorder, width: 1.4),
         ),
       ),
       padding: EdgeInsets.only(

@@ -41,17 +41,17 @@ class AppColors {
   static const Color statusCompleted = Color(0xFF059669); // Forest Green
   static const Color statusCancelled = Color(0xFFEF4444); // Red
 
-  // Neutral Colors & Surfaces
-  static const Color background = Color(0xFFF1F5F9);
-  static const Color surface = Colors.white;
-  static const Color surfaceVariant = Color(0xFFF1F5F9);
-  static const Color cardBorder = Color(0xFFE2E8F0);
-  static const Color cardGlassBorder = Color(0x33007791); // Subtle obsidian glass border
+  // Neutral Colors & Surfaces (Obsidian Automotive Studio)
+  static const Color background = Color(0xFF090D14); // Pitch-black midnight canvas
+  static const Color surface = Color(0xFF111827); // Elevated dark slate glass
+  static const Color surfaceVariant = Color(0xFF1E293B); // Darker container variant
+  static const Color cardBorder = Color(0x3300E5FF); // Liquid cyan neon metallic border
+  static const Color cardGlassBorder = Color(0x4000E5FF); // Subtle obsidian glass border
 
   // Text Colors
-  static const Color textPrimary = Color(0xFF0F172A);
-  static const Color textSecondary = Color(0xFF475569);
-  static const Color textMuted = Color(0xFF94A3B8);
+  static const Color textPrimary = Color(0xFFF8FAFC); // Crisp bright white
+  static const Color textSecondary = Color(0xFF94A3B8); // Muted slate silver
+  static const Color textMuted = Color(0xFF64748B); // Low-contrast hint
   static const Color textLight = Colors.white;
 
   // Dark Theme Neutral Surfaces

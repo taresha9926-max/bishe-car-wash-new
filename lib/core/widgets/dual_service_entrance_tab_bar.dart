@@ -21,18 +21,18 @@ class DualServiceEntranceTabBar extends StatelessWidget {
       padding: padding,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF111827),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.cardBorder, width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
+              color: Colors.black.withValues(alpha: 0.45),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(5),
         child: Row(
           children: [
             // 1. Car Washing Service Tab
@@ -50,14 +50,17 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                             end: Alignment.bottomRight,
                           )
                         : null,
-                    color: isCarWash ? null : Colors.transparent,
+                    color: isCarWash ? null : const Color(0xFF0F172A).withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
+                    border: isCarWash
+                        ? Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.6), width: 1)
+                        : null,
                     boxShadow: isCarWash
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF0284C7).withOpacity(0.35),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
+                              color: const Color(0xFF0284C7).withValues(alpha: 0.45),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
                           ]
                         : null,
@@ -81,7 +84,7 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w800,
-                            color: isCarWash ? Colors.white : AppColors.textPrimary,
+                            color: isCarWash ? Colors.white : Colors.white70,
                             height: 1.15,
                           ),
                         ),
@@ -108,14 +111,17 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                             end: Alignment.bottomRight,
                           )
                         : null,
-                    color: !isCarWash ? null : Colors.transparent,
+                    color: !isCarWash ? null : const Color(0xFF0F172A).withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
+                    border: !isCarWash
+                        ? Border.all(color: const Color(0xFFA78BFA).withValues(alpha: 0.6), width: 1)
+                        : null,
                     boxShadow: !isCarWash
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF7C3AED).withOpacity(0.35),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
+                              color: const Color(0xFF7C3AED).withValues(alpha: 0.45),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
                           ]
                         : null,
@@ -139,7 +145,7 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w800,
-                            color: !isCarWash ? Colors.white : AppColors.textPrimary,
+                            color: !isCarWash ? Colors.white : Colors.white70,
                             height: 1.15,
                           ),
                         ),

@@ -292,14 +292,14 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.cardBorder),
+            border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: Colors.black.withOpacity(0.35),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -443,9 +443,9 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFF111827),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: AppColors.cardBorder, width: 1.2),
             ),
             child: Center(
               child: Text(
@@ -480,13 +480,13 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
       appBar: AppBar(
         title: Text(
           _viewCarpetMode ? state.tr('carpetWashHistoryTitle') : state.tr('carWashHistoryTitle'),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.midnightCanvas,
+        foregroundColor: Colors.white,
         elevation: 0,
         actions: const [
-          LanguageSwitcherAction(isDark: false),
+          LanguageSwitcherAction(isDark: true),
         ],
       ),
       body: Center(
@@ -512,14 +512,14 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import '../../../../core/widgets/expandable_action_card.dart';
+import '../../../../core/widgets/liquid_level_gauge.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -62,15 +63,15 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFF111827),
               border: Border(
                 bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -802,7 +803,10 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         // Top action bar
         Container(
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 12),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: const Color(0xFF111827),
+            border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
+          ),
           child: Row(
             children: [
               Column(
@@ -848,6 +852,38 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             ],
           ),
         ),
+
+        // 3D Animated Chemical Tank Gauges
+        if (consumables.isNotEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.6))),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: consumables.take(6).map((c) {
+                  final ratio = c.minThreshold > 0
+                      ? (c.currentStock / (c.minThreshold * 2.5)).clamp(0.0, 1.0)
+                      : (c.currentStock > 0 ? 0.75 : 0.0);
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 14),
+                    child: LiquidLevelGauge(
+                      title: c.name,
+                      currentLevel: ratio,
+                      currentAmountStr: '${c.currentStock.toStringAsFixed(0)} ${c.unit}',
+                      maxAmountStr: '${(c.minThreshold * 2.5).toStringAsFixed(0)} ${c.unit}',
+                      height: 100,
+                      width: 58,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
         Expanded(
           child: ListView.builder(
             padding: EdgeInsets.all(isMobile ? 12 : 20),
@@ -1030,7 +1066,10 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       children: [
         Container(
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 12),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: const Color(0xFF111827),
+            border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
+          ),
           child: Row(
             children: [
               Text(

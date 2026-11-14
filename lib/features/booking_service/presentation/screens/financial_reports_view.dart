@@ -250,12 +250,12 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(dynamicTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        title: Text(dynamicTitle, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5, color: Colors.white)),
+        backgroundColor: AppColors.midnightCanvas,
+        foregroundColor: Colors.white,
         elevation: 0.5,
         actions: const [
-          LanguageSwitcherAction(isDark: false),
+          LanguageSwitcherAction(isDark: true),
         ],
       ),
       body: Center(
@@ -295,7 +295,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
               ),
               selected: isSelected,
               selectedColor: AppColors.primary,
-              backgroundColor: Colors.white,
+              backgroundColor: const Color(0xFF1E293B),
               showCheckmark: false,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -340,9 +340,16 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

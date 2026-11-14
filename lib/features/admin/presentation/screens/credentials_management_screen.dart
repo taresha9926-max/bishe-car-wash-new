@@ -400,13 +400,13 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
       appBar: AppBar(
         title: Text(
           state.tr('staffPinsTitle'),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.midnightCanvas,
+        foregroundColor: Colors.white,
         elevation: 0,
         actions: const [
-          LanguageSwitcherAction(isDark: false),
+          LanguageSwitcherAction(isDark: true),
         ],
       ),
       body: credentials.isEmpty

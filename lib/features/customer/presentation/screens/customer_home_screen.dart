@@ -70,13 +70,13 @@ class CustomerHomeScreen extends StatelessWidget {
                 const SizedBox(height: 18),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color(0xFF111827),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: AppColors.cardBorder, width: 1.4),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 14,
+                        color: Colors.black.withValues(alpha: 0.45),
+                        blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
                     ],
@@ -243,9 +243,16 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: const Color(0xFF111827),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.cardBorder),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -409,9 +416,16 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -497,13 +511,18 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF111827),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: accentColor.withValues(alpha: 0.35), width: 1.6),
+          border: Border.all(color: accentColor.withValues(alpha: 0.45), width: 1.6),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withValues(alpha: 0.08),
-              blurRadius: 12,
+              color: accentColor.withValues(alpha: 0.16),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.45),
+              blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
@@ -579,9 +598,16 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     final accent = isCarpet ? const Color(0xFF4F46E5) : AppColors.primary;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Column(
@@ -690,9 +716,21 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: wash.status.color.withOpacity(0.4), width: 1.5),
+        border: Border.all(color: wash.status.color.withValues(alpha: 0.6), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: wash.status.color.withValues(alpha: 0.2),
+            blurRadius: 14,
+            offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -824,9 +862,16 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Text(
         '${isCarpet ? state.tr("carpetWashingService") : state.tr("appName")} • ${state.tr("bishoftu")}\n${isCarpet ? state.tr("carpetTrustFooter") : state.tr("customerTrustPill")} • ${state.customerPhoneBookingNumber}',

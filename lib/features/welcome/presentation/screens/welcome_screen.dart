@@ -156,13 +156,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: const Color(0xFF111827),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.cardBorder),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.03),
-                                blurRadius: 6,
+                                color: Colors.black.withValues(alpha: 0.35),
+                                blurRadius: 10,
                                 offset: const Offset(0, 2),
                               ),
                             ],
@@ -170,19 +170,20 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: state.currentLang,
-                              icon: const Icon(Icons.language_rounded, size: 16, color: AppColors.primary),
+                              dropdownColor: const Color(0xFF111827),
+                              icon: const Icon(Icons.language_rounded, size: 16, color: AppColors.liquidCyanNeon),
                               items: const [
                                 DropdownMenuItem(
                                   value: 'EN',
-                                  child: Text('English (EN)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                                  child: Text('English (EN)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
                                 ),
                                 DropdownMenuItem(
                                   value: 'OM',
-                                  child: Text('Afaan Oromoo (OM)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                                  child: Text('Afaan Oromoo (OM)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
                                 ),
                                 DropdownMenuItem(
                                   value: 'AM',
-                                  child: Text('አማርኛ (AM)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                                  child: Text('አማርኛ (AM)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
                                 ),
                               ],
                               onChanged: (lang) {
@@ -195,9 +196,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         // Right: Relocated Cashier & Admin Entry (Top-Right Sandwich Menu)
                         PopupMenuButton<String>(
                           tooltip: state.tr('staffPortals'),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          elevation: 6,
-                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: const BorderSide(color: AppColors.cardBorder),
+                          ),
+                          elevation: 8,
+                          color: const Color(0xFF111827),
                           offset: const Offset(0, 42),
                           onSelected: (value) {
                             if (value == 'cashier') {
@@ -215,13 +219,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 12, vertical: 7),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: const Color(0xFF111827),
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1.2),
+                              border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.35), width: 1.2),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.08),
-                                  blurRadius: 8,
+                                  color: Colors.black.withValues(alpha: 0.35),
+                                  blurRadius: 10,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
@@ -229,14 +233,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.menu_rounded, size: 18, color: AppColors.primary),
+                                const Icon(Icons.menu_rounded, size: 18, color: AppColors.liquidCyanNeon),
                                 const SizedBox(width: 6),
                                 Text(
                                   state.tr('staffPortals'),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.textPrimary,
+                                    color: Colors.white,
                                     letterSpacing: 0.2,
                                   ),
                                 ),
@@ -444,17 +448,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                             child: Container(
                               padding: EdgeInsets.all(isMobile ? 15 : 20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: const Color(0xFF111827),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: _isCustomerHovered ? AppColors.primary : AppColors.cardBorder,
+                                  color: _isCustomerHovered ? AppColors.liquidCyanNeon : AppColors.cardBorder,
                                   width: _isCustomerHovered ? 2.0 : 1.2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withOpacity(_isCustomerHovered ? 0.16 : 0.06),
-                                    blurRadius: _isCustomerHovered ? 20 : 10,
+                                    color: AppColors.liquidCyanNeon.withValues(alpha: _isCustomerHovered ? 0.35 : 0.12),
+                                    blurRadius: _isCustomerHovered ? 22 : 12,
                                     offset: Offset(0, _isCustomerHovered ? 6 : 3),
+                                  ),
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.45),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
@@ -705,14 +714,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: isMobile ? 12 : 14),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: const Color(0xFF111827),
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: AppColors.cardBorder),
+                          border: Border.all(color: AppColors.cardBorder, width: 1.2),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
+                              color: Colors.black.withValues(alpha: 0.45),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),

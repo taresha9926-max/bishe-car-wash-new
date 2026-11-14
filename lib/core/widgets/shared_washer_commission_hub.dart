@@ -98,7 +98,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _isExpanded
@@ -108,8 +108,13 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.oromiaGold.withOpacity(_isExpanded ? 0.08 : 0.03),
-            blurRadius: _isExpanded ? 12 : 6,
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: AppColors.oromiaGold.withOpacity(_isExpanded ? 0.12 : 0.04),
+            blurRadius: _isExpanded ? 14 : 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -575,7 +580,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
             margin: const EdgeInsets.only(bottom: 6),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFF1E293B),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isPresent ? AppColors.statusCompleted.withOpacity(0.35) : Colors.red.withOpacity(0.25),
@@ -802,7 +807,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: AppColors.cardBorder),
                     ),
@@ -878,7 +883,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
               )
             : Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFF111827),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.cardBorder),
                 ),

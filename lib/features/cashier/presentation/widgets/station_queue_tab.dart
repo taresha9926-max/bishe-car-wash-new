@@ -228,9 +228,16 @@ class _StationQueueTabState extends State<StationQueueTab> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFF111827),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.cardBorder),
+              border: Border.all(color: AppColors.cardBorder, width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -332,18 +339,24 @@ class _StationQueueTabState extends State<StationQueueTab> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: EdgeInsets.all(widget.isMobile ? 12 : 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _isPayReady(b) ? AppColors.cashGreen.withOpacity(0.45) : AppColors.cardBorder,
-          width: _isPayReady(b) ? 1.5 : 1,
+          color: _isPayReady(b) ? AppColors.cashGreen.withOpacity(0.65) : AppColors.cardBorder,
+          width: _isPayReady(b) ? 1.6 : 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
+          if (_isPayReady(b))
+            BoxShadow(
+              color: AppColors.cashGreen.withOpacity(0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
         ],
       ),
       child: Column(
@@ -690,9 +703,16 @@ class _StationQueueTabState extends State<StationQueueTab> {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 10 : 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFF111827),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: AppColors.cardBorder, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -767,14 +787,14 @@ class _StationQueueTabState extends State<StationQueueTab> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 10 : 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),

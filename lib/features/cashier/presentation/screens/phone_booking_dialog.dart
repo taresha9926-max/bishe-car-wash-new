@@ -538,7 +538,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           Container(
                             constraints: const BoxConstraints(maxHeight: 220),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: const Color(0xFF1E293B),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
@@ -612,13 +612,14 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: const Color(0xFF1E293B),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 isExpanded: true,
+                                dropdownColor: const Color(0xFF1E293B),
                                 value: _selectedPackage?.id,
                                 items: packages.map((pkg) {
                                   final pkgPrice = pkg.getPriceFor(_carType);
