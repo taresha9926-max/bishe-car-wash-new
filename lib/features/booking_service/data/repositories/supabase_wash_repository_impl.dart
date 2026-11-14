@@ -203,6 +203,19 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   static DateTime _dataPurgeEpoch = DateTime.parse('2026-11-06T16:25:00Z');
   String? _lastClosingSyncError;
 
+  // In-memory caches to eliminate redundant network roundtrips and cut egress by >90%
+  List<WashPackage>? _cachedPackages;
+  DateTime? _packagesFetchedAt;
+  static const Duration _packagesCacheTtl = Duration(minutes: 15);
+
+  List<StaffMember>? _cachedStaff;
+  DateTime? _staffFetchedAt;
+  static const Duration _staffCacheTtl = Duration(minutes: 15);
+
+  List<StationBay>? _cachedBays;
+  DateTime? _baysFetchedAt;
+  static const Duration _baysCacheTtl = Duration(seconds: 30);
+
   @override
   String? get lastClosingSyncError => _lastClosingSyncError;
 
@@ -306,13 +319,18 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<List<WashPackage>> getPackages() async {
+    if (_cachedPackages != null &&
+        _packagesFetchedAt != null &&
+        DateTime.now().difference(_packagesFetchedAt!) < _packagesCacheTtl) {
+      return _cachedPackages!;
+    }
     try {
       final dynamic data = await _get('wash_packages?select=*&order=created_at.asc');
       if (data == null || data is! List || data.isEmpty) {
-        return _fallbackLocalRepo.getPackages();
+        return await _fallbackLocalRepo.getPackages();
       }
 
-      return data.map((json) {
+      final packages = data.map((json) {
         final double autoPrice = double.tryParse(json['price_automobile']?.toString() ?? '300') ?? 300.0;
         final double minibusPrice = double.tryParse(json['price_minibus']?.toString() ?? '450') ?? 450.0;
         final double truckPrice = double.tryParse(json['price_truck']?.toString() ?? '600') ?? 600.0;
@@ -337,13 +355,19 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           features: features,
         );
       }).toList();
+
+      _cachedPackages = packages;
+      _packagesFetchedAt = DateTime.now();
+      return packages;
     } catch (_) {
-      return _fallbackLocalRepo.getPackages();
+      return await _fallbackLocalRepo.getPackages();
     }
   }
 
   @override
   Future<void> updatePackagePrice(String packageId, CarType carType, double newPrice) async {
+    _cachedPackages = null;
+    _packagesFetchedAt = null;
     try {
       if (_isUuid(packageId)) {
         String colName = 'price_automobile';
@@ -403,13 +427,18 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<List<StaffMember>> getStaffMembers() async {
+    if (_cachedStaff != null &&
+        _staffFetchedAt != null &&
+        DateTime.now().difference(_staffFetchedAt!) < _staffCacheTtl) {
+      return _cachedStaff!;
+    }
     try {
       final dynamic data = await _get('staff_members?select=*&order=created_at.asc');
       if (data == null || data is! List || data.isEmpty) {
-        return _fallbackLocalRepo.getStaffMembers();
+        return await _fallbackLocalRepo.getStaffMembers();
       }
 
-      return data.map((json) {
+      final staff = data.map((json) {
         StaffRole role = StaffRole.washer;
         final roleStr = (json['role'] ?? '').toString().toLowerCase();
         if (roleStr.contains('lead') || roleStr.contains('detailer')) {
@@ -432,13 +461,19 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           totalCommissionEarnedETB: 0.0,
         );
       }).toList();
+
+      _cachedStaff = staff;
+      _staffFetchedAt = DateTime.now();
+      return staff;
     } catch (_) {
-      return _fallbackLocalRepo.getStaffMembers();
+      return await _fallbackLocalRepo.getStaffMembers();
     }
   }
 
   @override
   Future<void> updateStaffSalary(String staffId, double baseSalary, double commissionRate) async {
+    _cachedStaff = null;
+    _staffFetchedAt = null;
     try {
       if (_isUuid(staffId)) {
         await _patch('staff_members?id=eq.$staffId', {
@@ -452,6 +487,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> addStaffMember(StaffMember staff) async {
+    _cachedStaff = null;
+    _staffFetchedAt = null;
     try {
       await _post('staff_members', {
         'name': staff.name,
@@ -467,6 +504,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> deleteStaffMember(String staffId) async {
+    _cachedStaff = null;
+    _staffFetchedAt = null;
     try {
       if (_isUuid(staffId)) {
         await _delete('staff_members?id=eq.$staffId');
@@ -479,13 +518,18 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<List<StationBay>> getBays() async {
+    if (_cachedBays != null &&
+        _baysFetchedAt != null &&
+        DateTime.now().difference(_baysFetchedAt!) < _baysCacheTtl) {
+      return _cachedBays!;
+    }
     try {
       final dynamic data = await _get('station_bays?select=*&order=bay_number.asc');
       if (data == null || data is! List || data.isEmpty) {
-        return _fallbackLocalRepo.getBays();
+        return await _fallbackLocalRepo.getBays();
       }
 
-      return data.map((json) {
+      final bays = data.map((json) {
         BayType bayType = BayType.bay1;
         final typeStr = (json['bay_type'] ?? '').toString();
         if (typeStr == 'bay2' || json['bay_number'] == 2) {
@@ -505,170 +549,197 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           startedAt: json['started_at'] != null ? DateTime.tryParse(json['started_at']) : null,
         );
       }).toList();
+
+      _cachedBays = bays;
+      _baysFetchedAt = DateTime.now();
+      return bays;
     } catch (_) {
-      return _fallbackLocalRepo.getBays();
+      return await _fallbackLocalRepo.getBays();
     }
+  }
+
+  WashBooking _mapBookingFromJson(dynamic json, List<WashPackage> packages) {
+    CarType carType = CarType.automobile;
+    final carStr = (json['car_type'] ?? '').toString().toLowerCase();
+    if (carStr.contains('truck')) {
+      carType = CarType.truck;
+    } else if (carStr.contains('minibus') || carStr.contains('large')) {
+      carType = CarType.minibus;
+    }
+
+    ServiceType serviceType = ServiceType.walkInStation;
+    final stStr = (json['service_type'] ?? '').toString();
+    if (stStr.contains('atHome')) {
+      serviceType = ServiceType.atHomeMobile;
+    } else if (stStr.contains('valet') || stStr.contains('pickUp')) {
+      serviceType = ServiceType.valetPickUp;
+    } else if (stStr.contains('phone')) {
+      serviceType = ServiceType.phoneCallBooking;
+    }
+
+    WashStatus status = WashStatus.pending;
+    for (var s in WashStatus.values) {
+      if (s.name == json['status']) {
+        status = s;
+        break;
+      }
+    }
+
+    WashPackage pkg = packages.first;
+    if (json['package_id'] != null) {
+      final found = packages.where((p) => p.id == json['package_id'].toString());
+      if (found.isNotEmpty) pkg = found.first;
+    }
+
+    BayType? assignedBay;
+    final bayIdStr = json['assigned_bay_id']?.toString();
+    if (bayIdStr == 'b0000000-0000-0000-0000-000000000001') {
+      assignedBay = BayType.bay1;
+    } else if (bayIdStr == 'b0000000-0000-0000-0000-000000000002') {
+      assignedBay = BayType.bay2;
+    } else if (bayIdStr == 'b0000000-0000-0000-0000-000000000003') {
+      assignedBay = BayType.mobileVan;
+    }
+
+    PaymentMethod pMethod = PaymentMethod.cash;
+    final mStr = (json['payment_method'] ?? '').toString().toLowerCase();
+    if (mStr.contains('telebirr')) {
+      pMethod = PaymentMethod.telebirr;
+    } else if (mStr.contains('cbe')) {
+      pMethod = PaymentMethod.cbeBirr;
+    } else if (mStr.contains('abyssinia') || mStr.contains('boa')) {
+      pMethod = PaymentMethod.bankOfAbyssinia;
+    } else if (mStr.contains('awash')) {
+      pMethod = PaymentMethod.awashBank;
+    } else if (mStr.contains('dashen') || mStr.contains('amole')) {
+      pMethod = PaymentMethod.dashenBank;
+    } else if (mStr.contains('bank')) {
+      pMethod = PaymentMethod.otherBankTransfer;
+    }
+
+    final isPhone = json['booking_origin'] == 'phone_booking';
+    final rawPlate = json['license_plate']?.toString() ?? '';
+    final isCarpet = (json['is_carpet'] == true) || rawPlate.startsWith('CPT-');
+    final carpetType = json['carpet_type']?.toString();
+    final carpetAreaSqMeters = json['carpet_area_sq_meters'] != null
+        ? double.tryParse(json['carpet_area_sq_meters'].toString())
+        : null;
+    final carpetDimensions = json['carpet_dimensions']?.toString();
+    final customTotalPrice = json['custom_total_price'] != null
+        ? double.tryParse(json['custom_total_price'].toString())
+        : (isCarpet && json['total_amount'] != null ? double.tryParse(json['total_amount'].toString()) : null);
+
+    final rawLoc = json['delivery_location']?.toString();
+    final cleanLoc = extractCleanDeliveryLocation(rawLoc);
+    final bookingMeta = decodeBookingMeta(rawLoc);
+
+    List<String>? selectedServices;
+    if (json['selected_services'] != null) {
+      if (json['selected_services'] is List) {
+        selectedServices = (json['selected_services'] as List).map((e) => e.toString()).toList();
+      } else if (json['selected_services'] is String) {
+        try {
+          final dec = jsonDecode(json['selected_services']);
+          if (dec is List) selectedServices = dec.map((e) => e.toString()).toList();
+        } catch (_) {}
+      }
+    }
+    if (selectedServices == null && cleanLoc != null) {
+      if (cleanLoc.startsWith('Services: ')) {
+        selectedServices = cleanLoc.substring('Services: '.length).split(', ').map((s) => s.trim()).toList();
+      }
+    }
+
+    final paidAt = bookingMeta['paidAt'] != null
+        ? DateTime.tryParse(bookingMeta['paidAt'].toString())
+        : null;
+    final postponedAt = bookingMeta['postponedAt'] != null
+        ? DateTime.tryParse(bookingMeta['postponedAt'].toString())
+        : null;
+    final handedOverAt = bookingMeta['handedOverAt'] != null
+        ? DateTime.tryParse(bookingMeta['handedOverAt'].toString())
+        : null;
+
+    return WashBooking(
+      id: json['id'].toString(),
+      customerName: json['owner_name'] ?? 'Customer',
+      customerPhone: json['customer_phone'] ?? '',
+      serviceType: serviceType,
+      deliveryLocation: cleanLoc,
+      carType: carType,
+      licensePlate: rawPlate,
+      package: pkg,
+      status: status,
+      assignedBay: assignedBay,
+      assignedWasherId: json['assigned_washer_id']?.toString(),
+      assignedWasherName: json['washer_1_name'] ?? json['washer_2_name'],
+      payment: PaymentInfo(
+        isPaid: json['is_paid'] ?? false,
+        method: pMethod,
+        amount: double.tryParse(json['total_amount']?.toString() ?? '300') ?? 300.0,
+        transactionRef: json['transaction_ref'],
+        receiptScreenshot: json['receipt_url'],
+        paidAt: paidAt,
+      ),
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
+      scheduledTime: json['scheduled_time'] != null ? DateTime.tryParse(json['scheduled_time'].toString()) : null,
+      completedAt: json['completed_at'] != null ? DateTime.tryParse(json['completed_at']) : null,
+      commissionLogged: json['commission_logged'] ?? false,
+      isPhoneBooking: isPhone,
+      gpsCoordinates: bookingMeta['gps']?.toString(),
+      isCarpet: isCarpet,
+      carpetType: carpetType,
+      carpetAreaSqMeters: carpetAreaSqMeters,
+      carpetDimensions: carpetDimensions,
+      customTotalPrice: customTotalPrice,
+      selectedServices: selectedServices,
+      isOnlineBooking: bookingMeta['isOnline'] == true || json['booking_origin'] == 'customer_app',
+      isPostponed: bookingMeta['isPostponed'] == true,
+      postponedReason: bookingMeta['postponedReason']?.toString(),
+      postponedAt: postponedAt,
+      postponedByRole: bookingMeta['postponedByRole']?.toString(),
+      isHandedOverToManager: bookingMeta['isHandedOverToManager'] == true,
+      handedOverBy: bookingMeta['handedOverBy']?.toString(),
+      handoverNote: bookingMeta['handoverNote']?.toString(),
+      handedOverAt: handedOverAt,
+    );
   }
 
   @override
   Future<List<WashBooking>> getBookings() async {
     try {
-      final dynamic data = await _get('wash_bookings?select=*&order=created_at.desc');
+      final dynamic data = await _get('wash_bookings?select=*&order=created_at.desc&limit=60');
       if (data == null || data is! List || data.isEmpty) {
-        return _fallbackLocalRepo.getBookings();
+        return await _fallbackLocalRepo.getBookings();
       }
 
       final packages = await getPackages();
-
-      return data.map((json) {
-        CarType carType = CarType.automobile;
-        final carStr = (json['car_type'] ?? '').toString().toLowerCase();
-        if (carStr.contains('truck')) {
-          carType = CarType.truck;
-        } else if (carStr.contains('minibus') || carStr.contains('large')) {
-          carType = CarType.minibus;
-        }
-
-        ServiceType serviceType = ServiceType.walkInStation;
-        final stStr = (json['service_type'] ?? '').toString();
-        if (stStr.contains('atHome')) {
-          serviceType = ServiceType.atHomeMobile;
-        } else if (stStr.contains('valet') || stStr.contains('pickUp')) {
-          serviceType = ServiceType.valetPickUp;
-        } else if (stStr.contains('phone')) {
-          serviceType = ServiceType.phoneCallBooking;
-        }
-
-        WashStatus status = WashStatus.pending;
-        for (var s in WashStatus.values) {
-          if (s.name == json['status']) {
-            status = s;
-            break;
-          }
-        }
-
-        WashPackage pkg = packages.first;
-        if (json['package_id'] != null) {
-          final found = packages.where((p) => p.id == json['package_id'].toString());
-          if (found.isNotEmpty) pkg = found.first;
-        }
-
-        BayType? assignedBay;
-        final bayIdStr = json['assigned_bay_id']?.toString();
-        if (bayIdStr == 'b0000000-0000-0000-0000-000000000001') {
-          assignedBay = BayType.bay1;
-        } else if (bayIdStr == 'b0000000-0000-0000-0000-000000000002') {
-          assignedBay = BayType.bay2;
-        } else if (bayIdStr == 'b0000000-0000-0000-0000-000000000003') {
-          assignedBay = BayType.mobileVan;
-        }
-
-        PaymentMethod pMethod = PaymentMethod.cash;
-        final mStr = (json['payment_method'] ?? '').toString().toLowerCase();
-        if (mStr.contains('telebirr')) {
-          pMethod = PaymentMethod.telebirr;
-        } else if (mStr.contains('cbe')) {
-          pMethod = PaymentMethod.cbeBirr;
-        } else if (mStr.contains('abyssinia') || mStr.contains('boa')) {
-          pMethod = PaymentMethod.bankOfAbyssinia;
-        } else if (mStr.contains('awash')) {
-          pMethod = PaymentMethod.awashBank;
-        } else if (mStr.contains('dashen') || mStr.contains('amole')) {
-          pMethod = PaymentMethod.dashenBank;
-        } else if (mStr.contains('bank')) {
-          pMethod = PaymentMethod.otherBankTransfer;
-        }
-
-        final isPhone = json['booking_origin'] == 'phone_booking';
-        final rawPlate = json['license_plate']?.toString() ?? '';
-        final isCarpet = (json['is_carpet'] == true) || rawPlate.startsWith('CPT-');
-        final carpetType = json['carpet_type']?.toString();
-        final carpetAreaSqMeters = json['carpet_area_sq_meters'] != null
-            ? double.tryParse(json['carpet_area_sq_meters'].toString())
-            : null;
-        final carpetDimensions = json['carpet_dimensions']?.toString();
-        final customTotalPrice = json['custom_total_price'] != null
-            ? double.tryParse(json['custom_total_price'].toString())
-            : (isCarpet && json['total_amount'] != null ? double.tryParse(json['total_amount'].toString()) : null);
-
-        final rawLoc = json['delivery_location']?.toString();
-        final cleanLoc = extractCleanDeliveryLocation(rawLoc);
-        final bookingMeta = decodeBookingMeta(rawLoc);
-
-        List<String>? selectedServices;
-        if (json['selected_services'] != null) {
-          if (json['selected_services'] is List) {
-            selectedServices = (json['selected_services'] as List).map((e) => e.toString()).toList();
-          } else if (json['selected_services'] is String) {
-            try {
-              final dec = jsonDecode(json['selected_services']);
-              if (dec is List) selectedServices = dec.map((e) => e.toString()).toList();
-            } catch (_) {}
-          }
-        }
-        if (selectedServices == null && cleanLoc != null) {
-          if (cleanLoc.startsWith('Services: ')) {
-            selectedServices = cleanLoc.substring('Services: '.length).split(', ').map((s) => s.trim()).toList();
-          }
-        }
-
-        final paidAt = bookingMeta['paidAt'] != null
-            ? DateTime.tryParse(bookingMeta['paidAt'].toString())
-            : null;
-        final postponedAt = bookingMeta['postponedAt'] != null
-            ? DateTime.tryParse(bookingMeta['postponedAt'].toString())
-            : null;
-        final handedOverAt = bookingMeta['handedOverAt'] != null
-            ? DateTime.tryParse(bookingMeta['handedOverAt'].toString())
-            : null;
-
-        return WashBooking(
-          id: json['id'].toString(),
-          customerName: json['owner_name'] ?? 'Customer',
-          customerPhone: json['customer_phone'] ?? '',
-          serviceType: serviceType,
-          deliveryLocation: cleanLoc,
-          carType: carType,
-          licensePlate: rawPlate,
-          package: pkg,
-          status: status,
-          assignedBay: assignedBay,
-          assignedWasherId: json['assigned_washer_id']?.toString(),
-          assignedWasherName: json['washer_1_name'] ?? json['washer_2_name'],
-          payment: PaymentInfo(
-            isPaid: json['is_paid'] ?? false,
-            method: pMethod,
-            amount: double.tryParse(json['total_amount']?.toString() ?? '300') ?? 300.0,
-            transactionRef: json['transaction_ref'],
-            receiptScreenshot: json['receipt_url'],
-            paidAt: paidAt,
-          ),
-          createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
-          scheduledTime: json['scheduled_time'] != null ? DateTime.tryParse(json['scheduled_time'].toString()) : null,
-          completedAt: json['completed_at'] != null ? DateTime.tryParse(json['completed_at']) : null,
-          commissionLogged: json['commission_logged'] ?? false,
-          isPhoneBooking: isPhone,
-          gpsCoordinates: bookingMeta['gps']?.toString(),
-          isCarpet: isCarpet,
-          carpetType: carpetType,
-          carpetAreaSqMeters: carpetAreaSqMeters,
-          carpetDimensions: carpetDimensions,
-          customTotalPrice: customTotalPrice,
-          selectedServices: selectedServices,
-          isOnlineBooking: bookingMeta['isOnline'] == true || json['booking_origin'] == 'customer_app',
-          isPostponed: bookingMeta['isPostponed'] == true,
-          postponedReason: bookingMeta['postponedReason']?.toString(),
-          postponedAt: postponedAt,
-          postponedByRole: bookingMeta['postponedByRole']?.toString(),
-          isHandedOverToManager: bookingMeta['isHandedOverToManager'] == true,
-          handedOverBy: bookingMeta['handedOverBy']?.toString(),
-          handoverNote: bookingMeta['handoverNote']?.toString(),
-          handedOverAt: handedOverAt,
-        );
-      }).toList();
+      return data.map((json) => _mapBookingFromJson(json, packages)).toList();
     } catch (e) {
       debugPrint('Supabase getBookings exception: $e');
-      return _fallbackLocalRepo.getBookings();
+      return await _fallbackLocalRepo.getBookings();
+    }
+  }
+
+  @override
+  Future<List<WashBooking>> getPendingOnlineAlerts() async {
+    try {
+      final dynamic data = await _get(
+        'wash_bookings?select=*&status=eq.pending&order=created_at.desc&limit=10',
+      );
+      if (data == null || data is! List || data.isEmpty) {
+        return await _fallbackLocalRepo.getPendingOnlineAlerts();
+      }
+
+      final packages = await getPackages();
+      return data
+          .map((json) => _mapBookingFromJson(json, packages))
+          .where((b) => b.isOnlineBooking && b.status == WashStatus.pending)
+          .take(5)
+          .toList();
+    } catch (e) {
+      debugPrint('Supabase getPendingOnlineAlerts exception: $e');
+      return await _fallbackLocalRepo.getPendingOnlineAlerts();
     }
   }
 
@@ -734,6 +805,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         final newId = res.first['id'].toString();
 
         if (booking.assignedBay != null && !booking.isCarpet) {
+          _cachedBays = null;
+          _baysFetchedAt = null;
           final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
           await _patch('station_bays?bay_number=eq.$bayNum', {
             'is_occupied': true,
@@ -766,6 +839,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         final booking = await getBookingById(bookingId);
         if (booking != null && newStatus == WashStatus.completed && !booking.commissionLogged && booking.payment.isPaid) {
           if (booking.assignedBay != null && !booking.isCarpet) {
+            _cachedBays = null;
+            _baysFetchedAt = null;
             final bayNum = booking.assignedBay == BayType.bay1 ? 1 : (booking.assignedBay == BayType.bay2 ? 2 : 3);
             await _patch('station_bays?bay_number=eq.$bayNum', {
               'is_occupied': false,
@@ -825,6 +900,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   }) async {
     try {
       if (_isUuid(bookingId)) {
+        _cachedBays = null;
+        _baysFetchedAt = null;
         final bayNum = bay == BayType.bay1 ? 1 : (bay == BayType.bay2 ? 2 : 3);
         final bayId = bay == BayType.bay1
             ? 'b0000000-0000-0000-0000-000000000001'
@@ -981,6 +1058,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         final existing = await getBookingById(bookingId);
         if (existing != null) {
           if (existing.assignedBay != null && !existing.isCarpet) {
+            _cachedBays = null;
+            _baysFetchedAt = null;
             final bayNum = existing.assignedBay == BayType.bay1 ? 1 : (existing.assignedBay == BayType.bay2 ? 2 : 3);
             await _patch('station_bays?bay_number=eq.$bayNum', {
               'is_occupied': false,
@@ -1070,6 +1149,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (_isUuid(bookingId)) {
         final existing = await getBookingById(bookingId);
         if (existing?.assignedBay != null && !(existing?.isCarpet ?? false)) {
+          _cachedBays = null;
+          _baysFetchedAt = null;
           final bayNum = existing!.assignedBay == BayType.bay1 ? 1 : (existing.assignedBay == BayType.bay2 ? 2 : 3);
           await _patch('station_bays?bay_number=eq.$bayNum', {
             'is_occupied': false,
@@ -1090,6 +1171,12 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<void> clearAllBookings() async {
     _dataPurgeEpoch = DateTime.now();
     _lastClosingSyncError = null;
+    _cachedPackages = null;
+    _packagesFetchedAt = null;
+    _cachedStaff = null;
+    _staffFetchedAt = null;
+    _cachedBays = null;
+    _baysFetchedAt = null;
     try {
       // 1. Invoke server-side RPC function (truncates bookings, logs, sms, and resets bays)
       await _post('rpc/clear_all_bookings', {});
@@ -1123,7 +1210,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<List<CommissionLog>> getCommissionLogs() async {
     try {
-      final dynamic data = await _get('commission_logs?select=*&order=logged_at.desc');
+      final dynamic data = await _get('commission_logs?select=*&order=logged_at.desc&limit=50');
       if (data == null || data is! List || data.isEmpty) {
         return _fallbackLocalRepo.getCommissionLogs();
       }

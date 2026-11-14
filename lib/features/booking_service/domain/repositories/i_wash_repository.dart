@@ -20,6 +20,7 @@ import 'package:bishe_car_wash/features/inventory/domain/models/stock_transactio
 /// Domain port for active bookings, washing bay allocations, and payment processing.
 abstract class IBookingRepository {
   Future<List<WashBooking>> getBookings();
+  Future<List<WashBooking>> getPendingOnlineAlerts();
   Future<WashBooking?> getBookingById(String id);
   Future<WashBooking> createBooking(WashBooking booking);
   Future<WashBooking> updateWashStatus(String bookingId, WashStatus newStatus);

@@ -104,6 +104,14 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<List<WashBooking>> getPendingOnlineAlerts() async {
+    return _bookings
+        .where((b) => b.isOnlineBooking && b.status == WashStatus.pending)
+        .take(5)
+        .toList();
+  }
+
+  @override
   Future<WashBooking?> getBookingById(String id) async {
     try {
       return _bookings.firstWhere((b) => b.id == id);

@@ -21,7 +21,7 @@ class _OnlineBookingAlertBannerState extends State<OnlineBookingAlertBanner> {
   @override
   void initState() {
     super.initState();
-    _pollTimer = Timer.periodic(const Duration(seconds: 12), (_) {
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (!mounted) return;
       AppStateProvider.read(context).pollNewOnlineBookings();
     });

@@ -2872,9 +2872,25 @@ class AppStateNotifier extends ChangeNotifier {
   /// Lightweight silent poll used by Cashier & Operational Manager dashboards to detect new online bookings.
   Future<void> pollNewOnlineBookings() async {
     try {
-      final latest = await _repository.getBookings();
-      _bookings = latest;
-      _syncOnlineBookingAlerts(_bookings, notify: true);
+      final alerts = await _repository.getPendingOnlineAlerts();
+      if (alerts.isEmpty) {
+        return;
+      }
+      bool hasNew = false;
+      for (final a in alerts) {
+        final existingIdx = _bookings.indexWhere((b) => b.id == a.id);
+        if (existingIdx == -1) {
+          _bookings.insert(0, a);
+          hasNew = true;
+        } else if (_bookings[existingIdx].status != a.status) {
+          _bookings[existingIdx] = a;
+          hasNew = true;
+        }
+      }
+      _syncOnlineBookingAlerts(alerts, notify: true);
+      if (hasNew) {
+        notifyListeners();
+      }
     } catch (e) {
       debugPrint('Online booking poll error: $e');
     }
