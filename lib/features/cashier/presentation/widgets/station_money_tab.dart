@@ -37,6 +37,11 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final undepositedCash = state.undepositedCashTodayETB;
+    final cashierDrawerCash = state.cashierDrawerBalanceETB as double;
+    final managerCustodyCash = state.managerCustodyCashETB as double;
+    final activeDrawerCash = widget.isManager
+        ? (managerCustodyCash > 0 ? managerCustodyCash : undepositedCash)
+        : cashierDrawerCash;
     final pendingCashierOtp = state.pendingCashierHandover ?? state.pendingCashierAdminHandover;
     final pendingNightOtp = state.pendingAdminNightHandover;
     final latestDayClosing = state.latestDayClosing;
@@ -87,9 +92,23 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
               ),
               const SizedBox(height: 6),
               Text(
-                CurrencyFormatter.format(undepositedCash),
+                CurrencyFormatter.format(activeDrawerCash),
                 style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
               ),
+              if (!widget.isManager && isDayClosed) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    state.tr('drawerEmptyHandedOver'),
+                    style: const TextStyle(color: Color(0xFFFCD34D), fontSize: 11, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -382,13 +401,25 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
                 ? state.tr('commissionDisburseRequiredTitle')
                 : state.tr('reconcileAndCloseShift')));
 
+    final cashierCanDeposit = !isClosed && pendingHandover == null && (state.cashierDrawerBalanceETB as double) > 0.01;
+    final managerCanDeposit = (state.managerCustodyCashETB as double) > 0.01 || (state.undepositedCashTodayETB as double) > 0.01;
+    final canDeposit = widget.isManager ? managerCanDeposit : cashierCanDeposit;
+
+    final depositSubtitle = widget.isManager
+        ? CurrencyFormatter.formatShort((state.managerCustodyCashETB as double) > 0
+            ? (state.managerCustodyCashETB as double)
+            : (state.undepositedCashTodayETB as double))
+        : ((isClosed || pendingHandover != null)
+            ? state.tr('drawerEmptyHandedOver')
+            : CurrencyFormatter.formatShort(state.cashierDrawerBalanceETB as double));
+
     final actions = [
       _buildDeskActionButton(
-        onPressed: () => BankDepositDialog.show(context),
+        onPressed: canDeposit ? () => BankDepositDialog.show(context) : null,
         color: Colors.indigo,
         icon: Icons.account_balance_rounded,
         title: state.tr('depositCashToBank'),
-        subtitle: CurrencyFormatter.formatShort(undepositedCash),
+        subtitle: depositSubtitle,
       ),
       _buildDeskActionButton(
         onPressed: () => PettyCashDialog.show(context),
@@ -510,12 +541,13 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
   }
 
   Widget _buildDeskActionButton({
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     required Color color,
     required IconData icon,
     required String title,
     required String subtitle,
   }) {
+    final isEnabled = onPressed != null;
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 18),
@@ -524,12 +556,14 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
-          Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: Colors.white70)),
+          Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, color: isEnabled ? Colors.white70 : Colors.white60)),
         ],
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: color,
+        backgroundColor: isEnabled ? color : Colors.grey.shade400,
         foregroundColor: Colors.white,
+        disabledBackgroundColor: Colors.grey.shade400,
+        disabledForegroundColor: Colors.white70,
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

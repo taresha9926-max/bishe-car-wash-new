@@ -118,7 +118,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
   Widget _buildActionTabBar(dynamic state, int activeCount, bool isMobile) {
     final isCarpet = state.isCarpetDivisionActive as bool;
     final activeColor = isCarpet ? const Color(0xFF7C3AED) : AppColors.primary;
-    final undeposited = state.undepositedCashTodayETB as double;
+    final drawerCash = state.cashierDrawerBalanceETB as double;
 
     return Container(
       padding: const EdgeInsets.all(4),
@@ -146,7 +146,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
           ),
           _buildCompactTab(
             icon: Icons.account_balance_wallet_rounded,
-            label: '${state.tr("cashierTabMoney")} (${CurrencyFormatter.formatShort(undeposited)})',
+            label: '${state.tr("cashierTabMoney")} (${CurrencyFormatter.formatShort(drawerCash)})',
             isMobile: isMobile,
           ),
           _buildCompactTab(

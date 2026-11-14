@@ -1583,6 +1583,37 @@ class AppStateNotifier extends ChangeNotifier {
     return extra > 0 ? extra : 0.0;
   }
 
+  /// Role-specific physical cash in Cashier drawer. Drops to 0.00 once day shift is closed and handed over or deposited.
+  double get cashierDrawerBalanceETB {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'day' &&
+          c.isConfirmed &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return 0.0;
+      }
+    }
+    return undepositedCashTodayETB;
+  }
+
+  /// Role-specific physical cash in Operational Manager custody.
+  double get managerCustodyCashETB {
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'night' &&
+          c.isConfirmed &&
+          (c.isHandoverAccepted || c.handoverMethod == 'bank_deposit') &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        return 0.0;
+      }
+    }
+    return managerCarriedCashETB + nightShiftAdditionalCashETB;
+  }
+
   bool _verifyHandoverOtp(String? expectedOtp, String? enteredOtp) {
     final expected = (expectedOtp ?? '').trim();
     final actual = (enteredOtp ?? '').trim();

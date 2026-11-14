@@ -3755,6 +3755,21 @@ class AppStrings {
       AppLanguage.om: 'Maallaqa Kaashii Harkaa (Baankiitti Hin Galin)',
       AppLanguage.am: 'በመሳቢያ ያለ ጥሬ ገንዘብ (ወደ ባንክ ያልገባ)',
     },
+    'drawerEmptyHandedOver': {
+      AppLanguage.en: 'Drawer 0 ETB • Handed Over',
+      AppLanguage.om: 'Saanduqa 0 ETB • Dabarfameera',
+      AppLanguage.am: 'ሳጥን 0 ብር • ተላልፏል',
+    },
+    'cashHandedOverDisabledNotice': {
+      AppLanguage.en: 'Cash already handed over. Drawer is empty.',
+      AppLanguage.om: 'Qarshiin duraan dabarfameera. Saanduqni duwwaadha.',
+      AppLanguage.am: 'ጥሬ ገንዘብ አስቀድሞ ተላልፏል። ሳጥኑ ባዶ ነው።',
+    },
+    'handedOverViaOtpPrefix': {
+      AppLanguage.en: 'Handed Over',
+      AppLanguage.om: 'Dabarfameera',
+      AppLanguage.am: 'ተላልፏል',
+    },
     'expenseAmount': {
       AppLanguage.en: 'Expense Amount (ETB)',
       AppLanguage.om: 'Hamma Baasii (ETB)',
