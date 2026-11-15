@@ -223,15 +223,11 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             _buildStatusHeaderCard(context, state, booking),
             const SizedBox(height: 16),
 
-            // Vehicle & Bay Assignment Card
+            // Unified Vehicle & 4-Phase Activity Hero Card (Side-by-Side)
             _buildVehicleDetailsCard(context, state, booking),
             const SizedBox(height: 20),
 
-            // 4 Modern Automobile / Carpet Status Visualizer Thumbnails
-            _buildVehicleStatusThumbnailShowcase(context, state, booking),
-            const SizedBox(height: 20),
-
-            // Visual Live Progress Stepper
+            // Horizontal Visual Live Progress Stepper
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -251,17 +247,33 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.timeline, color: AppColors.primary, size: 20),
+                      const Icon(Icons.timeline_rounded, color: AppColors.primary, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          booking.isCarpet ? state.tr('carpetService') : state.tr('activeWashTitle'),
+                          state.tr('horizontalPipelineTitle'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 15.0,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          state.tr('liveTrackingTitle'),
+                          style: const TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -274,7 +286,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         : '${booking.licensePlate} • ${booking.localizedServiceDisplayName(state.currentLang)}',
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   LiveWashStepper(
                     currentStatus: booking.status,
                     isCarpet: booking.isCarpet,
@@ -283,10 +295,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Payment & Bill Summary
-            _buildPaymentCard(context, state, booking),
             const SizedBox(height: 20),
 
             // Facility Contact Assistance
@@ -432,11 +440,17 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
   }
 
   Widget _buildVehicleDetailsCard(BuildContext context, dynamic state, WashBooking booking) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 740;
+
+    final vehicleInfoWidget = _buildVehicleInfoColumn(context, state, booking);
+    final phaseGridWidget = _buildPhaseGrid(context, state, booking);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF111827),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
@@ -446,48 +460,114 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: booking.isCarpet
-                    ? (booking.carpetType == 'type_b' ? AutoCareAssets.carpetTypeBUrl : AutoCareAssets.carpetTypeAUrl)
-                    : AutoCareAssets.getCarTypeImage(booking.carType),
-                width: 58,
-                height: 58,
-                borderRadius: 14,
-                fallbackIcon: booking.isCarpet ? Icons.texture_rounded : booking.carType.icon,
-                fallbackColor: booking.isCarpet ? const Color(0xFF7C3AED) : AppColors.primary,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      booking.licensePlate,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.0,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      booking.isCarpet
-                          ? '${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}${booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? " • ${booking.carpetDimensions}" : ""}${booking.carpetAreaSqMeters != null ? " (${booking.carpetAreaSqMeters!.toStringAsFixed(1)} m²)" : ""}'
-                          : '${booking.carType.localizedName(state.currentLang)} • ${booking.localizedServiceDisplayName(state.currentLang)}',
-                      style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+      child: isCompact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                vehicleInfoWidget,
+                const Divider(height: 28, color: Color(0xFF1F2937)),
+                phaseGridWidget,
+              ],
+            )
+          : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 5, child: vehicleInfoWidget),
+                const SizedBox(width: 18),
+                Container(width: 1, height: 230, color: const Color(0xFF1F2937)),
+                const SizedBox(width: 18),
+                Expanded(flex: 6, child: phaseGridWidget),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildVehicleInfoColumn(BuildContext context, dynamic state, WashBooking booking) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF020617),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.liquidCyanNeon, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.liquidCyanNeon.withValues(alpha: 0.3),
+                      blurRadius: 8,
                     ),
                   ],
                 ),
+                child: Text(
+                  booking.licensePlate,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    color: Colors.white,
+                  ),
+                ),
               ),
-            ],
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.statusCompleted.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: AppColors.statusCompleted.withValues(alpha: 0.4)),
+              ),
+              child: Text(
+                booking.isCarpet
+                    ? (booking.carpetType == 'type_b' ? state.tr('carpetTypeB') : state.tr('carpetTypeA'))
+                    : booking.carType.localizedName(state.currentLang),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.statusCompleted,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          booking.isCarpet
+              ? '${state.tr("carpetService")}${booking.carpetDimensions != null && booking.carpetDimensions!.isNotEmpty ? " • ${booking.carpetDimensions}" : ""}'
+              : booking.localizedServiceDisplayName(state.currentLang),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            color: Colors.white,
           ),
-          const Divider(height: 24),
-          Row(
+        ),
+        const SizedBox(height: 3),
+        Text(
+          booking.isCarpet
+              ? (booking.carpetAreaSqMeters != null ? '${booking.carpetAreaSqMeters!.toStringAsFixed(1)} m²' : '')
+              : '${booking.carType.localizedName(state.currentLang)} • BISHE Auto Care',
+          style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0B1120),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.6)),
+          ),
+          child: Row(
             children: [
               Expanded(
                 child: _buildDetailSubItem(
@@ -503,7 +583,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   color: booking.isCarpet ? const Color(0xFF4F46E5) : (booking.assignedBay?.color ?? AppColors.textMuted),
                 ),
               ),
-              Container(width: 1, height: 38, color: AppColors.cardBorder),
+              Container(width: 1, height: 32, color: AppColors.cardBorder),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 12),
@@ -517,27 +597,306 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
               ),
             ],
           ),
-          if (booking.deliveryLocation != null) ...[
-            const Divider(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.location_on,
-                  size: 16,
-                  color: booking.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+        ),
+        if (booking.deliveryLocation != null) ...[
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.location_on,
+                size: 15,
+                color: booking.serviceType == ServiceType.valetPickUp ? const Color(0xFF7C3AED) : AppColors.mobileVanColor,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '${booking.isCarpet ? state.tr("carpetPickUpLocation") : (booking.serviceType == ServiceType.valetPickUp ? state.tr("driverPickUpLocation") : state.tr("locationArea"))}: ${booking.deliveryLocation}',
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPhaseGrid(BuildContext context, dynamic state, WashBooking booking) {
+    final status = booking.status;
+    final isCarpet = booking.isCarpet;
+
+    int activePhase = 0;
+    if (status == WashStatus.completed || status == WashStatus.readyForPickup) {
+      activePhase = 4;
+    } else if (status == WashStatus.drying) {
+      activePhase = 3;
+    } else if (status == WashStatus.washing) {
+      activePhase = 2;
+    } else if (status != WashStatus.pending && status != WashStatus.cancelled) {
+      activePhase = 1;
+    }
+
+    final phases = [
+      (
+        stageNumber: 1,
+        title: state.tr('phaseApprovedArrived'),
+        imagePath: isCarpet ? AutoCareAssets.carpetTypeAUrl : AutoCareAssets.phase1ArrivedDirtyAsset,
+        icon: Icons.domain_verification_rounded,
+      ),
+      (
+        stageNumber: 2,
+        title: state.tr('phaseStartWash'),
+        imagePath: isCarpet ? AutoCareAssets.carpetStationWashUrl : AutoCareAssets.phase2StartWashAsset,
+        icon: Icons.wash_rounded,
+      ),
+      (
+        stageNumber: 3,
+        title: state.tr('phaseMoveToDrying'),
+        imagePath: isCarpet ? AutoCareAssets.carpetDryingRackUrl : AutoCareAssets.phase3MoveDryingAsset,
+        icon: Icons.dry_cleaning_rounded,
+      ),
+      (
+        stageNumber: 4,
+        title: state.tr('phaseCompletedReady'),
+        imagePath: isCarpet ? AutoCareAssets.carpetValetPickupUrl : AutoCareAssets.phase4CompletedShowroomAsset,
+        icon: Icons.check_circle_rounded,
+      ),
+    ];
+
+    final counterText = activePhase == 0
+        ? state.tr('waitingArrival')
+        : (activePhase == 4 ? state.tr('completedPhaseBadge') : 'PHASE $activePhase OF 4');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  const Icon(Icons.camera_alt_rounded, color: AppColors.liquidCyanNeon, size: 16),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      state.tr('liveVehicleStatusVisualizer'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+              decoration: BoxDecoration(
+                color: AppColors.liquidCyanNeon.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                counterText,
+                style: const TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.liquidCyanNeon,
+                  letterSpacing: 0.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(child: _buildPhaseCardItem(phases[0], activePhase, booking)),
+            const SizedBox(width: 8),
+            Expanded(child: _buildPhaseCardItem(phases[1], activePhase, booking)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(child: _buildPhaseCardItem(phases[2], activePhase, booking)),
+            const SizedBox(width: 8),
+            Expanded(child: _buildPhaseCardItem(phases[3], activePhase, booking)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhaseCardItem(
+    ({int stageNumber, dynamic title, String imagePath, IconData icon}) phase,
+    int activePhase,
+    WashBooking booking,
+  ) {
+    final isReached = activePhase >= phase.stageNumber;
+    final isCurrent = activePhase == phase.stageNumber && booking.status != WashStatus.completed;
+    final isDone = activePhase > phase.stageNumber || booking.status == WashStatus.completed;
+
+    if (!isReached) {
+      // Empty Slate Card (NO picture, text & pending indicator only)
+      return Container(
+        height: 96,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F172A).withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFF334155),
+            width: 1.1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.hourglass_empty_rounded, size: 18, color: const Color(0xFF64748B)),
+            const SizedBox(height: 5),
+            Text(
+              phase.title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF64748B),
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Pending Step ${phase.stageNumber}',
+              style: const TextStyle(
+                fontSize: 8.5,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF475569),
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Filled Action Photo Card (Loaded when stage is triggered)
+    return Container(
+      height: 96,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isCurrent
+              ? AppColors.liquidCyanNeon
+              : (isDone ? AppColors.statusCompleted : AppColors.cardBorder),
+          width: isCurrent ? 2.0 : 1.2,
+        ),
+        boxShadow: isCurrent
+            ? [
+                BoxShadow(
+                  color: AppColors.liquidCyanNeon.withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildPhaseImage(phase.imagePath),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withValues(alpha: 0.60),
+                  Colors.black.withValues(alpha: 0.15),
+                  Colors.black.withValues(alpha: 0.88),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(7),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: isCurrent ? AppColors.liquidCyanNeon : AppColors.statusCompleted,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                   child: Text(
-                    '${booking.isCarpet ? state.tr("carpetPickUpLocation") : (booking.serviceType == ServiceType.valetPickUp ? state.tr("driverPickUpLocation") : state.tr("locationArea"))}: ${booking.deliveryLocation}',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                    isCurrent ? 'ACTIVE' : 'DONE',
+                    style: TextStyle(
+                      fontSize: 8.0,
+                      fontWeight: FontWeight.w900,
+                      color: isCurrent ? const Color(0xFF031428) : const Color(0xFF022013),
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+                Text(
+                  phase.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    height: 1.15,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black87,
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPhaseImage(String imagePath) {
+    if (imagePath.startsWith('assets/')) {
+      return Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          color: const Color(0xFF1E293B),
+          child: const Center(
+            child: Icon(Icons.directions_car_rounded, color: AppColors.primary, size: 22),
+          ),
+        ),
+      );
+    }
+    return Image.network(
+      imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        color: const Color(0xFF1E293B),
+        child: const Center(
+          child: Icon(Icons.broken_image_rounded, color: AppColors.textMuted, size: 22),
+        ),
       ),
     );
   }
@@ -566,354 +925,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
         ),
       ],
-    );
-  }
-
-  Widget _buildPaymentCard(BuildContext context, dynamic state, WashBooking booking) {
-    final payment = booking.payment;
-    final isPaid = payment.isPaid;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  state.tr('paymentMethod'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              StatusBadge(
-                label: isPaid ? 'PAID' : 'PENDING',
-                color: isPaid ? AppColors.statusReady : AppColors.statusPending,
-                icon: isPaid ? Icons.check_circle : Icons.pending,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  booking.isCarpet
-                      ? '${state.tr("carpetService")} (${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")})'
-                      : booking.localizedServiceDisplayName(state.currentLang),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                CurrencyFormatter.format(booking.totalPrice),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  state.tr('paymentMethod'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(payment.method.icon, size: 14, color: payment.method.color),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        payment.method.localizedName(state.currentLang),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: payment.method.color,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (payment.transactionRef != null) ...[
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    state.tr('transactionRef'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    payment.transactionRef!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVehicleStatusThumbnailShowcase(BuildContext context, dynamic state, WashBooking booking) {
-    final status = booking.status;
-    final isCarpet = booking.isCarpet;
-
-    int currentPhaseIndex = 0;
-    if (status == WashStatus.washing) {
-      currentPhaseIndex = 1;
-    } else if (status == WashStatus.drying) {
-      currentPhaseIndex = 2;
-    } else if (status == WashStatus.readyForPickup || status == WashStatus.completed) {
-      currentPhaseIndex = 3;
-    }
-
-    final phases = [
-      (
-        title: state.tr('phaseApprovedArrived'),
-        desc: state.tr('phaseApprovedArrivedSub'),
-        imageUrl: isCarpet ? AutoCareAssets.carpetTypeAUrl : AutoCareAssets.stationBayUrl,
-        icon: Icons.domain_verification_rounded,
-        stageNumber: 1,
-      ),
-      (
-        title: state.tr('phaseStartWash'),
-        desc: state.tr('phaseStartWashSub'),
-        imageUrl: isCarpet ? AutoCareAssets.carpetStationWashUrl : AutoCareAssets.packageFoamUrl,
-        icon: Icons.wash_rounded,
-        stageNumber: 2,
-      ),
-      (
-        title: state.tr('phaseMoveToDrying'),
-        desc: state.tr('phaseMoveToDryingSub'),
-        imageUrl: isCarpet ? AutoCareAssets.carpetDryingRackUrl : 'assets/images/reel_3.jpg',
-        icon: Icons.dry_cleaning_rounded,
-        stageNumber: 3,
-      ),
-      (
-        title: state.tr('phaseCompletedReady'),
-        desc: state.tr('phaseCompletedReadySub'),
-        imageUrl: isCarpet ? AutoCareAssets.carpetValetPickupUrl : AutoCareAssets.welcomeHeroUrl,
-        icon: Icons.check_circle_rounded,
-        stageNumber: 4,
-      ),
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.photo_library_rounded, color: AppColors.liquidCyanNeon, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  state.tr('liveVehicleStatusVisualizer'),
-                  style: const TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.liquidCyanNeon.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'PHASE ${currentPhaseIndex + 1} OF 4',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.liquidCyanNeon,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            height: 165,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: phases.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final item = phases[index];
-                final isCurrent = index == currentPhaseIndex;
-                final isDone = index < currentPhaseIndex;
-                final borderColor = isCurrent
-                    ? AppColors.liquidCyanNeon
-                    : (isDone ? AppColors.statusCompleted : AppColors.cardBorder);
-
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: 200,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: borderColor, width: isCurrent ? 2 : 1),
-                    boxShadow: isCurrent
-                        ? [
-                            BoxShadow(
-                              color: AppColors.liquidCyanNeon.withValues(alpha: 0.28),
-                              blurRadius: 14,
-                              spreadRadius: 1,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        children: [
-                          AutoCareAssets.buildPhotoThumbnail(
-                            imageUrl: item.imageUrl,
-                            width: 200,
-                            height: 85,
-                            borderRadius: 0,
-                            fallbackIcon: item.icon,
-                          ),
-                          Positioned(
-                            top: 6,
-                            left: 6,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.75),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'Step ${item.stageNumber}',
-                                style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 6,
-                            right: 6,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: isCurrent
-                                    ? AppColors.liquidCyanNeon
-                                    : (isDone ? AppColors.statusCompleted : Colors.black54),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                isCurrent ? 'ACTIVE' : (isDone ? 'DONE' : 'NEXT'),
-                                style: TextStyle(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w900,
-                                  color: isCurrent ? Colors.black : Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w800,
-                                color: isCurrent ? AppColors.liquidCyanNeon : Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              item.desc,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 9.5,
-                                color: AppColors.textSecondary,
-                                height: 1.2,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -16,6 +16,12 @@ class AutoCareAssets {
   static const String welcomeHeroUrl =
       'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=600&auto=format&fit=crop&q=80';
 
+  // 4 Cohesive BMW Vehicle Wash Lifecycle Phase Assets
+  static const String phase1ArrivedDirtyAsset = 'assets/images/phase1_arrived_dirty.jpg';
+  static const String phase2StartWashAsset = 'assets/images/phase2_start_wash.jpg';
+  static const String phase3MoveDryingAsset = 'assets/images/phase3_move_drying.jpg';
+  static const String phase4CompletedShowroomAsset = 'assets/images/phase4_completed_showroom.jpg';
+
   // Vehicle Categories
   static const String carSedanUrl =
       'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=400&auto=format&fit=crop&q=80';

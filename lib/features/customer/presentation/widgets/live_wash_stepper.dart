@@ -32,33 +32,52 @@ class LiveWashStepper extends StatelessWidget {
     final langCode = state.currentLang;
     final currentIndex = _steps.indexOf(currentStatus);
 
-    return Column(
-      children: List.generate(_steps.length, (index) {
-        final step = _steps[index];
-        final isDone = currentIndex > index || currentStatus == WashStatus.completed;
-        final isCurrent = currentIndex == index && currentStatus != WashStatus.completed;
-        final isLast = index == _steps.length - 1;
-        final stepIcon = isCarpet
-            ? (step == WashStatus.assignedToBay
-                ? Icons.layers_rounded
-                : (step == WashStatus.washing ? Icons.wash_rounded : step.icon))
-            : step.icon;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: List.generate(_steps.length * 2 - 1, (index) {
+          // Even indices are steps (0, 2, 4, 6, 8, 10, 12)
+          // Odd indices are modern arrow thumbnails (1, 3, 5, 7, 9, 11)
+          if (index.isOdd) {
+            final stepBeforeIndex = index ~/ 2;
+            final isArrowDone = currentIndex > stepBeforeIndex || currentStatus == WashStatus.completed;
+            final isArrowActive = currentIndex == stepBeforeIndex && currentStatus != WashStatus.completed;
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
+            return Padding(
+              padding: const EdgeInsets.only(top: 10, left: 4, right: 4),
+              child: _buildModernArrowThumbnail(
+                isDone: isArrowDone,
+                isActive: isArrowActive,
+              ),
+            );
+          }
+
+          final stepIndex = index ~/ 2;
+          final step = _steps[stepIndex];
+          final isDone = currentIndex > stepIndex || currentStatus == WashStatus.completed;
+          final isCurrent = currentIndex == stepIndex && currentStatus != WashStatus.completed;
+
+          final stepIcon = _getStepIcon(step, isCarpet);
+
+          return SizedBox(
+            width: 108,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _PulsingHaloRing(
                   isActive: isCurrent,
                   color: isCurrent ? AppColors.liquidCyanNeon : step.color,
                   child: Container(
-                    width: 38,
-                    height: 38,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
                       color: isDone
                           ? AppColors.statusCompleted
-                          : (isCurrent ? AppColors.slateGlass : AppColors.surfaceVariant),
+                          : (isCurrent ? AppColors.slateGlass : const Color(0xFF1E293B)),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isCurrent
@@ -78,8 +97,8 @@ class LiveWashStepper extends StatelessWidget {
                     ),
                     child: Center(
                       child: Icon(
-                        isDone ? Icons.check : stepIcon,
-                        size: 19,
+                        isDone ? Icons.check_rounded : stepIcon,
+                        size: 20,
                         color: isDone
                             ? Colors.white
                             : (isCurrent ? AppColors.liquidCyanNeon : AppColors.textMuted),
@@ -87,106 +106,146 @@ class LiveWashStepper extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (!isLast)
-                  Container(
-                    width: isCurrent ? 3.0 : 2.5,
-                    height: 38,
-                    margin: const EdgeInsets.symmetric(vertical: 3),
-                    decoration: BoxDecoration(
+                const SizedBox(height: 8),
+                Text(
+                  _getStepTitle(state, step, langCode),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: isCurrent ? FontWeight.w900 : (isDone ? FontWeight.w700 : FontWeight.w600),
+                    color: isCurrent
+                        ? AppColors.liquidCyanNeon
+                        : (isDone ? Colors.white : AppColors.textSecondary),
+                    height: 1.25,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: isDone
+                        ? AppColors.statusCompleted.withOpacity(0.15)
+                        : (isCurrent
+                            ? AppColors.liquidCyanNeon.withOpacity(0.15)
+                            : Colors.white.withOpacity(0.06)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    isDone
+                        ? 'DONE'
+                        : (isCurrent ? 'CURRENT' : 'STEP ${stepIndex + 1}'),
+                    style: TextStyle(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w800,
                       color: isDone
                           ? AppColors.statusCompleted
-                          : (isCurrent
-                              ? AppColors.liquidCyanNeon
-                              : AppColors.cardBorder.withValues(alpha: 0.6)),
-                      borderRadius: BorderRadius.circular(2),
-                      boxShadow: isCurrent
-                          ? [
-                              BoxShadow(
-                                color: AppColors.liquidCyanNeon.withValues(alpha: 0.5),
-                                blurRadius: 6,
-                              ),
-                            ]
-                          : null,
+                          : (isCurrent ? AppColors.liquidCyanNeon : AppColors.textMuted),
+                      letterSpacing: 0.4,
                     ),
                   ),
+                ),
               ],
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _getStepTitle(state, step, langCode),
-                            style: TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: isCurrent ? FontWeight.w800 : (isDone ? FontWeight.w700 : FontWeight.w500),
-                              color: isCurrent
-                                  ? AppColors.liquidCyanNeon
-                                  : (isDone ? AppColors.textPrimary : AppColors.textMuted),
-                            ),
-                          ),
-                        ),
-                        if (isCurrent) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppColors.liquidCyanNeon.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: AppColors.liquidCyanNeon.withValues(alpha: 0.4),
-                                width: 1,
-                              ),
-                            ),
-                            child: const Text(
-                              'CURRENT',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.5,
-                                color: AppColors.liquidCyanNeon,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _getStepSubtitle(state, step, isCurrent, isDone, isCarpet: isCarpet),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isCurrent ? AppColors.textSecondary : AppColors.textMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      }),
+          );
+        }),
+      ),
     );
+  }
+
+  Widget _buildModernArrowThumbnail({required bool isDone, required bool isActive}) {
+    final color = isDone
+        ? AppColors.statusCompleted
+        : (isActive ? AppColors.liquidCyanNeon : const Color(0xFF475569));
+    final bgColor = isDone
+        ? AppColors.statusCompleted.withValues(alpha: 0.16)
+        : (isActive ? AppColors.liquidCyanNeon.withValues(alpha: 0.20) : const Color(0xFF1E293B));
+    final borderColor = isDone
+        ? AppColors.statusCompleted.withValues(alpha: 0.5)
+        : (isActive ? AppColors.liquidCyanNeon.withValues(alpha: 0.7) : const Color(0xFF334155));
+
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: borderColor, width: 1.2),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: AppColors.liquidCyanNeon.withValues(alpha: 0.35),
+                  blurRadius: 8,
+                ),
+              ]
+            : null,
+      ),
+      child: Center(
+        child: Icon(
+          Icons.arrow_forward_ios_rounded,
+          size: 11,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  IconData _getStepIcon(WashStatus step, bool isCarpet) {
+    if (isCarpet) {
+      switch (step) {
+        case WashStatus.pending:
+          return Icons.event_available_rounded;
+        case WashStatus.confirmed:
+          return Icons.location_on_rounded;
+        case WashStatus.assignedToBay:
+          return Icons.layers_rounded;
+        case WashStatus.washing:
+          return Icons.wash_rounded;
+        case WashStatus.drying:
+          return Icons.wb_sunny_rounded;
+        case WashStatus.readyForPickup:
+          return Icons.verified_rounded;
+        case WashStatus.completed:
+          return Icons.check_circle_rounded;
+        default:
+          return Icons.circle;
+      }
+    }
+
+    switch (step) {
+      case WashStatus.pending:
+        return Icons.assignment_turned_in_rounded;
+      case WashStatus.confirmed:
+        return Icons.location_on_rounded;
+      case WashStatus.assignedToBay:
+        return Icons.garage_rounded;
+      case WashStatus.washing:
+        return Icons.local_car_wash_rounded;
+      case WashStatus.drying:
+        return Icons.air_rounded;
+      case WashStatus.readyForPickup:
+        return Icons.auto_awesome_rounded;
+      case WashStatus.completed:
+        return Icons.flag_circle_rounded;
+      default:
+        return step.icon;
+    }
   }
 
   String _getStepTitle(dynamic state, WashStatus step, String langCode) {
     if (serviceType == ServiceType.valetPickUp) {
       switch (step) {
-        case WashStatus.confirmed:
+        case WashStatus.pending:
           return state.tr('valetStepDispatched');
+        case WashStatus.confirmed:
         case WashStatus.assignedToBay:
           return state.tr('valetStepPickedUp');
         case WashStatus.washing:
           return state.tr('valetStepWashing');
         case WashStatus.drying:
-          return state.tr('valetStepReturning');
         case WashStatus.readyForPickup:
+          return state.tr('valetStepReturning');
         case WashStatus.completed:
           return state.tr('valetStepDelivered');
         default:
@@ -195,14 +254,15 @@ class LiveWashStepper extends StatelessWidget {
     }
     if (serviceType == ServiceType.atHomeMobile) {
       switch (step) {
-        case WashStatus.confirmed:
+        case WashStatus.pending:
           return state.tr('homeStepDispatched');
-        case WashStatus.assignedToBay:
+        case WashStatus.confirmed:
           return state.tr('homeStepEnRoute');
-        case WashStatus.washing:
+        case WashStatus.assignedToBay:
           return state.tr('homeStepSetup');
-        case WashStatus.drying:
+        case WashStatus.washing:
           return state.tr('homeStepWashing');
+        case WashStatus.drying:
         case WashStatus.readyForPickup:
         case WashStatus.completed:
           return state.tr('homeStepCompleted');
@@ -210,83 +270,24 @@ class LiveWashStepper extends StatelessWidget {
           return step.localizedName(langCode);
       }
     }
-    if (isCarpet && step == WashStatus.assignedToBay) {
-      return state.tr('carpetWashFloor');
-    }
-    return step.localizedName(langCode);
-  }
 
-  String _getStepSubtitle(dynamic state, WashStatus status, bool isCurrent, bool isDone, {bool isCarpet = false}) {
-    if (isDone) return state.tr('statusCompleted');
-    if (serviceType == ServiceType.valetPickUp) {
-      switch (status) {
-        case WashStatus.pending:
-          return 'Valet booking logged & awaiting confirmation';
-        case WashStatus.confirmed:
-          return 'Assigned driver en route to customer pickup address';
-        case WashStatus.assignedToBay:
-          return 'Vehicle checked in & arriving at Lake Hora station';
-        case WashStatus.washing:
-          return 'Active station jet wash, wheel care & foam rinse';
-        case WashStatus.drying:
-        case WashStatus.readyForPickup:
-          return 'Clean car inspected & driver in transit to your home';
-        case WashStatus.completed:
-          return 'Safely delivered to customer doorstep with keys returned';
-        default:
-          return '';
-      }
-    }
-    if (serviceType == ServiceType.atHomeMobile) {
-      switch (status) {
-        case WashStatus.pending:
-          return 'Mobile van booking logged & awaiting schedule';
-        case WashStatus.confirmed:
-          return 'Mobile crew & van dispatched to your street';
-        case WashStatus.assignedToBay:
-          return 'Van in transit with onboard water & power generators';
-        case WashStatus.washing:
-          return 'Setting up equipment in compound/driveway';
-        case WashStatus.drying:
-          return 'Active detailing & high-power extraction';
-        case WashStatus.readyForPickup:
-        case WashStatus.completed:
-          return 'Job inspected with customer & signed off';
-        default:
-          return '';
-      }
-    }
-    if (status == WashStatus.pending) return state.tr('stepApprovedDesc');
-    if (status == WashStatus.confirmed) return state.tr('stepArrivedDesc');
-    if (isCarpet) {
-      switch (status) {
-        case WashStatus.assignedToBay:
-          return 'Carpet laid on dedicated wash floor for treatment';
-        case WashStatus.washing:
-          return 'Deep rotary shampoo scrub, dust extraction & stain treatment';
-        case WashStatus.drying:
-          return 'Transferred to ventilated drying racks for thorough drying';
-        case WashStatus.readyForPickup:
-          return 'Inspection passed, sanitized, rolled & ready for pickup/delivery';
-        case WashStatus.completed:
-          return 'Carpet delivered safely to customer';
-        default:
-          return '';
-      }
-    }
-    switch (status) {
+    switch (step) {
+      case WashStatus.pending:
+        return state.tr('bookingApprovedStep');
+      case WashStatus.confirmed:
+        return state.tr('phaseApprovedArrived');
       case WashStatus.assignedToBay:
-        return 'Vehicle pulled into designated service bay';
+        return state.tr('queuedInBayStep');
       case WashStatus.washing:
-        return 'High pressure active foam spray & wheel rinse';
+        return state.tr('washingInProgressStep');
       case WashStatus.drying:
-        return 'Hand microfiber drying, vacuum & window polish';
+        return state.tr('dryingDetailingStep');
       case WashStatus.readyForPickup:
-        return 'Final inspection passed, ready for customer handover';
+        return state.tr('readyForPickupStep');
       case WashStatus.completed:
-        return 'Payment settled & gate pass issued';
+        return state.tr('statusCompleted');
       default:
-        return '';
+        return step.localizedName(langCode);
     }
   }
 }

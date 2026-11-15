@@ -606,6 +606,56 @@ class AppStrings {
       AppLanguage.om: 'Haala Dhiqannaa Konkolaataa Mul\'isaa',
       AppLanguage.am: 'የቀጥታ የተሽከርካሪ እጥበት ምስላዊ መከታተያ',
     },
+    'horizontalPipelineTitle': {
+      AppLanguage.en: 'Live Progress Pipeline',
+      AppLanguage.om: 'Adeemsa Hordoffii Qophaa\'ina',
+      AppLanguage.am: 'የቀጥታ ሂደት መከታተያ ቧንቧ',
+    },
+    'pipelineRealtimeNotice': {
+      AppLanguage.en: 'Real-time automated status',
+      AppLanguage.om: 'Haala kallattii yeroo qabatamaa',
+      AppLanguage.am: 'የቅጽበት ራስ-ሰር ሁኔታ',
+    },
+    'waitingArrival': {
+      AppLanguage.en: 'WAITING ARRIVAL',
+      AppLanguage.om: 'GAA\'ITII EEGGACHAA',
+      AppLanguage.am: 'መድረስን በመጠባበቅ ላይ',
+    },
+    'completedPhaseBadge': {
+      AppLanguage.en: 'COMPLETED (4 OF 4)',
+      AppLanguage.om: 'XUMURAMEERA (4 KEESSAA 4)',
+      AppLanguage.am: 'ተጠናቋል (4 ከ 4)',
+    },
+    'pendingStepBadge': {
+      AppLanguage.en: 'Pending Step',
+      AppLanguage.om: 'Tarkaanfii Eeggachaa',
+      AppLanguage.am: 'ደረጃ በመጠባበቅ ላይ',
+    },
+    'bookingApprovedStep': {
+      AppLanguage.en: 'Booking Approved',
+      AppLanguage.om: 'Galmeen Mirkanaa\'eera',
+      AppLanguage.am: 'ትዕዛዝ ጸድቋል',
+    },
+    'queuedInBayStep': {
+      AppLanguage.en: 'Queued in Bay',
+      AppLanguage.om: 'Gola Dhiqannaa Galeera',
+      AppLanguage.am: 'ወደ ማጠቢያ መስመር ገብቷል',
+    },
+    'washingInProgressStep': {
+      AppLanguage.en: 'Washing in Progress',
+      AppLanguage.om: 'Dhiqamuun Itti Jira',
+      AppLanguage.am: 'እጥበት በመካሄድ ላይ',
+    },
+    'dryingDetailingStep': {
+      AppLanguage.en: 'Drying & Detailing',
+      AppLanguage.om: 'Goggogsuu & Miidhagsuu',
+      AppLanguage.am: 'ማድረቅ እና ማሳመር',
+    },
+    'readyForPickupStep': {
+      AppLanguage.en: 'Ready for Pick-Up',
+      AppLanguage.om: 'Fudhachuuf Qophiidha',
+      AppLanguage.am: 'ለመረከብ ዝግጁ',
+    },
     'valetStepDispatched': {
       AppLanguage.en: 'Valet Driver Dispatched',
       AppLanguage.om: 'Konkolaachisaan Vaaleetii Ergameera',
