@@ -266,21 +266,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 ),
               ),
             ],
-            // 3D Automotive Live Wash Perspective
-            if (!booking.isCarpet) ...[
-              Automotive3DCarView(
-                status: booking.status,
-                licensePlate: booking.licensePlate,
-                vehicleCategory: booking.carType.name,
-                height: 190,
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Status Header Card
-            _buildStatusHeaderCard(context, state, booking),
-            const SizedBox(height: 16),
-
             // Unified Vehicle & 4-Phase Activity Hero Card (Side-by-Side)
             _buildVehicleDetailsCard(context, state, booking),
             const SizedBox(height: 20),
@@ -398,105 +383,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     );
   }
 
-  Widget _buildStatusHeaderCard(BuildContext context, dynamic state, WashBooking booking) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            booking.status.color.withOpacity(0.9),
-            booking.status.color,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: booking.status.color.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  'BOOKING #${booking.id}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(booking.status.icon, size: 14, color: booking.status.color),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        booking.status.localizedName(state.currentLang),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: booking.status.color,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            booking.status.localizedName(state.currentLang),
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            booking.isCarpet
-                ? '${booking.licensePlate} • ${booking.carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-                : '${booking.licensePlate} • ${booking.localizedServiceDisplayName(state.currentLang)}',
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.white70,
-              height: 1.35,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildVehicleDetailsCard(BuildContext context, dynamic state, WashBooking booking) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isCompact = screenWidth < 740;
@@ -544,39 +430,62 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 6,
           children: [
-            Flexible(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF020617),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.liquidCyanNeon, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.liquidCyanNeon.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: Text(
-                  booking.licensePlate,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15.5,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    color: Colors.white,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF020617),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.liquidCyanNeon, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.liquidCyanNeon.withValues(alpha: 0.3),
+                    blurRadius: 8,
                   ),
+                ],
+              ),
+              child: Text(
+                booking.licensePlate,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                  color: Colors.white,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: booking.status.color.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: booking.status.color.withValues(alpha: 0.45)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(booking.status.icon, size: 11, color: booking.status.color),
+                  const SizedBox(width: 4),
+                  Text(
+                    booking.status.localizedName(state.currentLang),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: booking.status.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
               decoration: BoxDecoration(
                 color: AppColors.statusCompleted.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
@@ -589,7 +498,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w800,
                   color: AppColors.statusCompleted,
                 ),
