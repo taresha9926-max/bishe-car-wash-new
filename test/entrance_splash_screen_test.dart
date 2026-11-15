@@ -52,7 +52,7 @@ void main() {
     expect(proceeded, isTrue);
   });
 
-  testWidgets('EntranceSplashScreen automatically proceeds after 5 seconds fallback timer', (tester) async {
+  testWidgets('EntranceSplashScreen automatically proceeds after 10 seconds fallback timer', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -78,7 +78,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(autoProceeded, isFalse);
 
-    // Elapse 5 seconds timer
+    // After 5 seconds, should not have auto-proceeded yet
+    await tester.pump(const Duration(seconds: 5));
+    expect(autoProceeded, isFalse);
+
+    // After full 10 seconds, it proceeds
     await tester.pump(const Duration(seconds: 5));
     expect(autoProceeded, isTrue);
   });

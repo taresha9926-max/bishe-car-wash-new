@@ -11,7 +11,7 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 /// Features official 3D chrome supercar emblem covering ~90% of screen,
 /// hydro-kinetic shockwave ripple, ambient hydro-particles,
 /// glass social media pills dock, "Tap anywhere to continue",
-/// tap-anywhere navigation, and a 5-second auto-transition fallback.
+/// tap-anywhere navigation, and a 10-second auto-transition fallback.
 class EntranceSplashScreen extends StatefulWidget {
   final VoidCallback? onProceed;
 
@@ -74,8 +74,8 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
 
     _logoController.forward();
 
-    // 3. Auto-transition fallback after 5 seconds
-    _autoTransitionTimer = Timer(const Duration(seconds: 5), () {
+    // 3. Auto-transition fallback after 10 seconds
+    _autoTransitionTimer = Timer(const Duration(seconds: 10), () {
       if (mounted) _proceed();
     });
   }
