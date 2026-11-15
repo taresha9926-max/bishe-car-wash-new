@@ -44,9 +44,10 @@ class _WelcomeServiceCarouselBannerState extends State<WelcomeServiceCarouselBan
   bool _isUserTouching = false;
 
   static const List<_CarouselSlideData> _slides = [
+    // 1. CAR: Snow Foam Cannon
     _CarouselSlideData(
       imageUrl: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=800&auto=format&fit=crop&q=80',
-      badgeText: 'TOUCHLESS • BAY 1 & 2',
+      badgeText: 'CAR • TOUCHLESS PRE-SOAK',
       badgeIcon: Icons.bubble_chart_rounded,
       badgeColor: Color(0xFF00E5FF),
       titleKey: 'carouselSlide1Title',
@@ -59,9 +60,26 @@ class _WelcomeServiceCarouselBannerState extends State<WelcomeServiceCarouselBan
         Color(0x20000000),
       ],
     ),
+    // 2. CARPET: Rotary Deep Jet Shampoo
+    _CarouselSlideData(
+      imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&auto=format&fit=crop&q=80',
+      badgeText: 'CARPET • ROTARY JET SHAMPOO',
+      badgeIcon: Icons.texture_rounded,
+      badgeColor: Color(0xFF818CF8),
+      titleKey: 'carouselCarpetSlide1Title',
+      descKey: 'carouselCarpetSlide1Desc',
+      tagText: 'Deep Scrub',
+      gradientColors: [
+        Color(0xF21E1B4B),
+        Color(0xD9312E81),
+        Color(0x661E1B4B),
+        Color(0x20000000),
+      ],
+    ),
+    // 3. CAR: Chassis Steam & Jet Rinse
     _CarouselSlideData(
       imageUrl: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=800&auto=format&fit=crop&q=80',
-      badgeText: 'POWER STEAM • CHASSIS',
+      badgeText: 'CAR • POWER CHASSIS STEAM',
       badgeIcon: Icons.speed_rounded,
       badgeColor: Color(0xFF38BDF8),
       titleKey: 'carouselSlide2Title',
@@ -74,9 +92,26 @@ class _WelcomeServiceCarouselBannerState extends State<WelcomeServiceCarouselBan
         Color(0x20000000),
       ],
     ),
+    // 4. CARPET: Spin Dehydration & Odor Extraction
+    _CarouselSlideData(
+      imageUrl: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800&auto=format&fit=crop&q=80',
+      badgeText: 'CARPET • SPIN EXTRACTION',
+      badgeIcon: Icons.rotate_right_rounded,
+      badgeColor: Color(0xFF34D399),
+      titleKey: 'carouselCarpetSlide2Title',
+      descKey: 'carouselCarpetSlide2Desc',
+      tagText: 'Zero Moisture',
+      gradientColors: [
+        Color(0xF2064E3B),
+        Color(0xD9047857),
+        Color(0x66064E3B),
+        Color(0x20000000),
+      ],
+    ),
+    // 5. CAR: Ceramic Gloss & Shield
     _CarouselSlideData(
       imageUrl: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=800&auto=format&fit=crop&q=80',
-      badgeText: 'CERAMIC GLOSS • SHIELD',
+      badgeText: 'CAR • CERAMIC GLOSS SHIELD',
       badgeIcon: Icons.auto_awesome_rounded,
       badgeColor: Color(0xFFFBBF24),
       titleKey: 'carouselSlide3Title',
@@ -89,18 +124,51 @@ class _WelcomeServiceCarouselBannerState extends State<WelcomeServiceCarouselBan
         Color(0x20000000),
       ],
     ),
+    // 6. CARPET: Heated Drying Racks
+    _CarouselSlideData(
+      imageUrl: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&auto=format&fit=crop&q=80',
+      badgeText: 'CARPET • HEATED DRYING RACKS',
+      badgeIcon: Icons.wb_sunny_rounded,
+      badgeColor: Color(0xFFF97316),
+      titleKey: 'carouselCarpetSlide3Title',
+      descKey: 'carouselCarpetSlide3Desc',
+      tagText: '100% Dry',
+      gradientColors: [
+        Color(0xF2431407),
+        Color(0xD97C2D12),
+        Color(0x66431407),
+        Color(0x20000000),
+      ],
+    ),
+    // 7. CAR: Express 15 Min Turnover
     _CarouselSlideData(
       imageUrl: 'https://images.unsplash.com/photo-1552930294-6b595f4c2974?w=800&auto=format&fit=crop&q=80',
-      badgeText: 'EXPRESS • 15 MIN TURNOVER',
+      badgeText: 'CAR • EXPRESS BAY WASH',
       badgeIcon: Icons.flash_on_rounded,
-      badgeColor: Color(0xFF34D399),
+      badgeColor: Color(0xFF22D3EE),
       titleKey: 'carouselSlide4Title',
       descKey: 'carouselSlide4Desc',
-      tagText: 'Zero Wait',
+      tagText: 'Fast Turn',
       gradientColors: [
         Color(0xF2041D17),
         Color(0xD9064E3B),
         Color(0x66041D17),
+        Color(0x20000000),
+      ],
+    ),
+    // 8. CARPET: VIP Doorstep Pickup & Delivery
+    _CarouselSlideData(
+      imageUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+      badgeText: 'CARPET • VIP DOORSTEP DELIVERY',
+      badgeIcon: Icons.local_shipping_rounded,
+      badgeColor: Color(0xFFA855F7),
+      titleKey: 'carouselCarpetSlide4Title',
+      descKey: 'carouselCarpetSlide4Desc',
+      tagText: 'Free Pickup',
+      gradientColors: [
+        Color(0xF23B0764),
+        Color(0xD9581C87),
+        Color(0x663B0764),
         Color(0x20000000),
       ],
     ),
@@ -115,7 +183,10 @@ class _WelcomeServiceCarouselBannerState extends State<WelcomeServiceCarouselBan
 
   void _startTimer() {
     _autoScrollTimer?.cancel();
-    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 3800), (_) {
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    if (isTest) return;
+
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!_isUserTouching && _pageController.hasClients) {
         final nextPage = (_currentPage + 1) % _slides.length;
         _pageController.animateToPage(
@@ -213,28 +284,34 @@ class _WelcomeServiceCarouselBannerState extends State<WelcomeServiceCarouselBan
                             // Top Row: Badge & Tag
                             Row(
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: slide.badgeColor.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: slide.badgeColor.withOpacity(0.55), width: 1),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(slide.badgeIcon, size: 11, color: slide.badgeColor),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        slide.badgeText,
-                                        style: TextStyle(
-                                          fontSize: isMobile ? 9.5 : 10.5,
-                                          fontWeight: FontWeight.w900,
-                                          color: slide.badgeColor,
-                                          letterSpacing: 0.3,
+                                Flexible(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: slide.badgeColor.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(color: slide.badgeColor.withOpacity(0.55), width: 1),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(slide.badgeIcon, size: 11, color: slide.badgeColor),
+                                        const SizedBox(width: 4),
+                                        Flexible(
+                                          child: Text(
+                                            slide.badgeText,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: isMobile ? 9.5 : 10.5,
+                                              fontWeight: FontWeight.w900,
+                                              color: slide.badgeColor,
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 6),

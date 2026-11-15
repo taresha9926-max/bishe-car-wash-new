@@ -227,6 +227,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             _buildVehicleDetailsCard(context, state, booking),
             const SizedBox(height: 20),
 
+            // 4 Modern Automobile / Carpet Status Visualizer Thumbnails
+            _buildVehicleStatusThumbnailShowcase(context, state, booking),
+            const SizedBox(height: 20),
+
             // Visual Live Progress Stepper
             Container(
               padding: const EdgeInsets.all(18),
@@ -271,7 +275,11 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 20),
-                  LiveWashStepper(currentStatus: booking.status, isCarpet: booking.isCarpet),
+                  LiveWashStepper(
+                    currentStatus: booking.status,
+                    isCarpet: booking.isCarpet,
+                    serviceType: booking.serviceType,
+                  ),
                 ],
               ),
             ),
@@ -687,6 +695,223 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVehicleStatusThumbnailShowcase(BuildContext context, dynamic state, WashBooking booking) {
+    final status = booking.status;
+    final isCarpet = booking.isCarpet;
+
+    int currentPhaseIndex = 0;
+    if (status == WashStatus.washing) {
+      currentPhaseIndex = 1;
+    } else if (status == WashStatus.drying) {
+      currentPhaseIndex = 2;
+    } else if (status == WashStatus.readyForPickup || status == WashStatus.completed) {
+      currentPhaseIndex = 3;
+    }
+
+    final phases = [
+      (
+        title: state.tr('phaseApprovedArrived'),
+        desc: state.tr('phaseApprovedArrivedSub'),
+        imageUrl: isCarpet ? AutoCareAssets.carpetTypeAUrl : AutoCareAssets.stationBayUrl,
+        icon: Icons.domain_verification_rounded,
+        stageNumber: 1,
+      ),
+      (
+        title: state.tr('phaseStartWash'),
+        desc: state.tr('phaseStartWashSub'),
+        imageUrl: isCarpet ? AutoCareAssets.carpetStationWashUrl : AutoCareAssets.packageFoamUrl,
+        icon: Icons.wash_rounded,
+        stageNumber: 2,
+      ),
+      (
+        title: state.tr('phaseMoveToDrying'),
+        desc: state.tr('phaseMoveToDryingSub'),
+        imageUrl: isCarpet ? AutoCareAssets.carpetDryingRackUrl : 'assets/images/reel_3.jpg',
+        icon: Icons.dry_cleaning_rounded,
+        stageNumber: 3,
+      ),
+      (
+        title: state.tr('phaseCompletedReady'),
+        desc: state.tr('phaseCompletedReadySub'),
+        imageUrl: isCarpet ? AutoCareAssets.carpetValetPickupUrl : AutoCareAssets.welcomeHeroUrl,
+        icon: Icons.check_circle_rounded,
+        stageNumber: 4,
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111827),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.photo_library_rounded, color: AppColors.liquidCyanNeon, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  state.tr('liveVehicleStatusVisualizer'),
+                  style: const TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.liquidCyanNeon.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'PHASE ${currentPhaseIndex + 1} OF 4',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.liquidCyanNeon,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 165,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: phases.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final item = phases[index];
+                final isCurrent = index == currentPhaseIndex;
+                final isDone = index < currentPhaseIndex;
+                final borderColor = isCurrent
+                    ? AppColors.liquidCyanNeon
+                    : (isDone ? AppColors.statusCompleted : AppColors.cardBorder);
+
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 200,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: borderColor, width: isCurrent ? 2 : 1),
+                    boxShadow: isCurrent
+                        ? [
+                            BoxShadow(
+                              color: AppColors.liquidCyanNeon.withValues(alpha: 0.28),
+                              blurRadius: 14,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        children: [
+                          AutoCareAssets.buildPhotoThumbnail(
+                            imageUrl: item.imageUrl,
+                            width: 200,
+                            height: 85,
+                            borderRadius: 0,
+                            fallbackIcon: item.icon,
+                          ),
+                          Positioned(
+                            top: 6,
+                            left: 6,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.75),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Step ${item.stageNumber}',
+                                style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isCurrent
+                                    ? AppColors.liquidCyanNeon
+                                    : (isDone ? AppColors.statusCompleted : Colors.black54),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                isCurrent ? 'ACTIVE' : (isDone ? 'DONE' : 'NEXT'),
+                                style: TextStyle(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w900,
+                                  color: isCurrent ? Colors.black : Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: isCurrent ? AppColors.liquidCyanNeon : Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              item.desc,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 9.5,
+                                color: AppColors.textSecondary,
+                                height: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

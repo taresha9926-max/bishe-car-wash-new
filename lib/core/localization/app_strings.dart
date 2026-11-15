@@ -496,6 +496,166 @@ class AppStrings {
       AppLanguage.om: 'Turtii malee tajaajila saffisaa fi ammayyaa',
       AppLanguage.am: 'ያለ ምንም ሰልፍ ፈጣን እና ዘመናዊ የእጥበት አገልግሎት',
     },
+    'carouselCarpetSlide1Title': {
+      AppLanguage.en: 'Rotary Deep Jet Carpet Shampoo',
+      AppLanguage.om: 'Dhiqannaa Karpeetii Hoomaa Cimaa',
+      AppLanguage.am: 'ጥልቅ የንጣፍ ሻምፑ እና ጄት እጥበት',
+    },
+    'carouselCarpetSlide1Desc': {
+      AppLanguage.en: 'Commercial rotary fiber scrubbing & anti-bacterial stain lift',
+      AppLanguage.om: 'Qulqullina olaanaa fi eegumsa rifeensa karpeetii',
+      AppLanguage.am: 'የጨርቅ እና ፀጉር ጥልቅ ቆሻሻ ማስወገጃ ቴክኖሎጂ',
+    },
+    'carouselCarpetSlide2Title': {
+      AppLanguage.en: 'Spin Dehydration & Odor Extraction',
+      AppLanguage.om: 'Bishaan Cabaqsuu & Urgooftuu',
+      AppLanguage.am: 'የውሃ ማድረቂያ ስፒን እና ሽታ ማስወገጃ',
+    },
+    'carouselCarpetSlide2Desc': {
+      AppLanguage.en: 'High-RPM centrifugal moisture extraction for fresh scent',
+      AppLanguage.om: 'Saffisaan bishaan keessaa baasuu fi foolii gaarii',
+      AppLanguage.am: 'በሴንትሪፊዩጋል ማድረቂያ እርጥበትን በደቂቃዎች ውስጥ ማድረቅ',
+    },
+    'carouselCarpetSlide3Title': {
+      AppLanguage.en: 'Heated Drying Racks & Fiber Grooming',
+      AppLanguage.om: 'Muka Goggogsuu & Qulqulleessuu',
+      AppLanguage.am: 'በማድረቂያ መደርደሪያዎች ላይ ማድረቅ',
+    },
+    'carouselCarpetSlide3Desc': {
+      AppLanguage.en: '100% dust-free indoor drying chambers & fiber grooming',
+      AppLanguage.om: 'Bakka eegamaatti guutummaatti goggogsuu',
+      AppLanguage.am: 'ከአቧራ ነፃ በሆነ ንፁህ ክፍል ውስጥ 100% ማድረቅ',
+    },
+    'carouselCarpetSlide4Title': {
+      AppLanguage.en: 'VIP Doorstep Carpet Pick-Up & Delivery',
+      AppLanguage.om: 'Fidanii Geessuu Qophii Karpeetii',
+      AppLanguage.am: 'ከቤት ወስዶ አጥቦ በነፃ የማድረስ አገልግሎት',
+    },
+    'carouselCarpetSlide4Desc': {
+      AppLanguage.en: 'Convenient pickup from your home & free delivery in Bishoftu',
+      AppLanguage.om: 'Mana keessanirraa fuunnee dhiquun deebifna',
+      AppLanguage.am: 'ከቤትዎ ተቀብለን አጥበን በታሸገ ሁኔታ ወደ ቤትዎ እንመልሳለን',
+    },
+    'carsAheadInQueue': {
+      AppLanguage.en: 'Cars Ahead in Queue',
+      AppLanguage.om: 'Konkolaattota Fuuldura Tarree jiran',
+      AppLanguage.am: 'በሰልፍ ውስጥ ከፊት ያሉ መኪኖች',
+    },
+    'estimatedBayArrival': {
+      AppLanguage.en: 'Estimated Time to Service',
+      AppLanguage.om: 'Yeroo Tilmaamaa Tajaajilaa',
+      AppLanguage.am: 'የሚገመት የእጥበት መድረሻ ጊዜ',
+    },
+    'lookingForEarlierBooking': {
+      AppLanguage.en: 'Looking for an earlier booking? Enter plate or phone',
+      AppLanguage.om: 'Biiroo duraa barbaadaa jirtuu? Gabatee ykn bilbila galchaa',
+      AppLanguage.am: 'ያለፈ ቀጠሮ መፈለግ ይፈልጋሉ? ታርጋ ወይም ስልክ ያስገቡ',
+    },
+    'enterPlateOrPhone': {
+      AppLanguage.en: 'Enter Plate or Phone Number',
+      AppLanguage.om: 'Lakkoofsa Gabatee ykn Bilbilaa',
+      AppLanguage.am: 'የታርጋ ወይም የስልክ ቁጥር ያስገቡ',
+    },
+    'onlyOwnVehicleNotice': {
+      AppLanguage.en: 'You can only track active bookings associated with your vehicle or phone.',
+      AppLanguage.om: 'Haala konkolaataa ykn bilbila keessanii qofa hordofuu dandeessu.',
+      AppLanguage.am: 'የእርስዎን መኪና ወይም የስልክ ቁጥር ሁኔታ ብቻ መከታተል ይችላሉ።',
+    },
+    'phaseApprovedArrived': {
+      AppLanguage.en: 'Approved & Arrived at Station',
+      AppLanguage.om: 'Mirkanaa\'ee Buufata Gaheera',
+      AppLanguage.am: 'ተረጋግጦ ማዕከል ደርሷል',
+    },
+    'phaseApprovedArrivedSub': {
+      AppLanguage.en: 'Vehicle inspected & queued in reception bay',
+      AppLanguage.om: 'Konkolaataan qoratamee tarree galeera',
+      AppLanguage.am: 'ተሽከርካሪው ተመርምሮ ወደ ማስተናገጃ መስመር ገብቷል',
+    },
+    'phaseStartWash': {
+      AppLanguage.en: 'Start Wash & Active Foam',
+      AppLanguage.om: 'Dhiqannaa Jalqabuu & Hoomaa',
+      AppLanguage.am: 'እጥበት ጀምር እና ንቁ አረፋ',
+    },
+    'phaseStartWashSub': {
+      AppLanguage.en: 'Touchless pre-soak & high-pressure jet rinse',
+      AppLanguage.om: 'Hoomaa qulqulluu fi bishaan dhiibbaa ol-aanaa',
+      AppLanguage.am: 'ንክኪ-አልባ የቅድመ-እጥበት እና ከፍተኛ ግፊት ጄት',
+    },
+    'phaseMoveToDrying': {
+      AppLanguage.en: 'Move to Drying & Detailing',
+      AppLanguage.om: 'Goggogsuu & Qulqulleessuu',
+      AppLanguage.am: 'ወደ ማድረቅ እና ማሳመር ሽግግር',
+    },
+    'phaseMoveToDryingSub': {
+      AppLanguage.en: 'Microfiber hand towel dry, tire shine & interior vacuum',
+      AppLanguage.om: 'Tawulaan goggogsuu, gommaa calaqqisiisuu fi vakiyuumii',
+      AppLanguage.am: 'በማይክሮፋይበር ፎጣ ማድረቅ፣ ጎማ ማብረቅ እና ቫኪዩም',
+    },
+    'phaseCompletedReady': {
+      AppLanguage.en: 'Completed & Showroom Ready',
+      AppLanguage.om: 'Xumuramee Qophaa\'eera',
+      AppLanguage.am: 'ተጠናቆ ዝግጁ ሆኗል',
+    },
+    'phaseCompletedReadySub': {
+      AppLanguage.en: 'Final inspection passed & ready for handover',
+      AppLanguage.om: 'Qulqullinni mirkanaa\'ee fudhachuuf qophiidha',
+      AppLanguage.am: 'የመጨረሻ ምርመራ አልፎ ለርክክብ ዝግጁ ነው',
+    },
+    'liveVehicleStatusVisualizer': {
+      AppLanguage.en: 'Live Vehicle Wash Visualizer',
+      AppLanguage.om: 'Haala Dhiqannaa Konkolaataa Mul\'isaa',
+      AppLanguage.am: 'የቀጥታ የተሽከርካሪ እጥበት ምስላዊ መከታተያ',
+    },
+    'valetStepDispatched': {
+      AppLanguage.en: 'Valet Driver Dispatched',
+      AppLanguage.om: 'Konkolaachisaan Vaaleetii Ergameera',
+      AppLanguage.am: 'ሹፌር ወደ እርስዎ ተልኳል',
+    },
+    'valetStepPickedUp': {
+      AppLanguage.en: 'Picked Up & En Route to Station',
+      AppLanguage.om: 'Fuudhamee Gara Buufataatti Deemaa Jira',
+      AppLanguage.am: 'ተረክበን ወደ ማዕከሉ በመጓዝ ላይ ነው',
+    },
+    'valetStepWashing': {
+      AppLanguage.en: 'Station Jet Wash & Detail',
+      AppLanguage.om: 'Buufatatti Dhiqamuu & Qulqulleeffamuu',
+      AppLanguage.am: 'በማዕከሉ ውስጥ እጥበት እና ማሳመር',
+    },
+    'valetStepReturning': {
+      AppLanguage.en: 'Driver Returning Vehicle',
+      AppLanguage.om: 'Konkolaachisaan Deebisaa Jira',
+      AppLanguage.am: 'ሹፌሩ መኪናዎን ይዞ በመመለስ ላይ ነው',
+    },
+    'valetStepDelivered': {
+      AppLanguage.en: 'Delivered to Doorstep',
+      AppLanguage.om: 'Maniitti Fudhachiifameera',
+      AppLanguage.am: 'በርዎ ላይ በሰላም ደርሶ ተረክበዋል',
+    },
+    'homeStepDispatched': {
+      AppLanguage.en: 'Mobile Van Dispatched',
+      AppLanguage.om: 'Garee Moobaayilaa Ergameera',
+      AppLanguage.am: 'ተንቀሳቃሽ የቫን ቡድን ተልኳል',
+    },
+    'homeStepEnRoute': {
+      AppLanguage.en: 'Van En Route to Address',
+      AppLanguage.om: 'Vaanichi Karaarra Jira',
+      AppLanguage.am: 'ቫኑ ወደ አድራሻዎ በመጓዝ ላይ ነው',
+    },
+    'homeStepSetup': {
+      AppLanguage.en: 'Arrived & Driveway Setup',
+      AppLanguage.om: 'Gahee Meeshaa Qopheessaa Jira',
+      AppLanguage.am: 'ቦታው ደርሶ እቃዎችን በማዘጋጀት ላይ',
+    },
+    'homeStepWashing': {
+      AppLanguage.en: 'Active Mobile Detailing',
+      AppLanguage.om: 'Dhiqannaa Iddoo Sanatti',
+      AppLanguage.am: 'በቦታው ላይ ንቁ እጥበት በመካሄድ ላይ',
+    },
+    'homeStepCompleted': {
+      AppLanguage.en: 'Inspected & Completed',
+      AppLanguage.om: 'Qoratamee Xumurameera',
+      AppLanguage.am: 'ተመርምሮ ስራው ተጠናቋል',
+    },
     'openGoogleMaps': {
       AppLanguage.en: 'Open in Google Maps',
       AppLanguage.om: 'Kaartaa Google irratti Bani',

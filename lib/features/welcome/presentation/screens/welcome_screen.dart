@@ -419,16 +419,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-
-                  // 2. Horizontally Rolling 4-Slide Service Carousel Banner
-                  FadeTransition(
-                    opacity: _topBarFade,
-                    child: WelcomeServiceCarouselBanner(isMobile: isMobile),
-                  ),
                   const SizedBox(height: 14),
 
-                  // 3. Customer Portal Positioned at the Top (Easily Found & Mobile-Thumb Friendly)
+                  // 2. Customer Portal Positioned at the Top (Easily Found & Mobile-Thumb Friendly)
                   SlideTransition(
                     position: _customerSlide,
                     child: FadeTransition(

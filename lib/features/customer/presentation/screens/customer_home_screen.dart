@@ -17,6 +17,7 @@ import 'package:bishe_car_wash/features/customer/presentation/screens/live_track
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable_price_badge.dart';
 import 'package:bishe_car_wash/features/welcome/presentation/widgets/customer_feedback_sheet.dart';
+import 'package:bishe_car_wash/features/welcome/presentation/widgets/welcome_service_carousel_banner.dart';
 
 /// Step 0 Customer Entry: asks "What would you like to wash today?" with ONLY
 /// the Car Washing Service and Carpet Washing Service tabs, then navigates to
@@ -51,13 +52,15 @@ class CustomerHomeScreen extends StatelessWidget {
       appBar: AppRoleHeader(title: state.tr('appName')),
       body: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 24),
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                WelcomeServiceCarouselBanner(isMobile: isMobile),
+                const SizedBox(height: 18),
                 Text(
                   state.tr('whatToWashToday'),
                   textAlign: TextAlign.center,
@@ -203,9 +206,8 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     final activeWash = state.activeTrackingBooking;
     final matchingActiveWash = (activeWash != null &&
             activeWash.isCarpet == isCarpet &&
-            (activeWash.status.isOngoing ||
-                activeWash.status == WashStatus.pending ||
-                activeWash.status == WashStatus.confirmed))
+            activeWash.status != WashStatus.pending &&
+            activeWash.status != WashStatus.cancelled)
         ? activeWash
         : null;
     final isDesktop = ResponsiveLayout.isDesktop(context);
@@ -302,10 +304,27 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                   ],
                   const SizedBox(height: 16),
 
-                  if (matchingActiveWash != null)
-                    _buildActiveWashCard(context, state, matchingActiveWash)
-                  else
-                    _buildVehicleLookupCard(context, state, isCarpet: isCarpet),
+                  if (matchingActiveWash != null) ...[
+                    _buildActiveWashCard(context, state, matchingActiveWash),
+                    const SizedBox(height: 12),
+                  ],
+
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => _showLookupModal(context, state, isCarpet: isCarpet),
+                      icon: const Icon(Icons.search_rounded, size: 15, color: AppColors.liquidCyanNeon),
+                      label: Text(
+                        state.tr('lookingForEarlierBooking'),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.liquidCyanNeon,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 14),
 
                   _buildPhoneBookingCard(context, state),
@@ -402,52 +421,182 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
 
   Widget _buildCompactLiveStatusCard(dynamic state, List<WashBooking> queueAhead) {
     final stationQueue = queueAhead.where((b) => b.serviceType == ServiceType.walkInStation).toList();
-    final mobileQueue = queueAhead.where((b) => b.serviceType == ServiceType.atHomeMobile).toList();
-
+    final carsAhead = stationQueue.length;
     final stationWaitMins = WashDispatcher.estimateStationWaitMinutes(
       availableBaysCount: state.availableBaysCount,
       queue: stationQueue,
     );
-    final mobileWaitMins = WashDispatcher.estimateMobileVanWaitMinutes(
-      isVanAvailable: state.isMobileVanAvailable,
-      queue: mobileQueue,
-    );
+    final waitText = stationWaitMins == 0
+        ? state.tr('readyNow')
+        : '~$stationWaitMins ${state.tr('minWait')}';
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.35), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
+            color: AppColors.liquidCyanNeon.withValues(alpha: 0.12),
             blurRadius: 14,
+            offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
-          Expanded(
-            child: _buildEtaPill(
-              icon: Icons.local_car_wash_rounded,
-              title: state.tr('stationBaysTitle'),
-              value: stationWaitMins == 0 ? state.tr('readyNow') : '~$stationWaitMins ${state.tr('minWait')}',
-              isReady: stationWaitMins == 0,
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: AppColors.liquidCyanNeon.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.45)),
             ),
+            child: const Icon(Icons.radar_rounded, color: AppColors.liquidCyanNeon, size: 22),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
-            child: _buildEtaPill(
-              icon: Icons.rv_hookup_rounded,
-              title: state.tr('mobileVanTitle'),
-              value: mobileWaitMins == 0 ? state.tr('vanReady') : '~$mobileWaitMins ${state.tr('minWait')}',
-              isReady: mobileWaitMins == 0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                        color: AppColors.statusReady,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '$carsAhead ${state.tr("carsAheadInQueue")}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '${state.tr("estimatedBayArrival")}: $waitText',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.liquidCyanNeon,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showLookupModal(BuildContext context, dynamic state, {required bool isCarpet}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF111827),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+            left: 20,
+            right: 20,
+            top: 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    state.tr('enterPlateOrPhone'),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white70, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                state.tr('onlyOwnVehicleNotice'),
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _trackController,
+                textCapitalization: TextCapitalization.characters,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+                decoration: InputDecoration(
+                  hintText: isCarpet ? state.tr('carpetTagOrPhoneHint') : state.tr('plateOrPhoneHint'),
+                  filled: true,
+                  fillColor: const Color(0xFF1E293B),
+                  prefixIcon: Icon(
+                    isCarpet ? Icons.texture_rounded : Icons.directions_car_outlined,
+                    color: AppColors.liquidCyanNeon,
+                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onSubmitted: (_) {
+                  Navigator.pop(ctx);
+                  _handleTrackVehicle(context, state, isCarpet: isCarpet);
+                },
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _handleTrackVehicle(context, state, isCarpet: isCarpet);
+                  },
+                  icon: const Icon(Icons.radar_rounded, size: 18),
+                  label: Text(
+                    state.tr('trackNow'),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isCarpet ? const Color(0xFF4F46E5) : AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

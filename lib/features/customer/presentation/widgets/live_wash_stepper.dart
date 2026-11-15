@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class LiveWashStepper extends StatelessWidget {
   final WashStatus currentStatus;
   final bool isCarpet;
+  final ServiceType serviceType;
 
   const LiveWashStepper({
     super.key,
     required this.currentStatus,
     this.isCarpet = false,
+    this.serviceType = ServiceType.walkInStation,
   });
 
   static const List<WashStatus> _steps = [
@@ -119,9 +122,7 @@ class LiveWashStepper extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            isCarpet && step == WashStatus.assignedToBay
-                                ? state.tr('carpetWashFloor')
-                                : step.localizedName(langCode),
+                            _getStepTitle(state, step, langCode),
                             style: TextStyle(
                               fontSize: 14.5,
                               fontWeight: isCurrent ? FontWeight.w800 : (isDone ? FontWeight.w700 : FontWeight.w500),
@@ -174,8 +175,87 @@ class LiveWashStepper extends StatelessWidget {
     );
   }
 
+  String _getStepTitle(dynamic state, WashStatus step, String langCode) {
+    if (serviceType == ServiceType.valetPickUp) {
+      switch (step) {
+        case WashStatus.confirmed:
+          return state.tr('valetStepDispatched');
+        case WashStatus.assignedToBay:
+          return state.tr('valetStepPickedUp');
+        case WashStatus.washing:
+          return state.tr('valetStepWashing');
+        case WashStatus.drying:
+          return state.tr('valetStepReturning');
+        case WashStatus.readyForPickup:
+        case WashStatus.completed:
+          return state.tr('valetStepDelivered');
+        default:
+          return step.localizedName(langCode);
+      }
+    }
+    if (serviceType == ServiceType.atHomeMobile) {
+      switch (step) {
+        case WashStatus.confirmed:
+          return state.tr('homeStepDispatched');
+        case WashStatus.assignedToBay:
+          return state.tr('homeStepEnRoute');
+        case WashStatus.washing:
+          return state.tr('homeStepSetup');
+        case WashStatus.drying:
+          return state.tr('homeStepWashing');
+        case WashStatus.readyForPickup:
+        case WashStatus.completed:
+          return state.tr('homeStepCompleted');
+        default:
+          return step.localizedName(langCode);
+      }
+    }
+    if (isCarpet && step == WashStatus.assignedToBay) {
+      return state.tr('carpetWashFloor');
+    }
+    return step.localizedName(langCode);
+  }
+
   String _getStepSubtitle(dynamic state, WashStatus status, bool isCurrent, bool isDone, {bool isCarpet = false}) {
     if (isDone) return state.tr('statusCompleted');
+    if (serviceType == ServiceType.valetPickUp) {
+      switch (status) {
+        case WashStatus.pending:
+          return 'Valet booking logged & awaiting confirmation';
+        case WashStatus.confirmed:
+          return 'Assigned driver en route to customer pickup address';
+        case WashStatus.assignedToBay:
+          return 'Vehicle checked in & arriving at Lake Hora station';
+        case WashStatus.washing:
+          return 'Active station jet wash, wheel care & foam rinse';
+        case WashStatus.drying:
+        case WashStatus.readyForPickup:
+          return 'Clean car inspected & driver in transit to your home';
+        case WashStatus.completed:
+          return 'Safely delivered to customer doorstep with keys returned';
+        default:
+          return '';
+      }
+    }
+    if (serviceType == ServiceType.atHomeMobile) {
+      switch (status) {
+        case WashStatus.pending:
+          return 'Mobile van booking logged & awaiting schedule';
+        case WashStatus.confirmed:
+          return 'Mobile crew & van dispatched to your street';
+        case WashStatus.assignedToBay:
+          return 'Van in transit with onboard water & power generators';
+        case WashStatus.washing:
+          return 'Setting up equipment in compound/driveway';
+        case WashStatus.drying:
+          return 'Active detailing & high-power extraction';
+        case WashStatus.readyForPickup:
+        case WashStatus.completed:
+          return 'Job inspected with customer & signed off';
+        default:
+          return '';
+      }
+    }
     if (status == WashStatus.pending) return state.tr('stepApprovedDesc');
     if (status == WashStatus.confirmed) return state.tr('stepArrivedDesc');
     if (isCarpet) {
