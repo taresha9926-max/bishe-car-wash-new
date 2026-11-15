@@ -334,12 +334,31 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
             children: [
               Expanded(
                 child: ChoiceChip(
+                  selectedColor: AppColors.liquidCyanNeon.withValues(alpha: 0.25),
+                  backgroundColor: const Color(0xFF1E293B),
+                  side: BorderSide(
+                    color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : AppColors.cardBorder,
+                  ),
                   label: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.payments_rounded, size: 15),
+                      Icon(
+                        Icons.payments_rounded,
+                        size: 15,
+                        color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : Colors.white70,
+                      ),
                       const SizedBox(width: 5),
-                      Flexible(child: Text(state.tr('payCash'), overflow: TextOverflow.ellipsis)),
+                      Flexible(
+                        child: Text(
+                          state.tr('payCash'),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : Colors.white,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   selected: _showerPaymentMethod == PaymentMethod.cash,
@@ -351,12 +370,31 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: ChoiceChip(
+                  selectedColor: const Color(0xFF0284C7).withValues(alpha: 0.25),
+                  backgroundColor: const Color(0xFF1E293B),
+                  side: BorderSide(
+                    color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF0284C7) : AppColors.cardBorder,
+                  ),
                   label: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.phone_android_rounded, size: 15),
+                      Icon(
+                        Icons.phone_android_rounded,
+                        size: 15,
+                        color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF38BDF8) : Colors.white70,
+                      ),
                       const SizedBox(width: 5),
-                      Flexible(child: Text(state.tr('payTelebirr'), overflow: TextOverflow.ellipsis)),
+                      Flexible(
+                        child: Text(
+                          state.tr('payTelebirr'),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF38BDF8) : Colors.white,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   selected: _showerPaymentMethod == PaymentMethod.telebirr,

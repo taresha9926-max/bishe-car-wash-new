@@ -111,16 +111,16 @@ class StaffWasherPickerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.cleaning_services_rounded, size: 16, color: AppColors.primary),
+              const Icon(Icons.cleaning_services_rounded, size: 16, color: AppColors.liquidCyanNeon),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -134,12 +134,21 @@ class StaffWasherPickerCard extends StatelessWidget {
           DropdownButtonFormField<String?>(
             initialValue: validSelected,
             isExpanded: true,
+            dropdownColor: const Color(0xFF1E293B),
+            style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w600),
             decoration: InputDecoration(
               filled: true,
-              fillColor: AppColors.surfaceVariant.withValues(alpha: 0.45),
+              fillColor: const Color(0xFF1E293B),
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppColors.cardBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppColors.cardBorder),
+              ),
             ),
             items: [
               DropdownMenuItem<String?>(
@@ -156,7 +165,7 @@ class StaffWasherPickerCard extends StatelessWidget {
                   child: Text(
                     '${w.name}$busyTag',
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                    style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                 );
               }),
@@ -237,7 +246,7 @@ class StaffDeliveryModeSelector extends StatelessWidget {
                   margin: EdgeInsets.only(right: mode != ServiceType.atHomeMobile ? 6 : 0),
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
                   decoration: BoxDecoration(
-                    color: isSelected ? color.withValues(alpha: 0.12) : Colors.white,
+                    color: isSelected ? color.withValues(alpha: 0.20) : const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isSelected ? color : AppColors.cardBorder,
@@ -256,7 +265,7 @@ class StaffDeliveryModeSelector extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                          color: isSelected ? color : AppColors.textPrimary,
+                          color: isSelected ? color : Colors.white,
                         ),
                       ),
                       if (addon > 0) ...[

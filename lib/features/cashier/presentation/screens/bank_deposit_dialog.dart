@@ -383,7 +383,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.08) : Colors.white,
+          color: isSelected ? color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? color : AppColors.cardBorder,
@@ -410,7 +410,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? color : AppColors.textPrimary,
+                      color: isSelected ? color : Colors.white,
                     ),
                   ),
                   const SizedBox(height: 2),

@@ -539,7 +539,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     decoration: BoxDecoration(
-                      color: hasPayments ? c.color.withValues(alpha: 0.1) : Colors.white,
+                      color: hasPayments ? c.color.withValues(alpha: 0.15) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: hasPayments ? c.color.withValues(alpha: 0.35) : AppColors.cardBorder),
                     ),

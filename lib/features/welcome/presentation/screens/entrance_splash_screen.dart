@@ -8,8 +8,10 @@ import '../../../../core/widgets/tactile_bounce.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 /// Entrance Splash Screen (Concept 1: Hydro-Kinetic Neon Pulse)
-/// Features official 3D chrome water shield emblem, shockwave ripple,
-/// ambient hydro-particles, Bishoftu location, social dock, and auto-transition.
+/// Features official 3D chrome supercar emblem covering ~90% of screen,
+/// hydro-kinetic shockwave ripple, ambient hydro-particles,
+/// glass social media pills dock, "Tap anywhere to continue",
+/// tap-anywhere navigation, and a 5-second auto-transition fallback.
 class EntranceSplashScreen extends StatefulWidget {
   final VoidCallback? onProceed;
 
@@ -29,8 +31,8 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
   late final Animation<double> _logoScale;
   late final Animation<double> _logoOpacity;
   late final Animation<double> _contentFade;
-  late final Animation<Offset> _contentSlide;
 
+  Timer? _autoTransitionTimer;
   bool _hasProceeded = false;
 
   @override
@@ -46,13 +48,13 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
     // 2. Entrance Sequence Controller
     _logoController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 900),
     );
 
-    _logoScale = Tween<double>(begin: 0.78, end: 1.0).animate(
+    _logoScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
         parent: _logoController,
-        curve: const Interval(0.0, 0.75, curve: Curves.easeOutBack),
+        curve: const Interval(0.0, 0.80, curve: Curves.easeOutBack),
       ),
     );
 
@@ -66,25 +68,21 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
     _contentFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _logoController,
-        curve: const Interval(0.40, 1.0, curve: Curves.easeIn),
-      ),
-    );
-
-    _contentSlide = Tween<Offset>(
-      begin: const Offset(0, 0.15),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: const Interval(0.40, 1.0, curve: Curves.easeOutCubic),
+        curve: const Interval(0.35, 1.0, curve: Curves.easeIn),
       ),
     );
 
     _logoController.forward();
+
+    // 3. Auto-transition fallback after 5 seconds
+    _autoTransitionTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) _proceed();
+    });
   }
 
   @override
   void dispose() {
+    _autoTransitionTimer?.cancel();
     _pulseController.dispose();
     _logoController.dispose();
     super.dispose();
@@ -93,6 +91,7 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
   void _proceed() {
     if (_hasProceeded) return;
     _hasProceeded = true;
+    _autoTransitionTimer?.cancel();
 
     if (widget.onProceed != null) {
       widget.onProceed!();
@@ -106,10 +105,10 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final size = MediaQuery.of(context).size;
-    final isCompact = size.width < 400;
-    final isShort = size.height < 720;
-    final logoSize = isShort ? 140.0 : 180.0;
-    final shieldContainerSize = isShort ? 175.0 : 220.0;
+
+    // Largest space coverage (~90% of screen width)
+    final logoWidth = (size.width * 0.90).clamp(280.0, 520.0);
+    final logoHeight = (size.height * 0.62).clamp(260.0, 520.0);
 
     return Scaffold(
       backgroundColor: AppColors.midnightCanvas,
@@ -123,7 +122,7 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: const Alignment(0, -0.2),
+                    center: const Alignment(0, -0.15),
                     radius: 1.1,
                     colors: [
                       const Color(0xFF00384D).withValues(alpha: 0.45),
@@ -146,368 +145,197 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
               ),
             ),
 
-            // Main Interactive Content
+            // Main Content Layout
             SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isCompact ? 16 : 24,
-                    vertical: isShort ? 10 : 20,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 440),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: isShort ? 6 : 12),
-
-                        // Trilingual Greeting Pill
-                        FadeTransition(
-                          opacity: _contentFade,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: AppColors.slateGlass.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: AppColors.liquidCyanNeon.withValues(alpha: 0.35),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.liquidCyanNeon.withValues(alpha: 0.15),
-                                  blurRadius: 10,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.liquidCyanNeon,
-                                    shape: BoxShape.circle,
+              child: Column(
+                children: [
+                  // Center: 90% Screen Space Dominant 3D Supercar Logo
+                  Expanded(
+                    child: Center(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Pulsing shockwave halo
+                          AnimatedBuilder(
+                            animation: _pulseController,
+                            builder: (context, _) {
+                              final val = _pulseController.value;
+                              final scale = 1.0 + (val * 0.12);
+                              final opacity = (1.0 - val).clamp(0.0, 1.0);
+                              return Transform.scale(
+                                scale: scale,
+                                child: Container(
+                                  width: logoWidth,
+                                  height: logoHeight,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(32),
+                                    border: Border.all(
+                                      color: AppColors.liquidCyanNeon.withValues(alpha: opacity * 0.65),
+                                      width: 2.2,
+                                    ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.liquidCyanNeon,
-                                        blurRadius: 6,
+                                        color: AppColors.liquidCyanNeon.withValues(alpha: opacity * 0.35),
+                                        blurRadius: 36,
+                                        spreadRadius: 6,
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  child: Text(
-                                    'Baga Nagaan Dhuftan • እንኳን ደህና መጡ • Welcome',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Colors.cyan.shade100,
-                                      fontSize: isCompact ? 11 : 12,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.4,
-                                    ),
-                                  ),
+                              );
+                            },
+                          ),
+
+                          // Inner settled glow ring
+                          Container(
+                            width: logoWidth,
+                            height: logoHeight,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(32),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.liquidCyanNeon.withValues(alpha: 0.28),
+                                  blurRadius: 40,
+                                  spreadRadius: 4,
                                 ),
                               ],
                             ),
                           ),
-                        ),
 
-                        SizedBox(height: isShort ? 14 : 24),
-
-                        // Logo Shield with Hydro Kinetic Shockwave
-                        SizedBox(
-                          width: shieldContainerSize + 30,
-                          height: shieldContainerSize + 30,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Pulsing shockwave ring
-                              AnimatedBuilder(
-                                animation: _pulseController,
-                                builder: (context, _) {
-                                  final val = _pulseController.value;
-                                  final scale = 1.0 + (val * 0.30);
-                                  final opacity = (1.0 - val).clamp(0.0, 1.0);
-                                  return Transform.scale(
-                                    scale: scale,
-                                    child: Container(
-                                      width: shieldContainerSize,
-                                      height: shieldContainerSize,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: AppColors.liquidCyanNeon.withValues(alpha: opacity * 0.6),
-                                          width: 2,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppColors.liquidCyanNeon.withValues(alpha: opacity * 0.25),
-                                            blurRadius: 24,
-                                            spreadRadius: 4,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-
-                              // Inner settled glow ring
-                              Container(
-                                width: shieldContainerSize,
-                                height: shieldContainerSize,
+                          // Animated Logo Card
+                          ScaleTransition(
+                            scale: _logoScale,
+                            child: FadeTransition(
+                              opacity: _logoOpacity,
+                              child: Container(
+                                width: logoWidth,
+                                height: logoHeight,
                                 decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(28),
+                                  border: Border.all(
+                                    color: AppColors.liquidCyanNeon.withValues(alpha: 0.60),
+                                    width: 2.0,
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppColors.liquidCyanNeon.withValues(alpha: 0.3),
-                                      blurRadius: 36,
-                                      spreadRadius: 6,
+                                      color: Colors.black.withValues(alpha: 0.85),
+                                      blurRadius: 32,
+                                      offset: const Offset(0, 12),
                                     ),
                                   ],
                                 ),
-                              ),
-
-                              // Animated Logo Card
-                              ScaleTransition(
-                                scale: _logoScale,
-                                child: FadeTransition(
-                                  opacity: _logoOpacity,
-                                  child: Container(
-                                    width: logoSize,
-                                    height: logoSize,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.circular(24),
-                                      border: Border.all(
-                                        color: AppColors.liquidCyanNeon.withValues(alpha: 0.45),
-                                        width: 1.8,
+                                clipBehavior: Clip.antiAlias,
+                                child: Image.asset(
+                                  'assets/images/bishe_logo.jpg',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Center(
+                                      child: Icon(
+                                        Icons.local_car_wash_rounded,
+                                        size: 110,
+                                        color: AppColors.liquidCyanNeon,
                                       ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.8),
-                                          blurRadius: 25,
-                                          offset: const Offset(0, 10),
-                                        ),
-                                      ],
-                                    ),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: Image.asset(
-                                      'assets/images/bishe_logo.jpg',
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Center(
-                                          child: Icon(
-                                            Icons.local_car_wash_rounded,
-                                            size: 70,
-                                            color: AppColors.liquidCyanNeon,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
+                                    );
+                                  },
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-                        SizedBox(height: isShort ? 14 : 20),
-
-                        // Title & Studio Tagline
-                        SlideTransition(
-                          position: _contentSlide,
-                          child: FadeTransition(
-                            opacity: _contentFade,
-                            child: Column(
+                  // Bottom Dock: Social Media Pills & Tap Anywhere Prompt
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Glass Social Media Pills
+                        FadeTransition(
+                          opacity: _contentFade,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  'BISHE CAR WASH',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: isCompact ? 22 : 25,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.4,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        color: AppColors.liquidCyanNeon.withValues(alpha: 0.6),
-                                        blurRadius: 14,
-                                      ),
-                                    ],
-                                  ),
+                                _buildSocialPill(
+                                  icon: Icons.play_arrow_rounded,
+                                  label: 'TikTok',
+                                  color: Colors.white,
+                                  onTap: () => UrlLauncherHelper.openUrl(state.tiktokUrl),
                                 ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  state.tr('entranceTagline'),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: isCompact ? 12 : 13,
-                                    color: Colors.white70,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                const SizedBox(width: 8),
+                                _buildSocialPill(
+                                  icon: Icons.send_rounded,
+                                  label: 'Telegram',
+                                  color: const Color(0xFF29B6F6),
+                                  onTap: () => UrlLauncherHelper.openUrl('https://t.me/bishecarwash'),
                                 ),
-                                SizedBox(height: isShort ? 8 : 12),
-
-                                // Bishoftu Lake Hora Address Chip
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.slateGlass.withValues(alpha: 0.7),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.white12,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.location_on_rounded,
-                                        size: 15,
-                                        color: AppColors.warmAmberSunset,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Flexible(
-                                        child: Text(
-                                          state.tr('entranceLocation'),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: isCompact ? 11 : 12,
-                                            color: Colors.white.withValues(alpha: 0.85),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                const SizedBox(width: 8),
+                                _buildSocialPill(
+                                  icon: Icons.phone_in_talk_rounded,
+                                  label: 'Call',
+                                  color: AppColors.warmAmberSunset,
+                                  onTap: () => UrlLauncherHelper.openUrl('tel:0962274450'),
                                 ),
-
-                                SizedBox(height: isShort ? 14 : 20),
-
-                                // Glass Social Connect Dock
-                                Text(
-                                  state.tr('socialConnect'),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.1,
-                                    color: Colors.white.withValues(alpha: 0.45),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _buildSocialPill(
-                                      icon: Icons.play_arrow_rounded,
-                                      label: 'TikTok',
-                                      color: Colors.white,
-                                      onTap: () => UrlLauncherHelper.openUrl(state.tiktokUrl),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildSocialPill(
-                                      icon: Icons.send_rounded,
-                                      label: 'Telegram',
-                                      color: const Color(0xFF29B6F6),
-                                      onTap: () => UrlLauncherHelper.openUrl('https://t.me/bishecarwash'),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildSocialPill(
-                                      icon: Icons.phone_in_talk_rounded,
-                                      label: 'Call',
-                                      color: AppColors.warmAmberSunset,
-                                      onTap: () => UrlLauncherHelper.openUrl('tel:0962274450'),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    _buildSocialPill(
-                                      icon: Icons.map_rounded,
-                                      label: 'Maps',
-                                      color: AppColors.liquidCyanNeon,
-                                      onTap: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                                    ),
-                                  ],
-                                ),
-
-                                SizedBox(height: isShort ? 20 : 28),
-
-                                // Enter Station Portal Button (Thumb-zone anchor)
-                                BounceTappable(
-                                  onTap: _proceed,
-                                  child: Container(
-                                    height: 50,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFF00B4D8),
-                                          Color(0xFF007791),
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.liquidCyanNeon.withValues(alpha: 0.35),
-                                          blurRadius: 16,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                      border: Border.all(
-                                        color: AppColors.liquidCyanNeon.withValues(alpha: 0.5),
-                                        width: 1.2,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          state.tr('enterStationPortal'),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.6,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        const Icon(
-                                          Icons.arrow_forward_rounded,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-                                Text(
-                                  state.tr('tapToContinue'),
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.4),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w400,
-                                  ),
+                                const SizedBox(width: 8),
+                                _buildSocialPill(
+                                  icon: Icons.map_rounded,
+                                  label: 'Maps',
+                                  color: AppColors.liquidCyanNeon,
+                                  onTap: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
                                 ),
                               ],
                             ),
                           ),
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        // "Tap anywhere to continue" pulsing prompt
+                        AnimatedBuilder(
+                          animation: _pulseController,
+                          builder: (context, _) {
+                            final opacity = 0.50 + 0.50 * math.sin(_pulseController.value * 2 * math.pi);
+                            return Opacity(
+                              opacity: opacity.clamp(0.35, 1.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.touch_app_rounded,
+                                    size: 15,
+                                    color: AppColors.liquidCyanNeon,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    state.tr('tapToContinue'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                      shadows: [
+                                        Shadow(
+                                          color: AppColors.liquidCyanNeon,
+                                          blurRadius: 10,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -530,7 +358,7 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
           color: AppColors.slateGlass,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: color.withValues(alpha: 0.3),
+            color: color.withValues(alpha: 0.35),
             width: 1,
           ),
         ),

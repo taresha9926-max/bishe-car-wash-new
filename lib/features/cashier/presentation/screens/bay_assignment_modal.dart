@@ -193,6 +193,8 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<StaffMember>(
                 isExpanded: true,
+                dropdownColor: const Color(0xFF1E293B),
+                style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w600),
                 value: _selectedWasher,
                 items: washers.map((washer) {
                   return DropdownMenuItem<StaffMember>(
@@ -200,10 +202,13 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(washer.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        Text(
+                          washer.name,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                        ),
                         Text(
                           '${washer.role.localizedName(state.currentLang)} • 15% Split',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                         ),
                       ],
                     ),

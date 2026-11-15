@@ -334,7 +334,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: _handoverMethod == 'manager_otp' ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                      color: _handoverMethod == 'manager_otp' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _handoverMethod == 'manager_otp' ? AppColors.primary : AppColors.cardBorder,
@@ -358,7 +358,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
-                                  color: _handoverMethod == 'manager_otp' ? AppColors.primary : AppColors.textPrimary,
+                                  color: _handoverMethod == 'manager_otp' ? AppColors.primaryLight : Colors.white,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -380,7 +380,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: _handoverMethod == 'admin_otp' ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                      color: _handoverMethod == 'admin_otp' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _handoverMethod == 'admin_otp' ? AppColors.primary : AppColors.cardBorder,
@@ -404,7 +404,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
-                                  color: _handoverMethod == 'admin_otp' ? AppColors.primary : AppColors.textPrimary,
+                                  color: _handoverMethod == 'admin_otp' ? AppColors.primaryLight : Colors.white,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -426,7 +426,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: _handoverMethod == 'bank_deposit' ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                      color: _handoverMethod == 'bank_deposit' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _handoverMethod == 'bank_deposit' ? AppColors.primary : AppColors.cardBorder,
@@ -485,14 +485,21 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: _selectedAccountKey == 'account_a' ? Colors.white : Colors.transparent,
+                                    color: _selectedAccountKey == 'account_a' ? AppColors.cbeBirrPurple.withValues(alpha: 0.25) : const Color(0xFF1E293B),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      color: _selectedAccountKey == 'account_a' ? AppColors.cbeBirrPurple : Colors.transparent,
+                                      color: _selectedAccountKey == 'account_a' ? AppColors.cbeBirrPurple : AppColors.cardBorder,
                                       width: 1.5,
                                     ),
                                   ),
-                                  child: const Text('CBE (Account A)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                                  child: Text(
+                                    'CBE (Account A)',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: _selectedAccountKey == 'account_a' ? const Color(0xFFC084FC) : Colors.white70,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -503,14 +510,21 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: _selectedAccountKey == 'account_b' ? Colors.white : Colors.transparent,
+                                    color: _selectedAccountKey == 'account_b' ? const Color(0xFFEA580C).withValues(alpha: 0.25) : const Color(0xFF1E293B),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      color: _selectedAccountKey == 'account_b' ? const Color(0xFFEA580C) : Colors.transparent,
+                                      color: _selectedAccountKey == 'account_b' ? const Color(0xFFEA580C) : AppColors.cardBorder,
                                       width: 1.5,
                                     ),
                                   ),
-                                  child: const Text('Awash (Account B)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                                  child: Text(
+                                    'Awash (Account B)',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: _selectedAccountKey == 'account_b' ? const Color(0xFFFB923C) : Colors.white70,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

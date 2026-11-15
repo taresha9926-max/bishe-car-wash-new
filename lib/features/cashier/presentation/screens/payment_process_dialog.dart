@@ -284,18 +284,18 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
+                    color: const Color(0xFF2E2415),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.amber.shade300),
+                    border: Border.all(color: AppColors.warmAmberSunset.withValues(alpha: 0.45)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.shield_rounded, size: 18, color: Colors.amber.shade900),
+                      const Icon(Icons.shield_rounded, size: 18, color: AppColors.warmAmberSunset),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           state.tr('proofMandatoryNotice'),
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade900),
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.amber.shade200),
                         ),
                       ),
                     ],
@@ -400,7 +400,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? method.color.withOpacity(0.08) : Colors.white,
+          color: isSelected ? method.color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? method.color : AppColors.cardBorder,
@@ -416,8 +416,8 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 label,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? method.color : AppColors.textPrimary,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  color: isSelected ? method.color : Colors.white,
                 ),
               ),
             ),
