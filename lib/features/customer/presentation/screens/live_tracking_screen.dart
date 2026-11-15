@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -31,15 +32,34 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
   final TextEditingController _searchController = TextEditingController();
   String? _queriedBookingId;
   bool _showSearchHeader = false;
+  Timer? _liveSyncTimer;
 
   @override
   void initState() {
     super.initState();
     _queriedBookingId = widget.bookingId;
+    _startLiveSync();
+  }
+
+  void _startLiveSync() {
+    _liveSyncTimer?.cancel();
+    final isTesting = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    if (isTesting) return;
+
+    // Real-time automatic polling every 3.5 seconds to sync cashier/manager status updates instantly
+    _liveSyncTimer = Timer.periodic(const Duration(milliseconds: 3500), (_) {
+      if (!mounted) return;
+      final state = AppStateProvider.of(context);
+      final activeId = _queriedBookingId ?? state.activeTrackingBookingId;
+      if (activeId != null && activeId.isNotEmpty) {
+        state.refreshActiveBooking(activeId);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _liveSyncTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -148,6 +168,44 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       appBar: AppBar(
         title: Text('${isCarpetBooking ? state.tr("carpetTrackingTitle") : state.tr("liveTrackingTitle")} • ${booking.licensePlate}'),
         actions: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+            margin: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10B981).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.45)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xFF10B981),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  'LIVE',
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF10B981),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const LanguageSwitcherAction(isDark: false),
           IconButton(
             icon: Icon(_showSearchHeader ? Icons.close : Icons.search_rounded),

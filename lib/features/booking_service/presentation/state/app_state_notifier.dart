@@ -2917,6 +2917,32 @@ class AppStateNotifier extends ChangeNotifier {
     }
   }
 
+  /// Real-time single-booking status refresher for customer LiveTrackingScreen
+  /// Pulls the latest live status from repository without querying unbounded tables.
+  Future<void> refreshActiveBooking(String bookingId) async {
+    try {
+      final updated = await _repository.getBookingById(bookingId);
+      if (updated != null) {
+        final existingIdx = _bookings.indexWhere((b) => b.id == bookingId);
+        if (existingIdx >= 0) {
+          final current = _bookings[existingIdx];
+          if (current.status != updated.status ||
+              current.assignedBay != updated.assignedBay ||
+              current.assignedWasherName != updated.assignedWasherName ||
+              current.payment.isPaid != updated.payment.isPaid) {
+            _bookings[existingIdx] = updated;
+            notifyListeners();
+          }
+        } else {
+          _bookings.insert(0, updated);
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint('Real-time booking refresh error: $e');
+    }
+  }
+
   /// On-demand pagination: fetches next batch of 50 older historical bookings from Supabase.
   Future<int> loadOlderBookings() async {
     if (_isLoadingOlderBookings || !_hasMoreOlderBookings) return 0;
