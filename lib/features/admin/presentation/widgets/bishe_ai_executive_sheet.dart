@@ -94,10 +94,19 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     _scrollToBottom();
 
     final state = AppStateProvider.read(context);
+    final history = _messages
+        .take(_messages.length - 1)
+        .map((m) => {
+              'role': m.isUser ? 'user' : 'model',
+              'text': m.text,
+            })
+        .toList();
+
     final response = await BisheAiExecutiveService.askExecutive(
       userQuestion: query,
       state: state,
       currentLang: AppLanguage.fromCode(state.currentLang),
+      conversationHistory: history,
     );
 
     if (mounted) {

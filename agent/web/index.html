@@ -365,6 +365,31 @@
       text-align: left;
       font-size: 13px;
     }
+    table.dynamic-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: #111827;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+    table.dynamic-table th {
+      background: #1e293b;
+      color: #00E5FF;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 1px solid var(--card-border);
+    }
+    table.dynamic-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+      color: var(--text-main);
+    }
+    table.dynamic-table tr:hover td {
+      background: rgba(0, 229, 255, 0.04);
+    }
     thead th {
       background: #141e33;
       color: var(--text-muted);
@@ -755,16 +780,30 @@
         let catName = 'Type A (Small Auto)';
         if (r.is_carpet) {
           tagClass = 'tag-carpet';
-          mult = `${r.carpet_area_sq_meters || 12} m²`;
+          const area = r.carpet_area_sq_meters || 12;
+          mult = `${area} m² (${(area * 0.25).toFixed(1)} EVU)`;
           catName = 'Carpet Order';
-        } else if ((r.car_type || '').toLowerCase().includes('minibus')) {
-          tagClass = 'tag-type-b';
-          mult = '1.5x Medium';
-          catName = 'Type B (Medium / SUV)';
-        } else if ((r.car_type || '').toLowerCase().includes('truck')) {
-          tagClass = 'tag-type-c';
-          mult = '2.5x Heavy';
-          catName = 'Type C (Heavy Truck)';
+        } else {
+          const ctype = (r.car_type || '').toLowerCase();
+          const plate = (r.license_plate || '').toLowerCase();
+          const combined = ctype + ' ' + plate;
+          if (combined.includes('truck') || combined.includes('heavy') || combined.includes('sinotruk') || combined.includes('fsr') || combined.includes('isuzu')) {
+            tagClass = 'tag-type-c';
+            mult = '2.5x Heavy';
+            catName = 'Heavy Truck (Type C)';
+          } else if (combined.includes('minibus') || combined.includes('van') || combined.includes('dolphin')) {
+            tagClass = 'tag-type-b';
+            mult = '1.8x Van';
+            catName = 'Minibus / Van (Type B)';
+          } else if (combined.includes('suv') || combined.includes('pickup') || combined.includes('hilux') || combined.includes('v8') || combined.includes('bigstar')) {
+            tagClass = 'tag-type-b';
+            mult = '1.4x SUV';
+            catName = 'SUV / Pickup (Type B)';
+          } else if (ctype.includes('minibus') || ctype.includes('medium')) {
+            tagClass = 'tag-type-b';
+            mult = '1.4x–1.8x';
+            catName = 'Type B (Medium)';
+          }
         }
         const statusTag = r.status === 'completed' ? 'tag-completed' : 'tag-pending';
         const d = r.created_at ? new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--';
@@ -868,7 +907,9 @@
       }
     }
 
-    // Dynamic AI Chat
+    // Dynamic AI Chat with Multi-turn Memory
+    let chatHistory = [];
+
     function sendPrompt(q) {
       document.getElementById('chatInput').value = q;
       submitChat();
@@ -885,25 +926,31 @@
       container.scrollTop = container.scrollHeight;
 
       const thinkingId = 'thinking_' + Date.now();
-      container.innerHTML += `<div class="message ai" id="${thinkingId}"><em>⚡ Querying live station database & computing real metrics...</em></div>`;
+      container.innerHTML += `<div class="message ai" id="${thinkingId}"><em>⚡ Computing live station metrics & grounding in Operations Manual...</em></div>`;
       container.scrollTop = container.scrollHeight;
+
+      // Add to multi-turn conversation memory
+      chatHistory.push({role: 'user', content: q});
 
       try {
         const res = await fetch('/api/ask', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({query: q})
+          body: JSON.stringify({query: q, history: chatHistory})
         });
         const data = await res.json();
         const thinkingElem = document.getElementById(thinkingId);
         
-        let htmlOutput = data.html || `<pre style="white-space:pre-wrap; font-family:inherit;">${escapeHtml(data.text)}</pre>`;
+        // Save model reply in history
+        chatHistory.push({role: 'model', content: data.text || ''});
+
+        let htmlOutput = data.html || `<div style="line-height:1.6;">${escapeHtml(data.text || '')}</div>`;
         
         // Add exportable buttons inside the AI response bubble
         htmlOutput += `
           <div class="message-actions">
-            <button class="btn btn-success" onclick="exportDataToCSV('${data.table_id || 'aiTable'}', 'bishe_query_export.csv')">📥 Export CSV</button>
-            <button class="btn" onclick="copySnippetToClipboard('${thinkingId}_content')">📋 Copy Text</button>
+            <button class="btn btn-success" onclick="exportDataToCSV('${data.table_id || ''}', 'bishe_ai_export_${Date.now()}.csv', '${thinkingId}_content')">📥 Export CSV</button>
+            <button class="btn" onclick="copySnippetToClipboard('${thinkingId}_content')">📋 Copy Table / Text</button>
             <button class="btn" onclick="window.print()">🖨️ Print View</button>
           </div>
         `;
@@ -920,15 +967,40 @@
       const activeTab = document.querySelector('.tab-content.active');
       const table = activeTab.querySelector('table');
       if (table) {
-        exportTableToCSV(table.id, `${activeTab.id}_export.csv`);
+        exportTableElementToCSV(table, `${activeTab.id}_export.csv`);
       } else {
         showToast('No table found in active view');
       }
     }
 
+    function exportDataToCSV(tableId, filename, containerId) {
+      let table = tableId ? document.getElementById(tableId) : null;
+      if (!table && containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+          table = container.querySelector('table');
+        }
+      }
+      if (table) {
+        exportTableElementToCSV(table, filename);
+      } else if (containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+          downloadCSV('"' + container.innerText.replace(/"/g, '""') + '"', filename);
+        }
+      } else {
+        showToast('No table found to export');
+      }
+    }
+
     function exportTableToCSV(tableId, filename) {
       const table = document.getElementById(tableId);
-      if (!table) return;
+      if (table) {
+        exportTableElementToCSV(table, filename);
+      }
+    }
+
+    function exportTableElementToCSV(table, filename) {
       let csv = [];
       for (const row of table.rows) {
         let cols = [];

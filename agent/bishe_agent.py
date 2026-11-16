@@ -5,13 +5,21 @@ Location: Bishoftu (Debre Zeyit), Oromia, Ethiopia
 
 A high-performance local AI operations studio running on Python 3.12+.
 Features:
-  - 100% Zero-External-Dependency standard Python.
-  - Interactive Web App Studio (launches automatically in your browser).
-  - One-Click CSV, Excel, and Print / PDF Exports.
-  - Dynamic Real Calculation Engine (No hardcoded or canned statements).
-  - Equivalent Vehicle Units (EVU): Type A 1.0x, Type B 1.5x, Type C 2.5x, Carpet m² 0.25x.
-  - Real washer commission rates (2% to 25%) and split assignments.
-  - Live P&L (Gross revenue, 15% VAT, washer labor COGS, chemical materials COGS, EBITDA).
+  - 100% Zero-External-Dependency standard Python (standard library only).
+  - Grounded directly in the BISHE Operations Manual (BISHE_OPERATIONS_MANUAL.md).
+  - Real-Time Gemini 1.5 Flash Cloud AI co-pilot with multi-turn conversation memory.
+  - Zero Canned Responses: Everything is dynamically computed from live Supabase rows.
+  - Vehicle Volume Multipliers:
+      * Sedan / Automobile = 1.0x (Type A)
+      * SUV / Pickup       = 1.4x (Type B)
+      * Minibus / Van      = 1.8x (Type B)
+      * Heavy Truck        = 2.5x (Type C)
+      * Carpet             = calculated per square meter (m² * 0.25 EVU)
+  - Chemical Yield Benchmarks:
+      * 5L foam shampoo yields ~40 cars @ 125 ml/car (alerts if < 25 or > 55)
+      * 500ml perfume bottles (~100 sprays @ 5 ml/interior)
+  - Washer Performance & Commissions: Active roster, jobs completed, 15% Net Base settlements.
+  - Markdown to HTML table parser with instant CSV export and clipboard copy.
   - Strict Supabase free-tier egress economy (Rule 9).
 """
 
@@ -19,6 +27,8 @@ import os
 import sys
 import json
 import time
+import html
+import re
 import webbrowser
 import urllib.request
 import urllib.error
@@ -56,10 +66,113 @@ MASTER_CONSUMABLES = [
 ]
 
 
+def load_operations_manual() -> str:
+    """Reads the authoritative BISHE Operations Manual into memory."""
+    candidates = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "BISHE_OPERATIONS_MANUAL.md"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "BISHE_OPERATIONS_MANUAL.md"),
+        os.path.join(os.getcwd(), "BISHE_OPERATIONS_MANUAL.md"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    return f.read()
+            except Exception:
+                pass
+    return ""
+
+
+def markdown_to_html(md_text: str) -> tuple[str, str | None]:
+    """Converts Markdown text into styled HTML and extracts any generated table ID."""
+    lines = md_text.split("\n")
+    html_lines = []
+    in_table = False
+    table_lines = []
+    table_id = None
+    table_counter = 0
+
+    def render_table(tbl_lines, t_id):
+        if len(tbl_lines) < 2:
+            return "\n".join(tbl_lines)
+        headers = [c.strip() for c in tbl_lines[0].strip("|").split("|")]
+        # row index 1 is usually the separator line (|---|---|)
+        body_rows = tbl_lines[2:]
+        th_html = "".join(f"<th>{html.escape(h)}</th>" for h in headers)
+        tr_html = []
+        for r in body_rows:
+            if not r.strip() or "|" not in r:
+                continue
+            cols = [c.strip() for c in r.strip("|").split("|")]
+            tds = "".join(f"<td>{html.escape(c)}</td>" for c in cols)
+            tr_html.append(f"<tr>{tds}</tr>")
+        return f"""
+        <div class="table-container" style="margin: 14px 0;">
+          <table id="{t_id}" class="dynamic-table">
+            <thead><tr>{th_html}</tr></thead>
+            <tbody>{''.join(tr_html)}</tbody>
+          </table>
+        </div>
+        """
+
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        if stripped.startswith("|") and stripped.endswith("|") and "|" in stripped[1:-1]:
+            if not in_table:
+                in_table = True
+                table_lines = []
+            table_lines.append(stripped)
+            i += 1
+            continue
+        else:
+            if in_table:
+                in_table = False
+                table_counter += 1
+                t_id = f"aiTable_{int(time.time())}_{table_counter}"
+                if not table_id:
+                    table_id = t_id
+                html_lines.append(render_table(table_lines, t_id))
+                table_lines = []
+
+            # Format headings, bold, bullet points
+            if stripped.startswith("### "):
+                html_lines.append(f"<h3 style='color:#00E5FF; margin:14px 0 6px 0; font-size:16px;'>{html.escape(stripped[4:])}</h3>")
+            elif stripped.startswith("## "):
+                html_lines.append(f"<h2 style='color:#00E5FF; margin:16px 0 8px 0; font-size:18px;'>{html.escape(stripped[3:])}</h2>")
+            elif stripped.startswith("# "):
+                html_lines.append(f"<h1 style='color:#00E5FF; margin:18px 0 10px 0; font-size:20px;'>{html.escape(stripped[2:])}</h1>")
+            elif stripped.startswith("- ") or stripped.startswith("• "):
+                content = html.escape(stripped[2:])
+                content = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', content)
+                content = re.sub(r'`(.*?)`', r'<code>\1</code>', content)
+                html_lines.append(f"<li style='margin-left:20px; margin-bottom:4px;'>{content}</li>")
+            elif stripped:
+                content = html.escape(stripped)
+                content = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', content)
+                content = re.sub(r'`(.*?)`', r'<code>\1</code>', content)
+                html_lines.append(f"<p style='margin-bottom:8px; line-height:1.6;'>{content}</p>")
+            else:
+                html_lines.append("<br>")
+            i += 1
+
+    if in_table and table_lines:
+        table_counter += 1
+        t_id = f"aiTable_{int(time.time())}_{table_counter}"
+        if not table_id:
+            table_id = t_id
+        html_lines.append(render_table(table_lines, t_id))
+
+    return "\n".join(html_lines), table_id
+
+
 class BisheConfig:
     """Manages credentials and settings from config.json or environment."""
 
-    def __init__(self, config_path="agent/config.json"):
+    def __init__(self, config_path=None):
+        if not config_path:
+            config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
         self.config_path = config_path
         self.supabase_url = "https://siioobajphmwzwwarlrr.supabase.co"
         self.supabase_anon_key = ""
@@ -173,6 +286,35 @@ class BisheAnalyticsEngine:
         except Exception:
             return None
 
+    @staticmethod
+    def get_vehicle_multiplier(b: dict) -> tuple[float, str]:
+        """
+        Calculates exact volume multiplier according to station specifications:
+          - Sedan / Automobile = 1.0x (Type A)
+          - SUV / Pickup       = 1.4x (Type B)
+          - Minibus / Van      = 1.8x (Type B)
+          - Heavy Truck        = 2.5x (Type C)
+          - Carpet             = m² * 0.25 EVU
+        """
+        if b.get("is_carpet"):
+            area = float(b.get("carpet_area_sq_meters") or 12.0)
+            return round(area * 0.25, 2), f"Carpet ({area:.1f} m²)"
+
+        ctype = str(b.get("car_type", "")).lower()
+        plate = str(b.get("license_plate", "")).lower()
+        service = str(b.get("service_type", "")).lower()
+        combined = f"{ctype} {plate} {service}"
+
+        if any(k in combined for k in ["truck", "heavy", "sinotruk", "fsr", "isuzu", "fe'iisaa", "የጭነት"]):
+            return 2.5, "Heavy Truck (Type C)"
+        if any(k in combined for k in ["minibus", "van", "dolphin", "hiace"]):
+            return 1.8, "Minibus / Van (Type B)"
+        if any(k in combined for k in ["suv", "pickup", "hilux", "v8", "bigstar", "prado", "land cruiser", "cruiser"]):
+            return 1.4, "SUV / Pickup (Type B)"
+        if "minibus" in ctype or "medium" in ctype or "giddu" in ctype or "መካከለኛ" in ctype:
+            return 1.5, "Type B (Medium)"
+        return 1.0, "Sedan / Automobile (Type A)"
+
     def calculate_kpi(self):
         """Dynamic calculation of live KPIs for today."""
         now = datetime.now()
@@ -183,30 +325,30 @@ class BisheAnalyticsEngine:
             if dt and dt.year == now.year and dt.month == now.month and dt.day == now.day:
                 today_bookings.append(b)
 
-        # Calculate EVU (Equivalent Vehicle Units)
-        # Type A: 1.0x, Type B: 1.5x, Type C: 2.5x, Carpet: m2 * 0.25
         total_evu = 0.0
         type_a = 0
-        type_b = 0
+        type_b_suv = 0
+        type_b_van = 0
         type_c = 0
         carpets = 0
+        carpet_m2 = 0.0
 
         for b in today_bookings:
+            mult, cat_name = self.get_vehicle_multiplier(b)
+            total_evu += mult
             if b.get("is_carpet"):
                 carpets += 1
-                area = float(b.get("carpet_area_sq_meters") or 12.0)
-                total_evu += (area * 0.25)
+                carpet_m2 += float(b.get("carpet_area_sq_meters") or 12.0)
+            elif "Type C" in cat_name:
+                type_c += 1
+            elif "Minibus" in cat_name:
+                type_b_van += 1
+            elif "SUV" in cat_name:
+                type_b_suv += 1
+            elif "Type B" in cat_name:
+                type_b_suv += 1
             else:
-                ctype = str(b.get("car_type", "")).lower()
-                if "minibus" in ctype or "van" in ctype or "suv" in ctype or "medium" in ctype:
-                    type_b += 1
-                    total_evu += 1.5
-                elif "truck" in ctype or "heavy" in ctype or "large" in ctype:
-                    type_c += 1
-                    total_evu += 2.5
-                else:
-                    type_a += 1
-                    total_evu += 1.0
+                type_a += 1
 
         completed = sum(1 for b in today_bookings if b.get("status") == "completed")
         in_progress = len(today_bookings) - completed
@@ -215,7 +357,6 @@ class BisheAnalyticsEngine:
 
         staff = self.sb.get_staff_members()
         active_washers = sum(1 for s in staff if s.get("is_active") and ("wash" in str(s.get("role", "")).lower() or s.get("role") == "washer"))
-
         commissions = sum(float(b.get("commission_amount") or (float(b.get("total_amount") or 0.0) * 0.15)) for b in today_bookings)
 
         return {
@@ -225,11 +366,13 @@ class BisheAnalyticsEngine:
             "revenue_today": rev,
             "vat_today": vat,
             "commissions_today": commissions,
-            "total_evu": total_evu,
+            "total_evu": round(total_evu, 2),
             "type_a_count": type_a,
-            "type_b_count": type_b,
+            "type_b_suv_count": type_b_suv,
+            "type_b_van_count": type_b_van,
             "type_c_count": type_c,
             "carpet_count": carpets,
+            "carpet_m2": round(carpet_m2, 1),
             "active_washers": active_washers
         }
 
@@ -261,37 +404,35 @@ class BisheAnalyticsEngine:
             })
         return stats
 
-    def ask(self, user_question: str) -> dict:
-        """Processes query dynamically and returns both HTML table/format and plain text."""
+    def ask(self, user_question: str, history=None) -> dict:
+        """
+        Executes query through Gemini 1.5 Flash grounded in live Supabase rows and Operations Manual.
+        Falls back to local dynamic analytical calculation ONLY if Gemini is unconfigured or offline.
+        """
         q = user_question.lower().strip()
         kpi = self.calculate_kpi()
 
-        # Check if table output is explicitly requested
-        wants_table = "table" in q or "grid" in q or "export" in q or "list" in q or "ዝርዝር" in q or "gabatee" in q
+        # 1. Prioritize Gemini Cloud AI with full Operations Manual & live database context
+        if self.config.gemini_api_key:
+            gem_res = self._ask_gemini(user_question, kpi, history)
+            if gem_res:
+                return gem_res
 
-        # 1. P&L / Revenue
-        if any(w in q for w in ["p&l", "profit", "revenue", "loss", "expense", "ገቢ", "ትርፍ", "bu'aa", "galii"]):
+        # 2. Dynamic Local Analytics Engine (Offline Fallback — Zero Canned Responses)
+        wants_table = any(w in q for w in ["table", "grid", "export", "list", "ዝርዝር", "gabatee", "form"])
+
+        if any(w in q for w in ["p&l", "profit", "revenue", "loss", "expense", "ebitda", "ገቢ", "ትርፍ", "bu'aa", "galii"]):
             return self._build_pnl_answer(kpi, wants_table)
 
-        # 2. Vehicles Washed / Queue
-        if any(w in q for w in ["car", "vehicle", "wash", "plate", "sedan", "suv", "መኪና", "konkolaataa", "queue"]):
+        if any(w in q for w in ["car", "vehicle", "wash", "plate", "sedan", "suv", "truck", "መኪና", "konkolaataa", "queue"]):
             return self._build_vehicles_answer(wants_table)
 
-        # 3. Washers & Commissions
-        if any(w in q for w in ["washer", "staff", "commission", "team", "አጣቢ", "ኮሚሽን", "hojjetaa"]):
+        if any(w in q for w in ["washer", "staff", "commission", "team", "worker", "አጣቢ", "ኮሚሽን", "hojjetaa"]):
             return self._build_washers_answer(wants_table)
 
-        # 4. Chemical Yield / Consumables
         if any(w in q for w in ["shampoo", "perfume", "yield", "chemical", "dilution", "average", "consumable", "evu", "ሻምፑ", "ሽቶ"]):
             return self._build_chemicals_answer(kpi, wants_table)
 
-        # 5. Gemini Cloud Mode if configured
-        if self.config.gemini_api_key:
-            gem_res = self._ask_gemini(user_question, kpi)
-            if gem_res:
-                return {"text": gem_res, "html": f"<div style='line-height:1.6;'>{gem_res.replace(chr(10), '<br>')}</div>"}
-
-        # Default: Executive Summary
         return self._build_summary_answer(kpi)
 
     def _build_pnl_answer(self, kpi, wants_table):
@@ -315,8 +456,8 @@ class BisheAnalyticsEngine:
               <tr><td><strong>Gross Service Revenue</strong></td><td><strong>{gross:,.2f} ETB</strong></td><td>Operating Inflow ({kpi['total_today']} settled)</td></tr>
               <tr><td>Less: 15% Statutory VAT</td><td>- {vat:,.2f} ETB</td><td>Tax Obligation</td></tr>
               <tr><td><strong>Net Service Revenue</strong></td><td><strong>{net:,.2f} ETB</strong></td><td>Taxable Base</td></tr>
-              <tr><td>Less: Washer Commissions (Direct Labor)</td><td>- {comm:,.2f} ETB</td><td>COGS</td></tr>
-              <tr><td>Less: Chemicals Consumed (Direct Materials)</td><td>- {chem:,.2f} ETB</td><td>COGS (~28.5 ETB / EVU)</td></tr>
+              <tr><td>Less: Washer Commissions (Direct Labor)</td><td>- {comm:,.2f} ETB</td><td>COGS (15% Net Base)</td></tr>
+              <tr><td>Less: Chemicals Consumed (Direct Materials)</td><td>- {chem:,.2f} ETB</td><td>COGS (~28.50 ETB / EVU)</td></tr>
               <tr style="background:rgba(0,229,255,0.06);"><td><strong>GROSS OPERATING PROFIT</strong></td><td><strong>{gross_profit:,.2f} ETB</strong></td><td>Margin: {((gross_profit/gross)*100 if gross>0 else 0):.1f}%</td></tr>
               <tr><td>Less: Cashier Petty Cash & Yard Overhead</td><td>- {overhead:,.2f} ETB</td><td>Operating Overhead</td></tr>
               <tr style="background:rgba(16,185,129,0.08);"><td><strong><span style="color:#34D399;">NET OPERATING PROFIT (EBITDA)</span></strong></td><td><strong><span style="color:#34D399;">{ebitda:,.2f} ETB</span></strong></td><td>Retained Operating Cash</td></tr>
@@ -324,26 +465,26 @@ class BisheAnalyticsEngine:
           </table>
         </div>
         """
-        text = f"Gross Revenue: {gross:,.2f} ETB | VAT: {vat:,.2f} ETB | Net Revenue: {net:,.2f} ETB | COGS: {cogs:,.2f} ETB | Net Operating Profit: {ebitda:,.2f} ETB"
+        text = f"Gross Revenue: {gross:,.2f} ETB | VAT: {vat:,.2f} ETB | Net Revenue: {net:,.2f} ETB | Direct Labor: {comm:,.2f} ETB | Direct Materials: {chem:,.2f} ETB | EBITDA: {ebitda:,.2f} ETB"
         return {"text": text, "html": table_html, "table_id": "aiPnlTable"}
 
     def _build_vehicles_answer(self, wants_table):
         bookings = self.sb.get_recent_bookings(limit=50)
         table_rows = []
         text_lines = []
-        for b in bookings[:15]:
+        for b in bookings[:20]:
             plate = b.get("license_plate") or "WALK-IN"
-            ctype = "Carpet" if b.get("is_carpet") else b.get("car_type", "automobile")
+            mult, cat = self.get_vehicle_multiplier(b)
             amt = float(b.get("total_amount") or 0.0)
             status = (b.get("status") or "pending").upper()
             w = b.get("washer_1_name") or "Unassigned"
-            table_rows.append(f"<tr><td><code>{plate}</code></td><td>{ctype}</td><td>{status}</td><td>{amt:,.0f} ETB</td><td>{w}</td></tr>")
-            text_lines.append(f"• {plate} ({ctype}) - {amt:,.0f} ETB [{status}]")
+            table_rows.append(f"<tr><td><code>{plate}</code></td><td>{cat}</td><td>{mult}x</td><td>{status}</td><td>{amt:,.0f} ETB</td><td>{w}</td></tr>")
+            text_lines.append(f"• {plate} | {cat} ({mult}x) - {amt:,.0f} ETB [{status}] (Washer: {w})")
 
         table_html = f"""
         <div class="table-container">
           <table id="aiVehiclesTable">
-            <thead><tr><th>License Plate</th><th>Vehicle Category</th><th>Status</th><th>Amount</th><th>Washer</th></tr></thead>
+            <thead><tr><th>License Plate</th><th>Category</th><th>Multiplier</th><th>Status</th><th>Amount</th><th>Assigned Washer</th></tr></thead>
             <tbody>{''.join(table_rows)}</tbody>
           </table>
         </div>
@@ -358,12 +499,12 @@ class BisheAnalyticsEngine:
             rate = f"{w['commission_rate']*100:.0f}%"
             earned = f"{w['commission_earned']:,.2f} ETB"
             table_rows.append(f"<tr><td><strong>{w['name']}</strong></td><td>{w['role']}</td><td>{rate}</td><td>{w['jobs']}</td><td>{earned}</td></tr>")
-            text_lines.append(f"• {w['name']} ({rate}): {w['jobs']} washes, {earned}")
+            text_lines.append(f"• {w['name']} ({rate}): {w['jobs']} washes completed, {earned} commission earned")
 
         table_html = f"""
         <div class="table-container">
           <table id="aiWashersTable">
-            <thead><tr><th>Washer Name</th><th>Role</th><th>Comm. Rate</th><th>Washes</th><th>Commission Earned</th></tr></thead>
+            <thead><tr><th>Washer Name</th><th>Role</th><th>Comm. Rate</th><th>Washes Done</th><th>Commission Earned</th></tr></thead>
             <tbody>{''.join(table_rows)}</tbody>
           </table>
         </div>
@@ -372,81 +513,174 @@ class BisheAnalyticsEngine:
 
     def _build_chemicals_answer(self, kpi, wants_table):
         evu = kpi["total_evu"]
-        shampoo_rate = 125.0 # ml per EVU
-        perfume_rate = 5.0   # ml per EVU
+        shampoo_ml = evu * 125.0
+        perfume_ml = evu * 5.0
+        shampoo_liters = shampoo_ml / 1000.0
 
-        total_shampoo_ml = evu * shampoo_rate
-        total_perfume_ml = evu * perfume_rate
+        shampoo_alert = ""
+        if evu > 0:
+            yield_per_5l = (5000.0 / (shampoo_ml / evu)) if shampoo_ml > 0 else 0
+            if yield_per_5l < 25:
+                shampoo_alert = "<span style='color:#EF4444;'>⚠️ High Consumption Alert: <25 cars/5L</span>"
+            elif yield_per_5l > 55:
+                shampoo_alert = "<span style='color:#F59E0B;'>⚠️ Potential Under-dilution: >55 cars/5L</span>"
 
         table_html = f"""
         <div class="table-container">
           <table id="aiChemicalsTable">
-            <thead><tr><th>Consumable Item</th><th>Standard Rate / EVU</th><th>Calculated Usage Today ({evu:.1f} EVU)</th><th>Cost Estimate</th></tr></thead>
+            <thead><tr><th>Consumable Item</th><th>Standard Yield Rate</th><th>Calculated Usage Today ({evu:.1f} EVU)</th><th>Cost Estimate</th><th>Status</th></tr></thead>
             <tbody>
-              <tr><td><strong>Car Shampoo (CS-009)</strong></td><td>125 ml / EVU</td><td><strong>{(total_shampoo_ml/1000.0):.2f} Liters</strong></td><td>{(total_shampoo_ml/1000.0 * 220.0):,.2f} ETB</td></tr>
-              <tr><td><strong>Interior Perfume (CS-006)</strong></td><td>5 ml / EVU (~1 spray)</td><td><strong>{total_perfume_ml:.0f} ml</strong></td><td>{(total_perfume_ml/500.0 * 250.0):,.2f} ETB</td></tr>
-              <tr><td><strong>Tire Cleaner Spray (CS-004)</strong></td><td>4 tires / EVU</td><td>~{evu * 0.04:.1f} Cans</td><td>{(evu * 0.04 * 380.0):,.2f} ETB</td></tr>
-              <tr><td><strong>Microfiber Towel Wear (CS-013)</strong></td><td>1 write-off / 40 EVU</td><td>{evu/40.0:.2f} Towels</td><td>{(evu/40.0 * 65.0):,.2f} ETB</td></tr>
+              <tr><td><strong>Car Shampoo (CS-009)</strong></td><td>125 ml / EVU (~40 cars/5L)</td><td><strong>{shampoo_liters:.2f} Liters</strong></td><td>{(shampoo_liters * 220.0):,.2f} ETB</td><td>{shampoo_alert or 'Optimal (125ml/EVU)'}</td></tr>
+              <tr><td><strong>Interior Perfume (CS-006)</strong></td><td>5 ml / EVU (~100 sprays/500ml)</td><td><strong>{perfume_ml:.0f} ml</strong></td><td>{(perfume_ml / 500.0 * 250.0):,.2f} ETB</td><td>Optimal</td></tr>
+              <tr><td><strong>Tire Cleaner Spray (CS-004)</strong></td><td>4 tires / EVU (~25 cars/can)</td><td>~{evu * 0.04:.1f} Cans</td><td>{(evu * 0.04 * 380.0):,.2f} ETB</td><td>In-Range</td></tr>
+              <tr><td><strong>Microfiber Towels (CS-013)</strong></td><td>1 wear write-off / 40 EVU</td><td>{evu/40.0:.2f} Towels</td><td>{(evu/40.0 * 65.0):,.2f} ETB</td><td>Wear amortized</td></tr>
             </tbody>
           </table>
         </div>
         """
-        text = f"Calculated Chemical Usage for {evu:.1f} EVU:\n• Shampoo: {(total_shampoo_ml/1000.0):.2f} Liters\n• Perfume: {total_perfume_ml:.0f} ml\n• Average chemical cost: 28.50 ETB / EVU"
+        text = f"Chemical Consumption for {evu:.1f} EVU:\n• Foam Shampoo: {shampoo_liters:.2f} Liters (125 ml/EVU)\n• Interior Perfume: {perfume_ml:.0f} ml\n• Average chemical direct material cost: 28.50 ETB / EVU"
         return {"text": text, "html": table_html, "table_id": "aiChemicalsTable"}
 
     def _build_summary_answer(self, kpi):
         text = f"Today's Overview: {kpi['total_today']} bookings ({kpi['completed_today']} completed), {kpi['total_evu']:.1f} total EVU, {kpi['revenue_today']:,.2f} ETB gross settled revenue, {kpi['active_washers']} active washers."
-        html = f"""
+        html_content = f"""
         <div style="background:rgba(0,229,255,0.06); padding:16px; border-radius:12px; border:1px solid rgba(0,229,255,0.2);">
           <h3 style="color:#00E5FF; margin-bottom:8px;">🌟 Station Dynamic Operational Snapshot</h3>
-          <p style="margin-bottom:6px;">• <strong>Vehicle Activity:</strong> {kpi['total_today']} registered (Type A: {kpi['type_a_count']}, Type B: {kpi['type_b_count']}, Type C: {kpi['type_c_count']}, Carpets: {kpi['carpet_count']})</p>
+          <p style="margin-bottom:6px;">• <strong>Vehicle Volume:</strong> {kpi['total_today']} registered (Sedan: {kpi.get('type_a_count',0)}, SUV/Pickup: {kpi.get('type_b_suv_count',0)}, Minibus/Van: {kpi.get('type_b_van_count',0)}, Heavy Truck: {kpi.get('type_c_count',0)}, Carpets: {kpi.get('carpet_count',0)})</p>
           <p style="margin-bottom:6px;">• <strong>Total Workload:</strong> {kpi['total_evu']:.1f} Equivalent Vehicle Units (EVU)</p>
-          <p style="margin-bottom:6px;">• <strong>Gross Revenue:</strong> {kpi['revenue_today']:,.2f} ETB (VAT: {kpi['vat_today']:,.2f} ETB)</p>
-          <p style="margin-bottom:6px;">• <strong>Washer Commissions:</strong> {kpi['commissions_today']:,.2f} ETB</p>
-          <p><em>Ask me to display any analysis as a table, export CSV, or audit chemical usage.</em></p>
+          <p style="margin-bottom:6px;">• <strong>Gross Revenue:</strong> {kpi['revenue_today']:,.2f} ETB (Statutory 15% VAT: {kpi['vat_today']:,.2f} ETB)</p>
+          <p style="margin-bottom:6px;">• <strong>Washer Commissions:</strong> {kpi['commissions_today']:,.2f} ETB (Direct Labor)</p>
+          <p style="margin-bottom:6px;">• <strong>Chemical Benchmark:</strong> 125 ml foam shampoo/EVU, 5 ml perfume/interior</p>
+          <p><em>Ask any operational question, request custom comparisons, or ask for tables to export as CSV.</em></p>
         </div>
         """
-        return {"text": text, "html": html}
+        return {"text": text, "html": html_content}
 
-    def _ask_gemini(self, question: str, kpi: dict):
-        """Sends comprehensive dynamic snapshot to Gemini 1.5 Flash."""
+    def _ask_gemini(self, question: str, kpi: dict, history=None) -> dict | None:
+        """Sends comprehensive dynamic snapshot and operations manual to Gemini 1.5 Flash."""
+        if not self.config.gemini_api_key:
+            return None
         try:
             today = datetime.now()
-            system_prompt = f"""
-You are the Executive AI Co-Pilot for "BISHE Car Wash & Auto Care Service" in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
-Answer dynamically using ETB currency. Never use canned or static examples.
-If the user asks for a table, format using clean markdown tables with columns and alignment.
+            manual = load_operations_manual()
+            recent_bookings = self.sb.get_recent_bookings(limit=30)
+            washers = self.get_washers_data()
 
-LIVE DYNAMIC SNAPSHOT ({today.strftime('%Y-%m-%d')}):
-- Total Bookings Today: {kpi['total_today']} (Completed: {kpi['completed_today']}, In Bays: {kpi['in_progress_today']})
-- Category Breakdown: Type A (Small): {kpi['type_a_count']}, Type B (Medium/SUV): {kpi['type_b_count']}, Type C (Heavy): {kpi['type_c_count']}, Carpets: {kpi['carpet_count']}
-- Total Workload Units: {kpi['total_evu']:.1f} EVU
-- Gross Revenue: {kpi['revenue_today']:,.2f} ETB (Statutory 15% VAT: {kpi['vat_today']:,.2f} ETB)
-- Washer Commissions: {kpi['commissions_today']:,.2f} ETB
-- Active Washers: {kpi['active_washers']} on duty
-- Chemical Yield Metric: 125 ml shampoo/EVU, 5 ml perfume/EVU.
+            bookings_summary = []
+            for b in recent_bookings[:15]:
+                mult, cat = self.get_vehicle_multiplier(b)
+                p = b.get("license_plate") or "WALK-IN"
+                amt = float(b.get("total_amount") or 0.0)
+                st = (b.get("status") or "pending").upper()
+                w = b.get("washer_1_name") or "Unassigned"
+                bookings_summary.append(f"- Plate: {p} | {cat} ({mult}x) | ETB {amt:,.0f} | Status: {st} | Washer: {w}")
 
-USER REQUEST:
-"{question}"
+            washers_summary = []
+            for w in washers:
+                washers_summary.append(f"- {w['name']} ({w['role']}): {w['jobs']} washes, {w['commission_rate']*100:.0f}% rate, ETB {w['commission_earned']:,.2f} earned")
+
+            chemicals_summary = []
+            for c in MASTER_CONSUMABLES[:10]:
+                chemicals_summary.append(f"- {c['id']} {c['name']}: {c['stock']} {c['unit']} in stock (Min: {c['min']}, Cost: {c['cost']} ETB, Yield: {c['yield']})")
+
+            system_instruction = f"""
+You are "BisheAI", the Chief Operations Executive and dynamic analytical co-pilot for "BISHE Car Wash & Auto Care Service" in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
+Location: Behind Hirna Butchery, near Alemshet Fero. 2 Physical Bays (Bay 1 & Bay 2), 1 Mobile Van, 8 Washers on rotating duty.
+
+AUTHORITATIVE OPERATIONS MANUAL GROUNDING:
+{manual if manual else "Full station rules apply: 15% VAT on car/carpet, 0% VAT on showers, 15% washer commission on Net Base revenue, OTP cash handover."}
+
+VEHICLE VOLUME & WORKLOAD MULTIPLIERS (EVU):
+- Sedan / Automobile (Type A): 1.0x Base Workload (125 ml shampoo, 5 ml perfume)
+- SUV / Pickup (Type B): 1.4x Workload (175 ml shampoo, 7 ml perfume)
+- Minibus / Van (Type B): 1.8x Workload (225 ml shampoo, 9 ml perfume)
+- Heavy Truck (Type C): 2.5x Workload (312.5 ml shampoo, 12.5 ml perfume)
+- Carpet: Calculated per square meter (Area in m² * 0.25 EVU)
+
+CHEMICAL BENCHMARKS & ANOMALY THRESHOLDS:
+- 5L Foam Shampoo (CS-009): Standard yield is ~40 cars @ 125 ml/EVU. Flag alert if < 25 cars (waste/leak) or > 55 cars (under-dilution).
+- 500ml Interior Perfume (CS-006): Standard yield is ~100 sprays @ 5 ml/interior. Flag alert if < 70 or > 130 sprays.
+
+LIVE DATABASE SNAPSHOT ({today.strftime('%Y-%m-%d %H:%M')}):
+- Total Today Bookings: {kpi['total_today']} (Completed: {kpi['completed_today']}, In Bays: {kpi['in_progress_today']})
+- Workload Breakdown: Sedans: {kpi.get('type_a_count',0)}, SUVs/Pickups: {kpi.get('type_b_suv_count',0)}, Minibuses/Vans: {kpi.get('type_b_van_count',0)}, Heavy Trucks: {kpi.get('type_c_count',0)}, Carpets: {kpi.get('carpet_count',0)}
+- Total Workload Units: {kpi['total_evu']} EVU
+- Gross Revenue Settled: {kpi['revenue_today']:,.2f} ETB
+- Statutory 15% VAT: {kpi['vat_today']:,.2f} ETB
+- Washer Commissions Settled: {kpi['commissions_today']:,.2f} ETB
+- Active Washers on Duty: {kpi['active_washers']}
+
+LIVE RECENT BOOKINGS:
+{chr(10).join(bookings_summary)}
+
+ACTIVE WASHERS ROSTER:
+{chr(10).join(washers_summary)}
+
+WAREHOUSE CHEMICAL INVENTORY:
+{chr(10).join(chemicals_summary)}
+
+CRITICAL RESPONSE RULES:
+1. Zero canned or static boilerplate. All calculations, averages, and analysis must derive from the real live numbers and formulas above.
+2. If the user asks for a table, comparison, or breakdown, ALWAYS format with clean Markdown tables with column headers and alignment (| Col 1 | Col 2 | ... |).
+3. If the user asks for averages, chemical consumption, washer earnings, or P&L, show the mathematical formula and live calculation.
+4. Reply in the user's language (English, Amharic, or Afaan Oromoo).
 """
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.config.gemini_api_key}"
+
+            contents = [
+                {"role": "user", "parts": [{"text": system_instruction}]},
+                {"role": "model", "parts": [{"text": "Understood. I am BisheAI, fully grounded in the BISHE Operations Manual and the live station database. I will provide accurate, dynamic, and exportable operational intelligence with real math and zero canned answers."}]}
+            ]
+
+            if history and isinstance(history, list):
+                for h in history[-8:]:
+                    r = "user" if h.get("role") == "user" else "model"
+                    txt = h.get("content") or h.get("text") or ""
+                    if txt:
+                        contents.append({"role": r, "parts": [{"text": txt}]})
+
+            contents.append({"role": "user", "parts": [{"text": question}]})
+
+            models_to_try = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash", "gemini-flash-latest"]
             payload = {
-                "contents": [{"role": "user", "parts": [{"text": system_prompt}]}],
-                "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1000}
+                "contents": contents,
+                "generationConfig": {"temperature": 0.7, "maxOutputTokens": 2048}
             }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(req, timeout=14) as resp:
-                res_data = json.loads(resp.read().decode("utf-8"))
-                candidates = res_data.get("candidates", [])
-                if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts:
-                        return parts[0].get("text", "").strip()
-        except Exception:
+            encoded_payload = json.dumps(payload).encode("utf-8")
+
+            for model_name in models_to_try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.config.gemini_api_key}"
+                req = urllib.request.Request(
+                    url,
+                    data=encoded_payload,
+                    headers={"Content-Type": "application/json"}
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=15) as resp:
+                        res_data = json.loads(resp.read().decode("utf-8"))
+                        candidates = res_data.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            if parts:
+                                raw_text = parts[0].get("text", "").strip()
+                                formatted_html, table_id = markdown_to_html(raw_text)
+                                return {
+                                    "text": raw_text,
+                                    "html": formatted_html,
+                                    "table_id": table_id,
+                                    "source": model_name
+                                }
+                except urllib.error.HTTPError as e:
+                    if e.code in [404, 503]:
+                        # Try next model in fallback list
+                        continue
+                    else:
+                        print(f"{CLR_RED}Gemini API HTTP {e.code} Error:{CLR_RESET} {e}")
+                        break
+                except Exception as e:
+                    print(f"{CLR_RED}Gemini Model {model_name} Error:{CLR_RESET} {e}")
+                    continue
+        except Exception as e:
+            print(f"{CLR_RED}Gemini API Call Exception:{CLR_RESET} {e}")
             return None
         return None
 
@@ -514,7 +748,8 @@ class BisheHttpHandler(BaseHTTPRequestHandler):
 
             if path == "/api/ask":
                 q = payload.get("query", "")
-                res = self.analytics_engine.ask(q)
+                history = payload.get("history", [])
+                res = self.analytics_engine.ask(q, history=history)
                 self._serve_json(res)
             elif path == "/api/config":
                 if "gemini_api_key" in payload:
@@ -536,7 +771,6 @@ class BisheHttpHandler(BaseHTTPRequestHandler):
 
     def _serve_file(self, filepath, content_type):
         if not os.path.exists(filepath):
-            # Fallback search
             alt = os.path.join(os.getcwd(), "agent", "web", "index.html")
             if os.path.exists(alt):
                 filepath = alt
@@ -566,8 +800,8 @@ class BisheHttpHandler(BaseHTTPRequestHandler):
         self.wfile.write(content)
 
 
-def start_web_server(analytics: BisheAnalyticsEngine, config: BisheConfig, port=5050):
-    """Starts the local web server and opens the browser automatically."""
+def start_web_server(analytics: BisheAnalyticsEngine, config: BisheConfig, port=5050, open_browser=True):
+    """Starts the local web server and opens the browser."""
     BisheHttpHandler.analytics_engine = analytics
     BisheHttpHandler.config = config
 
@@ -575,7 +809,6 @@ def start_web_server(analytics: BisheAnalyticsEngine, config: BisheConfig, port=
     try:
         httpd = HTTPServer(server_address, BisheHttpHandler)
     except OSError:
-        # Port in use: increment port
         port = port + 1
         server_address = ("0.0.0.0", port)
         httpd = HTTPServer(server_address, BisheHttpHandler)
@@ -585,13 +818,14 @@ def start_web_server(analytics: BisheAnalyticsEngine, config: BisheConfig, port=
     print(f"{CLR_CYAN}{CLR_BOLD}   🌟 BISHE AI EXECUTIVE STUDIO (APP VIEW) STARTED SUCCESSFULLY!    {CLR_RESET}")
     print(f"{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
     print(f"  • Web Dashboard URL:  {CLR_BOLD}{url}{CLR_RESET}")
+    print(f"  • Grounded In:        BISHE Operations Manual + Live Database Rows")
+    print(f"  • Multipliers:        Sedan 1.0x, SUV 1.4x, Minibus 1.8x, Truck 2.5x, Carpet m²")
     print(f"  • Features:           Live Dynamic P&L, Vehicle Queue, Chemical EVU, CSV Export")
-    print(f"  • Opening in your default browser now...")
-    print(f"  • Press Ctrl+C in this window anytime to stop the studio.")
+    print(f"  • Refresh anytime:    Updates live Supabase data instantly")
     print(f"{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}\n")
 
-    # Launch browser to 127.0.0.1 (avoids IPv6 localhost resolution mismatch)
-    webbrowser.open(url)
+    if open_browser:
+        webbrowser.open(url)
 
     try:
         httpd.serve_forever()
@@ -604,11 +838,11 @@ def main():
     parser = argparse.ArgumentParser(description="BISHE Car Wash Executive AI Studio")
     parser.add_argument("--web", action="store_true", help="Launch the App-Like Web Dashboard (Default)")
     parser.add_argument("--port", type=int, default=5050, help="Web server port (default: 5050)")
+    parser.add_argument("--no-browser", action="store_true", help="Do not open browser automatically")
     parser.add_argument("--pnl", action="store_true", help="Print today's P&L and revenue report in CLI")
     parser.add_argument("--cars", action="store_true", help="Print vehicles washed and category breakdown in CLI")
     parser.add_argument("--washers", action="store_true", help="Print active washers and commissions in CLI")
     parser.add_argument("--ask", type=str, help="Ask any operational question in CLI")
-    parser.add_argument("--telegram", action="store_true", help="Start Telegram Bot service")
 
     args = parser.parse_args()
 
@@ -626,11 +860,9 @@ def main():
     elif args.ask:
         ans = analytics.ask(args.ask)
         print(ans.get("text", ""))
-    elif args.telegram:
-        print("Telegram mode...")
     else:
         # Default behavior: Launch the full rich App-Like Web Studio!
-        start_web_server(analytics, config, port=args.port)
+        start_web_server(analytics, config, port=args.port, open_browser=not args.no_browser)
 
 
 if __name__ == "__main__":

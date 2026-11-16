@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
+import 'package:bishe_car_wash/core/utils/local_storage_helper.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/bank_deposit_record.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart';
@@ -301,6 +302,7 @@ class AppStateNotifier extends ChangeNotifier {
   String? get geminiApiKey => _geminiApiKey;
   void setGeminiApiKey(String? key) {
     _geminiApiKey = (key == null || key.trim().isEmpty) ? null : key.trim();
+    LocalStorageHelper.setString(LocalStorageHelper.keyGeminiApiKey, _geminiApiKey);
     notifyListeners();
   }
 
@@ -2186,6 +2188,7 @@ class AppStateNotifier extends ChangeNotifier {
   // --- Actions ---
 
   Future<void> loadData() async {
+    _geminiApiKey = LocalStorageHelper.getString(LocalStorageHelper.keyGeminiApiKey);
     _isLoading = true;
     _errorMessage = null;
     _repository.clearClosingSyncError();

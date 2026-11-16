@@ -12,66 +12,115 @@ import '../utils/currency_formatter.dart';
 class BisheAiExecutiveService {
   BisheAiExecutiveService._();
 
-  static const String _geminiModel = 'gemini-1.5-flash';
+  static const List<String> _geminiModels = [
+    'gemini-3.5-flash-lite',
+    'gemini-3.5-flash',
+    'gemini-3.8-flash',
+    'gemini-flash-latest',
+  ];
 
   /// Primary query entry point
   static Future<String> askExecutive({
     required String userQuestion,
     required AppStateNotifier state,
     required AppLanguage currentLang,
+    List<Map<String, String>>? conversationHistory,
   }) async {
     final apiKey = state.geminiApiKey;
+    String? cloudErrorNotice;
 
-    // 1. If Gemini API key is provided, query Gemini with compact in-memory state snapshot
+    // 1. If Gemini API key is provided, query Gemini with full grounded knowledge & multi-turn history
     if (apiKey != null && apiKey.isNotEmpty) {
       try {
-        final prompt = _buildGeminiSystemPrompt(userQuestion, state, currentLang);
-        final url = Uri.parse(
-          'https://generativelanguage.googleapis.com/v1beta/models/$_geminiModel:generateContent?key=$apiKey',
-        );
+        final systemContext = _buildGeminiSystemPrompt(userQuestion, state, currentLang);
+        final List<Map<String, dynamic>> contents = [];
 
-        final response = await http
-            .post(
-              url,
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode({
-                'contents': [
-                  {
-                    'role': 'user',
-                    'parts': [{'text': prompt}],
-                  }
-                ],
-                'generationConfig': {
-                  'temperature': 0.2,
-                  'maxOutputTokens': 1000,
-                },
-              }),
-            )
-            .timeout(const Duration(seconds: 14));
+        // Grounding System Context Turn
+        contents.add({
+          'role': 'user',
+          'parts': [{'text': systemContext}],
+        });
+        contents.add({
+          'role': 'model',
+          'parts': [{'text': 'Understood. I am BisheAI, Chief Operations Executive for BISHE Car Wash. Grounded in the operations manual and live station records, I will answer accurately with tables and calculations where appropriate.'}],
+        });
 
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body) as Map<String, dynamic>;
-          final candidates = data['candidates'] as List?;
-          if (candidates != null && candidates.isNotEmpty) {
-            final content = candidates[0]['content'] as Map<String, dynamic>?;
-            final parts = content?['parts'] as List?;
-            if (parts != null && parts.isNotEmpty) {
-              final text = parts[0]['text'] as String?;
-              if (text != null && text.trim().isNotEmpty) {
-                return text.trim();
-              }
+        // Add Multi-Turn History
+        if (conversationHistory != null && conversationHistory.isNotEmpty) {
+          for (final turn in conversationHistory.take(6)) {
+            final r = turn['role'] == 'user' ? 'user' : 'model';
+            final t = turn['text'] ?? '';
+            if (t.isNotEmpty) {
+              contents.add({
+                'role': r,
+                'parts': [{'text': t}],
+              });
             }
           }
-        } else {
-          debugPrint('Gemini API returned status ${response.statusCode}: ${response.body}');
+        }
+
+        // Add Current Question
+        contents.add({
+          'role': 'user',
+          'parts': [{'text': userQuestion}],
+        });
+
+        final payload = jsonEncode({
+          'contents': contents,
+          'generationConfig': {
+            'temperature': 0.7,
+            'maxOutputTokens': 1500,
+          },
+        });
+
+        // Try models in order with graceful fallback
+        for (final modelName in _geminiModels) {
+          final url = Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/$modelName:generateContent?key=$apiKey',
+          );
+
+          try {
+            final response = await http
+                .post(
+                  url,
+                  headers: {'Content-Type': 'application/json'},
+                  body: payload,
+                )
+                .timeout(const Duration(seconds: 15));
+
+            if (response.statusCode == 200) {
+              final data = jsonDecode(response.body) as Map<String, dynamic>;
+              final candidates = data['candidates'] as List?;
+              if (candidates != null && candidates.isNotEmpty) {
+                final content = candidates[0]['content'] as Map<String, dynamic>?;
+                final parts = content?['parts'] as List?;
+                if (parts != null && parts.isNotEmpty) {
+                  final text = parts[0]['text'] as String?;
+                  if (text != null && text.trim().isNotEmpty) {
+                    return text.trim();
+                  }
+                }
+              }
+            } else if (response.statusCode == 404 || response.statusCode == 503) {
+              // Model unavailable or retired; try next model in list
+              continue;
+            } else {
+              cloudErrorNotice = '⚠️ *[Gemini Cloud Note: HTTP ${response.statusCode} from $modelName. Falling back to live local calculation engine]*\n\n';
+              break;
+            }
+          } catch (_) {
+            continue;
+          }
         }
       } catch (e) {
-        debugPrint('Gemini API error (falling back to station analytics): $e');
+        cloudErrorNotice = '⚠️ *[Gemini Cloud Note: Connection error. Falling back to live local calculation engine]*\n\n';
+        debugPrint('Gemini API error: $e');
       }
     }
 
     // 2. Local Station Analytics Engine (Zero network egress, fast, 100% reliable)
-    return _localStationAnalytics(userQuestion, state, currentLang);
+    final localResult = _localStationAnalytics(userQuestion, state, currentLang);
+    return cloudErrorNotice != null ? '$cloudErrorNotice$localResult' : localResult;
   }
 
   /// Compact system prompt with aggregated business snapshot (< 1.5 KB)
@@ -88,27 +137,36 @@ class BisheAiExecutiveService {
 
     int typeA = 0, typeB = 0, typeC = 0, carpets = 0;
     double totalCarpetM2 = 0.0;
+    double vehicleEvuSum = 0.0;
 
     for (final b in todayBookings) {
       if (b.isCarpet) {
         carpets++;
-        totalCarpetM2 += (b.carpetAreaSqMeters ?? 12.0);
+        final m2 = (b.carpetAreaSqMeters ?? 12.0);
+        totalCarpetM2 += m2;
+        vehicleEvuSum += (m2 * 0.25);
       } else {
         switch (b.carType) {
           case CarType.automobile:
             typeA++;
+            vehicleEvuSum += 1.0;
             break;
           case CarType.minibus:
             typeB++;
+            // Differentiate SUV/Pickup (1.4x) from Minibus/Van (1.8x)
+            final plate = b.licensePlate.toLowerCase();
+            final isVan = plate.contains('van') || plate.contains('mini') || plate.contains('bus');
+            vehicleEvuSum += isVan ? 1.8 : 1.4;
             break;
           case CarType.truck:
             typeC++;
+            vehicleEvuSum += 2.5;
             break;
         }
       }
     }
 
-    final double totalEvu = (typeA * 1.0) + (typeB * 1.5) + (typeC * 2.5) + (totalCarpetM2 * 0.25);
+    final double totalEvu = vehicleEvuSum;
 
     final completedToday = todayBookings.where((b) => b.status.name == 'completed').toList();
     final grossRevenue = todayBookings
@@ -123,28 +181,50 @@ class BisheAiExecutiveService {
     final lowStockItems = state.consumables.where((c) => c.isLowStock).map((c) => '${c.name} (${c.currentStock} ${c.unit})').toList();
     final activeWashers = state.presentWashersToday.map((w) => '${w.name} (${w.role.displayName})').toList();
 
-    return '''
-You are the Executive AI Co-Pilot for "BISHE Car Wash & Carpet Cleaning Service" located in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
-Answer the user's question dynamically using ETB currency. Never use canned, preset, or static examples.
-If the user asks for a table or list, generate a clean markdown table with proper headers and data rows.
-If the user asks in Amharic or Afaan Oromoo, reply in that language. Otherwise reply in English.
+    final vehicleDetails = todayBookings.take(10).map((b) {
+      final p = b.licensePlate.isNotEmpty ? b.licensePlate : 'WALK-IN';
+      final t = b.isCarpet ? 'Carpet' : b.carType.displayName;
+      final st = b.status.name.toUpperCase();
+      return '• $p ($t) -> $st [ETB ${b.totalPrice.toStringAsFixed(0)}]';
+    }).join('\n');
 
-STATION REAL-TIME SNAPSHOT (${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}):
-- Total Bookings: ${todayBookings.length} (Completed: ${completedToday.length})
-- Vehicle Category Breakdown:
-  * Type A (Small / Corolla, Vitz): $typeA (1.0x coefficient)
-  * Type B (Medium / SUV, Minibus, V8): $typeB (1.5x coefficient)
-  * Type C (Large / Sinotruk, Heavy): $typeC (2.5x coefficient)
-  * Carpet Orders: $carpets (${totalCarpetM2.toStringAsFixed(1)} sq. meters)
+    return '''
+You are "BisheAI", the Chief Operations Executive for "BISHE Car Wash & Auto Care Service" located in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
+GPS: 8°44'57.2"N 38°58'02.4"E | Location: Behind Hirna Butchery, near Alemshet Fero.
+
+OPERATIONAL KNOWLEDGE BASE (BISHE OPERATIONS MANUAL):
+1. Infrastructure: 2 Physical Bays (Bay 1 & Bay 2), 1 Mobile Van (serving 8 Bishoftu zones), 8 Washers on duty in rotating pairs.
+2. Vehicle Volume & Category Multipliers (EVU):
+   - Sedan / Automobile (Type A): 1.0x Base Workload (125 ml shampoo, 5 ml perfume)
+   - SUV / Pickup (Type B): 1.4x Workload (175 ml shampoo, 7 ml perfume)
+   - Minibus / Van (Type B): 1.8x Workload (225 ml shampoo, 9 ml perfume)
+   - Heavy Truck (Type C): 2.5x Workload (312.5 ml shampoo, 12.5 ml perfume)
+   - Carpet Cleaning: Calculated per square meter (Area in m² * 0.25 EVU)
+3. Chemical Yield Benchmarks & Thresholds:
+   - 5L Foam Shampoo (CS-009): Standard yield is ~40 cars @ 125 ml/EVU. Trigger alert if < 25 cars (waste/leak) or > 55 cars (under-dilution).
+   - 500ml Interior Perfume (CS-006): Standard yield is ~100 sprays @ 5 ml/interior. Trigger alert if < 70 or > 130 sprays.
+   - Empty-for-Full chemical exchange strictly enforced by Storekeeper for all 22 consumables (CS-001 to CS-014).
+4. Statutory Tax & P&L Math:
+   - Car Wash & Carpets: 15% Statutory VAT.
+   - Shower Services: 0% VAT (Exempt).
+   - Washer Commissions: Default 15% (individual rates 2%-25%) calculated strictly on Net Base Revenue (Gross - VAT).
+   - Cash custody transferred via 6-digit OTP from Cashier (07:00-15:30) to Operations Manager.
+
+LIVE STATION DATABASE SNAPSHOT (${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}):
+- Total Today Bookings: ${todayBookings.length} (Completed: ${completedToday.length})
+- Workload Breakdown: Type A: $typeA | Type B: $typeB | Type C: $typeC | Carpets: $carpets (${totalCarpetM2.toStringAsFixed(1)} m²)
 - Total Workload Units: ${totalEvu.toStringAsFixed(1)} EVU
 - Gross Revenue Settled: ETB ${grossRevenue.toStringAsFixed(2)}
 - Washer Commissions Settled: ETB ${commissionsPaid.toStringAsFixed(2)}
-- Active Washers on Duty (${activeWashers.length}): ${activeWashers.join(', ')}
-- Low Stock Warehouse Alerts (${lowStockItems.length}): ${lowStockItems.isEmpty ? 'None (Healthy)' : lowStockItems.join(', ')}
-- Real Chemical Dosage: 125 ml shampoo / EVU, 5 ml interior perfume / EVU.
+- Active Washers on Duty: ${activeWashers.join(', ')}
+- Low Stock Warehouse Alerts: ${lowStockItems.isEmpty ? 'None (Healthy)' : lowStockItems.join(', ')}
+- Live Queue Entries:
+$vehicleDetails
 
-USER REQUEST:
-"$question"
+INSTRUCTIONS:
+- Answer with analytical depth, clarity, and authority. Point out revenue leaks, chemical variances, or anomalies if any.
+- If asked for a table or list, format as a clean Markdown table.
+- If asked in Amharic or Afaan Oromoo, reply in that language. Otherwise reply in English.
 ''';
   }
 
