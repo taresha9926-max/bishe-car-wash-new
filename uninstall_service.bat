@@ -1,9 +1,9 @@
 @echo off
-title BISHE AI Studio — Service Uninstaller
+title BISHE AI Studio - Service Uninstaller
 color 0C
 
 echo ======================================================================
-echo    BISHE Car Wash & Auto Care Service — AI Studio Service Uninstaller
+echo    BISHE Car Wash and Auto Care Service - AI Studio Service Uninstaller
 echo ======================================================================
 echo.
 
@@ -18,7 +18,7 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr :5050 ^| findstr LISTENING 2^
 set "STARTUP_VBS=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\BisheAiStudio.vbs"
 if exist "%STARTUP_VBS%" (
     del /f /q "%STARTUP_VBS%"
-    echo [✓] Removed from Windows Startup: %STARTUP_VBS%
+    echo [OK] Removed from Windows Startup: %STARTUP_VBS%
 ) else (
     echo [*] No Windows Startup file found.
 )
@@ -27,7 +27,7 @@ if exist "%STARTUP_VBS%" (
 set "DESKTOP_URL=%USERPROFILE%\Desktop\Bishe AI Studio.url"
 if exist "%DESKTOP_URL%" (
     del /f /q "%DESKTOP_URL%"
-    echo [✓] Removed Desktop Shortcut: %DESKTOP_URL%
+    echo [OK] Removed Desktop Shortcut: %DESKTOP_URL%
 )
 
 echo.
