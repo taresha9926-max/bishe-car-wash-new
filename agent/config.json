@@ -1,0 +1,7 @@
+{
+  "supabase_url": "https://siioobajphmwzwwarlrr.supabase.co",
+  "supabase_anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpaW9vYmFqcGhtd3p3d2FybHJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1OTA3MjksImV4cCI6MjEwODE2NjcyOX0.7ilkYS4N8m_b-uy3ExxnE-SJidumg-Zk8hkHP8CgD4U",
+  "gemini_api_key": "",
+  "telegram_bot_token": "",
+  "telegram_chat_id": ""
+}
