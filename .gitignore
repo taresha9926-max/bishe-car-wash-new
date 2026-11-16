@@ -36,3 +36,4 @@ app.*.symbols
 # Env / Secrets
 .env*
 !.env.example
+agent/config.json

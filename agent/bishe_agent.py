@@ -461,72 +461,106 @@ class BisheHttpHandler(BaseHTTPRequestHandler):
         # Silence routine access logs
         pass
 
-    def do_GET(self):
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
 
-        if path in ["/", "/index.html"]:
-            self._serve_file("agent/web/index.html", "text/html; charset=utf-8")
-        elif path == "/api/kpi":
-            kpi = self.analytics_engine.calculate_kpi()
-            self._serve_json(kpi)
-        elif path == "/api/vehicles":
-            data = self.analytics_engine.sb.get_recent_bookings(limit=60)
-            self._serve_json(data)
-        elif path == "/api/washers":
-            data = self.analytics_engine.get_washers_data()
-            self._serve_json(data)
-        elif path == "/api/chemicals":
-            self._serve_json(MASTER_CONSUMABLES)
-        elif path == "/api/config":
-            cfg = {
-                "gemini_api_key": self.config.gemini_api_key,
-                "telegram_bot_token": self.config.telegram_bot_token,
-                "telegram_chat_id": self.config.telegram_chat_id
-            }
-            self._serve_json(cfg)
-        else:
-            self.send_error(404, "Not Found")
+    def do_GET(self):
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            path = parsed.path
+
+            if path in ["/", "/index.html"]:
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+                html_path = os.path.join(base_dir, "web", "index.html")
+                self._serve_file(html_path, "text/html; charset=utf-8")
+            elif path == "/api/kpi":
+                kpi = self.analytics_engine.calculate_kpi()
+                self._serve_json(kpi)
+            elif path == "/api/vehicles":
+                data = self.analytics_engine.sb.get_recent_bookings(limit=60)
+                self._serve_json(data)
+            elif path == "/api/washers":
+                data = self.analytics_engine.get_washers_data()
+                self._serve_json(data)
+            elif path == "/api/chemicals":
+                self._serve_json(MASTER_CONSUMABLES)
+            elif path == "/api/config":
+                cfg = {
+                    "gemini_api_key": self.config.gemini_api_key,
+                    "telegram_bot_token": self.config.telegram_bot_token,
+                    "telegram_chat_id": self.config.telegram_chat_id
+                }
+                self._serve_json(cfg)
+            else:
+                self.send_response(404)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Type", "text/plain")
+                self.end_headers()
+                self.wfile.write(b"404 Not Found")
+        except Exception as e:
+            self._serve_json({"error": str(e)}, status=500)
 
     def do_POST(self):
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path
-        length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
-        payload = json.loads(body) if body else {}
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            path = parsed.path
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+            payload = json.loads(body) if body else {}
 
-        if path == "/api/ask":
-            q = payload.get("query", "")
-            res = self.analytics_engine.ask(q)
-            self._serve_json(res)
-        elif path == "/api/config":
-            if "gemini_api_key" in payload:
-                self.config.gemini_api_key = payload["gemini_api_key"]
-            if "telegram_bot_token" in payload:
-                self.config.telegram_bot_token = payload["telegram_bot_token"]
-            if "telegram_chat_id" in payload:
-                self.config.telegram_chat_id = payload["telegram_chat_id"]
-            self.config.save()
-            self._serve_json({"status": "saved"})
-        else:
-            self.send_error(404, "Not Found")
+            if path == "/api/ask":
+                q = payload.get("query", "")
+                res = self.analytics_engine.ask(q)
+                self._serve_json(res)
+            elif path == "/api/config":
+                if "gemini_api_key" in payload:
+                    self.config.gemini_api_key = payload["gemini_api_key"]
+                if "telegram_bot_token" in payload:
+                    self.config.telegram_bot_token = payload["telegram_bot_token"]
+                if "telegram_chat_id" in payload:
+                    self.config.telegram_chat_id = payload["telegram_chat_id"]
+                self.config.save()
+                self._serve_json({"status": "saved"})
+            else:
+                self.send_response(404)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Type", "text/plain")
+                self.end_headers()
+                self.wfile.write(b"404 Not Found")
+        except Exception as e:
+            self._serve_json({"error": str(e), "text": f"Error: {e}"}, status=500)
 
     def _serve_file(self, filepath, content_type):
         if not os.path.exists(filepath):
-            self.send_error(404, "File Not Found")
-            return
+            # Fallback search
+            alt = os.path.join(os.getcwd(), "agent", "web", "index.html")
+            if os.path.exists(alt):
+                filepath = alt
+            else:
+                self.send_response(404)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Content-Type", "text/plain")
+                self.end_headers()
+                self.wfile.write(f"File not found: {filepath}".encode())
+                return
         with open(filepath, "rb") as f:
             content = f.read()
         self.send_response(200)
         self.send_header("Content-Type", content_type)
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(content)))
         self.end_headers()
         self.wfile.write(content)
 
-    def _serve_json(self, data):
+    def _serve_json(self, data, status=200):
         content = json.dumps(data).encode("utf-8")
-        self.send_response(200)
+        self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(content)))
         self.end_headers()
         self.wfile.write(content)
@@ -537,16 +571,16 @@ def start_web_server(analytics: BisheAnalyticsEngine, config: BisheConfig, port=
     BisheHttpHandler.analytics_engine = analytics
     BisheHttpHandler.config = config
 
-    server_address = ("127.0.0.1", port)
+    server_address = ("0.0.0.0", port)
     try:
         httpd = HTTPServer(server_address, BisheHttpHandler)
     except OSError:
-        # Try port 5051 if 5050 is in use
+        # Port in use: increment port
         port = port + 1
-        server_address = ("127.0.0.1", port)
+        server_address = ("0.0.0.0", port)
         httpd = HTTPServer(server_address, BisheHttpHandler)
 
-    url = f"http://localhost:{port}"
+    url = f"http://127.0.0.1:{port}"
     print(f"\n{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
     print(f"{CLR_CYAN}{CLR_BOLD}   🌟 BISHE AI EXECUTIVE STUDIO (APP VIEW) STARTED SUCCESSFULLY!    {CLR_RESET}")
     print(f"{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
@@ -556,7 +590,7 @@ def start_web_server(analytics: BisheAnalyticsEngine, config: BisheConfig, port=
     print(f"  • Press Ctrl+C in this window anytime to stop the studio.")
     print(f"{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}\n")
 
-    # Automatically launch user's browser
+    # Launch browser to 127.0.0.1 (avoids IPv6 localhost resolution mismatch)
     webbrowser.open(url)
 
     try:
