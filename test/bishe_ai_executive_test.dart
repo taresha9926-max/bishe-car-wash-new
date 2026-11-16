@@ -41,8 +41,8 @@ void main() {
       );
 
       expect(response, contains('Vehicle & Carpet Wash Activity'));
-      expect(response, contains('Sedans / Small Cars'));
-      expect(response, contains('SUVs / Pickups'));
+      expect(response, contains('Type A (Small'));
+      expect(response, contains('Type B (Medium'));
     });
 
     test('Local analytics engine reports washer attendance and commissions', () async {

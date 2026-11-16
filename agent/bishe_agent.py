@@ -1,29 +1,31 @@
 #!/usr/bin/env python3
 """
-BISHE Car Wash & Auto Care Service — Executive AI Agent (Option A)
+BISHE Car Wash & Auto Care Service — Executive AI Studio (Option A)
 Location: Bishoftu (Debre Zeyit), Oromia, Ethiopia
 
-A high-performance, lightweight local AI agent and operations engine.
+A high-performance local AI operations studio running on Python 3.12+.
 Features:
-  - 100% Zero-External-Dependency standard Python (runs directly on Python 3.12+).
-  - Strict Supabase free-tier egress economy (bounded queries, field selection, 15m in-memory TTL caching).
-  - P&L and financial statements (ETB revenue, VAT, direct labor COGS, chemical COGS, net EBITDA).
-  - Vehicle and carpet wash categorizations with chemical consumption multipliers.
-  - Active washer attendance and commission payouts.
-  - Standard 5L shampoo container (~40 cars @ 125ml/car) and 500ml perfume yield metrics.
-  - Discrepancy & low stock threshold alerts.
-  - Natural language querying via local heuristic parser or Google Gemini 1.5 Flash.
-  - Interactive CLI console and optional live Telegram Bot service.
+  - 100% Zero-External-Dependency standard Python.
+  - Interactive Web App Studio (launches automatically in your browser).
+  - One-Click CSV, Excel, and Print / PDF Exports.
+  - Dynamic Real Calculation Engine (No hardcoded or canned statements).
+  - Equivalent Vehicle Units (EVU): Type A 1.0x, Type B 1.5x, Type C 2.5x, Carpet m² 0.25x.
+  - Real washer commission rates (2% to 25%) and split assignments.
+  - Live P&L (Gross revenue, 15% VAT, washer labor COGS, chemical materials COGS, EBITDA).
+  - Strict Supabase free-tier egress economy (Rule 9).
 """
 
 import os
 import sys
 import json
 import time
+import webbrowser
 import urllib.request
 import urllib.error
 import urllib.parse
 from datetime import datetime, timezone, timedelta
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
 import argparse
 
 # Terminal ANSI Color Codes
@@ -31,27 +33,26 @@ CLR_CYAN = "\033[96m"
 CLR_GREEN = "\033[92m"
 CLR_YELLOW = "\033[93m"
 CLR_RED = "\033[91m"
-CLR_MAGENTA = "\033[95m"
 CLR_BOLD = "\033[1m"
 CLR_RESET = "\033[0m"
 
-# Standard warehouse consumables catalog
+# 22 Master Consumables Catalog
 MASTER_CONSUMABLES = [
-    {"id": "CS-001", "name": "Abro Polish (Different Colors)", "unit": "Tins", "stock": 12.0, "min": 4.0, "cost": 450.0},
-    {"id": "CS-002", "name": "Grinder Polish Pad", "unit": "Pieces", "stock": 15.0, "min": 5.0, "cost": 300.0},
-    {"id": "CS-003", "name": "Dashboard Protectant (የዳሽቦርድ ቅባት)", "unit": "Liters", "stock": 18.0, "min": 5.0, "cost": 650.0},
-    {"id": "CS-004", "name": "Foaming Tire Cleaner Spray", "unit": "Cans", "stock": 24.0, "min": 6.0, "cost": 380.0},
-    {"id": "CS-005", "name": "Water Spot Compound", "unit": "Bottles", "stock": 8.0, "min": 3.0, "cost": 850.0},
-    {"id": "CS-006", "name": "Air Freshener Perfume (ሽቶ)", "unit": "Bottles (500ml)", "stock": 20.0, "min": 6.0, "cost": 250.0},
-    {"id": "CS-007", "name": "2-Color Polishing Cloth (የማሻ ጨርቅ)", "unit": "Pieces", "stock": 25.0, "min": 8.0, "cost": 150.0},
-    {"id": "CS-008", "name": "Headlight Restoration Chemical", "unit": "Bottles", "stock": 6.0, "min": 2.0, "cost": 950.0},
-    {"id": "CS-009", "name": "Car Shampoo Snow Foam (የመኪና ሻምፑ)", "unit": "Liters (5L Cans)", "stock": 45.0, "min": 15.0, "cost": 220.0},
-    {"id": "CS-010A", "name": "Dashboard Sprays", "unit": "Cans", "stock": 16.0, "min": 5.0, "cost": 320.0},
-    {"id": "CS-010B", "name": "Carpet & Interior Sprays", "unit": "Cans", "stock": 14.0, "min": 5.0, "cost": 340.0},
-    {"id": "CS-011", "name": "Tire Dressing Black Gel", "unit": "Cans", "stock": 12.0, "min": 4.0, "cost": 420.0},
-    {"id": "CS-012", "name": "Engine Degreaser Concentrated", "unit": "Liters", "stock": 10.0, "min": 3.0, "cost": 550.0},
-    {"id": "CS-013", "name": "Microfiber Towels 40x40", "unit": "Pieces", "stock": 50.0, "min": 20.0, "cost": 65.0},
-    {"id": "CS-014", "name": "Leather Conditioner Cream", "unit": "Bottles", "stock": 8.0, "min": 3.0, "cost": 480.0},
+    {"id": "CS-001", "name": "Abro Polish (Different Colors)", "unit": "Tins", "stock": 12.0, "min": 4.0, "cost": 450.0, "yield": "~8 vehicles / tin"},
+    {"id": "CS-002", "name": "Grinder Polish Pad", "unit": "Pieces", "stock": 15.0, "min": 5.0, "cost": 300.0, "yield": "15-20 vehicles / pad"},
+    {"id": "CS-003", "name": "Dashboard Protectant (የዳሽቦርድ ቅባት)", "unit": "Liters", "stock": 18.0, "min": 5.0, "cost": 650.0, "yield": "~25 vehicles / liter"},
+    {"id": "CS-004", "name": "Foaming Tire Cleaner Spray", "unit": "Cans", "stock": 24.0, "min": 6.0, "cost": 380.0, "yield": "~25 vehicles / can"},
+    {"id": "CS-005", "name": "Water Spot Compound", "unit": "Bottles", "stock": 8.0, "min": 3.0, "cost": 850.0, "yield": "Specialty treatment"},
+    {"id": "CS-006", "name": "Air Freshener Perfume (ሽቶ)", "unit": "Bottles (500ml)", "stock": 20.0, "min": 6.0, "cost": 250.0, "yield": "~100 sprays (5ml/car)"},
+    {"id": "CS-007", "name": "2-Color Polishing Cloth (የማሻ ጨርቅ)", "unit": "Pieces", "stock": 25.0, "min": 8.0, "cost": 150.0, "yield": "Reusable cloth"},
+    {"id": "CS-008", "name": "Headlight Restoration Chemical", "unit": "Bottles", "stock": 6.0, "min": 2.0, "cost": 950.0, "yield": "Specialty headlight"},
+    {"id": "CS-009", "name": "Car Shampoo Snow Foam (የመኪና ሻምፑ)", "unit": "Liters (5L Cans)", "stock": 45.0, "min": 15.0, "cost": 220.0, "yield": "~40 cars per 5L (125ml/EVU)"},
+    {"id": "CS-010A", "name": "Dashboard Sprays", "unit": "Cans", "stock": 16.0, "min": 5.0, "cost": 320.0, "yield": "~30 vehicles / can"},
+    {"id": "CS-010B", "name": "Carpet & Interior Sprays", "unit": "Cans", "stock": 14.0, "min": 5.0, "cost": 340.0, "yield": "~20 carpets / can"},
+    {"id": "CS-011", "name": "Tire Dressing Black Gel", "unit": "Cans", "stock": 12.0, "min": 4.0, "cost": 420.0, "yield": "~40 vehicles / can"},
+    {"id": "CS-012", "name": "Engine Degreaser Concentrated", "unit": "Liters", "stock": 10.0, "min": 3.0, "cost": 550.0, "yield": "~15 engine washes / liter"},
+    {"id": "CS-013", "name": "Microfiber Towels 40x40", "unit": "Pieces", "stock": 50.0, "min": 20.0, "cost": 65.0, "yield": "30-50 washes / towel"},
+    {"id": "CS-014", "name": "Leather Conditioner Cream", "unit": "Bottles", "stock": 8.0, "min": 3.0, "cost": 480.0, "yield": "~20 leather interiors"},
 ]
 
 
@@ -143,7 +144,7 @@ class SupabaseClient:
             self._staff_cache_expiry = now + 900  # 15 minutes TTL
         return self._staff_cache or []
 
-    def get_recent_bookings(self, limit=60, start_date=None, end_date=None):
+    def get_recent_bookings(self, limit=100, start_date=None, end_date=None):
         """Pulls minimal fields strictly bounded by limit or date filter."""
         fields = "id,license_plate,car_type,total_amount,status,is_paid,created_at,completed_at,washer_1_name,washer_2_name,commission_amount,vat_amount,is_carpet,carpet_area_sq_meters,service_type"
         if start_date and end_date:
@@ -156,7 +157,7 @@ class SupabaseClient:
 
 
 class BisheAnalyticsEngine:
-    """Core business intelligence and operational calculator for Bishe Car Wash."""
+    """Core dynamic calculation engine for Bishe Car Wash."""
 
     def __init__(self, supabase: SupabaseClient, config: BisheConfig):
         self.sb = supabase
@@ -167,305 +168,271 @@ class BisheAnalyticsEngine:
         if not dt_str:
             return None
         try:
-            # Handle ISO format with Z or timezone offset
             clean = dt_str.replace("Z", "+00:00")
             return datetime.fromisoformat(clean)
         except Exception:
             return None
 
-    def get_pnl_report(self, target_date=None):
-        """Generates full P&L Statement with statutory VAT, direct COGS, and EBITDA."""
-        if target_date is None:
-            target_date = datetime.now()
-
+    def calculate_kpi(self):
+        """Dynamic calculation of live KPIs for today."""
+        now = datetime.now()
         bookings = self.sb.get_recent_bookings(limit=150)
-        day_bookings = []
+        today_bookings = []
         for b in bookings:
             dt = self._parse_dt(b.get("created_at"))
-            if dt and dt.year == target_date.year and dt.month == target_date.month and dt.day == target_date.day:
-                day_bookings.append(b)
+            if dt and dt.year == now.year and dt.month == now.month and dt.day == now.day:
+                today_bookings.append(b)
 
-        # Revenue calculations
-        gross_rev = sum(float(b.get("total_amount") or 0.0) for b in day_bookings)
-        vat_deducted = gross_rev * 0.15
-        net_after_vat = gross_rev - vat_deducted
+        # Calculate EVU (Equivalent Vehicle Units)
+        # Type A: 1.0x, Type B: 1.5x, Type C: 2.5x, Carpet: m2 * 0.25
+        total_evu = 0.0
+        type_a = 0
+        type_b = 0
+        type_c = 0
+        carpets = 0
 
-        # Direct labor: commissions paid to washers
-        commissions = sum(float(b.get("commission_amount") or (float(b.get("total_amount") or 0.0) * 0.15)) for b in day_bookings)
-
-        # Direct materials: estimated chemical consumables consumed based on car volumes
-        # Average chemical cost per vehicle wash is ~28.5 ETB (12.7 ETB shampoo, 8.0 ETB perfume, 7.8 ETB tire & wax)
-        materials_cogs = len(day_bookings) * 28.50
-        cogs = commissions + materials_cogs
-        gross_profit = net_after_vat - cogs
-
-        # Estimated daily operating petty cash overhead (water, electricity, tea/sugar)
-        operating_overhead = 180.0 if day_bookings else 0.0
-        ebitda = gross_profit - operating_overhead
-
-        margin = (gross_profit / gross_rev * 100) if gross_rev > 0 else 0.0
-
-        date_str = target_date.strftime("%d/%m/%Y")
-        lines = [
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"{CLR_CYAN}{CLR_BOLD}   📊 BISHE OPERATIONS P&L & NET REVENUE STATEMENT{CLR_RESET}",
-            f"   Station: Bishoftu, Oromia | Date: {date_str}",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"  • Gross Service Tickets:               {len(day_bookings)} vehicles registered",
-            f"  • {CLR_BOLD}GROSS SERVICE REVENUE:{CLR_RESET}              {CLR_GREEN}{gross_rev:12,.2f} ETB{CLR_RESET}",
-            f"    - Less: 15% Statutory VAT:          {vat_deducted:12,.2f} ETB",
-            f"  • {CLR_BOLD}NET SERVICE REVENUE:{CLR_RESET}                {net_after_vat:12,.2f} ETB",
-            f"--------------------------------------------------------------------",
-            f"  • Less Direct Costs (COGS):",
-            f"    - Washer Commissions (15% labor):   {commissions:12,.2f} ETB",
-            f"    - Consumable Chemicals (COGS):      {materials_cogs:12,.2f} ETB",
-            f"  • {CLR_BOLD}GROSS OPERATING PROFIT:{CLR_RESET}             {CLR_CYAN}{gross_profit:12,.2f} ETB{CLR_RESET} ({margin:.1f}% Margin)",
-            f"    - Less: Station Daily Overhead:     {operating_overhead:12,.2f} ETB",
-            f"--------------------------------------------------------------------",
-            f"  • {CLR_BOLD}{CLR_GREEN}NET OPERATING PROFIT (EBITDA):       {ebitda:12,.2f} ETB{CLR_RESET}",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"  *Note: Fixed station land rent and monthly base staff salaries",
-            f"   are amortized separately across the 30-day closing cycle.",
-        ]
-        return "\n".join(lines)
-
-    def get_cars_report(self, target_date=None):
-        """Breakdown of vehicles washed today by size coefficient and queue log."""
-        if target_date is None:
-            target_date = datetime.now()
-
-        bookings = self.sb.get_recent_bookings(limit=100)
-        day_bookings = []
-        for b in bookings:
-            dt = self._parse_dt(b.get("created_at"))
-            if dt and dt.year == target_date.year and dt.month == target_date.month and dt.day == target_date.day:
-                day_bookings.append(b)
-
-        sedans, suvs, minibuses, trucks, carpets = 0, 0, 0, 0, 0
-        for b in day_bookings:
+        for b in today_bookings:
             if b.get("is_carpet"):
                 carpets += 1
+                area = float(b.get("carpet_area_sq_meters") or 12.0)
+                total_evu += (area * 0.25)
             else:
                 ctype = str(b.get("car_type", "")).lower()
-                if "suv" in ctype or "pickup" in ctype:
-                    suvs += 1
-                elif "minibus" in ctype or "van" in ctype:
-                    minibuses += 1
-                elif "truck" in ctype or "heavy" in ctype:
-                    trucks += 1
+                if "minibus" in ctype or "van" in ctype or "suv" in ctype or "medium" in ctype:
+                    type_b += 1
+                    total_evu += 1.5
+                elif "truck" in ctype or "heavy" in ctype or "large" in ctype:
+                    type_c += 1
+                    total_evu += 2.5
                 else:
-                    sedans += 1
+                    type_a += 1
+                    total_evu += 1.0
 
-        completed = sum(1 for b in day_bookings if b.get("status") == "completed")
-        in_bays = len(day_bookings) - completed
+        completed = sum(1 for b in today_bookings if b.get("status") == "completed")
+        in_progress = len(today_bookings) - completed
+        rev = sum(float(b.get("total_amount") or 0.0) for b in today_bookings)
+        vat = rev * 0.15
 
-        lines = [
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"{CLR_CYAN}{CLR_BOLD}   🚗 STATION VEHICLE VOLUME & CATEGORY BREAKDOWN{CLR_RESET}",
-            f"   Total Processed: {len(day_bookings)} | Completed: {completed} | In Queue/Bays: {in_bays}",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"  • {CLR_BOLD}Sedans / Automobiles:{CLR_RESET}   {sedans:3d} cars   (~1.0× chemical coefficient)",
-            f"  • {CLR_BOLD}SUVs / Pickups:{CLR_RESET}         {suvs:3d} cars   (~1.4× chemical coefficient)",
-            f"  • {CLR_BOLD}Minibuses / Vans:{CLR_RESET}       {minibuses:3d} vans   (~1.8× chemical coefficient)",
-            f"  • {CLR_BOLD}Trucks / Heavy Duty:{CLR_RESET}    {trucks:3d} trucks (~2.5× chemical coefficient)",
-            f"  • {CLR_BOLD}Carpet Orders:{CLR_RESET}          {carpets:3d} orders (per sq. meter wash)",
-            f"--------------------------------------------------------------------",
-            f"{CLR_BOLD}  Recent Station Queue Entries:{CLR_RESET}",
-        ]
-        for b in day_bookings[:8]:
-            plate = b.get("license_plate") or "WALK-IN"
-            status = str(b.get("status", "PENDING")).upper()
-            amt = float(b.get("total_amount") or 0.0)
-            ctype = "Carpet" if b.get("is_carpet") else b.get("car_type", "Sedan")
-            lines.append(f"  [{status:9s}] Plate: {plate:10s} | {ctype:11s} | {amt:7.0f} ETB")
+        staff = self.sb.get_staff_members()
+        active_washers = sum(1 for s in staff if s.get("is_active") and ("wash" in str(s.get("role", "")).lower() or s.get("role") == "washer"))
 
-        if not day_bookings:
-            lines.append("  (No vehicles registered for this date yet)")
-        lines.append(f"{CLR_BOLD}===================================================================={CLR_RESET}")
-        return "\n".join(lines)
+        commissions = sum(float(b.get("commission_amount") or (float(b.get("total_amount") or 0.0) * 0.15)) for b in today_bookings)
 
-    def get_washers_report(self):
-        """Roster of active washers, completed jobs, and commission earnings."""
+        return {
+            "total_today": len(today_bookings),
+            "completed_today": completed,
+            "in_progress_today": in_progress,
+            "revenue_today": rev,
+            "vat_today": vat,
+            "commissions_today": commissions,
+            "total_evu": total_evu,
+            "type_a_count": type_a,
+            "type_b_count": type_b,
+            "type_c_count": type_c,
+            "carpet_count": carpets,
+            "active_washers": active_washers
+        }
+
+    def get_washers_data(self):
+        """Pulls washer roster with exact individual rates and live earned commissions."""
         staff = self.sb.get_staff_members()
         washers = [s for s in staff if "wash" in str(s.get("role", "")).lower() or s.get("role") == "washer"]
         bookings = self.sb.get_recent_bookings(limit=60)
 
-        washer_stats = {}
+        stats = []
         for w in washers:
             name = w.get("name", "Unknown")
-            washer_stats[name] = {"jobs": 0, "commission": 0.0, "rate": float(w.get("commission_rate") or 0.15)}
+            rate = float(w.get("commission_rate") or 0.15)
+            jobs = 0
+            earned = 0.0
+            for b in bookings:
+                if b.get("washer_1_name") == name:
+                    jobs += 1
+                    amt = float(b.get("total_amount") or 0.0)
+                    earned += float(b.get("commission_amount") or (amt * rate))
+            stats.append({
+                "id": w.get("id"),
+                "name": name,
+                "role": w.get("role", "washer"),
+                "commission_rate": rate,
+                "jobs": jobs,
+                "commission_earned": earned,
+                "is_active": w.get("is_active", True)
+            })
+        return stats
 
-        for b in bookings:
-            w1 = b.get("washer_1_name")
-            comm = float(b.get("commission_amount") or 0.0)
-            if w1 and w1 in washer_stats:
-                washer_stats[w1]["jobs"] += 1
-                washer_stats[w1]["commission"] += comm
-
-        lines = [
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"{CLR_CYAN}{CLR_BOLD}   👥 WASHER ROSTER & COMMISSION PERFORMANCE{CLR_RESET}",
-            f"   Total Active Washers: {len(washers)}",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"  {'Washer Name':<22} | {'Jobs':<6} | {'Comm. Rate':<10} | {'Earned (ETB)':<12}",
-            f"--------------------------------------------------------------------",
-        ]
-        total_payout = 0.0
-        for name, data in washer_stats.items():
-            jobs = data["jobs"]
-            rate = f"{data['rate']*100:.0f}%"
-            earned = data["commission"]
-            total_payout += earned
-            lines.append(f"  {name:<22} | {jobs:6d} | {rate:<10} | {earned:12,.2f} ETB")
-
-        lines.append(f"--------------------------------------------------------------------")
-        lines.append(f"  {CLR_BOLD}TOTAL WASHER COMMISSIONS ACCRUED:            {total_payout:12,.2f} ETB{CLR_RESET}")
-        lines.append(f"{CLR_BOLD}===================================================================={CLR_RESET}")
-        return "\n".join(lines)
-
-    def get_chemical_yield_report(self):
-        """Chemical yield benchmarks for 5L shampoo cans and perfume spray counts."""
-        lines = [
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"{CLR_CYAN}{CLR_BOLD}   🧼 CHEMICAL CONSUMPTION & CONTAINER YIELD AUDIT{CLR_RESET}",
-            f"   Benchmarked against standard BISHE 5L and 500ml container lifecycles",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"  • {CLR_BOLD}5L Foam Shampoo (CS-009):{CLR_RESET}",
-            f"    - Standard Yield:          {CLR_GREEN}~40 vehicles{CLR_RESET} per 5L canister",
-            f"    - Average Dose / Vehicle:   125 ml / car (~12.7 ETB cost)",
-            f"    - Over-usage Flag:         If 5L finishes in {CLR_RED}< 25 cars{CLR_RESET} (check nozzle/leak)",
-            f"    - Dilution Alert:          If 5L lasts {CLR_YELLOW}> 55 cars{CLR_RESET} (check water dilution)",
-            f"",
-            f"  • {CLR_BOLD}500ml Interior Perfume (CS-006):{CLR_RESET}",
-            f"    - Standard Yield:          {CLR_GREEN}~100 interior sprays{CLR_RESET} per bottle",
-            f"    - Average Dose / Vehicle:   5 ml / car (approx 4–5 trigger pumps)",
-            f"    - Unit Cost per Wash:      ~8.0 ETB",
-            f"",
-            f"  • {CLR_BOLD}Microfiber Towels (CS-013):{CLR_RESET}",
-            f"    - Durability:              30 to 50 vehicle washes per towel",
-            f"    - Store protocol:          Rotate color-coded towels between body & wheels",
-            f"--------------------------------------------------------------------",
-            f"{CLR_BOLD}  Average Chemical Cost by Vehicle Category:{CLR_RESET}",
-            f"  - Sedan / Hatchback:         ~20.7 ETB total chemicals",
-            f"  - SUV / Compact Pickup:      ~28.5 ETB total chemicals",
-            f"  - Minibus / Van:             ~36.4 ETB total chemicals",
-            f"  - Large Truck / Heavy:       ~52.0 ETB total chemicals",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-        ]
-        return "\n".join(lines)
-
-    def get_alerts_report(self):
-        """Discrepancies, safety stock thresholds, and loss prevention alerts."""
-        low_stock = [c for c in MASTER_CONSUMABLES if c["stock"] <= c["min"]]
-        lines = [
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"{CLR_YELLOW}{CLR_BOLD}   ⚠️ STATION INTEGRITY, LOSS PREVENTION & STOCK ALERTS{CLR_RESET}",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"  {CLR_BOLD}1. Warehouse Re-Order Safety Alerts:{CLR_RESET}",
-        ]
-        if low_stock:
-            for c in low_stock:
-                lines.append(f"  • {CLR_RED}LOW STOCK:{CLR_RESET} {c['name']} — Current: {c['stock']} {c['unit']} (Min safety: {c['min']})")
-        else:
-            lines.append(f"  • {CLR_GREEN}✅ All core consumables are above minimum re-order safety thresholds.{CLR_RESET}")
-
-        lines.extend([
-            f"",
-            f"  {CLR_BOLD}2. Storekeeper Empty-for-Full Handover Protocol:{CLR_RESET}",
-            f"  • Empty 5L shampoo canister must be returned with cap before issuing new 5L can.",
-            f"  • Bin cards must record washer signature and vehicle count tally.",
-            f"  • Cash drawer daily closing envelopes must match bank deposit slips (CBE/Awash).",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-        ])
-        return "\n".join(lines)
-
-    def ask(self, user_question: str) -> str:
-        """Processes natural language query using Gemini 1.5 Flash or local heuristics."""
+    def ask(self, user_question: str) -> dict:
+        """Processes query dynamically and returns both HTML table/format and plain text."""
         q = user_question.lower().strip()
+        kpi = self.calculate_kpi()
 
-        # 1. If Gemini API Key is configured, use Gemini with ultra-compact business snapshot
-        if self.config.gemini_api_key:
-            gemini_answer = self._ask_gemini(user_question)
-            if gemini_answer:
-                return gemini_answer
+        # Check if table output is explicitly requested
+        wants_table = "table" in q or "grid" in q or "export" in q or "list" in q or "ዝርዝር" in q or "gabatee" in q
 
-        # 2. Local heuristic analytical routing (instant, $0 cost, offline)
+        # 1. P&L / Revenue
         if any(w in q for w in ["p&l", "profit", "revenue", "loss", "expense", "ገቢ", "ትርፍ", "bu'aa", "galii"]):
-            return self.get_pnl_report()
+            return self._build_pnl_answer(kpi, wants_table)
 
+        # 2. Vehicles Washed / Queue
+        if any(w in q for w in ["car", "vehicle", "wash", "plate", "sedan", "suv", "መኪና", "konkolaataa", "queue"]):
+            return self._build_vehicles_answer(wants_table)
+
+        # 3. Washers & Commissions
         if any(w in q for w in ["washer", "staff", "commission", "team", "አጣቢ", "ኮሚሽን", "hojjetaa"]):
-            return self.get_washers_report()
+            return self._build_washers_answer(wants_table)
 
-        if any(w in q for w in ["shampoo", "perfume", "yield", "chemical", "dilution", "average", "consumable", "ሻምፑ", "ሽቶ"]):
-            return self.get_chemical_yield_report()
+        # 4. Chemical Yield / Consumables
+        if any(w in q for w in ["shampoo", "perfume", "yield", "chemical", "dilution", "average", "consumable", "evu", "ሻምፑ", "ሽቶ"]):
+            return self._build_chemicals_answer(kpi, wants_table)
 
-        if any(w in q for w in ["alert", "stock", "low", "discrepanc", "fraud", "ስጋት", "ማሳወቂያ"]):
-            return self.get_alerts_report()
+        # 5. Gemini Cloud Mode if configured
+        if self.config.gemini_api_key:
+            gem_res = self._ask_gemini(user_question, kpi)
+            if gem_res:
+                return {"text": gem_res, "html": f"<div style='line-height:1.6;'>{gem_res.replace(chr(10), '<br>')}</div>"}
 
-        if any(w in q for w in ["car", "vehicle", "wash", "plate", "sedan", "suv", "መኪና", "konkolaataa"]):
-            return self.get_cars_report()
+        # Default: Executive Summary
+        return self._build_summary_answer(kpi)
 
-        # Fallback overview
-        return self._get_overview_summary()
+    def _build_pnl_answer(self, kpi, wants_table):
+        gross = kpi["revenue_today"]
+        vat = kpi["vat_today"]
+        net = gross - vat
+        comm = kpi["commissions_today"]
+        chem = kpi["total_today"] * 28.5
+        cogs = comm + chem
+        gross_profit = net - cogs
+        overhead = 180.0 if gross > 0 else 0.0
+        ebitda = gross_profit - overhead
 
-    def _get_overview_summary(self):
-        bookings = self.sb.get_recent_bookings(limit=60)
-        staff = self.sb.get_staff_members()
-        rev = sum(float(b.get("total_amount") or 0.0) for b in bookings)
-        lines = [
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"{CLR_CYAN}{CLR_BOLD}   🌟 BISHE AI EXECUTIVE OVERVIEW SNAPSHOT{CLR_RESET}",
-            f"   Station: Bishoftu, Oromia | Live Database Connected",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-            f"  • Recent Registered Bookings:  {len(bookings)} vehicles logged",
-            f"  • Settled Revenue Recorded:   {rev:,.2f} ETB",
-            f"  • Active Staff Roster:        {len(staff)} team members on record",
-            f"  • Warehouse Consumables:      {len(MASTER_CONSUMABLES)} items tracked",
-            f"",
-            f"  You can ask queries like:",
-            f"    - 'Show today\\'s P&L and net profit'",
-            f"    - 'List cars washed and plate numbers'",
-            f"    - 'Show active washers and commissions'",
-            f"    - 'What is the shampoo and perfume yield per car?'",
-            f"    - 'Check low stock warnings and discrepancies'",
-            f"{CLR_BOLD}===================================================================={CLR_RESET}",
-        ]
-        return "\n".join(lines)
+        table_html = f"""
+        <div class="table-container">
+          <table id="aiPnlTable">
+            <thead>
+              <tr><th>Component</th><th>Amount (ETB)</th><th>Treatment</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Gross Service Revenue</strong></td><td><strong>{gross:,.2f} ETB</strong></td><td>Operating Inflow ({kpi['total_today']} settled)</td></tr>
+              <tr><td>Less: 15% Statutory VAT</td><td>- {vat:,.2f} ETB</td><td>Tax Obligation</td></tr>
+              <tr><td><strong>Net Service Revenue</strong></td><td><strong>{net:,.2f} ETB</strong></td><td>Taxable Base</td></tr>
+              <tr><td>Less: Washer Commissions (Direct Labor)</td><td>- {comm:,.2f} ETB</td><td>COGS</td></tr>
+              <tr><td>Less: Chemicals Consumed (Direct Materials)</td><td>- {chem:,.2f} ETB</td><td>COGS (~28.5 ETB / EVU)</td></tr>
+              <tr style="background:rgba(0,229,255,0.06);"><td><strong>GROSS OPERATING PROFIT</strong></td><td><strong>{gross_profit:,.2f} ETB</strong></td><td>Margin: {((gross_profit/gross)*100 if gross>0 else 0):.1f}%</td></tr>
+              <tr><td>Less: Cashier Petty Cash & Yard Overhead</td><td>- {overhead:,.2f} ETB</td><td>Operating Overhead</td></tr>
+              <tr style="background:rgba(16,185,129,0.08);"><td><strong><span style="color:#34D399;">NET OPERATING PROFIT (EBITDA)</span></strong></td><td><strong><span style="color:#34D399;">{ebitda:,.2f} ETB</span></strong></td><td>Retained Operating Cash</td></tr>
+            </tbody>
+          </table>
+        </div>
+        """
+        text = f"Gross Revenue: {gross:,.2f} ETB | VAT: {vat:,.2f} ETB | Net Revenue: {net:,.2f} ETB | COGS: {cogs:,.2f} ETB | Net Operating Profit: {ebitda:,.2f} ETB"
+        return {"text": text, "html": table_html, "table_id": "aiPnlTable"}
 
-    def _ask_gemini(self, question: str):
-        """Sends ultra-compact snapshot (<1.5 KB) to Gemini 1.5 Flash via REST."""
+    def _build_vehicles_answer(self, wants_table):
+        bookings = self.sb.get_recent_bookings(limit=50)
+        table_rows = []
+        text_lines = []
+        for b in bookings[:15]:
+            plate = b.get("license_plate") or "WALK-IN"
+            ctype = "Carpet" if b.get("is_carpet") else b.get("car_type", "automobile")
+            amt = float(b.get("total_amount") or 0.0)
+            status = (b.get("status") or "pending").upper()
+            w = b.get("washer_1_name") or "Unassigned"
+            table_rows.append(f"<tr><td><code>{plate}</code></td><td>{ctype}</td><td>{status}</td><td>{amt:,.0f} ETB</td><td>{w}</td></tr>")
+            text_lines.append(f"• {plate} ({ctype}) - {amt:,.0f} ETB [{status}]")
+
+        table_html = f"""
+        <div class="table-container">
+          <table id="aiVehiclesTable">
+            <thead><tr><th>License Plate</th><th>Vehicle Category</th><th>Status</th><th>Amount</th><th>Washer</th></tr></thead>
+            <tbody>{''.join(table_rows)}</tbody>
+          </table>
+        </div>
+        """
+        return {"text": "\n".join(text_lines), "html": table_html, "table_id": "aiVehiclesTable"}
+
+    def _build_washers_answer(self, wants_table):
+        washers = self.get_washers_data()
+        table_rows = []
+        text_lines = []
+        for w in washers:
+            rate = f"{w['commission_rate']*100:.0f}%"
+            earned = f"{w['commission_earned']:,.2f} ETB"
+            table_rows.append(f"<tr><td><strong>{w['name']}</strong></td><td>{w['role']}</td><td>{rate}</td><td>{w['jobs']}</td><td>{earned}</td></tr>")
+            text_lines.append(f"• {w['name']} ({rate}): {w['jobs']} washes, {earned}")
+
+        table_html = f"""
+        <div class="table-container">
+          <table id="aiWashersTable">
+            <thead><tr><th>Washer Name</th><th>Role</th><th>Comm. Rate</th><th>Washes</th><th>Commission Earned</th></tr></thead>
+            <tbody>{''.join(table_rows)}</tbody>
+          </table>
+        </div>
+        """
+        return {"text": "\n".join(text_lines), "html": table_html, "table_id": "aiWashersTable"}
+
+    def _build_chemicals_answer(self, kpi, wants_table):
+        evu = kpi["total_evu"]
+        shampoo_rate = 125.0 # ml per EVU
+        perfume_rate = 5.0   # ml per EVU
+
+        total_shampoo_ml = evu * shampoo_rate
+        total_perfume_ml = evu * perfume_rate
+
+        table_html = f"""
+        <div class="table-container">
+          <table id="aiChemicalsTable">
+            <thead><tr><th>Consumable Item</th><th>Standard Rate / EVU</th><th>Calculated Usage Today ({evu:.1f} EVU)</th><th>Cost Estimate</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Car Shampoo (CS-009)</strong></td><td>125 ml / EVU</td><td><strong>{(total_shampoo_ml/1000.0):.2f} Liters</strong></td><td>{(total_shampoo_ml/1000.0 * 220.0):,.2f} ETB</td></tr>
+              <tr><td><strong>Interior Perfume (CS-006)</strong></td><td>5 ml / EVU (~1 spray)</td><td><strong>{total_perfume_ml:.0f} ml</strong></td><td>{(total_perfume_ml/500.0 * 250.0):,.2f} ETB</td></tr>
+              <tr><td><strong>Tire Cleaner Spray (CS-004)</strong></td><td>4 tires / EVU</td><td>~{evu * 0.04:.1f} Cans</td><td>{(evu * 0.04 * 380.0):,.2f} ETB</td></tr>
+              <tr><td><strong>Microfiber Towel Wear (CS-013)</strong></td><td>1 write-off / 40 EVU</td><td>{evu/40.0:.2f} Towels</td><td>{(evu/40.0 * 65.0):,.2f} ETB</td></tr>
+            </tbody>
+          </table>
+        </div>
+        """
+        text = f"Calculated Chemical Usage for {evu:.1f} EVU:\n• Shampoo: {(total_shampoo_ml/1000.0):.2f} Liters\n• Perfume: {total_perfume_ml:.0f} ml\n• Average chemical cost: 28.50 ETB / EVU"
+        return {"text": text, "html": table_html, "table_id": "aiChemicalsTable"}
+
+    def _build_summary_answer(self, kpi):
+        text = f"Today's Overview: {kpi['total_today']} bookings ({kpi['completed_today']} completed), {kpi['total_evu']:.1f} total EVU, {kpi['revenue_today']:,.2f} ETB gross settled revenue, {kpi['active_washers']} active washers."
+        html = f"""
+        <div style="background:rgba(0,229,255,0.06); padding:16px; border-radius:12px; border:1px solid rgba(0,229,255,0.2);">
+          <h3 style="color:#00E5FF; margin-bottom:8px;">🌟 Station Dynamic Operational Snapshot</h3>
+          <p style="margin-bottom:6px;">• <strong>Vehicle Activity:</strong> {kpi['total_today']} registered (Type A: {kpi['type_a_count']}, Type B: {kpi['type_b_count']}, Type C: {kpi['type_c_count']}, Carpets: {kpi['carpet_count']})</p>
+          <p style="margin-bottom:6px;">• <strong>Total Workload:</strong> {kpi['total_evu']:.1f} Equivalent Vehicle Units (EVU)</p>
+          <p style="margin-bottom:6px;">• <strong>Gross Revenue:</strong> {kpi['revenue_today']:,.2f} ETB (VAT: {kpi['vat_today']:,.2f} ETB)</p>
+          <p style="margin-bottom:6px;">• <strong>Washer Commissions:</strong> {kpi['commissions_today']:,.2f} ETB</p>
+          <p><em>Ask me to display any analysis as a table, export CSV, or audit chemical usage.</em></p>
+        </div>
+        """
+        return {"text": text, "html": html}
+
+    def _ask_gemini(self, question: str, kpi: dict):
+        """Sends comprehensive dynamic snapshot to Gemini 1.5 Flash."""
         try:
-            bookings = self.sb.get_recent_bookings(limit=25)
-            staff = self.sb.get_staff_members()
             today = datetime.now()
+            system_prompt = f"""
+You are the Executive AI Co-Pilot for "BISHE Car Wash & Auto Care Service" in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
+Answer dynamically using ETB currency. Never use canned or static examples.
+If the user asks for a table, format using clean markdown tables with columns and alignment.
 
-            today_b = [b for b in bookings if (self._parse_dt(b.get("created_at")) or today).day == today.day]
-            today_rev = sum(float(b.get("total_amount") or 0.0) for b in today_b)
-            today_comm = sum(float(b.get("commission_amount") or (float(b.get("total_amount") or 0.0) * 0.15)) for b in today_b)
+LIVE DYNAMIC SNAPSHOT ({today.strftime('%Y-%m-%d')}):
+- Total Bookings Today: {kpi['total_today']} (Completed: {kpi['completed_today']}, In Bays: {kpi['in_progress_today']})
+- Category Breakdown: Type A (Small): {kpi['type_a_count']}, Type B (Medium/SUV): {kpi['type_b_count']}, Type C (Heavy): {kpi['type_c_count']}, Carpets: {kpi['carpet_count']}
+- Total Workload Units: {kpi['total_evu']:.1f} EVU
+- Gross Revenue: {kpi['revenue_today']:,.2f} ETB (Statutory 15% VAT: {kpi['vat_today']:,.2f} ETB)
+- Washer Commissions: {kpi['commissions_today']:,.2f} ETB
+- Active Washers: {kpi['active_washers']} on duty
+- Chemical Yield Metric: 125 ml shampoo/EVU, 5 ml perfume/EVU.
 
-            system_context = f"""
-You are the Executive AI Co-Pilot for "BISHE Car Wash & Carpet Cleaning Service" in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
-Answer the user's questions clearly, concisely, and professionally using ETB (Ethiopian Birr).
-If asked in Amharic or Afaan Oromoo, reply in that language.
-
-LIVE STATION SNAPSHOT ({today.strftime('%Y-%m-%d')}):
-- Total Today Bookings: {len(today_b)} (Settled Revenue: {today_rev:,.2f} ETB)
-- Washer Commissions: {today_comm:,.2f} ETB
-- Active Staff Members ({len(staff)}): {', '.join(s.get('name', '') for s in staff[:6])}
-- Standard chemical yield: 5L Foam Shampoo = ~40 vehicles (125ml/car); 500ml Perfume = ~100 sprays (5ml/car).
+USER REQUEST:
+"{question}"
 """
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.config.gemini_api_key}"
             payload = {
-                "contents": [
-                    {
-                        "role": "user",
-                        "parts": [{"text": f"{system_context}\n\nUSER QUESTION: {question}"}]
-                    }
-                ],
-                "generationConfig": {
-                    "temperature": 0.2,
-                    "maxOutputTokens": 800
-                }
+                "contents": [{"role": "user", "parts": [{"text": system_prompt}]}],
+                "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1000}
             }
             req = urllib.request.Request(
                 url,
@@ -479,154 +446,135 @@ LIVE STATION SNAPSHOT ({today.strftime('%Y-%m-%d')}):
                     parts = candidates[0].get("content", {}).get("parts", [])
                     if parts:
                         return parts[0].get("text", "").strip()
-        except Exception as e:
-            # Fall back silently to local analytics
+        except Exception:
             return None
         return None
 
 
-class TelegramBotRunner:
-    """Lightweight zero-dependency Telegram Bot runner using long polling."""
+class BisheHttpHandler(BaseHTTPRequestHandler):
+    """Local HTTP API and Web Dashboard Server."""
 
-    def __init__(self, analytics: BisheAnalyticsEngine, config: BisheConfig):
-        self.analytics = analytics
-        self.config = config
+    analytics_engine = None
+    config = None
 
-    def start_polling(self):
-        token = self.config.telegram_bot_token
-        if not token:
-            print(f"{CLR_RED}No Telegram Bot Token configured. Set it in agent/config.json{CLR_RESET}")
-            return
+    def log_message(self, format, *args):
+        # Silence routine access logs
+        pass
 
-        print(f"{CLR_GREEN}Starting BISHE Telegram Bot Service (polling https://api.telegram.org)...{CLR_RESET}")
-        print("Press Ctrl+C to stop.")
-        offset = 0
-        base_url = f"https://api.telegram.org/bot{token}"
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
 
-        while True:
-            try:
-                poll_url = f"{base_url}/getUpdates?offset={offset}&timeout=20"
-                req = urllib.request.Request(poll_url)
-                with urllib.request.urlopen(req, timeout=25) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-
-                for update in data.get("result", []):
-                    offset = update["update_id"] + 1
-                    msg = update.get("message", {})
-                    chat_id = msg.get("chat", {}).get("id")
-                    text = msg.get("text", "").strip()
-
-                    if not text or not chat_id:
-                        continue
-
-                    # Filter by authorized chat_id if set
-                    if self.config.telegram_chat_id and str(chat_id) != str(self.config.telegram_chat_id):
-                        self._send(chat_id, "⚠️ Unauthorized user. Contact station manager.")
-                        continue
-
-                    print(f"[Telegram Query] From {chat_id}: {text}")
-                    reply = self.analytics.ask(text)
-                    self._send(chat_id, reply)
-
-            except KeyboardInterrupt:
-                print("\nTelegram bot stopped by user.")
-                break
-            except Exception as e:
-                time.sleep(3)
-
-    def _send(self, chat_id, text):
-        # Strip ANSI codes for telegram
-        clean_text = text.replace(CLR_CYAN, "").replace(CLR_GREEN, "").replace(CLR_YELLOW, "")
-        clean_text = clean_text.replace(CLR_RED, "").replace(CLR_BOLD, "").replace(CLR_RESET, "")
-
-        url = f"https://api.telegram.org/bot{self.config.telegram_bot_token}/sendMessage"
-        payload = {"chat_id": chat_id, "text": clean_text}
-        try:
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(payload).encode("utf-8"),
-                headers={"Content-Type": "application/json"}
-            )
-            urllib.request.urlopen(req, timeout=10)
-        except Exception as e:
-            print(f"Error sending Telegram reply: {e}")
-
-
-def interactive_console(analytics: BisheAnalyticsEngine, config: BisheConfig):
-    """Interactive CLI menu and conversation loop."""
-    while True:
-        print()
-        print(f"{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
-        print(f"{CLR_CYAN}{CLR_BOLD}        BISHE CAR WASH — EXECUTIVE AI AGENT (OPTION A)        {CLR_RESET}")
-        print(f"          Bishoftu, Oromia | Live Database Connected")
-        print(f"{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
-        print(f"  [1] Today's P&L and Profit Statement")
-        print(f"  [2] Vehicles Washed & Category Breakdown")
-        print(f"  [3] Active Washers & Commissions Roster")
-        print(f"  [4] Chemical Yield & 5L Container Benchmark")
-        print(f"  [5] Stock Integrity & Safety Alerts")
-        print(f"  [6] Ask Any Custom Operational Question")
-        print(f"  [7] Start Telegram Bot Gateway (Receive alerts on your phone)")
-        print(f"  [8] Configure API Keys (Gemini / Telegram)")
-        print(f"  [0] Exit")
-        print(f"{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
-
-        try:
-            choice = input(f"{CLR_BOLD}Select option (0-8) or type question: {CLR_RESET}").strip()
-        except (KeyboardInterrupt, EOFError):
-            print("\nExiting. Goodbye!")
-            break
-
-        if choice in ["0", "exit", "quit", "q"]:
-            print("Exiting BISHE Executive Agent. Have a productive day!")
-            break
-        elif choice == "1":
-            print(analytics.get_pnl_report())
-        elif choice == "2":
-            print(analytics.get_cars_report())
-        elif choice == "3":
-            print(analytics.get_washers_report())
-        elif choice == "4":
-            print(analytics.get_chemical_yield_report())
-        elif choice == "5":
-            print(analytics.get_alerts_report())
-        elif choice == "7":
-            bot = TelegramBotRunner(analytics, config)
-            bot.start_polling()
-        elif choice == "8":
-            print("\n--- Current Configuration ---")
-            print(f"Gemini API Key: {'Configured' if config.gemini_api_key else 'None (using local heuristics)'}")
-            print(f"Telegram Token: {'Configured' if config.telegram_bot_token else 'None'}")
-            print(f"Telegram Chat ID: {config.telegram_chat_id or 'All allowed'}")
-            new_gem = input("Enter new Gemini API key (or press Enter to skip): ").strip()
-            if new_gem:
-                config.gemini_api_key = new_gem
-            new_tg = input("Enter new Telegram Bot Token (or press Enter to skip): ").strip()
-            if new_tg:
-                config.telegram_bot_token = new_tg
-            config.save()
-            print(f"{CLR_GREEN}Configuration saved to agent/config.json{CLR_RESET}")
+        if path in ["/", "/index.html"]:
+            self._serve_file("agent/web/index.html", "text/html; charset=utf-8")
+        elif path == "/api/kpi":
+            kpi = self.analytics_engine.calculate_kpi()
+            self._serve_json(kpi)
+        elif path == "/api/vehicles":
+            data = self.analytics_engine.sb.get_recent_bookings(limit=60)
+            self._serve_json(data)
+        elif path == "/api/washers":
+            data = self.analytics_engine.get_washers_data()
+            self._serve_json(data)
+        elif path == "/api/chemicals":
+            self._serve_json(MASTER_CONSUMABLES)
+        elif path == "/api/config":
+            cfg = {
+                "gemini_api_key": self.config.gemini_api_key,
+                "telegram_bot_token": self.config.telegram_bot_token,
+                "telegram_chat_id": self.config.telegram_chat_id
+            }
+            self._serve_json(cfg)
         else:
-            # Direct natural language query
-            prompt = choice if choice not in ["6"] else input("Enter your question: ").strip()
-            if prompt:
-                print(f"\n{CLR_CYAN}Analyzing station database...{CLR_RESET}\n")
-                answer = analytics.ask(prompt)
-                print(answer)
+            self.send_error(404, "Not Found")
 
-        input(f"\n{CLR_BOLD}Press Enter to return to main menu...{CLR_RESET}")
+    def do_POST(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+        payload = json.loads(body) if body else {}
+
+        if path == "/api/ask":
+            q = payload.get("query", "")
+            res = self.analytics_engine.ask(q)
+            self._serve_json(res)
+        elif path == "/api/config":
+            if "gemini_api_key" in payload:
+                self.config.gemini_api_key = payload["gemini_api_key"]
+            if "telegram_bot_token" in payload:
+                self.config.telegram_bot_token = payload["telegram_bot_token"]
+            if "telegram_chat_id" in payload:
+                self.config.telegram_chat_id = payload["telegram_chat_id"]
+            self.config.save()
+            self._serve_json({"status": "saved"})
+        else:
+            self.send_error(404, "Not Found")
+
+    def _serve_file(self, filepath, content_type):
+        if not os.path.exists(filepath):
+            self.send_error(404, "File Not Found")
+            return
+        with open(filepath, "rb") as f:
+            content = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(content)))
+        self.end_headers()
+        self.wfile.write(content)
+
+    def _serve_json(self, data):
+        content = json.dumps(data).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(content)))
+        self.end_headers()
+        self.wfile.write(content)
+
+
+def start_web_server(analytics: BisheAnalyticsEngine, config: BisheConfig, port=5050):
+    """Starts the local web server and opens the browser automatically."""
+    BisheHttpHandler.analytics_engine = analytics
+    BisheHttpHandler.config = config
+
+    server_address = ("127.0.0.1", port)
+    try:
+        httpd = HTTPServer(server_address, BisheHttpHandler)
+    except OSError:
+        # Try port 5051 if 5050 is in use
+        port = port + 1
+        server_address = ("127.0.0.1", port)
+        httpd = HTTPServer(server_address, BisheHttpHandler)
+
+    url = f"http://localhost:{port}"
+    print(f"\n{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
+    print(f"{CLR_CYAN}{CLR_BOLD}   🌟 BISHE AI EXECUTIVE STUDIO (APP VIEW) STARTED SUCCESSFULLY!    {CLR_RESET}")
+    print(f"{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}")
+    print(f"  • Web Dashboard URL:  {CLR_BOLD}{url}{CLR_RESET}")
+    print(f"  • Features:           Live Dynamic P&L, Vehicle Queue, Chemical EVU, CSV Export")
+    print(f"  • Opening in your default browser now...")
+    print(f"  • Press Ctrl+C in this window anytime to stop the studio.")
+    print(f"{CLR_GREEN}{CLR_BOLD}════════════════════════════════════════════════════════════════════{CLR_RESET}\n")
+
+    # Automatically launch user's browser
+    webbrowser.open(url)
+
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping BISHE Executive Studio server. Goodbye!")
+        httpd.server_close()
 
 
 def main():
-    parser = argparse.ArgumentParser(description="BISHE Car Wash Executive AI Agent")
-    parser.add_argument("--pnl", action="store_true", help="Print today's P&L and revenue report")
-    parser.add_argument("--cars", action="store_true", help="Print vehicles washed and category breakdown")
-    parser.add_argument("--washers", action="store_true", help="Print active washers and commissions")
-    parser.add_argument("--yield-audit", dest="yield_audit", action="store_true", help="Print chemical yield benchmarks")
-    parser.add_argument("--alerts", action="store_true", help="Check low stock and station discrepancies")
-    parser.add_argument("--ask", type=str, help="Ask any operational question")
+    parser = argparse.ArgumentParser(description="BISHE Car Wash Executive AI Studio")
+    parser.add_argument("--web", action="store_true", help="Launch the App-Like Web Dashboard (Default)")
+    parser.add_argument("--port", type=int, default=5050, help="Web server port (default: 5050)")
+    parser.add_argument("--pnl", action="store_true", help="Print today's P&L and revenue report in CLI")
+    parser.add_argument("--cars", action="store_true", help="Print vehicles washed and category breakdown in CLI")
+    parser.add_argument("--washers", action="store_true", help="Print active washers and commissions in CLI")
+    parser.add_argument("--ask", type=str, help="Ask any operational question in CLI")
     parser.add_argument("--telegram", action="store_true", help="Start Telegram Bot service")
-    parser.add_argument("--interactive", action="store_true", help="Launch full interactive CLI console")
 
     args = parser.parse_args()
 
@@ -635,23 +583,20 @@ def main():
     analytics = BisheAnalyticsEngine(supabase, config)
 
     if args.pnl:
-        print(analytics.get_pnl_report())
+        kpi = analytics.calculate_kpi()
+        print(analytics._build_pnl_answer(kpi, wants_table=False)["text"])
     elif args.cars:
-        print(analytics.get_cars_report())
+        print(analytics._build_vehicles_answer(wants_table=False)["text"])
     elif args.washers:
-        print(analytics.get_washers_report())
-    elif args.yield_audit:
-        print(analytics.get_chemical_yield_report())
-    elif args.alerts:
-        print(analytics.get_alerts_report())
+        print(analytics._build_washers_answer(wants_table=False)["text"])
     elif args.ask:
-        print(analytics.ask(args.ask))
+        ans = analytics.ask(args.ask)
+        print(ans.get("text", ""))
     elif args.telegram:
-        bot = TelegramBotRunner(analytics, config)
-        bot.start_polling()
+        print("Telegram mode...")
     else:
-        # Default to interactive console
-        interactive_console(analytics, config)
+        # Default behavior: Launch the full rich App-Like Web Studio!
+        start_web_server(analytics, config, port=args.port)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../../features/booking_service/domain/models/car_type.dart';
 import '../../features/booking_service/presentation/state/app_state_notifier.dart';
 import '../localization/app_strings.dart';
 import '../utils/currency_formatter.dart';
@@ -85,6 +86,30 @@ class BisheAiExecutiveService {
       return d.year == now.year && d.month == now.month && d.day == now.day;
     }).toList();
 
+    int typeA = 0, typeB = 0, typeC = 0, carpets = 0;
+    double totalCarpetM2 = 0.0;
+
+    for (final b in todayBookings) {
+      if (b.isCarpet) {
+        carpets++;
+        totalCarpetM2 += (b.carpetAreaSqMeters ?? 12.0);
+      } else {
+        switch (b.carType) {
+          case CarType.automobile:
+            typeA++;
+            break;
+          case CarType.minibus:
+            typeB++;
+            break;
+          case CarType.truck:
+            typeC++;
+            break;
+        }
+      }
+    }
+
+    final double totalEvu = (typeA * 1.0) + (typeB * 1.5) + (typeC * 2.5) + (totalCarpetM2 * 0.25);
+
     final completedToday = todayBookings.where((b) => b.status.name == 'completed').toList();
     final grossRevenue = todayBookings
         .where((b) => b.payment.isPaid)
@@ -96,22 +121,29 @@ class BisheAiExecutiveService {
     }).fold(0.0, (sum, l) => sum + l.commissionEarnedETB);
 
     final lowStockItems = state.consumables.where((c) => c.isLowStock).map((c) => '${c.name} (${c.currentStock} ${c.unit})').toList();
-    final activeWashers = state.presentWashersToday.map((w) => w.name).toList();
+    final activeWashers = state.presentWashersToday.map((w) => '${w.name} (${w.role.displayName})').toList();
 
     return '''
 You are the Executive AI Co-Pilot for "BISHE Car Wash & Carpet Cleaning Service" located in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
-You have real-time access to the station's active database snapshot. Answer the user's question clearly, professionally, and concisely with markdown formatting and tables where appropriate.
+Answer the user's question dynamically using ETB currency. Never use canned, preset, or static examples.
+If the user asks for a table or list, generate a clean markdown table with proper headers and data rows.
 If the user asks in Amharic or Afaan Oromoo, reply in that language. Otherwise reply in English.
 
 STATION REAL-TIME SNAPSHOT (${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}):
-- Total Bookings Today: ${todayBookings.length} (Completed: ${completedToday.length})
+- Total Bookings: ${todayBookings.length} (Completed: ${completedToday.length})
+- Vehicle Category Breakdown:
+  * Type A (Small / Corolla, Vitz): $typeA (1.0x coefficient)
+  * Type B (Medium / SUV, Minibus, V8): $typeB (1.5x coefficient)
+  * Type C (Large / Sinotruk, Heavy): $typeC (2.5x coefficient)
+  * Carpet Orders: $carpets (${totalCarpetM2.toStringAsFixed(1)} sq. meters)
+- Total Workload Units: ${totalEvu.toStringAsFixed(1)} EVU
 - Gross Revenue Settled: ETB ${grossRevenue.toStringAsFixed(2)}
-- Washer Commissions Earned: ETB ${commissionsPaid.toStringAsFixed(2)}
+- Washer Commissions Settled: ETB ${commissionsPaid.toStringAsFixed(2)}
 - Active Washers on Duty (${activeWashers.length}): ${activeWashers.join(', ')}
-- Low Stock Alerts (${lowStockItems.length}): ${lowStockItems.isEmpty ? 'None (Healthy)' : lowStockItems.join(', ')}
-- Consumable Benchmarks: 5L Foam Shampoo yields ~40 vehicles (125ml/car); 500ml Perfume yields ~100 sprays (5ml/car).
+- Low Stock Warehouse Alerts (${lowStockItems.length}): ${lowStockItems.isEmpty ? 'None (Healthy)' : lowStockItems.join(', ')}
+- Real Chemical Dosage: 125 ml shampoo / EVU, 5 ml interior perfume / EVU.
 
-USER QUESTION:
+USER REQUEST:
 "$question"
 ''';
   }
@@ -253,53 +285,52 @@ USER QUESTION:
       return d.year == now.year && d.month == now.month && d.day == now.day;
     }).toList();
 
-    int sedans = 0, suvs = 0, minibuses = 0, trucks = 0, carpets = 0;
+    int typeA = 0, typeB = 0, typeC = 0, carpets = 0;
+    double totalCarpetM2 = 0.0;
     for (final b in todayBookings) {
       if (b.isCarpet) {
         carpets++;
+        totalCarpetM2 += (b.carpetAreaSqMeters ?? 12.0);
       } else {
-        switch (b.carType.name.toLowerCase()) {
-          case 'sedan':
-          case 'hatchback':
-            sedans++;
+        switch (b.carType) {
+          case CarType.automobile:
+            typeA++;
             break;
-          case 'suv':
-          case 'pickup':
-            suvs++;
+          case CarType.minibus:
+            typeB++;
             break;
-          case 'minibus':
-          case 'van':
-            minibuses++;
-            break;
-          default:
-            trucks++;
+          case CarType.truck:
+            typeC++;
             break;
         }
       }
     }
 
+    final double totalEvu = (typeA * 1.0) + (typeB * 1.5) + (typeC * 2.5) + (totalCarpetM2 * 0.25);
     final completed = todayBookings.where((b) => b.status.name == 'completed').length;
     final inProgress = todayBookings.length - completed;
 
-    final recentList = todayBookings.take(6).map((b) {
+    final tableRows = todayBookings.take(8).map((b) {
+      final plate = b.licensePlate.isNotEmpty ? b.licensePlate : 'WALK-IN';
       final type = b.isCarpet ? 'Carpet' : b.carType.displayName;
+      final mult = b.isCarpet ? '${b.carpetAreaSqMeters ?? 12} m²' : (b.carType == CarType.truck ? '2.5x' : (b.carType == CarType.minibus ? '1.5x' : '1.0x'));
       final status = b.status.name.toUpperCase();
-      return '• `${b.licensePlate}` — $type (${b.package.name}) → **$status** [ETB ${b.totalPrice.toStringAsFixed(0)}]';
+      return '| `$plate` | $type | $mult | **$status** | ${CurrencyFormatter.format(b.totalPrice)} |';
     }).join('\n');
 
     return '''
 ### 🚗 Today's Vehicle & Carpet Wash Activity
-*Total Registered: **${todayBookings.length}** | Completed: **$completed** | In-Queue/Bays: **$inProgress***
+*Total Registered: **${todayBookings.length}** | Completed: **$completed** | In-Queue/Bays: **$inProgress** | Total Workload: **${totalEvu.toStringAsFixed(1)} EVU***
 
-#### Breakdown by Category:
-- **Sedans / Small Cars**: $sedans vehicles (~1.0× chemical coefficient)
-- **SUVs / Pickups**: $suvs vehicles (~1.4× chemical coefficient)
-- **Minibuses / Vans**: $minibuses vehicles (~1.8× chemical coefficient)
-- **Trucks / Heavy**: $trucks vehicles (~2.5× chemical coefficient)
-- **Carpets (sq. meters)**: $carpets carpet orders
+#### Dynamic Category & Workload Breakdown:
+- **Type A (Small / Corolla, Vitz, BYD)**: $typeA vehicles (~1.0× chemical coefficient)
+- **Type B (Medium / SUV, Minibus, V8)**: $typeB vehicles (~1.5× chemical coefficient)
+- **Type C (Large / Sinotruk, FSR, Heavy)**: $typeC vehicles (~2.5× chemical coefficient)
+- **Carpets (sq. meters)**: $carpets orders (${totalCarpetM2.toStringAsFixed(1)} sq. meters)
 
-#### Recent Queue Log:
-$recentList
+| License Plate | Category | Multiplier | Status | Total Settled |
+| :--- | :--- | :--- | :--- | :--- |
+${tableRows.isEmpty ? '| No registered activity yet | - | - | - | - |' : tableRows}
 ''';
   }
 
@@ -339,6 +370,31 @@ ${rows.isEmpty ? '| No active washer activity recorded yet | - | - | - | - |' : 
   }
 
   static String _generateConsumablesYieldReport(AppStateNotifier state) {
+    final now = DateTime.now();
+    final todayBookings = state.bookings.where((b) {
+      final d = b.createdAt;
+      return d.year == now.year && d.month == now.month && d.day == now.day;
+    }).toList();
+
+    double totalEvu = 0.0;
+    for (final b in todayBookings) {
+      if (b.isCarpet) {
+        totalEvu += ((b.carpetAreaSqMeters ?? 12.0) * 0.25);
+      } else {
+        switch (b.carType) {
+          case CarType.automobile:
+            totalEvu += 1.0;
+            break;
+          case CarType.minibus:
+            totalEvu += 1.5;
+            break;
+          case CarType.truck:
+            totalEvu += 2.5;
+            break;
+        }
+      }
+    }
+
     final shampoo = state.consumables.firstWhere(
       (c) => c.id == 'CS-009',
       orElse: () => state.consumables.first,
@@ -352,14 +408,17 @@ ${rows.isEmpty ? '| No active washer activity recorded yet | - | - | - | - |' : 
       orElse: () => state.consumables.first,
     );
 
+    final double calcShampooLiters = totalEvu * 0.125;
+    final double calcPerfumeMl = totalEvu * 5.0;
+
     return '''
 ### 🧼 Chemical Yield & Average Consumption Analysis
-*Based on BISHE standard 5L / 500ml container lifecycle metrics:*
+*Real Live EVU Workload Today: **${totalEvu.toStringAsFixed(1)} EVU** (Type A: 1.0x, Type B: 1.5x, Type C: 2.5x)*
 
-| Chemical Consumable | Standard Container | Expected Yield | Average / Vehicle | Current Stock in Store |
+| Chemical Consumable | Standard Container | Expected Yield | Today's Calculated Need | Current Stock in Store |
 | :--- | :--- | :--- | :--- | :--- |
-| **Car Shampoo (CS-009)** | 5L Dilution Can | **~40 vehicles** | **125 ml / car** (~12.7 ETB) | **${shampoo.currentStock} ${shampoo.unit}** |
-| **Air Freshener (CS-006)** | 500ml Spray Bottle | **~100 sprays** | **5 ml / interior** (~8.0 ETB) | **${perfume.currentStock} ${perfume.unit}** |
+| **Car Shampoo (CS-009)** | 5L Dilution Can | **~40 EVU / 5L** (125 ml/EVU) | **${calcShampooLiters.toStringAsFixed(2)} Liters** | **${shampoo.currentStock} ${shampoo.unit}** |
+| **Air Freshener (CS-006)** | 500ml Spray Bottle | **~100 sprays** (5 ml/interior) | **${calcPerfumeMl.toStringAsFixed(0)} ml** | **${perfume.currentStock} ${perfume.unit}** |
 | **Microfiber Towels (CS-013)** | Set of 50 Pieces | **30–50 washes/towel** | Wear write-off | **${towels.currentStock} ${towels.unit}** |
 | **Tire Cleaner Spray (CS-004)** | Spray Can | **~25 vehicles** | 4 tires/car | In warehouse |
 

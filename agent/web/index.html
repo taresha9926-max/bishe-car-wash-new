@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BISHE Executive AI Studio — Auto Care Operations</title>
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --card-bg: #111827;
+      --card-border: #1e293b;
+      --card-hover: #1e293b80;
+      --primary: #00E5FF;
+      --primary-glow: rgba(0, 229, 255, 0.25);
+      --accent: #6366F1;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-stack);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #007791, #00E5FF);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--primary-glow);
+      font-size: 20px;
+    }
+    .brand-title h1 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #ffffff, #00E5FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--success);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 20px;
+    }
+    .badge-live::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+    }
+    .btn {
+      background: var(--card-border);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: #334155;
+      border-color: #475569;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0099b8, #00E5FF);
+      color: #031422;
+      border: none;
+      font-weight: 700;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 12px var(--primary-glow);
+      filter: brightness(1.1);
+    }
+    .btn-success {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34D399;
+    }
+    .btn-success:hover {
+      background: rgba(16, 185, 129, 0.3);
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* KPI Cards Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .kpi-card:hover {
+      border-color: rgba(0, 229, 255, 0.4);
+      transform: translateY(-2px);
+    }
+    .kpi-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .kpi-card.cyan .kpi-value { color: var(--primary); }
+    .kpi-card.green .kpi-value { color: var(--success); }
+    .kpi-card.amber .kpi-value { color: var(--warning); }
+    .kpi-card.purple .kpi-value { color: #A78BFA; }
+
+    /* Navigation Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .tab-btn.active {
+      background: rgba(0, 229, 255, 0.12);
+      color: var(--primary);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
+
+    /* Tab Panes */
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* Panel Card */
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+    }
+    .panel-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* AI Studio Chat */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      background: #0d1322;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .message {
+      max-width: 85%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      line-height: 1.5;
+      font-size: 13.5px;
+    }
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #1e3a8a, #0369a1);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+    .message.ai {
+      align-self: flex-start;
+      background: #131c31;
+      border: 1px solid var(--card-border);
+      color: #e2e8f0;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .message-actions {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Prompt Chips */
+    .chips-bar {
+      padding: 10px 16px;
+      background: rgba(17, 24, 39, 0.7);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 11.5px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .chip:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--primary);
+    }
+
+    /* Chat Input */
+    .chat-input-bar {
+      padding: 14px 18px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .chat-input {
+      flex: 1;
+      background: #090e1a;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    .chat-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 8px var(--primary-glow);
+    }
+
+    /* Interactive Data Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    thead th {
+      background: #141e33;
+      color: var(--text-muted);
+      font-weight: 700;
+      padding: 12px 14px;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s ease;
+    }
+    tbody tr:hover {
+      background: rgba(0, 229, 255, 0.03);
+    }
+    tbody td {
+      padding: 12px 14px;
+      color: #e2e8f0;
+    }
+    .tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+    .tag-completed { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+    .tag-pending { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+    .tag-type-a { background: rgba(99, 102, 241, 0.15); color: #818CF8; }
+    .tag-type-b { background: rgba(14, 165, 233, 0.15); color: #38BDF8; }
+    .tag-type-c { background: rgba(236, 72, 153, 0.15); color: #F472B6; }
+    .tag-carpet { background: rgba(168, 85, 247, 0.15); color: #C084FC; }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #00E5FF;
+      color: #031422;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 12px;
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.4);
+      display: none;
+      z-index: 100;
+    }
+
+    /* Print Formatting */
+    @media print {
+      header, .tabs-nav, .chips-bar, .chat-input-bar, .header-actions, .message-actions {
+        display: none !important;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .panel-card, .table-container, table {
+        border-color: #cccccc !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      thead th, tbody td {
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Application Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">✨</div>
+      <div class="brand-title">
+        <h1>BISHE AI EXECUTIVE STUDIO</h1>
+        <p>Bishoftu (Debre Zeyit), Oromia • Live Database Connected</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="badge-live">Live Supabase Sync</div>
+      <button class="btn btn-success" onclick="exportActiveTableToCSV()">📥 Export Active CSV</button>
+      <button class="btn" onclick="window.print()">🖨️ Print / PDF</button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+
+    <!-- KPI Metric Cards Strip (Calculated dynamically) -->
+    <div class="kpi-grid" id="kpiStrip">
+      <div class="kpi-card cyan">
+        <div class="kpi-title">Today's Vehicles</div>
+        <div class="kpi-value" id="kpiVehicles">--</div>
+        <div class="kpi-sub" id="kpiVehiclesSub">Completed: -- | In Bays: --</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-title">Gross Settled Revenue</div>
+        <div class="kpi-value" id="kpiRevenue">-- ETB</div>
+        <div class="kpi-sub" id="kpiRevenueSub">15% VAT: -- ETB</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-title">Total Workload (EVU)</div>
+        <div class="kpi-value" id="kpiEvu">-- EVU</div>
+        <div class="kpi-sub">Type A (1.0x), B (1.5x), C (2.5x)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Active Washers on Duty</div>
+        <div class="kpi-value" id="kpiWashers">--</div>
+        <div class="kpi-sub" id="kpiWashersSub">Commissions: -- ETB</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-title">Warehouse Stock Health</div>
+        <div class="kpi-value" id="kpiStock">Healthy</div>
+        <div class="kpi-sub" id="kpiStockSub">22 Consumables Monitored</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('chat')">💬 Executive AI Studio</button>
+      <button class="tab-btn" onclick="switchTab('pnl')">📊 Live P&L Statement</button>
+      <button class="tab-btn" onclick="switchTab('vehicles')">🚗 Vehicles & Carpets</button>
+      <button class="tab-btn" onclick="switchTab('washers')">👥 Washers & Commissions</button>
+      <button class="tab-btn" onclick="switchTab('chemicals')">🧼 Chemicals & Yield (EVU)</button>
+      <button class="tab-btn" onclick="switchTab('settings')">⚙️ Configuration</button>
+    </div>
+
+    <!-- TAB 1: EXECUTIVE AI STUDIO CHAT -->
+    <div class="tab-content active" id="tab-chat">
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message ai">
+            <strong>🌟 Welcome to the BISHE AI Executive Studio</strong><br><br>
+            I am connected live to your Bishoftu station database. Ask me any operational question, financial analysis, or chemical calculation. You can specify:
+            <br>• <em>"Show me today's vehicles washed in a table format"</em>
+            <br>• <em>"Calculate shampoo and perfume usage per EVU"</em>
+            <br>• <em>"Show washer commissions sorted by earnings"</em>
+            <br>• <em>"Generate our P&L statement with VAT and direct COGS"</em>
+          </div>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="chips-bar">
+          <button class="chip" onclick="sendPrompt('Show today\'s vehicles washed as an exportable table')">📋 Vehicle Table</button>
+          <button class="chip" onclick="sendPrompt('Generate today\'s complete P&L statement with 15% VAT and COGS')">📊 P&L Statement</button>
+          <button class="chip" onclick="sendPrompt('List all active washers and their earned commissions in a table')">👥 Washer Commissions</button>
+          <button class="chip" onclick="sendPrompt('Calculate chemical yield per EVU for shampoo and perfume')">🧼 Chemical Yield per EVU</button>
+          <button class="chip" onclick="sendPrompt('Audit warehouse stock thresholds and shift handovers')">⚠️ Stock & Loss Alerts</button>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="chat-input-bar">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type your operational question (e.g. 'Show me today's cars in table format')..." onkeydown="if(event.key==='Enter') submitChat()">
+          <button class="btn btn-primary" onclick="submitChat()">Ask Executive AI</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: LIVE P&L STATEMENT -->
+    <div class="tab-content" id="tab-pnl">
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>📊 Today's Operations P&L & Net Operating Revenue</h2>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-success" onclick="exportTableToCSV('pnlTable', 'bishe_pnl_report.csv')">📥 Export P&L (CSV)</button>
+            <button class="btn" onclick="copyTableToClipboard('pnlTable')">📋 Copy Table</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="pnlTable">
+            <thead>
+              <tr>
+                <th>Accounting Component</th>
+                <th>Amount (ETB)</th>
+                <th>Treatment</th>
+                <th>Notes / Benchmark</th>
+              </tr>
+            </thead>
+            <tbody id="pnlTableBody">
+              <tr><td colspan="4">Loading live financial records from Supabase...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: VEHICLES & CARPETS -->
+    <div class="tab-content" id="tab-vehicles">
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>🚗 Live Registered Vehicles & Carpet Orders</h2>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="text" id="vehicleSearch" class="chat-input" style="padding:6px 12px; font-size:12px; width:180px;" placeholder="Search plate or type..." oninput="filterVehiclesTable()">
+            <button class="btn btn-success" onclick="exportTableToCSV('vehiclesTable', 'bishe_vehicles_log.csv')">📥 Export Vehicles (CSV)</button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="vehiclesTable">
+            <thead>
+              <tr>
+                <th>License Plate</th>
+                <th>Category</th>
+                <th>Workload Multiplier</th>
+                <th>Wash Status</th>
+                <th>Settled Price</th>
+                <th>Washer Assigned</th>
+                <th>Time Registered</th>
+              </tr>
+            </thead>
+            <tbody id="vehiclesTableBody">
+              <tr><td colspan="7">Loading live vehicle queue...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: WASHERS & COMMISSIONS -->
+    <div class="tab-content" id="tab-washers">
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>👥 Washer Roster & Commission Settlements</h2>
+          <button class="btn btn-success" onclick="exportTableToCSV('washersTable', 'bishe_washers_commissions.csv')">📥 Export Commissions (CSV)</button>
+        </div>
+        <div class="table-container">
+          <table id="washersTable">
+            <thead>
+              <tr>
+                <th>Staff Name</th>
+                <th>Designated Role</th>
+                <th>Agreed Commission Rate</th>
+                <th>Washes Handled</th>
+                <th>Commission Accrued</th>
+                <th>Duty Status</th>
+              </tr>
+            </thead>
+            <tbody id="washersTableBody">
+              <tr><td colspan="6">Loading staff records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: CHEMICALS & YIELD -->
+    <div class="tab-content" id="tab-chemicals">
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>🧼 Warehouse Consumables & Chemical Yield Analysis (EVU)</h2>
+          <button class="btn btn-success" onclick="exportTableToCSV('chemicalsTable', 'bishe_chemicals_inventory.csv')">📥 Export Chemicals (CSV)</button>
+        </div>
+        <div class="table-container">
+          <table id="chemicalsTable">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Consumable Item</th>
+                <th>Current Stock</th>
+                <th>Safety Threshold</th>
+                <th>Unit Cost</th>
+                <th>Estimated Yield per Unit</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="chemicalsTableBody">
+              <tr><td colspan="7">Loading chemical inventory...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: CONFIGURATION -->
+    <div class="tab-content" id="tab-settings">
+      <div class="panel-card" style="max-width:700px;">
+        <div class="panel-header">
+          <h2>⚙️ System & AI Integration Settings</h2>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Google Gemini API Key (Optional Cloud Reasoning):</label>
+            <input type="password" id="cfgGeminiKey" class="chat-input" placeholder="AIzaSy...">
+          </div>
+          <div>
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Telegram Bot Token (Optional Phone Integration):</label>
+            <input type="password" id="cfgTelegramToken" class="chat-input" placeholder="123456789:ABCdef...">
+          </div>
+          <div>
+            <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;">Authorized Telegram Chat ID:</label>
+            <input type="text" id="cfgTelegramChatId" class="chat-input" placeholder="e.g. 987654321">
+          </div>
+          <button class="btn btn-primary" style="align-self:flex-start;" onclick="saveConfig()">💾 Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast">Copied to clipboard!</div>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2400);
+    }
+
+    // Load initial KPIs and live tables
+    async function loadData() {
+      try {
+        const res = await fetch('/api/kpi');
+        const d = await res.json();
+        document.getElementById('kpiVehicles').innerText = d.total_today || 0;
+        document.getElementById('kpiVehiclesSub').innerText = `Completed: ${d.completed_today || 0} | In Bays: ${d.in_progress_today || 0}`;
+        document.getElementById('kpiRevenue').innerText = `${Number(d.revenue_today || 0).toLocaleString()} ETB`;
+        document.getElementById('kpiRevenueSub').innerText = `15% VAT: ${Number(d.vat_today || 0).toLocaleString()} ETB`;
+        document.getElementById('kpiEvu').innerText = `${Number(d.total_evu || 0).toFixed(1)} EVU`;
+        document.getElementById('kpiWashers').innerText = d.active_washers || 0;
+        document.getElementById('kpiWashersSub').innerText = `Commissions: ${Number(d.commissions_today || 0).toLocaleString()} ETB`;
+        
+        loadPnlTable(d);
+        loadVehiclesTable();
+        loadWashersTable();
+        loadChemicalsTable(d.total_evu || 0);
+        loadConfig();
+      } catch (e) {
+        console.error('Error loading KPI data:', e);
+      }
+    }
+
+    function loadPnlTable(kpi) {
+      const tbody = document.getElementById('pnlTableBody');
+      const gross = Number(kpi.revenue_today || 0);
+      const vat = gross * 0.15;
+      const net = gross - vat;
+      const comm = Number(kpi.commissions_today || 0);
+      const chem = Number(kpi.total_today || 0) * 28.5; // Direct chemical consumables
+      const cogs = comm + chem;
+      const grossProfit = net - cogs;
+      const overhead = gross > 0 ? 180.0 : 0.0;
+      const ebitda = grossProfit - overhead;
+
+      tbody.innerHTML = `
+        <tr><td><strong>Gross Service Revenue</strong></td><td><strong>${gross.toLocaleString()} ETB</strong></td><td>Operating Cash/Digital Inflow</td><td>${kpi.total_today || 0} tickets settled</td></tr>
+        <tr><td>Less: 15% Statutory VAT Deduction</td><td>- ${vat.toLocaleString()} ETB</td><td>Tax Obligation</td><td>Statutory deduction</td></tr>
+        <tr><td><strong>Net Service Revenue</strong></td><td><strong>${net.toLocaleString()} ETB</strong></td><td>Net Taxable Income</td><td>After statutory VAT</td></tr>
+        <tr><td>Less: Washer Commissions (Direct Labor)</td><td>- ${comm.toLocaleString()} ETB</td><td>COGS (Direct Labor)</td><td>Registered washer rates</td></tr>
+        <tr><td>Less: Consumables Consumed (Direct Chemicals)</td><td>- ${chem.toLocaleString()} ETB</td><td>COGS (Direct Materials)</td><td>Avg ~28.5 ETB / EVU</td></tr>
+        <tr style="background:rgba(0,229,255,0.06);"><td><strong>GROSS OPERATING PROFIT</strong></td><td><strong>${grossProfit.toLocaleString()} ETB</strong></td><td><strong>Operating Margin: ${gross > 0 ? ((grossProfit/gross)*100).toFixed(1) : 0}%</strong></td><td>Retained after direct COGS</td></tr>
+        <tr><td>Less: Cashier Daily Petty Cash & Yard Overhead</td><td>- ${overhead.toLocaleString()} ETB</td><td>Operating Overhead</td><td>Station daily supplies</td></tr>
+        <tr style="background:rgba(16,185,129,0.08);"><td><strong><span style="color:#34D399;">NET OPERATING PROFIT (EBITDA)</span></strong></td><td><strong><span style="color:#34D399;">${ebitda.toLocaleString()} ETB</span></strong></td><td><strong>Net Retained Daily Cash</strong></td><td>Amortizes station rent</td></tr>
+      `;
+    }
+
+    async function loadVehiclesTable() {
+      try {
+        const res = await fetch('/api/vehicles');
+        const rows = await res.json();
+        window._vehicleRows = rows;
+        renderVehiclesRows(rows);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderVehiclesRows(rows) {
+      const tbody = document.getElementById('vehiclesTableBody');
+      if (!rows || rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94A3B8;">No vehicles registered for today yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(r => {
+        let tagClass = 'tag-type-a';
+        let mult = '1.0x Base';
+        let catName = 'Type A (Small Auto)';
+        if (r.is_carpet) {
+          tagClass = 'tag-carpet';
+          mult = `${r.carpet_area_sq_meters || 12} m²`;
+          catName = 'Carpet Order';
+        } else if ((r.car_type || '').toLowerCase().includes('minibus')) {
+          tagClass = 'tag-type-b';
+          mult = '1.5x Medium';
+          catName = 'Type B (Medium / SUV)';
+        } else if ((r.car_type || '').toLowerCase().includes('truck')) {
+          tagClass = 'tag-type-c';
+          mult = '2.5x Heavy';
+          catName = 'Type C (Heavy Truck)';
+        }
+        const statusTag = r.status === 'completed' ? 'tag-completed' : 'tag-pending';
+        const d = r.created_at ? new Date(r.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--';
+        return `
+          <tr>
+            <td><strong><code>${r.license_plate || 'WALK-IN'}</code></strong></td>
+            <td><span class="tag ${tagClass}">${catName}</span></td>
+            <td>${mult}</td>
+            <td><span class="tag ${statusTag}">${(r.status || 'pending').toUpperCase()}</span></td>
+            <td><strong>${Number(r.total_amount || 0).toLocaleString()} ETB</strong></td>
+            <td>${r.washer_1_name || 'Unassigned'}</td>
+            <td>${d}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterVehiclesTable() {
+      const q = document.getElementById('vehicleSearch').value.toLowerCase();
+      if (!window._vehicleRows) return;
+      const filtered = window._vehicleRows.filter(r => 
+        (r.license_plate || '').toLowerCase().includes(q) ||
+        (r.car_type || '').toLowerCase().includes(q) ||
+        (r.washer_1_name || '').toLowerCase().includes(q)
+      );
+      renderVehiclesRows(filtered);
+    }
+
+    async function loadWashersTable() {
+      try {
+        const res = await fetch('/api/washers');
+        const rows = await res.json();
+        const tbody = document.getElementById('washersTableBody');
+        tbody.innerHTML = rows.map(w => `
+          <tr>
+            <td><strong>${w.name}</strong></td>
+            <td>${w.role || 'Washer'}</td>
+            <td><strong>${(Number(w.commission_rate || 0.15) * 100).toFixed(0)}%</strong></td>
+            <td>${w.jobs || 0} washes</td>
+            <td><strong><span style="color:#00E5FF;">${Number(w.commission_earned || 0).toLocaleString()} ETB</span></strong></td>
+            <td><span class="tag tag-completed">${w.is_active ? 'ON DUTY' : 'OFF DUTY'}</span></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadChemicalsTable(evu) {
+      try {
+        const res = await fetch('/api/chemicals');
+        const rows = await res.json();
+        const tbody = document.getElementById('chemicalsTableBody');
+        tbody.innerHTML = rows.map(c => {
+          const isLow = Number(c.stock) <= Number(c.min);
+          const statusTag = isLow ? '<span class="tag" style="background:rgba(239,68,68,0.2); color:#F87171;">⚠️ RE-ORDER</span>' : '<span class="tag tag-completed">HEALTHY</span>';
+          return `
+            <tr>
+              <td><code>${c.id}</code></td>
+              <td><strong>${c.name}</strong></td>
+              <td><strong>${c.stock} ${c.unit}</strong></td>
+              <td>${c.min} ${c.unit}</td>
+              <td>${Number(c.cost).toLocaleString()} ETB</td>
+              <td>${c.yield || '~40 cars / unit'}</td>
+              <td>${statusTag}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config');
+        const cfg = await res.json();
+        if (cfg.gemini_api_key) document.getElementById('cfgGeminiKey').value = cfg.gemini_api_key;
+        if (cfg.telegram_bot_token) document.getElementById('cfgTelegramToken').value = cfg.telegram_bot_token;
+        if (cfg.telegram_chat_id) document.getElementById('cfgTelegramChatId').value = cfg.telegram_chat_id;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function saveConfig() {
+      const payload = {
+        gemini_api_key: document.getElementById('cfgGeminiKey').value.trim(),
+        telegram_bot_token: document.getElementById('cfgTelegramToken').value.trim(),
+        telegram_chat_id: document.getElementById('cfgTelegramChatId').value.trim()
+      };
+      try {
+        await fetch('/api/config', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        showToast('Settings saved successfully!');
+      } catch (e) {
+        alert('Error saving settings: ' + e);
+      }
+    }
+
+    // Dynamic AI Chat
+    function sendPrompt(q) {
+      document.getElementById('chatInput').value = q;
+      submitChat();
+    }
+
+    async function submitChat() {
+      const input = document.getElementById('chatInput');
+      const q = input.value.trim();
+      if (!q) return;
+
+      const container = document.getElementById('chatMessages');
+      container.innerHTML += `<div class="message user">${escapeHtml(q)}</div>`;
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
+
+      const thinkingId = 'thinking_' + Date.now();
+      container.innerHTML += `<div class="message ai" id="${thinkingId}"><em>⚡ Querying live station database & computing real metrics...</em></div>`;
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({query: q})
+        });
+        const data = await res.json();
+        const thinkingElem = document.getElementById(thinkingId);
+        
+        let htmlOutput = data.html || `<pre style="white-space:pre-wrap; font-family:inherit;">${escapeHtml(data.text)}</pre>`;
+        
+        // Add exportable buttons inside the AI response bubble
+        htmlOutput += `
+          <div class="message-actions">
+            <button class="btn btn-success" onclick="exportDataToCSV('${data.table_id || 'aiTable'}', 'bishe_query_export.csv')">📥 Export CSV</button>
+            <button class="btn" onclick="copySnippetToClipboard('${thinkingId}_content')">📋 Copy Text</button>
+            <button class="btn" onclick="window.print()">🖨️ Print View</button>
+          </div>
+        `;
+
+        thinkingElem.innerHTML = `<div id="${thinkingId}_content">${htmlOutput}</div>`;
+        container.scrollTop = container.scrollHeight;
+      } catch (e) {
+        document.getElementById(thinkingId).innerHTML = `<span style="color:#EF4444;">Error processing query: ${e}</span>`;
+      }
+    }
+
+    // CSV & Export Helpers
+    function exportActiveTableToCSV() {
+      const activeTab = document.querySelector('.tab-content.active');
+      const table = activeTab.querySelector('table');
+      if (table) {
+        exportTableToCSV(table.id, `${activeTab.id}_export.csv`);
+      } else {
+        showToast('No table found in active view');
+      }
+    }
+
+    function exportTableToCSV(tableId, filename) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      let csv = [];
+      for (const row of table.rows) {
+        let cols = [];
+        for (const cell of row.cells) {
+          cols.push('"' + cell.innerText.replace(/"/g, '""').trim() + '"');
+        }
+        csv.push(cols.join(','));
+      }
+      downloadCSV(csv.join('\n'), filename);
+    }
+
+    function downloadCSV(csvContent, filename) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Exported ${filename}`);
+    }
+
+    function copyTableToClipboard(tableId) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      navigator.clipboard.writeText(table.innerText).then(() => {
+        showToast('Table copied to clipboard!');
+      });
+    }
+
+    function copySnippetToClipboard(elemId) {
+      const elem = document.getElementById(elemId);
+      if (!elem) return;
+      navigator.clipboard.writeText(elem.innerText).then(() => {
+        showToast('Response copied to clipboard!');
+      });
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
