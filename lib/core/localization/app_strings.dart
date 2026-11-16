@@ -4872,6 +4872,86 @@ class AppStrings {
       AppLanguage.om: 'Galmeen seenaa hundi fe\'ameera',
       AppLanguage.am: 'ሁሉም ታሪካዊ መዝገቦች ተጭነዋል',
     },
+    'aiExecutiveTitle': {
+      AppLanguage.en: 'BISHE AI Executive',
+      AppLanguage.om: 'Hogganaa AI BISHE',
+      AppLanguage.am: 'የቢሼ AI ስራ አስፈፃሚ',
+    },
+    'aiExecutiveSub': {
+      AppLanguage.en: 'Real-time operational Q&A, chemical yields, and P&L analytics',
+      AppLanguage.om: 'Gaaffilee hojii battalaa, oomishitummaa qorichaa fi gabaasa bu\'aa/kisaaraa',
+      AppLanguage.am: 'የእውነተኛ ጊዜ ስራዎች፣ የኬሚካል ፍጆታ እና የትርፍ/ኪሳራ ትንተና',
+    },
+    'askAiHint': {
+      AppLanguage.en: 'Ask anything (e.g. "Today\'s P&L", "Cars washed", "Shampoo yield")...',
+      AppLanguage.om: 'Waan fedhe gaafadhaa (fkn "Bu\'aa har\'aa", "Konkolaattota dhiqaman")...',
+      AppLanguage.am: 'ማንኛውንም ይጠይቁ (ምሳሌ "የዛሬው ትርፍና ኪሳራ"፣ "የታጠቡ መኪኖች")...',
+    },
+    'aiPromptPnL': {
+      AppLanguage.en: '📊 Today\'s P&L & Profit',
+      AppLanguage.om: '📊 Bu\'aa & Kisaaraa Har\'aa',
+      AppLanguage.am: '📊 የዛሬው ትርፍና ኪሳራ',
+    },
+    'aiPromptCars': {
+      AppLanguage.en: '🚗 Cars Washed Today',
+      AppLanguage.om: '🚗 Konkolaattota Har\'a Dhiqaman',
+      AppLanguage.am: '🚗 ዛሬ የታጠቡ መኪኖች',
+    },
+    'aiPromptWashers': {
+      AppLanguage.en: '👥 Active Washers & Commissions',
+      AppLanguage.om: '👥 Hojjettoota Hojjataaniifi Komishinii',
+      AppLanguage.am: '👥 ስራ ላይ ያሉ አጣቢዎችና ኮሚሽን',
+    },
+    'aiPromptYield': {
+      AppLanguage.en: '🧼 Chemical Yield & Averages',
+      AppLanguage.om: '🧼 Oomishitummaa Qoricha Dhiqa',
+      AppLanguage.am: '🧼 የኬሚካል ፍጆታና አማካይ',
+    },
+    'aiPromptAlerts': {
+      AppLanguage.en: '⚠️ Stock & Anomaly Alerts',
+      AppLanguage.om: '⚠️ Akeekkachiisa Meeshaafi Hir\'inaa',
+      AppLanguage.am: '⚠️ የአላቂ ዕቃዎችና የስጋት ማሳወቂያ',
+    },
+    'configureApiKey': {
+      AppLanguage.en: 'Configure Gemini API Key',
+      AppLanguage.om: 'Furtuu Gemini API Qindeessi',
+      AppLanguage.am: 'የGemini API ቁልፍ ያዘጋጁ',
+    },
+    'apiKeyNotice': {
+      AppLanguage.en: 'Free Gemini API Key from Google AI Studio (optional for deep chat)',
+      AppLanguage.om: 'Furtuu Gemini API tolaa Google AI Studio irraa',
+      AppLanguage.am: 'ነጻ የGemini API ቁልፍ ከ Google AI Studio',
+    },
+    'getFreeKeyBtn': {
+      AppLanguage.en: 'Get Free Key',
+      AppLanguage.om: 'Furtuu Tolaa Fudhadhu',
+      AppLanguage.am: 'ነጻ ቁልፍ ይውሰዱ',
+    },
+    'aiLocalEngineBadge': {
+      AppLanguage.en: 'Local Station Analytics',
+      AppLanguage.om: 'Xiinxala Iddoo Dhiqa',
+      AppLanguage.am: 'የማዕከሉ የቀጥታ ትንተና',
+    },
+    'aiCloudEngineBadge': {
+      AppLanguage.en: 'Gemini AI Cloud',
+      AppLanguage.om: 'Gemini AI Duumessa',
+      AppLanguage.am: 'የGemini AI ደመና',
+    },
+    'aiThinking': {
+      AppLanguage.en: 'Analyzing station data...',
+      AppLanguage.om: 'Ragaa iddoo dhiqa xiinxalaa jira...',
+      AppLanguage.am: 'የማዕከሉን መረጃ በመተንተን ላይ...',
+    },
+    'clearChat': {
+      AppLanguage.en: 'Clear Chat',
+      AppLanguage.om: 'Haquu',
+      AppLanguage.am: 'ውይይት አጽዳ',
+    },
+    'aiWelcomeMessage': {
+      AppLanguage.en: '👋 Hello! I am your BISHE AI Operations Executive. Ask me anything about today\'s cars, washer commissions, chemical yields (shampoo & perfume averages), or station P&L.',
+      AppLanguage.om: '👋 Akkam! Ani Hogganaa Hojii AI BISHE ti. Waa\'ee konkolaattota har\'aa, komishinii hojjettootaa, oomishitummaa qorichaa ykn bu\'aafi kisaaraa na gaafachuu dandeessu.',
+      AppLanguage.am: '👋 ጤና ይስጥልኝ! እኔ የቢሼ AI ስራ አስፈፃሚ ነኝ። ስለ ዛሬ የታጠቡ መኪኖች፣ የአጣቢዎች ኮሚሽን፣ የኬሚካል ፍጆታ (የሻምፑና የሽቶ አማካይ) ወይም ስለ ትርፍና ኪሳራ ማንኛውንም ይጠይቁኝ።',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

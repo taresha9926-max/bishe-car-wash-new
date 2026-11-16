@@ -19,6 +19,7 @@ import '../../domain/models/commission_log.dart';
 import '../../../inventory/domain/models/stock_transaction.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../../core/widgets/expandable_action_card.dart';
+import '../widgets/bishe_ai_executive_sheet.dart';
 
 class AccountantDashboardScreen extends StatefulWidget {
   const AccountantDashboardScreen({super.key});
@@ -53,6 +54,28 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('accountantRole'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon),
+            tooltip: state.tr('aiExecutiveTitle'),
+            onPressed: () => BisheAiExecutiveSheet.show(context),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF111827),
+        foregroundColor: AppColors.liquidCyanNeon,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.4),
+        ),
+        icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 20),
+        label: Text(
+          state.tr('aiExecutiveTitle'),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, letterSpacing: 0.3),
+        ),
+        onPressed: () => BisheAiExecutiveSheet.show(context),
       ),
       body: Column(
         children: [

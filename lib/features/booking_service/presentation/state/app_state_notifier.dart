@@ -296,6 +296,14 @@ class AppStateNotifier extends ChangeNotifier {
   List<StockTransaction> _stockTransactions = [];
   List<StockTransaction> get stockTransactions => _stockTransactions;
 
+  // BISHE AI Executive Engine
+  String? _geminiApiKey;
+  String? get geminiApiKey => _geminiApiKey;
+  void setGeminiApiKey(String? key) {
+    _geminiApiKey = (key == null || key.trim().isEmpty) ? null : key.trim();
+    notifyListeners();
+  }
+
   DailyHandover? get activeHandover => _dailyHandovers.cast<DailyHandover?>().firstWhere(
     (h) => h?.status == HandoverStatus.active,
     orElse: () => null,

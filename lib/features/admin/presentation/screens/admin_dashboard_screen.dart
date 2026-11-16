@@ -17,6 +17,7 @@ import '../../../booking_service/presentation/screens/vehicle_history_screen.dar
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../welcome/domain/models/tiktok_ad_video.dart';
 import '../widgets/admin_feedback_moderation_card.dart';
+import '../widgets/bishe_ai_executive_sheet.dart';
 import 'credentials_management_screen.dart';
 import 'pricing_management_screen.dart';
 import 'staff_management_screen.dart';
@@ -218,6 +219,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('adminTitle'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon),
+            tooltip: state.tr('aiExecutiveTitle'),
+            onPressed: () => BisheAiExecutiveSheet.show(context),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF111827),
+        foregroundColor: AppColors.liquidCyanNeon,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.4),
+        ),
+        icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 20),
+        label: Text(
+          state.tr('aiExecutiveTitle'),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, letterSpacing: 0.3),
+        ),
+        onPressed: () => BisheAiExecutiveSheet.show(context),
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
