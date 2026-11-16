@@ -1682,15 +1682,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppColors.cardBorder),
+                  border: Border.all(color: const Color(0xFFFE2C55).withValues(alpha: 0.35)),
                 ),
                 child: Text(
                   reel.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
                 ),
               );
             }).toList(),
@@ -1741,12 +1741,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor: const Color(0xFF111827),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Color(0x3300E5FF), width: 1.2),
+            ),
             title: Row(
               children: [
                 const Icon(Icons.video_library_rounded, color: Color(0xFFFE2C55), size: 24),
                 const SizedBox(width: 10),
-                Expanded(child: Text(state.tr('tiktokReelsCardTitle'), style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold))),
+                Expanded(
+                  child: Text(
+                    state.tr('tiktokReelsCardTitle'),
+                    style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
               ],
             ),
             content: ConstrainedBox(
@@ -1797,9 +1806,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         return Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
+                            color: const Color(0xFF1E293B),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.cardBorder),
+                            border: Border.all(color: const Color(0xFF334155)),
                           ),
                           child: Row(
                             children: [
@@ -1808,7 +1817,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                 child: Container(
                                   width: 44,
                                   height: 44,
-                                  color: Colors.black12,
+                                  color: const Color(0xFF0F172A),
                                   child: reel.thumbnailUrl.isNotEmpty
                                       ? (reel.thumbnailUrl.startsWith('assets/')
                                           ? Image.asset(reel.thumbnailUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.grey))
@@ -1821,18 +1830,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('${index + 1}. ${reel.title}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                    Text(reel.tiktokUrl, style: const TextStyle(fontSize: 11, color: Color(0xFFFE2C55)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    Text(
+                                      '${index + 1}. ${reel.title}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      reel.tiktokUrl,
+                                      style: const TextStyle(fontSize: 11, color: Color(0xFFFE2C55)),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ],
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.edit_rounded, size: 18, color: AppColors.primary),
+                                icon: const Icon(Icons.edit_rounded, size: 18, color: AppColors.liquidCyanNeon),
                                 onPressed: () => _editReelPopup(context, reel, (updated) => setDialogState(() => reels[index] = updated)),
                               ),
                               if (reels.length > 1)
                                 IconButton(
-                                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
                                   onPressed: () => setDialogState(() => reels.removeAt(index)),
                                 ),
                             ],
@@ -1871,11 +1891,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         },
                       ),
                       OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFF334155)),
+                        ),
                         onPressed: () => _showBatchImportDialog(context, reels, setDialogState, state),
                         icon: const Icon(Icons.playlist_add_rounded, size: 16),
                         label: const Text('Batch Paste', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                       OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Color(0xFF334155)),
+                        ),
                         onPressed: () {
                           final nextIndex = reels.length;
                           final poolItem = AutoCareAssets.curatedReelsPool[nextIndex % AutoCareAssets.curatedReelsPool.length];
@@ -1897,7 +1925,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'))),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(state.tr('cancel'), style: const TextStyle(color: AppColors.textSecondary)),
+              ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
                 onPressed: () async {
@@ -1940,9 +1971,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isSel ? const Color(0xFFFE2C55).withValues(alpha: 0.12) : const Color(0xFFF1F5F9),
+                  color: isSel ? const Color(0xFFFE2C55).withValues(alpha: 0.18) : const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: isSel ? const Color(0xFFFE2C55) : AppColors.cardBorder, width: isSel ? 1.5 : 1),
+                  border: Border.all(color: isSel ? const Color(0xFFFE2C55) : const Color(0xFF334155), width: isSel ? 1.5 : 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1954,7 +1985,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                           : Image.network(p['url']!, width: 24, height: 24, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.photo, size: 14)),
                     ),
                     const SizedBox(width: 6),
-                    Text(p['label']!, style: TextStyle(fontSize: 10.5, fontWeight: isSel ? FontWeight.bold : FontWeight.w600)),
+                    Text(
+                      p['label']!,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: isSel ? FontWeight.bold : FontWeight.w600,
+                        color: isSel ? const Color(0xFFFE2C55) : Colors.white,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1962,8 +2000,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           }
 
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            title: Text(state.tr('manageReelsBtn'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            backgroundColor: const Color(0xFF111827),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: const BorderSide(color: Color(0x3300E5FF), width: 1.2),
+            ),
+            title: Text(state.tr('manageReelsBtn'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
             content: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: SingleChildScrollView(
@@ -1971,14 +2013,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder())),
+                    TextField(
+                      controller: titleCtrl,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
+                    ),
                     const SizedBox(height: 10),
-                    TextField(controller: subCtrl, decoration: const InputDecoration(labelText: 'Subtitle', border: OutlineInputBorder())),
+                    TextField(
+                      controller: subCtrl,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(labelText: 'Subtitle', border: OutlineInputBorder()),
+                    ),
                     const SizedBox(height: 10),
                     Row(
                       children: [
                         Expanded(
-                          child: TextField(controller: linkCtrl, decoration: const InputDecoration(labelText: 'TikTok URL', border: OutlineInputBorder())),
+                          child: TextField(
+                            controller: linkCtrl,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(labelText: 'TikTok URL', border: OutlineInputBorder()),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         IconButton.filledTonal(
@@ -1991,7 +2045,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       ],
                     ),
                     const SizedBox(height: 10),
-                    TextField(controller: thumbCtrl, decoration: const InputDecoration(labelText: 'Thumbnail', border: OutlineInputBorder())),
+                    TextField(
+                      controller: thumbCtrl,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(labelText: 'Thumbnail', border: OutlineInputBorder()),
+                    ),
                     const SizedBox(height: 12),
                     Text(state.tr('curatedReelsPoolTitle'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
                     const SizedBox(height: 6),
@@ -2001,7 +2059,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'))),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(state.tr('cancel'), style: const TextStyle(color: AppColors.textSecondary)),
+              ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
                 onPressed: () {
@@ -2035,22 +2096,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (batchCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Batch Paste TikTok Links', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        backgroundColor: const Color(0xFF111827),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: Color(0x3300E5FF), width: 1.2),
+        ),
+        title: const Text('Batch Paste TikTok Links', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
           child: TextField(
             controller: batchCtrl,
             minLines: 5,
             maxLines: 8,
+            style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               hintText: 'https://www.tiktok.com/@bishecarwash/video/...',
+              hintStyle: const TextStyle(color: AppColors.textMuted),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(batchCtx), child: Text(state.tr('cancel'))),
+          TextButton(
+            onPressed: () => Navigator.pop(batchCtx),
+            child: Text(state.tr('cancel'), style: const TextStyle(color: AppColors.textSecondary)),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFE2C55), foregroundColor: Colors.white),
             onPressed: () async {

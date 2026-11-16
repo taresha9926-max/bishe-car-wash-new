@@ -22,7 +22,7 @@ class CommissionItemCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [

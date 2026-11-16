@@ -48,11 +48,11 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     final state = AppStateProvider.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(state.tr('masterPricingAndInventory')),
         actions: const [
-          LanguageSwitcherAction(isDark: false),
+          LanguageSwitcherAction(isDark: true),
         ],
         elevation: 0,
       ),

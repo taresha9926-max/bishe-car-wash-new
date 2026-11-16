@@ -42,7 +42,7 @@ class _AdminFeedbackModerationCardState extends State<AdminFeedbackModerationCar
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: pendingCount > 0 ? const Color(0xFFF59E0B) : AppColors.cardBorder,
