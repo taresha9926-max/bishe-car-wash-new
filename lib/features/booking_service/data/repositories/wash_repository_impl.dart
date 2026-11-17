@@ -559,6 +559,16 @@ class WashRepositoryImpl implements IWashRepository {
     _customerFeedback = List.from(feedbackList);
   }
 
+  String? _geminiApiKey;
+
+  @override
+  Future<String?> getRemoteGeminiApiKey() async => _geminiApiKey;
+
+  @override
+  Future<void> saveRemoteGeminiApiKey(String key) async {
+    _geminiApiKey = key.trim();
+  }
+
   @override
   Future<List<FixedAsset>> getFixedAssets() async {
     return List.unmodifiable(_fixedAssets);

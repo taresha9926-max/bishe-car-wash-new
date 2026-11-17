@@ -303,6 +303,9 @@ class AppStateNotifier extends ChangeNotifier {
   void setGeminiApiKey(String? key) {
     _geminiApiKey = (key == null || key.trim().isEmpty) ? null : key.trim();
     LocalStorageHelper.setString(LocalStorageHelper.keyGeminiApiKey, _geminiApiKey);
+    if (_geminiApiKey != null && _geminiApiKey!.isNotEmpty) {
+      _repository.saveRemoteGeminiApiKey(_geminiApiKey!);
+    }
     notifyListeners();
   }
 
@@ -2208,6 +2211,7 @@ class AppStateNotifier extends ChangeNotifier {
         _repository.getDailyHandovers(),
         _repository.getStockTransactions(),
         _repository.getPricingAndCommissionConfig(),
+        _repository.getRemoteGeminiApiKey(),
       ]);
       _packages = List.from(results[0] as List<WashPackage>);
       _staff = List.from(results[1] as List<StaffMember>);
@@ -2239,6 +2243,14 @@ class AppStateNotifier extends ChangeNotifier {
         _carpetTypeAStationPrice = (pricingConfig['carpetTypeAPrice'] as num?)?.toDouble() ?? _carpetTypeAStationPrice;
         _carpetTypeBStationPrice = (pricingConfig['carpetTypeBPrice'] as num?)?.toDouble() ?? _carpetTypeBStationPrice;
         _teamCommissionRate = (pricingConfig['teamCommissionRate'] as num?)?.toDouble() ?? _teamCommissionRate;
+      }
+
+      if (_geminiApiKey == null || _geminiApiKey!.isEmpty) {
+        final remoteKey = results[12] as String?;
+        if (remoteKey != null && remoteKey.isNotEmpty) {
+          _geminiApiKey = remoteKey;
+          LocalStorageHelper.setString(LocalStorageHelper.keyGeminiApiKey, remoteKey);
+        }
       }
 
       try {

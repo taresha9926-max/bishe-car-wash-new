@@ -97,6 +97,8 @@ abstract class IMarketingRepository {
   Future<void> saveCustomerPhoneBookingNumber(String phone);
   Future<List<CustomerFeedback>> getCustomerFeedback();
   Future<void> saveCustomerFeedback(List<CustomerFeedback> feedbackList);
+  Future<String?> getRemoteGeminiApiKey();
+  Future<void> saveRemoteGeminiApiKey(String key);
 }
 
 /// Domain port for fixed assets, consumables stock, and washer team daily handovers.

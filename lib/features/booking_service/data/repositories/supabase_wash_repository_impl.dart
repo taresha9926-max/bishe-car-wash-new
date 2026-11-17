@@ -1600,6 +1600,35 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     await _fallbackLocalRepo.saveCustomerPhoneBookingNumber(phone);
   }
 
+  @override
+  Future<String?> getRemoteGeminiApiKey() async {
+    try {
+      final dynamic data = await _get('staff_credentials?username=eq.app_config_tiktok_reels&select=pin_hash');
+      if (data is List && data.isNotEmpty) {
+        final pin = data.first['pin_hash']?.toString() ?? '';
+        if (pin.contains('GEMINI_KEY:')) {
+          final extracted = pin.substring(pin.indexOf('GEMINI_KEY:') + 'GEMINI_KEY:'.length).trim();
+          if (extracted.isNotEmpty) return extracted;
+        }
+      }
+    } catch (e) {
+      debugPrint('Supabase getRemoteGeminiApiKey exception: $e');
+    }
+    return _fallbackLocalRepo.getRemoteGeminiApiKey();
+  }
+
+  @override
+  Future<void> saveRemoteGeminiApiKey(String key) async {
+    try {
+      await _patch('staff_credentials?username=eq.app_config_tiktok_reels', {
+        'pin_hash': '4450|GEMINI_KEY:${key.trim()}',
+      });
+    } catch (e) {
+      debugPrint('Supabase saveRemoteGeminiApiKey exception: $e');
+    }
+    await _fallbackLocalRepo.saveRemoteGeminiApiKey(key);
+  }
+
   Future<String?> _getStaffConfigPayload(String key) async {
     try {
       final dynamic data = await _get('staff_credentials?username=eq.$key&select=*');
