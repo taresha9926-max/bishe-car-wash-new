@@ -5007,6 +5007,116 @@ class AppStrings {
       AppLanguage.om: 'Gabatee arguuf gara cinaatti dhiibi ↔',
       AppLanguage.am: 'ሰንጠረዥ ለማየት ወደ ጎን ያንሸራትቱ ↔',
     },
+    'aiConciergeTitle': {
+      AppLanguage.en: 'BISHE AI Concierge',
+      AppLanguage.om: 'Tajaajila AI BISHE',
+      AppLanguage.am: 'የቢሼ AI እንግዳ ተቀባይ',
+    },
+    'aiConciergeSub': {
+      AppLanguage.en: 'Instant price estimates, package guidance, EV care, and live queue status',
+      AppLanguage.om: 'Tilmaama gatii battalaa, qajeelfama paakeejii fi dabaree dhiqa',
+      AppLanguage.am: 'የዋጋ ግምት፣ የፓኬጅ ማብራሪያ፣ የኤሌክትሪክ መኪና እንክብካቤ እና የተራ ሁኔታ',
+    },
+    'aiCustomerWelcomeMessage': {
+      AppLanguage.en: '👋 Welcome to BISHE Car Wash! I am your AI Concierge. Ask me about our wash packages, prices, EV safety, carpet cleaning, or current bay wait times.',
+      AppLanguage.om: '👋 Baga nagaan dhuftan gara Dhiqa Konkolaataa BISHE! Ani gargaaraa AI keessani. Waa\'ee paakeejii dhiqa, gatii, eegumsa konkolaataa elektiriikii ykn dabaree na gaafadhaa.',
+      AppLanguage.am: '👋 ወደ ቢሼ መኪና ማጠቢያ እንኳን ደህና መጡ! እኔ የ AI እንግዳ ተቀባይ ነኝ። ስለ ማጠቢያ ፓኬጆቻችን፣ ዋጋዎች፣ የኤሌክትሪክ መኪናዎች ደህንነት፣ ምንጣፍ እጥበት ወይም የተራ ጊዜ ማንኛውንም ይጠይቁኝ።',
+    },
+    'askAiCustomerHint': {
+      AppLanguage.en: 'Ask anything (e.g. "SUV wash price?", "Silver vs Gold?", "Wait time right now?")...',
+      AppLanguage.om: 'Waan fedhe gaafadhaa (fkn "Gatiin SUV meeqa?", "Silver moo Gold?", "Yeroon eegumsaa meeqa?")...',
+      AppLanguage.am: 'ማንኛውንም ይጠይቁ (ምሳሌ "የSUV እጥበት ስንት ነው?"፣ "ሲልቨር ወይስ ጎልድ?"፣ "አሁን ያለው ተራ ስንት ነው?")...',
+    },
+    'askBisheAiConcierge': {
+      AppLanguage.en: 'Ask BISHE AI Concierge',
+      AppLanguage.om: 'AI BISHE Gaafadhaa',
+      AppLanguage.am: 'የቢሼ AI እንግዳ ተቀባይን ይጠይቁ',
+    },
+    'aiConciergeBannerSub': {
+      AppLanguage.en: 'Need price estimates, wait times, or service advice? Chat now',
+      AppLanguage.om: 'Tilmaama gatii, yeroo eegumsaa ykn gorsa barbaaddu? Amma haasa\'aa',
+      AppLanguage.am: 'የዋጋ ግምት፣ የተራ ጊዜ ወይም የማጠቢያ ምክር ይፈልጋሉ? አሁን ይጠይቁ',
+    },
+    'aiPromptCustomerPackages': {
+      AppLanguage.en: '✨ Packages & Pricing',
+      AppLanguage.om: '✨ Paakeejii & Gatii',
+      AppLanguage.am: '✨ የፓኬጅ ዓይነቶችና ዋጋ',
+    },
+    'aiPromptCustomerWaitTime': {
+      AppLanguage.en: '⏱️ Live Queue & Wait Time',
+      AppLanguage.om: '⏱️ Dabaree & Yeroo Eegumsaa',
+      AppLanguage.am: '⏱️ የቀጥታ ተራና የጥበቃ ጊዜ',
+    },
+    'aiPromptCustomerEvSafety': {
+      AppLanguage.en: '⚡ EV & High-Pressure Safety',
+      AppLanguage.om: '⚡ Eegumsa Konkolaataa Elektiriikii',
+      AppLanguage.am: '⚡ የኤሌክትሪክ መኪና ደህንነት',
+    },
+    'aiPromptCustomerCarpet': {
+      AppLanguage.en: '🏠 Carpet Wash & Delivery',
+      AppLanguage.om: '🏠 Dhiqa Afataafi Geessuu',
+      AppLanguage.am: '🏠 የምንጣፍ እጥበትና ትራንስፖርት',
+    },
+    'aiPromptCustomerShower': {
+      AppLanguage.en: '🚿 Clean Hot Showers',
+      AppLanguage.om: '🚿 Dhiqannaa Qaamaa Qulqulluu',
+      AppLanguage.am: '🚿 ዘመናዊ የሙቅ ውሃ ሻወር',
+    },
+    'aiPromptBaySpeed': {
+      AppLanguage.en: '⚡ Bay Turnaround & Queue',
+      AppLanguage.om: '⚡ Saffisa Dabaree & Iddoo Dhiqa',
+      AppLanguage.am: '⚡ የማጠቢያ ቦታዎች ፍጥነትና ተራ',
+    },
+    'aiPromptOtpStatus': {
+      AppLanguage.en: '🔐 OTP Shift Handover Status',
+      AppLanguage.om: '🔐 Haala OTP Dabarsa Shiftii',
+      AppLanguage.am: '🔐 የፈረቃ ርክክብ OTP ሁኔታ',
+    },
+    'aiPromptWasherPairs': {
+      AppLanguage.en: '👥 Washer Pairs & Bay Roster',
+      AppLanguage.om: '👥 Ramaddii Cimdii Hojjettootaa',
+      AppLanguage.am: '👥 የአጣቢ ጥንዶችና የስራ ድልድል',
+    },
+    'aiPromptUnsettled': {
+      AppLanguage.en: '⏳ Unsettled & Pending Tickets',
+      AppLanguage.om: '⏳ Tikkeettii Hin Kaffalamne',
+      AppLanguage.am: '⏳ ያልተከፈሉና በመጠባበቅ ያሉ ቲኬቶች',
+    },
+    'aiPromptShowersCount': {
+      AppLanguage.en: '🚿 Today\'s Shower Revenue',
+      AppLanguage.om: '🚿 Galii Dhiqannaa Har\'aa',
+      AppLanguage.am: '🚿 የዛሬው የሻወር ገቢ',
+    },
+    'aiPromptCashDrawer': {
+      AppLanguage.en: '💵 Drawer Cash & Handover',
+      AppLanguage.om: '💵 Qarshii Sanduuqaa & Dabarsuu',
+      AppLanguage.am: '💵 የካዝና ጥሬ ገንዘብና ርክክብ',
+    },
+    'aiPromptEmptyExchange': {
+      AppLanguage.en: '🔄 Empty Return (ዕቃ በዕቃ)',
+      AppLanguage.om: '🔄 Qodaa Duudaa Deebisuu',
+      AppLanguage.am: '🔄 ዕቃ በዕቃ ቅያሪ',
+    },
+    'aiPromptAssetHealth': {
+      AppLanguage.en: '🛠️ Machinery & Asset Health',
+      AppLanguage.om: '🛠️ Fayyummaa Maashinootaa',
+      AppLanguage.am: '🛠️ የማሽኖችና ቋሚ ዕቃዎች ጤንነት',
+    },
+    'aiPromptConsumableReorder': {
+      AppLanguage.en: '📦 Low Stock & Re-Order',
+      AppLanguage.om: '📦 Hir\'ina Meeshaafi Ajajuu',
+      AppLanguage.am: '📦 የአላቂ ዕቃዎች እጥረትና ማዘዣ',
+    },
+    'aiPromptBankReconciliation': {
+      AppLanguage.en: '🏦 Bank Deposit Slips Audit',
+      AppLanguage.om: '🏦 Qorannoo Nagaraga Baankii',
+      AppLanguage.am: '🏦 የባንክ ተቀማጭ ደረሰኞች ማረጋገጫ',
+    },
+    'aiPromptVatSummary': {
+      AppLanguage.en: '📑 15% VAT vs 0% Exempt Shower',
+      AppLanguage.om: '📑 VAT 15% fi Dhiqannaa 0%',
+      AppLanguage.am: '📑 15% ቫት እና ከቫት ነጻ ሻወር',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

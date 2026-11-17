@@ -5,6 +5,7 @@ import '../../../../core/localization/app_strings.dart';
 import '../../../../core/services/bishe_ai_executive_service.dart';
 import '../../../../core/utils/sound_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
+import '../../../auth_roles/domain/models/user_role.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class BisheAiExecutiveSheet extends StatefulWidget {
@@ -107,10 +108,13 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     super.didChangeDependencies();
     if (!_initialized) {
       final state = AppStateProvider.read(context);
+      final welcomeText = state.currentRole == UserRole.customer
+          ? state.tr('aiCustomerWelcomeMessage')
+          : state.tr('aiWelcomeMessage');
       _messages.add(
         _ChatMessage(
           isUser: false,
-          text: state.tr('aiWelcomeMessage'),
+          text: welcomeText,
         ),
       );
       _initialized = true;
@@ -231,6 +235,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
       userQuestion: query,
       state: state,
       currentLang: AppLanguage.fromCode(state.currentLang),
+      callerRole: state.currentRole,
       conversationHistory: history,
     );
 
@@ -472,7 +477,9 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  state.tr('aiExecutiveTitle'),
+                  state.currentRole == UserRole.customer
+                      ? state.tr('aiConciergeTitle')
+                      : state.tr('aiExecutiveTitle'),
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -519,7 +526,9 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                   ],
                 ),
                 Text(
-                  state.tr('aiExecutiveSub'),
+                  state.currentRole == UserRole.customer
+                      ? state.tr('aiConciergeSub')
+                      : state.tr('aiExecutiveSub'),
                   style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -546,14 +555,15 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               });
             },
           ),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 30, height: 30),
-            icon: const Icon(Icons.key_rounded, size: 18, color: AppColors.liquidCyanNeon),
-            tooltip: state.tr('configureApiKey'),
-            onPressed: _showApiKeyDialog,
-          ),
+          if (state.currentRole != UserRole.customer)
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+              icon: const Icon(Icons.key_rounded, size: 18, color: AppColors.liquidCyanNeon),
+              tooltip: state.tr('configureApiKey'),
+              onPressed: _showApiKeyDialog,
+            ),
           IconButton(
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
@@ -562,9 +572,12 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             tooltip: state.tr('clearChat'),
             onPressed: () {
               _stopSpeaking();
+              final resetText = state.currentRole == UserRole.customer
+                  ? state.tr('aiCustomerWelcomeMessage')
+                  : state.tr('aiWelcomeMessage');
               setState(() {
                 _messages.clear();
-                _messages.add(_ChatMessage(isUser: false, text: state.tr('aiWelcomeMessage')));
+                _messages.add(_ChatMessage(isUser: false, text: resetText));
               });
             },
           ),
@@ -581,13 +594,63 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
   }
 
   Widget _buildQuickPromptChips(dynamic state) {
-    final chips = [
-      {'label': state.tr('aiPromptPnL'), 'query': 'Today\'s P&L and net profit summary'},
-      {'label': state.tr('aiPromptCars'), 'query': 'List cars washed today and vehicle types'},
-      {'label': state.tr('aiPromptWashers'), 'query': 'Active washers on duty and their commissions'},
-      {'label': state.tr('aiPromptYield'), 'query': 'Chemical yield and average shampoo and perfume used per car'},
-      {'label': state.tr('aiPromptAlerts'), 'query': 'Check for low inventory stock and station discrepancies'},
-    ];
+    final List<Map<String, String>> chips;
+    final currentRole = state.currentRole as UserRole;
+
+    switch (currentRole) {
+      case UserRole.customer:
+        chips = [
+          {'label': state.tr('aiPromptCustomerPackages'), 'query': 'What wash packages do you offer and what are the prices?'},
+          {'label': state.tr('aiPromptCustomerWaitTime'), 'query': 'How busy are the bays right now and what is the wait time?'},
+          {'label': state.tr('aiPromptCustomerEvSafety'), 'query': 'Is high-pressure and steam wash safe for electric vehicles (EV)?'},
+          {'label': state.tr('aiPromptCustomerCarpet'), 'query': 'How much is carpet washing per square meter and delivery turnaround?'},
+          {'label': state.tr('aiPromptCustomerShower'), 'query': 'Where are your clean hot showers located and what is the fee?'},
+        ];
+        break;
+      case UserRole.manager:
+        chips = [
+          {'label': state.tr('aiPromptBaySpeed'), 'query': 'Bay turnaround speed, active queue, and washer dispatch'},
+          {'label': state.tr('aiPromptOtpStatus'), 'query': 'Status of Cashier 15:30 OTP handover and night closing'},
+          {'label': state.tr('aiPromptWasherPairs'), 'query': 'Active washer pairs distribution and commission balance'},
+          {'label': state.tr('aiPromptShowersCount'), 'query': 'Today\'s shower guest count and 0% VAT exempt revenue'},
+          {'label': state.tr('aiPromptPnL'), 'query': 'Today\'s P&L and net profit summary'},
+        ];
+        break;
+      case UserRole.cashier:
+        chips = [
+          {'label': state.tr('aiPromptUnsettled'), 'query': 'List cars in queue and unsettled vehicle tickets'},
+          {'label': state.tr('aiPromptShowersCount'), 'query': 'Today\'s shower ticket count, cash and digital totals'},
+          {'label': state.tr('aiPromptCashDrawer'), 'query': 'Cash drawer balance and 15:30 OTP handover preparation'},
+          {'label': state.tr('aiPromptCars'), 'query': 'List cars washed today and vehicle types'},
+        ];
+        break;
+      case UserRole.storekeeper:
+        chips = [
+          {'label': state.tr('aiPromptEmptyExchange'), 'query': 'Empty-for-full container exchange balance and missing cans'},
+          {'label': state.tr('aiPromptAssetHealth'), 'query': 'Fixed asset equipment health, service due, and repairs'},
+          {'label': state.tr('aiPromptConsumableReorder'), 'query': 'Consumables stock levels and low-stock re-order alerts'},
+          {'label': state.tr('aiPromptYield'), 'query': 'Chemical yield and average shampoo and perfume used per car'},
+        ];
+        break;
+      case UserRole.accountant:
+        chips = [
+          {'label': state.tr('aiPromptPnL'), 'query': 'Today\'s P&L and net operating profit statement'},
+          {'label': state.tr('aiPromptBankReconciliation'), 'query': 'Bank deposit slips vs cashier drawer settlements audit'},
+          {'label': state.tr('aiPromptVatSummary'), 'query': '15% VAT on car wash vs 0% exempt shower reconciliation'},
+          {'label': state.tr('aiPromptWashers'), 'query': 'Active washers on duty and their commissions'},
+        ];
+        break;
+      case UserRole.admin:
+        chips = [
+          {'label': state.tr('aiPromptPnL'), 'query': 'Today\'s P&L and net profit summary'},
+          {'label': state.tr('aiPromptCars'), 'query': 'List cars washed today and vehicle types'},
+          {'label': state.tr('aiPromptWashers'), 'query': 'Active washers on duty and their commissions'},
+          {'label': state.tr('aiPromptYield'), 'query': 'Chemical yield and average shampoo and perfume used per car'},
+          {'label': state.tr('aiPromptAssetHealth'), 'query': 'Fixed asset equipment health, service due, and repairs'},
+          {'label': state.tr('aiPromptAlerts'), 'query': 'Check for low inventory stock and station discrepancies'},
+        ];
+        break;
+    }
 
     return Container(
       color: const Color(0xFF0F172A),
@@ -1430,7 +1493,11 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               controller: _inputController,
               style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(
-                hintText: _isListening ? state.tr('aiMicListening') : state.tr('askAiHint'),
+                hintText: _isListening
+                    ? state.tr('aiMicListening')
+                    : (state.currentRole == UserRole.customer
+                        ? state.tr('askAiCustomerHint')
+                        : state.tr('askAiHint')),
                 hintStyle: TextStyle(
                   fontSize: 12,
                   color: _isListening ? Colors.redAccent : AppColors.textMuted,

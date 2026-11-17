@@ -18,6 +18,7 @@ import 'package:bishe_car_wash/features/customer/presentation/screens/new_bookin
 import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable_price_badge.dart';
 import 'package:bishe_car_wash/features/welcome/presentation/widgets/customer_feedback_sheet.dart';
 import 'package:bishe_car_wash/features/welcome/presentation/widgets/welcome_service_carousel_banner.dart';
+import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 
 /// Step 0 Customer Entry: asks "What would you like to wash today?" with ONLY
 /// the Car Washing Service and Carpet Washing Service tabs, then navigates to
@@ -49,7 +50,31 @@ class CustomerHomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppRoleHeader(title: state.tr('appName')),
+      appBar: AppRoleHeader(
+        title: state.tr('appName'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 21),
+            tooltip: state.tr('askBisheAiConcierge'),
+            onPressed: () => BisheAiExecutiveSheet.show(context),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF111827),
+        foregroundColor: AppColors.liquidCyanNeon,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.4),
+        ),
+        icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 20),
+        label: Text(
+          state.tr('askBisheAiConcierge'),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, letterSpacing: 0.3),
+        ),
+        onPressed: () => BisheAiExecutiveSheet.show(context),
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
@@ -107,6 +132,67 @@ class CustomerHomeScreen extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // Interactive Customer AI Concierge Banner
+                BounceTappable(
+                  onTap: () => BisheAiExecutiveSheet.show(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF0B2545), Color(0xFF111827)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0x4400E5FF), width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.liquidCyanNeon.withOpacity(0.12),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.liquidCyanNeon.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('askBisheAiConcierge'),
+                                style: const TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                state.tr('aiConciergeBannerSub'),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right_rounded, color: AppColors.liquidCyanNeon, size: 20),
+                      ],
+                    ),
                   ),
                 ),
               ],

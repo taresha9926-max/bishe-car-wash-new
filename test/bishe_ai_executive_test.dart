@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/services/bishe_ai_executive_service.dart';
+import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
@@ -18,6 +19,7 @@ void main() {
       repository = WashRepositoryImpl();
       state = AppStateNotifier(repository: repository);
       state.setSuperAdminStatus(true);
+      state.switchRole(UserRole.admin);
       await state.loadData();
     });
 
@@ -91,6 +93,121 @@ void main() {
       expect(response, contains("Today's Bookings"));
       expect(response, contains('Lifetime Completed'));
     });
+
+    test('Blind Spot 1: Ingests showers and reports 0% VAT statutory exemption', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'How many showers were used today and what is the VAT?',
+        state: state,
+        currentLang: AppLanguage.en,
+      );
+
+      expect(response, contains("Today's Shower Service & 0% VAT Statutory Audit"));
+      expect(response, contains('0% VAT EXEMPT'));
+      expect(response, contains('Total Shower Guests Today'));
+    });
+
+    test('Blind Spot 2: Reports Bay 1, Bay 2, Mobile Van turnaround and queue', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'What is the bay turnaround speed and active queue?',
+        state: state,
+        currentLang: AppLanguage.en,
+      );
+
+      expect(response, contains('Live Bay Distribution, Queue & Turnaround Speed'));
+      expect(response, contains('Bay 1 (Concrete)'));
+      expect(response, contains('Bay 2 (Concrete)'));
+      expect(response, contains('Mobile Van Unit'));
+    });
+
+    test('Blind Spot 3: Audits fixed asset machinery health and maintenance conditions', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Check fixed assets and machinery equipment health',
+        state: state,
+        currentLang: AppLanguage.en,
+      );
+
+      expect(response, contains('Station Fixed Assets & Machinery Health Audit'));
+      expect(response, contains('Operational'));
+      expect(response, contains('Needs Preventative Service'));
+    });
+
+    test('Blind Spot 4: Reconciles bank deposit slips against cashier drawer collections', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Audit bank deposit slips and cashier collections',
+        state: state,
+        currentLang: AppLanguage.en,
+      );
+
+      expect(response, contains('Bank Deposit Slips & Cash Drawer Reconciliation'));
+      expect(response, contains('Total Deposited to Bank Today'));
+    });
+
+    test('Blind Spot 5: Reports 6-digit OTP shift handover custody status', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'What is the status of the cashier 6-digit OTP shift handover?',
+        state: state,
+        currentLang: AppLanguage.en,
+      );
+
+      expect(response, contains('Shift Custody & 6-Digit OTP Handover Status'));
+      expect(response, contains('Day Shift Handover'));
+    });
+
+    test('Blind Spot 6: Reports customer feedback sentiment and satisfaction ratings', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Show customer feedback ratings and sentiment',
+        state: state,
+        currentLang: AppLanguage.en,
+      );
+
+      expect(response, contains('Customer Satisfaction & Feedback Sentiment'));
+      expect(response, contains('Average Star Rating'));
+    });
+
+    test('Storekeeper: Audits empty container exchange (ዕቃ በዕቃ)', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Check empty container return balance',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.storekeeper,
+      );
+
+      expect(response, contains('Storekeeper Empty-for-Full Container Exchange (ዕቃ በዕቃ)'));
+      expect(response, contains('Snow Foam Shampoo'));
+    });
+
+    test('Customer Concierge: Gives package pricing and EV safety guidance', () async {
+      final packageResponse = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'What wash packages do you offer and how much are they?',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.customer,
+      );
+      expect(packageResponse, contains('Service Packages & Pricing'));
+      expect(packageResponse, contains('Silver / Basic'));
+      expect(packageResponse, contains('Gold Polish'));
+
+      final evResponse = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Is high pressure wash safe for electric vehicles?',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.customer,
+      );
+      expect(evResponse, contains('Electric Vehicle (EV) Safety Guarantee'));
+      expect(evResponse, contains('BYD'));
+    });
+
+    test('Customer Concierge: Strictly enforces privacy guardrails on profit and payroll', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'What is your net profit margin and how much commission do washers get?',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.customer,
+      );
+
+      expect(response, contains('Customer Privacy Notice'));
+      expect(response, contains('cannot be disclosed'));
+    });
   });
 
   group('BISHE AI Executive Sheet UI Widget Tests', () {
@@ -101,6 +218,7 @@ void main() {
       repository = WashRepositoryImpl();
       state = AppStateNotifier(repository: repository);
       state.setSuperAdminStatus(true);
+      state.switchRole(UserRole.admin);
       await state.loadData();
     });
 
@@ -209,6 +327,27 @@ void main() {
       // Verify Export CSV and Copy Table buttons are present
       expect(find.text(state.tr('aiExportCsv')), findsWidgets);
       expect(find.text(state.tr('aiCopyTable')), findsWidgets);
+    });
+
+    testWidgets('Adapts to Customer Concierge mode: displays concierge title and hides API key config', (tester) async {
+      state.switchRole(UserRole.customer);
+
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open AI Co-Pilot'));
+      await tester.pumpAndSettle();
+
+      // Verify Concierge header
+      expect(find.textContaining('BISHE AI Concierge'), findsWidgets);
+      // Verify API key config button is hidden for customers
+      expect(find.byIcon(Icons.key_rounded), findsNothing);
+      // Verify customer package prompt chip is visible
+      expect(find.text(state.tr('aiPromptCustomerPackages')), findsOneWidget);
     });
   });
 }

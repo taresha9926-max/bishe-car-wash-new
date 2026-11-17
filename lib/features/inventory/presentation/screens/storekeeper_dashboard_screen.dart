@@ -15,6 +15,7 @@ import '../../domain/models/consumable_item.dart';
 import '../../domain/models/daily_handover.dart';
 import '../../domain/models/fixed_asset.dart';
 import '../../domain/models/stock_transaction.dart';
+import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 
 class StorekeeperDashboardScreen extends StatefulWidget {
   const StorekeeperDashboardScreen({super.key});
@@ -50,6 +51,28 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('storekeeperRole'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 21),
+            tooltip: state.tr('aiExecutiveTitle'),
+            onPressed: () => BisheAiExecutiveSheet.show(context),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF111827),
+        foregroundColor: AppColors.liquidCyanNeon,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.4),
+        ),
+        icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 20),
+        label: Text(
+          state.tr('aiExecutiveTitle'),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, letterSpacing: 0.3),
+        ),
+        onPressed: () => BisheAiExecutiveSheet.show(context),
       ),
       body: Column(
         children: [

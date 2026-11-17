@@ -12,6 +12,7 @@ import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../widgets/station_money_tab.dart';
 import '../widgets/station_queue_tab.dart';
+import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 import 'daily_closing_dialog.dart';
 
 /// Option 1 Cashier Action Desk: immediate live queue, unified money/closing desk,
@@ -66,6 +67,28 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
         title: state.activeStaffFullName != null && state.activeStaffFullName!.isNotEmpty
             ? '${state.tr("cashierTitle")} • ${state.activeStaffFullName}'
             : state.tr('cashierTitle'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 21),
+            tooltip: state.tr('aiExecutiveTitle'),
+            onPressed: () => BisheAiExecutiveSheet.show(context),
+          ),
+        ],
+      ),
+      floatingActionButton: isMobile ? null : FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF111827),
+        foregroundColor: AppColors.liquidCyanNeon,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.4),
+        ),
+        icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 20),
+        label: Text(
+          state.tr('aiExecutiveTitle'),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, letterSpacing: 0.3),
+        ),
+        onPressed: () => BisheAiExecutiveSheet.show(context),
       ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
