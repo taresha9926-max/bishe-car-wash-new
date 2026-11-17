@@ -1,0 +1,211 @@
+﻿Section,Key,English,Afaan_Oromoo,Amharic
+Customer_UI,appName,BISHE Car Wash,BISHE Dhiqannaa,ቢሼ የመኪና ማጠቢያ
+Customer_UI,bishoftu,"Bishoftu • Oromia, Ethiopia","Bishoftuu • Oromiyaa, Itoophiyaa",ቢሾፍቱ • ኦሮሚያ፣ ኢትዮጵያ
+Customer_UI,tagline,Premier Auto Care near Crater Lakes,Tajaajila Qulqullina Konkolaataa Bishoftuu,ምርጥ የመኪና እጥበት እና እንክብካቤ
+Customer_UI,customerRole,Customer,Maamila,ደንበኛ
+Customer_UI,back,Back,Deebi'i,ተመለስ
+Customer_UI,close,Close,Cufi,ዝጋ
+Customer_UI,cancel,Cancel,Dhiisi,ሰርዝ
+Customer_UI,save,Save,Oolchi,አስቀምጥ
+Customer_UI,confirm,Confirm,Mirkaneessi,አረጋግጥ
+Customer_UI,all,All,Hunda,ሁሉም
+Customer_UI,refresh,Refresh,Haaromsi,አድስ
+Customer_UI,customerTrustPill,Instant Wash Booking • Live Queue Tracker,Ajaja Dhiqannaa Battalaa • Hordoffii Dabaree Kallattii,ፈጣን የእጥበት ትዕዛዝ • የቀጥታ የተራ መከታተያ
+Customer_UI,reelCounter,REEL,Viidiyoo Gabaabaa (Reel),አጫጭር ቪዲዮዎች (Reel)
+Customer_UI,selectServiceMode,Select Service Mode,Gosa Tajaajilaa Filadhaa,የአገልግሎት ዓይነት ይምረጡ
+Customer_UI,driveInStation,At Station,Buufata Keessatti,በጣቢያው ውስጥ
+Customer_UI,driveInSub,Drive in to Bishoftu Station bays,Buufata Bishooftuutti dhiqadhaa,ወደ ቢሾፍቱ ጣቢያ ማጠቢያ ክፍሎች በመምጣት
+Customer_UI,atHomeMobile,At Customer Home (Van Wash),Mana Maamilaatti (Makiinaa Socho'aa),በደንበኛ ቤት (ተንቀሳቃሽ ቫን)
+Customer_UI,atHomeSub,Equipped mobile van washes the vehicle at customer home,Makiinaan bishaanii fi jeneretara qabu mana keessanitti dhiqa,የውሃ ታንከር እና ጄነሬተር የታጠቀ ቫን እቤትዎ ድረስ መጥቶ ያጥባል
+Customer_UI,availableNow,Available,Qophiidha,ክፍት ነው
+Customer_UI,busyWashing,Busy Washing,Hojjataa Jira,በመታጠብ ላይ
+Customer_UI,servicePackages,Service Packages & Pricing,Gosa Dhiqannaafi Gatii,የእጥበት ዓይነቶችና ዋጋቸው
+Customer_UI,myHistory,My History,Seenaa Koo,የቀደመ ታሪክ
+Customer_UI,bookThisWash,Book This Wash,Dhiqannaa Qabadhaa,ይህንን እጥበት ይዘዙ
+Customer_UI,bookNow,Book Now,Amma Qabadhaa,አሁን ይዘዙ
+Customer_UI,activeWashTitle,Active Wash Tracking,Hordoffii Dhiqannaa Ammaa,የአሁኑ እጥበት ሁኔታ መከታተያ
+Customer_UI,openFullTracker,Open Full Live Tracker,Hordoffii Guutuu Bani,ሙሉ መከታተያውን ክፈት
+Customer_UI,serviceWalkIn,Walk-in Station,Kutaa Dhiqannaa,የጣቢያ እጥበት
+Customer_UI,serviceAtHome,At-Home Mobile Service,Tajaajila Makiinaa Socho'aa,ተንቀሳቃሽ የቤት ለቤት አገልግሎት
+Customer_UI,serviceValetPickUp,VIP Driver Pick-up & Return,Konkolaachisaa VIP (Fuudhee Deebisa),የቪአይፒ ሹፌር መውሰድና መመለስ (VIP)
+Customer_UI,serviceValetPickUpSub,"Driver from BISHE Car Wash takes vehicle from home to the station, washes, and returns it back.","Konkolaachisaan BISHE makiinaa mana keessanii fuudhee, buufatatti dhiqee mana keessanitti deebisa.",የቢሼ አሽከርካሪ መኪናውን ከቤት ወስዶ ጣቢያ ካጠበ በኋላ መልሶ ያደርሳል።
+Customer_UI,servicePhoneCall,Phone Reservation,Qabannaa Bilbilaa,የስልክ ጥሪ ትዕዛዝ
+Customer_UI,servicePhoneCallSub,Pre-booked via Gate Phone Call,Bilbilaan duraan qabame,በስልክ ጥሪ አስቀድሞ የተያዘ
+Customer_UI,serviceWalkInCapacity,2 Bays Available at Bishoftu Station,Iddoowwan Dhiqa Konkolaataa 2 Bishooftuutti Qophii,በቢሾፍቱ ጣቢያ 2 የማጠቢያ ክፍሎች ዝግጁ ናቸው
+Customer_UI,automobile,Type A (Small),Gosa A (Xiqqaa),ዓይነት ሀ (አነስተኛ)
+Customer_UI,minibus,Type B (Medium),Gosa B (Giddu-galeessa),ዓይነት ለ (መካከለኛ/ቪ8)
+Customer_UI,truck,Type C (Truck),Gosa C (Fe'iisaa),ዓይነት ሐ (የጭነት/ኢሱዙ)
+Customer_UI,automobileSub,"Corolla, Dzire, Yaris, Vitz, BYD","Corolla, Dzire, Yaris, Vitz, BYD",ኮሮላ፣ ዲዛየር፣ ያሪስ፣ ቪትዝ፣ ቢዋይዲ
+Customer_UI,minibusSub,"V8, Bigstar, Hilux, Dolphin","V8, Bigstar, Hilux, Dolphin",ቪ8፣ ቢግስታር፣ ሃይሉክስ፣ ዶልፊን
+Customer_UI,truckSub,"Isuzu 1200, FSR 1800","Isuzu 1200, FSR 1800",ኢሱዙ 1200፣ ኤፍኤስአር 1800
+Customer_UI,carsAheadInQueue,Cars Ahead in Queue,Konkolaattota Fuuldura Dabaree jiran,በተራ ላይ ከፊትዎ ያሉ መኪኖች
+Customer_UI,estimatedBayArrival,Estimated Time to Service,Yeroo Tilmaamaa Tajaajilaa,የሚገመት የእጥበት መድረሻ ጊዜ
+Customer_UI,lookingForEarlierBooking,Looking for an earlier booking? Enter plate or phone,Ajaja kanaan duraa barbaadaa jirtuu? Gabatee ykn bilbila galchaa,ያለፈ ትዕዛዝ መፈለግ ይፈልጋሉ? ታርጋ ወይም ስልክ ያስገቡ
+Customer_UI,enterPlateOrPhone,Enter Plate or Phone Number,Lakkoofsa Gabatee ykn Bilbilaa,የታርጋ ወይም የስልክ ቁጥር ያስገቡ
+Customer_UI,onlyOwnVehicleNotice,You can only track active bookings associated with your vehicle or phone.,Haala konkolaataa ykn bilbila keessanii qofa hordofuu dandeessu.,የእርስዎን መኪና ወይም የስልክ ቁጥር ሁኔታ ብቻ መከታተል ይችላሉ።
+Customer_UI,customerPhone,Phone Number,Lakkoofsa Bilbilaa,ስልክ ቁጥር
+Customer_UI,customerName,Customer Name,Maqaa Maamilaa,የደንበኛው ስም
+Customer_UI,statusPending,Booking Approved,Ajajni Mirkanaa'eera,ቦታ ማስያዝ ጸድቋል
+Customer_UI,statusConfirmed,Approved & Arrived at Station,Mirkanaa'ee Buufata Gaheera,ጸድቆ ጣቢያ ደርሷል
+Customer_UI,statusAssignedToBay,Queued in Bay,Iddoo Dhiqaatti Qophaa'e,ክፍል ውስጥ ተሰይሟል
+Customer_UI,statusWashing,Washing in Progress,Dhiqamaa Jira,እየታጠበ ነው
+Customer_UI,statusDrying,Drying & Detailing,Gogsamaa fi Qulqullaa'aa Jira,እየደረቀና እየጸዳ ነው
+Customer_UI,statusReadyForPickup,Ready for Pickup,Fudhachuuf Qophiidha,ለመረከብ ዝግጁ ነው
+Customer_UI,statusCompleted,Completed,Xumurameera,ተጠናቋል
+Customer_UI,statusCancelled,Cancelled,Haqameera,ተሰርዟል
+Customer_UI,phaseApprovedArrived,Approved & Arrived at Station,Mirkanaa'ee Buufata Gaheera,ተረጋግጦ ማዕከል ደርሷል
+Customer_UI,phaseApprovedArrivedSub,Vehicle inspected & queued in reception bay,Konkolaataan qoratamee dabaree dhiqaa galeera,ተሽከርካሪው ተመርምሮ ወደ ማጠቢያ ተራ ገብቷል
+Customer_UI,phaseStartWash,Start Wash & Active Foam,Dhiqannaa Jalqabuu & Saamunaa Hoomisaa,እጥበት ጀምር እና የአረፋ ሳሙና
+Customer_UI,phaseStartWashSub,Touchless pre-soak & high-pressure jet rinse,Saamunaa hoomisaafi bishaan dhiibbaa ol-aanaa,የአረፋ ሳሙና እና ከፍተኛ ግፊት ውሃ
+Customer_UI,phaseMoveToDrying,Move to Drying & Detailing,Goggogsuu & Qulqulleessuu,ወደ ማድረቅ እና ማሳመር ሽግግር
+Customer_UI,phaseMoveToDryingSub,"Microfiber hand towel dry, tire shine & interior vacuum","Tawulaan goggogsuu, gommaa calaqqisiisuu fi vakiyuumii",በማይክሮፋይበር ፎጣ ማድረቅ፣ ጎማ ማብረቅ እና ቫኪዩም
+Customer_UI,phaseCompletedReadySub,Final inspection passed & ready for handover,Qulqullinni mirkanaa'ee fudhachuuf qophiidha,የመጨረሻ ምርመራ አልፎ ለርክክብ ዝግጁ ነው
+Customer_UI,noQueueImmediate,No queue • Immediate service available,Dabareen hin jiru • Tajaajila battalaa,ተራ የለም • ፈጣን አገልግሎት ዝግጁ ነው
+Customer_UI,pkg_express_name,Express Foam Wash,Dhiqannaa Saamunaa Saffisaa,ፈጣን የአረፋ ሳሙና እጥበት
+Customer_UI,pkg_express_desc,"High-pressure water rinse, active snow foam soak, tire shine & hand dry.","Bishaan dhiibbaa ol-aanaa, saamunaa hoomisaa, cululuqsa gommaafi goggogsuu harkaa.",በከፍተኛ የውሃ ግፊት ማጠብ፣ ንቁ የሳሙና አረፋ፣ የጎማ ማብሪያና ማድረቅ።
+Customer_UI,pkg_silver_name,Basic / Silver Package,Paakeejii Bu'uuraa / Meetaa,ቤሲክ / ሲልቨር ፓኬጅ
+Customer_UI,pkg_silver_desc,Basic wash for exterior body and glass clean.,Dhiqannaa bu'uuraa qaama alaa fi fuula daawwitii.,መሰረታዊ የውጭ አካል እና የመስታወት እጥበት።
+Customer_UI,pkg_gold_name,Gold Package (Polish),Paakeejii Warqee (Pooliishii),ጎልድ ፓኬጅ (ፖሊሽ)
+Customer_UI,pkg_gold_desc,Basic wash plus premium protective body polish.,Dhiqannaa bu'uuraa fi pooliishii qulqulluu eegumsa qaamaa.,መሰረታዊ እጥበት ከፕሪሚየም የቦዲ ፖሊሽ ማብሪያ ጋር።
+Customer_UI,cat_exterior,Exterior & Hand Wash,Dhiqannaa Qaama Alaa fi Harka,የውጭ አካል እና የእጅ እጥበት
+Customer_UI,cat_polish,Body Polish & Paint Correction,Poolishii Qaama Konkolaataa fi Bakkoltee Halluu Sirreessuu,የመኪና አካል ፖሊሽ እና የቀለም ጭረት ጥገና
+Customer_UI,cat_interior,Interior Restoration & Detailing,Qulqullina Keessaa fi Miidhagina Guutuu,የውስጥ ክፍል ፅዳት እና ዲቴይሊንግ
+Customer_UI,cat_engine,Engine & Specialty Detailing,Qulqullina Gadi-fageenyaa Mootoraa fi Kutaa Addaa,የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት
+Customer_UI,srv_dashboard_detailing,Dashboard Detailing: Cream & Airfresh,Daashboordii miidheksuu (kiriimii fi shittoo sirreessuu),የዳሽቦርድ ማስዋብ (ክሬም እና ሽቶ ማስተካከል)
+Customer_UI,srv_door_panel,Door Panel Deep Cleaning,Qaama keessoo balbalaa gadi-fageenyaan qulqulleessuu fi miidheksuu,የበር ውስጣዊ ገጽታዎች ጥልቅ ጽዳት እና ማስዋብ
+Customer_UI,srv_engine_shampoo,Engine Cleaning: Shampoo,Mootora shaamപ്പോdhaan dhiquu,የሞተር እጥበት (በሻምፖ)
+Customer_UI,srv_engine_chemical,"Engine Bay Chemical Degreasing: Deep Clean, Rinse & Dry","Moora mootoraa kemikaalaan cooma qulqulleessuu (dhiquu, dhiqachuu fi gogsuu)",የሞተር ክፍል በኬሚካል ቅባት ማስለቀቅ (ጥልቅ ጽዳት፣ ማጠብ እና ማድረቅ)
+Customer_UI,srv_headlight_restoration,Headlight Restoration,Daawwitii ifaa fuulduraa kan dhiitama/bifa gate gara oriijinaalaatti deebisuu,የደበዘዘ (የወየበ) የግንባር መብራት መስታወት ወደ ኦሪጂናል መመለስ
+Customer_UI,srv_plastic_trim,Plastic Trim Restoration,Pilaastikii fi Gommaa Haaromsuu,የፕላስቲክ እና የጎማ ማደስ
+Customer_UI,srv_diamond_detailing,Diamond - Interior & Exterior Detailing (1 Day),Daayimandii - Miidhagina Keessaa fi Alaa Guutuu (Guyyaa 1),ዳይመንድ - የውስጥ እና የውጭ ሙሉ ዲቴይሊንግ (1 ቀን)
+Customer_UI,carpetWashingService,Carpet Washing Service,Tajaajila Dhiqa Karpeetii,የምንጣፍ እጥበት አገልግሎት
+Customer_UI,carpetMatrixTitle,Carpet Service Package Pricing Matrix,Madaallii Gatii Paakeejii Karpeetii,የምንጣፍ እጥበት ፓኬጆች ዋጋ ዝርዝር
+Customer_UI,carpetMatrixSubtitle,Set ETB per m² for Type A & Type B across all 3 delivery modes,Gatii m² akaakuu A fi B tajaajiloota 3f murteessaa,ለአይነት ሀ እና አይነት ለ በሦስቱም የአገልግሎት መንገዶች የካሬ ሜትር ዋጋ ይወስኑ
+Customer_UI,carpetValetDriver,Valet Pick-up & Delivery,Geejjiba Karpeetii,የምንጣፍ ትራንስፖርትና ርክክብ
+Customer_UI,carpetQueueTitle,Carpet Cleaning Queue,Tarree Dhiqa Karpeetii,የምንጣፍ እጥበት ተራ
+Customer_UI,showerCommissionNotice,100% Station Net Revenue • 0% Washer Commission,Galii Buufataa %100 • Dhiqxootaaf %0,100% የጣቢያው ገቢ • ለአጣቢዎች 0% ኮሚሽን
+Customer_UI,addTipPrompt,Add Tip for Washers (Optional),Dhiqxootaaf tipii dabali (filannoo),ለአጣቢዎች ቲፕ ጨምር (አማራጭ)
+Customer_UI,tipPassThroughNotice,100% of customer tips are passed directly to the washing crew.,Tipiin maamilaa %100 kallattiin garee dhiqdootaatiif kennama.,100% የደንበኛ ቲፕ በቀጥታ ለአጣቢዎች ይተላለፋል።
+Customer_UI,washersTip,Washer Team Tip (ETB),Gumaata Dhiqxootaa (ETB),የአጣቢዎች ቲፕ (ብር)
+Customer_UI,digitalPay,Telebirr / CBE,Kaffaltii Dijitaalaa (Telebirr / CBE),ዲጂታል ክፍያ (ቴሌብር / ሲቢኢ ብር)
+Customer_UI,carouselSlide1Title,Active Snow Foam Pre-Soak,Dhiqannaa Hoomaa Qulqulluu,ንክኪ-አልባ የሆም አረፋ እጥበት
+Customer_UI,carouselSlide1Desc,Scratch-free dirt breakdown with pH-neutral active shampoo,Qulqullina olaanaa fi eegumsa rifeensa konkolaataa,የመኪናውን ቀለም የማይጎዳ ጥልቅ ቆሻሻ ማስወገጃ
+Customer_UI,carouselSlide2Title,High-Pressure Chassis & Jet Steam,Bishaan Dhiibbaa Ol-aanaa & Shassii,ከፍተኛ ግፊት የታችኛው አካል እጥበት
+Customer_UI,carouselSlide2Desc,Deep wheel-well cleaning & high-power underside rinse,Qulqullina gommaa fi jala konkolaataa cimaa,የጎማ እና የታችኛው ክፍል ከባድ የጭቃ እጥበት
+Customer_UI,carouselSlide3Title,Diamond Polish & Ceramic Shield,Poolishii Daayimandii & Eegumsa,ዳይመንድ ፖሊሽ እና ሴራሚክ ከለላ
+Customer_UI,carouselSlide3Desc,Hydrophobic ceramic protection & showroom mirror gloss,Calaqqisa addaa fi eegumsa aduu fi bishaanii,የመስታወት ነፀብራቅ ወዝ እና የውሃ መከላከያ ከለላ
+Customer_UI,carouselSlide4Title,Rapid Express Bay Wash,Tajaajila Dafee Qophaa'u (Daqiiqaa 15),ፈጣን የ15 ደቂቃ ኤክስፕረስ እጥበት
+Customer_UI,carouselSlide4Desc,Fast automated rinse & wax with zero wait time,Turtii malee tajaajila saffisaa fi ammayyaa,ያለ ምንም ተራ ፈጣን እና ዘመናዊ የእጥበት አገልግሎት
+Customer_UI,carouselCarpetSlide1Title,Rotary Deep Jet Carpet Shampoo,Dhiqannaa Karpeetii Hoomaa Cimaa,ጥልቅ የንጣፍ ሻምፑ እና ጄት እጥበት
+Customer_UI,carouselCarpetSlide1Desc,Commercial rotary fiber scrubbing & anti-bacterial stain lift,Qulqullina olaanaa fi eegumsa rifeensa karpeetii,የጨርቅ እና ፀጉር ጥልቅ ቆሻሻ ማስወገጃ ቴክኖሎጂ
+Customer_UI,carouselCarpetSlide2Title,Spin Dehydration & Odor Extraction,Bishaan Cabaqsuu & Urgooftuu,የውሃ ማድረቂያ ስፒን እና ሽታ ማስወገጃ
+Customer_UI,carouselCarpetSlide2Desc,High-RPM centrifugal moisture extraction for fresh scent,Saffisaan bishaan keessaa baasuu fi foolii gaarii,በሴንትሪፊዩጋል ማድረቂያ እርጥበትን በደቂቃዎች ውስጥ ማድረቅ
+AI_Concierge_Prompt,aiConciergeTitle,BISHE AI Concierge,Tajaajila AI BISHE,የቢሼ AI እንግዳ ተቀባይ
+AI_Concierge_Prompt,aiConciergeSub,"Instant price estimates, package guidance, EV care, and live queue status","Tilmaama gatii battalaa, qajeelfama paakeejii fi dabaree dhiqa",የዋጋ ግምት፣ የፓኬጅ ማብራሪያ፣ የኤሌክትሪክ መኪና እንክብካቤ እና የተራ ሁኔታ
+AI_Concierge_Prompt,aiPromptCustomerPackages,✨ Packages & Pricing,✨ Paakeejii & Gatii,✨ የፓኬጅ ዓይነቶችና ዋጋ
+AI_Concierge_Prompt,aiPromptCustomerWaitTime,⏱️ Live Queue & Wait Time,⏱️ Dabaree & Yeroo Eegumsaa,⏱️ የቀጥታ ተራና የጥበቃ ጊዜ
+AI_Concierge_Prompt,aiPromptCustomerEvSafety,⚡ EV & High-Pressure Safety,⚡ Eegumsa Konkolaataa Elektiriikii,⚡ የኤሌክትሪክ መኪና ደህንነት
+AI_Concierge_Prompt,aiPromptCustomerCarpet,🏠 Carpet Wash & Delivery,🏠 Dhiqa Afataafi Geessuu,🏠 የምንጣፍ እጥበትና ትራንስፖርት
+AI_Concierge_Prompt,aiPromptCustomerShower,🚿 Clean Hot Showers,🚿 Dhiqannaa Qaamaa Qulqulluu,🚿 ዘመናዊ የሙቅ ውሃ ሻወር
+AI_Concierge_Prompt,aiQueryCustomerPackages,What wash packages do you offer and what are the prices?,Paakeejiiwwan dhiqaafi gatii isaanii natti himaa,የማጠቢያ ፓኬጆችንና ዋጋቸውን ንገሩኝ
+AI_Concierge_Prompt,aiQueryCustomerWaitTime,How busy are the bays right now and what is the wait time?,Amma dabareefi yeroon eegumsaa akkam jira?,አሁን ያለው ተራ እና የጥበቃ ጊዜ ስንት ነው?
+AI_Concierge_Prompt,aiQueryCustomerEvSafety,Is high-pressure and steam wash safe for electric vehicles (EV)?,Konkolaataa elektiriikii dhiquun amansiisaadhaa?,የኤሌክትሪክ መኪና ማጠብ ደህንነቱ የተጠበቀ ነው?
+AI_Concierge_Prompt,aiQueryCustomerCarpet,How much is carpet washing per square meter and delivery turnaround?,Dhiqi afataa meetira isquweeriin meeqa?,የምንጣፍ እጥበት በካሬ ሜትር ዋጋው ስንት ነው?
+AI_Concierge_Prompt,aiQueryCustomerShower,Where are your clean hot showers located and what is the fee?,Tajaajilli dhiqannaa eessatti argama kaffaltiin meeqa?,የሻወር አገልግሎት የት ይገኛል ክፍያው ስንት ነው?
+AI_Concierge_Response,ai_response_welcome_greeting,"👋 Hello! I am your BISHE Customer Concierge. How can I help you today? Ask me about wash packages, queue wait times, EV wash safety, carpet cleaning, or clean hot showers.","👋 Akkam! Ani Gargaaraa Maamilaa BISHE ti. Har'a akkamitti isin gargaaruu danda'a? Waa'ee paakeejiiwwan dhiqaa, yeroo eegumsaa dabaree, nageenya dhiqa makiinaa elektiriikii, karpeetii ykn dhiqannaa qaamaa na gaafachuu dandeessu.",👋 ጤና ይስጥልኝ! እኔ የቢሼ ደንበኞች ረዳት (AI Concierge) ነኝ። ዛሬ በምን ላግዝዎት? ስለ እጥበት ፓኬጆች፣ ስለ ተራ እና የጥበቃ ጊዜ፣ ስለ ኤሌክትሪክ መኪና እጥበት፣ ስለ ምንጣፍ እጥበት ወይም ስለ ንጹህ ሙቅ ሻወር አገልግሎት ሊጠይቁኝ ይችላሉ።
+AI_Concierge_Response,ai_response_packages_pricing,"### 🚿 BISHE Car Wash Service Packages & Pricing
+*Bishoftu Station Drive-In & Mobile Van Wash*
+
+1. **Silver / Basic Wash** (15–20 mins): High-pressure touchless rinse, snow foam soak, tire shine & hand dry. (Type A: 300 ETB | Type B: 400 ETB | Type C: 600 ETB)
+2. **Gold Polish Wash** (30–40 mins): Basic + full body hand polish, hydrophobic glass coat, interior vacuum. (Type A: 600 ETB | Type B: 800 ETB | Type C: 1200 ETB)
+3. **Platinum Detailing** (45–60 mins): Gold + steam upholstery, dashboard restoration, rim degreasing. (Type A: 900 ETB | Type B: 1200 ETB | Type C: 1800 ETB)
+4. **Diamond Showroom** (75–90 mins): Platinum + 3-stage orbital buffing, ceramic spray, engine degrease. (Type A: 1500 ETB | Type B: 2000 ETB | Type C: 3000 ETB)","### 🚿 Paakeejiiwwan Dhiqa Konkolaataa BISHE fi Gatii Isaanii
+*Buufata Bishooftuutti Dhuftanii ykn Makiinaa Socho'aan*
+
+1. **Silver / Bu'uuraa** (Daqiiqaa 15–20): Bishaan dhiibbaa ol-aanaa, saamunaa hoomisaa, cululuqsa gommaafi qoorsuu harkaa. (Gosa A: 300 ETB | Gosa B: 400 ETB | Gosa C: 600 ETB)
+2. **Gold Polish** (Daqiiqaa 30–40): Bu'uuraa + poolishii qaama makiinaa, cululuqsa fuullee, qulqulleessuu keessaa. (Gosa A: 600 ETB | Gosa B: 800 ETB | Gosa C: 1200 ETB)
+3. **Platinum Detailing** (Daqiiqaa 45–60): Gold + hurkaan teessuma qulqulleessuu, daashboordii fi koochoo qulqulleessuu. (Gosa A: 900 ETB | Gosa B: 1200 ETB | Gosa C: 1800 ETB)
+4. **Diamond Showroom** (Daqiiqaa 75–90): Platinum + poolishii sadarkaa 3, seraamikii, dhiqa mooraa mootoraa. (Gosa A: 1500 ETB | Gosa B: 2000 ETB | Gosa C: 3000 ETB)","### 🚿 የቢሼ መኪና ማጠቢያ ፓኬጆች እና ዋጋ ዝርዝር
+*በቢሾፍቱ ማዕከል መጥተው ወይም በሞባይል ቫን*
+
+1. **ሲልቨር / መደበኛ** (15–20 ደቂቃ): የከፍተኛ ግፊት ውሃ፣ የአረፋ ሳሙና፣ የጎማ ማብሪያና ማድረቅ። (ዓይነት ሀ: 300 ብር | ዓይነት ለ: 400 ብር | ዓይነት ሐ: 600 ብር)
+2. **ጎልድ ፖሊሽ** (30–40 ደቂቃ): ሲልቨር + ሙሉ የሰውነት ፖሊሽ፣ የብርጭቆ ውሃ መከላከያ፣ የውስጥ ቫኪዩም። (ዓይነት ሀ: 600 ብር | ዓይነት ለ: 800 ብር | ዓይነት ሐ: 1200 ብር)
+3. **ፕላቲነም ዲቴይሊንግ** (45–60 ደቂቃ): ጎልድ + በእንፋሎት የመቀመጫ እጥበት፣ የዳሽቦርድና የጎማ ሪም ማጽዳት። (ዓይነት ሀ: 900 ብር | ዓይነት ለ: 1200 ብር | ዓይነት ሐ: 1800 ብር)
+4. **ዳይመንድ ሾውሩም** (75–90 ደቂቃ): ፕላቲነም + ባለ 3 ደረጃ የፖሊሽ ማሽን፣ የሴራሚክ ስፕሬይ፣ የሞተር እጥበት። (ዓይነት ሀ: 1500 ብር | ዓይነት ለ: 2000 ብር | ዓይነት ሐ: 3000 ብር)"
+AI_Concierge_Response,ai_response_queue_wait_time,"### ⏱️ Live Queue & Wait Time Report
+*Live Station Status at Bishoftu*
+
+- **Bay 1 (Concrete)**: Open and ready for incoming vehicles.
+- **Bay 2 (Concrete)**: Open and ready for incoming vehicles.
+- **Cars in Queue**: ~0 vehicles ahead (Estimated wait time: ~5 mins).
+
+💡 *Tip: If you are in a rush, Silver / Basic wash takes only 15–20 minutes!*","### ⏱️ Odeeffannoo Dabaree fi Yeroo Eegumsaa Battalaa
+*Haala Qabatamaa Iddoo Dhiqa Bishooftuu*
+
+- **Iddoo 1 (Bay 1)**: Duwwaadha, konkolaataa simachuuf qophiidha.
+- **Iddoo 2 (Bay 2)**: Duwwaadha, konkolaataa simachuuf qophiidha.
+- **Dabaree Irra Kan Jiran**: Konkolaattota 0 (Tilmaama Yeroo Eegumsaa: ~Daqiiqaa 5).
+
+💡 *Gorsa: Yoo ariifattan dhiqni Silver Bu'uuraa daqiiqaa 15–20 keessatti xumurama!*","### ⏱️ የቀጥታ ተራ እና የጥበቃ ጊዜ መረጃ
+*የቢሾፍቱ ማዕከል የቀጥታ ሁኔታ*
+
+- **ማጠቢያ ቦታ 1 (Bay 1)**: ክፍት ነው፣ መኪና ለመቀበል ዝግጁ ነው።
+- **ማጠቢያ ቦታ 2 (Bay 2)**: ክፍት ነው፣ መኪና ለመቀበል ዝግጁ ነው።
+- **በተራ ላይ ያሉ**: 0 መኪኖች (የሚገመተው የጥበቃ ጊዜ: ~5 ደቂቃ)።
+
+💡 *ምክር: አጣዳፊ ጉዞ ካለዎት ሲልቨር መደበኛ እጥበት ከ15–20 ደቂቃ ውስጥ ይጠናቀቃል!*"
+AI_Concierge_Response,ai_response_ev_safety,"### ⚡ Electric Vehicle (EV) Safety Guarantee
+*Engineered for BYD, Volkswagen ID, Tesla, Hyundai Ioniq, and all modern EVs*
+
+1. **Zero High-Pressure on Charge Ports**: Charge doors and high-voltage DC/AC ports are hand-cleaned only.
+2. **Underbody Shielding Protection**: Touchless rinsing calibrated to 80 Bar max under battery trays.
+3. **Safe Engine Bay / Frunk Cleaning**: Frunks and inverter areas are cleaned using dry microfiber & dielectric conditioning only; NO pressurized steam or flooding.
+4. **Neutral pH Snow Foam**: Protects EV sensors, ultrasonic park-assist radars, and camera housings.","### ⚡ Wabii Nageenya Konkolaattota Elektiriikii (EV)
+*Makiinaalee BYD, VW ID, Tesla, Hyundai Ioniq fi hundaaf kan qophaa'e*
+
+1. **Bakka Chaarjii Irra Bishaan Dhiibbaa Guddaa Dhabamsiisuu**: Qodaan chaarjii harkaan qofa qulqullaa'a.
+2. **Eegumsa Baatrii Jala Konkolaataa**: Dhiibbaan bishaan baatrii jalaatiif bar 80 hin caalle qofa fayyadamna.
+3. **Qulqullina Mooraa Fuulduraa (Frunk)**: Naannoo inverteeraafi baatriitti bishaan hin lolaafamu; fooyisoo qalloo gogaan qulqullaa'a.
+4. **Saamunaa Seensaroota Eegu**: Kaameraafi seensaroota konkolaataa hin miidhu.","### ⚡ ለኤሌክትሪክ ተሽከርካሪዎች (EV) የተረጋገጠ ደህንነት
+*ለቢዋይዲ (BYD)፣ ቮልስዋገን አይዲ፣ ቴስላ እና ለሁሉም የኤሌክትሪክ መኪኖች የተዘጋጀ*
+
+1. **በቻርጅ መክደኛ ላይ ከፍተኛ ግፊት አይደረግም**: የቻርጅ ክፍሎች በእጅ ብቻ በጥንቃቄ ይጸዳሉ።
+2. **የታችኛው ባትሪ መከላከያ**: የታችኛው የባትሪ ክፍል በከፍተኛ የውሃ ግፊት ሳይሆን በተመጠነ ርጭት ይታጠባል።
+3. **የፍራንክ (Frunk) እና ኢንቨርተር እንክብካቤ**: በኤሌክትሪክ ገመዶችና ኢንቨርተሮች ላይ ውሃ አይረጭም፤ በደረቅ ማይክሮፋይበር ብቻ ይጸዳል።
+4. **ሴንሰሮችንና ካሜራዎችን የሚጠብቅ ሳሙና**: የፓርኪንግ ሴንሰሮችንና ካሜራዎችን የማይጎዳ ገለልተኛ ኬሚካል ጥቅም ላይ ይውላል።"
+AI_Concierge_Response,ai_response_carpet_washing,"### 🧶 Carpet & Rug Deep Jet Washing Service
+*Sanitized, Sun-Dried & Delivered to Your Doorstep*
+
+- **Pricing**: Calculated per square meter (m²) based on carpet weave (Type A Standard: ~60 ETB/m² | Type B Premium Wool/Shag: ~90 ETB/m²).
+- **3 Delivery Modes**: 1) Station Drop-off/Pick-up 2) At Customer Home 3) VIP Valet Van Pick-up & Return.
+- **Turnaround Time**: 24–48 hours for deep rotational shampooing, high-pressure jet dirt extraction, and full UV sun-drying.","### 🧶 Tajaajila Dhiqa Karpeetii fi Afataa
+*Qulqulluu, Aadaatiin Kan Qoore fi Mana Keessanitti Kan Deebi'u*
+
+- **Gatii**: Meetira iskuweeriin shallagama (Akaakuu A Bu'uuraa: ~60 ETB/m² | Akaakuu B Wool/Furdaa: ~90 ETB/m²).
+- **Filannoowwan Tajaajilaa 3**: 1) Buufatatti Fiduu 2) Mana Maamilaatti 3) Makiinaa BISHE tiin Fuudhanii Deebisuu.
+- **Yeroo Xumuraa**: Sa'aatii 24–48 keessatti saamunaan dhiqamee, bishaaniin qulqullaa'ee aduudhaan gogsee dhiyaata.","### 🧶 ጥልቅ የምንጣፍ እጥበት አገልግሎት
+*በዘመናዊ ማሽን ታጥቦ፣ በጸሐይ ደርቆ እቤትዎ ድረስ የሚደርስ*
+
+- **ዋጋ**: በካሬ ሜትር (m²) ይሰላል (ዓይነት ሀ መደበኛ: ~60 ብር/ካሬ | ዓይነት ለ ወፍራም/ሱፍ: ~90 ብር/ካሬ)።
+- **3 የአገልግሎት መንገዶች**: 1) ጣቢያ አምጥተው የሚወስዱት 2) በደንበኛ ቤት 3) በቢሼ ቫን ተወስዶ የሚመለስ።
+- **የሚወስደው ጊዜ**: ከ24–48 ሰዓታት ውስጥ በጥልቅ ሻምፑና በጄት ግፊት ታጥቦ በጸሐይ ደርቆ ይረከባሉ።"
+AI_Concierge_Response,ai_response_shower_facility,"### 🚿 Clean Hot Shower Facility (0% VAT Statutory Exemption)
+*Private, Sanitized & Refreshed with Hot Water*
+
+- **Location**: Located inside the BISHE Bishoftu Main Station rest facility.
+- **Price**: 100 ETB per shower guest (100% Station revenue, 0% VAT exempt under Ethiopian tax law).
+- **Amenities**: Hot water, fresh clean towel, single-use soap, and private sanitised cabin.","### 🚿 Tajaajila Dhiqannaa Qaamaa (Bishaan Hoo'aa - VAT 0%)
+*Dhuunfaa, Qulqulluu fi Bishaan Hoo'aa Qabu*
+
+- **Iddoo**: Buufata BISHE Bishooftuu keessatti argama.
+- **Gatii**: Qarshii 100 (Gibira VAT irraa kan bilisa ta'e).
+- **Wanta Qophaa'e**: Bishaan hoo'aa, footaa qulqulluu, saamunaafi kutaa qulqullinaa dhuunfaa.","### 🚿 የሙቅ ውሃ ሻወር አገልግሎት (ከቫት ነጻ - 0% VAT)
+*ንጹህ፣ የግል እና በሙቅ ውሃ የታጠረ*
+
+- **አድራሻ**: በቢሾፍቱ የቢሼ ማዕከል ውስጥ ይገኛል።
+- **ዋጋ**: 100 ብር ለአንድ ሰው (በኢትዮጵያ የግብር ህግ መሰረት 0% ከቫት ነጻ የሆነ)።
+- **የተሟሉ ነገሮች**: አስተማማኝ ሙቅ ውሃ፣ ንጹህ ፎጣ፣ ሳሙና እና የግል ንጹህ ማረፊያ።"
+AI_Concierge_Response,ai_response_privacy_notice,"### 🔒 Customer Privacy & Station Policy
+Thank you for reaching out! Operational details such as washer commission splits, internal profit margins, and station payroll are internal confidential station policies and cannot be disclosed. For service questions or custom fleet discounts, please contact the Cashier or General Manager at the station desk.","### 🔒 Eegumsa Icciitii Maamilaa fi Imaammata Buufataa
+Nagaan dhuftan! Odeeffannoowwan keessoo kanneen akka komishinii hojjettootaa, bu'aa dhugaa fi miindaa qulqullinaa icciitii dhaabbatichaa waan ta'eef maamiltootaaf hin ibsamu. Tajaajiloota dhiqannaa fi hir'isa gatii daldalaatiif kaashiyara ykn maneejara buufataa gaafadhaa.","### 🔒 የደንበኞች ደህንነት እና የጣቢያው ህግ
+ስለጠየቁን እናመሰግናለን! የአጣቢዎች ኮሚሽን ክፍፍል፣ የውስጥ ትርፍ ህዳግ እና የሰራተኞች ደመወዝ የድርጅቱ የውስጥ ሚስጥር በመሆናቸው ለደንበኞች አይገለጹም። ስለ እጥበት አገልግሎቶች ወይም ስለ ልዩ የድርጅት ቅናሽ መረጃ ከፈለጉ እባክዎን የጣቢያውን ገንዘብ ያዥ ወይም ስራ አስኪያጅ ያነጋግሩ።"
