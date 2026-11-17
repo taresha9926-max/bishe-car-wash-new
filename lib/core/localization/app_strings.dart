@@ -46,23 +46,23 @@ class AppStrings {
     },
     'cashierRole': {
       AppLanguage.en: 'Cashier Desk',
-      AppLanguage.om: 'Qabaa Qarshii',
-      AppLanguage.am: 'ገንዘብ ያዥ',
+      AppLanguage.om: 'Kaashiyara (Herregduu)',
+      AppLanguage.am: 'ገንዘብ ያዥ (ካሺየር)',
     },
     'managerRole': {
       AppLanguage.en: 'Operational Manager',
-      AppLanguage.om: 'Hojii Geggeessaa',
+      AppLanguage.om: 'Maneejara Hojii (Geggeessaa)',
       AppLanguage.am: 'ኦፕሬሽን ስራ አስኪያጅ',
     },
     'storekeeperRole': {
       AppLanguage.en: 'Storekeeper Desk',
-      AppLanguage.om: 'Kuusaa Qulqullinaa',
-      AppLanguage.am: 'ዕቃ ግምጃ ቤት',
+      AppLanguage.om: 'Eegaa Kuusaa & Meeshaa',
+      AppLanguage.am: 'የዕቃ ግምጃ ቤት ኃላፊ',
     },
     'accountantRole': {
       AppLanguage.en: 'Accountant Hub',
-      AppLanguage.om: 'Herrega & Faayinaansii',
-      AppLanguage.am: 'ሂሳብ እና ኦዲት',
+      AppLanguage.om: 'Ogeessa Herregaa & Faayinaansii',
+      AppLanguage.am: 'የሂሳብና ፋይናንስ ክፍል',
     },
     'adminRole': {
       AppLanguage.en: 'Admin Hub',
@@ -217,7 +217,7 @@ class AppStrings {
     },
     'statusAssignedToBay': {
       AppLanguage.en: 'Queued in Bay',
-      AppLanguage.om: 'Kutaa Keessatti Qophaa\'e',
+      AppLanguage.om: 'Iddoo Dhiqaatti Qophaa\'e',
       AppLanguage.am: 'ክፍል ውስጥ ተሰይሟል',
     },
     'statusWashing': {
@@ -279,7 +279,7 @@ class AppStrings {
     },
     'serviceWalkInCapacity': {
       AppLanguage.en: '2 Bays Available at Bishoftu Station',
-      AppLanguage.om: 'Kutaalee Dhiqannaa 2 Bishooftuutti Qophii',
+      AppLanguage.om: 'Iddoowwan Dhiqa Konkolaataa 2 Bishooftuutti Qophii',
       AppLanguage.am: 'በቢሾፍቱ ጣቢያ 2 የማጠቢያ ክፍሎች ዝግጁ ናቸው',
     },
     'serviceAtHomeCapacity': {
@@ -494,7 +494,7 @@ class AppStrings {
     'carouselSlide4Desc': {
       AppLanguage.en: 'Fast automated rinse & wax with zero wait time',
       AppLanguage.om: 'Turtii malee tajaajila saffisaa fi ammayyaa',
-      AppLanguage.am: 'ያለ ምንም ሰልፍ ፈጣን እና ዘመናዊ የእጥበት አገልግሎት',
+      AppLanguage.am: 'ያለ ምንም ተራ ፈጣን እና ዘመናዊ የእጥበት አገልግሎት',
     },
     'carouselCarpetSlide1Title': {
       AppLanguage.en: 'Rotary Deep Jet Carpet Shampoo',
@@ -538,8 +538,8 @@ class AppStrings {
     },
     'carsAheadInQueue': {
       AppLanguage.en: 'Cars Ahead in Queue',
-      AppLanguage.om: 'Konkolaattota Fuuldura Tarree jiran',
-      AppLanguage.am: 'በሰልፍ ውስጥ ከፊት ያሉ መኪኖች',
+      AppLanguage.om: 'Konkolaattota Fuuldura Dabaree jiran',
+      AppLanguage.am: 'በተራ ላይ ከፊትዎ ያሉ መኪኖች',
     },
     'estimatedBayArrival': {
       AppLanguage.en: 'Estimated Time to Service',
@@ -548,8 +548,8 @@ class AppStrings {
     },
     'lookingForEarlierBooking': {
       AppLanguage.en: 'Looking for an earlier booking? Enter plate or phone',
-      AppLanguage.om: 'Biiroo duraa barbaadaa jirtuu? Gabatee ykn bilbila galchaa',
-      AppLanguage.am: 'ያለፈ ቀጠሮ መፈለግ ይፈልጋሉ? ታርጋ ወይም ስልክ ያስገቡ',
+      AppLanguage.om: 'Ajaja kanaan duraa barbaadaa jirtuu? Gabatee ykn bilbila galchaa',
+      AppLanguage.am: 'ያለፈ ትዕዛዝ መፈለግ ይፈልጋሉ? ታርጋ ወይም ስልክ ያስገቡ',
     },
     'enterPlateOrPhone': {
       AppLanguage.en: 'Enter Plate or Phone Number',
@@ -568,18 +568,18 @@ class AppStrings {
     },
     'phaseApprovedArrivedSub': {
       AppLanguage.en: 'Vehicle inspected & queued in reception bay',
-      AppLanguage.om: 'Konkolaataan qoratamee tarree galeera',
-      AppLanguage.am: 'ተሽከርካሪው ተመርምሮ ወደ ማስተናገጃ መስመር ገብቷል',
+      AppLanguage.om: 'Konkolaataan qoratamee dabaree dhiqaa galeera',
+      AppLanguage.am: 'ተሽከርካሪው ተመርምሮ ወደ ማጠቢያ ተራ ገብቷል',
     },
     'phaseStartWash': {
       AppLanguage.en: 'Start Wash & Active Foam',
-      AppLanguage.om: 'Dhiqannaa Jalqabuu & Hoomaa',
-      AppLanguage.am: 'እጥበት ጀምር እና ንቁ አረፋ',
+      AppLanguage.om: 'Dhiqannaa Jalqabuu & Saamunaa Hoomisaa',
+      AppLanguage.am: 'እጥበት ጀምር እና የአረፋ ሳሙና',
     },
     'phaseStartWashSub': {
       AppLanguage.en: 'Touchless pre-soak & high-pressure jet rinse',
-      AppLanguage.om: 'Hoomaa qulqulluu fi bishaan dhiibbaa ol-aanaa',
-      AppLanguage.am: 'ንክኪ-አልባ የቅድመ-እጥበት እና ከፍተኛ ግፊት ጄት',
+      AppLanguage.om: 'Saamunaa hoomisaafi bishaan dhiibbaa ol-aanaa',
+      AppLanguage.am: 'የአረፋ ሳሙና እና ከፍተኛ ግፊት ውሃ',
     },
     'phaseMoveToDrying': {
       AppLanguage.en: 'Move to Drying & Detailing',
@@ -763,7 +763,7 @@ class AppStrings {
     },
     'storekeeperPortal': {
       AppLanguage.en: 'Storekeeper Inventory',
-      AppLanguage.om: 'Kuusaa Qulqullinaa',
+      AppLanguage.om: 'Eegaa Kuusaa',
       AppLanguage.am: 'የዕቃ ግምጃ ቤት',
     },
     'storekeeperPinBadge': {
@@ -928,8 +928,8 @@ class AppStrings {
     },
     'customerTrustPill': {
       AppLanguage.en: 'Instant Wash Booking • Live Queue Tracker',
-      AppLanguage.om: 'Dhiqannaa Battalaa • Hordoffii Qophii Kallattii',
-      AppLanguage.am: 'ፈጣን የእጥበት ትዕዛዝ • የቀጥታ የሰልፍ መከታተያ',
+      AppLanguage.om: 'Ajaja Dhiqannaa Battalaa • Hordoffii Dabaree Kallattii',
+      AppLanguage.am: 'ፈጣን የእጥበት ትዕዛዝ • የቀጥታ የተራ መከታተያ',
     },
     'tiktokReelsTitle': {
       AppLanguage.en: 'OFFICIAL TIKTOK REELS',
@@ -973,8 +973,8 @@ class AppStrings {
     },
     'reelCounter': {
       AppLanguage.en: 'REEL',
-      AppLanguage.om: 'REEL',
-      AppLanguage.am: 'ቪዲዮ',
+      AppLanguage.om: 'Viidiyoo Gabaabaa (Reel)',
+      AppLanguage.am: 'አጫጭር ቪዲዮዎች (Reel)',
     },
     'ofWord': {
       AppLanguage.en: 'OF',
@@ -1509,12 +1509,12 @@ class AppStrings {
     },
     'pkg_express_name': {
       AppLanguage.en: 'Express Foam Wash',
-      AppLanguage.om: 'Dhiqannaa Hoomaa Saffisaa',
-      AppLanguage.am: 'አጭር የሳሙና አረፋ እጥበት',
+      AppLanguage.om: 'Dhiqannaa Saamunaa Saffisaa',
+      AppLanguage.am: 'ፈጣን የአረፋ ሳሙና እጥበት',
     },
     'pkg_express_desc': {
       AppLanguage.en: 'High-pressure water rinse, active snow foam soak, tire shine & hand dry.',
-      AppLanguage.om: 'Bishaan dhiibbaa guddaa, hoomaa dhiqannaa, gogaa gommaa fi qoorsuu harkaa.',
+      AppLanguage.om: 'Bishaan dhiibbaa ol-aanaa, saamunaa hoomisaa, cululuqsa gommaafi goggogsuu harkaa.',
       AppLanguage.am: 'በከፍተኛ የውሃ ግፊት ማጠብ፣ ንቁ የሳሙና አረፋ፣ የጎማ ማብሪያና ማድረቅ።',
     },
     'pkg_standard_name': {
@@ -1576,7 +1576,7 @@ class AppStrings {
     },
     'roleCashier': {
       AppLanguage.en: 'Cashier Desk',
-      AppLanguage.om: 'Qabaa Qarshii',
+      AppLanguage.om: 'Kaashiyara',
       AppLanguage.am: 'ገንዘብ ያዥ',
     },
     'roleAdmin': {
@@ -1593,7 +1593,7 @@ class AppStrings {
     // Cashier Screen
     'cashierTitle': {
       AppLanguage.en: 'Cashier Station Operations',
-      AppLanguage.om: 'Hojii Qabaa Qarshii',
+      AppLanguage.om: 'Hojii Kaashiyara',
       AppLanguage.am: 'የገንዘብ ያዥ የሥራ ሰሌዳ',
     },
     'newWalkIn': {
@@ -1613,8 +1613,8 @@ class AppStrings {
     },
     'digitalPay': {
       AppLanguage.en: 'Telebirr / CBE',
-      AppLanguage.om: 'Telebirr / CBE',
-      AppLanguage.am: 'ቴሌብር / ሲቢኢ',
+      AppLanguage.om: 'Kaffaltii Dijitaalaa (Telebirr / CBE)',
+      AppLanguage.am: 'ዲጂታል ክፍያ (ቴሌብር / ሲቢኢ ብር)',
     },
     'cashCollected': {
       AppLanguage.en: 'Cash Collected',
@@ -1653,8 +1653,8 @@ class AppStrings {
     },
     'queueAndVehicles': {
       AppLanguage.en: 'Queue & Vehicles',
-      AppLanguage.om: 'Tarree Konkolaattotaa',
-      AppLanguage.am: 'የመኪኖች ወረፋ',
+      AppLanguage.om: 'Dabareefi Konkolaattota',
+      AppLanguage.am: 'የመኪኖች ተራ ዝርዝር',
     },
     'filterAll': {
       AppLanguage.en: 'All Active',
@@ -1918,116 +1918,116 @@ class AppStrings {
     // Categories
     'cat_exterior': {
       AppLanguage.en: 'Exterior & Hand Wash',
-      AppLanguage.am: 'የውጭ አካል እና የእጅ እጥበት',
       AppLanguage.om: 'Dhiqannaa Qaama Alaa fi Harka',
+      AppLanguage.am: 'የውጭ አካል እና የእጅ እጥበት',
     },
     'cat_polish': {
       AppLanguage.en: 'Body Polish & Paint Correction',
-      AppLanguage.am: 'የመኪና አካል ፖሊሽ እና የቀለም ጭረት ጥገና',
       AppLanguage.om: 'Poolishii Qaama Konkolaataa fi Bakkoltee Halluu Sirreessuu',
+      AppLanguage.am: 'የመኪና አካል ፖሊሽ እና የቀለም ጭረት ጥገና',
     },
     'cat_interior': {
       AppLanguage.en: 'Interior Restoration & Detailing',
-      AppLanguage.am: 'የውስጥ ክፍል ፅዳት እና ዲቴይሊንግ',
       AppLanguage.om: 'Qulqullina Keessaa fi Miidhagina Guutuu',
+      AppLanguage.am: 'የውስጥ ክፍል ፅዳት እና ዲቴይሊንግ',
     },
     'cat_engine': {
       AppLanguage.en: 'Engine & Specialty Detailing',
-      AppLanguage.am: 'የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት',
       AppLanguage.om: 'Qulqullina Gadi-fageenyaa Mootoraa fi Kutaa Addaa',
+      AppLanguage.am: 'የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት',
     },
     'cat_specialty': {
       AppLanguage.en: 'Engine & Specialty Detailing',
-      AppLanguage.am: 'የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት',
       AppLanguage.om: 'Qulqullina Gadi-fageenyaa Mootoraa fi Kutaa Addaa',
+      AppLanguage.am: 'የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት',
     },
 
     // 1. Exterior & Hand Wash Items
     'srv_body_wash': {
       AppLanguage.en: 'Body Hand Wash with Shampoo & Fiber Towel',
-      AppLanguage.am: 'የመኪና አካል በሻምፖ እና በፋይበር ፎጣ እጥበት',
       AppLanguage.om: 'Dhiqannaa qaama konkolaataa shaamപ്പോ fi fooxaa faayiberiitiin',
+      AppLanguage.am: 'የመኪና አካል በሻምፖ እና በፋይበር ፎጣ እጥበት',
     },
     'srv_tire_clean': {
       AppLanguage.en: 'Tire Cleaning & Tire Black Finish',
-      AppLanguage.am: 'የጎማ እጥበት እና ማጥቆሪያ ቅባት',
       AppLanguage.om: 'Qulqullina gommaa fi kuula guraachessituu gommaa',
+      AppLanguage.am: 'የጎማ እጥበት እና ማጥቆሪያ ቅባት',
     },
     'srv_window_polish': {
       AppLanguage.en: 'Window Polish & Cleaning',
-      AppLanguage.am: 'የመስኮት መስታወት ማጽዳት',
       AppLanguage.om: 'Daawwitii foddaa konkolaataa qulqulleessuu',
+      AppLanguage.am: 'የመስኮት መስታወት ማጽዳት',
     },
 
     // 2. Body Polish & Paint Correction Items
     'srv_machine_polish': {
       AppLanguage.en: 'Machine Body Polish',
-      AppLanguage.am: 'በማሽን የሚደረግ የሰውነት ፖሊሽ',
       AppLanguage.om: 'Poolishii qaamaa maashiniin hojjetamu',
+      AppLanguage.am: 'በማሽን የሚደረግ የሰውነት ፖሊሽ',
     },
     'srv_scratch_removal': {
       AppLanguage.en: 'Scratch / Minor Scratch Removal',
-      AppLanguage.am: 'የጭረት እና ጥቃቅን ስንጥቆች ማስለቀቅ',
       AppLanguage.om: 'Ciccitaa fi madaa xixiqqoo halluu balleessuu',
+      AppLanguage.am: 'የጭረት እና ጥቃቅን ስንጥቆች ማስለቀቅ',
     },
     'srv_water_spot': {
       AppLanguage.en: 'Water Spot Chemical Removal',
-      AppLanguage.am: 'የውሃ እና የጨው ድርቀት ምልክቶችን ማስለቀቅ',
       AppLanguage.om: 'Mallattoo bishaanii fi ashaboo goge qorichaan balleessuu',
+      AppLanguage.am: 'የውሃ እና የጨው ድርቀት ምልክቶችን ማስለቀቅ',
     },
 
     // 3. Interior Restoration & Detailing Items
     'srv_int_vacuum': {
       AppLanguage.en: 'Interior Vacuum: Floor & Seat Cleaning',
-      AppLanguage.am: 'የውስጥ ክፍል ቫኪዩም (የወለል እና የወንበር አቧራ ማጽዳት)',
       AppLanguage.om: 'Vaakiyuumii keessaa (dhukkee lafaa fi teessumaa qulqulleessuu)',
+      AppLanguage.am: 'የውስጥ ክፍል ቫኪዩም (የወለል እና የወንበር አቧራ ማጽዳት)',
     },
     'srv_seats_out': {
       AppLanguage.en: 'Seat & Floor Carpet Removed & Washed',
-      AppLanguage.am: 'ወንበሮችና የወለል ምንጣፎች ወጥተው የሚታጠቡበት',
       AppLanguage.om: 'Teessumootaa fi afata lafaa baasanii dhiquu',
+      AppLanguage.am: 'ወንበሮችና የወለል ምንጣፎች ወጥተው የሚታጠቡበት',
     },
     'srv_roof_cleaning': {
       AppLanguage.en: 'Roof Headliner Deep Cleaning',
-      AppLanguage.am: 'የኮርኒስ/የጣራ ጨርቅ ጥልቅ እጥበት',
       AppLanguage.om: 'Huccuu korniisa/baaxii keessaa gadi-fageenyaan dhiquu',
+      AppLanguage.am: 'የኮርኒስ/የጣራ ጨርቅ ጥልቅ እጥበት',
     },
     'srv_dashboard_detailing': {
       AppLanguage.en: 'Dashboard Detailing: Cream & Airfresh',
-      AppLanguage.am: 'የዳሽቦርድ ማስዋብ (ክሬም እና ሽቶ ማስተካከል)',
       AppLanguage.om: 'Daashboordii miidheksuu (kiriimii fi shittoo sirreessuu)',
+      AppLanguage.am: 'የዳሽቦርድ ማስዋብ (ክሬም እና ሽቶ ማስተካከል)',
     },
     'srv_door_panel': {
       AppLanguage.en: 'Door Panel Deep Cleaning',
-      AppLanguage.am: 'የበር ውስጣዊ ገጽታዎች ጥልቅ ጽዳት እና ማስዋብ',
       AppLanguage.om: 'Qaama keessoo balbalaa gadi-fageenyaan qulqulleessuu fi miidheksuu',
+      AppLanguage.am: 'የበር ውስጣዊ ገጽታዎች ጥልቅ ጽዳት እና ማስዋብ',
     },
 
     // 4. Engine & Specialty Detailing Items
     'srv_engine_shampoo': {
       AppLanguage.en: 'Engine Cleaning: Shampoo',
-      AppLanguage.am: 'የሞተር እጥበት (በሻምፖ)',
       AppLanguage.om: 'Mootora shaamപ്പോdhaan dhiquu',
+      AppLanguage.am: 'የሞተር እጥበት (በሻምፖ)',
     },
     'srv_engine_chemical': {
       AppLanguage.en: 'Engine Bay Chemical Degreasing: Deep Clean, Rinse & Dry',
-      AppLanguage.am: 'የሞተር ክፍል በኬሚካል ቅባት ማስለቀቅ (ጥልቅ ጽዳት፣ ማጠብ እና ማድረቅ)',
       AppLanguage.om: 'Moora mootoraa kemikaalaan cooma qulqulleessuu (dhiquu, dhiqachuu fi gogsuu)',
+      AppLanguage.am: 'የሞተር ክፍል በኬሚካል ቅባት ማስለቀቅ (ጥልቅ ጽዳት፣ ማጠብ እና ማድረቅ)',
     },
     'srv_headlight_restoration': {
       AppLanguage.en: 'Headlight Restoration',
-      AppLanguage.am: 'የደበዘዘ (የወየበ) የግንባር መብራት መስታወት ወደ ኦሪጂናል መመለስ',
       AppLanguage.om: 'Daawwitii ifaa fuulduraa kan dhiitama/bifa gate gara oriijinaalaatti deebisuu',
+      AppLanguage.am: 'የደበዘዘ (የወየበ) የግንባር መብራት መስታወት ወደ ኦሪጂናል መመለስ',
     },
     'srv_plastic_trim': {
       AppLanguage.en: 'Plastic Trim Restoration',
-      AppLanguage.am: 'የፕላስቲክ እና የጎማ ማደስ',
       AppLanguage.om: 'Pilaastikii fi Gommaa Haaromsuu',
+      AppLanguage.am: 'የፕላስቲክ እና የጎማ ማደስ',
     },
     'srv_diamond_detailing': {
       AppLanguage.en: 'Diamond - Interior & Exterior Detailing (1 Day)',
-      AppLanguage.am: 'ዳይመንድ - የውስጥ እና የውጭ ሙሉ ዲቴይሊንግ (1 ቀን)',
       AppLanguage.om: 'Daayimandii - Miidhagina Keessaa fi Alaa Guutuu (Guyyaa 1)',
+      AppLanguage.am: 'ዳይመንድ - የውስጥ እና የውጭ ሙሉ ዲቴይሊንግ (1 ቀን)',
     },
     'staffManagementTitle': {
       AppLanguage.en: 'Staff & Salaries Management',
@@ -2142,8 +2142,8 @@ class AppStrings {
     // Queue & Real-Time Capacity
     'liveQueue': {
       AppLanguage.en: 'Live Queue',
-      AppLanguage.om: 'Tarree Kallattii',
-      AppLanguage.am: 'የቀጥታ ወረፋ',
+      AppLanguage.om: 'Dabaree Kallattii',
+      AppLanguage.am: 'የቀጥታ ተራ',
     },
     'stationBaysTitle': {
       AppLanguage.en: 'Station (2 Bays)',
@@ -2379,8 +2379,8 @@ class AppStrings {
     },
     'noQueueImmediate': {
       AppLanguage.en: 'No queue • Immediate service available',
-      AppLanguage.om: 'Tarreen hin jiru • Tajaajila battalaa',
-      AppLanguage.am: 'ወረፋ የለም • ፈጣን አገልግሎት ዝግጁ ነው',
+      AppLanguage.om: 'Dabareen hin jiru • Tajaajila battalaa',
+      AppLanguage.am: 'ተራ የለም • ፈጣን አገልግሎት ዝግጁ ነው',
     },
     'vehiclesAhead': {
       AppLanguage.en: 'vehicle(s) currently ahead of you',
@@ -2501,7 +2501,7 @@ class AppStrings {
     },
     'smsGatewayPhone': {
       AppLanguage.en: 'Cashier SMS Gateway Phone',
-      AppLanguage.om: 'Lakk. Bilbilaa Ergaa SMS Qabaa Qarshii',
+      AppLanguage.om: 'Lakk. Bilbilaa Ergaa SMS Kaashiyara',
       AppLanguage.am: 'የገንዘብ ያዥ የኤስኤምኤስ (SMS) መላኪያ ስልክ',
     },
     'cashInDrawer': {
@@ -2521,7 +2521,7 @@ class AppStrings {
     },
     'closingCashierName': {
       AppLanguage.en: 'Closing Cashier Name',
-      AppLanguage.om: 'Maqaa Qabaa Qarshii Cufuu',
+      AppLanguage.om: 'Maqaa Kaashiyara Cufuu',
       AppLanguage.am: 'ሂሳብ የዘጋችው ገንዘብ ያዥ ስም',
     },
 
@@ -2580,7 +2580,7 @@ class AppStrings {
     // Weekly Commission & Washer Payroll
     'weeklyCommissionReportTitle': {
       AppLanguage.en: 'Weekly Washer Commission Report',
-      AppLanguage.om: 'Gabaasa Komishiinii Torbanii Dhiqitootaa',
+      AppLanguage.om: 'Gabaasa Komishiinii Torbanii Dhiqxootaa',
       AppLanguage.am: 'ሳምንታዊ የአጣቢዎች ኮሚሽን ሪፖርት',
     },
     'reportWeeklyCommissionToAdmin': {
@@ -2600,7 +2600,7 @@ class AppStrings {
     },
     'reportedByCashier': {
       AppLanguage.en: 'Reported by Cashier',
-      AppLanguage.om: 'Qabaa Qarshiin Kan Gabaafame',
+      AppLanguage.om: 'Kaashiyaraan Kan Gabaafame',
       AppLanguage.am: 'በገንዘብ ያዥ የቀረበ',
     },
     'disburseWeeklyCommission': {
@@ -2935,7 +2935,7 @@ class AppStrings {
     },
     'dailyWasherCommissionPool': {
       AppLanguage.en: 'Daily Washer Commission Pool',
-      AppLanguage.om: 'Kuusaa Komishiinii Dhiqitootaa Guyyaa',
+      AppLanguage.om: 'Kuusaa Komishiinii Dhiqxootaa Guyyaa',
       AppLanguage.am: 'ዕለታዊ የአጣቢዎች ኮሚሽን ገቢ',
     },
     'reportWeeklyCommission': {
@@ -2950,12 +2950,12 @@ class AppStrings {
     },
     'expandRoster': {
       AppLanguage.en: 'Expand Washer Roster',
-      AppLanguage.om: 'Tarree Dhiqitootaa Bal\'isi',
+      AppLanguage.om: 'Tarree Dhiqxootaa Bal\'isi',
       AppLanguage.am: 'የአጣቢዎች ዝርዝር ዘርጋ',
     },
     'collapseRoster': {
       AppLanguage.en: 'Collapse Washer Roster',
-      AppLanguage.om: 'Tarree Dhiqitootaa Dhiphisi',
+      AppLanguage.om: 'Tarree Dhiqxootaa Dhiphisi',
       AppLanguage.am: 'የአጣቢዎች ዝርዝር አሳንስ',
     },
     'onDutyBadge': {
@@ -3080,13 +3080,13 @@ class AppStrings {
     },
     'shiftHandoverDesk': {
       AppLanguage.en: 'Shift Handover Desk',
-      AppLanguage.om: 'Dabarsa Wal-Harkaa Fudhinsaa',
+      AppLanguage.om: 'Kutaa Wal-Harkaa Fuudhiinsa Shiftii',
       AppLanguage.am: 'የፈረቃ ርክክብ ማዕከል',
     },
     'shiftHandoverLogs': {
       AppLanguage.en: 'Shift Handover Logs',
-      AppLanguage.om: 'Galmee Dabarsa Wal-Harkaa',
-      AppLanguage.am: 'የፈረቃ ርክክብ መዝገቦች',
+      AppLanguage.om: 'Galmee Wal-Harkaa Fuudhiinsa Shiftii',
+      AppLanguage.am: 'የፈረቃ ርክክብ መዝገብ',
     },
     'handoverOtpCode': {
       AppLanguage.en: 'ACTIVE SHIFT OTP CODE:',
@@ -3095,7 +3095,7 @@ class AppStrings {
     },
     'waitingForManager': {
       AppLanguage.en: 'WAITING FOR MANAGER',
-      AppLanguage.om: 'HOJII GEGGEESSAA EEGA',
+      AppLanguage.om: 'Maneejara Eeggachaa Jira',
       AppLanguage.am: 'ስራ አስኪያጁን በመጠባበቅ ላይ',
     },
     'enterOtp': {
@@ -3110,22 +3110,22 @@ class AppStrings {
     },
     'pendingAdminReceipt': {
       AppLanguage.en: 'PENDING ADMIN RECEIPT',
-      AppLanguage.om: 'FUUDHATAMA BULCHAA EEGA',
+      AppLanguage.om: 'Wal-harkaa Fuudhiinsa Bulchaa Eeggachaa Jira',
       AppLanguage.am: 'የአስተዳዳሪ ርክክብ በመጠባበቅ ላይ',
     },
     'threePartyCustody': {
       AppLanguage.en: '3-PARTY CUSTODY',
-      AppLanguage.om: 'EEGUUMSA QAAMA 3',
-      AppLanguage.am: 'የ 3 ወገን ጥበቃ',
+      AppLanguage.om: 'Eegumsa Qabeenyaa Qaama Sadii (3)',
+      AppLanguage.am: 'የ 3 ወገን ጥምር የገንዘብ ቁጥጥር',
     },
     'dayShiftCustody': {
       AppLanguage.en: 'Day Shift (Cashier → Op Manager)',
-      AppLanguage.om: 'Faraqaa Guyyaa (Qabaa Qarshii → Hojii Geggeessaa)',
+      AppLanguage.om: 'Shiftii Guyyaa (Kaashiyara → Maneejara Hojii)',
       AppLanguage.am: 'የቀን ፈረቃ (ገንዘብ ያዥ → ስራ አስኪያጅ)',
     },
     'nightShiftCustody': {
       AppLanguage.en: 'Night Shift (Op Manager → Admin Vault)',
-      AppLanguage.om: 'Faraqaa Halkan (Hojii Geggeessaa → Saanduqa Bulchaa)',
+      AppLanguage.om: 'Shiftii Halkan (Maneejara Hojii → Kaazinaa Bulchaa)',
       AppLanguage.am: 'የሌሊት ፈረቃ (ስራ አስኪያጅ → የአስተዳዳሪ ካዝና)',
     },
     'verifiedBadge': {
@@ -3135,7 +3135,7 @@ class AppStrings {
     },
     'inVaultBadge': {
       AppLanguage.en: 'IN VAULT',
-      AppLanguage.om: 'SAANDUQA KEESSA',
+      AppLanguage.om: 'KAAZINAA KEESSA',
       AppLanguage.am: 'ካዝና ገብቷል',
     },
     'activeShiftBadge': {
@@ -3160,13 +3160,13 @@ class AppStrings {
     },
     'shiftHandoverMethodTitle': {
       AppLanguage.en: 'Shift Handover: Operational Manager (4-Digit OTP)',
-      AppLanguage.om: 'Dabarsa Faraqaa: Hojii Geggeessaa (OTP Dijitii 4)',
+      AppLanguage.om: 'Wal-Harkaa Fuudhiinsa Shiftii: Maneejara Hojii (OTP Dijitii 4)',
       AppLanguage.am: 'የፈረቃ ርክክብ፡ ስራ አስኪያጅ (ባለ 4 አሃዝ OTP)',
     },
     'shiftHandoverMethodDesc': {
       AppLanguage.en: 'Closing the register calculates washer dividends and generates a 4-digit OTP for the Operational Manager to count and accept physical cash.',
-      AppLanguage.om: 'Saanduqa cufuun komishiinii dhiqaa shallagee koodii OTP dijitii 4 hojii geggeessaaf uuma.',
-      AppLanguage.am: 'መዝገቡን መዝጋት የአጣቢዎችን ኮሚሽን በማስላት ስራ አስኪያጁ ጥሬ ገንዘቡን እንዲያረጋግጥ ባለ 4 አሃዝ OTP ያመነጫል።',
+      AppLanguage.om: 'Kaazinaa cufuun komishiinii dhiqxootaa shallagee koodii OTP dijitii 4 maneejaraaf uuma.',
+      AppLanguage.am: 'ካዝናውን መዝጋት የአጣቢዎችን ኮሚሽን በማስላት ስራ አስኪያጁ ጥሬ ገንዘቡን እንዲያረጋግጥ ባለ 4 አሃዝ OTP ያመነጫል።',
     },
     'viewClosingVoucher': {
       AppLanguage.en: 'View Closing Voucher',
@@ -3185,13 +3185,13 @@ class AppStrings {
     },
     'reconcileAndGenerateOtp': {
       AppLanguage.en: 'Reconcile register & generate OTP',
-      AppLanguage.om: 'Herrega saanduqaafi koodii OTP uumi',
-      AppLanguage.am: 'ሂሳብ አስታርቅ እና OTP አመንጭ',
+      AppLanguage.om: 'Herrega kaazinaafi koodii OTP uumi',
+      AppLanguage.am: 'የካዝና ሂሳብ አስታርቅ እና OTP አመንጭ',
     },
     'washerCommissionReportNote': {
       AppLanguage.en: 'Reported for Weekly Admin Payroll • Not deducted from daily cash drawer',
-      AppLanguage.om: 'Kaffaltii torbaniitiif gabaafame • Saanduqa guyyaarraa hin hir\'ifamu',
-      AppLanguage.am: 'ለሳምንታዊ ክፍያ ሪፖርት የተደረገ • ከዕለታዊ ካሽ የማይቀነስ',
+      AppLanguage.om: 'Kaffaltii torbaniitiif gabaafame • Kaazinaa guyyaarraa hin hir\'ifamu',
+      AppLanguage.am: 'ለሳምንታዊ ክፍያ ሪፖርት የተደረገ • ከዕለታዊ ካዝና የማይቀነስ',
     },
     'confirmCashierHandover': {
       AppLanguage.en: 'Verify Cashier Closing OTP',
@@ -3200,7 +3200,7 @@ class AppStrings {
     },
     'confirmManagerNightCash': {
       AppLanguage.en: 'Confirm & Seal in Vault',
-      AppLanguage.om: 'Mirkaneessi & Saanduqatti Galchi',
+      AppLanguage.om: 'Mirkaneessi & Kaazinatti Galchi',
       AppLanguage.am: 'አረጋግጥ እና ካዝና አስገባ',
     },
     'enterHandoverOtpInline': {
@@ -3398,8 +3398,8 @@ class AppStrings {
     },
     'showerCommissionNotice': {
       AppLanguage.en: '100% Station Net Revenue • 0% Washer Commission',
-      AppLanguage.om: 'Galii Buufataa %100 • Dhiqdootaaf %0',
-      AppLanguage.am: '100% የጣቢያው ገቢ • ለእጣቢዎች 0% ኮሚሽን',
+      AppLanguage.om: 'Galii Buufataa %100 • Dhiqxootaaf %0',
+      AppLanguage.am: '100% የጣቢያው ገቢ • ለአጣቢዎች 0% ኮሚሽን',
     },
     'numberOfPersons': {
       AppLanguage.en: 'Number of Persons',
@@ -3589,18 +3589,18 @@ class AppStrings {
     // Tips
     'washersTip': {
       AppLanguage.en: 'Washer Team Tip (ETB)',
-      AppLanguage.om: 'Gumaata Dhiqdootaa (ETB)',
-      AppLanguage.am: 'የእጣቢዎች ቲፕ (ብር)',
+      AppLanguage.om: 'Gumaata Dhiqxootaa (ETB)',
+      AppLanguage.am: 'የአጣቢዎች ቲፕ (ብር)',
     },
     'addTipPrompt': {
       AppLanguage.en: 'Add Tip for Washers (Optional)',
-      AppLanguage.om: 'Dhiqdootaaf tipii dabali (filannoo)',
-      AppLanguage.am: 'ለእጣቢዎች ቲፕ ጨምር (አማራጭ)',
+      AppLanguage.om: 'Dhiqxootaaf tipii dabali (filannoo)',
+      AppLanguage.am: 'ለአጣቢዎች ቲፕ ጨምር (አማራጭ)',
     },
     'tipPassThroughNotice': {
       AppLanguage.en: '100% of customer tips are passed directly to the washing crew.',
       AppLanguage.om: 'Tipiin maamilaa %100 kallattiin garee dhiqdootaatiif kennama.',
-      AppLanguage.am: '100% የደንበኛ ቲፕ በቀጥታ ለእጣቢዎች ይተላለፋል።',
+      AppLanguage.am: '100% የደንበኛ ቲፕ በቀጥታ ለአጣቢዎች ይተላለፋል።',
     },
     'customerTipsPool': {
       AppLanguage.en: 'Customer Tips Pool',
@@ -4169,8 +4169,8 @@ class AppStrings {
     },
     'awaitingHandoverLabel': {
       AppLanguage.en: 'No Day Handover Yet',
-      AppLanguage.om: 'Wal-harkaan Guyyaa Hin Jiru',
-      AppLanguage.am: 'እስካሁን የቀን ርክክብ የለም',
+      AppLanguage.om: 'Wal-Harkaan Guyyaa Hin Jiru',
+      AppLanguage.am: 'እስካሁን የቀን ርክክብ አልተደረገም',
     },
     'awaitingHandoverDesc': {
       AppLanguage.en: 'When Cashier submits Day closing via Manager OTP, verification appears above.',
@@ -4394,12 +4394,12 @@ class AppStrings {
     },
     'pendingVaultSealBadge': {
       AppLanguage.en: 'PENDING VAULT SEAL',
-      AppLanguage.om: 'SAANDUQAAN EEGAMA',
+      AppLanguage.om: 'KAAZINAAN EEGAMA',
       AppLanguage.am: 'ካዝና ማረጋገጫ በመጠባበቅ ላይ',
     },
     'sealedInVaultBadge': {
       AppLanguage.en: 'SEALED IN VAULT',
-      AppLanguage.om: 'SAANDUQATTI MIRKANAA\'E',
+      AppLanguage.om: 'KAAZINATTI MIRKANAA\'E',
       AppLanguage.am: 'በካዝና ተዘግቷል',
     },
     'nightShiftActiveBadge': {
@@ -4504,8 +4504,8 @@ class AppStrings {
     },
     'postponeDialogDesc': {
       AppLanguage.en: 'Keep this arrived vehicle active for tomorrow\'s queue and log the reason for Accountant & Admin audit.',
-      AppLanguage.om: 'Konkolaataan dhufe kun hiriira boruu keessatti akka turuu fi sababni oodiitiif akka galmaa\'u godhi.',
-      AppLanguage.am: 'የደረሰው ተሽከርካሪ ለነገው ሰልፍ እንዲቆይ እና ምክንያቱ ለሂሳብ እና ለአስተዳዳሪ ኦዲት እንዲመዘገብ ያድርጉ።',
+      AppLanguage.om: 'Konkolaataan dhufe kun dabaree dhiqaa boruutiif akka turuu fi sababni isaa oodiitiif akka galmaa\'u godhi.',
+      AppLanguage.am: 'የደረሰው ተሽከርካሪ ለነገው ተራ እንዲቆይ እና ምክንያቱ ለሂሳብና ለአስተዳዳሪ ኦዲት እንዲመዘገብ ያድርጉ።',
     },
     'postponeReasonHint': {
       AppLanguage.en: 'e.g. Customer pickup tomorrow morning',
@@ -4624,7 +4624,7 @@ class AppStrings {
     },
     'custodyChainLabel': {
       AppLanguage.en: 'Custody',
-      AppLanguage.om: 'Harkaa-Harkatti',
+      AppLanguage.om: 'Wal-Harkaa Fuudhiinsa',
       AppLanguage.am: 'የርክክብ ሰንሰለት',
     },
     'handoffCustodyArrow': {
@@ -4744,8 +4744,8 @@ class AppStrings {
     },
     'reconcileAndCloseShift': {
       AppLanguage.en: 'Reconcile cash drawer & close shift',
-      AppLanguage.om: 'Herrega saanduqaa wal-simsii cufi',
-      AppLanguage.am: 'የጥሬ ገንዘብ መሳቢያውን አስታርቅና ፈረቃውን ዝጋ',
+      AppLanguage.om: 'Qarshii kaazinaa wal-simsiisii shiftii cufi',
+      AppLanguage.am: 'የካዝናውን ሂሳብ አስታርቀህ ፈረቃውን ዝጋ',
     },
     'carpetDeliveryOptionsTitle': {
       AppLanguage.en: 'Carpet Cleaning Service Options',
@@ -4759,13 +4759,13 @@ class AppStrings {
     },
     'dayShiftClosingSubtitle': {
       AppLanguage.en: 'Reconcile day shift sales, commissions & cash drawer',
-      AppLanguage.om: 'Gurgurtaa guyyaa, komishinii fi saanduqaa wal-simsiisi',
-      AppLanguage.am: 'የቀን ፈረቃ ሽያጭን፣ ኮሚሽንን እና የጥሬ ገንዘብ መሳቢያውን ያስታርቁ',
+      AppLanguage.om: 'Gurgurtaa shiftii guyyaa, komishinii fi qarshii kaazinaa wal-simsiisi',
+      AppLanguage.am: 'የቀን ፈረቃ ሽያጭን፣ ኮሚሽንን እና የካዝናውን ጥሬ ገንዘብ ያስታርቁ',
     },
     'remainingCashInDrawerLabel': {
       AppLanguage.en: 'Remaining Cash Balance in Drawer:',
-      AppLanguage.om: 'Qarshii Saanduqaa Keessaa Hafe:',
-      AppLanguage.am: 'በመሳቢያ ውስጥ የቀረ ጥሬ ገንዘብ:',
+      AppLanguage.om: 'Qarshii Kaazinaa Keessaa Hafe:',
+      AppLanguage.am: 'በካዝና ውስጥ የቀረ ጥሬ ገንዘብ:',
     },
     'sendManagerOtpSub': {
       AppLanguage.en: 'Generates a 4-digit OTP request for Operational Manager to verify drawer cash.',
@@ -4879,7 +4879,7 @@ class AppStrings {
     },
     'aiExecutiveSub': {
       AppLanguage.en: 'Real-time operational Q&A, chemical yields, and P&L analytics',
-      AppLanguage.om: 'Gaaffilee hojii battalaa, oomishitummaa qorichaa fi gabaasa bu\'aa/kisaaraa',
+      AppLanguage.om: 'Gaaffilee hojii battalaa, ittifayyadama saamunaa fi gabaasa bu\'aa/kisaaraa',
       AppLanguage.am: 'የእውነተኛ ጊዜ ስራዎች፣ የኬሚካል ፍጆታ እና የትርፍ/ኪሳራ ትንተና',
     },
     'askAiHint': {
@@ -4904,8 +4904,8 @@ class AppStrings {
     },
     'aiPromptYield': {
       AppLanguage.en: '🧼 Chemical Yield & Averages',
-      AppLanguage.om: '🧼 Oomishitummaa Qoricha Dhiqa',
-      AppLanguage.am: '🧼 የኬሚካል ፍጆታና አማካይ',
+      AppLanguage.om: '🧼 Ittifayyadama Saamunaafi Qorichaa',
+      AppLanguage.am: '🧼 የኬሚካልና ሳሙና ፍጆታ አማካይ',
     },
     'aiPromptAlerts': {
       AppLanguage.en: '⚠️ Stock & Anomaly Alerts',
@@ -4949,7 +4949,7 @@ class AppStrings {
     },
     'aiWelcomeMessage': {
       AppLanguage.en: '👋 Hello! I am your BISHE AI Operations Executive. Ask me anything about today\'s cars, washer commissions, chemical yields (shampoo & perfume averages), or station P&L.',
-      AppLanguage.om: '👋 Akkam! Ani Hogganaa Hojii AI BISHE ti. Waa\'ee konkolaattota har\'aa, komishinii hojjettootaa, oomishitummaa qorichaa ykn bu\'aafi kisaaraa na gaafachuu dandeessu.',
+      AppLanguage.om: '👋 Akkam! Ani Gargaaraa Hojii AI BISHE ti. Waa\'ee konkolaattota har\'aa, komishinii dhiqxootaa, ittifayyadama saamunaafi qorichaa ykn bu\'aafi kisaaraa na gaafachuu dandeessu.',
       AppLanguage.am: '👋 ጤና ይስጥልኝ! እኔ የቢሼ AI ስራ አስፈፃሚ ነኝ። ስለ ዛሬ የታጠቡ መኪኖች፣ የአጣቢዎች ኮሚሽን፣ የኬሚካል ፍጆታ (የሻምፑና የሽቶ አማካይ) ወይም ስለ ትርፍና ኪሳራ ማንኛውንም ይጠይቁኝ።',
     },
     'aiListen': {
@@ -5069,7 +5069,7 @@ class AppStrings {
     },
     'aiPromptOtpStatus': {
       AppLanguage.en: '🔐 OTP Shift Handover Status',
-      AppLanguage.om: '🔐 Haala OTP Dabarsa Shiftii',
+      AppLanguage.om: '🔐 Haala OTP Wal-Harkaa Fuudhiinsa Shiftii',
       AppLanguage.am: '🔐 የፈረቃ ርክክብ OTP ሁኔታ',
     },
     'aiPromptWasherPairs': {
@@ -5089,7 +5089,7 @@ class AppStrings {
     },
     'aiPromptCashDrawer': {
       AppLanguage.en: '💵 Drawer Cash & Handover',
-      AppLanguage.om: '💵 Qarshii Sanduuqaa & Dabarsuu',
+      AppLanguage.om: '💵 Qarshii Kaazinaafi Wal-Harkaa Fuudhiinsa',
       AppLanguage.am: '💵 የካዝና ጥሬ ገንዘብና ርክክብ',
     },
     'aiPromptEmptyExchange': {
@@ -5109,7 +5109,7 @@ class AppStrings {
     },
     'aiPromptBankReconciliation': {
       AppLanguage.en: '🏦 Bank Deposit Slips Audit',
-      AppLanguage.om: '🏦 Qorannoo Nagaraga Baankii',
+      AppLanguage.om: '🏦 Qorannoo Nagahee Baankii',
       AppLanguage.am: '🏦 የባንክ ተቀማጭ ደረሰኞች ማረጋገጫ',
     },
     'aiPromptVatSummary': {
@@ -5149,8 +5149,8 @@ class AppStrings {
     },
     'aiQueryCars': {
       AppLanguage.en: 'List cars washed today and vehicle types',
-      AppLanguage.om: 'Tarree konkolaattota har\'a dhiqamanii',
-      AppLanguage.am: 'ዛሬ የታጠቡ መኪኖችን ዝርዝር',
+      AppLanguage.om: 'Tarree konkolaattota har\'a dhiqamanii fi akaakuu isaanii',
+      AppLanguage.am: 'ዛሬ የታጠቡ መኪኖች ዝርዝርና ዓይነታቸው',
     },
     'aiQueryWashers': {
       AppLanguage.en: 'Active washers on duty and their commissions',
@@ -5159,7 +5159,7 @@ class AppStrings {
     },
     'aiQueryYield': {
       AppLanguage.en: 'Chemical yield and average shampoo and perfume used per car',
-      AppLanguage.om: 'Oomishitummaa qorichaa fi giddu galeessa shaampuu',
+      AppLanguage.om: 'Ittifayyadama qorichaa fi giddu galeessa shaampuu fayyadamaa',
       AppLanguage.am: 'የኬሚካል ፍጆታና የሻምፑ እንዲሁም የሽቶ አማካይ',
     },
     'aiQueryAlerts': {
@@ -5184,7 +5184,7 @@ class AppStrings {
     },
     'aiQueryUnsettled': {
       AppLanguage.en: 'List cars in queue and unsettled vehicle tickets',
-      AppLanguage.om: 'Tarree tikkeettiiwwan hin kaffalamne',
+      AppLanguage.om: 'Tarree tikkeettiiwwan hin kaffalamneefi dabaree keessa jiranii',
       AppLanguage.am: 'ያልተከፈሉ ቲኬቶችና በተራ ላይ ያሉ መኪኖች',
     },
     'aiQueryShowersCount': {
@@ -5214,7 +5214,7 @@ class AppStrings {
     },
     'aiQueryBankReconciliation': {
       AppLanguage.en: 'Bank deposit slips vs cashier drawer settlements audit',
-      AppLanguage.om: 'Qorannoo nagaraga baankii fi herrega kaashiyaraa',
+      AppLanguage.om: 'Qorannoo nagahee baankii fi herrega kaashiyaraa',
       AppLanguage.am: 'የባንክ ተቀማጭ ደረሰኞችና የካሺየር ሂሳብ ማረጋገጫ',
     },
   };

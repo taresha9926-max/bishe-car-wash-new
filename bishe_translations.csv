@@ -1,0 +1,1026 @@
+﻿Key,English,Afaan_Oromoo,Amharic
+appName,BISHE Car Wash,BISHE Dhiqannaa,ቢሼ የመኪና ማጠቢያ
+bishoftu,"Bishoftu • Oromia, Ethiopia","Bishoftuu • Oromiyaa, Itoophiyaa",ቢሾፍቱ • ኦሮሚያ፣ ኢትዮጵያ
+tagline,Premier Auto Care near Crater Lakes,Tajaajila Qulqullina Konkolaataa Bishoftuu,ምርጥ የመኪና እጥበት እና እንክብካቤ
+customerRole,Customer,Maamila,ደንበኛ
+cashierRole,Cashier Desk,Kaashiyara (Herregduu),ገንዘብ ያዥ (ካሺየር)
+managerRole,Operational Manager,Maneejara Hojii (Geggeessaa),ኦፕሬሽን ስራ አስኪያጅ
+storekeeperRole,Storekeeper Desk,Eegaa Kuusaa & Meeshaa,የዕቃ ግምጃ ቤት ኃላፊ
+accountantRole,Accountant Hub,Ogeessa Herregaa & Faayinaansii,የሂሳብና ፋይናንስ ክፍል
+adminRole,Admin Hub,Bulchiinsa,አስተዳዳሪ
+back,Back,Deebi'i,ተመለስ
+close,Close,Cufi,ዝጋ
+cancel,Cancel,Dhiisi,ሰርዝ
+save,Save,Oolchi,አስቀምጥ
+confirm,Confirm,Mirkaneessi,አረጋግጥ
+all,All,Hunda,ሁሉም
+refresh,Refresh,Haaromsi,አድስ
+selectServiceMode,Select Service Mode,Gosa Tajaajilaa Filadhaa,የአገልግሎት ዓይነት ይምረጡ
+driveInStation,At Station,Buufata Keessatti,በጣቢያው ውስጥ
+driveInSub,Drive in to Bishoftu Station bays,Buufata Bishooftuutti dhiqadhaa,ወደ ቢሾፍቱ ጣቢያ ማጠቢያ ክፍሎች በመምጣት
+atHomeMobile,At Customer Home (Van Wash),Mana Maamilaatti (Makiinaa Socho'aa),በደንበኛ ቤት (ተንቀሳቃሽ ቫን)
+atHomeSub,Equipped mobile van washes the vehicle at customer home,Makiinaan bishaanii fi jeneretara qabu mana keessanitti dhiqa,የውሃ ታንከር እና ጄነሬተር የታጠቀ ቫን እቤትዎ ድረስ መጥቶ ያጥባል
+availableNow,Available,Qophiidha,ክፍት ነው
+busyWashing,Busy Washing,Hojjataa Jira,በመታጠብ ላይ
+servicePackages,Service Packages & Pricing,Gosa Dhiqannaafi Gatii,የእጥበት ዓይነቶችና ዋጋቸው
+myHistory,My History,Seenaa Koo,የቀደመ ታሪክ
+bookThisWash,Book This Wash,Dhiqannaa Qabadhaa,ይህንን እጥበት ይዘዙ
+bookNow,Book Now,Amma Qabadhaa,አሁን ይዘዙ
+activeWashTitle,Active Wash Tracking,Hordoffii Dhiqannaa Ammaa,የአሁኑ እጥበት ሁኔታ መከታተያ
+openFullTracker,Open Full Live Tracker,Hordoffii Guutuu Bani,ሙሉ መከታተያውን ክፈት
+automobile,Type A (Small),Gosa A (Xiqqaa),ዓይነት ሀ (አነስተኛ)
+minibus,Type B (Medium),Gosa B (Giddu-galeessa),ዓይነት ለ (መካከለኛ/ቪ8)
+truck,Type C (Truck),Gosa C (Fe'iisaa),ዓይነት ሐ (የጭነት/ኢሱዙ)
+automobileSub,"Corolla, Dzire, Yaris, Vitz, BYD","Corolla, Dzire, Yaris, Vitz, BYD",ኮሮላ፣ ዲዛየር፣ ያሪስ፣ ቪትዝ፣ ቢዋይዲ
+minibusSub,"V8, Bigstar, Hilux, Dolphin","V8, Bigstar, Hilux, Dolphin",ቪ8፣ ቢግስታር፣ ሃይሉክስ፣ ዶልፊን
+truckSub,"Isuzu 1200, FSR 1800","Isuzu 1200, FSR 1800",ኢሱዙ 1200፣ ኤፍኤስአር 1800
+statusPending,Booking Approved,Ajajni Mirkanaa'eera,ቦታ ማስያዝ ጸድቋል
+statusConfirmed,Approved & Arrived at Station,Mirkanaa'ee Buufata Gaheera,ጸድቆ ጣቢያ ደርሷል
+statusAssignedToBay,Queued in Bay,Iddoo Dhiqaatti Qophaa'e,ክፍል ውስጥ ተሰይሟል
+statusWashing,Washing in Progress,Dhiqamaa Jira,እየታጠበ ነው
+statusDrying,Drying & Detailing,Gogsamaa fi Qulqullaa'aa Jira,እየደረቀና እየጸዳ ነው
+statusReadyForPickup,Ready for Pickup,Fudhachuuf Qophiidha,ለመረከብ ዝግጁ ነው
+statusCompleted,Completed,Xumurameera,ተጠናቋል
+statusCancelled,Cancelled,Haqameera,ተሰርዟል
+serviceWalkIn,Walk-in Station,Kutaa Dhiqannaa,የጣቢያ እጥበት
+serviceAtHome,At-Home Mobile Service,Tajaajila Makiinaa Socho'aa,ተንቀሳቃሽ የቤት ለቤት አገልግሎት
+serviceValetPickUp,VIP Driver Pick-up & Return,Konkolaachisaa VIP (Fuudhee Deebisa),የቪአይፒ ሹፌር መውሰድና መመለስ (VIP)
+serviceValetPickUpSub,"Driver from BISHE Car Wash takes vehicle from home to the station, washes, and returns it back.","Konkolaachisaan BISHE makiinaa mana keessanii fuudhee, buufatatti dhiqee mana keessanitti deebisa.",የቢሼ አሽከርካሪ መኪናውን ከቤት ወስዶ ጣቢያ ካጠበ በኋላ መልሶ ያደርሳል።
+servicePhoneCall,Phone Reservation,Qabannaa Bilbilaa,የስልክ ጥሪ ትዕዛዝ
+servicePhoneCallSub,Pre-booked via Gate Phone Call,Bilbilaan duraan qabame,በስልክ ጥሪ አስቀድሞ የተያዘ
+serviceWalkInCapacity,2 Bays Available at Bishoftu Station,Iddoowwan Dhiqa Konkolaataa 2 Bishooftuutti Qophii,በቢሾፍቱ ጣቢያ 2 የማጠቢያ ክፍሎች ዝግጁ ናቸው
+serviceAtHomeCapacity,1 Mobile Van Available (Bishoftu Area),Makiinaa Socho'aa 1 Qophii (Bishooftuu),1 ተንቀሳቃሽ ቫን ዝግጁ ነው (ቢሾፍቱ)
+serviceValetCapacity,Driver Dispatched to Your GPS Location,Konkolaachisaan Bakka GPS Keessanitti Ergame,አሽከርካሪ ወደ ጂፒኤስ መገኛዎ ይላካል
+servicePhoneCapacity,Call-in Booking via Gate Reception,Galmee Bilbilaan Balbala Seensaatti,የስልክ ጥሪ ምዝገባ በበሩ ዴስክ
+serviceWalkInDesc,Drive in to our Bishoftu main facility with dedicated pressure washing bays.,Kutaa dhiqannaa keenya Bishooftuutti qophaa'etti dhuftanii dhiqadhaa.,በቢሾፍቱ ዋና ማዕከላችን ባሉ ዘመናዊ የማጠቢያ ክፍሎች መኪናዎን ያጥቡ።
+serviceAtHomeDesc,Our fully equipped water-tank & power generator van comes right to your doorstep.,Makiinaan keenya bishaaniifi jeneretara guutuu qabate mana keessanitti dhufa.,የውሃ ታንከርና ጄነሬተር የታጠቀው ተንቀሳቃሽ ቫን እርስዎ ደጃፍ ድረስ ይመጣል።
+serviceValetDesc,"A dedicated driver picks up your vehicle from your location, brings it to the station for wash, and returns it safely to your doorstep.","Konkolaachisaan keenya makiinaa keessan bakka jirtanirraa fuudhee, dhiqee qulqullinaan mana keessanitti deebisa.",አሽከርካሪ መጥቶ መኪናዎን ካሉበት ተረክቦ፣ ወደ ማጠቢያ ጣቢያ ወስዶ ካጠበ በኋላ በታማኝነት ደጃፍዎ ድረስ ይመልሳል።
+servicePhoneDesc,Pre-booked reservation received via station phone call.,Qabannaa bilbilaan duraan qabame.,በስልክ ጥሪ አስቀድሞ የተያዘ ቦታ።
+valetServiceAvailable,Valet Service Available,Tajaajilli Konkolaachisaa Qophiidha,የአሽከርካሪ አገልግሎት ዝግጁ ነው
+valetBadge,Valet Pick-up,Fuudhuu & Deebisuu,የአሽከርካሪ አገልግሎት
+driverPickUpLocation,Driver Pick-up Location,Iddoo Konkolaachisaan Itti Fudhatu,አሽከርካሪ መኪናውን የሚረከብበት ቦታ
+streetLandmark,Street / Landmark,Daandii / Mallattoo Iddoo,ጎዳና / መለያ ምልክት
+streetLandmarkHint,"e.g. Near Asham Africa Resort, House 420","Fkn. Gammoojjii Asham Africa Resort bira, Mana 420",ምሳሌ፡ አሻም አፍሪካ ሪዞርት አጠገብ፣ የቤት ቁጥር 420
+streetLandmarkRequired,Please provide street / residence landmark in Bishoftu,Mee daandii ykn mallattoo iddoo Bishooftuu galchaa,እባክዎ በቢሾፍቱ ያለውን ጎዳና ወይም የመኖሪያ መለያ ምልክት ያስገቡ
+valetPickupInBishoftu,Valet Pick-up in Bishoftu,Bishooftuutti Konkolaachisaan Fuudhuu,በቢሾፍቱ በአሽከርካሪ መኪና መረከብ
+bishoftuMobileVan,Bishoftu Mobile Van,Makiinaa Socho'aa Bishooftuu,የቢሾፍቱ ተንቀሳቃሽ ቫን
+serviceMode,Service Mode,Haala Tajaajilaa,የአገልግሎት ዓይነት
+driveInStationBays,Drive-in Station (Bays),Kutaa Dhiqannaa (Bay),የጣቢያ እጥበት (ቤይ)
+atHomeMobileVan,At-Home Mobile Van,Makiinaa Socho'aa (Mana),ተንቀሳቃሽ የቤት ለቤት ቫን
+houseOrLandmark,House / Landmark,Mana / Mallattoo Iddoo,የቤት ቁጥር / መለያ ምልክት
+landmarkHintExample,e.g. Near Babogaya Resort,Fkn. Haroo Baabogayyaa bira,ምሳሌ፡ ባቦጋያ ሪዞርት አጠገብ
+selectedWashPackage,Selected Wash Package,Pakeejii Dhiqannaa Filatame,የተመረጠ የእጥበት ፓኬጅ
+confirmPhoneReservation,Confirm Phone Reservation,Qabannaa Bilbilaa Mirkaneessi,የስልክ ቀጠሮውን አረጋግጥ
+arrivalSlotHint,e.g. Today 3:00 PM,Fkn. Har'a Sa'aatii 9:00,ምሳሌ፡ ዛሬ ከሰዓት 9:00
+callerNameHint,e.g. Almaz Bekele,Fkn. Almaz Baqqalaa,ምሳሌ፡ አልማዝ በቀለ
+enterCallerName,Please enter caller name,Mee maqaa bilbilaa galchaa,እባክዎ የደዋዩን ስም ያስገቡ
+entranceGreeting,Welcome to BISHE Car Wash,Baga Nagaan Dhuftan Giddugala BISHE,ወደ ቢሼ የመኪና ማጠቢያ በደህና መጡ
+entranceTagline,Crater Lake Auto Detailing & Care Studio,Istudiyoo Dhiqannaa fi Kunuunsa Konkolaataa Bishooftuu,የቢሾፍቱ ሃይቆች መኪና እጥበትና ዲቴይሊንግ ስቱዲዮ
+entranceLocation,"Bishoftu / Debre Zeit • Near Lake Hora, Oromia","Bishooftuu • Haroo Hoolaa cinaa, Oromiyaa",ቢሾፍቱ / ደብረ ዘይት • ሆራ ሐይቅ አጠገብ፣ ኦሮሚያ
+enterStationPortal,Enter Station Portal,Gara Giddugalaatti Seenaa,ወደ ማዕከሉ ይግቡ
+tapToContinue,Tap anywhere to continue,Itti fufuuf tuqaa,ለመቀጠል ይንኩ
+socialConnect,Connect With Us,Nu Qunnamaa,ያግኙን
+callUs,Direct Call,Bilbila Kallattii,ቀጥታ ስልክ
+welcomeTitle,BISHE Car Wash Hub,Giddugala Dhiqannaa BISHE,ቢሼ የመኪና ማጠቢያ ማዕከል
+welcomeSubtitle,Premier Auto Detailing & Care in Bishoftu,Dhiqannaafi Kunuunsa Makiinaa Qulqulluu Bishooftuutti,በቢሾፍቱ ምርጡ የዲቴይሊንግ እና የመኪና እንክብካቤ ማዕከል
+carouselSlide1Title,Active Snow Foam Pre-Soak,Dhiqannaa Hoomaa Qulqulluu,ንክኪ-አልባ የሆም አረፋ እጥበት
+carouselSlide1Desc,Scratch-free dirt breakdown with pH-neutral active shampoo,Qulqullina olaanaa fi eegumsa rifeensa konkolaataa,የመኪናውን ቀለም የማይጎዳ ጥልቅ ቆሻሻ ማስወገጃ
+carouselSlide2Title,High-Pressure Chassis & Jet Steam,Bishaan Dhiibbaa Ol-aanaa & Shassii,ከፍተኛ ግፊት የታችኛው አካል እጥበት
+carouselSlide2Desc,Deep wheel-well cleaning & high-power underside rinse,Qulqullina gommaa fi jala konkolaataa cimaa,የጎማ እና የታችኛው ክፍል ከባድ የጭቃ እጥበት
+carouselSlide3Title,Diamond Polish & Ceramic Shield,Poolishii Daayimandii & Eegumsa,ዳይመንድ ፖሊሽ እና ሴራሚክ ከለላ
+carouselSlide3Desc,Hydrophobic ceramic protection & showroom mirror gloss,Calaqqisa addaa fi eegumsa aduu fi bishaanii,የመስታወት ነፀብራቅ ወዝ እና የውሃ መከላከያ ከለላ
+carouselSlide4Title,Rapid Express Bay Wash,Tajaajila Dafee Qophaa'u (Daqiiqaa 15),ፈጣን የ15 ደቂቃ ኤክስፕረስ እጥበት
+carouselSlide4Desc,Fast automated rinse & wax with zero wait time,Turtii malee tajaajila saffisaa fi ammayyaa,ያለ ምንም ተራ ፈጣን እና ዘመናዊ የእጥበት አገልግሎት
+carouselCarpetSlide1Title,Rotary Deep Jet Carpet Shampoo,Dhiqannaa Karpeetii Hoomaa Cimaa,ጥልቅ የንጣፍ ሻምፑ እና ጄት እጥበት
+carouselCarpetSlide1Desc,Commercial rotary fiber scrubbing & anti-bacterial stain lift,Qulqullina olaanaa fi eegumsa rifeensa karpeetii,የጨርቅ እና ፀጉር ጥልቅ ቆሻሻ ማስወገጃ ቴክኖሎጂ
+carouselCarpetSlide2Title,Spin Dehydration & Odor Extraction,Bishaan Cabaqsuu & Urgooftuu,የውሃ ማድረቂያ ስፒን እና ሽታ ማስወገጃ
+carouselCarpetSlide2Desc,High-RPM centrifugal moisture extraction for fresh scent,Saffisaan bishaan keessaa baasuu fi foolii gaarii,በሴንትሪፊዩጋል ማድረቂያ እርጥበትን በደቂቃዎች ውስጥ ማድረቅ
+carouselCarpetSlide3Title,Heated Drying Racks & Fiber Grooming,Muka Goggogsuu & Qulqulleessuu,በማድረቂያ መደርደሪያዎች ላይ ማድረቅ
+carouselCarpetSlide3Desc,100% dust-free indoor drying chambers & fiber grooming,Bakka eegamaatti guutummaatti goggogsuu,ከአቧራ ነፃ በሆነ ንፁህ ክፍል ውስጥ 100% ማድረቅ
+carouselCarpetSlide4Title,VIP Doorstep Carpet Pick-Up & Delivery,Fidanii Geessuu Qophii Karpeetii,ከቤት ወስዶ አጥቦ በነፃ የማድረስ አገልግሎት
+carouselCarpetSlide4Desc,Convenient pickup from your home & free delivery in Bishoftu,Mana keessanirraa fuunnee dhiquun deebifna,ከቤትዎ ተቀብለን አጥበን በታሸገ ሁኔታ ወደ ቤትዎ እንመልሳለን
+carsAheadInQueue,Cars Ahead in Queue,Konkolaattota Fuuldura Dabaree jiran,በተራ ላይ ከፊትዎ ያሉ መኪኖች
+estimatedBayArrival,Estimated Time to Service,Yeroo Tilmaamaa Tajaajilaa,የሚገመት የእጥበት መድረሻ ጊዜ
+lookingForEarlierBooking,Looking for an earlier booking? Enter plate or phone,Ajaja kanaan duraa barbaadaa jirtuu? Gabatee ykn bilbila galchaa,ያለፈ ትዕዛዝ መፈለግ ይፈልጋሉ? ታርጋ ወይም ስልክ ያስገቡ
+enterPlateOrPhone,Enter Plate or Phone Number,Lakkoofsa Gabatee ykn Bilbilaa,የታርጋ ወይም የስልክ ቁጥር ያስገቡ
+onlyOwnVehicleNotice,You can only track active bookings associated with your vehicle or phone.,Haala konkolaataa ykn bilbila keessanii qofa hordofuu dandeessu.,የእርስዎን መኪና ወይም የስልክ ቁጥር ሁኔታ ብቻ መከታተል ይችላሉ።
+phaseApprovedArrived,Approved & Arrived at Station,Mirkanaa'ee Buufata Gaheera,ተረጋግጦ ማዕከል ደርሷል
+phaseApprovedArrivedSub,Vehicle inspected & queued in reception bay,Konkolaataan qoratamee dabaree dhiqaa galeera,ተሽከርካሪው ተመርምሮ ወደ ማጠቢያ ተራ ገብቷል
+phaseStartWash,Start Wash & Active Foam,Dhiqannaa Jalqabuu & Saamunaa Hoomisaa,እጥበት ጀምር እና የአረፋ ሳሙና
+phaseStartWashSub,Touchless pre-soak & high-pressure jet rinse,Saamunaa hoomisaafi bishaan dhiibbaa ol-aanaa,የአረፋ ሳሙና እና ከፍተኛ ግፊት ውሃ
+phaseMoveToDrying,Move to Drying & Detailing,Goggogsuu & Qulqulleessuu,ወደ ማድረቅ እና ማሳመር ሽግግር
+phaseMoveToDryingSub,"Microfiber hand towel dry, tire shine & interior vacuum","Tawulaan goggogsuu, gommaa calaqqisiisuu fi vakiyuumii",በማይክሮፋይበር ፎጣ ማድረቅ፣ ጎማ ማብረቅ እና ቫኪዩም
+phaseCompletedReady,Completed & Showroom Ready,Xumuramee Qophaa'eera,ተጠናቆ ዝግጁ ሆኗል
+phaseCompletedReadySub,Final inspection passed & ready for handover,Qulqullinni mirkanaa'ee fudhachuuf qophiidha,የመጨረሻ ምርመራ አልፎ ለርክክብ ዝግጁ ነው
+liveVehicleStatusVisualizer,Live Vehicle Wash Visualizer,Haala Dhiqannaa Konkolaataa Mul'isaa,የቀጥታ የተሽከርካሪ እጥበት ምስላዊ መከታተያ
+horizontalPipelineTitle,Live Progress Pipeline,Adeemsa Hordoffii Qophaa'ina,የቀጥታ ሂደት መከታተያ ቧንቧ
+pipelineRealtimeNotice,Real-time automated status,Haala kallattii yeroo qabatamaa,የቅጽበት ራስ-ሰር ሁኔታ
+waitingArrival,WAITING ARRIVAL,GAA'ITII EEGGACHAA,መድረስን በመጠባበቅ ላይ
+completedPhaseBadge,COMPLETED (4 OF 4),XUMURAMEERA (4 KEESSAA 4),ተጠናቋል (4 ከ 4)
+pendingStepBadge,Pending Step,Tarkaanfii Eeggachaa,ደረጃ በመጠባበቅ ላይ
+bookingApprovedStep,Booking Approved,Galmeen Mirkanaa'eera,ትዕዛዝ ጸድቋል
+queuedInBayStep,Queued in Bay,Gola Dhiqannaa Galeera,ወደ ማጠቢያ መስመር ገብቷል
+washingInProgressStep,Washing in Progress,Dhiqamuun Itti Jira,እጥበት በመካሄድ ላይ
+dryingDetailingStep,Drying & Detailing,Goggogsuu & Miidhagsuu,ማድረቅ እና ማሳመር
+readyForPickupStep,Ready for Pick-Up,Fudhachuuf Qophiidha,ለመረከብ ዝግጁ
+valetStepDispatched,Valet Driver Dispatched,Konkolaachisaan Vaaleetii Ergameera,ሹፌር ወደ እርስዎ ተልኳል
+valetStepPickedUp,Picked Up & En Route to Station,Fuudhamee Gara Buufataatti Deemaa Jira,ተረክበን ወደ ማዕከሉ በመጓዝ ላይ ነው
+valetStepWashing,Station Jet Wash & Detail,Buufatatti Dhiqamuu & Qulqulleeffamuu,በማዕከሉ ውስጥ እጥበት እና ማሳመር
+valetStepReturning,Driver Returning Vehicle,Konkolaachisaan Deebisaa Jira,ሹፌሩ መኪናዎን ይዞ በመመለስ ላይ ነው
+valetStepDelivered,Delivered to Doorstep,Maniitti Fudhachiifameera,በርዎ ላይ በሰላም ደርሶ ተረክበዋል
+homeStepDispatched,Mobile Van Dispatched,Garee Moobaayilaa Ergameera,ተንቀሳቃሽ የቫን ቡድን ተልኳል
+homeStepEnRoute,Van En Route to Address,Vaanichi Karaarra Jira,ቫኑ ወደ አድራሻዎ በመጓዝ ላይ ነው
+homeStepSetup,Arrived & Driveway Setup,Gahee Meeshaa Qopheessaa Jira,ቦታው ደርሶ እቃዎችን በማዘጋጀት ላይ
+homeStepWashing,Active Mobile Detailing,Dhiqannaa Iddoo Sanatti,በቦታው ላይ ንቁ እጥበት በመካሄድ ላይ
+homeStepCompleted,Inspected & Completed,Qoratamee Xumurameera,ተመርምሮ ስራው ተጠናቋል
+openGoogleMaps,Open in Google Maps,Kaartaa Google irratti Bani,በጉግል ካርታ ክፈት
+locateBisheStation,Locate BISHE Station,Bakka BISHE Argadhaa,የቢሼ ማጠቢያን መገኛ አግኝ
+customerPortal,Customer Portal,Balbala Maamiltootaa,የደንበኞች መግቢያ
+customerPortalDesc,"Browse 10 packages, book wash & private live wash tracking","Gosoota 10 ilaalaa, qabadhaa fi makiinaa keessan hordofaa",10 ፓኬጆችን ይመልከቱ፣ እጥበት ይዘዙ እና ሁኔታውን ይከታተሉ
+cashierPortal,Cashier Gate Desk,Kaffaltii & Seensa Balbalaa,የካሸር በር ዴስክ
+cashierPortalDesc,"Gate walk-in check-in, phone call bookings & post-wash payments","Galmee balbalaa, bilbila, adeemsa dhiqannaafi kaffaltii",የበር መግቢያ ምዝገባ፣ የስልክ ጥሪ፣ የእጥበት ሂደትና የድህረ-እጥበት ክፍያ
+adminPortal,Admin Console,To'annoo Bulchiinsaa,የአስተዳዳሪ መቆጣጠሪያ
+adminPortalDesc,"Staff control, 15% washer team dividends, PINs & time reports","Hojjattoota, komishiinii 15%, koodii duraafi gabaasa yeroo",ሰራተኞች፣ የ15% አጣቢዎች ኮሚሽን፣ ሚስጥር ቁጥርና የጊዜ ሪፖርቶች
+staffPortals,Staff Portals,Balbala Hojjettootaa,የሰራተኞች መግቢያ
+staffMenuDesc,Staff & Admin Access Only,Seensa Hojjettootaafi Bulchiinsaa Qofa,የሰራተኞች እና የአስተዳዳሪ ብቻ
+cashierPinBadge,Gate Desk,Balbala Seensaa,የመግቢያ በር
+storekeeperPortal,Storekeeper Inventory,Eegaa Kuusaa,የዕቃ ግምጃ ቤት
+storekeeperPinBadge,Supplies & Assets,Meeshaalee & Qabeenya,እቃዎች እና ቋሚ ንብረቶች
+accountantPortal,Accountant Hub,Herrega & Faayinaansii,የሂሳብ እና ፋይናንስ ማዕከል
+accountantPinBadge,Audits & P&L,Herrega & Bu'aa,ኦዲት እና ትርፍ/ኪሳራ
+adminPinBadge,Super Admin Hub,Giddugala Bulchiinsaa,ዋና አስተዳዳሪ ማዕከል
+managerPortal,Operational Manager,Hojii Geggeessaa,የኦፕሬሽን ስራ አስኪያጅ
+managerPortalDesc,"Night shift intake, cashier cash handover, washer dividends & closing","Halkan hojjechuu, dabarsa qarshii saanduqaa, komishinii & cufiinsa",የሌሊት ፈረቃ፣ ከካሺየር ገንዘብ ርክክብ፣ የአጣቢዎች ኮሚሽንና ሂሳብ መዝጊያ
+managerPinBadge,Night Operations,Hojii Halkan,የሌሊት ኦፕሬሽን
+operationalManagerTitle,Operations Manager Hub,Wiirtuu Hojii Geggeessaa,የኦፕሬሽን ስራ አስኪያጅ ማዕከል
+cashierHandoverTitle,Cashier Cash Handover,Dabarsa Qarshii Saanduqaa,የካሺየር ጥሬ ገንዘብ ርክክብ
+acceptCashierHandover,Verify Cashier Closing (OTP),Cufiinsa Kaasharii OTPn Mirkaneessi,የገንዘብ ተቀባይ መዝጊያን በOTP ያረጋግጡ
+handoverPending,Pending Manager Acceptance,Fudhatama Eegaa Jira,የስራ አስኪያጅ ማረጋገጫ በመጠባበቅ ላይ
+handoverConfirmed,Confirmed,Mirkanaa'eera,የተረጋገጠ
+nightClosingTitle,Night Shift Closing & Payout to Admin,Cufiinsa Halkan & Kaffaltii Bulchaaf,የሌሊት ፈረቃ ሂሳብ መዝጊያ እና ለአስተዳዳሪ ማስረከቢያ
+carriedCashierCash,Carried Cashier Cash,Qarshii Saanduqarraa Fudhatame,ከካሺየር የተረከቡት ጥሬ ገንዘብ
+nightShiftGross,Night Shift Gross Revenue,Galii Waliigalaa Halkan,የሌሊት ፈረቃ ጠቅላላ ገቢ
+totalCashHandedToAdmin,Total Physical Cash Handed to Admin,Waliigala Qarshii Bulchaaf Kenname,ለአስተዳዳሪው የሚሰጥ ጠቅላላ ጥሬ ገንዘብ
+handoverMethod,Shift Closing & Verification Method,Akkaataa Cufiinsa & Mirkaneessa,የፈረቃ መዝጊያ እና ማረጋገጫ ዘዴ
+handoverToManagerOption,Send OTP Request to Operational Manager,Gaaffii OTP Hojii Geggeessaatti Ergi,ለኦፕሬሽን ስራ አስኪያጅ የOTP ጥያቄ ላክ
+handoverToAdminOption,Send OTP Request to Admin / Owner,Gaaffii OTP Bulchaatti Ergi,ለአስተዳዳሪ የOTP ጥያቄ ላክ
+handoverToAdminSub,"If Operational Manager is absent, off-duty, or on leave",Hojii geggeessaan yoo hin jirre ykn boqonnaa irra jiraate,ስራ አስኪያጁ ከሌለ፣ ስራ ላይ ካልሆነ ወይም እረፍት ላይ ከሆነ
+bankDepositOption,Deposit to Owner Bank Account,Herrega Baankii Abbaatti Galchuu,ወደ ባለንብረቱ የባንክ ሂሳብ ማስገባት
+bankDepositSub,If Manager is absent or deposited before 5 PM,Hojii geggeessaan yoo hin jirre ykn sa'a 11 dura,ስራ አስኪያጁ ከሌለ ወይም ከቀኑ 11 ሰዓት በፊት
+transferOtpCode,Shift Verification OTP Code,Koodii Mirkaneessa OTP,የፈረቃ ማረጋገጫ OTP ኮድ
+enterHandoverOtp,Enter 4-Digit Handover Code,Koodii Dabarsoo Dijitii 4 Galchaa,ባለ 4 አሃዝ የርክክብ ኮድ ያስገቡ
+giveOtpToReceiver,Give this 4-digit code to the receiver after counting physical cash,Qarshii erga lakkooftanii kennitanii booda koodii kana fuudhataaf kennaa,ጥሬ ገንዘቡን ቆጥረው ካስረከቡ በኋላ ይህንን ባለ 4 አሃዝ ኮድ ለተቀባዩ ይስጡ
+verifyAndTakeCustody,Verify & Take Custody,Mirkaneessi & Fudhadhu,አረጋግጥ እና ተረከብ
+invalidOtpCode,Invalid Code. Please confirm physical count with sender.,Koodiin dogoggora. Maaloo lakkoofsa qarshii waliin mirkaneeffadhaa.,የተሳሳተ ኮድ። እባክዎ ከላኪው ጋር የገንዘቡን መጠን ያረጋግጡ።
+handoverSuccess,Cash handover verified and received successfully!,Dabarsoon qarshii milkaa'inaan mirkanaa'eera!,የጥሬ ገንዘብ ርክክቡ በተሳካ ሁኔታ ተረጋግጧል!
+bankDepositRecorded,Cash deposit to Owner's Bank Account recorded,Galiin herrega baankiitti galmaa'eera,ወደ ባለንብረቱ የባንክ ሂሳብ የተደረገው ተቀማጭ ተመዝግቧል
+adminHandoverPending,Night Cash Pending Admin Acceptance,Qarshii Halkan Bulchaan Fudhatamu,የሌሊት ጥሬ ገንዘብ በአስተዳዳሪው እንዲረጋገጥ የሚጠብቅ
+verifyAdminOtp,Verify & Accept Night Cash,Mirkaneessi & Qarshii Halkan Fudhadhu,አረጋግጥ እና የሌሊት ጥሬ ገንዘብ ተረከብ
+enterCustomerPortal,Enter Customer Portal,Gara Balbala Maamilaa Seenaa,ወደ ደንበኛ መግቢያ ይግቡ
+customerTrustPill,Instant Wash Booking • Live Queue Tracker,Ajaja Dhiqannaa Battalaa • Hordoffii Dabaree Kallattii,ፈጣን የእጥበት ትዕዛዝ • የቀጥታ የተራ መከታተያ
+tiktokReelsTitle,OFFICIAL TIKTOK REELS,REEL TIKTOOKII OFFICIAL,ይፋዊ የቲክቶክ ቪዲዮዎች
+tapToWatchInTikTok,Tap to Watch in TikTok App,App TikTok irratti daawwadhaa,በቲክቶክ አፕ ይመልከቱ
+openInTikTok,Open in TikTok,TikTok irratti Bani,በቲክቶክ ክፈት
+redirectingToTikTok,Redirecting to TikTok app...,Gara App TikToktti dabarsaa jira...,ወደ ቲክቶክ አፕ በመሄድ ላይ...
+stationBishoftuLocation,"Bishoftu (Debre Zeyit), Oromia, Ethiopia","Bishoftuu (Dabrazayiti), Oromiyaa, Itoophiyaa",ቢሾፍቱ (ደብረ ዘይት)፣ ኦሮሚያ፣ ኢትዮጵያ
+curatedReelsPoolTitle,Curated Detailing & Ad Photo Pool (Tap to Apply):,Filannoo Suuraalee Beeksisaafi Miidhaginaa (Tuqaa Fayyadamaa):,የተመረጡ የማስታወቂያ እና ዲቴይሊንግ ፎቶዎች (ለመምረጥ ይንኩ):
+curatedPoolArtworks,Official Branding Artworks & Murals,Mallattoolee fi Fakkiiwwan Bishee Official,ይፋዊ የቢሼ አርማዎች እና የግድግዳ ስዕሎች
+curatedPoolAdBanners,Commercial Service Ad Banners (Trilingual Detailing & Carpet),Baanaroota Beeksisa Tajaajilaa (Miidhagina Makiinaa fi Kaarpeetii),የአገልግሎት ማስታወቂያ ባነሮች (የመኪና ዲቴይሊንግ እና ምንጣፍ እጥበት)
+reelCounter,REEL,Viidiyoo Gabaabaa (Reel),አጫጭር ቪዲዮዎች (Reel)
+ofWord,OF,IRRAA,ከ
+publicAccess,PUBLIC ACCESS,HUNDAAF BANAA,ለሁሉም ክፍት
+openBadge,OPEN NOW,BANAA DA,ክፍት ነው
+stationCapBays,2 Pressure Bays,Iddoo Dhiqannaa 2,2 የማጠቢያ ክፍሎች
+stationCapVan,1 At-Home Van,Makiinaa Manaa 1,1 የሞባይል ቫን
+stationCapPackages,10 Detailing Packages,Paakeejii 10,10 ፓኬጆች
+startWashAction,Start Wash,Dhiqannaa Jalqabi,እጥበት ጀምር
+moveToDryingAction,Move to Drying,Gogsatti Dabarsi,ወደ ማድረቅ አሳልፍ
+markCompletedAction,Mark Completed,Xumurameera Jedhi,ተጠናቋል በል
+collectPaymentAction,Collect Payment,Kaffaltii Fudhadhu,ክፍያ ተቀበል
+paymentLockedUntilCompleted,Payment unlocks after vehicle is marked completed,Kaffaltiin kan banamu erga dhiqamee xumuramee qofa,ክፍያ የሚፈቀደው እጥበቱ ተጠናቋል ተብሎ ከተረጋገጠ በኋላ ብቻ ነው
+registerPhoneBooking,Register Phone Booking,Galmee Bilbilaa,የስልክ ጥሪ ትዕዛዝ መዝግብ
+phoneBookingCallerName,Caller / Customer Name,Maqaa Maamilaa,የደዋይ / ደንበኛ ስም
+phoneBookingArrival,Expected Arrival Slot,Yeroo Dhufan,የሚመጡበት ሰዓት
+paymentAtGateNote,No advance payment needed. Payment is settled at the gate once your vehicle is washed.,Kaffaltii duroo hin barbaachisu. Kaffaltiin kan kaffalamu erga makiinaan dhiqamee booda.,ቅድመ ክፍያ አያስፈልግም። ክፍያ የሚፈጸመው መኪናዎ ታጥቦ ሲጠናቀቅ በካሸር ዴስክ ላይ ነው።
+filterToday,Today (Daily),Har'a (Guyyaa),ዛሬ (ዕለታዊ)
+filterYesterday,Yesterday,Kaleessa,ትናንት
+filterThisWeek,This Week (Weekly),Torban Kana (Torban),በዚህ ሳምንት (ሳምንታዊ)
+filterThisMonth,This Month (Monthly),Ji'a Kana (Ji'a),በዚህ ወር (ወርሃዊ)
+filterCustomRange,Custom Range,Yeroo Filatame,የተመረጠ የጊዜ ክልል
+filterAllTime,All Time,Yeroo Hunda,ሁሉንም ጊዜ
+teamCommissionDistribution,15% Team Commission Seniority Distribution,Qoqqoodama Komishiinii Garee 15% Sadarkaan,የ15% የቡድን አጣቢዎች ኮሚሽን በደረጃ ክፍፍል
+disburseCommission,Disburse Commission Pool,Komishiinii Raabsi,ኮሚሽን አከፋፍል
+commissionDisbursedSuccess,Commission dividends successfully approved and logged!,Komishiiniin milkaa'inaan raabsamee galmaa'eera!,የኮሚሽን ክፍፍል በተሳካ ሁኔታ ጸድቆ ተመዝግቧል!
+seniorityWeight,Seniority Weight,Ulfaatina Sadarkaa,የደረጃ ክብደት
+cashVsDigital,Cash vs Digital Settlement,Kaffaltii Qarshii fi Dijitaalaa,የጥሬ ገንዘብ እና ዲጂታል ክፍያ ንፅፅር
+bay1Name,Bay 1 (Station),Kutaa 1 (Dhiqannaa),ክፍል 1 (ማጠቢያ)
+bay2Name,Bay 2 (Station),Kutaa 2 (Dhiqannaa),ክፍል 2 (ማጠቢያ)
+bayVanName,Mobile Van 1 (At-Home),Makiinaa Socho'aa 1 (Mana),ተንቀሳቃሽ ቫን 1 (ቤት ለቤት)
+payCash,Cash (Gate / Handover),Qarshii Harkaa,በጥሬ ገንዘብ (ካሽ)
+payTelebirr,Telebirr (Ethio Telecom),Telebirr (Ityoo Telekom),ቴሌብር (ኢትዮ ቴሌኮም)
+payCbeBirr,CBE Birr (Commercial Bank),CBE Birr (Baankii Daldala),ሲቢኢ ብር (ንግድ ባንክ)
+payBank,Bank Transfer / Mobile Banking,Dabarsa Baankii,በባንክ ሒሳብ ማስተላለፍ
+customDetailingTab,Custom Detailing (Tick Boxes),Filannoo Qubaa (Tajaajila Filatamaa),ልዩ ዲቴይሊንግ (የሚመረጡ አገልግሎቶች)
+presetPackagesTab,Preset Service Packages,Paakeejiiwwan Tajaajilaa Qophaa'an,የተዘጋጁ የአገልግሎት ፓኬጆች
+feedbackTab,Feedback,Yaada Maamilaa,የደንበኞች አስተያየት
+customerFeedbackHeader,Customer Feedback & Ratings,Yaada fi Sadarkaa Qulqullinaa,የደንበኞች አስተያየት እና ደረጃ
+rateExperienceQuestion,How satisfied are you with our service?,Tajaajila keenyaan hammam gammaddan?,በአገልግሎታችን ምን ያህል ረክተዋል?
+star1Good,1 Star — Good,Urjii 1 — Gaarii,1 ኮከብ — ጥሩ
+star2Satisfactory,2 Stars — Satisfactory,Urjii 2 — Quubsaa,2 ኮከብ — አጥጋቢ
+star3Excellent,3 Stars — Excellent,Urjii 3 — Baay'ee Gaarii,3 ኮከብ — በጣም ጥሩ
+star4SuperSatisfied,4 Stars — Super Satisfied,Urjii 4 — Hedduu Gammadeera,4 ኮከብ — እጅግ በጣም አርኪ
+feedbackNameOptional,Your Name (Optional),Maqaa Keessan (Dirqama Miti),ስምዎ (አማራጭ)
+feedbackOpinionHint,Write your personal opinion (Optional),Yaada dhuunfaa keessan barreessaa (Dirqama Miti),የግል አስተያየትዎን ይጻፉ (አማራጭ)
+sendFeedback,Send Feedback,Yaada Ergi,አስተያየት ላክ
+feedbackSentForApproval,Thank you! Your feedback has been sent to management for review.,Galatoomaa! Yaadni keessan mirkaneessa bulchiinsaaf ergameera.,እናመሰግናለን! አስተያየትዎ ለማጽደቅ ወደ አስተዳዳሪ ተልኳል።
+selectStarRatingFirst,Please select a star rating (1–4) before sending.,Erguun dura sadarkaa urjii (1–4) filadhaa.,ከመላክዎ በፊት እባክዎ የኮከብ ደረጃ (1–4) ይምረጡ።
+feedbackLinksBlocked,Links or web addresses are not allowed in feedback.,Liinkiiwwan ykn teessoon weebsaayitii yaada keessatti hin hayyamamu.,በአስተያየት ውስጥ ሊንኮች ወይም የድረ-ገጽ አድራሻዎች አይፈቀዱም።
+feedbackCooldownError,Please wait a moment before sending another feedback.,Yaada biroo erguuf yeroo xiqqoo eegaa.,ሌላ አስተያየት ከመላክዎ በፊት እባክዎ ትንሽ ይጠብቁ።
+showCustomersSuggestions,Show Customers Suggestions,Yaada Maamiltootaa Agarsiisi,የደንበኞችን አስተያየት አሳይ
+noApprovedFeedbackYet,No approved customer feedback yet. Share your thoughts above!,Hanga ammaatti yaadni mirkanaa'e hin jiru. Yaada keessan qooddadhaa!,እስካሁን የጸደቀ የደንበኛ አስተያየት የለም። አስተያየትዎን ከላይ ይላኩ!
+anonymousCustomer,Anonymous Customer,Maamila,ደንበኛ
+averageRatingLabel,Avg Rating,Giddugaleessa,አማካይ ደረጃ
+adminFeedbackModeration,Customer Feedback Moderation,To'annoo Yaada Maamiltootaa,የደንበኞች አስተያየት ማጽደቂያ
+adminFeedbackModerationSub,Approve genuine ratings or ignore spam & inappropriate comments,Yaada dhugaa mirkaneessaa ykn spam dhiisaa,ትክክለኛ አስተያየቶችን ያጽድቁ ወይም አላስፈላጊዎችን ይተዉ
+approveFeedback,Approve,Mirkaneessi,አጽድቅ
+ignoreFeedback,Ignore,Dhiisi,ተወው
+removeFeedback,Remove,Haqi,አስወግድ
+pendingReviewLabel,Pending Review,Mirkaneessa Eeggataa,ማጽደቅ የሚጠባበቅ
+approvedLabel,Approved,Mirkanaa'e,የጸደቀ
+ignoredLabel,Ignored,Kan Dhiifame,የተተወ
+feedbackModerationEmpty,No customer feedback in this category.,Kutaa kana keessa yaadni maamilaa hin jiru.,በዚህ ክፍል ውስጥ ምንም የደንበኛ አስተያየት የለም።
+pricesAreNegotiable,Prices are negotiable,Gatiin mariin ni sirraa'a,ዋጋዎች በድርድር የሚስተካከሉ ናቸው
+whatToWashToday,What would you like to wash today?,Har'a maal dhiqachuu barbaaddu?,ዛሬ ምን ማሳጠብ ይፈልጋሉ?
+washMyCarTitle,Wash My Car,Konkolaataa Dhiqachuu,መኪና ማሳጠብ
+washMyCarSub,Choose a ready package or pick exact items in 3 easy steps,Paakeejii qophaa'e ykn tajaajila barbaaddan tarkaanfii 3n filadhaa,የተዘጋጀ ፓኬጅ ወይም የሚፈልጉትን አገልግሎት በ3 ቀላል ደረጃ ይዘዙ
+startCarBooking,Start Car Booking,Ajaja Konkolaataa Jalqabi,የመኪና እጥበት ይዘዙ
+washMyCarpetTitle,Wash My Carpet,Karpeetii Dhiqachuu,ምንጣፍ ማሳጠብ
+washMyCarpetSub,"At our station, driver pick-up, or cleaned right at your home","Buufata keenyatti, mana keessanii fuunee ykn manatti isiniif dhiqna",በማዕከላችን፣ ከቤትዎ ወስደን ወይም ቤትዎ ድረስ መጥተን እናጥባለን
+startCarpetBooking,Start Carpet Booking,Ajaja Karpeetii Jalqabi,የምንጣፍ እጥበት ይዘዙ
+needHelpCallBanner,New to the app? Call us and we will book for you in 30 seconds!,Appii fayyadamuun yoo isinitti ulfaate bilbilaa — sekoondii 30 keessatti isiniif ajajna!,መተግበሪያውን መጠቀም ካስቸገረዎት ይደውሉ — በ30 ሰከንድ እንመዘግብዎታለን!
+step1ModeInstruction,Step 1 of 3: How should we serve you?,Tarkaanfii 1/3: Akkamitti isin tajaajillu?,ደረጃ 1 ከ 3፡ አገልግሎቱን እንዴት ማግኘት ይፈልጋሉ?
+step2CarInstruction,Step 2 of 3: Pick vehicle size & wash service,Tarkaanfii 2/3: Gosa konkolaataa fi tajaajila filadhaa,ደረጃ 2 ከ 3፡ የመኪናውን አይነት እና አገልግሎት ይምረጡ
+step2CarpetInstruction,Step 2 of 3: Pick carpet type & size,Tarkaanfii 2/3: Gosa karpeetii fi bal'ina filadhaa,ደረጃ 2 ከ 3፡ የምንጣፍ አይነት እና መጠን ይምረጡ
+step3DetailsInstruction,"Step 3 of 3: Your name, phone and plate number","Tarkaanfii 3/3: Maqaa, bilbila fi lakkoofsa taargaa keessan",ደረጃ 3 ከ 3፡ ስም፣ ስልክ እና የሰሌዳ ቁጥርዎን ያስገቡ
+step3CarpetDetailsInstruction,"Step 3 of 3: Your name, phone & carpet tag","Tarkaanfii 3/3: Maqaa, bilbila fi koodii karpeetii keessan",ደረጃ 3 ከ 3፡ ስም፣ ስልክ እና የምንጣፍ መለያ ቁጥርዎን ያስገቡ
+nextStep,Next Step,Itti Fufi,ቀጥል
+backStep,Back,Duubatti,ተመለስ
+estimatedTotalLabel,Estimated Total,Tilmaama Waliigalaa,ግምታዊ ጠቅላላ ዋጋ
+finalNegotiatedPriceEtb,Final Negotiated Price (ETB),Gatii Xumuraa Mariin Murtaa'e (ETB),በድርድር የጸደቀው የመጨረሻ ዋጋ (ብር)
+bookedReferenceTariff,Booked Reference Tariff,Gatii Jalqabaa Galmaa'e,በትዕዛዝ የተመዘገበ መነሻ ዋጋ
+bookingFailedPrefix,Could not complete booking,Ajaja xumuruun hin danda'amne,ትዕዛዙን ማጠናቀቅ አልተቻለም
+callingStationPrefix,Calling BISHE Station,Buufata BISHE'tti bilbilamaa jira,ወደ ቢሼ ማዕከል እየተደወለ ነው
+pkg_silver_name,Basic / Silver Package,Paakeejii Bu'uuraa / Meetaa,ቤሲክ / ሲልቨር ፓኬጅ
+pkg_silver_desc,Basic wash for exterior body and glass clean.,Dhiqannaa bu'uuraa qaama alaa fi fuula daawwitii.,መሰረታዊ የውጭ አካል እና የመስታወት እጥበት።
+pkg_gold_name,Gold Package (Polish),Paakeejii Warqee (Pooliishii),ጎልድ ፓኬጅ (ፖሊሽ)
+pkg_gold_desc,Basic wash plus premium protective body polish.,Dhiqannaa bu'uuraa fi pooliishii qulqulluu eegumsa qaamaa.,መሰረታዊ እጥበት ከፕሪሚየም የቦዲ ፖሊሽ ማብሪያ ጋር።
+pkg_plat_interior_name,Platinum Interior Detailing,Pulaatiiniyemii Dhiqannaa Keessoo Guutuu,ፕላቲነም የውስጥ ሙሉ ዲቴይሊንግ
+pkg_plat_interior_desc,Seat & floor carpet removed & washing + roof deep cleaning + dashboard detailing.,Barcuma & karpeeta lafaa baasanii dhiqquu + baaxii qulqulleessuu + daashboordii.,ወንበርና ምንጣፍ ወጥቶ የሚታጠብ + የጣሪያ ጥልቅ ጽዳት + የዳሽቦርድ ዲቴይሊንግ።
+pkg_plat_ext_a_name,Platinum Exterior - A,Pulaatiiniyemii Alaa - Sadarkaa A,ፕላቲነም የውጭ - ደረጃ ኤ
+pkg_plat_ext_a_desc,Body Polish + Water Spot removal and gloss treatment.,Pooliishii qaamaa + bakkoota bishaanii balleessuu fi calaqqisiisuu.,የቦዲ ፖሊሽ እና የውሃ ምልክት ማጥፊያ ህክምና።
+pkg_plat_ext_b_name,Platinum Exterior - B,Pulaatiiniyemii Alaa - Sadarkaa B,ፕላቲነም የውጭ - ደረጃ ቢ
+pkg_plat_ext_b_desc,Body + Water Spot + Tire Detailing & rim protection.,Qaama + bakkoota bishaanii + dhiqannaa & eegumsa gommaa.,የቦዲ + የውሃ ምልክት ማጥፊያ + የጎማ እና ሪም ዲቴይሊንግ።
+pkg_plat_ext_c_name,Platinum Exterior - C,Pulaatiiniyemii Alaa - Sadarkaa C,ፕላቲነም የውጭ - ደረጃ ሲ
+pkg_plat_ext_c_desc,Body + Water Spot + Tire Detailing + Headlight restoration.,Qaama + bishaan + gommaa + ifa ija konkolaataa haaromsuu.,የቦዲ + የውሃ ምልክት + የጎማ ዲቴይሊንግ + የፊት መብራት ማብሪያ።
+pkg_diamond_a_name,Diamond Package A,Paakeejii Daayimandii A,ዳይመንድ ፓኬጅ ኤ
+pkg_diamond_a_desc,Interior Full Detailing & Body Polish + Water Spot treatment.,Dhiqannaa keessoo guutuu & pooliishii qaamaa + bishaan dhabamsiisuu.,የውስጥ ሙሉ ዲቴይሊንግ እና የቦዲ ፖሊሽ + የውሃ ምልክት ማጥፊያ።
+pkg_diamond_b_name,Diamond Package B,Paakeejii Daayimandii B,ዳይመንድ ፓኬጅ ቢ
+pkg_diamond_b_desc,Interior Full Detailing & Body + Water Spot + Tire Detailing.,Dhiqannaa keessoo guutuu & qaama + bishaan + gommaa.,የውስጥ ሙሉ ዲቴይሊንግ እና ቦዲ + የውሃ ምልክት + የጎማ ዲቴይሊንግ።
+pkg_diamond_full_name,Diamond Package C (Full),Paakeejii Daayimandii Guutuu,ዳይመንድ ሙሉ ፓኬጅ
+pkg_diamond_full_desc,The ultimate showroom detail: Full Platinum Interior + Complete Platinum Exterior Level C.,Sadarkaa olaanaa: Pulaatiiniyemii Keessoo Guutuu + Pulaatiiniyemii Alaa Sadarkaa C guutuu.,የላቀ የሾውሩም ደረጃ ዲቴይሊንግ፡ ሙሉ የፕላቲነም የውስጥ + የተሟላ የፕላቲነም የውጭ ደረጃ ሲ።
+pkg_engine_chem_name,Engine Chemical Cleaning,Qulqullina Keemikaala Motoraa,የሞተር ኬሚካል እጥበት
+pkg_engine_chem_desc,Basic / Silver package wash + professional engine chemical degrease.,Dhiqannaa bu'uuraa meetaa + dhangala'aa motoraa keemikaalaan qulqulleessuu.,የቤሲክ / ሲልቨር እጥበት + የሞተር ኬሚካል ፍላሽ እና ዲግሪዝ።
+pkg_express_name,Express Foam Wash,Dhiqannaa Saamunaa Saffisaa,ፈጣን የአረፋ ሳሙና እጥበት
+pkg_express_desc,"High-pressure water rinse, active snow foam soak, tire shine & hand dry.","Bishaan dhiibbaa ol-aanaa, saamunaa hoomisaa, cululuqsa gommaafi goggogsuu harkaa.",በከፍተኛ የውሃ ግፊት ማጠብ፣ ንቁ የሳሙና አረፋ፣ የጎማ ማብሪያና ማድረቅ።
+pkg_standard_name,Standard Clean & Vacuum,Qulqullina Idilee & Vaakiyuumii,መደበኛ ሙሉ እጥበትና ቫኪዩም
+pkg_standard_desc,"Complete exterior body wash plus deep interior vacuum, dashboard wipe & glass cleaning.","Dhiqannaa alaa guutuu, keessa vaakiyuumii gochuu, daashboordii fi fuula daawwitii qulqulleessuu.",ሙሉ የውጭ አካል እጥበት፣ የውስጥ ቫኪዩም፣ ዳሽቦርድ ማፅዳትና መስታወት ማብራት።
+pkg_deluxe_name,Deluxe Spa & Engine Detail,Ispaa Dilaaksii & Qulqullina Motoraa,ልዩ ስፓ እና የሞተር እጥበት
+pkg_deluxe_desc,"Comprehensive exterior hand polish, high-temperature interior steam sanitize, engine bay shampoo & synthetic spray wax.","Pooliishii harkaa, hurka ho'aan keessa qulqulleessuu, saamunaa motoraa fi waaksii alaa.",የእጅ ፖሊሽ፣ በከፍተኛ ሙቀት እንፋሎት የውስጥ ማፅዳት፣ የሞተር ሻምፑና የሰም ቅባት።
+pkg_executive_name,Executive Detailing & Wax,Dhiqannaa Sadarkaa Olaanaa & Waaksii,ልዩ የዲቴይሊንግ እና የሰም እጥበት
+pkg_executive_desc,"Showroom finish with clay treatment, machine paste wax, leather balm & underbody wash.","Haala shooruumii wajjin yaala kileeyii, waaksii maashinii, baalmii gogaa fi dhiqannaa jalaa.",የሾውሩም ደረጃ ማብሪያ፣ የማሽን ሰም ቅባት፣ የቆዳ ወንበር እንክብካቤ እና የታችኛው ክፍል እጥበት።
+pkg_chassis_name,Chassis & Engine Flush,Dhiqannaa Chaasii & Motoraa,የቻሲስ እና የሞተር እጥበት
+pkg_chassis_desc,Targeted high-pressure undercarriage rust prevention wash & safe steam engine bay degrease.,Bishaan dhiibbaa guddaan jala makiinaa dhiqanii dhangala'aa motoraa hurkaan qulqulleessuu.,በከፍተኛ የውሃ ግፊት ዝገት መከላከያ የታችኛው ክፍል እጥበት እና የሞተር እንፋሎት ጽዳት።
+pkg_mobile_name,Mobile At-Home Express Van,Makiinaa Socho'aa Mana Keessanitti,ተንቀሳቃሽ ቫን (ቤትዎ ድረስ)
+pkg_mobile_desc,"Doorstep wash anywhere in Bishoftu. Onboard high-pressure system, spotless deionized water & silent generator.",Bishoftuu keessatti bakka jirtanitti dhiqannaa. Bishaan qulqulluu fi jenereetara sagalee hin qabne.,ቢሾፍቱ ውስጥ ባሉበት ቦታ ድረስ መጥቶ ማጠብ። የራሱ የውሃ ታንክና ፀጥተኛ ጄነሬተር ያለው።
+roleWasher,Car Washer,Dhiqaa Konkolaataa,መኪና አጣቢ
+roleCashier,Cashier Desk,Kaashiyara,ገንዘብ ያዥ
+roleAdmin,Admin / Manager,Bulchaa / Hojii Geggeessaa,አስተዳዳሪ / ስራ አስኪያጅ
+roleLeadDetailer,Lead Detailer,Gaggeessaa Qulqullinaa,ዋና የእጥበት ባለሙያ
+cashierTitle,Cashier Station Operations,Hojii Kaashiyara,የገንዘብ ያዥ የሥራ ሰሌዳ
+newWalkIn,New Walk-In Entry,Galmee Haaraa,አዲስ መኪና አስመዝግብ
+todayRevenue,Today Revenue,Galii Har'aa,የዛሬ ገቢ
+carsWashed,cars washed,konkolaataa dhiqaman,የታጠቡ መኪኖች
+digitalPay,Telebirr / CBE,Kaffaltii Dijitaalaa (Telebirr / CBE),ዲጂታል ክፍያ (ቴሌብር / ሲቢኢ ብር)
+cashCollected,Cash Collected,Qarshii Harkaa,በካሽ የተሰበሰበ
+activeWashingBays,Active Washing Bays,Kutaalee Dhiqannaa,የመኪና ማጠቢያ ክፍሎች
+assignVehicle,Assign Vehicle,Makiinaa Ramadi,መኪና መድብ
+startWashing,Start Washing,Dhiqannaa Jalqabi,ማጠብ ጀምር
+setToDrying,Set to Drying,Gogsutti Jijjiiri,ወደ ማድረቅ ቀይር
+markReady,Mark Ready for Pickup,Fudhachuuf Qophii,ለመረከብ ዝግጁ አድርግ
+completeArchive,Complete & Archive,Xumuri,አጠናቅቅ
+queueAndVehicles,Queue & Vehicles,Dabareefi Konkolaattota,የመኪኖች ተራ ዝርዝር
+filterAll,All Active,Hunda,ሁሉም
+filterPending,Pending Bay,Kutaa Eegaa,ክፍል የሚጠብቁ
+filterInService,In Service,Dhiqamaa Jira,በእጥበት ላይ
+filterUnpaid,Unpaid Only,Kaffaltii Qofa,ያልተከፈሉ ብቻ
+payButton,Pay,Kaffali,ክፈል
+adminTitle,Executive Administration Hub,Wiirtuu Bulchiinsaa,የአስተዳዳሪ መቆጣጠሪያ ማዕከል
+totalRevenueAdmin,Total Revenue,Galii Waliigalaa,አጠቃላይ ገቢ
+totalRevenue,Total Revenue,Galii Waliigalaa,ጠቅላላ ገቢ
+washAndVehicleHistory,Wash & Vehicle History,Seenaa Dhiqannaa & Konkolaataa,የመኪና እጥበት እና ተሽከርካሪ ታሪክ
+commissionsPaid,Commissions,Komishiinii,ኮሚሽን
+netStationProfit,Net Station Profit,Bu'aa Qulqulluu,የተጣራ ትርፍ
+activeWashers,Active Washers,Hojjettoota Hojirra Jiran,ንቁ አጣቢዎች
+managementOperations,Management Operations,Hojiiwwan Bulchiinsaa,የአስተዳደር ስራዎች
+clearAllBookings,Clear All Bookings,Galmee Hundumaa Haqi,ሁሉንም መዝገቦች አጽዳ
+clearAllBookingsSubtitle,"Reset active queue, history & relative data across the database","Galmeewwan, seenaa fi database qulqulleessi",የነቃ ወረፋ፣ ታሪክ እና መረጃዎችን ከዳታቤዝ አጽዳ
+clearAllBookingsConfirm,Clear All Bookings & History?,Galmeewwan fi Seenaa Hundumaa Haquu Barbaadduu?,ሁሉንም መዝገቦች እና ታሪክ ማጽዳት ይፈልጋሉ?
+clearAllBookingsDesc,"This will permanently delete all active and historical bookings, commission logs, bank deposits, expenses, and handovers from the SQL database and reset washing bays to vacant for fresh testing. Master fixtures (tariffs, staff, inventory catalog) will NOT be affected.\n\nAre you sure you want to proceed?","Kun galmeewwan dhiqannaa, komishiinii, baankii, baasii fi dabarsaa meeshaalee database SQL keessaa guutummaatti haqa. Tajaajilootaa fi miseensota hojii hin tuqu.\n\nDhuguma itti fufuu barbaadduu?",ይህ ሁሉንም የቦታ ማስያዣዎች፣ የኮሚሽን መዝገቦች፣ የባንክ ገቢዎች፣ ወጪዎች እና የዕቃ ርክክቦችን ከ SQL ዳታቤዝ ሙሉ በሙሉ ያጠፋል፤ ማጠቢያ ክፍሎችንም ባዶ ያደርጋል። ዋና መረጃዎች (የአገልግሎት ዋጋ፣ ሠራተኞች፣ ዕቃዎች) አይነኩም።\n\nበእርግጥ መቀጠል ይፈልጋሉ?
+clearAllBookingsSuccess,All bookings and operational history have been purged from the database and app screens!,Galmeewwan dhiqannaa fi seenaan hundi database fi iskiriinii hunda irraa haqamaniiru!,ሁሉም የቦታ ማስያዣዎች እና የሥራ ታሪኮች ከዳታቤዝ እና ከሁሉም ስክሪኖች ሙሉ በሙሉ ጸድተዋል!
+pricingMatrix,Pricing Matrix,Gatii Tajaajilaa,የዋጋ ማስተካከያ
+pricingSubtitle,"Edit ETB tariffs for Type A, B, and C",Gatii konkolaataa jijjiiraa,ዋጋዎችን እንደ መኪናው ዓይነት ያስተካክሉ
+staffPayroll,Staff Payroll,Kaffaltii Hojjettootaa,የሰራተኞች ደመወዝ
+staffPayrollSub,Base wages & commission rates,Miindaa fi komishiinii,ወርሃዊ ደመወዝና የኮሚሽን ምጣኔ
+recentCommissions,Recent Washer Commission Splits,Komishiinii Dhiheenyaa,የቅርብ ጊዜ የአጣቢዎች ኮሚሽን
+viewAll,View All,Hunda Ilaali,ሁሉንም እይ
+digitalReceiptsTitle,Digital Receipts & Verification,Nagahee Dijitaalaafi Qorannoo,የዲጂታል ደረሰኞችና ማረጋገጫ
+noDigitalReceipts,No digital payments recorded yet today.,Kaffaltiin dijitaalaa har'aa hin jiru.,ዛሬ የተመዘገበ የዲጂታል ክፍያ የለም።
+viewReceipt,View Receipt,Nagahee Ilaali,ደረሰኝ እይ
+noReceipt,No Receipt,Nagahee Hin Qabu,ደረሰኝ የለም
+pricingManagementTitle,Service Pricing & Master Inventory,Gatii Tajaajilaa fi Qabeenyaa Waliigalaa,የእጥበት ዋጋ እና አጠቃላይ የንብረት መቆጣጠሪያ
+masterPricingAndInventory,Pricing & Master Inventory Editor,Gulaalaa Gatii fi Qabeenyaa Waliigalaa,የዋጋ ማስተካከያ እና አጠቃላይ የንብረት መቆጣጠሪያ
+carWashTariffs,Car Wash Detailing,Dhiqannaa Konkolaataa,የመኪና ማጠቢያ ዋጋዎች
+carpetTariffs,Carpet Services,Tajaajila Karpeetii,የምንጣፍ አገልግሎቶች
+consumablesPricing,Storekeeper Consumables,Meeshaalee Dhumatoo Bakka Kuusaa,የመጋዘን አላቂ እቃዎች
+fixedAssetsValuation,Storekeeper Fixed Assets,Qabeenya Dhaabbataa Bakka Kuusaa,የመጋዘን ቋሚ ንብረቶች
+addNewService,Add New Service,Tajaajila Haaraa Dabali,አዲስ አገልግሎት ያክሉ
+edit,Edit,Gulaali,አስተካክል
+editService,Edit Service,Tajaajila Gulaali,አገልግሎቱን ያርትዑ
+deleteService,Delete Service,Tajaajila Haqi,አገልግሎቱን ይሰርዙ
+confirmDeleteService,Are you sure you want to permanently delete this service?,Tajaajila kana dhaabbataan haquu barbaadduu?,እርግጠኛ ነዎት ይህን አገልግሎት እስከመጨረሻው መሰረዝ ይፈልጋሉ?
+addNewConsumable,Add Consumable Item,Meeshaa Dhumataa Haaraa Dabali,አዲስ አላቂ እቃ ያክሉ
+editConsumable,Edit Consumable Item,Meeshaa Dhumataa Gulaali,አላቂ እቃውን ያርትዑ
+deleteConsumableConfirm,Are you sure you want to delete this consumable item from inventory?,Meeshaa dhumataa kana kuusaa keessaa haquu barbaadduu?,እርግጠኛ ነዎት ይህን አላቂ እቃ ከመጋዘን ዝርዝር መሰረዝ ይፈልጋሉ?
+addNewFixedAsset,Add Fixed Asset,Qabeenya Dhaabbataa Haaraa Dabali,አዲስ ቋሚ ንብረት ያክሉ
+editFixedAsset,Edit Fixed Asset,Qabeenya Dhaabbataa Gulaali,ቋሚ ንብረቱን ያርትዑ
+deleteFixedAssetConfirm,Are you sure you want to permanently delete this fixed asset?,Qabeenya dhaabbataa kana dhaabbataan haquu barbaadduu?,እርግጠኛ ነዎት ይህን ቋሚ ንብረት እስከመጨረሻው መሰረዝ ይፈልጋሉ?
+assetValueEtb,Asset Valuation (ETB),Gatii Qabeenyaa (ETB),የንብረቱ ዋጋ (ብር)
+unitCostEtb,Unit Cost / Price (ETB),Gatii Tokkoo (ETB),የአንዱ ዋጋ (ብር)
+addNewCarpetService,Add Carpet Service,Tajaajila Karpeetii Dabali,የምንጣፍ አገልግሎት ያክሉ
+editCarpetService,Edit Carpet Service,Tajaajila Karpeetii Gulaali,የምንጣፍ አገልግሎት ያርትዑ
+deleteCarpetServiceConfirm,Are you sure you want to delete this carpet service?,Tajaajila karpeetii kana haquu barbaadduu?,እርግጠኛ ነዎት ይህን የምንጣፍ አገልግሎት መሰረዝ ይፈልጋሉ?
+superAdminOnlyNotice,Super Admin Access: Direct live changes to system tariffs & inventory,Eeyyama Super Admin: Gatiiwwan sirnaa fi kuusaa kallattiin gulaaluuf,የሱፐር አድሚን ፈቃድ፡ የሲስተም ዋጋዎችንና የመጋዘን እቃዎችን በቀጥታ የማስተካከል ስልጣን
+cat_exterior,Exterior & Hand Wash,Dhiqannaa Qaama Alaa fi Harka,የውጭ አካል እና የእጅ እጥበት
+cat_polish,Body Polish & Paint Correction,Poolishii Qaama Konkolaataa fi Bakkoltee Halluu Sirreessuu,የመኪና አካል ፖሊሽ እና የቀለም ጭረት ጥገና
+cat_interior,Interior Restoration & Detailing,Qulqullina Keessaa fi Miidhagina Guutuu,የውስጥ ክፍል ፅዳት እና ዲቴይሊንግ
+cat_engine,Engine & Specialty Detailing,Qulqullina Gadi-fageenyaa Mootoraa fi Kutaa Addaa,የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት
+cat_specialty,Engine & Specialty Detailing,Qulqullina Gadi-fageenyaa Mootoraa fi Kutaa Addaa,የሞተር እና የሞተር የተለያዩ ክፍሎች ጥልቅ ፅዳት
+srv_body_wash,Body Hand Wash with Shampoo & Fiber Towel,Dhiqannaa qaama konkolaataa shaamപ്പോ fi fooxaa faayiberiitiin,የመኪና አካል በሻምፖ እና በፋይበር ፎጣ እጥበት
+srv_tire_clean,Tire Cleaning & Tire Black Finish,Qulqullina gommaa fi kuula guraachessituu gommaa,የጎማ እጥበት እና ማጥቆሪያ ቅባት
+srv_window_polish,Window Polish & Cleaning,Daawwitii foddaa konkolaataa qulqulleessuu,የመስኮት መስታወት ማጽዳት
+srv_machine_polish,Machine Body Polish,Poolishii qaamaa maashiniin hojjetamu,በማሽን የሚደረግ የሰውነት ፖሊሽ
+srv_scratch_removal,Scratch / Minor Scratch Removal,Ciccitaa fi madaa xixiqqoo halluu balleessuu,የጭረት እና ጥቃቅን ስንጥቆች ማስለቀቅ
+srv_water_spot,Water Spot Chemical Removal,Mallattoo bishaanii fi ashaboo goge qorichaan balleessuu,የውሃ እና የጨው ድርቀት ምልክቶችን ማስለቀቅ
+srv_int_vacuum,Interior Vacuum: Floor & Seat Cleaning,Vaakiyuumii keessaa (dhukkee lafaa fi teessumaa qulqulleessuu),የውስጥ ክፍል ቫኪዩም (የወለል እና የወንበር አቧራ ማጽዳት)
+srv_seats_out,Seat & Floor Carpet Removed & Washed,Teessumootaa fi afata lafaa baasanii dhiquu,ወንበሮችና የወለል ምንጣፎች ወጥተው የሚታጠቡበት
+srv_roof_cleaning,Roof Headliner Deep Cleaning,Huccuu korniisa/baaxii keessaa gadi-fageenyaan dhiquu,የኮርኒስ/የጣራ ጨርቅ ጥልቅ እጥበት
+srv_dashboard_detailing,Dashboard Detailing: Cream & Airfresh,Daashboordii miidheksuu (kiriimii fi shittoo sirreessuu),የዳሽቦርድ ማስዋብ (ክሬም እና ሽቶ ማስተካከል)
+srv_door_panel,Door Panel Deep Cleaning,Qaama keessoo balbalaa gadi-fageenyaan qulqulleessuu fi miidheksuu,የበር ውስጣዊ ገጽታዎች ጥልቅ ጽዳት እና ማስዋብ
+srv_engine_shampoo,Engine Cleaning: Shampoo,Mootora shaamപ്പോdhaan dhiquu,የሞተር እጥበት (በሻምፖ)
+srv_engine_chemical,"Engine Bay Chemical Degreasing: Deep Clean, Rinse & Dry","Moora mootoraa kemikaalaan cooma qulqulleessuu (dhiquu, dhiqachuu fi gogsuu)",የሞተር ክፍል በኬሚካል ቅባት ማስለቀቅ (ጥልቅ ጽዳት፣ ማጠብ እና ማድረቅ)
+srv_headlight_restoration,Headlight Restoration,Daawwitii ifaa fuulduraa kan dhiitama/bifa gate gara oriijinaalaatti deebisuu,የደበዘዘ (የወየበ) የግንባር መብራት መስታወት ወደ ኦሪጂናል መመለስ
+srv_plastic_trim,Plastic Trim Restoration,Pilaastikii fi Gommaa Haaromsuu,የፕላስቲክ እና የጎማ ማደስ
+srv_diamond_detailing,Diamond - Interior & Exterior Detailing (1 Day),Daayimandii - Miidhagina Keessaa fi Alaa Guutuu (Guyyaa 1),ዳይመንድ - የውስጥ እና የውጭ ሙሉ ዲቴይሊንግ (1 ቀን)
+staffManagementTitle,Staff & Salaries Management,Bulchiinsa Hojjettootaafi Miindaa,የሰራተኞችና ደመወዝ አስተዳደር
+commissionLogsTitle,Washer Commission Logs,Galmee Komishiinii Dhiqaa,የአጣቢዎች ኮሚሽን ዝርዝር መዝገብ
+addStaff,Add Staff,Hojjetaa Dabali,ሰራተኛ መዝግብ
+liveTrackingTitle,Live Wash Tracking,Hordoffii Dhiqannaa Kallattii,የቀጥታ እጥበት ሁኔታ መከታተያ
+bookWashTitle,Book Car Wash,Dhiqannaa Qabadhaa,መኪና እጥበት ይዘዙ
+walkInTitle,Gate Walk-In Registration,Galmee Balbala Duraa,የበር ላይ መኪና ምዝገባ
+paymentDialogTitle,Process Payment,Kaffaltii Raawwadhu,ክፍያ ተቀበል
+historyTitle,My Wash History,Seenaa Dhiqannaa Koo,የቀደመ እጥበት ታሪኬ
+noRecords,No booking records available,Galmeen dhiqannaa hin jiru,ምንም የተመዘገበ ታሪክ የለም
+total,Total,Waliigala,ጠቅላላ
+licensePlate,License Plate,Gabatee Makiinaa,የሰሌዳ ቁጥር
+customerName,Customer Name,Maqaa Maamilaa,የደንበኛው ስም
+customerPhone,Phone Number,Lakkoofsa Bilbilaa,ስልክ ቁጥር
+locationArea,Delivery Location / Bishoftu Area,Iddoo Geessisaa / Bishoftuu,የሚታጠብበት አድራሻ (ቢሾፍቱ)
+paymentMethod,Payment Method,Mala Kaffaltii,የክፍያ ዘዴ
+transactionRef,Transfer Reference (Optional),Koodii Dabarsaa (Dirqama Miti),የክፍያ ማረጋገጫ ቁጥር (አስፈላጊ ከሆነ)
+uploadReceipt,Upload Payment Screenshot,Suuraa Nagahee Galchaa,የደረሰኝ ፎቶ / ስክሪንሽት ጫን
+receiptUploaded,Receipt screenshot attached,Suuraan nagahee qabsiifameera,የደረሰኙ ፎቶ በተሳካ ሁኔታ ተያይዟል
+confirmAndPay,Confirm & Complete Payment,Mirkaneessiitii Kaffali,አረጋግጥና ክፍያ ፈፅም
+assignBayWasher,Assign Bay / Washer,Kutaa / Dhiqaa Ramadi,ክፍልና አጣቢ መድብ
+baseMonthlySalary,BASE MONTHLY SALARY,MIINDAA JIOOTAA BU'UURAA,ወርሃዊ ቋሚ ደመወዝ
+commissionRate,COMMISSION RATE,HAMMA KOMISHIINII,የኮሚሽን ምጣኔ
+liveQueue,Live Queue,Dabaree Kallattii,የቀጥታ ተራ
+stationBaysTitle,Station (2 Bays),Dhaabbata (Kutaa 2),ዋና ጣቢያ (2 ክፍሎች)
+mobileVanTitle,Mobile Van (1 Van),Makiinaa Sochooftuu (1),ተንቀሳቃሽ ቫን (1)
+readyNow,Ready Now,Amma Qophiidha,አሁን ዝግጁ ነው
+vanReady,Van Ready,Vaanichi Qophiidha,ቫኑ ዝግጁ ነው
+doorstepService,Doorstep service,Tajaajila mana dhufaa,እስከ ደጅ ድረስ አገልግሎት
+carsAhead,ahead,dura jiru,ከፊት ያሉ
+baysOpen,bays open,kutaaleen banaadha,ክፍሎች ክፍት ናቸው
+minWait,min wait,daqiiqaa eeggannaa,ደቂቃ ጥበቃ
+bay1,Bay 1,Kutaa 1,ክፍል 1
+bay2,Bay 2,Kutaa 2,ክፍል 2
+mobileVan,Mobile Van,Makiinaa Sochooftuu,ተንቀሳቃሽ ቫን
+washer,Washer,Dhiqaa,አጣቢ
+assignedTeam,Assigned Team,Garee Ramadame,የተመደበ ቡድን
+pending,Pending,Eeggachaa jira,በመጠባበቅ ላይ
+paid,PAID,KAFFALAMEERA,ተከፍሏል
+enterName,Please enter your name,Maaloo maqaa keessan galchaa,እባክዎ ስምዎን ያስገቡ
+enterValidPhone,Please enter a valid phone number,Maaloo lakkoofsa bilbilaa sirrii galchaa,እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ
+enterPlate,Please enter license plate,Maaloo gabatee makiinaa galchaa,እባክዎ የሰሌዳ ቁጥር ያስገቡ
+bookingSuccess,Booking created successfully!,Dhiqannaan milkaa'inaan qabameera!,እጥበቱ በተሳካ ሁኔታ ተመዝግቧል!
+bookingFailed,Failed to create booking,Dhiqannaa qabachuun hin danda'amne,እጥበት መመዝገብ አልተሳካም
+staffPins,Staff PINs,Koodii Hojjettootaa,የሰራተኞች ሚስጥር ቁጥር
+staffPinsSub,Admin & Cashier logins,Galtee Bulchiinsaafi Kaffaltii,የአስተዳዳሪና ገንዘብ ያዥ መግቢያ
+staffPinsTitle,Staff Access & PIN Credentials,Koodii Eenyummeessaafi Mirga Galtee,የሰራተኞች መግቢያና የሚስጥር ቁጥሮች
+staffPinsDesc,Configure security PINs for the Cashier desk and Admin dashboard. Only users with the designated PIN can enter these views.,Koodii icciitii qabaa qarshiifi bulchiinsaa qindeessaa. Namni koodii qabu qofti seenuu danda'a.,ለገንዘብ ያዥና ለአስተዳዳሪ ክፍሎች የሚስጥር ቁጥር እዚህ ያዘጋጁ። ትክክለኛ ቁጥር ያለው ብቻ መግባት ይችላል።
+editPin,Edit PIN,Koodii Jijjiiri,ሚስጥር ቁጥር ቀይር
+changePin,Change PIN,Koodii Jijjiiri,ሚስጥር ቁጥር ቀይር
+savePin,Save PIN,Koodii Oolchi,ሚስጥር ቁጥር አስቀምጥ
+securityPin,Security PIN (Numeric),Koodii Icciitii (Lakkoofsa),የሚስጥር ቁጥር (በአሃዝ)
+staffDisplayName,Staff Name / Display Name,Maqaa Hojjetaa,የሰራተኛው ሙሉ ስም
+enterPinPrompt,Enter PIN,Koodii galchaa,ሚስጥር ቁጥር ያስገቡ
+incorrectPin,Incorrect PIN code,Koodiin dogoggora,የተሳሳተ ሚስጥር ቁጥር
+unlock,Unlock,Bani,ክፈት
+digitalPayments,Digital payments,Kaffaltii dijitaalaa,የዲጂታል ክፍያዎች
+atFrontDesk,At front desk,Balbala duraatti,በቀጥታ ፊት ለፊት
+advanceStatus,Advance Status,Sadarkaa Fuulduraa,ደረጃውን አሻግር
+afterPayrollCuts,After payroll cuts,Kaffaltii komishiinii booda,የሰራተኛ ኮሚሽን ከተቀነሰ በኋላ
+washesToday,WASHES TODAY,DHIQANNAA HAR'AA,የዛሬ እጥበቶች
+priceInEtb,Price in ETB,Gatii Qarshiin,ዋጋ በብር
+fullName,Full Name,Maqaa Guutuu,ሙሉ ስም
+receiptImageError,Unable to load receipt image,Suuraa nagahee fiduun hin danda'amne,የደረሰኙን ፎቶ ማሳየት አልተቻለም
+trackMyCar,Track My Vehicle,Dhiqannaa Konkolaataa Koo Hordofi,የመኪናዬን እጥበት ሁኔታ ተከታተል
+trackVehiclePrompt,Enter your plate number or phone to see your vehicle's live progress,Haala dhiqannaa ilaaluuf gabatee makiinaa ykn bilbila keessan galchaa,የመኪናዎን የቀጥታ ሁኔታ ለማየት የሰሌዳ ወይም የስልክ ቁጥር ያስገቡ
+trackNow,Track Wash,Hordofi,ተከታተል
+noActiveWashFound,No active wash found for this vehicle. Please verify your details or book a wash.,Dhiqannaan adeemsarra jiru hin argamne. Odeeffannoo keessan mirkaneeffadhaa.,ለዚህ መኪና ምንም በመከናወን ላይ ያለ እጥበት አልተገኘም። እባክዎ መረጃዎን ያረጋግጡ።
+trackAnother,Track another vehicle,Konkolaataa biraa hordofi,ሌላ መኪና ፈልግ
+plateOrPhoneHint,e.g. ET-3-B98124 or 0911...,Fkn. ET-3-B98124 ykn 0911...,ምሳሌ: ET-3-B98124 ወይም 0911...
+noQueueImmediate,No queue • Immediate service available,Dabareen hin jiru • Tajaajila battalaa,ተራ የለም • ፈጣን አገልግሎት ዝግጁ ነው
+vehiclesAhead,vehicle(s) currently ahead of you,konkolaataan dura keessan jiru,ተሽከርካሪ(ዎች) ከእርስዎ ፊት አሉ
+bookByPhone,Call Station Gate,Balbala Dhiqannaatti Bilbilaa,ለጣቢያው በስልክ ይደውሉ
+bookByPhoneSub,Call hotline to book your wash instantly by phone,Dhiqannaa battalatti qabachuuf sarara bilbilaa fayyadamaa,በስልክ ፈጣን ቀጠሮ ለመያዝ ወደ ሆትላይን ቁጥር ይደውሉ
+phoneCallBooking,Phone Call Booking,Galmee Bilbilaan,በስልክ የተያዘ ቀጠሮ
+useGpsLocation,Use Current GPS Location,Bakka GPS Ammaa Fayyadami,የአሁኑን የጂፒኤስ መገኛ ተጠቀም
+gpsLocationPinned,GPS Pinned,GPS Qabameera,ጂፒኤስ ተቀምጧል
+openInMaps,Open in Maps,Kaartaadhaan Bani,በካርታ ክፈት
+teamCommissionPool,Team Commission Pool (15%),Kuusaa Komishiinii Garee (15%),የቡድን አጣቢዎች ኮሚሽን ገንዳ (15%)
+dividendBySeniority,Dividend by Seniority & Skill,Qoodama Muuxannoo fi Ogummaan,በልምድና ክህሎት የተከፋፈለ ድርሻ
+teamRateLabel,Team Commission Rate (%),Hamma Komishiinii Garee (%),የቡድን ኮሚሽን ምጣኔ (%)
+updateRate,Update Rate,Hamma Jijjiiri,ምጣኔ ቀይር
+includedServices,Included Services:,Tajaajiloota Dabalatan:,የተካተቱ አገልግሎቶች፡
+financialReportsTitle,Financial Transactions & Closing Reports,Gabaasa Faayinaansii fi Cufiinsa Herregaa,የፋይናንስ ዝውውርና የሂሳብ መዝጊያ ሪፖርቶች
+dailyFinancialClosing,Daily Financial Closing,Cufiinsa Faayinaansii Guyyaa,ዕለታዊ የፋይናንስ ሂሳብ መዝጊያ
+confirmDailyClosing,Confirm Daily Closing,Cufiinsa Guyyaa Mirkaneessi,ዕለታዊ ሂሳብ መዝጊያን አረጋግጥ
+dailyClosingConfirmed,Daily Closing Confirmed,Cufiinsi Guyyaa Mirkanaa'eera,ዕለታዊ ሂሳብ ተዘግቷል
+grossRevenue,Daily Gross Revenue,Galii Dimshaashaa Guyyaa,ዕለታዊ ጠቅላላ ገቢ
+washerCommissionDeducted,Washer Commission Deducted (15%),Komishiinii Dhiqaa Hir'ifame (15%),የተቆረጠ የአጣቢዎች ኮሚሽን (15%)
+cashAtGate,Cash Handover at Gate,Qarshii Harkaa Balbalaa,በር ላይ የተሰበሰበ ካሽ
+digitalChannels,Digital Channels Total,Waliigala Karaalee Dijitaalaa,ጠቅላላ የዲጂታል ክፍያዎች
+digitalMoneyTransfer,Digital Money Transfer,Dabarsa Qarshii Dijitaalaa,የዲጂታል ገንዘብ ዝውውር
+shiftLocked,Shift Locked,Hojiin Cufameera,ተዘግቷል
+smsSentSuccess,Completion SMS dispatched to customer,Ergaan xumuramu maamiilaaf ergameera,የማጠናቀቂያ አጭር የጽሑፍ መልዕክት (SMS) ለደንበኛው ተልኳል
+smsGatewayPhone,Cashier SMS Gateway Phone,Lakk. Bilbilaa Ergaa SMS Kaashiyara,የገንዘብ ያዥ የኤስኤምኤስ (SMS) መላኪያ ስልክ
+cashInDrawer,Cash in Register Drawer,Qarshii Saanduqa Keessaa,በካዝና ውስጥ ያለ ጥሬ ገንዘብ
+awaitingDeposit,Awaiting Bank Deposit,Baankiitti Galchuuf Kan Eegu,ወደ ባንክ ለመግባት የሚጠብቅ
+closingRemarks,Closing Remarks / Notes,Yaada Cufiinsaa / Qabxii,የመዝጊያ አስተያየት / ማስታወሻ
+closingCashierName,Closing Cashier Name,Maqaa Kaashiyara Cufuu,ሂሳብ የዘጋችው ገንዘብ ያዥ ስም
+depositCashToBank,Deposit Cash to Owner Bank,Qarshii Baankii Abbaa Qabeenyaatti Galchi,ጥሬ ገንዘብ ለባለቤቱ ባንክ ገቢ አድርግ
+ownerAccountA,Account A - Commercial Bank of Ethiopia (CBE),Herrega A - Baankii Daldala Itoophiyaa (CBE),አካውንት ኤ - የኢትዮጵያ ንግድ ባንክ (CBE)
+ownerAccountB,Account B - Awash Bank,Herrega B - Baankii Hawaash,አካውንት ቢ - አዋሽ ባንክ
+depositAmount,Deposit Amount (ETB),Hamma Qarshii Galfamu (ETB),የገቢ ገንዘብ መጠን (ብር)
+depositAllCash,Deposit All Cash,Qarshii Hunda Galchi,ሁሉንም ካሽ ገቢ አድርግ
+bankSlipNumber,Bank Deposit Slip / Ref Number,Lakkoofsa Nagahee Baankii,የባንክ ደረሰኝ / ማረጋገጫ ቁጥር
+uploadDepositSlip,Bank Receipt Photo / Screenshot,Suuraa Nagahee Baankii Qabsiisi,የባንክ ደረሰኝ ፎቶ / ስክሪንሽት ጫን
+confirmBankDeposit,Confirm & Record Bank Deposit,Galii Baankii Mirkaneessi,የባንክ ገቢውን አረጋግጥ
+bankDepositsLog,Cash Bank Deposits (Owner Accounts A & B),Galmee Kaffaltii Baankii (Herrega A & B),የባንክ ገቢዎች መዝገብ (የባለቤቱ አካውንት ኤ እና ቢ)
+viewDepositReceipt,View Receipt Slip,Nagahee Ilaali,ደረሰኝ ተመልከት
+weeklyCommissionReportTitle,Weekly Washer Commission Report,Gabaasa Komishiinii Torbanii Dhiqxootaa,ሳምንታዊ የአጣቢዎች ኮሚሽን ሪፖርት
+reportWeeklyCommissionToAdmin,Submit Weekly Commission Report to Admin,Gabaasa Torbanii Bulchaatti Ergi,ሳምንታዊ የኮሚሽን ሪፖርት ለአስተዳዳሪ ላክ
+weeklyCommissionAccrual,Current Week Commission Accrual,Kuusaa Komishiinii Torban Kanaa,በዚህ ሳምንት የተጠራቀመ ኮሚሽን
+monthlyBaseSalaryPool,Total Monthly Base Salary Pool,Miindaa Bu'uuraa Ji'a Guutuu,ጠቅላላ ወርሃዊ ቋሚ ደመወዝ
+reportedByCashier,Reported by Cashier,Kaashiyaraan Kan Gabaafame,በገንዘብ ያዥ የቀረበ
+disburseWeeklyCommission,Disburse & Report Weekly Commission,Komishiinii Torbanii Kaffaliifi Gabaasi,ሳምንታዊ ኮሚሽን ክፈልና ሪፖርት አድርግ
+weeklyReportSuccess,Weekly washer commission report submitted successfully!,Gabaasni komishiinii torbanii milkaa'inaan ergameera!,ሳምንታዊ የአጣቢዎች ኮሚሽን ሪፖርት በተሳካ ሁኔታ ተልኳል!
+cashierCommissionNotice,Daily commission pool disbursement and cash reconciliation are managed directly from the Cashier Dashboard. Weekly amounts are verified and reported here for executive oversight.,Kaffaltiin komishiinii guyyaa fi qorannoon qarshii kallattiin gabatee kaffaltii irraa gaggeeffama. Hammi torbanii to'annoof asitti dhiyaata.,ዕለታዊ የኮሚሽን ክፍፍልና የጥሬ ገንዘብ ቁጥጥር በቀጥታ በገንዘብ ያዥ ሰሌዳ ላይ ይከናወናል። ሳምንታዊ መጠኖች ለክትትል እዚህ ይቀርባሉ።
+pettyCashExpense,Petty Cash & Emergency Spend,Baasii Ariifachiisaa & Qusannaa,አነስተኛ ወጪ እና ድንገተኛ ወጪዎች
+logPettyCash,Log Petty Cash / Emergency,Baasii Ariifachiisaa Galmeessi,አነስተኛ ወጪ መዝግብ
+pettyCashToday,Today Petty Cash Expenses,Baasii Ariifachiisaa Har'aa,የዛሬ አነስተኛ ወጪዎች
+pettyCashReason,Reason / Item Description,Sababa / Ibsa Meeshaa,ምክንያት / የዕቃው ማብራሪያ
+pettyCategory,Expense Category,Kutaalee Baasii,የወጪ ዓይነት
+pettyCategoryFuel,Fuel / Generator,Bobaa / Jenereetara,ነዳጅ / ጄኔሬተር
+pettyCategoryPlumbing,Plumbing & Hardware Repair,Ujummoo & Suphaa,ቧንቧ እና ጥገና
+pettyCategorySupplies,Urgent Consumables,Meeshaalee Ariifachiisaa,አስቸኳይ መገልገያ ዕቃዎች
+pettyCategoryStaffLunch,Staff Welfare / Meals,Nyaata Hojjattootaa,የሰራተኞች ምግብ
+pettyCategoryOther,Other Operational Emergency,Baasii Biroo,ሌሎች ድንገተኛ ወጪዎች
+pettyCashSuccess,Petty cash expense recorded successfully!,Baasiin ariifachiisaan galmaa'eera!,አነስተኛ ወጪ በተሳካ ሁኔታ ተመዝግቧል!
+pettyCashScreenshotRequired,Physical receipt / voucher photo is required!,Suuraan nagahee dirqama!,የወጪ ደረሰኝ ፎቶ ግዴታ ነው!
+proofMandatoryNotice,Payment screenshot & reference number are mandatory for digital payments.,Kaffaltii dijitaalaaf suuraan nagahee fi lakkoofsi mirkaneessaa dirqama.,ለዲጂታል ክፍያዎች የደረሰኝ ስክሪንሾት እና የማረጋገጫ ቁጥር ግዴታ ነው።
+depositSlipMandatoryNotice,Stamped bank deposit teller slip photo and reference number are strictly mandatory.,Suuraan nagahee baankii mallatteeffamee fi lakkoofsi nagahee dirqama.,የማህተም ያለበት የባንክ ደረሰኝ ፎቶና ቁጥር ግዴታ ነው።
+pleaseUploadProof,Please attach receipt screenshot before proceeding,Mee dura suuraa nagahee galchaa,እባክዎ ከመቀጠልዎ በፊት የደረሰኝ ስክሪንሾት ያያይዙ
+pleaseUploadDepositSlip,Please upload stamped bank deposit slip photo,Mee suuraa nagahee baankii asitti fe'aa,እባክዎ የማህተም ያለበትን የባንክ ደረሰኝ ፎቶ ያያይዙ
+unitOfMeasurement,Unit of Measurement,Safartuu Meeshaa,የመለኪያ አሃድ
+totalCalculatedCost,Total Calculated Cost,Waliigala Gatii Shallagame,ጠቅላላ የተሰላ ዋጋ
+unitLiters,Liters (L),Liitira (L),ሊትር (L)
+unitPieces,Pieces (Pcs),Qodaa (Pcs),ፍሬ (Pcs)
+unitCans,Cans / Tins,Qorqoorroo,ቆርቆሮ / ጣሳ
+unitBottles,Bottles,Qaruuraa,ጠርሙስ
+unitKg,Kilograms (Kg),Kiiloo (Kg),ኪሎግራም (Kg)
+unitPacks,Packs / Boxes,Saanduqa,ፓኮ / ካርቶን
+unitBars,Bars,Kutaalee,ሙልጭ / አሞሌ
+categoryExchangeNote,Category A (Sealed Sprays): Empty-can exchange required,Kutaa A (Farra Folii): Qorqoorroo duwwaa deebisuun dirqama,ክፍል ሀ (ስፕሬዮች)፡ ባዶ ቆርቆሮ ሲመለስ ብቻ የሚተካ
+categoryCountNote,Category B (Reusable Tools): Exact piece count in & out,Kutaa B (Meeshaalee Hojii): Lakkoofsa qoodamee fi deebi'e to'adhu,ክፍል ለ (የሚደገሙ ዕቃዎች)፡ የገቡና የወጡ ፍሬዎችን በትክክል መቁጠር
+categoryLiquidNote,Category C (Bulk Liquids): 1L dispensers with car usage check,Kutaa C (Dhangala'aa): Qodaa 1L konkolaataa dhiqame wajjin madaali,ክፍል ሐ (ፈሳሾች)፡ 1 ሊትር ዲስፔንሰር ከመኪኖች ብዛት ጋር ማነጻጸር
+weeklyPayrollMatrix,Weekly Payroll & Attendance Matrix,Gabatee Hojii fi Miindaa Torbanii,ሳምንታዊ የደመወዝ እና የቅጥር ሰንጠረዥ
+monShort,Mon,Wix,ሰኞ
+tueShort,Tue,Kib,ማክ
+wedShort,Wed,Rob,ረቡዕ
+thuShort,Thu,Kam,ሐሙስ
+friShort,Fri,Jim,አርብ
+satShort,Sat,San,ቅዳሜ
+sunShort,Sun,Dil,እሑድ
+presentShort,P,H,ተገኝቷል
+absentShort,A,D,ቀሪ
+weeklyCommEarned,Weekly Commission,Komishiinii Torbanii,ሳምንታዊ ኮሚሽን
+monthlySalary,Monthly Base Salary,Miindaa Ji'aa,ወርሃዊ ቋሚ ደመወዝ
+disburseWeeklyAction,Disburse Commission,Komishiinii Kaffali,ኮሚሽን ክፈል
+disbursedStatus,Paid / Disbursed,Kaffalameera,ተከፍሏል
+pendingDisbursal,Ready for Disbursal,Kaffaltii Eegaa Jira,ክፍያ ዝግጁ ነው
+attendanceAndCommission,Attendance & Commission Desk,Galmee Hojii fi Komishiinii,የሰራተኞች ገጽና የኮሚሽን ዴስክ
+washHistory,Vehicle Wash History,Seenaa Dhiqannaa Konkolaattotaa,የታጠቡ መኪኖች ታሪክ
+closingAndFinancialReports,Closing & Financial Reports,Cufiinsa Faayinaansiifi Gabaasa,የሂሳብ መዝጊያና የፋይናንስ ሪፖርቶች
+searchPlateOrPhone,"Search plate, customer name, or phone...","Gabatee, maqaa maamilaa, ykn bilbila barbaadi...",በሰሌዳ፣ በደንበኛ ስም ወይም በስልክ ቁጥር ፈልግ...
+noVehiclesFound,No washed vehicles found for this period.,Konkolaataan dhiqame yeroo kana keessatti hin argamne.,በዚህ የጊዜ ክልል ውስጥ የታጠበ መኪና አልተገኘም።
+markAllPresent,Mark All Present,Hunda Hojirra Jedhi,ሁሉንም አሉ በል
+assignedCommissionShare,Assigned Commission Share,Qooda Komishiinii Ramadame,የተመደበ የኮሚሽን ድርሻ
+totalCommissionAllocation,Total Commission Allocation,Qooda Komishiinii Waliigalaa,ጠቅላላ የኮሚሽን ድልድል
+moneyReceivedBreakdown,Money Received Breakdown by Provider,Gabaasa Qarshii Karaalee Kaffaltiitiin,የገቢ ገንዘብ ዝርዝር በከፋይ ድርጅቶች
+payBankOfAbyssinia,Bank of Abyssinia (BoA),Baankii Habashaa (BoA),አቢሲኒያ ባንክ (ቦአ)
+payAwashBank,Awash Bank,Baankii Hawaash,አዋሽ ባንክ
+payDashenBank,Dashen Bank (Amole),Baankii Daashen (Amoolee),ዳሽን ባንክ (አሞሌ)
+weeklyCommissionReport,Weekly Washer Commission Report,Gabaasa Komishiinii Hojjettoota Dhiqaa Torbaanii,ሳምንታዊ የአጣቢዎች ኮሚሽን ሪፖርት
+weeklyCommissionReportSub,Disbursed and reported weekly by cashier,Qophaa'ee fi kan gabaafame kaashiyariin torbaaniin,በካሽየር የተዘጋጀ እና በየሳምንቱ የተላከ
+noWeeklyCommissionReports,No weekly commission reports filed yet by cashier.,Gabaasni komishiinii torbaanii kaashiyariin hin dhiyaanne.,እስካሁን በገንዘብ ያዥ የቀረበ ሳምንታዊ የኮሚሽን ሪፖርት የለም።
+totalCommissionDisbursed,Total Disbursed,Waliigala Kan Kaffalame,ጠቅላላ የተከፈለ
+daysPresent,Days Present,Guyyoota Argaman,የተገኙባቸው ቀናት
+staffAndSalaries,Staff & Salaries,Hojjettoota & Miindaa,ሰራተኞች እና ደመወዝ
+dailyWasherCommissionPool,Daily Washer Commission Pool,Kuusaa Komishiinii Dhiqxootaa Guyyaa,ዕለታዊ የአጣቢዎች ኮሚሽን ገቢ
+reportWeeklyCommission,Report Weekly Commission,Komishiinii Torbanii Gabaasi,ሳምንታዊ ኮሚሽን ሪፖርት አድርግ
+attendanceDesk,Attendance & Commission,Argama & Komishiinii,የመገኘትና ኮሚሽን መዝገብ
+expandRoster,Expand Washer Roster,Tarree Dhiqxootaa Bal'isi,የአጣቢዎች ዝርዝር ዘርጋ
+collapseRoster,Collapse Washer Roster,Tarree Dhiqxootaa Dhiphisi,የአጣቢዎች ዝርዝር አሳንስ
+onDutyBadge,ON DUTY,HOJIRRA,በስራ ላይ
+absentBadge,ABSENT,HIN JIRRE,ቀሪ
+absentWashersProtection,100% of the commission pool is distributed strictly among washers on duty today. Absent washers receive 0 ETB.,100% kuusaa komishiinii qulqullinaan hojjettoota guyyaa kana hojirra jiran qofaaf raabsama. Kanneen hin jirre 0 ETB argatu.,100% የኮሚሽን ገቢ ዛሬ በስራ ላይ ላሉ አጣቢዎች ብቻ ይከፋፈላል። የቀሩ አጣቢዎች 0 ብር ያገኛሉ።
+disbursedToday,Disbursed Today,Har'a Kaffalameera,ዛሬ ተከፍሏል
+disburseAndReportDailyCommission,Disburse & Report Daily Commission,Komishiinii Guyyaa Raabsii Gabaasi,ዕለታዊ ኮሚሽን አከፋፍለህ ሪፖርት አድርግ
+confirmWeeklyCommissionPaid,Confirm & Mark Weekly Commission Paid,Komishiinii Torbanii Kaffalame Mirkaneessi,ሳምንታዊ ኮሚሽን መከፈሉን አረጋግጥ
+weeklyCommissionPaidAndConfirmed,Weekly Commission Paid & Confirmed,Komishiiniin Torbanii Kaffalamee Mirkanaa'eera,ሳምንታዊ ኮሚሽን ተከፍሎ ተረጋግጧል
+dailyCommissionDisbursedReported,Daily commission pool disbursed and reported to Accountant & Admin!,Kuusaan komishiinii guyyaa raabsamee Herregaafi Bulchaaf gabaafameera!,ዕለታዊ የኮሚሽን ገቢ ተከፋፍሎ ለሂሳብ ሹምና ለአስተዳዳሪ ሪፖርት ተደርጓል!
+weeklyCommissionPaidSuccess,Weekly commission successfully marked as paid and confirmed!,Komishiiniin torbanii milkaa'inaan kaffalamee mirkanaa'eera!,ሳምንታዊ ኮሚሽን በተሳካ ሁኔታ ተከፍሎ ተረጋግጧል!
+adminWasherHubTitle,Washer Team Operations & 7-Day Matrix,Hojii Garee Dhiqxootaa fi Maatriksii Guyyaa 7,የአጣቢዎች ቡድን ስራዎች እና የ7 ቀን ማትሪክስ
+sevenDayMatrix,7-Day Payroll Matrix,Maatriksii Mindaa Guyyaa 7,የ7 ቀን የደመወዝ ማትሪክስ
+liveRosterAndSwitches,Live Shift Attendance Roster,Galmee Hojii Dhiqxootaa Ammee,የቀጥታ የአጣቢዎች የስራ ምዝገባ
+emptyRefillExchangeTitle,Empty Return & Refill Desk (ዕቃ በዕቃ),Iddoo Meeshaa Qullaa Deebisanii Guutuu (ዕቃ በዕቃ),የባዶ እቃ መልሶ መሙያ ጠረጴዛ (ዕቃ በዕቃ)
+emptyRefillExchangeSub,Issue chemicals & soaps strictly upon returning empty bottles,Qorichaa fi saamunaa qullaa deebisuun qofa kenni,ኬሚካሎችና ሳሙናዎችን ባዶ እቃ ሲመለስ ብቻ ይስጡ
+dailyClosingTitle,Daily Closing & Financial Reconciliations,Cufiinsa Guyyaa & Madaallii Faayinaansii,የዕለት ሂሳብ መዝጊያ እና የፋይናንስ ማጠቃለያ
+liveStationCapacity,Live Station & Van Capacity,Dandeettii Buufataafi Vaan Dhiqannaa,የቀጥታ ጣቢያ እና የሞባይል ቫን አቅም
+statusPaid,Paid,Kaffalameera,ተከፍሏል
+financialReports,Financial Reports,Gabaasaalee Faayinaansii,የፋይናንስ ሪፖርቶች
+depositToOwnerAccounts,Deposit Cash to Owner Accounts,Qarshii Herrega Abbaa Qabeenyaatti Galchi,ጥሬ ገንዘብ ለባለቤቱ አካውንት ገቢ አድርግ
+cashAwaitingDeposit,Cash Awaiting Deposit,Qarshii Baankii Galuu Eegu,ባንክ ሊገባ የሚጠብቅ ጥሬ ገንዘብ
+selectTargetBankAccount,Select Target Bank Account,Herrega Baankii Filadhu,የባንክ አካውንት ይምረጡ
+dailyClosing,Daily Closing,Cufiinsa Guyyaa,የዕለት መዝጊያ
+bay,Bay,Kutaa,ክፍል
+recentRefillLogs,Recent Refill Logs,Galmee Guutinsa Dhiyoo,የቅርብ ጊዜ የመሙያ መዝገቦች
+shiftHandoverDesk,Shift Handover Desk,Kutaa Wal-Harkaa Fuudhiinsa Shiftii,የፈረቃ ርክክብ ማዕከል
+shiftHandoverLogs,Shift Handover Logs,Galmee Wal-Harkaa Fuudhiinsa Shiftii,የፈረቃ ርክክብ መዝገብ
+handoverOtpCode,ACTIVE SHIFT OTP CODE:,KOODII OTP CUFINSAA:,ንቁ የመዝጊያ OTP ኮድ:
+waitingForManager,WAITING FOR MANAGER,Maneejara Eeggachaa Jira,ስራ አስኪያጁን በመጠባበቅ ላይ
+enterOtp,Enter OTP,OTP Galchaa,OTP ያስገቡ
+adminNightHandoverCode,NIGHT CLOSING ADMIN OTP CODE:,KOODII OTP BULCHAA HALKAN:,የምሽት መዝጊያ አስተዳዳሪ OTP ኮድ:
+pendingAdminReceipt,PENDING ADMIN RECEIPT,Wal-harkaa Fuudhiinsa Bulchaa Eeggachaa Jira,የአስተዳዳሪ ርክክብ በመጠባበቅ ላይ
+threePartyCustody,3-PARTY CUSTODY,Eegumsa Qabeenyaa Qaama Sadii (3),የ 3 ወገን ጥምር የገንዘብ ቁጥጥር
+dayShiftCustody,Day Shift (Cashier → Op Manager),Shiftii Guyyaa (Kaashiyara → Maneejara Hojii),የቀን ፈረቃ (ገንዘብ ያዥ → ስራ አስኪያጅ)
+nightShiftCustody,Night Shift (Op Manager → Admin Vault),Shiftii Halkan (Maneejara Hojii → Kaazinaa Bulchaa),የሌሊት ፈረቃ (ስራ አስኪያጅ → የአስተዳዳሪ ካዝና)
+verifiedBadge,VERIFIED,MIRKANAA'EERA,የተረጋገጠ
+inVaultBadge,IN VAULT,KAAZINAA KEESSA,ካዝና ገብቷል
+activeShiftBadge,ACTIVE,HOJII IRRA,በስራ ላይ
+otpReconciliationPending,PENDING OTP RECONCILIATION,WAL-SIMSIISA OTP EEGA,የ OTP ማስታረቅ በመጠባበቅ ላይ
+physicalCash,physical cash,qarshii harkaa,ጥሬ ገንዘብ
+confirmDailyClosingOtp,Confirm Daily Closing (OTP),Cufiinsa Guyyaa Mirkaneessi (OTP),ዕለታዊ ሂሳብ መዝጊያን አረጋግጥ (OTP)
+shiftHandoverMethodTitle,Shift Handover: Operational Manager (4-Digit OTP),Wal-Harkaa Fuudhiinsa Shiftii: Maneejara Hojii (OTP Dijitii 4),የፈረቃ ርክክብ፡ ስራ አስኪያጅ (ባለ 4 አሃዝ OTP)
+shiftHandoverMethodDesc,Closing the register calculates washer dividends and generates a 4-digit OTP for the Operational Manager to count and accept physical cash.,Kaazinaa cufuun komishiinii dhiqxootaa shallagee koodii OTP dijitii 4 maneejaraaf uuma.,ካዝናውን መዝጋት የአጣቢዎችን ኮሚሽን በማስላት ስራ አስኪያጁ ጥሬ ገንዘቡን እንዲያረጋግጥ ባለ 4 አሃዝ OTP ያመነጫል።
+viewClosingVoucher,View Closing Voucher,Nagahee Cufiinsaa Ilaali,የሂሳብ መዝጊያ ደረሰኝ እይ
+waitingForManagerOtpDesc,Give this 4-digit code to the Operational Manager after counting physical cash.,Qarshii harkaa erga lakkooftanii booda koodii OTP kana hojii geggeessaaf kennaa.,ጥሬ ገንዘቡን ቆጥረው ካስረከቡ በኋላ ይህንን የ OTP ኮድ ለስራ አስኪያጁ ይስጡ።
+handoverVerifiedTitle,Handover Verified & Accepted,Dabarsoon Mirkanaa'ee Fudhatameera,ርክክቡ ተረጋግጦ ተጠናቋል
+reconcileAndGenerateOtp,Reconcile register & generate OTP,Herrega kaazinaafi koodii OTP uumi,የካዝና ሂሳብ አስታርቅ እና OTP አመንጭ
+washerCommissionReportNote,Reported for Weekly Admin Payroll • Not deducted from daily cash drawer,Kaffaltii torbaniitiif gabaafame • Kaazinaa guyyaarraa hin hir'ifamu,ለሳምንታዊ ክፍያ ሪፖርት የተደረገ • ከዕለታዊ ካዝና የማይቀነስ
+confirmCashierHandover,Verify Cashier Closing OTP,OTP Kaasharii Mirkaneessi,የገንዘብ ተቀባይ OTP አረጋግጥ
+confirmManagerNightCash,Confirm & Seal in Vault,Mirkaneessi & Kaazinatti Galchi,አረጋግጥ እና ካዝና አስገባ
+enterHandoverOtpInline,Enter 4-Digit Handover OTP,Koodii OTP Dijitii 4 Galchaa,ባለ 4 አሃዝ የርክክብ OTP ያስገቡ
+unlockAndResumeShift,Unlock & Resume Day Shift,Garee Guyyaa Bani & Itti Fufi,የቀን ፈረቃን ክፈት እና ቀጥል
+cancelHandoverAndAddCars,Cancel OTP Request & Add Cars,Gaaffii OTP Haqii Konkolaataa Dabali,የOTP ጥያቄን ሰርዝ እና መኪና ጨምር
+unlockWithManagerPin,Unlock Shift (Manager / Admin PIN),Garee Bani (PIN Hoggansaa / Bulchaa),ፈረቃን ክፈት (የስራ አስኪያጅ / አስተዳዳሪ ፒን)
+confirmUnlockShiftTitle,Unlock Day Shift Closing?,Cuffaa Guyyaa Banuu Barbaaddaa?,የቀን ፈረቃ መዝጊያን መክፈት ይፈልጋሉ?
+confirmUnlockShiftDesc,This will cancel the pending closing and allow you to record and wash new vehicles. You can close again when done.,"Kun cufiinsa eeggataa haqa, konkolaattota haaraa galmeessuuf carraa kenna. Erga xumurte booda deebitee cufuu dandeessa.",ይህ በመጠባበቅ ላይ ያለውን መዝጊያ ይሰርዛል፤ አዳዲስ መኪኖችን መዝግበው እንዲያጥቡ ያስችላል። ሲጨርሱ እንደገና መዝጋት ይችላሉ።
+shiftUnlockedSuccess,Day shift unlocked! You can now record new cars and close again.,Gareen guyyaa banameera! Konkolaattota haaraa galmeessitee deebitee cufuu dandeessa.,የቀን ፈረቃ ተከፍቷል! አሁን አዳዲስ መኪኖችን መዝግበው እንደገና መዝጋት ይችላሉ።
+managerOrAdminPinRequired,Manager or Admin PIN required to unlock verified closing,Cufiinsa mirkanaa'e banuuf PIN Hoggansaa ykn Bulchaa barbaachisa,የተረጋገጠ መዝጊያን ለመክፈት የስራ አስኪያጅ ወይም አስተዳዳሪ ፒን ያስፈልጋል
+enterManagerOrAdminPin,Enter Operational Manager or Admin PIN,PIN Hoggansa Hojii ykn Bulchaa galchaa,የስራ አስኪያጅ ወይም የአስተዳዳሪ ፒን ያስገቡ
+invalidManagerOrAdminPin,Invalid Manager or Admin PIN. Access denied.,PIN Hoggansaa ykn Bulchaa dogoggora. Hayyamni dhowwameera.,ልክ ያልሆነ የስራ አስኪያጅ ወይም አስተዳዳሪ ፒን። አልተፈቀደም።
+confirmUnlockAction,"Yes, Unlock Shift","Eeyyee, Garee Bani",አዎ፣ ፈረቃውን ክፈት
+cashierHandoverVerification,1. Cashier Day Closing Verification (OTP),1. Mirkaneessa Cufiinsa Kaasharii (OTP),1. የገንዘብ ተቀባይ የቀን መዝጊያ ማረጋገጫ (OTP)
+managerHandoverVerification,2. Night Shift Closing Verification (OTP),2. Mirkaneessa Cufiinsa Shiftii Halkanii (OTP),2. የምሽት ፈረቃ መዝጊያ ማረጋገጫ (OTP)
+noPendingClosingToVerify,No pending closing found. The staff must submit daily closing first.,Gabaasni cufiinsa eeggatu hin jiru. Jalqaba gabaasa cufaa dhiyeessuu qabu.,በመጠባበቅ ላይ ያለ መዝጊያ አልተገኘም። መጀመሪያ የዕለት መዝጊያውን ማስገባት አለባቸው።
+alreadyVerifiedClosing,This shift closing is already verified and reconciled.,Cufiinsi garee kanaa duraan mirkanaa'ee qulqullaa'eera.,ይህ የፈረቃ መዝጊያ ቀደም ሲል ተረጋግጦ ተጠናቋል።
+carpetCleaning,Carpet Cleaning,Qulqulleessaa Karpeetii,የምንጣፍ እጥበት
+carpetCleaningSubtitle,Professional residential & commercial carpet deep wash & sanitize,Tajaajila qulqulleessa karpeetii qulqullina olaanaa fi ammayyaa,ሙያዊ የመኖሪያ እና የንግድ ምንጣፍ ጥልቅ እጥበት እና ማጽዳት
+carpetTypeA,Type A (Normal Clean),Akaakuu A (Idilee),አይነት ሀ (መደበኛ እጥበት)
+carpetTypeB,Type B (Heavy Duty / Deep Clean),Akaakuu B (Xurii Cimaa),አይነት ለ (ከባድ ቆሻሻ/ጥልቅ እጥበት)
+carpetTypeADesc,"Standard clean: snow foam, dirt lift & air dry.",Dhiqannaa idilee: soofii dhoqqee kaasuu fi gogsuu.,መደበኛ እጥበት፡ አረፋ፣ ቆሻሻ ማንሳት እና ማድረቅ።
+carpetTypeBDesc,"Deep extraction: stain treatment, brush agitation & sanitization.",Qulqulleessa gadi fageenyaa: bブラシ fi keemikaala xurii balleessu.,ጥልቅ እጥበት፡ የቆሻሻ ማስለቀቂያ፣ ፍቅፋቂ እና ማጽዳት።
+carpetDimensions,Dimensions (Length × Width),Safartuu (Dheerina × Bal'ina),ልኬት (ርዝመት × ወርድ)
+carpetAreaSqM,Area (m²),Bal'ina (m²),ስፋት (በካሬ ሜትር)
+pricePerSqM,Rate per m²,Gatii m² Tokkoo,ዋጋ በካሬ ሜትር
+carpetDropOff,Station Drop-off,Buufataatti Fiduu,ጣቢያው ድረስ አምጥቶ ማስረከብ
+carpetPickUpValet,Staff Pickup & Return,Hojjattootaan Fudhatamee Deebifamu,በሰራተኞች ተወስዶ የሚመለስ
+carpetTag,Carpet Tag / ID,Koodii Karpeetii,የምንጣፍ መለያ ቁጥር
+bookCarpet,Book Carpet Cleaning,Qulqulleessaa Karpeetii Qabadhaa,የምንጣፍ እጥበት ያስይዙ
+carpetServicesTab,Carpet Cleaning,Qulqullina Karpeetii,የምንጣፍ እጥበት
+vehicleServicesTab,Car Wash Packages,Paakeejii Makiinaa,የመኪና እጥበት ጥቅሎች
+showerServiceTitle,Station Public Shower,Shawaaraa Buufataa,የጣቢያው የህዝብ ሻወር
+showerServiceSubtitle,Fast counter logger for shower users & payments,Galmeessaa kaffaltii fi fayyadamtoota shawaaraa,የሻወር ተጠቃሚዎች እና ክፍያ ፈጣን መዝገብ
+showerUsers,Shower Users,Fayyadamtoota Shawaaraa,የሻወር ተጠቃሚዎች
+showerTariff,Shower Tariff (per person),Gatii Shawaaraa (Nama 1),የአንድ ሰው የሻወር ዋጋ
+recordShower,Record Shower Entry,Seensa Shawaaraa Galmeessi,የሻወር ተጠቃሚ መዝግብ
+todayShowerRevenue,Shower Revenue,Galii Shawaaraa,የሻወር ገቢ
+stationShowerService,Station Public Shower,Shawaaraa Buufataa,የጣቢያው የህዝብ ሻወር
+perPerson,per person,nama tokkoof,በአንድ ሰው
+showerCommissionNotice,100% Station Net Revenue • 0% Washer Commission,Galii Buufataa %100 • Dhiqxootaaf %0,100% የጣቢያው ገቢ • ለአጣቢዎች 0% ኮሚሽን
+numberOfPersons,Number of Persons,Baay'ina Namootaa,የሰዎች ብዛት
+recordShowerEntry,Record Shower Entry,Seensa Shawaaraa Galmeessi,የሻወር ተጠቃሚ መዝግብ
+showerTotalRevenue,Total Shower Revenue,Ida'ama Galii Shawaaraa,አጠቃላይ የሻወር ገቢ
+additionalServicesTariffs,Additional Services Tariffs,Madaallii Gatii Tajaajiloota Biroo,ተጨማሪ የአገልግሎት ዋጋዎች
+carpetPricingTitle,Carpet Cleaning Pricing (ETB/m²),Gatii Qulqullina Karpeetii (ETB/m²),የምንጣፍ እጥበት ዋጋ (ብር/ካሬ)
+carpetPricingSubtitle,Estimated dynamically by area square meters,Bal'ina kaaree meetiraatiin kan shallagamu,በካሬ ሜትር ስፋት የሚሰላ ዋጋ
+showerTariffTitle,Station Public Shower Fee,Gatii Shawaaraa Buufataa,የጣቢያው የህዝብ ሻወር ክፍያ
+showerFeePerPerson,Shower Fee per Person,Kaffaltii Shawaaraa Nama Tokkoo,የአንድ ሰው የሻወር ክፍያ
+publicShowerAtStation,On-site hot & cold shower facility,Tajaajila shawaaraa buufata keessatti argamu,በጣቢያው የሚገኝ የሻወር አገልግሎት
+carpetDimensionsTitle,Carpet Dimensions (Length × Width),Safartuu Karpeetii (Dheerina × Bal'ina),የምንጣፍ ልኬት (ርዝመት × ወርድ)
+carpetLength,Length,Dheerina,ርዝመት
+carpetWidth,Width,Bal'ina,ወርድ
+carpetTotalArea,Total Area,Bal'ina Waliigalaa,አጠቃላይ ስፋት
+bookCarpetCleaning,Book Carpet Cleaning,Qulqullina Karpeetii Qabadhaa,የምንጣፍ እጥበት ያስይዙ
+carpetService,Carpet Cleaning,Qulqullina Karpeetii,የምንጣፍ እጥበት
+carpetCleaningOptions,Carpet Cleaning Options,Filannoowwan Qulqullina Karpeetii,የምንጣፍ እጥበት አማራጮች
+serviceProvisionMode,Service Delivery Provision,Haala Tajaajilli Itti Kennamu,የአገልግሎት አሰጣጥ ዘዴ
+carpetTrackingTag,Carpet Tracking Tag / ID,Koodii Karpeetii,የምንጣፍ መለያ ቁጥር
+vehicleRegistration,Vehicle Registration,Galmee Makiinaa,የመኪና ምዝገባ
+atStationService,At Station,Buufata Keessatti,ጣቢያው ድረስ
+carpetStationService,At-Station Carpet Cleaning,Dhiqa Karpeetii Buufatatti,የጣቢያ ውስጥ የምንጣፍ እጥበት
+carpetStationSub,Bring your carpet directly to our station wash floor & drying racks.,Karpeetii keessan kallattiin gara buufata keenyaafi iddoo gogsiisaatti fidaa.,ምንጣፍዎን በቀጥታ ወደ ማጠቢያ ጣቢያችንና ማድረቂያ ቦታ ያምጡ።
+carpetValetTitle,Carpet Pick-up & Return,Karpeetii Fudhatanii Deebisuu,ምንጣፍን መውሰድና ማድረስ
+carpetValetSub,"Staff picks up your carpet from your door, deep-cleans at station, and returns it safely.","Hojjettoonni keenya balbala keessanirraa fuudhanii, dhiqanii, deebisanii isiniif fidu.",ሰራተኞቻችን ደጃፍዎ ድረስ መጥተው ምንጣፍዎን ወስደው፣ አጥበውና አድርቀው ይመልሱልዎታል።
+carpetValetAvailable,Carpet Pick-up Available,Karpeetii Fuudhuun Qophiidha,የምንጣፍ ማድረስና መውሰድ ዝግጁ ነው
+carpetHomeTitle,At-Home Carpet Cleaning,Dhiqa Karpeetii Mana Keessanitti,የቤት ውስጥ የምንጣፍ እጥበት
+carpetHomeSub,Mobile crew comes to your home equipped with carpet extraction machines & shampoo.,Gareen keenya maashina cuunfaafi saamuunaan mana keessan dhufee dhiqa.,ተንቀሳቃሽ ቡድናችን ከነማሽኑና ሳሙናው ቤትዎ ድረስ መጥቶ ያጥባልዎታል።
+atHomeService,At Customer Home,Mana Maamilaatti,ደንበኛ መኖሪያ ቤት
+valetPickupReturn,Valet Pickup & Return,Fuudhanii Deebisuu,ተወስዶ የሚመለስ
+carpetPickUpLocation,Carpet Pick-up & Return Address,Teessoo Karpeetii Fudhatanii Deebisan,ምንጣፍ የሚወሰድበትና የሚመለስበት አድራሻ
+carpetPaymentAtGateNote,No advance payment needed. Payment is settled at delivery or pickup once your carpet is cleaned & dried.,Kaffaltii duroo hin barbaachisu. Kaffaltiin kan kaffalamu erga karpeetiin dhiqamee gogee booda.,ቅድመ ክፍያ አያስፈልግም። ክፍያ የሚፈጸመው ምንጣፍዎ ታጥቦና ደርቆ ሲረከቡ ነው።
+trackMyCarpet,Track My Carpet Cleaning,Qulqullina Karpeetii Koo Hordofaa,የምንጣፍ እጥበትን ይከታተሉ
+trackCarpetPrompt,Enter your carpet tracking tag (e.g. CPT-8941) or phone number to see real-time progress,Koodii karpeetii keessanii yookiin lakkoofsa bilbilaa galchuun haala dhiqannaa hordofaa,የምንጣፍ መለያ ቁጥር ወይም ስልክ ቁጥር በማስገባት የእጥበቱን ሂደት በቀጥታ ይከታተሉ
+carpetTagOrPhoneHint,Carpet Tag (CPT-...) or Phone Number,Koodii Karpeetii ykn Bilbila,የምንጣፍ መለያ ወይም ስልክ ቁጥር
+carpetTrackingTitle,Carpet Live Tracking,Hordoffii Dhiqa Karpeetii,የምንጣፍ እጥበት የቀጥታ ክትትል
+enterCarpetTag,Please enter carpet tracking tag,Koodii karpeetii galchaa,እባክዎ የምንጣፍ መለያ ቁጥር ያስገቡ
+customTip,Custom Tip,Tipii Kan Biroo,ሌላ የቲፕ መጠን
+washersTip,Washer Team Tip (ETB),Gumaata Dhiqxootaa (ETB),የአጣቢዎች ቲፕ (ብር)
+addTipPrompt,Add Tip for Washers (Optional),Dhiqxootaaf tipii dabali (filannoo),ለአጣቢዎች ቲፕ ጨምር (አማራጭ)
+tipPassThroughNotice,100% of customer tips are passed directly to the washing crew.,Tipiin maamilaa %100 kallattiin garee dhiqdootaatiif kennama.,100% የደንበኛ ቲፕ በቀጥታ ለአጣቢዎች ይተላለፋል።
+customerTipsPool,Customer Tips Pool,Kuusaa Tipii Maamiltootaa,የደንበኞች ቲፕ ድምር
+carWashingService,Car Washing Service,Tajaajila Dhiqa Konkolaataa,የመኪና እጥበት አገልግሎት
+carpetWashingService,Carpet Washing Service,Tajaajila Dhiqa Karpeetii,የምንጣፍ እጥበት አገልግሎት
+carpetMatrixTitle,Carpet Service Package Pricing Matrix,Madaallii Gatii Paakeejii Karpeetii,የምንጣፍ እጥበት ፓኬጆች ዋጋ ዝርዝር
+carpetMatrixSubtitle,Set ETB per m² for Type A & Type B across all 3 delivery modes,Gatii m² akaakuu A fi B tajaajiloota 3f murteessaa,ለአይነት ሀ እና አይነት ለ በሦስቱም የአገልግሎት መንገዶች የካሬ ሜትር ዋጋ ይወስኑ
+carpetTypeAStation,Type A - At Station,Akaakuu A - Buufatatti,አይነት ሀ - ጣቢያ ውስጥ
+carpetTypeAHome,Type A - At Owner's Home,Akaakuu A - Mana Abbaatti,አይነት ሀ - ባለቤቱ ቤት
+carpetTypeAValet,Type A - Pick-up & Return,Akaakuu A - Fudhatamee Deebifamu,አይነት ሀ - ተወስዶ የሚመለስ
+carpetTypeBStation,Type B - At Station,Akaakuu B - Buufatatti,አይነት ለ - ጣቢያ ውስጥ
+carpetTypeBHome,Type B - At Owner's Home,Akaakuu B - Mana Abbaatti,አይነት ለ - ባለቤቱ ቤት
+carpetTypeBValet,Type B - Pick-up & Return,Akaakuu B - Fudhatamee Deebifamu,አይነት ለ - ተወስዶ የሚመለስ
+carpetStations,Carpet Cleaning Stations,Buufataalee Dhiqa Karpeetii,የምንጣፍ ማጠቢያ ክፍሎች
+carpetWashFloor,Wash & Extraction Floor,Lafa Dhiqaafi Cuunfaa,ማጠቢያና ማድረቂያ ወለል
+carpetDryingRacks,Ventilated Drying Racks,Bakka Karpeetii Gogsuu,አየር የሚዘዋወርበት ማድረቂያ ራክ
+carpetHomeMobileCrew,Home Cleaning Mobile Crew,Garee Moobaayilaa Manaa,የቤት ውስጥ ተንቀሳቃሽ አጣቢ ቡድን
+carpetValetDriver,Valet Pick-up & Delivery,Geejjiba Karpeetii,የምንጣፍ ትራንስፖርትና ርክክብ
+carpetQueueTitle,Carpet Cleaning Queue,Tarree Dhiqa Karpeetii,የምንጣፍ እጥበት ተራ
+carpetIntakeRegister,Register Carpet Intake,Karpeetii Haaraa Galmeessi,አዲስ ምንጣፍ መዝግብ
+carpetTagNumber,Tag Number,Lakkoofsa Karpeetii,የምንጣፍ መለያ ቁጥር
+editCarpetTariff,Edit Carpet Tariff (ETB/m²),Gatii Karpeetii Jijjiiri (ETB/m²),የምንጣፍ ካሬ ሜትር ዋጋ ቀይር (ብር/ካሬ)
+servicePricingSettings,Service Pricing & Tariffs,Madaallii Gatii Tajaajilootaa,የአገልግሎት ዋጋዎች ማስተካከያ
+carWashHistoryTitle,Car Wash History,Seenaa Dhiqa Konkolaataa,የመኪና እጥበት ታሪክ
+carpetWashHistoryTitle,Carpet Cleaning History,Seenaa Dhiqa Karpeetii,የምንጣፍ እጥበት ታሪክ
+myCarWashes,My Car Washes,Dhiqa Konkolaataa Koo,የመኪና እጥበቶቼ
+myCarpetCleanings,My Carpet Cleanings,Dhiqa Karpeetii Koo,የምንጣፍ እጥበቶቼ
+consolidatedStationClosing,Consolidated Daily Financial Report,Gabaasa Maallaqaa Guyyaa Waliigalaa,የጣቢያው ጠቅላላ ዕለታዊ የፋይናንስ ሪፖርት
+carWashSubtotal,Car Wash Division,Kutaa Dhiqa Konkolaataa,የመኪና እጥበት ዘርፍ
+carpetWashSubtotal,Carpet Cleaning Division,Kutaa Dhiqa Karpeetii,የምንጣፍ እጥበት ዘርፍ
+showerSubtotal,Station Public Shower,Dhaaba Dhiqannaa Buufataa,የጣቢያው የህዝብ ሻወር
+washerTipsSubtotal,Customer Digital Tips,Gumaata Maamiltootaa (Tip),የደንበኞች ዲጂታል ጉርሻ (ቲፕ)
+carpetsCleanedSqM,Area Cleaned (m²),Bal'ina Dhiqame (m²),የታጠበው ስፋት (ካሬ ሜትር)
+noCarpetsFound,No carpet cleaning records found,Galmeen dhiqa karpeetii hin jiru,ምንም የምንጣፍ እጥበት መረጃ አልተገኘም
+noVehiclesInQueue,No vehicles currently in queue,Konkolaataan tarree keessa jiru hin jiru,በተራው ላይ ያለ መኪና የለም
+noCarpetsInQueue,No carpets currently in queue,Karpeetiin tarree keessa jiru hin jiru,በተራው ላይ ያለ ምንጣፍ የለም
+washFloorAndDryingRacks,Wash Floor & Drying Racks,Lafa Dhiqaafi Bakka Gogsuu,ማጠቢያ ወለልና ማድረቂያዎች
+storekeeperCombinedHeader,Car Wash & Carpet Consumables & Assets Desk,Kutaa Qabeenyaa Dhiqa Konkolaataafi Karpeetii,የመኪና እና የምንጣፍ እጥበት እቃዎችና ንብረት ማዕከል
+storekeeperCombinedSub,Central warehouse inventory for vehicle chemicals and carpet detergents,Kuusaa qorichootaafi meeshaalee dhiqa konkolaataafi karpeetii,የመኪና ኬሚካሎች እና የምንጣፍ ሳሙናዎች ማዕከላዊ መጋዘን
+carpetIntakeSmsSent,Carpet registration tag SMS sent to customer!,Ergaan koodii galmee karpeetii maamilaaf ergameera!,የምንጣፍ ምዝገባ መለያ ቁጥር ኤስኤምኤስ ለደንበኛው ተልኳል!
+carpetCompletionSmsSent,Carpet completion SMS sent to customer!,Ergaan xumura dhiqa karpeetii maamilaaf ergameera!,የምንጣፍ እጥበት መጠናቀቅ ኤስኤምኤስ ለደንበኛው ተልኳል!
+sendCarpetCompletionSms,Send Completion SMS,Ergaa Xumuraa Ergi,የመጠናቀቂያ ኤስኤምኤስ ላክ
+startWashFloorAction,Start Wash Floor,Dhiqa Lafa Jalqabi,ወለል ላይ ማጠብ ጀምር
+moveToDryingRacksAction,Move to Drying Racks,Bakka Gogsuutti Dabarri,ወደ ማድረቂያ ራክ አዛውር
+markCarpetReadyAction,Mark Cleaned & Dried,Dhiqamee Goge Jedhi,ታጥቦ ደርቋል በል
+accountantCombinedHeader,Car Wash & Carpet Consolidated Financial Hub,Wiirtuu Maallaqa Dhiqa Konkolaataafi Karpeetii,የመኪና እና የምንጣፍ እጥበት የጋራ ፋይናንስ ማዕከል
+accountantCombinedSub,"Audits, daily closings, bank accounts A & B, and consolidated P&L","Oodiitii, cufiinsa guyyaa, herrega baankii A fi B, gabaasa bu'aafi kisaaraa",ኦዲት፣ ዕለታዊ ሂሳብ መዝጊያ፣ የባንክ ሂሳብ ሀ እና ለ፣ እና ጠቅላላ ትርፍና ኪሳራ
+adminCombinedHeader,Car Wash & Carpet Administration Desk,Wiirtuu Bulchiinsa Dhiqa Konkolaataafi Karpeetii,የመኪና እና የምንጣፍ እጥበት ዋና አስተዳደር ማዕከል
+adminCombinedSub,"System configuration, pricing tariffs, bays & staff credentials","Qindaa'ina sirnaa, madaallii gatii, iddoowwan dhiqaafi eeyyama hojjettootaa",የስርዓት ቅንብር፣ የዋጋ ተመኖች፣ ማጠቢያ ክፍሎች እና የሰራተኞች መለያዎች
+unifiedDesk,Unified Desk,Kutaa Qindaa'e,የተቀናጀ ማዕከል
+carWashAndCarpetFacilities,Car Bays & Carpet Facilities,Bakka Dhiqa Konkolaataafi Karpeetii,የመኪና ማጠቢያና የምንጣፍ ክፍሎች
+carWashAndCarpetFacilitiesSub,"Bay 1, Bay 2, Mobile Van & Carpet Drying Racks","Kutaa 1, Kutaa 2, Vaan Moobaayilaafi Raakii Karpeetii",ክፍል 1፣ ክፍል 2፣ ተንቀሳቃሽ ቫን እና የምንጣፍ ማድረቂያ ራኮች
+serviceSelectionMode,Service Mode,Haala Tajaajilaa,የአገልግሎት ምርጫ
+customServicesChecklist,Detailing Services Checklist,Tarree Tajaajiloota Filataman,የዝርዝር አገልግሎቶች አመራረጥ
+presetPackages,Preset Packages,Paakeejiiwwan Qophaa'an,ዝግጁ ፓኬጆች
+negotiatedTotalPrice,Negotiated Total Price (ETB),Gatii Waliigaltee Waliigalaa (ETB),የተደራደሩበት ጠቅላላ ዋጋ (ብር)
+suggestedTariffTotal,Suggested Tariff Total,Ida'ama Gatii Dhaabbataa,መደበኛ የተሰላ ድምር ዋጋ
+staffTariff,Staff Tariff Total,Ida'ama Gatii Hojjattootaa,የሰራተኞች መደበኛ ታሪፍ
+agreedTariff,Agreed Tariff (ETB),Gatii Waliigaltee (ETB),የተስማሙበት ዋጋ (ብር)
+useSuggestedPrice,Use Tariff,Gatii Dhaabbataa Fudhadhu,መደበኛ ዋጋ ተጠቀም
+manageDetailServices,Manage Detailing Services,Tajaajiloota Bal'aa Bulchi,ዝርዝር አገልግሎቶችን አስተዳድር
+addNewDetailService,Add Detailing Service,Tajaajila Haaraa Dabaladhu,አዲስ ዝርዝር አገልግሎት አክል
+serviceCategory,Service Category,Ramaddii Tajaajilaa,የአገልግሎት ምድብ
+categoryExterior,Exterior & Wash,Dhiqannaa Alaa,የውጭ እጥበት
+categoryPolish,Body Polish & Restoration,Pooliishii fi Bareechuu,የመኪና ፖሊሽ እና ማብራት
+categoryInterior,Interior Detailing,Qulqullina Keessoo,የውስጥ ዲቴይሊንግ
+categoryEngine,Engine Detailing,Qulqullina Motooraa,የሞተር ጽዳት
+categorySpecialty,Specialty Add-ons,Tajaajiloota Dabalataa,ልዩ ተጨማሪ አገልግሎቶች
+selectAtLeastOneService,Please select at least one detailing service,Maaloo yoo xiqqaate tajaajila tokko filadhaa,እባክዎ ቢያንስ አንድ ዝርዝር አገልግሎት ይምረጡ
+enterAgreedPrice,Enter agreed price,Gatii waliigaltee galchaa,የተስማሙበትን ዋጋ ያስገቡ
+customNegotiatedWash,Custom Detailing Wash,Dhiqannaa Addaa Filatame,ልዩ የተመረጠ ዲቴይሊንግ እጥበት
+customWashServices,Custom Wash Services,Tajaajiloota Dhiqannaa Filataman,የተመረጡ የእጥበት አገልግሎቶች
+cashierTabQueue,Queue,Tartiiba,ወረፋ
+cashierTabMoney,Money,Maallaqa,ገንዘብ
+cashierTabTeamShower,Team & Shower,Garee & Shaaworii,ቡድን እና ሻወር
+cashierFilterAll,All,Hunda,ሁሉም
+cashierFilterWaiting,Waiting,Eegamaa,በመጠባበቅ ላይ
+cashierFilterInProgress,In Progress,Hojii Irra,በሂደት ላይ
+cashierFilterPayReady,Ready to Pay,Kaffaltiif Qophii,ለክፍያ ዝግጁ
+searchQueueHint,"Search plate, tag, customer or phone...","Lakkoofsa gabatee, taagii, maqaa ykn bilbila barbaadi...",ሰሌዳ፣ ታግ፣ ስም ወይም ስልክ ይፈልጉ...
+waitingForAdminOtp,WAITING FOR ADMIN,ADMIN EEGAMAA JIRA,አስተዳዳሪን በመጠባበቅ ላይ
+physicalCashInDrawer,Physical Cash in Drawer (Awaiting Deposit),Maallaqa Kaashii Harkaa (Baankiitti Hin Galin),በመሳቢያ ያለ ጥሬ ገንዘብ (ወደ ባንክ ያልገባ)
+drawerEmptyHandedOver,Drawer 0 ETB • Handed Over,Saanduqa 0 ETB • Dabarfameera,ሳጥን 0 ብር • ተላልፏል
+cashHandedOverDisabledNotice,Cash already handed over. Drawer is empty.,Qarshiin duraan dabarfameera. Saanduqni duwwaadha.,ጥሬ ገንዘብ አስቀድሞ ተላልፏል። ሳጥኑ ባዶ ነው።
+handedOverViaOtpPrefix,Handed Over,Dabarfameera,ተላልፏል
+expenseAmount,Expense Amount (ETB),Hamma Baasii (ETB),የወጪ መጠን (ብር)
+copySms,Copy SMS,SMS Garagalchi,SMS ቅዳ
+smsCopiedClipboard,Customer SMS copied to clipboard!,Ergaan maamilaa gara clipboard garagalfameera!,የደንበኛ SMS ወደ ክሊፕቦርድ ተቀድቷል!
+settledPaidBadge,PAID,KAFFALAMEERA,ተከፍሏል
+phoneOrderBadge,Phone,Bilbila,ስልክ
+carpetTypeBadgeA,CARPET A,KARPEETII A,ምንጣፍ A
+carpetTypeBadgeB,CARPET B,KARPEETII B,ምንጣፍ B
+tipBadgePrefix,Tip,Gumaata,ቲፕ
+bayAndWasherLabel,Bay / Washer,Bakka / Dhiqaa,ቦታ / አጣቢ
+unassignedBay,Assign Bay,Bakka Ramadi,ቦታ መድብ
+busyLabel,Busy,Qabameera,ተይዟል
+activeLabel,Active,Hojii Irra,በስራ ላይ
+commissionShort,Commission,Komishiinii,ኮሚሽን
+dutyWorkers,Duty,Hojii Irra,በስራ ላይ
+dailyFinancialReportsTab,Shift Logs & Deposits,Galmee Cufiinsaafi Baankii,የፈረቃ መዝገብ እና ተቀማጭ
+safeCashierModeNotice,Safe Mode: Bulk delete disabled for Cashier,Eegumsa: Haqumsii waliigalaa dhorkameera,ደህንነት፡ የጅምላ ማጥፊያ ተሰናክሏል
+showerRecordedToast,Recorded shower entry,Tajaajilli shaaworii galmaa'eera,የሻወር አገልግሎት ተመዝግቧል
+viewVoucher,View Voucher,Ragaalee Ilaali,ደረሰኝ እይ
+shiftLockedLabel,Shift Locked,Shiffitiin Cufameera,ፈረቃ ተቆልፏል
+managerTabHandoverClose,Money & Closing,Maallaqa & Cufiinsa,ገንዘብ እና መዝጊያ
+managerTabTeam,Team,Garee,ቡድን
+cashierOtpSubmitPrompt,submitted physical cash. Count drawer cash and enter the 4-digit Cashier OTP below:,maallaqa kaashii dhiheesseera. Maallaqa lakkaa'iitii koodii OTP lakkoofsa 4 gadi galchi:,ጥሬ ገንዘብ አስገብቷል። ገንዘቡን ቆጥረው ባለ 4 አሃዝ የOTP ኮድ ከታች ያስገቡ:
+enterFourDigitOtpError,Please enter the 4-digit Cashier OTP code.,Maaloo koodii OTP kaasharii lakkoofsa 4 galchaa.,እባክዎ ባለ 4 አሃዝ የገንዘብ ተቀባይ OTP ኮድ ያስገቡ።
+dayShiftHandoverCashLabel,Day Shift Carried Cash:,Maallaqa Shiftii Guyyaa Wal-harkaa:,ከቀን ፈረቃ የተረከቡት ገንዘብ:
+nightShiftNetCashLabel,Night Shift Cash Collected:,Maallaqa Shiftii Halkanii Sassaabame:,በምሽት ፈረቃ የተሰበሰበ ገንዘብ:
+totalCashToAdminLabel,Total Physical Cash to Admin:,Maallaqa Kaashii Waliigalaa Adminiif:,ለአስተዳዳሪ የሚረከብ ጠቅላላ ጥሬ ገንዘብ:
+initiateNightShiftClosing,Initiate Night Shift Closing,Cufiinsa Shiftii Halkanii Jalqabi,የምሽት ፈረቃ መዝጊያ ጀምር
+nightClosingConfirmed,Night Closing Confirmed,Cufiinsi Halkanii Mirkanaa'eera,የምሽት ፈረቃ መዝጊያ ተረጋግጧል
+nightClosingSubDesc,Reconciles night shift cash & washer pool before closing.,Cufiinsa dura maallaqaafi komishinii shiftii halkanii walitti qaba.,ከመዝጋቱ በፊት የምሽት ፈረቃ ገንዘብን እና የአጣቢዎችን ኮሚሽን ያስላል።
+cashToAdminSuffix,cash to Admin,Adminiif,ለአስተዳዳሪ
+awaitingHandoverLabel,No Day Handover Yet,Wal-Harkaan Guyyaa Hin Jiru,እስካሁን የቀን ርክክብ አልተደረገም
+awaitingHandoverDesc,"When Cashier submits Day closing via Manager OTP, verification appears above.",Yeroo kaashariin cufiinsa guyyaa OTP Maanaajaraatiin ergu asirratti mul'ata.,ገንዘብ ተቀባዩ የቀን ፈረቃን በስራ አስኪያጅ OTP ሲዘጋ ማረጋገጫው ከላይ ይታያል።
+commissionDisburseRequiredTitle,Disburse Daily Commissions First,Koomishinii Guyyaa Dura Kaffali,በመጀመሪያ የቀን ኮሚሽን ይክፈሉ
+commissionDisburseRequiredDesc,You must disburse today's daily washer commission pool before closing or handing over this shift.,Shiftii kana cufuun ykn maallaqa wal-harkaa fuuchuun dura koomishinii dhiqxootaa har'aa kaffaluun dirqama.,ይህንን ፈረቃ ከመዝጋትዎ ወይም ከማስረከብዎ በፊት የዛሬውን የአጣቢዎች የቀን ኮሚሽን መክፈል የግድ ነው።
+goToTeamAndDisburse,Go to Team & Disburse,Gara Garee Deemiitii Kaffali,ወደ ቡድን ሄደው ይክፈሉ
+disburseNowAndUnlockClosing,Disburse Pool Now & Unlock Closing,Amma Kaffaliitii Cufiinsa Bani,አሁን ከፍለው መዝጊያውን ይክፈቱ
+remainingCommissionPool,Undisbursed Pool,Koomishinii Hin Kaffalamin,ያልተከፈለ ኮሚሽን
+enterFourDigitManagerOtpError,Please enter the 4-digit Operational Manager OTP code.,Maaloo koodii OTP Hojii Geggeessaa lakkoofsa 4 galchaa.,እባክዎ ባለ 4 አሃዝ የኦፕሬሽን ስራ አስኪያጅ OTP ኮድ ያስገቡ።
+otpMissingOrCorruptError,Handover OTP could not be verified. Ask the sender to regenerate a fresh OTP.,Koodiin OTP mirkanaa'uu hin dandeenye. Ergaan koodii haaraa akka uumu gaafadhu.,የOTP ኮዱን ማረጋገጥ አልተቻለም። ላኪው አዲስ ኮድ እንዲያወጣ ይጠይቁ።
+adminTabOverviewCash,Overview & Cash,Cuunfaa & Maallaqa,አጠቃላይ እና ገንዘብ
+adminTabPricingTeam,Pricing & Team,Gatii & Garee,ዋጋ እና ቡድን
+adminTabCustomersAds,Customers & Ads,Maamila & Beeksisa,ደንበኞች እና ማስታወቂያ
+superAdminRoleBadge,SUPER ADMIN,SUPPER ADMINII,ዋና አስተዳዳሪ
+secondaryAdminRoleBadge,SECONDARY ADMIN,ADMINII LAMAFFAA,ሁለተኛ አስተዳዳሪ
+filterByDate,Filter by Date,Guyyaadhaan Filadhu,በቀን ይምረጡ
+executiveMetricsTitle,Executive Real-Time Metrics,Raawwii Hojii Kallattii,ቀጥታ የስራ አፈጻጸም
+netMarginLabel,Net Margin,Bu'aa Qulqulluu,የተጣራ ትርፍ %
+digitalVsCashLabel,Digital Transfers vs Cash,Dijitaala vs Kaashii,ዲጂታል እና ጥሬ ገንዘብ
+washerCrewAttendanceLabel,Washer Crew Attendance,Hirmaannaa Dhiqxootaa,የአጣቢዎች መገኘት
+onDutyCountLabel,On Duty,Hojii Irra,በስራ ላይ
+totalWashersLabel,total washers,dhiqxoota waliigalaa,ጠቅላላ አጣቢዎች
+teamPoolLabel,team pool,kuufama garee,የቡድን ኮሚሽን
+pnlStatementTitle,Financial Statement (P&L),Gabaasa Bu'aa fi Kasaaraa (P&L),የትርፍ እና ኪሳራ መግለጫ (P&L)
+pnlStatementSub,"Gross revenue, commission COGS, supplies & petty cash OpEx","Galii waliigalaa, koomishinii, meeshaalee fi baasii xixiqqaa",ጠቅላላ ገቢ፣ ኮሚሽን፣ የፍጆታ እቃዎች እና ጥቃቅን ወጪ
+profitableBadge,PROFITABLE,BU'AA QABA,ትርፋማ
+deficitBadge,DEFICIT,HIR'INA,ጉድለት
+grossRevenueRow,I. Gross Station Revenue,I. Galii Buufataa Waliigalaa,I. ጠቅላላ የጣቢያው ገቢ
+cogsRow,II. Cost of Goods Sold (COGS),II. Baasii Tajaajilaa (COGS),II. የአገልግሎት ወጪ (COGS)
+washerCommissionSub,Washer Team Commission Pool,Koomishinii Garee Dhiqxootaa,የአጣቢ ቡድን ኮሚሽን
+consumablesSub,Consumables Used & Soap Restocks,Saamunaa fi Meeshaalee Fayyadaman,የተጠቀሙ ፍጆታ ዕቃዎች እና ሳሙና
+grossOperatingProfitRow,Gross Operating Profit,Bu'aa Hojii Waliigalaa,ጠቅላላ የስራ ትርፍ
+opexRow,III. Operating Expenses (OpEx),III. Baasii Hojii Guyyaa (OpEx),III. የስራ ማስኬጃ ወጪ (OpEx)
+pettyCashOpexSub,Petty Cash Emergency Spends,Baasii Kaashii Hatattamaa,ጥቃቅን የአስቸኳይ ወጪዎች
+netOperatingProfitRow,Net Operating Profit (EBITDA),Bu'aa Qulqulluu (EBITDA),የተጣራ የስራ ትርፍ (EBITDA)
+salaryReserveRow,IV. Guaranteed Base Salaries Reserve,IV. Mindaa Bu'uuraa Ji'aa,IV. የወር መሰረታዊ ደሞዝ መጠባበቂያ
+netRetainedProfitRow,Net Retained Cash Profit,Bu'aa Kaashii Qulqulluu Hafe,የተጣራ የተረፈ ትርፍ
+washHistoryAuditDesc,Audit paid washes & receipts by date,Seenaa dhiqannaa kaffalamee sakatta'i,የተከፈሉ እጥበቶችን እና ደረሰኞችን ይመልከቱ
+financialReportsAuditDesc,"Shift closings, bank deposits & cash drawer","Cufiinsa shiftii, baankii fi kaashii",የፈረቃ መዝጊያ፣ የባንክ ገቢ እና የገንዘብ ሪፖርት
+editTariffsInventorySub,"Car & carpet tariffs, consumables & equipment","Gatii konkolaataa fi kaarpeetii, meeshaalee",የመኪና እና ምንጣፍ ዋጋ፣ ዕቃዎች እና መሳሪያ
+dailyTodayFilter,Daily Today,Har'a,የዛሬ ቀን
+weeklyReportFilter,Weekly Report,Torbanii,ሳምንታዊ ሪፖርት
+periodReportFilter,Selected Period,Yeroo Filatame,የተመረጠ ጊዜ
+pendingDayOtpBadge,PENDING CASHIER OTP,OTP KAASHARII EEGAA JIRA,የገንዘብ ተቀባይ OTP በመጠባበቅ ላይ
+reconciledBadge,RECONCILED,MIRKANAA'EERA,ተረጋግጧል
+dayShiftActiveBadge,DAY SHIFT ACTIVE,SHIFTIIN GUYYAA HOJII IRRA,የቀን ፈረቃ ንቁ ነው
+pendingVaultSealBadge,PENDING VAULT SEAL,KAAZINAAN EEGAMA,ካዝና ማረጋገጫ በመጠባበቅ ላይ
+sealedInVaultBadge,SEALED IN VAULT,KAAZINATTI MIRKANAA'E,በካዝና ተዘግቷል
+nightShiftActiveBadge,NIGHT SHIFT ACTIVE,SHIFTIIN HALKANII HOJII IRRA,የምሽት ፈረቃ ንቁ ነው
+secondaryApprovalsAwaiting,Secondary Admin Action(s) Awaiting Approval,Gochaa Adminii Lammaffaa Mirkaneessa Eegu,ማረጋገጫ የሚጠብቁ የሁለተኛ አስተዳዳሪ ተግባራት
+submittedForSuperApproval,Action(s) Submitted for Super Admin Approval,Gochaa Mirkaneessa Supper Adminiif Ergame,ለዋና አስተዳዳሪ ማረጋገጫ የቀረቡ ተግባራት
+approveAction,Approve,Mirkaneessi,አጽድቅ
+rejectAction,Reject,Kuffisi,ውድቅ አድርግ
+pendingReviewBadge,Pending Review,Sakatta'ama Eegaa Jira,ግምገማ በመጠባበቅ ላይ
+smsAndHotlineTitle,Customer Hotline & Cashier SMS,Bilbila Maamilaafi SMS Kaasharii,የደንበኞች ስልክ እና የገንዘብ ተቀባይ SMS
+hotlineBookingLabel,Customer Hotline Booking Number,Lakkoofsa Bilbila Ajaja Maamilaa,የደንበኞች የስልክ ማዘዣ ቁጥር
+cashierSmsPhoneLabel,Cashier SMS Phone Number,Lakkoofsa Bilbila SMS Kaasharii,የገንዘብ ተቀባይ SMS ስልክ ቁጥር
+updateAction,Update,Haaromsi,አዘምን
+tiktokReelsCardTitle,Welcome Screen TikTok Reels,Viidiyoo TikTok Fuula Jalqabaa,የመግቢያ ገጽ የTikTok ማስታወቂያዎች
+manageReelsBtn,Manage Reels,Viidiyoowwan Bulchi,ቪዲዮዎችን ያስተዳድሩ
+reelsActiveSuffix,reels active,viidiyoowwan hojii irra,ንቁ ቪዲዮዎች
+cashierFilterOnlineBookers,Online Bookers,Ajaja Intarneetaa,በኦንላይን ያዘዙ
+onlineBookingBadge,ONLINE BOOKER,AJAJA INTARNEETAA,የኦንላይን ትዕዛዝ
+approveAndArrivedAction,Approve & Arrived at Station,Mirkaneessiitii Buufata Gahe,አጽድቅ እና ጣቢያ ደርሷል
+postponeNextDayAction,Postpone to Next Day,Guyyaa Itti Aanutti Dabarsi,ለሚቀጥለው ቀን አዛውር
+postponedCarryOverBadge,POSTPONED CARRY-OVER,BORUUTTI DARBE,ለነገ የተዛወረ
+prepaidFinishWashBadge,PAID — FINISH & DELIVER,KAFFALAMEERA — XUMURIITII KENNI,ተከፍሏል — አጥበህ አስረክብ
+postponeDialogTitle,Postpone Wash to Next Day,Dhiqannaa Boruutti Dabarsi,እጥበቱን ለሚቀጥለው ቀን አዛውር
+postponeDialogDesc,Keep this arrived vehicle active for tomorrow's queue and log the reason for Accountant & Admin audit.,Konkolaataan dhufe kun dabaree dhiqaa boruutiif akka turuu fi sababni isaa oodiitiif akka galmaa'u godhi.,የደረሰው ተሽከርካሪ ለነገው ተራ እንዲቆይ እና ምክንያቱ ለሂሳብና ለአስተዳዳሪ ኦዲት እንዲመዘገብ ያድርጉ።
+postponeReasonHint,e.g. Customer pickup tomorrow morning,fkn. Maamilli ganama boruu fudhata,ለምሳሌ፡ ደንበኛው ነገ ጠዋት ይረከባል
+postponedSuccessMsg,Vehicle carried over to next day queue & logged for audit.,Konkolaataan gara boruutti dabarfamee oodiitidhaaf galmaa'eera.,ተሽከርካሪው ወደ ቀጣዩ ቀን ተዛውሮ ለኦዲት ተመዝግቧል።
+openVehiclesHandoverTitle,Active Vehicles Continuing to Next Shift,Konkolaattota Shiftii Itti Aanutti Darban,ወደ ቀጣዩ ፈረቃ የሚቀጥሉ ተሽከርካሪዎች
+openVehiclesHandoverDesc,Arrived vehicles still in bays or queue continue automatically to the next shift.,Konkolaattonni buufata gahanii hin xumuramin gara shiftii itti aanuutti ofumaan itti fufu.,ጣቢያ የደረሱና ያልተጠናቀቁ ተሽከርካሪዎች በራስ-ሰር ወደ ቀጣዩ ፈረቃ ይቀጥላሉ።
+autoClearNoShowsNotice,Unarrived online booking(s) will be automatically removed from the queue upon closing.,Ajajni intarneetaa hin dhufne yeroo cufiinsaa ofumaan hiriira keessaa ni haqamu.,ያልመጡ የኦንላይን ትዕዛዞች ሲዘጋ በራስ-ሰር ከሰልፉ ይሰረዛሉ።
+unarrivedNoShowsClearedLabel,Online no-shows cleared,Ajaja hin dhufne haqaman,ያልመጡ የተሰረዙ ትዕዛዞች
+carryOverAuditTitle,Carry-Over & Postponed Vehicles Audit,Oodiitii Konkolaattota Boruutti Darban,ወደ ቀጣይ ቀን የተዛወሩ ተሽከርካሪዎች ኦዲት
+carryOverAuditSub,"Open, postponed & prepaid pending washes across shifts",Dhiqannaa hin xumuramin ykn boruutti darban,ያልተጠናቀቁ እና ለነገ የተዛወሩ እጥበቶች
+noCarryOverVehicles,No postponed or overdue carry-over vehicles pending.,Konkolaataan hin xumuramin ykn boruutti darbe hin jiru.,ምንም ያልተጠናቀቀ ወይም የተዛወረ ተሽከርካሪ የለም።
+stepApprovedDesc,Booking approved — drive in to the station when ready to start.,Ajajni mirkanaa'eera — yeroo dhuftan buufatatti mirkaneessaa.,ቦታዎ ጸድቋል — ወደ ጣቢያው ሲመጡ መድረስዎን ያረጋግጡ።
+stepArrivedDesc,Cashier confirmed your arrival at station.,Qabaan qarshii buufata gahuu keessan mirkaneesseera.,ገንዘብ ተቀባዩ ጣቢያ መድረስዎን አረጋግጧል።
+handoverToOpManagerAction,Handover to Operational Manager,Hogganaa Hojiitti Kenni,ለኦፕሬሽን ማናጀር አስረክብ
+handedOverToManagerBadge,HANDED TO OP. MANAGER,HOGGANAA HOJIITTI KENNAME,ለኦፕሬሽን ማናጀር የተረከበ
+fromDayCashierBadge,FROM DAY CASHIER,KAASHIYARA GUYAA IRRAA,ከቀን ካሸር የመጣ
+postponedByManagerBadge,POSTPONED BY OP. MANAGER,HOGGANAA HOJIIN BORUUTTI DARBE,በኦፕሬሽን ማናጀር ለነገ የተዛወረ
+handoverDialogTitle,Handover to Operational Manager,Hogganaa Hojiitti Dabarsi,ለኦፕሬሽን ማናጀር ማስረከብ
+handoverDialogDesc,"Keep this vehicle active for Night Shift continuation under the Operational Manager. Current wash stage, bay & payment status stay preserved.","Konkolaataan kun shiftii halkaniitti hogganaa hojiitiin akka itti fufu godhi. Sadarkaan dhiqannaa, booxinii fi haalli kaffaltii ni eegama.",ይህ ተሽከርካሪ በምሽት ፈረቃ በኦፕሬሽን ማናጀር ስር እንዲቀጥል ያስረክቡ። የእጥበት ደረጃው፣ ቦታው እና የክፍያ ሁኔታው እንደተጠበቀ ይቆያል።
+handoverNoteHint,"Optional note (e.g. half-washed, prepaid)...","Yaada dabalataa (fkn. walakkaan dhiqame, kaffalameera)...",ተጨማሪ ማስታወሻ (ለምሳሌ፡ ግማሽ የታጠበ፣ የተከፈለ)...
+handoverSuccessMsg,Vehicle handed over to Operational Manager for Night Shift.,Konkolaataan shiftii halkaniif Hogganaa Hojiitti dabarfameera.,ተሽከርካሪው ለምሽት ፈረቃ ለኦፕሬሽን ማናጀር ተሰጥቷል።
+postponeReasonRequiredError,Operational Manager must enter a reason before postponing to next day.,Hogganaan Hojii gara boruutti dabarsuun dura sababa barreessuu qaba.,ኦፕሬሽን ማናጀር ለነገ ከማዘዋወሩ በፊት ምክንያት መጻፍ አለበት።
+postponeReasonRequiredLabel,Reason required for Accountant & Admin audit *,Sababa dirqama oodiitiif barreeffamu *,ለሂሳብ እና ለአስተዳዳሪ ኦዲት የሚያስፈልግ የግድ ምክንያት *
+handedOverVehiclesTitle,Active Vehicles from Day Shift,Konkolaattota Shiftii Guyyaa,ከቀን ፈረቃ የቀጠሉ ተሽከርካሪዎች
+postponedByLabel,Postponed by,Kan dabarse,ያዘዋወረው
+custodyChainLabel,Custody,Wal-Harkaa Fuudhiinsa,የርክክብ ሰንሰለት
+handoffCustodyArrow,Day Cashier → Op. Manager,Kaashiyara Guyyaa → Hogganaa Hojii,ቀን ካሸር → ኦፕሬሽን ማናጀር
+closingCloudSyncRlsWarning,"Saved locally, but Supabase daily_closings UPDATE was blocked by RLS (42501). Run migration 20261111_fix_rls_closings_and_bookings.sql in Supabase SQL Editor.","Naannotti olkaa'ameera, garuu haaromsi daily_closings Supabase keessaa seera RLS (42501) tiin uggurame. Migration 20261111_fix_rls_closings_and_bookings.sql Supabase SQL Editor keessatti hojisiisaa.",በመሣሪያው ላይ ተቀምጧል፣ ነገር ግን የSupabase daily_closings ማሻሻያ በRLS ፖሊሲ (42501) ታግዷል። እባክዎ 20261111_fix_rls_closings_and_bookings.sql በSupabase SQL Editor ያስኪዱ።
+closingCloudSyncNetworkWarning,"Saved locally, but cloud sync to Supabase daily_closings failed. Check connection or verify Supabase policies and refresh.","Naannotti olkaa'ameera, garuu erguun gara Supabase daily_closings hin milkoofne. Interneetii yookaan seera Supabase mirkaneeffadhaatii haaromsaa.",በመሣሪያው ላይ ተቀምጧል፣ ነገር ግን ወደ Supabase daily_closings መላክ አልተቻለም። ኢንተርኔት ወይም የSupabase ፖሊሲዎችን አረጋግጠው ያድሱ።
+exactHomePlaceLabel,Exact Customer Home / Place Address,Teessoo Sirrii Manaa / Bakka Maamilaa,የደንበኛው ቤት / ቦታ ትክክለኛ አድራሻ
+exactHomePlaceHint,"e.g. Kebele 04, Near Kuriftu Gate, Villa #12","fkn. Ganda 04, Karra Kuriftu bira, Mana #12",ለምሳሌ፡ ቀበሌ 04፣ ኩሪፍቱ በር አጠገብ፣ ቤት ቁጥር 12
+liveGpsLocatorBtn,Live GPS,GPS Ammaa,ቀጥታ ጂፒኤስ
+liveGpsFetching,Locating...,Barbaadaa...,በመፈለግ...
+gpsCoordinatesLabel,"Live GPS Coordinates (Lat, Lng)","Koordinaatii GPS (Lat, Lng)","የጂፒኤስ መጋጠሚያ (Lat, Lng)"
+gpsUnavailableMsg,Allow location access in browser or enter address / coordinates manually.,Hayyama bakkaa banaa ykn teessoo/GPS harkaan galchaa.,የአካባቢ ፈቃድ ይስጡ ወይም አድራሻውን በእጅ ያስገቡ።
+phoneIntakeDeliverySub,"Phone intake: At Station, At Home Van, or VIP Driver Pick-up & Return","Ajaja bilbilaa: Buufata, Mana Maamilaa (Van), ykn Konkolaachisaa VIP",የስልክ ትዕዛዝ፡ በጣቢያ፣ በቤት ቫን ወይም በቪአይፒ ሹፌር መውሰድና መመለስ
+deliveryModeRequiredAddress,Please enter the exact home/place address or live GPS coordinates.,Mee teessoo sirrii manaa ykn GPS galchaa.,እባክዎ ትክክለኛ የቤት አድራሻ ወይም ጂፒኤስ ያስገቡ።
+chooseDeliveryQuick,Car Wash Delivery Options,Filannoo Tajaajila Dhiqannaa,የመኪና እጥበት አገልግሎት አማራጮች
+consolidatedDailyTitle,Consolidated Daily Financial Report,Gabaasa Faayinaansii Guyyaa Walitti Qabame,የተጠቃለለ ዕለታዊ የፋይናንስ ሪፖርት
+consolidatedWeeklyTitle,Consolidated Weekly Financial Report,Gabaasa Faayinaansii Torbanii Walitti Qabame,የተጠቃለለ ሳምንታዊ የፋይናንስ ሪፖርት
+consolidatedMonthlyTitle,Consolidated Monthly Financial Report,Gabaasa Faayinaansii Ji'aa Walitti Qabame,የተጠቃለለ ወርሃዊ የፋይናንስ ሪፖርት
+consolidatedCustomPrefix,Consolidated,Walitti Qabama,የተጠቃለለ
+consolidatedCustomSuffix,Financial Report,Gabaasa Faayinaansii,የፋይናንስ ሪፖርት
+divisionSummaryTableTitle,Service Division Revenue Summary,Cuunfaa Galii Kutaa Tajaajilaa,የአገልግሎት ክፍሎች የገቢ ማጠቃለያ
+paymentSummaryTableTitle,Collections & Profit Ledger Table,Gabatee Kaffaltii fi Bu'aa,የክፍያ እና ትርፍ መዝገብ ሰንጠረዥ
+categoryColLabel,Category,Gosa,ምድብ
+countColLabel,Count / Detail,Lakkoofsa,ብዛት / ዝርዝር
+amountColLabel,Amount (ETB),Hanga (ETB),መጠን (ETB)
+weeklyTotalLabel,Weekly Total,Ida'ama Torbanii,ሳምንታዊ ድምር
+reconcileAndCloseShift,Reconcile cash drawer & close shift,Qarshii kaazinaa wal-simsiisii shiftii cufi,የካዝናውን ሂሳብ አስታርቀህ ፈረቃውን ዝጋ
+carpetDeliveryOptionsTitle,Carpet Cleaning Service Options,Filannoo Tajaajila Dhiqannaa Firaashii,የምንጣፍ እጥበት አገልግሎት አማራጮች
+carpetTrustFooter,Professional Carpet Cleaning • Fast Drying & Delivery,Dhiqannaa Firaashii Qulqullina Qabu • Gogsuu fi Geessuu Saffisaa,ፕሮፌሽናል የምንጣፍ እጥበት • ፈጣን ማድረቅና ማድረስ
+dayShiftClosingSubtitle,"Reconcile day shift sales, commissions & cash drawer","Gurgurtaa shiftii guyyaa, komishinii fi qarshii kaazinaa wal-simsiisi",የቀን ፈረቃ ሽያጭን፣ ኮሚሽንን እና የካዝናውን ጥሬ ገንዘብ ያስታርቁ
+remainingCashInDrawerLabel,Remaining Cash Balance in Drawer:,Qarshii Kaazinaa Keessaa Hafe:,በካዝና ውስጥ የቀረ ጥሬ ገንዘብ:
+sendManagerOtpSub,Generates a 4-digit OTP request for Operational Manager to verify drawer cash.,Koodii OTP dijitii 4 Hojii Geggeessaan qarshii akka mirkaneessuuf uuma.,ስራ አስኪያጁ ጥሬ ገንዘቡን እንዲያረጋግጥ ባለ 4 አሃዝ OTP ጥያቄ ያመነጫል።
+basePrice,Base Price,Gatii Bu'uuraa,መሰረታዊ ዋጋ
+deliveryAddonFeeLabel,Delivery / Service Add-on,Kaffaltii Dabalataa Geessuu,የማድረስ ተጨማሪ ክፍያ
+deliveryAddonIncluded,Includes delivery add-on,Kaffaltiin geessuu itti dabalameera,የማድረስ ተጨማሪ ክፍያ ተካትቷል
+carWashDeliveryFeesTitle,Car Wash Delivery Add-on Fees,Kaffaltii Dabalataa Geessuu Konkolaataa,የመኪና ማጠብ የማድረስ ተጨማሪ ክፍያዎች
+carpetDeliveryFeesTitle,Carpet Delivery Add-on Fees (Once Per Order),Kaffaltii Dabalataa Geessuu Firaashii (Ajaja Tokkotti),የምንጣፍ ማድረስ ተጨማሪ ክፍያዎች (በአንድ ትዕዛዝ)
+oncePerOrderTag,Once per order,Ajaja tokkotti al tokko,በአንድ ትዕዛዝ አንድ ጊዜ
+baseStationRatePerSqm,Base At-Station Rate / m²,Gatii Bu'uuraa Buufataa / m²,መሰረታዊ የጣቢያ ዋጋ / ካሬ ሜትር
+negotiatedTotalPriceTitle,Negotiated Final Price (ETB),Gatii Xumuraa Waliigaltee (ETB),የተስማሙበት የመጨረሻ ዋጋ (ብር)
+assignWasherDuringBooking,Assign Washer (Tips go 100% to assigned washer),Dhiqaa Ramadi (Tippiin 100% isaaf kenna),አጣቢ ይመድቡ (ቲፕ 100% ለተመደበው አጣቢ ይሆናል)
+noWasherAssignedOption,Assign Later / No Washer Selected,Booda Ramadi / Hin Filatamne,በኋላ ይመደብ / አጣቢ አልተመረጠም
+vatDeduction15Label,Less: 15% VAT (Wash & Delivery),Hir'isa: VAT 15% (Dhiqaa fi Geessuu),ተቀናሽ: 15% ተ.እ.ታ (እጥበት እና ማድረስ)
+netTaxableWashRevenue,Net Revenue (Excl. 15% VAT),Galii Qulqulluu (VAT 15% Booda),የተጣራ ገቢ (15% ተ.እ.ታ ከተቀነሰ በኋላ)
+directAssignedTip,Direct Tip,Tippii Kallattii,ቀጥተኛ ቲፕ
+newOnlineBookingAlertTitle,New Online Booking Received!,Ajajni Toora Interneetii Haaraan Dhufeera!,አዲስ የኦንላይን ትዕዛዝ ደርሷል!
+acknowledgeAlert,Dismiss,Cufi,አጥፋ
+deliveryModeLabel,Service Delivery Mode,Haala Kenniinsa Tajaajilaa,የአገልግሎት አሰጣጥ ሁኔታ
+loadOlderBookings,Load Older Bookings,Galmee Dursa Dhufe Fe'i,የቀደሙ መዝገቦችን ጫን
+loadedOlderBookingsPrefix,Loaded,Fe'ameera,ተጭነዋል
+loadedOlderBookingsSuffix,older bookings,galmeewwan dursa,የቀደሙ መዝገቦች
+noMoreOlderBookings,All historical bookings loaded,Galmeen seenaa hundi fe'ameera,ሁሉም ታሪካዊ መዝገቦች ተጭነዋል
+aiExecutiveTitle,BISHE AI Executive,Hogganaa AI BISHE,የቢሼ AI ስራ አስፈፃሚ
+aiExecutiveSub,"Real-time operational Q&A, chemical yields, and P&L analytics","Gaaffilee hojii battalaa, ittifayyadama saamunaa fi gabaasa bu'aa/kisaaraa",የእውነተኛ ጊዜ ስራዎች፣ የኬሚካል ፍጆታ እና የትርፍ/ኪሳራ ትንተና
+askAiHint,"Ask anything (e.g. ""Today's P&L"", ""Cars washed"", ""Shampoo yield"")...","Waan fedhe gaafadhaa (fkn ""Bu'aa har'aa"", ""Konkolaattota dhiqaman"")...","ማንኛውንም ይጠይቁ (ምሳሌ ""የዛሬው ትርፍና ኪሳራ""፣ ""የታጠቡ መኪኖች"")..."
+aiPromptPnL,📊 Today's P&L & Profit,📊 Bu'aa & Kisaaraa Har'aa,📊 የዛሬው ትርፍና ኪሳራ
+aiPromptCars,🚗 Cars Washed Today,🚗 Konkolaattota Har'a Dhiqaman,🚗 ዛሬ የታጠቡ መኪኖች
+aiPromptWashers,👥 Active Washers & Commissions,👥 Hojjettoota Hojjataaniifi Komishinii,👥 ስራ ላይ ያሉ አጣቢዎችና ኮሚሽን
+aiPromptYield,🧼 Chemical Yield & Averages,🧼 Ittifayyadama Saamunaafi Qorichaa,🧼 የኬሚካልና ሳሙና ፍጆታ አማካይ
+aiPromptAlerts,⚠️ Stock & Anomaly Alerts,⚠️ Akeekkachiisa Meeshaafi Hir'inaa,⚠️ የአላቂ ዕቃዎችና የስጋት ማሳወቂያ
+configureApiKey,Configure Gemini API Key,Furtuu Gemini API Qindeessi,የGemini API ቁልፍ ያዘጋጁ
+apiKeyNotice,Free Gemini API Key from Google AI Studio (optional for deep chat),Furtuu Gemini API tolaa Google AI Studio irraa,ነጻ የGemini API ቁልፍ ከ Google AI Studio
+getFreeKeyBtn,Get Free Key,Furtuu Tolaa Fudhadhu,ነጻ ቁልፍ ይውሰዱ
+aiLocalEngineBadge,Local Station Analytics,Xiinxala Iddoo Dhiqa,የማዕከሉ የቀጥታ ትንተና
+aiCloudEngineBadge,Gemini AI Cloud,Gemini AI Duumessa,የGemini AI ደመና
+aiThinking,Analyzing station data...,Ragaa iddoo dhiqa xiinxalaa jira...,የማዕከሉን መረጃ በመተንተን ላይ...
+clearChat,Clear Chat,Haquu,ውይይት አጽዳ
+aiWelcomeMessage,"👋 Hello! I am your BISHE AI Operations Executive. Ask me anything about today's cars, washer commissions, chemical yields (shampoo & perfume averages), or station P&L.","👋 Akkam! Ani Gargaaraa Hojii AI BISHE ti. Waa'ee konkolaattota har'aa, komishinii dhiqxootaa, ittifayyadama saamunaafi qorichaa ykn bu'aafi kisaaraa na gaafachuu dandeessu.",👋 ጤና ይስጥልኝ! እኔ የቢሼ AI ስራ አስፈፃሚ ነኝ። ስለ ዛሬ የታጠቡ መኪኖች፣ የአጣቢዎች ኮሚሽን፣ የኬሚካል ፍጆታ (የሻምፑና የሽቶ አማካይ) ወይም ስለ ትርፍና ኪሳራ ማንኛውንም ይጠይቁኝ።
+aiListen,Listen,Dhaggeeffadhu,አዳምጥ
+aiStopAudio,Stop Audio,Sagalee Dhaabi,ድምፅ አቁም
+aiVoiceMode,Voice Narration,Ibsa Sagalee,የድምፅ ንባብ
+aiMicListening,Listening...,Dhaggeeffachaa jira...,እያዳመጠ ነው...
+aiMicTooltip,Speak with microphone,Maayikiroofooniin dubbadhu,በማይክሮፎን ተናገር
+aiExportCsv,Export CSV,CSV Baasi,CSV ላክ
+aiCopyTable,Copy Table,Gabatee Waraabi,ሰንጠረዥ ቅዳ
+aiCopyAll,Copy Text,Barreeffama Waraabi,ጽሁፍ ቅዳ
+aiCopiedToast,Copied to clipboard!,Gara gabatee waraabbiitti kophameera!,ወደ ቅንጥብ ሰሌዳ ተቀድቷል!
+aiExportSuccess,CSV exported & copied to clipboard!,Galmeen CSV kophamee baafameera!,CSV በተሳካ ሁኔታ ተዘጋጅቷል ወደ ቅንጥብ ሰሌዳ ተቀድቷል!
+aiTableHint,Swipe ↔ to view table,Gabatee arguuf gara cinaatti dhiibi ↔,ሰንጠረዥ ለማየት ወደ ጎን ያንሸራትቱ ↔
+aiConciergeTitle,BISHE AI Concierge,Tajaajila AI BISHE,የቢሼ AI እንግዳ ተቀባይ
+aiConciergeSub,"Instant price estimates, package guidance, EV care, and live queue status","Tilmaama gatii battalaa, qajeelfama paakeejii fi dabaree dhiqa",የዋጋ ግምት፣ የፓኬጅ ማብራሪያ፣ የኤሌክትሪክ መኪና እንክብካቤ እና የተራ ሁኔታ
+aiCustomerWelcomeMessage,"👋 Welcome to BISHE Car Wash! I am your AI Concierge. Ask me about our wash packages, prices, EV safety, carpet cleaning, or current bay wait times.","👋 Baga nagaan dhuftan gara Dhiqa Konkolaataa BISHE! Ani gargaaraa AI keessani. Waa'ee paakeejii dhiqa, gatii, eegumsa konkolaataa elektiriikii ykn dabaree na gaafadhaa.",👋 ወደ ቢሼ መኪና ማጠቢያ እንኳን ደህና መጡ! እኔ የ AI እንግዳ ተቀባይ ነኝ። ስለ ማጠቢያ ፓኬጆቻችን፣ ዋጋዎች፣ የኤሌክትሪክ መኪናዎች ደህንነት፣ ምንጣፍ እጥበት ወይም የተራ ጊዜ ማንኛውንም ይጠይቁኝ።
+askAiCustomerHint,"Ask anything (e.g. ""SUV wash price?"", ""Silver vs Gold?"", ""Wait time right now?"")...","Waan fedhe gaafadhaa (fkn ""Gatiin SUV meeqa?"", ""Silver moo Gold?"", ""Yeroon eegumsaa meeqa?"")...","ማንኛውንም ይጠይቁ (ምሳሌ ""የSUV እጥበት ስንት ነው?""፣ ""ሲልቨር ወይስ ጎልድ?""፣ ""አሁን ያለው ተራ ስንት ነው?"")..."
+askBisheAiConcierge,Ask BISHE AI Concierge,AI BISHE Gaafadhaa,የቢሼ AI እንግዳ ተቀባይን ይጠይቁ
+aiConciergeBannerSub,"Need price estimates, wait times, or service advice? Chat now","Tilmaama gatii, yeroo eegumsaa ykn gorsa barbaaddu? Amma haasa'aa",የዋጋ ግምት፣ የተራ ጊዜ ወይም የማጠቢያ ምክር ይፈልጋሉ? አሁን ይጠይቁ
+aiPromptCustomerPackages,✨ Packages & Pricing,✨ Paakeejii & Gatii,✨ የፓኬጅ ዓይነቶችና ዋጋ
+aiPromptCustomerWaitTime,⏱️ Live Queue & Wait Time,⏱️ Dabaree & Yeroo Eegumsaa,⏱️ የቀጥታ ተራና የጥበቃ ጊዜ
+aiPromptCustomerEvSafety,⚡ EV & High-Pressure Safety,⚡ Eegumsa Konkolaataa Elektiriikii,⚡ የኤሌክትሪክ መኪና ደህንነት
+aiPromptCustomerCarpet,🏠 Carpet Wash & Delivery,🏠 Dhiqa Afataafi Geessuu,🏠 የምንጣፍ እጥበትና ትራንስፖርት
+aiPromptCustomerShower,🚿 Clean Hot Showers,🚿 Dhiqannaa Qaamaa Qulqulluu,🚿 ዘመናዊ የሙቅ ውሃ ሻወር
+aiPromptBaySpeed,⚡ Bay Turnaround & Queue,⚡ Saffisa Dabaree & Iddoo Dhiqa,⚡ የማጠቢያ ቦታዎች ፍጥነትና ተራ
+aiPromptOtpStatus,🔐 OTP Shift Handover Status,🔐 Haala OTP Wal-Harkaa Fuudhiinsa Shiftii,🔐 የፈረቃ ርክክብ OTP ሁኔታ
+aiPromptWasherPairs,👥 Washer Pairs & Bay Roster,👥 Ramaddii Cimdii Hojjettootaa,👥 የአጣቢ ጥንዶችና የስራ ድልድል
+aiPromptUnsettled,⏳ Unsettled & Pending Tickets,⏳ Tikkeettii Hin Kaffalamne,⏳ ያልተከፈሉና በመጠባበቅ ያሉ ቲኬቶች
+aiPromptShowersCount,🚿 Today's Shower Revenue,🚿 Galii Dhiqannaa Har'aa,🚿 የዛሬው የሻወር ገቢ
+aiPromptCashDrawer,💵 Drawer Cash & Handover,💵 Qarshii Kaazinaafi Wal-Harkaa Fuudhiinsa,💵 የካዝና ጥሬ ገንዘብና ርክክብ
+aiPromptEmptyExchange,🔄 Empty Return (ዕቃ በዕቃ),🔄 Qodaa Duudaa Deebisuu,🔄 ዕቃ በዕቃ ቅያሪ
+aiPromptAssetHealth,🛠️ Machinery & Asset Health,🛠️ Fayyummaa Maashinootaa,🛠️ የማሽኖችና ቋሚ ዕቃዎች ጤንነት
+aiPromptConsumableReorder,📦 Low Stock & Re-Order,📦 Hir'ina Meeshaafi Ajajuu,📦 የአላቂ ዕቃዎች እጥረትና ማዘዣ
+aiPromptBankReconciliation,🏦 Bank Deposit Slips Audit,🏦 Qorannoo Nagahee Baankii,🏦 የባንክ ተቀማጭ ደረሰኞች ማረጋገጫ
+aiPromptVatSummary,📑 15% VAT vs 0% Exempt Shower,📑 VAT 15% fi Dhiqannaa 0%,📑 15% ቫት እና ከቫት ነጻ ሻወር
+aiQueryCustomerPackages,What wash packages do you offer and what are the prices?,Paakeejiiwwan dhiqaafi gatii isaanii natti himaa,የማጠቢያ ፓኬጆችንና ዋጋቸውን ንገሩኝ
+aiQueryCustomerWaitTime,How busy are the bays right now and what is the wait time?,Amma dabareefi yeroon eegumsaa akkam jira?,አሁን ያለው ተራ እና የጥበቃ ጊዜ ስንት ነው?
+aiQueryCustomerEvSafety,Is high-pressure and steam wash safe for electric vehicles (EV)?,Konkolaataa elektiriikii dhiquun amansiisaadhaa?,የኤሌክትሪክ መኪና ማጠብ ደህንነቱ የተጠበቀ ነው?
+aiQueryCustomerCarpet,How much is carpet washing per square meter and delivery turnaround?,Dhiqi afataa meetira isquweeriin meeqa?,የምንጣፍ እጥበት በካሬ ሜትር ዋጋው ስንት ነው?
+aiQueryCustomerShower,Where are your clean hot showers located and what is the fee?,Tajaajilli dhiqannaa eessatti argama kaffaltiin meeqa?,የሻወር አገልግሎት የት ይገኛል ክፍያው ስንት ነው?
+aiQueryPnL,Today's P&L and net profit summary,Gabaasa bu'aa fi kisaaraa har'aa,የዛሬው ትርፍና ኪሳራ ማጠቃለያ
+aiQueryCars,List cars washed today and vehicle types,Tarree konkolaattota har'a dhiqamanii fi akaakuu isaanii,ዛሬ የታጠቡ መኪኖች ዝርዝርና ዓይነታቸው
+aiQueryWashers,Active washers on duty and their commissions,Hojjettoota hojii irra jiranii fi komishinii isaanii,ስራ ላይ ያሉ አጣቢዎችና ኮሚሽናቸው
+aiQueryYield,Chemical yield and average shampoo and perfume used per car,Ittifayyadama qorichaa fi giddu galeessa shaampuu fayyadamaa,የኬሚካል ፍጆታና የሻምፑ እንዲሁም የሽቶ አማካይ
+aiQueryAlerts,Check for low inventory stock and station discrepancies,Akeekkachiisa meeshaalee fi hir'ina iddoo dhiqa,የአላቂ ዕቃዎች እጥረትና የስጋት ማሳወቂያዎች
+aiQueryBaySpeed,"Bay turnaround speed, active queue, and washer dispatch","Saffisa dabaree, iddoowwan dhiqaafi ramaddii hojjettootaa",የማጠቢያ ቦታዎች ፍጥነት፣ ተራና የስራ ድልድል
+aiQueryOtpStatus,Status of Cashier 15:30 OTP handover and night closing,Haala OTP dabarsa shiftii fi cufiinsa halkan,የ15:30 ፈረቃ ርክክብ OTP እና የማታ መዝጊያ ሁኔታ
+aiQueryWasherPairs,Active washer pairs distribution and commission balance,Ramaddii cimdii hojjettootaa fi madaallii komishinii,የአጣቢ ጥንዶች ድልድልና የኮሚሽን ሚዛን
+aiQueryUnsettled,List cars in queue and unsettled vehicle tickets,Tarree tikkeettiiwwan hin kaffalamneefi dabaree keessa jiranii,ያልተከፈሉ ቲኬቶችና በተራ ላይ ያሉ መኪኖች
+aiQueryShowersCount,"Today's shower ticket count, cash and digital totals",Baay'ina tikkeettii dhiqannaa fi galii har'aa,የዛሬው የሻወር ቲኬት ብዛትና ጠቅላላ ገቢ
+aiQueryCashDrawer,Cash drawer balance and 15:30 OTP handover preparation,Hambaa qarshii sanduuqaa fi qophii OTP,የካዝና ጥሬ ገንዘብና የ15:30 OTP ዝግጅት
+aiQueryEmptyExchange,Empty-for-full container exchange balance and missing cans,Qodaa duudaa deebisuu fi qorannoo qodaa,ዕቃ በዕቃ ቅያሪ ሚዛንና የጎደሉ ዕቃዎች
+aiQueryAssetHealth,"Fixed asset equipment health, service due, and repairs",Fayyummaa maashinootaa fi suphaa,የማሽኖችና ቋሚ ዕቃዎች ጤንነት እንዲሁም ጥገና
+aiQueryConsumableReorder,Consumables stock levels and low-stock re-order alerts,Sadarkaa meeshaalee dhumoo fi ajaja haaromsaa,የአላቂ ዕቃዎች ክምችትና የዳግም ማዘዣ ማሳወቂያ
+aiQueryBankReconciliation,Bank deposit slips vs cashier drawer settlements audit,Qorannoo nagahee baankii fi herrega kaashiyaraa,የባንክ ተቀማጭ ደረሰኞችና የካሺየር ሂሳብ ማረጋገጫ
