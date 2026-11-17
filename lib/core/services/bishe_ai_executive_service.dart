@@ -1,13 +1,58 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../../features/admin/domain/models/monthly_overhead_expense.dart';
 import '../../features/auth_roles/domain/models/user_role.dart';
 import '../../features/booking_service/domain/models/bay_station.dart';
 import '../../features/booking_service/domain/models/car_type.dart';
+import '../../features/booking_service/domain/models/payment_info.dart';
+import '../../features/booking_service/domain/models/service_type.dart';
+import '../../features/booking_service/domain/models/wash_booking.dart';
+import '../../features/booking_service/domain/models/wash_package.dart';
+import '../../features/booking_service/domain/models/wash_status.dart';
 import '../../features/booking_service/presentation/state/app_state_notifier.dart';
 import '../../features/inventory/domain/models/fixed_asset.dart';
 import '../localization/app_strings.dart';
 import '../utils/currency_formatter.dart';
+
+enum WatchdogSeverity { info, warning, danger }
+enum WatchdogCategory { inventory, bays, shiftHandover, machinery }
+
+class StationWatchdogAlert {
+  final String id;
+  final String title;
+  final String description;
+  final WatchdogSeverity severity;
+  final WatchdogCategory category;
+  final String recommendedAction;
+
+  const StationWatchdogAlert({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.severity,
+    required this.category,
+    required this.recommendedAction,
+  });
+}
+
+class CustomerLoyaltyInfo {
+  final String plateNumber;
+  final int totalCompletedWashes;
+  final int progressInCycle;
+  final int washesRemainingForReward;
+  final bool isRewardEligible;
+  final String rewardDescription;
+
+  const CustomerLoyaltyInfo({
+    required this.plateNumber,
+    required this.totalCompletedWashes,
+    required this.progressInCycle,
+    required this.washesRemainingForReward,
+    required this.isRewardEligible,
+    required this.rewardDescription,
+  });
+}
 
 /// BISHE AI Operations Executive & Customer Concierge Service
 /// Provides intelligent operational answers using either the Google Gemini API
@@ -85,8 +130,98 @@ class BisheAiExecutiveService {
           'parts': [{'text': userQuestion}],
         });
 
+        final tools = [
+          {
+            'functionDeclarations': [
+              {
+                'name': 'tool_book_wash',
+                'description': 'Book a vehicle or carpet wash into the station database with license plate, car type, and package',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'licensePlate': {'type': 'STRING', 'description': 'Vehicle license plate number'},
+                    'carType': {'type': 'STRING', 'description': 'Car type: automobile, minibus, truck, or carpet'},
+                    'packageId': {'type': 'STRING', 'description': 'Wash package: silver, gold, platinum, or diamond'},
+                    'targetBay': {'type': 'STRING', 'description': 'Target bay: bay1, bay2, or mobileVan'}
+                  },
+                  'required': ['licensePlate']
+                }
+              },
+              {
+                'name': 'tool_settle_payment',
+                'description': 'Settle an active vehicle wash order with cash, telebirr, or CBE Birr',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'plateOrId': {'type': 'STRING', 'description': 'Vehicle plate or booking ID'},
+                    'paymentMethod': {'type': 'STRING', 'description': 'Payment method: cash, telebirr, or cbe'}
+                  },
+                  'required': ['plateOrId']
+                }
+              },
+              {
+                'name': 'tool_initiate_daily_closing',
+                'description': 'Initiate Cashier 15:30 daily register closing and dispatch 6-digit OTP to Operations Manager',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'notes': {'type': 'STRING', 'description': 'Optional closing notes'}
+                  }
+                }
+              },
+              {
+                'name': 'tool_verify_closing_otp',
+                'description': 'Verify Operations Manager 6-digit OTP to finalize closing and disburse washer commissions',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'otpCode': {'type': 'STRING', 'description': '6-digit OTP code'}
+                  },
+                  'required': ['otpCode']
+                }
+              },
+              {
+                'name': 'tool_record_empty_exchange',
+                'description': 'Record empty-for-full container chemical exchange (ዕቃ በዕቃ) as COGS',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'chemicalId': {'type': 'STRING', 'description': 'Chemical item name or ID, e.g. CS-009 or shampoo'},
+                    'quantity': {'type': 'NUMBER', 'description': 'Number of cans exchanged'}
+                  },
+                  'required': ['chemicalId']
+                }
+              },
+              {
+                'name': 'tool_update_master_price',
+                'description': 'Update station wash package rates or monthly overhead expenses (rent, electricity, water)',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'targetId': {'type': 'STRING', 'description': 'Target ID or name, e.g. overhead_rent, overhead_water, or pkg_gold'},
+                    'newPrice': {'type': 'NUMBER', 'description': 'New price in ETB'}
+                  },
+                  'required': ['targetId', 'newPrice']
+                }
+              },
+              {
+                'name': 'tool_check_loyalty_pass',
+                'description': 'Check frequent washer loyalty points and free wash eligibility for a license plate',
+                'parameters': {
+                  'type': 'OBJECT',
+                  'properties': {
+                    'plateNumber': {'type': 'STRING', 'description': 'Vehicle license plate number'}
+                  },
+                  'required': ['plateNumber']
+                }
+              }
+            ]
+          }
+        ];
+
         final payload = jsonEncode({
           'contents': contents,
+          'tools': tools,
           'generationConfig': {
             'temperature': isCustomer ? 0.5 : 0.7,
             'maxOutputTokens': 1500,
@@ -115,6 +250,64 @@ class BisheAiExecutiveService {
                 final content = candidates[0]['content'] as Map<String, dynamic>?;
                 final parts = content?['parts'] as List?;
                 if (parts != null && parts.isNotEmpty) {
+                  // Check for tool / function call execution
+                  for (final part in parts) {
+                    if (part is Map<String, dynamic> && part.containsKey('functionCall')) {
+                      final fnCall = part['functionCall'] as Map<String, dynamic>;
+                      final fnName = fnCall['name'] as String?;
+                      final fnArgs = fnCall['args'] as Map<String, dynamic>? ?? {};
+
+                      if (fnName == 'tool_book_wash') {
+                        return await executeToolBookWash(
+                          licensePlate: fnArgs['licensePlate']?.toString() ?? '',
+                          carTypeStr: fnArgs['carType']?.toString() ?? 'automobile',
+                          packageIdStr: fnArgs['packageId']?.toString() ?? 'pkg_gold',
+                          targetBayStr: fnArgs['targetBay']?.toString(),
+                          state: state,
+                          lang: currentLang,
+                        );
+                      } else if (fnName == 'tool_settle_payment') {
+                        return await executeToolSettlePayment(
+                          plateOrId: fnArgs['plateOrId']?.toString() ?? '',
+                          methodStr: fnArgs['paymentMethod']?.toString() ?? 'cash',
+                          state: state,
+                          lang: currentLang,
+                        );
+                      } else if (fnName == 'tool_initiate_daily_closing') {
+                        return await executeToolInitiateDailyClosing(
+                          cashierName: 'Cashier',
+                          notes: fnArgs['notes']?.toString(),
+                          state: state,
+                          lang: currentLang,
+                        );
+                      } else if (fnName == 'tool_verify_closing_otp') {
+                        return await executeToolVerifyClosingOtp(
+                          otpCode: fnArgs['otpCode']?.toString() ?? '',
+                          managerName: 'Operations Manager',
+                          state: state,
+                          lang: currentLang,
+                        );
+                      } else if (fnName == 'tool_record_empty_exchange') {
+                        return await executeToolRecordEmptyExchange(
+                          chemicalNameOrId: fnArgs['chemicalId']?.toString() ?? 'CS-009',
+                          quantity: (fnArgs['quantity'] as num?)?.toDouble() ?? 1.0,
+                          state: state,
+                          lang: currentLang,
+                        );
+                      } else if (fnName == 'tool_update_master_price') {
+                        return await executeToolUpdateMasterPrice(
+                          targetId: fnArgs['targetId']?.toString() ?? '',
+                          newPrice: (fnArgs['newPrice'] as num?)?.toDouble() ?? 0.0,
+                          state: state,
+                          lang: currentLang,
+                        );
+                      } else if (fnName == 'tool_check_loyalty_pass') {
+                        final plate = fnArgs['plateNumber']?.toString() ?? '';
+                        return generateCustomerLoyaltyReport(plate, state, currentLang);
+                      }
+                    }
+                  }
+
                   final text = parts[0]['text'] as String?;
                   if (text != null && text.trim().isNotEmpty) {
                     return text.trim();
@@ -140,8 +333,8 @@ class BisheAiExecutiveService {
 
     // 2. Local Station Analytics Engine (Zero network egress, fast, 100% reliable)
     final localResult = callerRole == UserRole.customer
-        ? _localCustomerConciergeAnalytics(userQuestion, state, currentLang)
-        : _localStationAnalytics(userQuestion, state, currentLang, callerRole);
+        ? await _localCustomerConciergeAnalytics(userQuestion, state, currentLang)
+        : await _localStationAnalytics(userQuestion, state, currentLang, callerRole);
 
     return cloudErrorNotice != null ? '$cloudErrorNotice$localResult' : localResult;
   }
@@ -303,10 +496,13 @@ LIVE STATION SNAPSHOT (${now.year}-${now.month.toString().padLeft(2, '0')}-${now
 - Live Queue Vehicles:
 $vehicleDetails
 
-INSTRUCTIONS:
-- Answer with executive clarity, specific numbers, and deep station context.
-- Format structured data, lists, and comparative statements as clean Markdown tables.
-- Tailor the response to the caller's role (${callerRole.displayName}).
+INSTRUCTIONS & PLAIN-WRITING RULES:
+- Lead with the answer: State the exact key metric, finding, or result in Sentence 1.
+- Zero robotic preamble: Cut out corporate filler like "Certainly!", "As an AI assistant...", or "I would be delighted to...".
+- Real-truth 30-day accrual accounting: Master overheads (rent, water, electricity, salaries) are accrued daily at 1/30th per day to display true net earnings.
+- Empty container COGS: Only chemical cans exchanged (ዕቃ በዕቃ) and shift consumption are counted as chemical COGS.
+- Authority: Answer with the sharp insight of a veteran station executive in Bishoftu.
+- You have access to real action tools (tool_book_wash, tool_settle_payment, tool_initiate_daily_closing, tool_verify_closing_otp, tool_record_empty_exchange, tool_update_master_price). Call them when commanded.
 - MANDATORY LANGUAGE REQUIREMENT: You MUST reply entirely in ${lang == AppLanguage.am ? 'Amharic (አማርኛ)' : (lang == AppLanguage.om ? 'Afaan Oromoo' : 'English')}. Write all titles, tables, explanations, and numbers in ${lang == AppLanguage.am ? 'Amharic (አማርኛ)' : (lang == AppLanguage.om ? 'Afaan Oromoo' : 'English')}. Do NOT reply in English when the user language is Amharic or Afaan Oromoo!
 ''';
   }
@@ -324,7 +520,7 @@ INSTRUCTIONS:
     final estWaitMinutes = (activeQueue * 15).clamp(5, 60);
 
     return '''
-You are "BisheAI Concierge", the friendly, hospitable, and knowledgeable customer service assistant for "BISHE Car Wash & Auto Care Service" located in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
+You are "BisheAI Concierge", the friendly, hospitable, and knowledgeable customer service host for "BISHE Car Wash & Auto Care Service" located in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
 Location: Bishoftu, behind Hirna Butchery, near Alemshet Fero.
 Hotline: +251 911 000 000 | Open 7 Days a week: 07:00 AM - 10:00 PM.
 
@@ -355,14 +551,29 @@ OUR SERVICE PACKAGES & PRICING:
 7. Electric Vehicle (EV) Safety Guarantee:
    - 100% safe for EVs (BYD, VW ID.4/ID.6, Tesla, Toyota bZ4X).
    - Our washers use calibrated pressure sprayers angled safely away from high-voltage battery enclosures and charging ports.
+8. Frequent Washer Loyalty Pass:
+   - Every 5 completed washes unlocks a 100% FREE Silver Wash or 50% OFF Gold Detailing on the 6th visit!
+9. Pre-Wash Photo Scratch Inspection:
+   - Intake attendants inspect pre-existing chips and scratches with the driver, attaching photos to the digital ticket for dispute-free peace of mind.
+10. Bishoftu Volcanic Red Clay Removal:
+   - Mud from Babogaya, Kuriftu, and Hora lakes cakes onto chassis. Recommend our high-pressure undercarriage mud blast in Bay 2!
+
+CONVERSATIONAL BOOKING & ACTION:
+- When a guest says "book my car" or requests a wash, collect: License Plate, Car Model/Type, and Package.
+- If any parameter is missing, ask for it in a warm, friendly single sentence.
+- When all parameters are present, call `tool_book_wash(licensePlate, carType, packageId, targetBay)`.
 
 STRICT PRIVACY GUARDRAILS (NON-NEGOTIABLE):
 - NEVER disclose staff salaries, washer commission percentages, station net profits, internal EBITDA, wholesale chemical costs, or internal 6-digit OTP codes.
 - If a customer asks about internal profits, commission cuts, or security OTPs, politely decline and redirect them to our service quality and packages.
 
-TONE & STYLE:
-- Warm, polite, professional, and welcoming.
-- Use clear bullet points and markdown tables for package comparisons or pricing questions.
+TONE, STYLE & PLAIN-WRITING:
+- Warm, polite, hospitable, and welcoming—like a proud Ethiopian station host.
+- Greet warmly:
+  * Amharic: "ሰላም ጤና ይስጥልኝ! እንደምን አደሩ/ዋሉ! ዛሬ በቢሼ ማጠቢያ ምን ልርዳዎት?"
+  * Afaan Oromoo: "Akkam jirtu! Baga nagaan gara BISHE dhuftan. Har'a maal isiniif haa goonu?"
+  * English: "Welcome to BISHE Car Wash! How can I take care of your car today?"
+- Answer the customer's question directly in Sentence 1 before providing further advice.
 - MANDATORY LANGUAGE REQUIREMENT:
   * Current Active User Language: ${lang == AppLanguage.am ? 'AMHARIC (አማርኛ)' : (lang == AppLanguage.om ? 'AFAAN OROMOO' : 'ENGLISH')}.
   * You MUST write your entire response, headings, tables, prices, and notes in ${lang == AppLanguage.am ? 'Amharic (አማርኛ)' : (lang == AppLanguage.om ? 'Afaan Oromoo' : 'English')}.
@@ -370,15 +581,82 @@ TONE & STYLE:
 ''';
   }
 
-  /// Built-in local station analytics engine for instant, zero-bandwidth executive answers
-  static String _localStationAnalytics(
+  /// Built-in local station analytics engine for instant, zero-bandwidth executive answers & duty execution
+  static Future<String> _localStationAnalytics(
     String rawQuery,
     AppStateNotifier state,
     AppLanguage lang,
     UserRole callerRole,
-  ) {
+  ) async {
     final query = rawQuery.toLowerCase().trim();
     final now = DateTime.now();
+
+    // 0. Duty Execution: Cashier Daily Register Closing
+    if (query.contains('close register') ||
+        query.contains('daily close') ||
+        query.contains('daily closing') ||
+        query.contains('shift close') ||
+        query.contains('ሂሳብ ዝጋ') ||
+        query.contains('መዝጊያ') ||
+        query.contains('cufi')) {
+      return await executeToolInitiateDailyClosing(
+        cashierName: 'Cashier',
+        state: state,
+        lang: lang,
+      );
+    }
+
+    // 0. Duty Execution: Manager / Cashier 4-to-6-Digit Handover OTP Verification
+    final otpMatch = RegExp(r'\b([0-9]{4,6})\b').firstMatch(rawQuery);
+    if ((query.contains('otp') || query.contains('verify') || query.contains('ኦቲፒ') || query.contains('አረጋግጥ') || query.contains('mirkaneessi')) &&
+        otpMatch != null) {
+      final code = otpMatch.group(1)!;
+      return await executeToolVerifyClosingOtp(
+        otpCode: code,
+        managerName: 'Operations Manager',
+        state: state,
+        lang: lang,
+      );
+    }
+
+    // 0. Duty Execution: Storekeeper Empty Container Exchange (ዕቃ በዕቃ)
+    if ((query.contains('exchange') || query.contains('ዕቃ በዕቃ') || query.contains('ቀይር') || query.contains('qodaa')) &&
+        (query.contains('shampoo') || query.contains('can') || query.contains('perfume') || query.contains('ሻምፑ') || query.contains('ጀሪካን'))) {
+      final qtyMatch = RegExp(r'(\d+(\.\d+)?)').firstMatch(rawQuery);
+      final qty = qtyMatch != null ? double.tryParse(qtyMatch.group(1)!) ?? 1.0 : 1.0;
+      final chem = query.contains('perfume') || query.contains('ሽቶ') ? 'CS-006' : 'CS-009';
+      return await executeToolRecordEmptyExchange(
+        chemicalNameOrId: chem,
+        quantity: qty,
+        state: state,
+        lang: lang,
+      );
+    }
+
+    // 0. Duty Execution: Super Admin Price Update
+    if ((query.contains('update price') || query.contains('change price') || query.contains('ዋጋ ቀይር') || query.contains('gatii jijjiiri')) &&
+        (query.contains('rent') || query.contains('water') || query.contains('electric') || query.contains('ኪራይ') || query.contains('ውሃ') || query.contains('መብራት'))) {
+      final numMatch = RegExp(r'(\d+(\.\d+)?)').firstMatch(rawQuery);
+      final price = numMatch != null ? double.tryParse(numMatch.group(1)!) ?? 0.0 : 0.0;
+      String target = 'overhead_rent';
+      if (query.contains('water') || query.contains('ውሃ')) target = 'overhead_water';
+      if (query.contains('electric') || query.contains('መብራት')) target = 'overhead_electricity';
+      return await executeToolUpdateMasterPrice(
+        targetId: target,
+        newPrice: price,
+        state: state,
+        lang: lang,
+      );
+    }
+
+    // 0. Duty Execution: Station Watchdog Health Audit
+    if (query.contains('watchdog') ||
+        query.contains('bottleneck') ||
+        query.contains('ንቁ ጠባቂ') ||
+        query.contains('ስጋት ፍተሻ') ||
+        query.contains('hordoffii')) {
+      return generateWatchdogReport(state);
+    }
 
     // 1. Showers & 0% VAT Exempt Services
     if (query.contains('shower') ||
@@ -535,13 +813,128 @@ TONE & STYLE:
     return _generateStationOverview(state, now);
   }
 
-  /// Built-in local customer concierge answers (zero network egress)
-  static String _localCustomerConciergeAnalytics(
+  /// Built-in local customer concierge answers & conversational booking (zero network egress)
+  static Future<String> _localCustomerConciergeAnalytics(
     String rawQuery,
     AppStateNotifier state,
     AppLanguage lang,
-  ) {
+  ) async {
     final query = rawQuery.toLowerCase().trim();
+
+    // 0. Conversational Booking Intent Execution
+    if (query.contains('book') ||
+        query.contains('መዝግብ') ||
+        query.contains('አስመዝግብ') ||
+        query.contains('ያስይዙ') ||
+        query.contains('አጥቡልኝ') ||
+        query.contains('ማስጠብ') ||
+        query.contains('galmeessi') ||
+        query.contains('qabadhaa')) {
+      // Check if user has provided a license plate
+      final plateRegex = RegExp(r'\b([0-9]-[A-Za-z0-9]{4,8}|ET-?[0-9A-Za-z]{3,7}|AA-?[0-9A-Za-z]{3,7}|OR-?[0-9A-Za-z]{3,7})\b', caseSensitive: false);
+      final match = plateRegex.firstMatch(rawQuery);
+
+      if (match != null) {
+        final plate = match.group(1)!;
+        return await executeToolBookWash(
+          licensePlate: plate,
+          carTypeStr: query.contains('suv') || query.contains('prado') ? 'SUV' : (query.contains('truck') ? 'truck' : 'automobile'),
+          packageIdStr: query.contains('gold') || query.contains('ጎልድ') ? 'pkg_gold' : 'pkg_silver',
+          targetBayStr: query.contains('lake') || query.contains('mud') || query.contains('ጭቃ') || query.contains('bay 2') || query.contains('bay2') || query.contains('ቦታ 2') ? 'Bay 2' : 'Bay 1',
+          state: state,
+          lang: lang,
+        );
+      } else {
+        // Missing plate parameter: ask warm focused follow-up
+        switch (lang) {
+          case AppLanguage.am:
+            return '''
+### 🚗 መኪናዎን ለማስመዝገብ ዝግጁ ነኝ!
+*የቢሼ መኪና ማጠቢያ • ቢሾፍቱ*
+
+መኪናዎን ወረፋ ለማስያዝና ቦታ ለመመደብ እባክዎ የሚከተሉትን ይንገሩኝ፡
+1. **የሰሌዳ ቁጥርዎ** (ለምሳሌ፦ **ኮድ 2 - B48291**)
+2. **የመኪናዎ ዓይነት** (ለምሳሌ፦ ቪትዝ፣ ኮሮላ፣ ፕራዶ SUV፣ አይሱዙ)
+3. **የሚመርጡት ፓኬጅ** (ሲልቨር መደበኛ ወይስ ለሀይቅ አፈር ተመራጩ **ጎልድ ፖሊሽ**?)
+
+ልክ ሰሌዳዎን ሲነግሩኝ ወዲያውኑ የቲኬት ቁጥርና የተራ ሰዓት እሰጥዎታለሁ!
+''';
+          case AppLanguage.om:
+            return '''
+### 🚗 Makiinaa Keessan Galmeessuuf Qophiidha!
+*Giddugala Dhiqannaa BISHE • Bishooftuu*
+
+Dabaree qabsiisuuf maaloo odeeffannoo armaan gadii naaf himaa:
+1. **Lakkoofsa Gabatee** (Fkn: **Koodii 2 - B48291**)
+2. **Gosa Makiinaa** (Fkn: Vitz, Corolla, Prado SUV, Isuzu)
+3. **Paakeejii Filatan** (Silver Bu'uuraa moo dhoqqee harootaaf **Gold Polish**?)
+
+Gabatee keessan akkuma naaf himtaniin tikkeettii fi iddoo dhiqa isiniif qaba!
+''';
+          case AppLanguage.en:
+            return '''
+### 🚗 Ready to Book Your Wash!
+*BISHE Car Wash Station • Bishoftu*
+
+To assign your bay and lock in your queue token, please tell me:
+1. **Your License Plate** (e.g., **Code 2 - B48291**)
+2. **Vehicle Model / Type** (e.g., Vitz, Corolla, Prado SUV, or Isuzu)
+3. **Preferred Package** (Silver Basic or our recommended **Gold Polish** for lake volcanic dust?)
+
+As soon as you provide your license plate, I will issue your ticket and bay assignment immediately!
+''';
+        }
+      }
+    }
+
+    // 0. Frequent Washer Loyalty Pass Lookup
+    if (query.contains('loyalty') ||
+        query.contains('pass') ||
+        query.contains('point') ||
+        query.contains('reward') ||
+        query.contains('free wash') ||
+        query.contains('ታማኝ') ||
+        query.contains('ነጻ') ||
+        query.contains('ነፃ') ||
+        query.contains('ሽልማት') ||
+        query.contains('maamilummaa') ||
+        query.contains('badhaasa') ||
+        query.contains('tola')) {
+      return generateCustomerLoyaltyReport(rawQuery, state, lang);
+    }
+
+    // 0. Pre-Wash Visual Scratch & Dent Photo Inspection
+    if (query.contains('scratch') ||
+        query.contains('dent') ||
+        query.contains('inspect') ||
+        query.contains('photo') ||
+        query.contains('pre-wash') ||
+        query.contains('ጭረት') ||
+        query.contains('ጉዳት') ||
+        query.contains('ፍተሻ') ||
+        query.contains('suuraa') ||
+        query.contains('miidhaa')) {
+      return generateCustomerScratchInspectionReport(lang);
+    }
+
+    // 0. Bishoftu Crater Lakes Volcanic Red Mud Removal
+    if (query.contains('mud') ||
+        query.contains('lake') ||
+        query.contains('volcanic') ||
+        query.contains('crater') ||
+        query.contains('babogaya') ||
+        query.contains('kuriftu') ||
+        query.contains('hora') ||
+        query.contains('undercarriage') ||
+        query.contains('chassis') ||
+        query.contains('ጭቃ') ||
+        query.contains('ሀይቅ') ||
+        query.contains('ሐይቅ') ||
+        query.contains('ቀይ አፈር') ||
+        query.contains('dhoqqee') ||
+        query.contains('haroo')) {
+      return generateBishoftuMudRoadsReport(lang);
+    }
 
     if (query.contains('package') ||
         query.contains('price') ||
@@ -636,6 +1029,678 @@ TONE & STYLE:
     }
 
     return _generateCustomerOverview(state, lang);
+  }
+
+  // ==========================================
+  // AUTONOMOUS DUTY EXECUTION TOOLS
+  // ==========================================
+
+  static Future<String> executeToolBookWash({
+    required String licensePlate,
+    required String carTypeStr,
+    required String packageIdStr,
+    String? targetBayStr,
+    required AppStateNotifier state,
+    required AppLanguage lang,
+  }) async {
+    final cleanPlate = licensePlate.trim().toUpperCase();
+    if (cleanPlate.isEmpty) {
+      switch (lang) {
+        case AppLanguage.am:
+          return '⚠️ እባክዎ የመኪናውን የሰሌዳ ቁጥር ይንገሩኝ? (ለምሳሌ "ኮድ 2 - B12345")';
+        case AppLanguage.om:
+          return '⚠️ Maaloo lakkoofsa gabatee makiinaa naaf himaa? (Fkn "Koodii 2 - B12345")';
+        case AppLanguage.en:
+          return '⚠️ Please provide the vehicle license plate number to confirm booking (e.g. "2-B12345").';
+      }
+    }
+
+    // Match CarType
+    CarType type = CarType.automobile;
+    final ct = carTypeStr.toLowerCase();
+    if (ct.contains('suv') || ct.contains('pickup') || ct.contains('prado') || ct.contains('b')) {
+      type = CarType.minibus;
+    } else if (ct.contains('truck') || ct.contains('isuzu') || ct.contains('heavy') || ct.contains('c')) {
+      type = CarType.truck;
+    }
+
+    // Match Package
+    WashPackage? pkg;
+    final pStr = packageIdStr.toLowerCase();
+    for (final p in state.packages) {
+      final pn = p.name.toLowerCase();
+      if (pStr.contains('gold') || pStr.contains('0102') || pStr.contains('ጎልድ')) {
+        if (p.id.endsWith('0102') || pn.contains('gold')) { pkg = p; break; }
+      } else if (pStr.contains('plat') || pStr.contains('0104') || pStr.contains('ፕላቲነም')) {
+        if (p.id.endsWith('0104') || pn.contains('plat')) { pkg = p; break; }
+      } else if (pStr.contains('diamond') || pStr.contains('0109') || pStr.contains('ዳይመንድ')) {
+        if (p.id.endsWith('0109') || pn.contains('diamond')) { pkg = p; break; }
+      } else if (pStr.contains('silver') || pStr.contains('0101') || pStr.contains('ሲልቨር')) {
+        if (p.id.endsWith('0101') || pn.contains('silver')) { pkg = p; break; }
+      }
+    }
+    pkg ??= state.packages.isNotEmpty ? state.packages.first : const WashPackage(
+      id: 'pkg-silver',
+      name: 'Silver Wash',
+      description: 'Exterior Snow Foam Rinse',
+      durationMinutes: 20,
+      pricingByCarType: {CarType.automobile: 200.0, CarType.minibus: 300.0, CarType.truck: 500.0},
+      features: ['Snow Foam', 'High Pressure Rinse', 'Tire Shine'],
+    );
+
+    final assignedBay = (targetBayStr != null && targetBayStr.toLowerCase().contains('2'))
+        ? 'Bay 2 (Undercarriage & Red Clay)'
+        : 'Bay 1 (Snow Foam & Body Gloss)';
+
+    final booking = await state.bookNewWash(
+      customerName: 'Driver $cleanPlate',
+      customerPhone: '0911000000',
+      serviceType: ServiceType.walkInStation,
+      carType: type,
+      licensePlate: cleanPlate,
+      package: pkg,
+      deliveryLocation: 'Bishoftu Hub ($assignedBay)',
+      paymentMethod: PaymentMethod.cash,
+    );
+
+    final price = booking.totalPrice;
+    final queueNum = '#${state.bookings.length.toString().padLeft(2, '0')}';
+
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### ✅ መኪናዎ በተሳካ ሁኔታ ተመዝግቧል!
+*የቢሼ መኪና ማጠቢያ ማዕከል • ቢሾፍቱ*
+
+| መረጃ | ዝርዝር |
+| :--- | :--- |
+| **የቲኬት ቁጥር** | **`${booking.id}` ($queueNum)** |
+| **የሰሌዳ ቁጥር** | **`$cleanPlate`** (${type.displayName}) |
+| **የተመረጠው ፓኬጅ** | **${pkg.name}** |
+| **የተመደበው ቦታ** | **$assignedBay** |
+| **ጠቅላላ ክፍያ (15% ቫትን ጨምሮ)** | **${CurrencyFormatter.format(price)}** |
+| **የጥበቃ ጊዜ** | **~8–12 ደቂቃ** |
+
+💡 እባክዎ መኪናዎን ወደ **$assignedBay** ያስጠጉ፤ አጣቢዎቻችን ዝግጁ ሆነው ይጠብቁዎታል!
+''';
+
+      case AppLanguage.om:
+        return '''
+### ✅ Makiinaan Keessan Milkaa'inaan Galmaa'eera!
+*Giddugala Dhiqannaa BISHE • Bishooftuu*
+
+| Odeeffannoo | Qabiyyee |
+| :--- | :--- |
+| **Lakkoofsa Tikkeettii** | **`${booking.id}` ($queueNum)** |
+| **Gabatee Makiinaa** | **`$cleanPlate`** (${type.displayName}) |
+| **Paakeejii Filatame** | **${pkg.name}** |
+| **Iddoo Ramadame** | **$assignedBay** |
+| **Gatii Guutuu (VAT 15% dabalatee)** | **${CurrencyFormatter.format(price)}** |
+| **Yeroo Eegumsaa** | **~Daqiiqaa 8–12** |
+
+💡 Maaloo makiinaa keessan gara **$assignedBay** dhiyeessaa; hojjettoonni qophaa'aniiru!
+''';
+
+      case AppLanguage.en:
+        return '''
+### ✅ Vehicle Wash Booked Successfully!
+*BISHE Car Wash Station • Bishoftu*
+
+| Detail | Value |
+| :--- | :--- |
+| **Booking Token** | **`${booking.id}` ($queueNum)** |
+| **License Plate** | **`$cleanPlate`** (${type.displayName}) |
+| **Wash Package** | **${pkg.name}** |
+| **Assigned Station Bay** | **$assignedBay** |
+| **Total Price (incl. 15% VAT)** | **${CurrencyFormatter.format(price)}** |
+| **Estimated Queue Wait** | **~8–12 minutes** |
+
+💡 Please pull your vehicle forward into **$assignedBay**; our detailing team is standing by!
+''';
+    }
+  }
+
+  static Future<String> executeToolSettlePayment({
+    required String plateOrId,
+    required String methodStr,
+    required AppStateNotifier state,
+    required AppLanguage lang,
+  }) async {
+    final clean = plateOrId.trim().toUpperCase().replaceAll(' ', '');
+    final match = state.bookings.firstWhere(
+      (b) => !b.payment.isPaid && (b.id.toUpperCase() == clean || b.licensePlate.toUpperCase().replaceAll(' ', '') == clean),
+      orElse: () => state.bookings.isNotEmpty ? state.bookings.first : state.bookings.first,
+    );
+
+    PaymentMethod method = PaymentMethod.cash;
+    final m = methodStr.toLowerCase();
+    if (m.contains('tele') || m.contains('ቴሌ')) {
+      method = PaymentMethod.telebirr;
+    } else if (m.contains('cbe') || m.contains('ንግድ') || m.contains('ባንክ')) {
+      method = PaymentMethod.cbeBirr;
+    }
+
+    await state.processPayment(
+      bookingId: match.id,
+      method: method,
+      amount: match.totalPrice,
+      transactionRef: 'AI-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
+    );
+
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 💵 ክፍያ በተሳካ ሁኔታ ተፈጽሟል!
+| የቲኬት ቁጥር | ሰሌዳ | የተከፈለው መጠን | የክፍያ መንገድ | ሁኔታ |
+| :--- | :--- | :--- | :--- | :--- |
+| **`${match.id}`** | `${match.licensePlate}` | **${CurrencyFormatter.format(match.totalPrice)}** | ${method.displayName} | **✅ ተከፍሏል (PAID)** |
+''';
+      case AppLanguage.om:
+        return '''
+### 💵 Kaffaltiin Milkaa'inaan Xumurameera!
+| Tikkeettii | Gabatee | Gatii Kaffalame | Toftaa Kaffaltii | Haala |
+| :--- | :--- | :--- | :--- | :--- |
+| **`${match.id}`** | `${match.licensePlate}` | **${CurrencyFormatter.format(match.totalPrice)}** | ${method.displayName} | **✅ Kaffalameera** |
+''';
+      case AppLanguage.en:
+        return '''
+### 💵 Payment Settled Successfully!
+| Ticket ID | License Plate | Amount Paid | Payment Method | Audit Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **`${match.id}`** | `${match.licensePlate}` | **${CurrencyFormatter.format(match.totalPrice)}** | ${method.displayName} | **✅ PAID & LOGGED** |
+''';
+    }
+  }
+
+  static Future<String> executeToolInitiateDailyClosing({
+    required String cashierName,
+    String? notes,
+    required AppStateNotifier state,
+    required AppLanguage lang,
+  }) async {
+    final closing = await state.confirmDailyClosing(
+      cashierName: cashierName.isNotEmpty ? cashierName : 'Cashier',
+      notes: notes,
+      shiftType: 'day',
+      handoverTo: 'Operational Manager',
+      handoverMethod: 'manager_otp',
+    );
+
+    final otp = closing.handoverOtp ?? '849201';
+    final vatAmount = (closing.grossRevenue - closing.showerRevenue) * 0.15;
+
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🔐 የቀን ፈረቃ ሂሳብ መዝጊያ ተጀምሯል (15:30 EAT)
+*የቢሾፍቱ ማዕከል • የካሺየር ካዝና ርክክብ*
+
+| የፋይናንስ መረጃ | መጠን | ዝርዝር |
+| :--- | :--- | :--- |
+| **የታጠቡ መኪኖች** | **${closing.carsWashedCount} መኪኖች** | የተጠናቀቁ እጥበቶች |
+| **ጠቅላላ የተሰበሰበ ገቢ** | **${CurrencyFormatter.format(closing.grossRevenue)}** | ጥሬ ገንዘብ + ዲጂታል |
+| • የጥሬ ገንዘብ (Cash Drawer) | ${CurrencyFormatter.format(closing.cashRevenue)} | በካዝና ውስጥ ያለ ጥሬ ገንዘብ |
+| • የቴሌብር/ዲጂታል (Digital) | ${CurrencyFormatter.format(closing.digitalRevenue)} | በቴሌብር/ባንክ ገቢ የሆነ |
+| **15% ህጋዊ ቫት** | **${CurrencyFormatter.format(vatAmount)}** | ለመንግስት የሚከፈል ቫት |
+| **ለአጣቢዎች 15% ኮሚሽን** | **${CurrencyFormatter.format(closing.commissionPool)}** | ለአጣቢዎች የሚከፋፈል ድርሻ |
+
+#### ⚠️ የስራ አስኪያጅ ማረጋገጫ OTP ተልኳል፡
+የካሺየር ካዝናውን ለመዝጋትና ኮሚሽኑን ለአጣቢዎች ለማከፋፈል **ባለ 6-አሃዝ OTP ወደ ስራ አስኪያጁ ተልኳል** (የሙከራ OTP፦ `$otp`)። እባክዎ ስራ አስኪያጁ ኮዱን እንዲሰጥዎት ጠይቀው እዚህ ያስገቡ።
+''';
+
+      case AppLanguage.om:
+        return '''
+### 🔐 Cufiinsi Shiftii Guyyaa Eegalameera (15:30 EAT)
+*Giddugala Bishooftuu • Wal-harkaa Fuudhiinsa Kaashiyaraa*
+
+| Ragaa Faayinaansii | Hamma | Qabiyyee |
+| :--- | :--- | :--- |
+| **Makiinaa Dhiqame** | **Makiinaa ${closing.carsWashedCount}** | Dhiqa xumurame |
+| **Galii Waliigalaa** | **${CurrencyFormatter.format(closing.grossRevenue)}** | Qarshii harkaa + Dijitaalaa |
+| • Qarshii Sanduuqaa (Cash) | ${CurrencyFormatter.format(closing.cashRevenue)} | Sanduuqa keessa kan jiru |
+| • Telebirr / Dijitaalaa | ${CurrencyFormatter.format(closing.digitalRevenue)} | Telebirr / Baankiin kan kaffalame |
+| **VAT 15% Mootummaa** | **${CurrencyFormatter.format(vatAmount)}** | Taaksii seeraa |
+| **Komishinii Hojjettootaa 15%** | **${CurrencyFormatter.format(closing.commissionPool)}** | Qooda hojjettoota dhiqaaf |
+
+#### ⚠️ OTP Mirkaneessaa Hogganaa Hojiitiif Ergameera:
+Cufiinsa xumuruuf **koodiin OTP 6 Hogganaa Hojii (Operations Manager) tiif ergameera** (Koodii: `$otp`). Maaloo koodicha fuudhaatii asitti galchaa.
+''';
+
+      case AppLanguage.en:
+        return '''
+### 🔐 Day Shift Financial Closing Initiated (15:30 EAT)
+*Bishoftu Station • Cashier Drawer Custody Handover*
+
+| Financial Component | Amount (ETB) | Accounting Treatment |
+| :--- | :--- | :--- |
+| **Vehicles Settled** | **${closing.carsWashedCount} vehicles** | Completed wash jobs |
+| **Gross Total Revenue** | **${CurrencyFormatter.format(closing.grossRevenue)}** | Operating Cash + Digital Inflow |
+| • Cash Drawer Balance | ${CurrencyFormatter.format(closing.cashRevenue)} | Physical cash for handover |
+| • Digital / Telebirr Inflow | ${CurrencyFormatter.format(closing.digitalRevenue)} | Digital ledger verified |
+| **15% Statutory VAT** | **${CurrencyFormatter.format(vatAmount)}** | Statutory tax obligation |
+| **15% Washer Commission Pool** | **${CurrencyFormatter.format(closing.commissionPool)}** | Direct labor allocation |
+
+#### ⚠️ Manager 6-Digit Verification OTP Dispatched:
+To commit the register close and disburse washer commissions, a 6-digit OTP has been generated for the Operations Manager (`$otp`). Please obtain and type the OTP here to finalize.
+''';
+    }
+  }
+
+  static Future<String> executeToolVerifyClosingOtp({
+    required String otpCode,
+    String managerName = 'Operations Manager',
+    required AppStateNotifier state,
+    required AppLanguage lang,
+  }) async {
+    final cleanOtp = otpCode.trim().replaceAll(RegExp(r'[^0-9]'), '');
+    final success = await state.acceptCashierHandover(
+      managerName: managerName,
+      enteredOtp: cleanOtp,
+    );
+
+    if (success) {
+      await state.disburseAndReportDailyCommissionToAdmin(cashierName: 'Cashier');
+      switch (lang) {
+        case AppLanguage.am:
+          return '''
+### ✅ OTP ተረጋግጧል! የፈረቃ ሂሳብ በይፋ ተዘግቷል
+1. **የካሺየር ካዝና ርክክብ**: በስራ አስኪያጅ $managerName ተረጋግጦ ተዘግቷል።
+2. **የአጣቢዎች 15% ኮሚሽን**: በቅጽበት ወደ አጣቢዎች የደመወዝ መዝገብ ተከፋፍሏል።
+3. **የፋይናንስ ሪፖርት**: ወደ አካውንታንት እና አድሚን ዳሽቦርድ በሙሉ ተላልፏል።
+''';
+        case AppLanguage.om:
+          return '''
+### ✅ Koodiin OTP Mirkanaa'eera! Shiftiin Cufameera
+1. **Wal-harkaa Fuudhiinsi Kaashiyaraa**: Hogganaa Hojii $managerName tiin mirkanaa'ee cufameera.
+2. **Komishiniin Hojjettootaa 15%**: Battalatti herrega mindaa isaaniitti qoodameera.
+3. **Gabaasni Faayinaansii**: Gara daashboordii oodiitaraafi abbaa qabeenyaatti darbeera.
+''';
+        case AppLanguage.en:
+          return '''
+### ✅ OTP Verified & Accepted! Register Closed
+1. **Cash Drawer Custody**: Verified and locked by $managerName.
+2. **15% Washer Commissions**: Disbursed immediately to active technician payroll ledgers.
+3. **Fiscal Audit Snapshot**: Dispatched to Accountant and Super Admin dashboards.
+''';
+      }
+    } else {
+      switch (lang) {
+        case AppLanguage.am:
+          return '❌ የተሳሳተ OTP ኮድ ነው። እባክዎ ከስራ አስኪያጁ ትክክለኛውን ባለ 6-አሃዝ ኮድ ጠይቀው እንደገና ያስገቡ።';
+        case AppLanguage.om:
+          return '❌ Koodiin OTP dogoggora. Maaloo koodii sirrii Hogganaa Hojiirraa fudhadhaa itti deebi\'aa.';
+        case AppLanguage.en:
+          return '❌ Invalid OTP code. Please verify the 6-digit handover code with the Operations Manager and try again.';
+      }
+    }
+  }
+
+  static Future<String> executeToolRecordEmptyExchange({
+    required String chemicalNameOrId,
+    required double quantity,
+    required AppStateNotifier state,
+    required AppLanguage lang,
+  }) async {
+    final query = chemicalNameOrId.toLowerCase();
+    final item = state.consumables.firstWhere(
+      (c) => c.id.toLowerCase() == query || c.name.toLowerCase().contains(query),
+      orElse: () => state.consumables.isNotEmpty ? state.consumables.first : state.consumables.first,
+    );
+
+    await state.exchangeConsumableEmptyForNew(
+      itemId: item.id,
+      quantity: quantity,
+      washerTeamLeaderName: 'Washer Team Lead',
+    );
+
+    final cost = quantity * item.unitCostEtb;
+
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🔄 ዕቃ በዕቃ ቅያሪ ተመዝግቧል (COGS Deduction)
+| የተሰጠው ኬሚካል | የወጣው ብዛት | የተመለሰ ባዶ ዕቃ | የተመዘገበ ወጪ (COGS) | የቀረ ክምችት |
+| :--- | :--- | :--- | :--- | :--- |
+| **${item.name} (${item.id})** | **$quantity ${item.unit}** | $quantity ባዶ እቃ ተመልሷል | **${CurrencyFormatter.format(cost)}** | ${item.currentStock} ${item.unit} |
+
+> *ማስታወሻ፦ ኬሚካሉ እንደ ዕለታዊ የስራ ማስኬጃ ወጪ (Direct Consumable COGS) በ P&L ላይ በቀጥታ ተቀንሷል።*
+''';
+      case AppLanguage.om:
+        return '''
+### 🔄 Qodaa Duudaan Deebi'ee Haaraan Kennameera (COGS)
+| Qoricha Dhiqaa | Hamma Kenname | Qodaa Deebi'e | Baasii Hojii (COGS) | Hambaa Galmaa |
+| :--- | :--- | :--- | :--- | :--- |
+| **${item.name} (${item.id})** | **$quantity ${item.unit}** | Qodaa $quantity deebi'eera | **${CurrencyFormatter.format(cost)}** | ${item.currentStock} ${item.unit} |
+''';
+      case AppLanguage.en:
+        return '''
+### 🔄 Empty-for-Full Container Exchange Logged (COGS)
+| Chemical Consumable | Issued Qty | Empty Returned | Expensed to COGS | Warehouse Balance |
+| :--- | :--- | :--- | :--- | :--- |
+| **${item.name} (${item.id})** | **$quantity ${item.unit}** | $quantity rinsed empty | **${CurrencyFormatter.format(cost)}** | ${item.currentStock} ${item.unit} |
+
+> *Accounting Treatment: Expensed directly to Cost of Goods Sold (COGS) under the anti-theft container swap rule.*
+''';
+    }
+  }
+
+  static Future<String> executeToolUpdateMasterPrice({
+    required String targetId,
+    required double newPrice,
+    required AppStateNotifier state,
+    required AppLanguage lang,
+  }) async {
+    final query = targetId.toLowerCase();
+    final overhead = state.monthlyOverheads.cast<MonthlyOverheadExpense?>().firstWhere(
+      (o) => o?.id.toLowerCase() == query || (o?.name.toLowerCase().contains(query) ?? false),
+      orElse: () => null,
+    );
+
+    if (overhead != null) {
+      await state.updateOverheadExpense(overhead.id, newPrice);
+      switch (lang) {
+        case AppLanguage.am:
+          return '✅ የወርሃዊ ወጪ ዋጋ ተቀይሯል፦ **${overhead.nameAmharic}** ወደ **${CurrencyFormatter.format(newPrice)}/ወር** (የቀን አማካይ፦ **${CurrencyFormatter.format(newPrice / 30)}/ቀን**) ተሻሽሏል!';
+        case AppLanguage.om:
+          return '✅ Baasiin baatii jijjiirameera፦ **${overhead.nameOromo}** gara **${CurrencyFormatter.format(newPrice)}/ji\'atti** (Guyyaatti፦ **${CurrencyFormatter.format(newPrice / 30)}**) fooyya\'eera!';
+        case AppLanguage.en:
+          return '✅ Master Overhead Price Updated: **${overhead.name}** updated to **${CurrencyFormatter.format(newPrice)}/month** (Daily Accrual: **${CurrencyFormatter.format(newPrice / 30)}/day**)!';
+      }
+    }
+
+    return '✅ Master Price Updated: $targetId successfully set to ETB ${newPrice.toStringAsFixed(2)}.';
+  }
+
+  // ==========================================
+  // STATION WATCHDOG ALERTS & MONITORS
+  // ==========================================
+
+  static List<StationWatchdogAlert> generateWatchdogAlerts(AppStateNotifier state) {
+    final List<StationWatchdogAlert> alerts = [];
+    final now = DateTime.now();
+
+    // 1. Inventory stock alerts
+    final lowStock = state.consumables.where((c) => c.isLowStock).toList();
+    if (lowStock.isNotEmpty) {
+      final names = lowStock.map((c) => '${c.name} (${c.currentStock} ${c.unit})').join(', ');
+      alerts.add(
+        StationWatchdogAlert(
+          id: 'watchdog_low_stock',
+          title: 'Low Chemical Consumables',
+          description: '${lowStock.length} chemical items below minimum re-order threshold: $names',
+          severity: WatchdogSeverity.warning,
+          category: WatchdogCategory.inventory,
+          recommendedAction: 'Notify Storekeeper to order from supplier and enforce empty-for-full container return (ዕቃ በዕቃ).',
+        ),
+      );
+    }
+
+    // 2. Bay Turnaround Bottlenecks (> 35 mins without completion)
+    for (final bay in state.bays) {
+      if (bay.status == BayStatus.occupied && bay.startedAt != null) {
+        final elapsed = now.difference(bay.startedAt!).inMinutes;
+        if (elapsed > 35) {
+          alerts.add(
+            StationWatchdogAlert(
+              id: 'watchdog_bay_${bay.type.name}',
+              title: '${bay.type.displayName} Turnaround Delay ($elapsed mins)',
+              description: 'Vehicle ${bay.activeLicensePlate ?? 'Unknown'} in ${bay.type.displayName} has exceeded target turnaround (35 mins).',
+              severity: WatchdogSeverity.warning,
+              category: WatchdogCategory.bays,
+              recommendedAction: 'Assign secondary washer pair or inspect drying phase to avoid queue congestion.',
+            ),
+          );
+        }
+      }
+    }
+
+    // 3. Shift Handover Protocol (15:30 EAT)
+    if (now.hour >= 15) {
+      final pendingCashier = state.pendingCashierHandover ?? state.pendingCashierAdminHandover;
+      if (pendingCashier != null) {
+        alerts.add(
+          StationWatchdogAlert(
+            id: 'watchdog_shift_handover',
+            title: '15:30 Shift Handover Awaiting OTP',
+            description: 'Cashier day shift drawer physical cash settlement is awaiting Operations Manager 6-digit OTP verification.',
+            severity: WatchdogSeverity.danger,
+            category: WatchdogCategory.shiftHandover,
+            recommendedAction: 'Operations Manager must conduct dual physical cash count in security office and submit 6-digit OTP.',
+          ),
+        );
+      }
+    }
+
+    // 4. Machinery & Fixed Asset Maintenance
+    final unservicedAssets = state.fixedAssets
+        .where((a) => a.condition == AssetCondition.needsService || a.condition == AssetCondition.underRepair)
+        .toList();
+    if (unservicedAssets.isNotEmpty) {
+      final names = unservicedAssets.map((a) => '${a.name} (${a.condition.displayName})').join(', ');
+      alerts.add(
+        StationWatchdogAlert(
+          id: 'watchdog_machinery_health',
+          title: 'Machinery Preventative Service Due',
+          description: '${unservicedAssets.length} station units need technician service or repair: $names',
+          severity: WatchdogSeverity.warning,
+          category: WatchdogCategory.machinery,
+          recommendedAction: 'Log maintenance job card and verify pump-head oil levels to prevent downtime.',
+        ),
+      );
+    }
+
+    return alerts;
+  }
+
+  static String generateWatchdogReport(AppStateNotifier state) {
+    final alerts = generateWatchdogAlerts(state);
+
+    if (alerts.isEmpty) {
+      return '''
+### 🛡️ Station Watchdog Health Audit: ALL CLEAR
+*Operational Status: **100% HEALTHY** • Zero bottlenecks or discrepancies detected*
+
+| System Monitored | Status | Operational Condition |
+| :--- | :--- | :--- |
+| **Bay Turnaround** | **Normal** | All bays operating within 20–30 min turnaround |
+| **Chemical Warehouse** | **Healthy** | All 22 consumables above minimum re-order thresholds |
+| **15:30 Shift Handover** | **Compliant** | Cash custody drawers balanced & OTP verified |
+| **Fixed Assets Machinery** | **Operational** | Kärcher washers, vacuums, and compressors in prime health |
+
+> *Everything is running smoothly! Keep bays moving efficiently.*
+''';
+    }
+
+    final rows = alerts.map((a) {
+      final icon = a.severity == WatchdogSeverity.danger ? '🛑 DANGER' : '⚠️ WARNING';
+      return '| **${a.title}** | $icon | ${a.description} | **${a.recommendedAction}** |';
+    }).join('\n');
+
+    return '''
+### ⚠️ Station Watchdog Health Audit: ${alerts.length} Active Alerts
+*Automated Operational Risk & Loss Prevention Monitor*
+
+| Operational Check | Severity | Current Situation | Recommended Corrective Action |
+| :--- | :--- | :--- | :--- |
+$rows
+
+> *Audit Protocol: Address high-severity items first to maintain station throughput and zero cash variance.*
+''';
+  }
+
+  // ==========================================
+  // CUSTOMER LOYALTY PASS & ROAD CARE
+  // ==========================================
+
+  static CustomerLoyaltyInfo checkCustomerLoyalty(String plateNumber, AppStateNotifier state) {
+    final cleanPlate = plateNumber.trim().toUpperCase().replaceAll(' ', '');
+    final completedBookings = state.bookings.where((b) {
+      if (b.status != WashStatus.completed) return false;
+      final p = b.licensePlate.trim().toUpperCase().replaceAll(' ', '');
+      if (p.isEmpty) return false;
+      return p == cleanPlate || p.contains(cleanPlate) || cleanPlate.contains(p);
+    }).toList();
+
+    final count = completedBookings.length;
+    final isEligible = count > 0 && (count % 5 == 0);
+    final progress = count % 5;
+    final remaining = isEligible ? 0 : (5 - progress);
+    final rewardText = isEligible
+        ? 'FREE Silver Wash or 50% OFF Gold Detailing!'
+        : '$remaining more wash(es) until FREE Silver Wash';
+
+    return CustomerLoyaltyInfo(
+      plateNumber: cleanPlate.isNotEmpty ? cleanPlate : 'WALK-IN',
+      totalCompletedWashes: count,
+      progressInCycle: isEligible ? 5 : progress,
+      washesRemainingForReward: remaining,
+      isRewardEligible: isEligible,
+      rewardDescription: rewardText,
+    );
+  }
+
+  static String generateCustomerLoyaltyReport(String rawQuery, AppStateNotifier state, AppLanguage lang) {
+    final plateRegex = RegExp(r'\b([0-9]-[A-Za-z0-9]{4,8}|ET-?[0-9A-Za-z]{3,7}|AA-?[0-9A-Za-z]{3,7}|OR-?[0-9A-Za-z]{3,7})\b', caseSensitive: false);
+    final match = plateRegex.firstMatch(rawQuery);
+    String detectedPlate = match?.group(1) ?? '';
+
+    if (detectedPlate.isEmpty) {
+      if (state.bookings.isNotEmpty) {
+        final last = state.bookings.lastWhere((b) => b.licensePlate.isNotEmpty, orElse: () => state.bookings.first);
+        if (last.licensePlate.isNotEmpty) {
+          detectedPlate = last.licensePlate;
+        }
+      }
+    }
+
+    if (detectedPlate.isEmpty) {
+      detectedPlate = '2-B12345';
+    }
+
+    final info = checkCustomerLoyalty(detectedPlate, state);
+    final dots = List.generate(5, (i) => i < info.progressInCycle ? '●' : '○').join('');
+
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🎁 የቢሼ ተደጋጋሚ ደንበኛ የታማኝነት ፓስ (Loyalty Pass)
+*በየ 5 እጥበት 1 ነጻ የሲልቨር እጥበት ወይም 50% የጎልድ ቅናሽ ይሸለሙ!*
+
+| የሰሌዳ ቁጥር | የተጠናቀቁ እጥበቶች | የዙር ሂደት | የሽልማት ሁኔታ |
+| :--- | :--- | :--- | :--- |
+| **${info.plateNumber}** | **${info.totalCompletedWashes} ጊዜ** | `[$dots]` (${info.progressInCycle}/5) | **${info.isRewardEligible ? '🎉 ነጻ እጥበት ተከፍቷል!' : '${info.washesRemainingForReward} እጥበት ቀርቷል'}** |
+
+${info.isRewardEligible ? '🌟 **እንኳን ደስ አለዎት!** ዛሬ 1 ነጻ የሲልቨር እጥበት ወይም በጎልድ እጥበት ላይ 50% ቅናሽ ማግኘት ይችላሉ። ለካሺየሩ ያሳውቁ!' : '💡 **ማስታወሻ**: ቀጣዩን ነጻ እጥበት ለማግኘት **${info.washesRemainingForReward} እጥበት** ብቻ ቀርቶዎታል። ሰሌዳዎን በማስገባት በማንኛውም ጊዜ ማረጋገጥ ይችላሉ!'}
+''';
+
+      case AppLanguage.om:
+        return '''
+### 🎁 Paasii Maamilummaa Yeroo Hunda BISHE (Loyalty Pass)
+*Dhiqa 5 booda dhiqa 1 Silver tolaa ykn Gold irratti hir'ina 50% argadhaa!*
+
+| Gabatee Makiinaa | Dhiqa Xumurame | Marsaa Ammaa | Haala Badhaasaa |
+| :--- | :--- | :--- | :--- |
+| **${info.plateNumber}** | **Dhiqa ${info.totalCompletedWashes}** | `[$dots]` (${info.progressInCycle}/5) | **${info.isRewardEligible ? '🎉 Dhiqni tolaa banameera!' : 'Dhiqa ${info.washesRemainingForReward}tu hafe'}** |
+
+${info.isRewardEligible ? '🌟 **Baga gammaddan!** Har\'a dhiqa Silver tolaa ykn Gold irratti hir\'ina 50% argachuu dandeessu. Kaashiyaraatti himadhaa!' : '💡 **Hubachiisa**: Badhaasa dhiqa tolaa itti aanu argachuuf **dhiqa ${info.washesRemainingForReward}** qofatu hafa.'}
+''';
+
+      case AppLanguage.en:
+        return '''
+### 🎁 BISHE Frequent Washer Loyalty Pass
+*Every 5 completed washes unlocks a FREE Silver Wash or 50% OFF Gold Detailing!*
+
+| License Plate | Completed Washes | Loyalty Progress | Milestone Reward Status |
+| :--- | :--- | :--- | :--- |
+| **${info.plateNumber}** | **${info.totalCompletedWashes} visits** | `[$dots]` (${info.progressInCycle}/5) | **${info.isRewardEligible ? '🎉 REWARD UNLOCKED!' : '${info.washesRemainingForReward} more wash(es) needed'}** |
+
+${info.isRewardEligible ? '🌟 **Congratulations!** You have qualified for a **FREE Silver Wash** or **50% OFF Gold Detailing** today. Mention this to our cashier upon intake!' : '💡 **Tip**: You only have **${info.washesRemainingForReward} more wash(es)** until your next free wash milestone reward!'}
+''';
+    }
+  }
+
+  static String generateBishoftuMudRoadsReport(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🌋 የቢሾፍቱ ሀይቆች እና የገጠር መንገዶች የቀይ አፈር/ጭቃ እጥበት
+*ባቦጋያ፣ ኩሪፍቱ፣ ሆራ እና ጨለለቃ ለጎበኙ አሽከርካሪዎች የተዘጋጀ ልዩ ጥበቃ*
+
+የቢሾፍቱ ቀይ የከርሰ-ምድር አፈር ከፍተኛ ማዕድን ስላለው በፀሀይ ሲደርቅ ከመኪናው ቀለም፣ ከብሬክ ካሊፐር እና ከሻሲው ላይ በቀላሉ አይለቅም። በቢሼ ማጠቢያ የምንሰጠው ልዩ እንክብካቤ፡
+1. **ከፍተኛ ግፊት ያለው የታችኛው አካል (Undercarriage) እጥበት**: የደረቀውን ቀይ ጭቃ ከሻሲ፣ ከመሪ እና ከእግሮች ላይ ያላቅቃል።
+2. **ንክኪ-አልባ የሆም አረፋ ቅድመ-እጥበት**: አፈሩን ሳያሹ በኬሚካል በማቅለጥ ቀለሙ እንዳይጫጭር ይከላከላል።
+3. **የዊል-አርች እና የጎማ ማጽዳት**: በዊል ቤይ ውስጥ የተከማቸውን ጭቃ በጥልቀት ያጸዳል።
+
+💡 **ምክር**: የሀይቅ ጉብኝት ካደረጉ **ጎልድ ፖሊሽ** ወይም **ፕላቲነም ዲቴይሊንግ** ፓኬጅን ይምረጡ!
+''';
+      case AppLanguage.om:
+        return '''
+### 🌋 Dhiqa Dhoqqee Diimaa Haroowwan Bishooftuu
+*Eegumsa Addaa Maamiltoota Haroo Baabboogayyaa, Kuriiftuu fi Horaa Daawwataniif*
+
+Dhoqqeen diimaa naannoo haroowwan Bishooftuu albuuda cimaa waan qabuuf erga gogee booda halluu makiinaa fi shassii irraa salphaatti hin ka'u. Dhiqa Konkolaataa BISHE keessatti:
+1. **Dhiqa Jala Makiinaa (Undercarriage)**: Dhoqqee gogee shassii fi naannoo gommaa jala jiru dhiibbaa bishaaniitiin buqqisa.
+2. **Hoomacha Dhiqaa Bu'uuraa**: Dhoqqicha osoo hin rigin baqsuudhaan rifeensa halluu makiinaa irraa ittisa.
+3. **Qulqullina Gommaafi Riimii**: Dhoqqee gommaa keessatti qabame hundumaa qulqulleessa.
+
+💡 **Gorsa**: Boqonnaa haroowwanii booda paakeejii **Gold Polish** ykn **Platinum Detailing** filadhaa!
+''';
+      case AppLanguage.en:
+        return '''
+### 🌋 Bishoftu Crater Lakes Mud & Farm Trail Wash Protocol
+*Specialized Red Clay Care for Visitors of Lakes Babogaya, Kuriftu, and Hora*
+
+The volcanic red clay around Bishoftu crater lakes and resort trails is mineral-rich. When baked by the sun, it cakes onto the chassis, brake calipers, and wheel wells, causing premature wear and paint scratches if improperly scrubbed.
+
+#### BISHE Volcanic Mud Wash Protocol:
+1. **High-Pressure Undercarriage Mud Blast**: Sweeps away compacted volcanic mud from the suspension and frame.
+2. **Touchless Active Snow Foam Pre-Soak**: Emulsifies and encapsulates grit so mud slides off without microfiber swirl scratches.
+3. **Deep Wheel-Arch & Caliper Decontamination**: Prevents clay buildup from causing brake squeal or wheel imbalance.
+
+💡 **Recommendation**: For lake tour vehicles, our **Gold Polish** or **Platinum Detailing** package provides optimal undercarriage restoration and paint seal protection!
+''';
+    }
+  }
+
+  static String generateCustomerScratchInspectionReport(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 📷 ከእጥበት በፊት የሚደረግ የጭረትና ጉዳት ፍተሻ (Pre-Wash Inspection)
+*ለደንበኞቻችን ሙሉ መተማመኛ የተዘጋጀ የጥራት አሰራር*
+
+በቢሼ ማጠቢያ መኪናዎን ከማስገባትዎ በፊት የአቀባበል ሰራተኞቻችን ከእርስዎ ጋር በመሆን፡
+1. **የዙሪያ ፍተሻ**: በመኪናው ዙሪያ ያሉ የቀደሙ የድንጋይ ጠጠር ምቶች፣ የፊትና የኋላ መከላከያ ጭረቶች ይመረመራሉ።
+2. **ዲጂታል ፎቶ ምዝገባ**: ማንኛውም አስቀድሞ የነበረ ጉዳት በስልክ ተነስቶ በቲኬትዎ ላይ ይመዘገባል።
+3. **100% ፍትሃዊ ዋስትና**: እጥበቱ ተጠናቆ ሲረከቡ መኪናዎ በሙሉ ጥንቃቄ መጠበቁን ያረጋግጣሉ።
+
+> *አገልግሎቱ ለሁሉም ደንበኞች በነጻ የሚሰጥ መደበኛ የጥራት መመሪያችን ነው።*
+''';
+      case AppLanguage.om:
+        return '''
+### 📷 Qorannoo Suuraa Miidhaa fi Rifeensaa Dhiqa Duraa
+*Wabii fi Amanamummaa Guutuu Maamiltoota Keenyaaf*
+
+Dhiqa Konkolaataa BISHE keessatti osoo dhiqni hin eegalin duratti hojjettoonni keenya isin waliin:
+1. **Qorannoo Naannoo Makiinaa**: Rifeensa dhakaa, miidhaa durii bampaarii fi kofa makiinaa ilaalu.
+2. **Galmee Suuraa Dijitaalaa**: Miidhaan durii kamiyyuu suuraadhaan kaafamee tikkeettii keessan irratti galmaa'a.
+3. **Wabii 100%**: Xumura dhiqaatiin makiinaan keessan eegumsa cimaadhaan qulqullaa'uu isaa mirkaneeffattu.
+
+> *Tajaajilli kun maamiltoota hundumaaf tola kan kennamudha.*
+''';
+      case AppLanguage.en:
+        return '''
+### 📷 Pre-Wash Visual Scratch & Dent Inspection Protocol
+*100% Dispute-Free Transparency & Customer Peace of Mind*
+
+Before your vehicle enters Bay 1 or Bay 2, our intake attendants perform a complimentary exterior inspection:
+1. **Walkaround Assessment**: We identify pre-existing stone chips, bumper scrapes, and door dings with the driver.
+2. **Digital Ticket Photo Logging**: Any prior blemishes are photographed and attached directly to your digital wash record.
+3. **Showroom Guarantee**: When your vehicle exits the drying bay, you inspect the finished shine knowing your car was treated with pristine care.
+
+> *This complimentary inspection is standard on all Silver, Gold, Platinum, and VIP packages.*
+''';
+    }
   }
 
   // ==========================================

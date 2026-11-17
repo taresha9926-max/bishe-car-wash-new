@@ -5302,6 +5302,46 @@ class AppStrings {
       AppLanguage.om: 'Qorannoo nagahee baankii fi herrega kaashiyaraa',
       AppLanguage.am: 'የባንክ ተቀማጭ ደረሰኞችና የካሺየር ሂሳብ ማረጋገጫ',
     },
+    'aiPromptCustomerLoyalty': {
+      AppLanguage.en: '🎁 Loyalty Pass & Rewards',
+      AppLanguage.om: '🎁 Paasii Maamilummaa & Badhaasa',
+      AppLanguage.am: '🎁 የታማኝ ደንበኛ ፓስና ሽልማት',
+    },
+    'aiQueryCustomerLoyalty': {
+      AppLanguage.en: 'Check my loyalty pass status and free wash eligibility',
+      AppLanguage.om: 'Sadarkaa paasii maamilummaafi dhiqa tolaa naaf ilaali',
+      AppLanguage.am: 'የታማኝ ደንበኛ ደረጃዬንና የነጻ እጥበት እድሌን አሳየኝ',
+    },
+    'aiPromptCustomerScratch': {
+      AppLanguage.en: '📷 Pre-Wash Inspection',
+      AppLanguage.om: '📷 Qorannoo Suuraa',
+      AppLanguage.am: '📷 ከእጥበት በፊት ፍተሻ',
+    },
+    'aiQueryCustomerScratch': {
+      AppLanguage.en: 'How does pre-wash scratch and dent photo inspection work?',
+      AppLanguage.om: 'Qorannoon suuraa miidhaa duraa akkamitti hojjeta?',
+      AppLanguage.am: 'ከእጥበት በፊት የጭረትና ጉዳት ፎቶ ፍተሻ እንዴት ይሰራል?',
+    },
+    'aiWatchdogAlertsActive': {
+      AppLanguage.en: '⚠️ Station Watchdog: {count} Operational Alerts',
+      AppLanguage.om: '⚠️ Hordoffii Buufataa: Akeekkachiisa Hojii {count}',
+      AppLanguage.am: '⚠️ የማዕከሉ ንቁ ጠባቂ፡ {count} የስራ ማስጠንቀቂያዎች አሉ',
+    },
+    'aiWatchdogBannerAction': {
+      AppLanguage.en: 'Explain & Fix',
+      AppLanguage.om: 'Ibsi & Furi',
+      AppLanguage.am: 'አብራራና መፍትሔ ስጥ',
+    },
+    'aiPromptWatchdog': {
+      AppLanguage.en: '⚠️ Watchdog Health Audit',
+      AppLanguage.om: '⚠️ Qorannoo Eegumsa Buufataa',
+      AppLanguage.am: '⚠️ የማዕከሉ ንቁ የደህንነት ፍተሻ',
+    },
+    'aiQueryWatchdog': {
+      AppLanguage.en: 'Run Station Watchdog audit for bottlenecks, low stock, and shift handovers',
+      AppLanguage.om: 'Akeekkachiisa dhiphina iddoo dhiqa, hir\'ina meeshaalee fi dabarsa shiftii qoradhu',
+      AppLanguage.am: 'የቦታዎች መዘግየት፣ የአላቂ ዕቃዎች እጥረትና የፈረቃ ርክክብ የስጋት ፍተሻ አድርግ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

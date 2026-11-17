@@ -390,4 +390,139 @@ void main() {
       expect(find.text(state.tr('aiPromptCustomerPackages')), findsOneWidget);
     });
   });
+
+  group('BISHE AI Supreme Governance & Autonomous Duty Execution Tests', () {
+    late AppStateNotifier state;
+    late WashRepositoryImpl repository;
+
+    setUp(() async {
+      repository = WashRepositoryImpl();
+      state = AppStateNotifier(repository: repository);
+      state.setSuperAdminStatus(true);
+      state.switchRole(UserRole.admin);
+      await state.loadData();
+    });
+
+    test('Customer Governance: Missing plate triggers conversational interview asking for plate & model', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'I want to book my car for a wash',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.customer,
+      );
+
+      expect(response, contains('Ready to Book Your Wash'));
+      expect(response, contains('License Plate'));
+      expect(response, contains('Vehicle Model'));
+    });
+
+    test('Customer Governance: Complete conversational prompt executes real booking into database', () async {
+      final initialCount = state.bookings.length;
+
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Book my Prado plate 2-B48291 for Gold polish in Bay 2',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.customer,
+      );
+
+      expect(response, contains('Vehicle Wash Booked Successfully'));
+      expect(response, contains('2-B48291'));
+      expect(response, contains('Bay 2'));
+      expect(state.bookings.length, equals(initialCount + 1));
+      expect(state.bookings.last.licensePlate, equals('2-B48291'));
+    });
+
+    test('Cashier Governance: Cashier initiates daily close, receives financial summary & manager OTP notice', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Close register for today',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.cashier,
+      );
+
+      expect(response, contains('Day Shift Financial Closing Initiated'));
+      expect(response, contains('Gross Total Revenue'));
+      expect(response, contains('Washer Commission Pool'));
+      expect(response, contains('Manager 6-Digit Verification OTP Dispatched'));
+    });
+
+    test('Manager Governance: Manager submits 6-digit OTP to finalize closing and disburse commissions', () async {
+      // First initiate closing to generate OTP
+      await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Close register for today',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.cashier,
+      );
+
+      final pending = state.pendingCashierHandover;
+      expect(pending, isNotNull);
+      final otp = pending!.handoverOtp!;
+
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Verify OTP $otp and disburse commissions',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.manager,
+      );
+
+      expect(response, contains('OTP Verified & Accepted'));
+      expect(response, contains('Disbursed immediately to active technician payroll'));
+      expect(state.isDailyCommissionDisbursedToday, isTrue);
+    });
+
+    test('Storekeeper Governance: Records empty-for-full container exchange as COGS', () async {
+      final initialStock = state.consumables.firstWhere((c) => c.id == 'CS-009').currentStock;
+
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Record exchange 2 cans of shampoo empty return',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.storekeeper,
+      );
+
+      expect(response, contains('Empty-for-Full Container Exchange Logged (COGS)'));
+      expect(response, contains('CS-009'));
+      final newStock = state.consumables.firstWhere((c) => c.id == 'CS-009').currentStock;
+      expect(newStock, equals(initialStock - 2));
+    });
+
+    test('Admin Governance: Updates master overhead price and recalculates daily accrual', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Update price for water to 15000',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.admin,
+      );
+
+      expect(response, contains('Master Overhead Price Updated'));
+      expect(response, contains('15000'));
+      expect(response, contains('500'));
+    });
+
+    test('Loyalty Pass: Tracks frequent washer visits and reports milestone reward', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Check loyalty pass for plate 2-B48291',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.customer,
+      );
+
+      expect(response, contains('BISHE Frequent Washer Loyalty Pass'));
+      expect(response, contains('2-B48291'));
+      expect(response, contains('Loyalty Progress'));
+    });
+
+    test('Station Watchdog: Generates proactive operational health audit', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Run station watchdog audit',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.admin,
+      );
+
+      expect(response, contains('Station Watchdog Health Audit'));
+    });
+  });
 }

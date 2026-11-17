@@ -411,6 +411,10 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               // 1. Header Bar
               _buildHeader(context, state, hasKey),
 
+              // Watchdog Alerts Banner (for Staff Roles)
+              if (state.currentRole != UserRole.customer)
+                _buildWatchdogBanner(context, state),
+
               // 2. Horizontally scrollable quick-prompt chips
               _buildQuickPromptChips(state),
 
@@ -606,6 +610,63 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     );
   }
 
+  Widget _buildWatchdogBanner(BuildContext context, dynamic state) {
+    final alerts = BisheAiExecutiveService.generateWatchdogAlerts(state);
+    if (alerts.isEmpty) return const SizedBox.shrink();
+
+    final hasDanger = alerts.any((a) => a.severity == WatchdogSeverity.danger);
+    final color = hasDanger ? const Color(0xFFEF4444) : const Color(0xFFF59E0B);
+    final count = alerts.length;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(hasDanger ? Icons.warning_rounded : Icons.info_outline_rounded, color: color, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              state.tr('aiWatchdogAlertsActive').replaceAll('{count}', count.toString()),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          InkWell(
+            onTap: () => _handleSend(state.tr('aiQueryWatchdog')),
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: color.withOpacity(0.5)),
+              ),
+              child: Text(
+                state.tr('aiWatchdogBannerAction'),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuickPromptChips(dynamic state) {
     final List<Map<String, String>> chips;
     final currentRole = state.currentRole as UserRole;
@@ -615,6 +676,8 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         chips = [
           {'label': state.tr('aiPromptCustomerPackages'), 'query': state.tr('aiQueryCustomerPackages')},
           {'label': state.tr('aiPromptCustomerWaitTime'), 'query': state.tr('aiQueryCustomerWaitTime')},
+          {'label': state.tr('aiPromptCustomerLoyalty'), 'query': state.tr('aiQueryCustomerLoyalty')},
+          {'label': state.tr('aiPromptCustomerScratch'), 'query': state.tr('aiQueryCustomerScratch')},
           {'label': state.tr('aiPromptCustomerEvSafety'), 'query': state.tr('aiQueryCustomerEvSafety')},
           {'label': state.tr('aiPromptCustomerCarpet'), 'query': state.tr('aiQueryCustomerCarpet')},
           {'label': state.tr('aiPromptCustomerShower'), 'query': state.tr('aiQueryCustomerShower')},
@@ -622,6 +685,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         break;
       case UserRole.manager:
         chips = [
+          {'label': state.tr('aiPromptWatchdog'), 'query': state.tr('aiQueryWatchdog')},
           {'label': state.tr('aiPromptBaySpeed'), 'query': state.tr('aiQueryBaySpeed')},
           {'label': state.tr('aiPromptOtpStatus'), 'query': state.tr('aiQueryOtpStatus')},
           {'label': state.tr('aiPromptWasherPairs'), 'query': state.tr('aiQueryWasherPairs')},
@@ -631,6 +695,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         break;
       case UserRole.cashier:
         chips = [
+          {'label': state.tr('aiPromptWatchdog'), 'query': state.tr('aiQueryWatchdog')},
           {'label': state.tr('aiPromptUnsettled'), 'query': state.tr('aiQueryUnsettled')},
           {'label': state.tr('aiPromptShowersCount'), 'query': state.tr('aiQueryShowersCount')},
           {'label': state.tr('aiPromptCashDrawer'), 'query': state.tr('aiQueryCashDrawer')},
@@ -656,6 +721,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
       case UserRole.admin:
         chips = [
           {'label': state.tr('aiPromptPnL'), 'query': state.tr('aiQueryPnL')},
+          {'label': state.tr('aiPromptWatchdog'), 'query': state.tr('aiQueryWatchdog')},
           {'label': state.tr('aiPromptCars'), 'query': state.tr('aiQueryCars')},
           {'label': state.tr('aiPromptWashers'), 'query': state.tr('aiQueryWashers')},
           {'label': state.tr('aiPromptYield'), 'query': state.tr('aiQueryYield')},
