@@ -441,6 +441,18 @@
       z-index: 100;
     }
 
+    .mic-active {
+      background: rgba(239, 68, 68, 0.25) !important;
+      border-color: #EF4444 !important;
+      color: #EF4444 !important;
+      animation: pulse-mic 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse-mic {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+      70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
     /* Print Formatting */
     @media print {
       header, .tabs-nav, .chips-bar, .chat-input-bar, .header-actions, .message-actions {
@@ -546,7 +558,8 @@
 
         <!-- Input Bar -->
         <div class="chat-input-bar">
-          <input type="text" id="chatInput" class="chat-input" placeholder="Type your operational question (e.g. 'Show me today's cars in table format')..." onkeydown="if(event.key==='Enter') submitChat()">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type or click 🎙️ to speak your question..." onkeydown="if(event.key==='Enter') submitChat()">
+          <button id="micBtn" class="btn" onclick="toggleVoiceInput()" title="Voice Dictation (Microphone)" style="font-size:14px; padding:7px 11px;">🎙️</button>
           <button class="btn btn-primary" onclick="submitChat()">Ask Executive AI</button>
         </div>
       </div>
@@ -946,9 +959,12 @@
 
         let htmlOutput = data.html || `<div style="line-height:1.6;">${escapeHtml(data.text || '')}</div>`;
         
+        playChime();
+
         // Add exportable buttons inside the AI response bubble
         htmlOutput += `
           <div class="message-actions">
+            <button class="btn btn-primary" id="${thinkingId}_listenBtn" onclick="speakText('${thinkingId}_content', '${thinkingId}_listenBtn')">🔊 Listen</button>
             <button class="btn btn-success" onclick="exportDataToCSV('${data.table_id || ''}', 'bishe_ai_export_${Date.now()}.csv', '${thinkingId}_content')">📥 Export CSV</button>
             <button class="btn" onclick="copySnippetToClipboard('${thinkingId}_content')">📋 Copy Table / Text</button>
             <button class="btn" onclick="window.print()">🖨️ Print View</button>
@@ -959,6 +975,160 @@
         container.scrollTop = container.scrollHeight;
       } catch (e) {
         document.getElementById(thinkingId).innerHTML = `<span style="color:#EF4444;">Error processing query: ${e}</span>`;
+      }
+    }
+
+    // Audio Chimes & Synthesis
+    function playChime(isAlert = false) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = isAlert ? 'sawtooth' : 'sine';
+        osc.frequency.value = isAlert ? 440 : 880;
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + (isAlert ? 0.35 : 0.18));
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + (isAlert ? 0.35 : 0.18));
+      } catch (e) {}
+    }
+
+    // Text-to-Speech (TTS)
+    let currentlySpeakingId = null;
+
+    function stopSpeaking() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (currentlySpeakingId) {
+        const btn = document.getElementById(currentlySpeakingId);
+        if (btn) btn.innerHTML = '🔊 Listen';
+        currentlySpeakingId = null;
+      }
+    }
+
+    function cleanTextForSpeech(raw) {
+      return raw
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\|[\s\-:]+\|\n?/g, ' ')
+        .replace(/\|/g, ', ')
+        .replace(/#+\s*/g, '')
+        .replace(/\*+/g, '')
+        .replace(/`+.*?`+/g, '')
+        .replace(/\$\$.*?\$\$/g, '')
+        .replace(/\$.*?\$/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function speakText(containerId, btnId) {
+      if (!('speechSynthesis' in window)) {
+        showToast('Speech synthesis not supported in this browser.');
+        return;
+      }
+      if (currentlySpeakingId === btnId) {
+        stopSpeaking();
+        return;
+      }
+      stopSpeaking();
+
+      const elem = document.getElementById(containerId);
+      if (!elem) return;
+      const clean = cleanTextForSpeech(elem.innerText);
+      if (!clean) return;
+
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = 'en-US';
+      utterance.rate = 1.05;
+
+      const btn = document.getElementById(btnId);
+      if (btn) btn.innerHTML = '⏹️ Stop';
+      currentlySpeakingId = btnId;
+
+      utterance.onend = () => {
+        if (btn) btn.innerHTML = '🔊 Listen';
+        currentlySpeakingId = null;
+      };
+      utterance.onerror = () => {
+        if (btn) btn.innerHTML = '🔊 Listen';
+        currentlySpeakingId = null;
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Speech-to-Text (Microphone Dictation)
+    let recognition = null;
+    let isListening = false;
+
+    function toggleVoiceInput() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('Microphone dictation not supported in this browser (Chrome / Edge recommended)');
+        return;
+      }
+      const micBtn = document.getElementById('micBtn');
+
+      if (isListening && recognition) {
+        recognition.stop();
+        isListening = false;
+        if (micBtn) {
+          micBtn.classList.remove('mic-active');
+          micBtn.innerHTML = '🎙️';
+        }
+        return;
+      }
+
+      try {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          isListening = true;
+          if (micBtn) {
+            micBtn.classList.add('mic-active');
+            micBtn.innerHTML = '🔴 Listening...';
+          }
+        };
+
+        recognition.onresult = (e) => {
+          const transcript = Array.from(e.results)
+            .map(r => r[0].transcript)
+            .join('');
+          document.getElementById('chatInput').value = transcript;
+        };
+
+        recognition.onerror = () => {
+          isListening = false;
+          if (micBtn) {
+            micBtn.classList.remove('mic-active');
+            micBtn.innerHTML = '🎙️';
+          }
+        };
+
+        recognition.onend = () => {
+          isListening = false;
+          if (micBtn) {
+            micBtn.classList.remove('mic-active');
+            micBtn.innerHTML = '🎙️';
+          }
+        };
+
+        recognition.start();
+      } catch (e) {
+        console.error(e);
+        isListening = false;
+        if (micBtn) {
+          micBtn.classList.remove('mic-active');
+          micBtn.innerHTML = '🎙️';
+        }
       }
     }
 

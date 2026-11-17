@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/services/bishe_ai_executive_service.dart';
+import '../../../../core/utils/sound_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 
@@ -44,6 +45,9 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
   final List<_ChatMessage> _messages = [];
   bool _isLoading = false;
   bool _initialized = false;
+  bool _autoVoiceEnabled = false;
+  String? _speakingText;
+  bool _isListening = false;
 
   @override
   void didChangeDependencies() {
@@ -62,6 +66,8 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
 
   @override
   void dispose() {
+    SoundHelper.stopSpeaking();
+    SoundHelper.stopListening();
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -77,6 +83,72 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         );
       }
     });
+  }
+
+  void _speakMessage(String text) {
+    setState(() {
+      _speakingText = text;
+    });
+    SoundHelper.speak(
+      text,
+      onDone: () {
+        if (mounted) {
+          setState(() {
+            if (_speakingText == text) _speakingText = null;
+          });
+        }
+      },
+      onError: () {
+        if (mounted) {
+          setState(() {
+            if (_speakingText == text) _speakingText = null;
+          });
+        }
+      },
+    );
+  }
+
+  void _stopSpeaking() {
+    SoundHelper.stopSpeaking();
+    setState(() {
+      _speakingText = null;
+    });
+  }
+
+  void _toggleListening() {
+    if (_isListening) {
+      SoundHelper.stopListening();
+      setState(() {
+        _isListening = false;
+      });
+    } else {
+      setState(() {
+        _isListening = true;
+      });
+      SoundHelper.startListening(
+        onResult: (text) {
+          if (mounted) {
+            setState(() {
+              _inputController.text = text;
+            });
+          }
+        },
+        onDone: () {
+          if (mounted) {
+            setState(() {
+              _isListening = false;
+            });
+          }
+        },
+        onError: () {
+          if (mounted) {
+            setState(() {
+              _isListening = false;
+            });
+          }
+        },
+      );
+    }
   }
 
   Future<void> _handleSend([String? presetQuery]) async {
@@ -115,6 +187,10 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         _messages.add(_ChatMessage(isUser: false, text: response));
       });
       _scrollToBottom();
+      SoundHelper.playChime();
+      if (_autoVoiceEnabled) {
+        _speakMessage(response);
+      }
     }
   }
 
@@ -252,7 +328,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   itemCount: _messages.length,
-                  itemBuilder: (ctx, idx) => _buildMessageBubble(_messages[idx]),
+                  itemBuilder: (ctx, idx) => _buildMessageBubble(_messages[idx], state),
                 ),
               ),
 
@@ -368,6 +444,22 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             ),
           ),
           IconButton(
+            icon: Icon(
+              _autoVoiceEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+              size: 20,
+              color: _autoVoiceEnabled ? AppColors.liquidCyanNeon : AppColors.textMuted,
+            ),
+            tooltip: state.tr('aiVoiceMode'),
+            onPressed: () {
+              setState(() {
+                _autoVoiceEnabled = !_autoVoiceEnabled;
+                if (!_autoVoiceEnabled) {
+                  _stopSpeaking();
+                }
+              });
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.key_rounded, size: 20, color: AppColors.liquidCyanNeon),
             tooltip: state.tr('configureApiKey'),
             onPressed: _showApiKeyDialog,
@@ -376,6 +468,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             icon: const Icon(Icons.cleaning_services_rounded, size: 18, color: AppColors.textMuted),
             tooltip: state.tr('clearChat'),
             onPressed: () {
+              _stopSpeaking();
               setState(() {
                 _messages.clear();
                 _messages.add(_ChatMessage(isUser: false, text: state.tr('aiWelcomeMessage')));
@@ -425,7 +518,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     );
   }
 
-  Widget _buildMessageBubble(_ChatMessage message) {
+  Widget _buildMessageBubble(_ChatMessage message, dynamic state) {
     final isUser = message.isUser;
 
     return Padding(
@@ -459,14 +552,75 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                   color: isUser ? AppColors.primaryLight.withOpacity(0.4) : const Color(0xFF334155),
                 ),
               ),
-              child: SelectableText(
-                message.text,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  height: 1.4,
-                  color: isUser ? Colors.white : AppColors.textPrimary,
-                  fontFamily: 'NotoSansEthiopic',
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SelectableText(
+                    message.text,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.4,
+                      color: isUser ? Colors.white : AppColors.textPrimary,
+                      fontFamily: 'NotoSansEthiopic',
+                    ),
+                  ),
+                  if (!isUser) ...[
+                    const SizedBox(height: 8),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      onTap: () {
+                        if (_speakingText == message.text) {
+                          _stopSpeaking();
+                        } else {
+                          _speakMessage(message.text);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: (_speakingText == message.text
+                                  ? Colors.redAccent
+                                  : AppColors.liquidCyanNeon)
+                              .withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: (_speakingText == message.text
+                                    ? Colors.redAccent
+                                    : AppColors.liquidCyanNeon)
+                                .withOpacity(0.35),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _speakingText == message.text
+                                  ? Icons.stop_rounded
+                                  : Icons.volume_up_rounded,
+                              size: 13,
+                              color: _speakingText == message.text
+                                  ? Colors.redAccent
+                                  : AppColors.liquidCyanNeon,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _speakingText == message.text
+                                  ? state.tr('aiStopAudio')
+                                  : state.tr('aiListen'),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _speakingText == message.text
+                                    ? Colors.redAccent
+                                    : AppColors.liquidCyanNeon,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
@@ -495,27 +649,48 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: Icon(
+              _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+              size: 20,
+              color: _isListening ? Colors.redAccent : AppColors.liquidCyanNeon,
+            ),
+            tooltip: _isListening ? state.tr('aiMicListening') : state.tr('aiMicTooltip'),
+            onPressed: _toggleListening,
+          ),
+          const SizedBox(width: 4),
           Expanded(
             child: TextField(
               controller: _inputController,
               style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(
-                hintText: state.tr('askAiHint'),
-                hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                hintText: _isListening ? state.tr('aiMicListening') : state.tr('askAiHint'),
+                hintStyle: TextStyle(
+                  fontSize: 12,
+                  color: _isListening ? Colors.redAccent : AppColors.textMuted,
+                  fontStyle: _isListening ? FontStyle.italic : FontStyle.normal,
+                ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 filled: true,
                 fillColor: const Color(0xFF1E293B),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                  borderSide: BorderSide(
+                    color: _isListening ? Colors.redAccent : const Color(0xFF334155),
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                  borderSide: BorderSide(
+                    color: _isListening ? Colors.redAccent : const Color(0xFF334155),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.5),
+                  borderSide: BorderSide(
+                    color: _isListening ? Colors.redAccent : AppColors.liquidCyanNeon,
+                    width: 1.5,
+                  ),
                 ),
               ),
               onSubmitted: (_) => _handleSend(),

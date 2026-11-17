@@ -4952,6 +4952,31 @@ class AppStrings {
       AppLanguage.om: '👋 Akkam! Ani Hogganaa Hojii AI BISHE ti. Waa\'ee konkolaattota har\'aa, komishinii hojjettootaa, oomishitummaa qorichaa ykn bu\'aafi kisaaraa na gaafachuu dandeessu.',
       AppLanguage.am: '👋 ጤና ይስጥልኝ! እኔ የቢሼ AI ስራ አስፈፃሚ ነኝ። ስለ ዛሬ የታጠቡ መኪኖች፣ የአጣቢዎች ኮሚሽን፣ የኬሚካል ፍጆታ (የሻምፑና የሽቶ አማካይ) ወይም ስለ ትርፍና ኪሳራ ማንኛውንም ይጠይቁኝ።',
     },
+    'aiListen': {
+      AppLanguage.en: 'Listen',
+      AppLanguage.om: 'Dhaggeeffadhu',
+      AppLanguage.am: 'አዳምጥ',
+    },
+    'aiStopAudio': {
+      AppLanguage.en: 'Stop Audio',
+      AppLanguage.om: 'Sagalee Dhaabi',
+      AppLanguage.am: 'ድምፅ አቁም',
+    },
+    'aiVoiceMode': {
+      AppLanguage.en: 'Voice Narration',
+      AppLanguage.om: 'Ibsa Sagalee',
+      AppLanguage.am: 'የድምፅ ንባብ',
+    },
+    'aiMicListening': {
+      AppLanguage.en: 'Listening...',
+      AppLanguage.om: 'Dhaggeeffachaa jira...',
+      AppLanguage.am: 'እያዳመጠ ነው...',
+    },
+    'aiMicTooltip': {
+      AppLanguage.en: 'Speak with microphone',
+      AppLanguage.om: 'Maayikiroofooniin dubbadhu',
+      AppLanguage.am: 'በማይክሮፎን ተናገር',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
