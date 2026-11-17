@@ -12,13 +12,15 @@ import '../../../booking_service/domain/models/wash_package.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../inventory/domain/models/consumable_item.dart';
 import '../../../inventory/domain/models/fixed_asset.dart';
+import '../../../admin/domain/models/monthly_overhead_expense.dart';
 
 /// Centralized Super Admin Hub to manage, edit prices, add new entries,
-/// and delete items across 4 separated operational divisions:
+/// and delete items across 5 separated operational divisions:
 /// 1. Car Wash Detailing Services & Vehicle Tariffs
 /// 2. Carpet Cleaning Tariffs & Specialty Treatments
 /// 3. Storekeeper Consumables Inventory & Unit Costs
 /// 4. Storekeeper Fixed Assets & Equipment Valuation
+/// 5. Monthly Overheads & Budget Controller (Rent, Utilities, Staff Salaries)
 class PricingManagementScreen extends StatefulWidget {
   final int initialTabIndex;
 
@@ -40,7 +42,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _activeTab = widget.initialTabIndex.clamp(0, 3);
+    _activeTab = widget.initialTabIndex.clamp(0, 4);
   }
 
   @override
@@ -102,6 +104,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       {'label': state.tr('carpetTariffs'), 'icon': Icons.texture_rounded, 'count': state.carpetAddonServices.length + 6},
       {'label': state.tr('consumablesPricing'), 'icon': Icons.science_outlined, 'count': state.consumables.length},
       {'label': state.tr('fixedAssetsValuation'), 'icon': Icons.precision_manufacturing_rounded, 'count': state.fixedAssets.length},
+      {'label': state.tr('monthlyOverheadsTab'), 'icon': Icons.account_balance_wallet_rounded, 'count': state.monthlyOverheads.length},
     ];
 
     return Container(
@@ -189,6 +192,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         return _buildConsumablesTab(context, state);
       case 3:
         return _buildFixedAssetsTab(context, state);
+      case 4:
+        return _buildMonthlyOverheadsTab(context, state);
       default:
         return const SizedBox.shrink();
     }
@@ -2563,6 +2568,399 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               }
             },
             child: Text(state.tr('save')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= 5. MONTHLY OVERHEADS & OPERATING BUDGET =================
+
+  Widget _buildMonthlyOverheadsTab(BuildContext context, dynamic state) {
+    final List<MonthlyOverheadExpense> overheads = state.monthlyOverheads;
+    final filtered = overheads.where((o) {
+      if (_searchQuery.isEmpty) return true;
+      return o.name.toLowerCase().contains(_searchQuery) ||
+          o.nameAmharic.toLowerCase().contains(_searchQuery) ||
+          o.nameOromo.toLowerCase().contains(_searchQuery) ||
+          o.category.toLowerCase().contains(_searchQuery);
+    }).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Summary KPI Banner
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [Color(0xFF1E3A8A), Color(0xFF1D4ED8)]),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(color: Colors.blue.withValues(alpha: 0.2), blurRadius: 6, offset: const Offset(0, 2)),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(state.tr('monthlyBudget'), style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text(
+                      CurrencyFormatter.format(state.totalMonthlyOverheads),
+                      style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text('Total Fixed Overheads / Mo', style: TextStyle(color: Colors.white60, fontSize: 9.5)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF0D9488)]),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(color: Colors.teal.withValues(alpha: 0.2), blurRadius: 6, offset: const Offset(0, 2)),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(state.tr('dailyAccrualRate'), style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text(
+                      CurrencyFormatter.format(state.totalDailyOverheadAccrual),
+                      style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text('Daily P&L Accrual (Monthly ÷ 30)', style: TextStyle(color: Colors.white60, fontSize: 9.5)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // Header with Add Button
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${filtered.length} Overhead Items',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            ),
+            ElevatedButton.icon(
+              onPressed: () => _showAddOverheadDialog(context, state),
+              icon: const Icon(Icons.add_rounded, size: 16),
+              label: Text(state.tr('addCustomOverhead'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        if (filtered.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 40),
+            child: Center(child: Text('No overhead expenses match search', style: TextStyle(color: AppColors.textMuted))),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filtered.length,
+            itemBuilder: (context, idx) {
+              final item = filtered[idx];
+              return _buildOverheadCard(context, state, item);
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildOverheadCard(BuildContext context, dynamic state, MonthlyOverheadExpense item) {
+    IconData getCategoryIcon(String cat) {
+      switch (cat.toLowerCase()) {
+        case 'rent':
+          return Icons.home_work_rounded;
+        case 'utilities':
+          return Icons.electric_bolt_rounded;
+        case 'payroll':
+          return Icons.badge_rounded;
+        case 'taxes':
+          return Icons.account_balance_rounded;
+        default:
+          return Icons.miscellaneous_services_rounded;
+      }
+    }
+
+    String localizedName() {
+      if (state.currentLang == AppLanguage.am && item.nameAmharic.isNotEmpty) {
+        return item.nameAmharic;
+      }
+      if (state.currentLang == AppLanguage.om && item.nameOromo.isNotEmpty) {
+        return item.nameOromo;
+      }
+      return item.name;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(getCategoryIcon(item.category), color: AppColors.primary, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localizedName(),
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        item.category,
+                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Colors.blueGrey),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Daily: ${CurrencyFormatter.format(item.dailyAccrualEtb)}/day',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.teal),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                CurrencyFormatter.format(item.monthlyAmountEtb),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+              ),
+              const Text('/ month', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+            ],
+          ),
+          const SizedBox(width: 6),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+            tooltip: state.tr('editOverhead'),
+            onPressed: () => _showEditOverheadDialog(context, state, item),
+          ),
+          if (!item.isDefault)
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+              tooltip: 'Delete custom expense',
+              onPressed: () => _showDeleteOverheadDialog(context, state, item),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditOverheadDialog(BuildContext context, dynamic state, MonthlyOverheadExpense item) {
+    final controller = TextEditingController(text: item.monthlyAmountEtb.toStringAsFixed(0));
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(state.tr('editOverhead')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(item.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+            const SizedBox(height: 12),
+            CustomTextField(
+              controller: controller,
+              label: 'Monthly Amount (ETB)',
+              hint: 'e.g. 45000',
+              keyboardType: TextInputType.number,
+              prefixIcon: Icons.payments_outlined,
+            ),
+            const SizedBox(height: 8),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (ctx, val, _) {
+                final monthly = double.tryParse(val.text.trim()) ?? 0.0;
+                final daily = monthly / 30.0;
+                return Text(
+                  'Daily P&L Accrual: ${CurrencyFormatter.format(daily)} / day',
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.teal),
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+            onPressed: () async {
+              final newAmt = double.tryParse(controller.text.trim());
+              if (newAmt != null && newAmt >= 0) {
+                Navigator.pop(dialogCtx);
+                final appState = AppStateProvider.read(context);
+                await appState.updateOverheadExpense(item.id, newAmt);
+              }
+            },
+            child: Text(state.tr('save')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddOverheadDialog(BuildContext context, dynamic state) {
+    final nameCtrl = TextEditingController();
+    final nameAmCtrl = TextEditingController();
+    final amountCtrl = TextEditingController();
+    String category = 'Operational';
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(state.tr('addCustomOverhead')),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomTextField(
+                  controller: nameCtrl,
+                  label: 'Expense Name (English)',
+                  hint: 'e.g. Generator Maintenance Contract',
+                  prefixIcon: Icons.description_outlined,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: nameAmCtrl,
+                  label: 'Expense Name (Amharic)',
+                  hint: 'ለምሳሌ፡ የጄኔሬተር አመታዊ ጥገና',
+                  prefixIcon: Icons.translate_rounded,
+                ),
+                const SizedBox(height: 10),
+                CustomTextField(
+                  controller: amountCtrl,
+                  label: 'Monthly Amount (ETB)',
+                  hint: 'e.g. 5000',
+                  keyboardType: TextInputType.number,
+                  prefixIcon: Icons.payments_outlined,
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: category,
+                  decoration: InputDecoration(
+                    labelText: 'Category',
+                    isDense: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'Rent', child: Text('Rent')),
+                    DropdownMenuItem(value: 'Utilities', child: Text('Utilities')),
+                    DropdownMenuItem(value: 'Payroll', child: Text('Payroll')),
+                    DropdownMenuItem(value: 'Taxes', child: Text('Taxes')),
+                    DropdownMenuItem(value: 'Operational', child: Text('Operational')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setDialogState(() => category = val);
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                final amt = double.tryParse(amountCtrl.text.trim());
+                if (name.isNotEmpty && amt != null && amt > 0) {
+                  Navigator.pop(dialogCtx);
+                  final appState = AppStateProvider.read(context);
+                  final expense = MonthlyOverheadExpense(
+                    id: 'custom_overhead_${DateTime.now().millisecondsSinceEpoch}',
+                    name: name,
+                    nameAmharic: nameAmCtrl.text.trim(),
+                    nameOromo: name,
+                    monthlyAmountEtb: amt,
+                    category: category,
+                    isDefault: false,
+                  );
+                  await appState.addCustomOverheadExpense(expense);
+                }
+              },
+              child: Text(state.tr('save')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteOverheadDialog(BuildContext context, dynamic state, MonthlyOverheadExpense item) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Custom Overhead'),
+        content: Text('${state.tr("deleteOverheadConfirm")}\n\n${item.name} (${CurrencyFormatter.format(item.monthlyAmountEtb)}/mo)'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              final appState = AppStateProvider.read(context);
+              await appState.deleteOverheadExpense(item.id);
+            },
+            child: Text(state.tr('deleteService')),
           ),
         ],
       ),

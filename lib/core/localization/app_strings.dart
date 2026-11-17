@@ -1828,6 +1828,91 @@ class AppStrings {
       AppLanguage.om: 'Qabeenya Dhaabbataa Bakka Kuusaa',
       AppLanguage.am: 'የመጋዘን ቋሚ ንብረቶች',
     },
+    'monthlyOverheadsTab': {
+      AppLanguage.en: 'Monthly Overheads & Utilities',
+      AppLanguage.om: 'Baasiiwwan Ji\'aa fi Tajaajiloota',
+      AppLanguage.am: 'ወርሃዊ ወጪዎችና መገልገያዎች',
+    },
+    'dailyAccrualRate': {
+      AppLanguage.en: 'Daily Accrual (÷ 30)',
+      AppLanguage.om: 'Herrega Guyyaa (÷ 30)',
+      AppLanguage.am: 'ዕለታዊ ወጪ (÷ 30)',
+    },
+    'monthlyBudget': {
+      AppLanguage.en: 'Monthly Budget',
+      AppLanguage.om: 'Bajata Ji\'aa',
+      AppLanguage.am: 'ወርሃዊ በጀት',
+    },
+    'addCustomOverhead': {
+      AppLanguage.en: 'Add Overhead Expense',
+      AppLanguage.om: 'Baasii Haaraa Dabali',
+      AppLanguage.am: 'አዲስ ወጪ ያክሉ',
+    },
+    'editOverhead': {
+      AppLanguage.en: 'Edit Overhead Amount',
+      AppLanguage.om: 'Hanga Baasii Gulaali',
+      AppLanguage.am: 'የወጪውን መጠን ያስተካክሉ',
+    },
+    'deleteOverheadConfirm': {
+      AppLanguage.en: 'Are you sure you want to delete this custom overhead expense?',
+      AppLanguage.om: 'Baasii kana haquu barbaadduu?',
+      AppLanguage.am: 'እርግጠኛ ነዎት ይህን ወጪ መሰረዝ ይፈልጋሉ?',
+    },
+    'pnlDailyView': {
+      AppLanguage.en: 'Today Live P&L',
+      AppLanguage.om: 'Bu\'aa/Kisaaraa Har\'aa',
+      AppLanguage.am: 'የዛሬ የቀጥታ ትርፍና ኪሳራ',
+    },
+    'pnlMonthlyView': {
+      AppLanguage.en: 'Monthly Statement',
+      AppLanguage.om: 'Gabaasa Ji\'aa',
+      AppLanguage.am: 'ወርሃዊ የሂሳብ መግለጫ',
+    },
+    'dailyRentAccrual': {
+      AppLanguage.en: 'Station Land / House Rent (1/30th)',
+      AppLanguage.om: 'Kiraa Lafaa/Bakka Buufataa (1/30)',
+      AppLanguage.am: 'የጣቢያው መሬት / የቦታ ኪራይ (1/30)',
+    },
+    'dailyWaterAccrual': {
+      AppLanguage.en: 'Municipal Water Supply (1/30th)',
+      AppLanguage.om: 'Tajaajila Bishaanii (1/30)',
+      AppLanguage.am: 'የውሃ አገልግሎት ፍጆታ (1/30)',
+    },
+    'dailyElectricityAccrual': {
+      AppLanguage.en: 'Electricity Utility - EEU (1/30th)',
+      AppLanguage.om: 'Humna Elektiriikii - EEU (1/30)',
+      AppLanguage.am: 'የኤሌክትሪክ አገልግሎት - ኢኢዩ (1/30)',
+    },
+    'dailyInternetAccrual': {
+      AppLanguage.en: 'Wi-Fi & Digital Connectivity (1/30th)',
+      AppLanguage.om: 'Interneetii fi Wi-Fi (1/30)',
+      AppLanguage.am: 'ኢንተርኔት እና ዋይፋይ (1/30)',
+    },
+    'dailySanitationAccrual': {
+      AppLanguage.en: 'Municipal Sanitation & Environment (1/30th)',
+      AppLanguage.om: 'Gibira Qulqullina Magaalaa (1/30)',
+      AppLanguage.am: 'የከተማ ጽዳትና አካባቢ ጥበቃ ግብር (1/30)',
+    },
+    'dailyFuelAccrual': {
+      AppLanguage.en: 'Generator Fuel & Maintenance Buffer (1/30th)',
+      AppLanguage.om: 'Bobaa Jenereetaraa fi Suphaa (1/30)',
+      AppLanguage.am: 'የጄኔሬተር ነዳጅ እና ጥገና (1/30)',
+    },
+    'dailyStaffSalaryAccrual': {
+      AppLanguage.en: 'Management & Office Staff Salaries (1/30th)',
+      AppLanguage.om: 'Miindaa Hojjettoota Waajjiraa (1/30)',
+      AppLanguage.am: 'የአስተዳደርና የቢሮ ሰራተኞች ደመወዝ (1/30)',
+    },
+    'dailyWasherBaseAccrual': {
+      AppLanguage.en: 'Washer Guaranteed Base Payroll Reserve (1/30th)',
+      AppLanguage.om: 'Qophii Miindaa Bu\'uuraa Dhiqxootaa (1/30)',
+      AppLanguage.am: 'የአጣቢዎች ዝቅተኛ ዋስትና ደመወዝ (1/30)',
+    },
+    'dailyMachineryDepreciation': {
+      AppLanguage.en: 'Machinery & Equipment Depreciation (1/30th)',
+      AppLanguage.om: 'Moofina Maashinootaa fi Qabeenyaa (1/30)',
+      AppLanguage.am: 'የማሽኖችና ቋሚ ዕቃዎች እርጅና/ዲፕሪሴሽን (1/30)',
+    },
     'addNewService': {
       AppLanguage.en: 'Add New Service',
       AppLanguage.om: 'Tajaajila Haaraa Dabali',

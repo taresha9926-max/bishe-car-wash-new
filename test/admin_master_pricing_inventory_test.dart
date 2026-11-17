@@ -195,5 +195,32 @@ void main() {
       expect(deleted, isTrue);
       expect(state.fixedAssets.length, initialAssetsCount);
     });
+
+    testWidgets('Monthly Overheads Tab: Renders 5th tab, displays daily accrual (÷ 30), and updates rent', (tester) async {
+      tester.view.physicalSize = const Size(1200, 1800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(createTestWidget(initialTab: 4));
+      await tester.pumpAndSettle();
+
+      // Verify Overheads title and default items
+      expect(find.textContaining('Overhead Items'), findsOneWidget);
+      expect(find.text('Station Land / House Rent'), findsOneWidget);
+      expect(find.text('Municipal Water Supply (Bishoftu Water)'), findsOneWidget);
+      expect(find.text('Electricity Utility (EEU)'), findsOneWidget);
+      expect(find.textContaining('Daily P&L Accrual (Monthly ÷ 30)'), findsWidgets);
+
+      // Verify Daily Accrual math (e.g. 45000 / 30 = 1500)
+      expect(state.totalDailyOverheadAccrual, equals(state.totalMonthlyOverheads / 30.0));
+
+      // Update rent from 45,000 to 50,000
+      await state.updateOverheadExpense('overhead_rent', 50000.0);
+      await tester.pumpAndSettle();
+
+      final rentItem = state.monthlyOverheads.firstWhere((o) => o.id == 'overhead_rent');
+      expect(rentItem.monthlyAmountEtb, equals(50000.0));
+      expect(rentItem.dailyAccrualEtb, equals(50000.0 / 30.0));
+    });
   });
 }

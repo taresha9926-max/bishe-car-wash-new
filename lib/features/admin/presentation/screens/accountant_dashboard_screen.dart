@@ -19,6 +19,7 @@ import '../../domain/models/commission_log.dart';
 import '../../../inventory/domain/models/stock_transaction.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../../core/widgets/expandable_action_card.dart';
+import '../../domain/models/monthly_overhead_expense.dart';
 import '../widgets/bishe_ai_executive_sheet.dart';
 
 class AccountantDashboardScreen extends StatefulWidget {
@@ -32,6 +33,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _auditDateRange = 'All'; // All, Today, This Week, This Month
+  bool _isDailyPnlView = true; // Default to True: Real-truth Daily Accrual P&L
 
   @override
   void initState() {
@@ -1251,49 +1253,171 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final paidBookings = bookingsList.where((WashBooking b) => b.payment.isPaid).toList();
     final grossRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final commissionPaid = (state.commissionLogs as List).cast<CommissionLog>().fold<double>(0.0, (sum, l) => sum + l.commissionEarnedETB);
+
+    // COST OF GOODS SOLD (COGS): Only actual consumed soap via empty-full can exchange or bay consumption
+    // NEVER deduct warehouse inventory restocks (receiveStock)
     final suppliesCost = (state.stockTransactions as List<StockTransaction>)
-        .where((t) => t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption')
+        .where((t) => t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption')
         .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
+
     final pettyCost = (state.pettyCashExpenses as List<PettyCashExpense>)
         .fold<double>(0.0, (sum, p) => sum + p.amount);
-    final fixedAssetsCost = 0.0;
-    final monthlySalaryObligation = state.monthlyTotalBaseSalary as double;
+
+    final List<MonthlyOverheadExpense> overheads = state.monthlyOverheads;
+    final totalMonthlyOverheads = state.totalMonthlyOverheads as double;
+    final totalDailyOverheads = state.totalDailyOverheadAccrual as double;
+    final dailyDepreciation = state.dailyMachineryDepreciation as double;
+    final monthlyDepreciation = dailyDepreciation * 30.0;
 
     final cogs = commissionPaid + suppliesCost;
     final grossProfit = grossRevenue - cogs;
-    final opex = pettyCost + fixedAssetsCost;
+
+    // OpEx calculation based on active view (Daily Accrual ÷ 30 vs Full Monthly)
+    final opex = _isDailyPnlView
+        ? (totalDailyOverheads + dailyDepreciation + pettyCost)
+        : (totalMonthlyOverheads + monthlyDepreciation + pettyCost);
+
     final netOperatingProfit = grossProfit - opex;
-    final netRetainedProfit = netOperatingProfit - monthlySalaryObligation;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 1. Timeframe Mode Switcher (Today Live P&L vs Full Monthly Statement)
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111827),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.cardBorder.withOpacity(0.8)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => setState(() => _isDailyPnlView = true),
+                    borderRadius: BorderRadius.circular(9),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _isDailyPnlView ? AppColors.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.today_rounded, size: 16, color: _isDailyPnlView ? Colors.white : AppColors.textMuted),
+                          const SizedBox(width: 6),
+                          Text(
+                            state.tr('pnlDailyView'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: _isDailyPnlView ? Colors.white : AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => setState(() => _isDailyPnlView = false),
+                    borderRadius: BorderRadius.circular(9),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: !_isDailyPnlView ? AppColors.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.calendar_month_rounded, size: 16, color: !_isDailyPnlView ? Colors.white : AppColors.textMuted),
+                          const SizedBox(width: 6),
+                          Text(
+                            state.tr('pnlMonthlyView'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: !_isDailyPnlView ? Colors.white : AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // 2. Net Operating Profit Hero Banner
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: netOperatingProfit >= 0 ? [const Color(0xFF065F46), const Color(0xFF047857)] : [Colors.red.shade900, Colors.red.shade700],
+                colors: netOperatingProfit >= 0
+                    ? [const Color(0xFF065F46), const Color(0xFF047857)]
+                    : [Colors.red.shade900, Colors.red.shade700],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(18),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                  color: (netOperatingProfit >= 0 ? Colors.green : Colors.red).withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('NET STATION OPERATING PROFIT', style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _isDailyPnlView ? 'TODAY NET OPERATING PROFIT (EBITDA)' : 'MONTHLY NET OPERATING PROFIT',
+                      style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(6)),
+                      child: Text(
+                        grossRevenue > 0 ? '${((netOperatingProfit / grossRevenue) * 100).toStringAsFixed(1)}% Margin' : '0.0% Margin',
+                        style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 6),
-                Text(CurrencyFormatter.format(netOperatingProfit), style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
+                Text(
+                  CurrencyFormatter.format(netOperatingProfit),
+                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
+                ),
                 const SizedBox(height: 4),
-                const Text('Gross Revenue − COGS (Commissions + Consumables) − OpEx (Petty Cash + Equipment)', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                Text(
+                  _isDailyPnlView
+                      ? 'Gross Revenue − Direct COGS (Commissions + Soap) − Daily Accrued Overheads (Rent/30, Utilities/30, Salaries/30)'
+                      : 'Gross Revenue − Direct COGS − Full Monthly Fixed Overheads & Machinery Depreciation',
+                  style: const TextStyle(color: Colors.white70, fontSize: 10.5),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 18),
-          const Text('Standard Income & Financial Statement:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+
+          Text(
+            _isDailyPnlView ? 'Daily Operational Income Statement (Real-Truth Model):' : 'Full Monthly Station Income Statement:',
+            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
           const SizedBox(height: 12),
 
           // Section 1: Revenue
@@ -1302,29 +1426,42 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           const SizedBox(height: 8),
 
           // Section 2: COGS
-          const Text('II. COST OF GOODS SOLD (COGS)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.orange)),
-          _buildPnLLine('Washer Team 15% Commissions', '- ${CurrencyFormatter.format(commissionPaid)}', Colors.orange.shade800, false),
-          _buildPnLLine('Consumables Used & Soap Restocks', '- ${CurrencyFormatter.format(suppliesCost)}', Colors.orange.shade800, false),
+          const Text('II. DIRECT COST OF GOODS SOLD (COGS)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.orange)),
+          _buildPnLLine('Washer Team 15% Net Commission', '- ${CurrencyFormatter.format(commissionPaid)}', Colors.orange.shade800, false),
+          _buildPnLLine('Storekeeper Soap Consumed (ዕቃ በዕቃ Exchange)', '- ${CurrencyFormatter.format(suppliesCost)}', Colors.orange.shade800, false),
           _buildPnLLine('Total Cost of Goods Sold', '- ${CurrencyFormatter.format(cogs)}', Colors.orange.shade900, true),
           const Divider(thickness: 1, height: 16),
-          _buildPnLLine('GROSS PROFIT', CurrencyFormatter.format(grossProfit), grossProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
-          const SizedBox(height: 8),
+          _buildPnLLine('GROSS OPERATING PROFIT', CurrencyFormatter.format(grossProfit), grossProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
+          const SizedBox(height: 10),
 
-          // Section 3: OpEx
-          const Text('III. OPERATING EXPENSES (OPEX)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.deepOrange)),
+          // Section 3: Operating Overheads (OpEx)
+          Text(
+            _isDailyPnlView ? 'III. DAILY ACCRUED OPERATING OVERHEADS (Monthly ÷ 30)' : 'III. MONTHLY OPERATING OVERHEADS (OpEx)',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.deepOrange),
+          ),
+          ...overheads.map((o) {
+            final amt = _isDailyPnlView ? o.dailyAccrualEtb : o.monthlyAmountEtb;
+            final subtitle = _isDailyPnlView ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo ÷ 30)' : '(Monthly Budget)';
+            return _buildPnLLine('${o.name} $subtitle', '- ${CurrencyFormatter.format(amt)}', Colors.deepOrange.shade700, false);
+          }),
+          _buildPnLLine(
+            _isDailyPnlView ? 'Machinery Depreciation (÷ 30)' : 'Machinery Depreciation (Monthly)',
+            '- ${CurrencyFormatter.format(_isDailyPnlView ? dailyDepreciation : monthlyDepreciation)}',
+            Colors.deepOrange.shade700,
+            false,
+          ),
           _buildPnLLine('Cashier Petty Cash / Emergency Spends', '- ${CurrencyFormatter.format(pettyCost)}', Colors.deepOrange.shade700, false),
-          _buildPnLLine('Fixed Assets & Machinery Purchases', '- ${CurrencyFormatter.format(fixedAssetsCost)}', Colors.deepOrange.shade700, false),
-          _buildPnLLine('Total Operating Expenses', '- ${CurrencyFormatter.format(opex)}', Colors.deepOrange.shade900, true),
+          const Divider(thickness: 1, height: 16),
+          _buildPnLLine('Total Operating Expenses (OpEx)', '- ${CurrencyFormatter.format(opex)}', Colors.deepOrange.shade900, true),
           const Divider(thickness: 1.5, height: 20),
 
-          // Section 4: Net Operating Profit
-          _buildPnLLine('NET OPERATING PROFIT (EBITDA)', CurrencyFormatter.format(netOperatingProfit), netOperatingProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
-          const Divider(thickness: 1, height: 20),
-
-          // Section 5: Base Salary Reserve
-          const Text('IV. GUARANTEED MONTHLY PAYROLL RESERVE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.blueGrey)),
-          _buildPnLLine('Guaranteed Monthly Base Salary Reserve', CurrencyFormatter.format(monthlySalaryObligation), Colors.blueGrey, false),
-          _buildPnLLine('Net Retained Cash Profit', CurrencyFormatter.format(netRetainedProfit), netRetainedProfit >= 0 ? Colors.teal.shade800 : Colors.red, true),
+          // Section 4: Final Net Operating Profit
+          _buildPnLLine(
+            _isDailyPnlView ? 'NET STATION OPERATING PROFIT (TODAY)' : 'NET STATION OPERATING PROFIT (MONTH)',
+            CurrencyFormatter.format(netOperatingProfit),
+            netOperatingProfit >= 0 ? Colors.green.shade800 : Colors.red,
+            true,
+          ),
         ],
       ),
     );

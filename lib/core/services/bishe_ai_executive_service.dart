@@ -1205,11 +1205,14 @@ We prioritize transparency in our wash services, package quality, and customer p
       return d.year == now.year && d.month == now.month && d.day == now.day;
     }).fold(0.0, (sum, p) => sum + p.amount);
 
-    final netOperatingProfit = grossProfit - pettyExpenses;
+    final dailyOverheadAccrual = state.totalDailyOverheadAccrual;
+    final dailyDepreciation = state.dailyMachineryDepreciation;
+    final totalDailyOpEx = dailyOverheadAccrual + dailyDepreciation + pettyExpenses;
+    final netOperatingProfit = grossProfit - totalDailyOpEx;
 
     return '''
-### 📊 Today's Executive Financial & P&L Statement
-*Station Date: ${now.day}/${now.month}/${now.year}*
+### 📊 Today's Executive Financial & P&L Statement (Real-Truth Model)
+*Station Date: ${now.day}/${now.month}/${now.year} • Daily Accrual (Monthly ÷ 30)*
 
 | Financial Component | Amount (ETB) | Accounting Treatment |
 | :--- | :--- | :--- |
@@ -1217,12 +1220,14 @@ We prioritize transparency in our wash services, package quality, and customer p
 | Less: 15% VAT Statutory Deduction | - ${CurrencyFormatter.format(vatDeducted)} | Tax Obligation |
 | **Net Service Revenue** | **${CurrencyFormatter.format(netAfterVat)}** | Net Taxable Income |
 | Less: Washer Commissions (15%) | - ${CurrencyFormatter.format(commissionsPaid)} | Direct Labor (COGS) |
-| Less: Supplies Consumed | - ${CurrencyFormatter.format(suppliesConsumed)} | Direct Chemicals (COGS) |
+| Less: Storekeeper Soap Consumed (ዕቃ በዕቃ) | - ${CurrencyFormatter.format(suppliesConsumed)} | Direct Chemicals (COGS) |
 | **GROSS OPERATING PROFIT** | **${CurrencyFormatter.format(grossProfit)}** | **Margin: ${grossRevenue > 0 ? ((grossProfit / grossRevenue) * 100).toStringAsFixed(1) : '0'}%** |
-| Less: Cashier & Yard Petty Cash | - ${CurrencyFormatter.format(pettyExpenses)} | General Operating Overhead |
-| **NET OPERATING PROFIT (EBITDA)** | **${CurrencyFormatter.format(netOperatingProfit)}** | **Net Retained Daily Cash** |
+| Less: Daily Accrued Overheads (Rent/Power/Salaries ÷ 30) | - ${CurrencyFormatter.format(dailyOverheadAccrual)} | Fixed Monthly Operating Accrual |
+| Less: Machinery Depreciation (÷ 30) | - ${CurrencyFormatter.format(dailyDepreciation)} | Fixed Equipment Amortization |
+| Less: Cashier & Yard Petty Cash | - ${CurrencyFormatter.format(pettyExpenses)} | General Emergency Overhead |
+| **NET OPERATING PROFIT (EBITDA)** | **${CurrencyFormatter.format(netOperatingProfit)}** | **Real-Truth Net Daily Earning** |
 
-> *Note: Fixed station rent and guaranteed monthly base salaries are amortized over the 30-day calendar cycle.*
+> *Note: Station land rent (ETB ${(state.monthlyOverheads.firstWhere((o) => o.id == 'overhead_rent', orElse: () => state.monthlyOverheads.first).monthlyAmountEtb).toStringAsFixed(0)}/mo), utilities, and staff base salaries are accrued daily at 1/30th per day to display the real truth.*
 ''';
   }
 

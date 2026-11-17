@@ -9,6 +9,7 @@ import 'package:bishe_car_wash/features/admin/domain/models/commission_log.dart'
 import 'package:bishe_car_wash/features/admin/domain/models/daily_financial_closing.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/petty_cash_expense.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/monthly_overhead_expense.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/washer_dividend.dart';
@@ -296,6 +297,120 @@ class AppStateNotifier extends ChangeNotifier {
 
   List<StockTransaction> _stockTransactions = [];
   List<StockTransaction> get stockTransactions => _stockTransactions;
+
+  // Monthly Fixed Overheads & Utilities (Accrued Daily as Monthly ÷ 30)
+  List<MonthlyOverheadExpense> _monthlyOverheads = [
+    const MonthlyOverheadExpense(
+      id: 'overhead_rent',
+      name: 'Station Land / House Rent',
+      nameAmharic: 'የጣቢያው መሬት / የቦታ ኪራይ',
+      nameOromo: 'Kiraa Lafaa / Bakka Buufataa',
+      monthlyAmountEtb: 45000.0,
+      category: 'Rent',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_water',
+      name: 'Municipal Water Supply (Bishoftu Water)',
+      nameAmharic: 'የከተማ ውሃ አገልግሎት ፍጆታ',
+      nameOromo: 'Tajaajila Bishaanii Magaalaa',
+      monthlyAmountEtb: 12000.0,
+      category: 'Utilities',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_electricity',
+      name: 'Electricity Utility (EEU)',
+      nameAmharic: 'የኤሌክትሪክ ኃይል ፍጆታ (ኢኢዩ)',
+      nameOromo: 'Humna Elektiriikii (EEU)',
+      monthlyAmountEtb: 9000.0,
+      category: 'Utilities',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_internet',
+      name: 'Wi-Fi & Digital Connectivity',
+      nameAmharic: 'ኢንተርኔትና ዲጂታል ግንኙነት',
+      nameOromo: 'Interneetii fi Wi-Fi',
+      monthlyAmountEtb: 3000.0,
+      category: 'Utilities',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_sanitation',
+      name: 'Municipal Sanitation & Environmental Tax',
+      nameAmharic: 'የከተማ ጽዳትና አካባቢ ጥበቃ ግብር',
+      nameOromo: 'Gibira Qulqullina Magaalaa',
+      monthlyAmountEtb: 4500.0,
+      category: 'Taxes',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_generator_fuel',
+      name: 'Generator Fuel & Maintenance Buffer',
+      nameAmharic: 'የጄኔሬተር ነዳጅ እና ጥገና',
+      nameOromo: 'Bobaa Jenereetaraa fi Suphaa',
+      monthlyAmountEtb: 6000.0,
+      category: 'Operational',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_staff_salaries',
+      name: 'Management & Office Staff Salaries',
+      nameAmharic: 'የአስተዳደርና የቢሮ ሰራተኞች ደመወዝ',
+      nameOromo: 'Miindaa Hojjettoota Waajjiraa',
+      monthlyAmountEtb: 36000.0,
+      category: 'Payroll',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_washer_base',
+      name: 'Guaranteed Washer Base Salary Reserve (8 Washers)',
+      nameAmharic: 'የአጣቢዎች ዝቅተኛ ዋስትና ደመወዝ (8 አጣቢዎች)',
+      nameOromo: 'Qophii Miindaa Bu\'uuraa Dhiqxootaa (8)',
+      monthlyAmountEtb: 28000.0,
+      category: 'Payroll',
+      isDefault: true,
+    ),
+    const MonthlyOverheadExpense(
+      id: 'overhead_misc',
+      name: 'Miscellaneous Emergency Contingency',
+      nameAmharic: 'ድንገተኛና ልዩ ልዩ ወጪዎች',
+      nameOromo: 'Baasiiwwan Biroo fi Ariifachiisaa',
+      monthlyAmountEtb: 3000.0,
+      category: 'Operational',
+      isDefault: true,
+    ),
+  ];
+  List<MonthlyOverheadExpense> get monthlyOverheads => List.unmodifiable(_monthlyOverheads);
+
+  double get totalMonthlyOverheads => _monthlyOverheads.fold<double>(0.0, (sum, o) => sum + o.monthlyAmountEtb);
+  double get totalDailyOverheadAccrual => totalMonthlyOverheads / 30.0;
+
+  double get dailyMachineryDepreciation {
+    final activeAssets = _fixedAssets.where((a) => a.condition != AssetCondition.decommissioned);
+    final totalVal = activeAssets.fold<double>(0.0, (sum, a) => sum + (a.assetValueEtb * a.quantity));
+    // Standard 3-year straight line amortization (1095 days)
+    return totalVal > 0 ? totalVal / (3.0 * 365.0) : 0.0;
+  }
+
+  Future<void> updateOverheadExpense(String id, double newMonthlyAmount) async {
+    final idx = _monthlyOverheads.indexWhere((o) => o.id == id);
+    if (idx != -1) {
+      _monthlyOverheads[idx] = _monthlyOverheads[idx].copyWith(monthlyAmountEtb: newMonthlyAmount);
+      notifyListeners();
+    }
+  }
+
+  Future<void> addCustomOverheadExpense(MonthlyOverheadExpense expense) async {
+    _monthlyOverheads.add(expense);
+    notifyListeners();
+  }
+
+  Future<void> deleteOverheadExpense(String id) async {
+    _monthlyOverheads.removeWhere((o) => o.id == id && !o.isDefault);
+    notifyListeners();
+  }
 
   // BISHE AI Executive Engine
   String? _geminiApiKey;
