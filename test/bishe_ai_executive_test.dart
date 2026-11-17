@@ -197,6 +197,46 @@ void main() {
       expect(evResponse, contains('BYD'));
     });
 
+    test('Customer Concierge: Responds in Amharic when language is Amharic', () async {
+      final amharicPackageResponse = await BisheAiExecutiveService.askExecutive(
+        userQuestion: state.tr('aiQueryCustomerPackages'),
+        state: state,
+        currentLang: AppLanguage.am,
+        callerRole: UserRole.customer,
+      );
+      expect(amharicPackageResponse, contains('የቢሼ መኪና ማጠቢያ ፓኬጆች'));
+      expect(amharicPackageResponse, contains('ሲልቨር / መደበኛ'));
+      expect(amharicPackageResponse, contains('ጎልድ ፖሊሽ'));
+
+      final amharicWaitResponse = await BisheAiExecutiveService.askExecutive(
+        userQuestion: state.tr('aiQueryCustomerWaitTime'),
+        state: state,
+        currentLang: AppLanguage.am,
+        callerRole: UserRole.customer,
+      );
+      expect(amharicWaitResponse, contains('የጥበቃ ጊዜ'));
+    });
+
+    test('Customer Concierge: Responds in Afaan Oromoo when language is Afaan Oromoo', () async {
+      final oromooPackageResponse = await BisheAiExecutiveService.askExecutive(
+        userQuestion: state.tr('aiQueryCustomerPackages'),
+        state: state,
+        currentLang: AppLanguage.om,
+        callerRole: UserRole.customer,
+      );
+      expect(oromooPackageResponse, contains('Paakeejiiwwan Dhiqa Konkolaataa BISHE'));
+      expect(oromooPackageResponse, contains("Silver / Bu'uuraa"));
+      expect(oromooPackageResponse, contains('Gold Polish'));
+
+      final oromooWaitResponse = await BisheAiExecutiveService.askExecutive(
+        userQuestion: state.tr('aiQueryCustomerWaitTime'),
+        state: state,
+        currentLang: AppLanguage.om,
+        callerRole: UserRole.customer,
+      );
+      expect(oromooWaitResponse, contains('Yeroo Eegumsaa'));
+    });
+
     test('Customer Concierge: Strictly enforces privacy guardrails on profit and payroll', () async {
       final response = await BisheAiExecutiveService.askExecutive(
         userQuestion: 'What is your net profit margin and how much commission do washers get?',

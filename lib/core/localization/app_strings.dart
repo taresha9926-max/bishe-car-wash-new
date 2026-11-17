@@ -5117,6 +5117,106 @@ class AppStrings {
       AppLanguage.om: '📑 VAT 15% fi Dhiqannaa 0%',
       AppLanguage.am: '📑 15% ቫት እና ከቫት ነጻ ሻወር',
     },
+    'aiQueryCustomerPackages': {
+      AppLanguage.en: 'What wash packages do you offer and what are the prices?',
+      AppLanguage.om: 'Paakeejiiwwan dhiqaafi gatii isaanii natti himaa',
+      AppLanguage.am: 'የማጠቢያ ፓኬጆችንና ዋጋቸውን ንገሩኝ',
+    },
+    'aiQueryCustomerWaitTime': {
+      AppLanguage.en: 'How busy are the bays right now and what is the wait time?',
+      AppLanguage.om: 'Amma dabareefi yeroon eegumsaa akkam jira?',
+      AppLanguage.am: 'አሁን ያለው ተራ እና የጥበቃ ጊዜ ስንት ነው?',
+    },
+    'aiQueryCustomerEvSafety': {
+      AppLanguage.en: 'Is high-pressure and steam wash safe for electric vehicles (EV)?',
+      AppLanguage.om: 'Konkolaataa elektiriikii dhiquun amansiisaadhaa?',
+      AppLanguage.am: 'የኤሌክትሪክ መኪና ማጠብ ደህንነቱ የተጠበቀ ነው?',
+    },
+    'aiQueryCustomerCarpet': {
+      AppLanguage.en: 'How much is carpet washing per square meter and delivery turnaround?',
+      AppLanguage.om: 'Dhiqi afataa meetira isquweeriin meeqa?',
+      AppLanguage.am: 'የምንጣፍ እጥበት በካሬ ሜትር ዋጋው ስንት ነው?',
+    },
+    'aiQueryCustomerShower': {
+      AppLanguage.en: 'Where are your clean hot showers located and what is the fee?',
+      AppLanguage.om: 'Tajaajilli dhiqannaa eessatti argama kaffaltiin meeqa?',
+      AppLanguage.am: 'የሻወር አገልግሎት የት ይገኛል ክፍያው ስንት ነው?',
+    },
+    'aiQueryPnL': {
+      AppLanguage.en: 'Today\'s P&L and net profit summary',
+      AppLanguage.om: 'Gabaasa bu\'aa fi kisaaraa har\'aa',
+      AppLanguage.am: 'የዛሬው ትርፍና ኪሳራ ማጠቃለያ',
+    },
+    'aiQueryCars': {
+      AppLanguage.en: 'List cars washed today and vehicle types',
+      AppLanguage.om: 'Tarree konkolaattota har\'a dhiqamanii',
+      AppLanguage.am: 'ዛሬ የታጠቡ መኪኖችን ዝርዝር',
+    },
+    'aiQueryWashers': {
+      AppLanguage.en: 'Active washers on duty and their commissions',
+      AppLanguage.om: 'Hojjettoota hojii irra jiranii fi komishinii isaanii',
+      AppLanguage.am: 'ስራ ላይ ያሉ አጣቢዎችና ኮሚሽናቸው',
+    },
+    'aiQueryYield': {
+      AppLanguage.en: 'Chemical yield and average shampoo and perfume used per car',
+      AppLanguage.om: 'Oomishitummaa qorichaa fi giddu galeessa shaampuu',
+      AppLanguage.am: 'የኬሚካል ፍጆታና የሻምፑ እንዲሁም የሽቶ አማካይ',
+    },
+    'aiQueryAlerts': {
+      AppLanguage.en: 'Check for low inventory stock and station discrepancies',
+      AppLanguage.om: 'Akeekkachiisa meeshaalee fi hir\'ina iddoo dhiqa',
+      AppLanguage.am: 'የአላቂ ዕቃዎች እጥረትና የስጋት ማሳወቂያዎች',
+    },
+    'aiQueryBaySpeed': {
+      AppLanguage.en: 'Bay turnaround speed, active queue, and washer dispatch',
+      AppLanguage.om: 'Saffisa dabaree, iddoowwan dhiqaafi ramaddii hojjettootaa',
+      AppLanguage.am: 'የማጠቢያ ቦታዎች ፍጥነት፣ ተራና የስራ ድልድል',
+    },
+    'aiQueryOtpStatus': {
+      AppLanguage.en: 'Status of Cashier 15:30 OTP handover and night closing',
+      AppLanguage.om: 'Haala OTP dabarsa shiftii fi cufiinsa halkan',
+      AppLanguage.am: 'የ15:30 ፈረቃ ርክክብ OTP እና የማታ መዝጊያ ሁኔታ',
+    },
+    'aiQueryWasherPairs': {
+      AppLanguage.en: 'Active washer pairs distribution and commission balance',
+      AppLanguage.om: 'Ramaddii cimdii hojjettootaa fi madaallii komishinii',
+      AppLanguage.am: 'የአጣቢ ጥንዶች ድልድልና የኮሚሽን ሚዛን',
+    },
+    'aiQueryUnsettled': {
+      AppLanguage.en: 'List cars in queue and unsettled vehicle tickets',
+      AppLanguage.om: 'Tarree tikkeettiiwwan hin kaffalamne',
+      AppLanguage.am: 'ያልተከፈሉ ቲኬቶችና በተራ ላይ ያሉ መኪኖች',
+    },
+    'aiQueryShowersCount': {
+      AppLanguage.en: 'Today\'s shower ticket count, cash and digital totals',
+      AppLanguage.om: 'Baay\'ina tikkeettii dhiqannaa fi galii har\'aa',
+      AppLanguage.am: 'የዛሬው የሻወር ቲኬት ብዛትና ጠቅላላ ገቢ',
+    },
+    'aiQueryCashDrawer': {
+      AppLanguage.en: 'Cash drawer balance and 15:30 OTP handover preparation',
+      AppLanguage.om: 'Hambaa qarshii sanduuqaa fi qophii OTP',
+      AppLanguage.am: 'የካዝና ጥሬ ገንዘብና የ15:30 OTP ዝግጅት',
+    },
+    'aiQueryEmptyExchange': {
+      AppLanguage.en: 'Empty-for-full container exchange balance and missing cans',
+      AppLanguage.om: 'Qodaa duudaa deebisuu fi qorannoo qodaa',
+      AppLanguage.am: 'ዕቃ በዕቃ ቅያሪ ሚዛንና የጎደሉ ዕቃዎች',
+    },
+    'aiQueryAssetHealth': {
+      AppLanguage.en: 'Fixed asset equipment health, service due, and repairs',
+      AppLanguage.om: 'Fayyummaa maashinootaa fi suphaa',
+      AppLanguage.am: 'የማሽኖችና ቋሚ ዕቃዎች ጤንነት እንዲሁም ጥገና',
+    },
+    'aiQueryConsumableReorder': {
+      AppLanguage.en: 'Consumables stock levels and low-stock re-order alerts',
+      AppLanguage.om: 'Sadarkaa meeshaalee dhumoo fi ajaja haaromsaa',
+      AppLanguage.am: 'የአላቂ ዕቃዎች ክምችትና የዳግም ማዘዣ ማሳወቂያ',
+    },
+    'aiQueryBankReconciliation': {
+      AppLanguage.en: 'Bank deposit slips vs cashier drawer settlements audit',
+      AppLanguage.om: 'Qorannoo nagaraga baankii fi herrega kaashiyaraa',
+      AppLanguage.am: 'የባንክ ተቀማጭ ደረሰኞችና የካሺየር ሂሳብ ማረጋገጫ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

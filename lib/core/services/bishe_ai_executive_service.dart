@@ -48,15 +48,21 @@ class BisheAiExecutiveService {
           'role': 'user',
           'parts': [{'text': systemContext}],
         });
+        final modelWelcome = isCustomer
+            ? (currentLang == AppLanguage.am
+                ? 'ሰላም! እኔ የቢሼ AI እንግዳ ተቀባይ ነኝ። ስለ ማጠቢያ ፓኬጆቻችን፣ ዋጋዎች፣ የኤሌክትሪክ መኪናዎች ደህንነት እና የተራ ሁኔታ በማብራራት ደስ ይለኛል።'
+                : (currentLang == AppLanguage.om
+                    ? 'Akkam! Ani Tajaajila AI BISHE ti. Waa\'ee paakeejii dhiqa, gatii, eegumsa konkolaataa elektiriikii fi yeroo eegumsaatiin isin gargaaruuf qophiidha.'
+                    : 'Greetings! I am the BISHE AI Concierge. I will guide you warmly through our wash packages, prices, EV safety, carpet services, and wait times in Bishoftu.'))
+            : (currentLang == AppLanguage.am
+                ? 'ተረድቻለሁ። እኔ የቢሼ መኪና ማጠቢያ የ AI ስራ አስፈፃሚ ነኝ። የማዕከሉን የቀጥታ መረጃዎች፣ የዕቃዎች ሁኔታና የሂሳብ መዛግብት መሠረት በማድረግ ትክክለኛ ምላሽ እሰጣለሁ።'
+                : (currentLang == AppLanguage.om
+                    ? 'Hubadheera. Ani Hogganaa Hojii AI BISHE ti. Ragaa iddoo dhiqaafi herrega bu\'uura godhachuun deebii sirrii kennuuf qophiidha.'
+                    : 'Understood. I am BisheAI, Chief Operations Executive for BISHE Car Wash. Grounded in the operations manual, equipment health, bank slips, showers, and live bay records, I will answer accurately with tables and calculations where appropriate.'));
+
         contents.add({
           'role': 'model',
-          'parts': [
-            {
-              'text': isCustomer
-                  ? 'Greetings! I am the BISHE AI Concierge. I will guide you warmly through our wash packages, prices, EV safety, carpet services, and wait times in Bishoftu.'
-                  : 'Understood. I am BisheAI, Chief Operations Executive for BISHE Car Wash. Grounded in the operations manual, equipment health, bank slips, showers, and live bay records, I will answer accurately with tables and calculations where appropriate.'
-            }
-          ],
+          'parts': [{'text': modelWelcome}],
         });
 
         // Add Multi-Turn History
@@ -301,7 +307,7 @@ INSTRUCTIONS:
 - Answer with executive clarity, specific numbers, and deep station context.
 - Format structured data, lists, and comparative statements as clean Markdown tables.
 - Tailor the response to the caller's role (${callerRole.displayName}).
-- Respond in the user's language (Amharic, Afaan Oromoo, or English).
+- MANDATORY LANGUAGE REQUIREMENT: You MUST reply entirely in ${lang == AppLanguage.am ? 'Amharic (አማርኛ)' : (lang == AppLanguage.om ? 'Afaan Oromoo' : 'English')}. Write all titles, tables, explanations, and numbers in ${lang == AppLanguage.am ? 'Amharic (አማርኛ)' : (lang == AppLanguage.om ? 'Afaan Oromoo' : 'English')}. Do NOT reply in English when the user language is Amharic or Afaan Oromoo!
 ''';
   }
 
@@ -357,7 +363,10 @@ STRICT PRIVACY GUARDRAILS (NON-NEGOTIABLE):
 TONE & STYLE:
 - Warm, polite, professional, and welcoming.
 - Use clear bullet points and markdown tables for package comparisons or pricing questions.
-- Respond in the language used by the customer (English, Afaan Oromoo, or Amharic).
+- MANDATORY LANGUAGE REQUIREMENT:
+  * Current Active User Language: ${lang == AppLanguage.am ? 'AMHARIC (አማርኛ)' : (lang == AppLanguage.om ? 'AFAAN OROMOO' : 'ENGLISH')}.
+  * You MUST write your entire response, headings, tables, prices, and notes in ${lang == AppLanguage.am ? 'Amharic (አማርኛ)' : (lang == AppLanguage.om ? 'Afaan Oromoo' : 'English')}.
+  * Do NOT reply in English when the active user language is Amharic or Afaan Oromoo!
 ''';
   }
 
@@ -544,9 +553,15 @@ TONE & STYLE:
         query.contains('diamond') ||
         query.contains('ዋጋ') ||
         query.contains('ፓኬጅ') ||
+        query.contains('ክፍያ') ||
+        query.contains('ሲልቨር') ||
+        query.contains('ጎልድ') ||
+        query.contains('ፕላቲነም') ||
         query.contains('gatii') ||
-        query.contains('paakeejii')) {
-      return _generateCustomerPackagesReport(state);
+        query.contains('paakeejii') ||
+        query.contains('kaffaltii') ||
+        query.contains('qarshii')) {
+      return _generateCustomerPackagesReport(state, lang);
     }
 
     if (query.contains('wait') ||
@@ -556,9 +571,14 @@ TONE & STYLE:
         query.contains('bay') ||
         query.contains('ተራ') ||
         query.contains('ጊዜ') ||
+        query.contains('ስንት') ||
+        query.contains('ይፈጃል') ||
+        query.contains('ቆይታ') ||
         query.contains('dabaree') ||
-        query.contains('yeroo')) {
-      return _generateCustomerWaitTimeReport(state);
+        query.contains('yeroo') ||
+        query.contains('eegumsa') ||
+        query.contains('iddoo')) {
+      return _generateCustomerWaitTimeReport(state, lang);
     }
 
     if (query.contains('ev') ||
@@ -568,23 +588,33 @@ TONE & STYLE:
         query.contains('ባትሪ') ||
         query.contains('ኤሌክትሪክ') ||
         query.contains('ደህንነት') ||
-        query.contains('elektiriikii')) {
-      return _generateCustomerEvSafetyReport();
+        query.contains('ጥንቃቄ') ||
+        query.contains('elektiriikii') ||
+        query.contains('baatrii') ||
+        query.contains('eegumsa') ||
+        query.contains('nagaa')) {
+      return _generateCustomerEvSafetyReport(lang);
     }
 
     if (query.contains('carpet') ||
         query.contains('rug') ||
         query.contains('ምንጣፍ') ||
-        query.contains('afata')) {
-      return _generateCustomerCarpetReport(state);
+        query.contains('ካሬ') ||
+        query.contains('afata') ||
+        query.contains('meetira')) {
+      return _generateCustomerCarpetReport(state, lang);
     }
 
     if (query.contains('shower') ||
         query.contains('bath') ||
         query.contains('hot water') ||
         query.contains('ሻወር') ||
-        query.contains('dhiqannaa')) {
-      return _generateCustomerShowersReport(state);
+        query.contains('መታጠቢያ') ||
+        query.contains('ሙቅ') ||
+        query.contains('dhiqannaa') ||
+        query.contains('bishaani') ||
+        query.contains('ho\'aa')) {
+      return _generateCustomerShowersReport(state, lang);
     }
 
     // Guardrail against internal profit/salary inquiries
@@ -596,21 +626,16 @@ TONE & STYLE:
         query.contains('cost') ||
         query.contains('ትርፍ') ||
         query.contains('ኮሚሽን') ||
-        query.contains('ደመወዝ')) {
-      return '''
-### 🛡️ Customer Privacy Notice
-*BISHE Car Wash Station Policies*
-
-We prioritize transparency in our wash services, package quality, and customer pricing. Internal station operating margins, employee payroll, and confidential security PINs/OTPs are strictly reserved for administrative compliance and cannot be disclosed.
-
-**Would you like to explore:**
-1. Our popular **Gold Polish Wash** package?
-2. Our **Electric Vehicle (EV) Safety Guarantee**?
-3. Current **Bay queue and wait time** in Bishoftu?
-''';
+        query.contains('ደመወዝ') ||
+        query.contains('ኦቲፒ') ||
+        query.contains('bu\'aa') ||
+        query.contains('komishinii') ||
+        query.contains('minda') ||
+        query.contains('mindaa')) {
+      return _generateCustomerPrivacyNotice(lang);
     }
 
-    return _generateCustomerOverview(state);
+    return _generateCustomerOverview(state, lang);
   }
 
   // ==========================================
@@ -848,8 +873,40 @@ ${feedbackRows.isEmpty ? '| No customer feedback submissions yet | - | - | - |' 
   // ==========================================
   // CUSTOMER CONCIERGE LOCAL REPORTS
   // ==========================================
-  static String _generateCustomerPackagesReport(AppStateNotifier state) {
-    return '''
+  static String _generateCustomerPackagesReport(AppStateNotifier state, AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### ✨ የቢሼ መኪና ማጠቢያ ፓኬጆች እና ዋጋዎች
+*ከፍተኛ ጥራት ያለው የመኪና እጥበትና እንክብካቤ በቢሾፍቱ (ደብረ ዘይት)*
+
+| የማጠቢያ ፓኬጅ | አነስተኛ / ቪትዝ | መካከለኛ / SUV | ሚኒባስ / ቫን | የሚያካትተው አገልግሎት |
+| :--- | :--- | :--- | :--- | :--- |
+| **ሲልቨር / መደበኛ** | **ብር 150–200** | **ብር 250–300** | **ብር 350** | የውጭ አረፋ እጥበት፣ የጎማ ማጠብና ቀለም፣ ማይክሮፋይበር ማድረቅ |
+| **ጎልድ ፖሊሽ (ተመራጭ)** | **ብር 300–350** | **ብር 400–450** | **ብር 550** | ሲልቨር + የውስጥ ቫኪዩም፣ የዳሽቦርድ ፖሊሽ፣ የመስታወት ማጽዳት፣ ሽቶ |
+| **ፕላቲነም ዲቴይሊንግ** | **ብር 600–750** | **ብር 800–950** | **ብር 1,100** | ጎልድ + የታችኛው አካል ዝገት መከላከያ እጥበት፣ የእንፋሎት ሞተር እጥበት፣ ሰም |
+| **ዳይመንድ VIP ሙሉ ጥገና** | **በስምምነት** | **በስምምነት** | **በስምምነት** | ሙሉ የውስጥ እንፋሎት እጥበት፣ የቆዳ ወንበር እንክብካቤ፣ የውጭ ፖሊሽ |
+
+> *ሁሉም ዋጋዎች 15% ህጋዊ ቫትን ያካትታሉ። ንጹህ የመጠጥ ውሃ እና የማረፊያ ሳሎን ተዘጋጅቷል!*
+''';
+
+      case AppLanguage.om:
+        return '''
+### ✨ Paakeejiiwwan Dhiqa Konkolaataa BISHE fi Gatii
+*Tajaajila Qulqullina Olaanaa Bishooftuu (Dabra Zayit) Keessatti*
+
+| Paakeejii Dhiqa | Konkolaataa Xiqqa | SUV / Piikaappii | Minibaasii / Vaan | Wanta Of Keessaa Qabu |
+| :--- | :--- | :--- | :--- | :--- |
+| **Silver / Bu'uuraa** | **ETB 150–200** | **ETB 250–300** | **ETB 350** | Dhiqa hoomacha alaa, gommaa dhiquu, haxooftuu maaykiroofaayibariin gogsuu |
+| **Gold Polish (Jaallatamaa)** | **ETB 300–350** | **ETB 400–450** | **ETB 550** | Silver + vaakiyumiin keessaa, daashboordii polishi gochuu, fuullee qulqulleessuu, urgooftuu |
+| **Platinum Diteeyiliing** | **ETB 600–750** | **ETB 800–950** | **ETB 1,100** | Gold + dhiqa jala konkolaataa, dhiqa mootoraa hurkaan, eegumsa saamunaa seeraamikii |
+| **Diamond VIP Guutuu** | **Waliigalteedhaan** | **Waliigalteedhaan** | **Waliigalteedhaan** | Dhiqa keessaa bal'aa, kunuunsa gogaa teessumaa, polishi maashinaa |
+
+> *Gatiin hundi VAT 15% of keessaa qaba. Bishaan dhugaatii qulqulluun qophaa'eera!*
+''';
+
+      case AppLanguage.en:
+        return '''
 ### ✨ BISHE Car Wash Service Packages & Pricing
 *Quality Auto Detailing in Bishoftu (Debre Zeyit)*
 
@@ -862,16 +919,51 @@ ${feedbackRows.isEmpty ? '| No customer feedback submissions yet | - | - | - |' 
 
 > *All wash prices include statutory 15% VAT. Clean drinking water and waiting lounge available!*
 ''';
+    }
   }
 
-  static String _generateCustomerWaitTimeReport(AppStateNotifier state) {
+  static String _generateCustomerWaitTimeReport(AppStateNotifier state, AppLanguage lang) {
     final bays = state.bays;
     final bay1 = bays.firstWhere((b) => b.type == BayType.bay1, orElse: () => const StationBay(type: BayType.bay1));
     final bay2 = bays.firstWhere((b) => b.type == BayType.bay2, orElse: () => const StationBay(type: BayType.bay2));
     final activeQueue = state.bookings.where((b) => b.status.name != 'completed' && b.status.name != 'cancelled').length;
     final estWaitMinutes = (activeQueue * 15).clamp(5, 60);
 
-    return '''
+    switch (lang) {
+      case AppLanguage.am:
+        final b1Status = bay1.status == BayStatus.vacant ? 'ክፍት ነው' : (bay1.status == BayStatus.occupied ? 'በመታጠብ ላይ' : 'ዝግ ነው');
+        final b2Status = bay2.status == BayStatus.vacant ? 'ክፍት ነው' : (bay2.status == BayStatus.occupied ? 'በመታጠብ ላይ' : 'ዝግ ነው');
+        return '''
+### ⏱️ የቀጥታ ተራ እና የጥበቃ ጊዜ መረጃ
+*የቢሾፍቱ ማዕከል የቀጥታ ሁኔታ*
+
+| የማጠቢያ ቦታ | የአሁን ሁኔታ | ዝርዝር |
+| :--- | :--- | :--- |
+| **ቦታ 1 (Bay 1)** | **$b1Status** | ${bay1.activeLicensePlate != null ? 'መኪና በመታጠብ ላይ ነው' : 'መኪና ለመቀበል ክፍት ነው'} |
+| **ቦታ 2 (Bay 2)** | **$b2Status** | ${bay2.activeLicensePlate != null ? 'መኪና በመታጠብ ላይ ነው' : 'መኪና ለመቀበል ክፍት ነው'} |
+| **በተራ ላይ ያሉ** | **$activeQueue መኪኖች** | የሚገመተው የጥበቃ ጊዜ: **~$estWaitMinutes ደቂቃ** |
+
+💡 **ምክር**: አጣዳፊ ጉዞ ካለዎት **ሲልቨር መደበኛ እጥበት** ከ15–20 ደቂቃ ውስጥ ይጠናቀቃል!
+''';
+
+      case AppLanguage.om:
+        final b1Status = bay1.status == BayStatus.vacant ? 'Duwwaadha' : (bay1.status == BayStatus.occupied ? 'Dhiqa Jira' : 'Cufaadha');
+        final b2Status = bay2.status == BayStatus.vacant ? 'Duwwaadha' : (bay2.status == BayStatus.occupied ? 'Dhiqa Jira' : 'Cufaadha');
+        return '''
+### ⏱️ Odeeffannoo Dabaree fi Yeroo Eegumsaa Battalaa
+*Haala Qabatamaa Iddoo Dhiqa Bishooftuu*
+
+| Iddoo Dhiqa | Haala Ammaa | Qabiyyee |
+| :--- | :--- | :--- |
+| **Iddoo 1 (Bay 1)** | **$b1Status** | ${bay1.activeLicensePlate != null ? 'Konkolaataan dhiqamaa jira' : 'Konkolaataa simachuuf duwwaadha'} |
+| **Iddoo 2 (Bay 2)** | **$b2Status** | ${bay2.activeLicensePlate != null ? 'Konkolaataan dhiqamaa jira' : 'Konkolaataa simachuuf duwwaadha'} |
+| **Dabaree Irra Kan Jiran** | **Konkolaattota $activeQueue** | Tilmaama Yeroo Eegumsaa: **~Daqiiqaa $estWaitMinutes** |
+
+💡 **Gorsa**: Yoo ariifattan dhiqni **Silver Bu'uuraa** daqiiqaa 15–20 keessatti xumurama!
+''';
+
+      case AppLanguage.en:
+        return '''
 ### ⏱️ Live Bay Queue & Wait Time Update
 *Real-time Bishoftu Station Status*
 
@@ -883,10 +975,35 @@ ${feedbackRows.isEmpty ? '| No customer feedback submissions yet | - | - | - |' 
 
 💡 **Tip**: If you are in a hurry, our **Silver Basic Wash** takes only ~20 minutes from intake to showroom finish!
 ''';
+    }
   }
 
-  static String _generateCustomerEvSafetyReport() {
-    return '''
+  static String _generateCustomerEvSafetyReport(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### ⚡ የኤሌክትሪክ መኪናዎች (EV) ደህንነት ማረጋገጫ
+*ለ BYD, VW ID.4/ID.6, Tesla እና Hybrid መኪኖች የተረጋገጠ ጥበቃ*
+
+አዎ! በቢሼ መኪና ማጠቢያ የኤሌክትሪክ መኪናዎ አስተማማኝ ጥበቃ ይደረግለታል፡
+- **የተመጠነ የውሃ ኃይል**: ከፍተኛ ግፊት ያለው ውሃ በቀጥታ ወደ ኃይል መሙያ (Charging Port) ወይም ወደ ታችኛው የባትሪ ክፍል አይረጭም።
+- **የእንፋሎት ሞተር ማጽዳት**: የኤሌክትሪክ ክፍሎችን ከውሃ ፍሳሽ ለመጠበቅ አነስተኛ እርጥበት ባለው ንጹህ እንፋሎት ይጸዳል።
+- **ገለልተኛ (pH-Neutral) ሳሙና**: የኤሌክትሪክ መኪና ቀለሞችን እና የአየር ዳሳሾችን (Sensors) የሚጠብቅ ልዩ ኬሚካል እንጠቀማለን።
+''';
+
+      case AppLanguage.om:
+        return '''
+### ⚡ Wabii Eegumsa Konkolaattota Elektiriikii (EV)
+*Eegumsa Mirkanaa'aa BYD, VW ID.4, Tesla fi Konkolaattota Haayibiriidii*
+
+Eeyyee! Dhiqa Konkolaataa BISHE keessatti konkolaataan elektiriikii keessan nagaadhaan dhiqama:
+- **Dhiibbaa Bishaan Madaalawaa**: Dhiibbaan bishaanii kallattiin gara bakka chaarjii fi baatrii konkolaataa jalaatti hin dhangala'u.
+- **Hurkaan Qulqulleessuu**: Bakki mootoraa akka bishaan hin miinetti hurka qulqulluun dhiqama.
+- **Shaampuu Miidhaa Hin Qabne (pH-Neutral)**: Qorichi qulqulleessaa miidhaa hin qabne halluu fi seensaroota eega.
+''';
+
+      case AppLanguage.en:
+        return '''
 ### ⚡ Electric Vehicle (EV) Safety Guarantee
 *Safe Washing for BYD, VW ID.4, Tesla, and Hybrid Vehicles*
 
@@ -895,10 +1012,35 @@ Yes! At BISHE Car Wash, your Electric Vehicle is in certified safe hands:
 - **Steam Engine Bay Cleaning**: Safe, low-moisture steam is used for engine bay dust removal without water flooding sensitive inverters.
 - **pH-Neutral Foam**: Specially formulated biodegradable shampoo protects modern EV matte paints and aerodynamic sensor lenses.
 ''';
+    }
   }
 
-  static String _generateCustomerCarpetReport(AppStateNotifier state) {
-    return '''
+  static String _generateCustomerCarpetReport(AppStateNotifier state, AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🏠 የምንጣፍ እና የጨርቃጨርቅ እጥበት አገልግሎት
+*በዘመናዊ ማሽን እና ልዩ ማድረቂያዎች የሚከናወን*
+
+- **ዋጋ**: **በአንድ ካሬ ሜትር ከብር 50–70** (እንደ ምንጣፉ ውፍረትና ዓይነት)።
+- **የአሠራር ሂደት**: የአቧራ ማራገፍ ➔ ጥልቅ የሳሙና እጥበት ➔ በውሃ ማጠብ ➔ በልዩ ማድረቂያ ማድረቅ።
+- **የማድረቂያ ጊዜ**: ከ24–48 ሰዓታት ውስጥ ደርቆ በፕላስቲክ ተጠቅልሎ ይሰጣል።
+- **ነጻ ትራንስፖርት**: በቢሾፍቱ ከተማ ውስጥ ለትላልቅ ምንጣፎች ነጻ የማንሳትና የማድረስ አገልግሎት አለን!
+''';
+
+      case AppLanguage.om:
+        return '''
+### 🏠 Tajaajila Dhiqa Afataafi Firaashii
+*Maashina Ammayyaa fi Iddoo Gogsuu Addaatiin Kan Hojjetamu*
+
+- **Gatii**: **Meetira isquweeriidhaan ETB 50–70** (akka furdinna afataatti)።
+- **Adeemsa Hojii**: Dhukkoo buqqisuu ➔ Shaampuudhaan dhiquu ➔ Bishaaniin dhiquu ➔ Iddoo aduutti gogsuu።
+- **Yeroo Goguu**: Sa'aatii 24–48 keessatti gogee pilaastikiidhaan maramee kennama።
+- **Geejjiba Tolaa**: Afata gurguddaadhaaf magaalaa Bishooftuu keessatti fe'uun tola!
+''';
+
+      case AppLanguage.en:
+        return '''
 ### 🏠 Carpet & Rug Cleaning Service
 *Deep Pressure Washing & Specialized Drying Racks*
 
@@ -907,10 +1049,33 @@ Yes! At BISHE Car Wash, your Electric Vehicle is in certified safe hands:
 - **Turnaround Time**: 24–48 hours for complete drying and hygienic plastic wrapping.
 - **Free Pickup & Delivery**: Available for large household or hotel carpets anywhere in Bishoftu!
 ''';
+    }
   }
 
-  static String _generateCustomerShowersReport(AppStateNotifier state) {
-    return '''
+  static String _generateCustomerShowersReport(AppStateNotifier state, AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🚿 ዘመናዊ የሙቅ ውሃ ሻወር ለደንበኞችና አሽከርካሪዎች
+*በቢሾፍቱ ማዕከላችን ታጥበው ዘና ይበሉ*
+
+- **ክፍያ**: **በአንድ ሰው ብር 70–100** (ከቫት ነጻ የሆነ 0% VAT ህጋዊ ተመን)።
+- **አገልግሎቶች**: የሙቅ ውሃ፣ ንጹህ ፎጣ፣ ሳሙና፣ መስተዋት እና ሻወር ቤት።
+- **ቦታ**: ከደንበኞች ማረፊያ እና ሻይ/ቡና መጠጫው አጠገብ ይገኛል።
+''';
+
+      case AppLanguage.om:
+        return '''
+### 🚿 Tajaajila Dhiqannaa Qaamaa Bishaani Ho'aa
+*Iddoo Dhiqa Bishooftuutti Boqodhaa Qulqullaa'aa*
+
+- **Gatii**: **Nama tokkoof ETB 70–100** (Taaksiirraa kan bilisa ta'e 0% VAT)።
+- **Wanti Dhiyaatu**: Bishaan ho'aa, fooxaa qulqulluu, saamunaa, daawwitii fi kutaa qulqulluu።
+- **Bakka**: Iddoo boqonnaa maamiltootaa cinaatti argama።
+''';
+
+      case AppLanguage.en:
+        return '''
 ### 🚿 Clean Hot Showers for Guests & Drivers
 *Rest & Refresh at Bishoftu Station*
 
@@ -918,10 +1083,82 @@ Yes! At BISHE Car Wash, your Electric Vehicle is in certified safe hands:
 - **Amenities**: Instant hot water, sanitized shower suites, clean fresh towels, soap, and mirrors.
 - **Location**: Right adjacent to the main waiting lounge and customer refreshment area.
 ''';
+    }
   }
 
-  static String _generateCustomerOverview(AppStateNotifier state) {
-    return '''
+  static String _generateCustomerPrivacyNotice(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🛡️ የደንበኞች ደህንነትና ምስጢራዊነት ማስታወቂያ
+*የቢሼ መኪና ማጠቢያ ደንቦች*
+
+የአገልግሎት ጥራትንና የደንበኛ ዋጋን በግልጽ ማሳወቅ ዋና መርሀችን ነው። የማዕከሉ ውስጣዊ የትርፍ ህዳግ፣ የሰራተኞች ደመወዝና ኮሚሽን፣ እንዲሁም የደህንነት የይለፍ ቃሎች (OTP) ለደንበኞች የማይገለጹ አስተዳደራዊ መረጃዎች ናቸው።
+
+**ምን ማወቅ ይፈልጋሉ:**
+1. ስለ ተወዳጁ **ጎልድ ፖሊሽ** ፓኬጃችን?
+2. ስለ **ኤሌክትሪክ መኪናዎች ደህንነት ማረጋገጫ**?
+3. አሁን ስላለው **የተራና የጥበቃ ጊዜ**?
+''';
+
+      case AppLanguage.om:
+        return '''
+### 🛡️ Hubachiisa Eegumsa Iccitii Maamiltootaa
+*Seera Iddoo Dhiqa Konkolaataa BISHE*
+
+Qulqullina tajaajilaafi gatii ifa gochuun imaammata keenyadha. Bu'aan keessoo iddoo dhiqa, kaffaltiin komishinii hojjettootaa fi koodiin OTP iccitii bulchiinsaa waan ta'eef maamilaaf hin ibsamu.
+
+**Maal baruu barbaaddu:**
+1. Waa'ee paakeejii jaallatamaa **Gold Polish**?
+2. Waa'ee **Wabii Eegumsa Konkolaattota Elektiriikii**?
+3. Waa'ee **Dabaree fi Yeroo Eegumsaa Ammaa**?
+''';
+
+      case AppLanguage.en:
+        return '''
+### 🛡️ Customer Privacy Notice
+*BISHE Car Wash Station Policies*
+
+We prioritize transparency in our wash services, package quality, and customer pricing. Internal station operating margins, employee payroll, and confidential security PINs/OTPs are strictly reserved for administrative compliance and cannot be disclosed.
+
+**Would you like to explore:**
+1. Our popular **Gold Polish Wash** package?
+2. Our **Electric Vehicle (EV) Safety Guarantee**?
+3. Current **Bay queue and wait time** in Bishoftu?
+''';
+    }
+  }
+
+  static String _generateCustomerOverview(AppStateNotifier state, AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 🌟 ወደ ቢሼ መኪና ማጠቢያና እንክብካቤ ማዕከል እንኳን ደህና መጡ!
+*ቢሾፍቱ (ደብረ ዘይት)፣ ኦሮሚያ | ሂርና ስጋ ቤት ጀርባ፣ አለምሸት ፌሮ አጠገብ*
+
+**ዛሬ በምን ልርዳዎት?**
+1. ✨ *"የማጠቢያ ፓኬጆች እና ዋጋቸው ስንት ነው?"*
+2. ⏱️ *"አሁን ያለው ተራ እና የጥበቃ ጊዜ ስንት ነው?"*
+3. ⚡ *"የኤሌክትሪክ መኪና ማጠብ ደህንነቱ የተጠበቀ ነው?"*
+4. 🏠 *"የምንጣፍ እጥበት እንዴት ይሰራል፣ ዋጋውስ በካሬ ስንት ነው?"*
+5. 🚿 *"የሙቅ ውሃ ሻወር የት ይገኛል?"*
+''';
+
+      case AppLanguage.om:
+        return '''
+### 🌟 Baga Gara Dhiqa Konkolaataa BISHE Nagaan Dhuftan!
+*Bishooftuu (Dabra Zayit), Oromiyaa | Foon Hirnaa Duuba, Alemxahay Feeroo Cinaa*
+
+**Har'a maaliin isin gargaaruu dandeessu?**
+1. ✨ *"Paakeejiiwwan dhiqaafi gatiin meeqa?"*
+2. ⏱️ *"Amma dabareefi yeroon eegumsaa akkam jira?"*
+3. ⚡ *"Konkolaataa elektiriikii dhiquun amansiisaadhaa?"*
+4. 🏠 *"Dhiqi afataa akkamitti hojjeta, gatiin meetiraan meeqa?"*
+5. 🚿 *"Dhiqannaan bishaan ho'aa eessatti argama?"*
+''';
+
+      case AppLanguage.en:
+        return '''
 ### 🌟 Welcome to BISHE Car Wash & Auto Care!
 *Bishoftu (Debre Zeyit), Oromia, Ethiopia | Behind Hirna Butchery, near Alemshet Fero*
 
@@ -932,6 +1169,7 @@ Yes! At BISHE Car Wash, your Electric Vehicle is in certified safe hands:
 4. 🏠 *"How does carpet washing work and what is the cost per m²?"*
 5. 🚿 *"Where are your clean hot showers located?"*
 ''';
+    }
   }
 
   // ==========================================

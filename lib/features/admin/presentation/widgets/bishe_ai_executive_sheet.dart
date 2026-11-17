@@ -102,12 +102,14 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
   bool _autoVoiceEnabled = false;
   String? _speakingText;
   bool _isListening = false;
+  String? _lastLang;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final state = AppStateProvider.read(context);
+    final currentLang = state.currentLang;
     if (!_initialized) {
-      final state = AppStateProvider.read(context);
       final welcomeText = state.currentRole == UserRole.customer
           ? state.tr('aiCustomerWelcomeMessage')
           : state.tr('aiWelcomeMessage');
@@ -118,6 +120,17 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         ),
       );
       _initialized = true;
+      _lastLang = currentLang;
+    } else if (_lastLang != currentLang) {
+      _lastLang = currentLang;
+      if (_messages.length == 1 && !_messages.first.isUser) {
+        _messages[0] = _ChatMessage(
+          isUser: false,
+          text: state.currentRole == UserRole.customer
+              ? state.tr('aiCustomerWelcomeMessage')
+              : state.tr('aiWelcomeMessage'),
+        );
+      }
     }
   }
 
@@ -600,54 +613,54 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     switch (currentRole) {
       case UserRole.customer:
         chips = [
-          {'label': state.tr('aiPromptCustomerPackages'), 'query': 'What wash packages do you offer and what are the prices?'},
-          {'label': state.tr('aiPromptCustomerWaitTime'), 'query': 'How busy are the bays right now and what is the wait time?'},
-          {'label': state.tr('aiPromptCustomerEvSafety'), 'query': 'Is high-pressure and steam wash safe for electric vehicles (EV)?'},
-          {'label': state.tr('aiPromptCustomerCarpet'), 'query': 'How much is carpet washing per square meter and delivery turnaround?'},
-          {'label': state.tr('aiPromptCustomerShower'), 'query': 'Where are your clean hot showers located and what is the fee?'},
+          {'label': state.tr('aiPromptCustomerPackages'), 'query': state.tr('aiQueryCustomerPackages')},
+          {'label': state.tr('aiPromptCustomerWaitTime'), 'query': state.tr('aiQueryCustomerWaitTime')},
+          {'label': state.tr('aiPromptCustomerEvSafety'), 'query': state.tr('aiQueryCustomerEvSafety')},
+          {'label': state.tr('aiPromptCustomerCarpet'), 'query': state.tr('aiQueryCustomerCarpet')},
+          {'label': state.tr('aiPromptCustomerShower'), 'query': state.tr('aiQueryCustomerShower')},
         ];
         break;
       case UserRole.manager:
         chips = [
-          {'label': state.tr('aiPromptBaySpeed'), 'query': 'Bay turnaround speed, active queue, and washer dispatch'},
-          {'label': state.tr('aiPromptOtpStatus'), 'query': 'Status of Cashier 15:30 OTP handover and night closing'},
-          {'label': state.tr('aiPromptWasherPairs'), 'query': 'Active washer pairs distribution and commission balance'},
-          {'label': state.tr('aiPromptShowersCount'), 'query': 'Today\'s shower guest count and 0% VAT exempt revenue'},
-          {'label': state.tr('aiPromptPnL'), 'query': 'Today\'s P&L and net profit summary'},
+          {'label': state.tr('aiPromptBaySpeed'), 'query': state.tr('aiQueryBaySpeed')},
+          {'label': state.tr('aiPromptOtpStatus'), 'query': state.tr('aiQueryOtpStatus')},
+          {'label': state.tr('aiPromptWasherPairs'), 'query': state.tr('aiQueryWasherPairs')},
+          {'label': state.tr('aiPromptShowersCount'), 'query': state.tr('aiQueryShowersCount')},
+          {'label': state.tr('aiPromptPnL'), 'query': state.tr('aiQueryPnL')},
         ];
         break;
       case UserRole.cashier:
         chips = [
-          {'label': state.tr('aiPromptUnsettled'), 'query': 'List cars in queue and unsettled vehicle tickets'},
-          {'label': state.tr('aiPromptShowersCount'), 'query': 'Today\'s shower ticket count, cash and digital totals'},
-          {'label': state.tr('aiPromptCashDrawer'), 'query': 'Cash drawer balance and 15:30 OTP handover preparation'},
-          {'label': state.tr('aiPromptCars'), 'query': 'List cars washed today and vehicle types'},
+          {'label': state.tr('aiPromptUnsettled'), 'query': state.tr('aiQueryUnsettled')},
+          {'label': state.tr('aiPromptShowersCount'), 'query': state.tr('aiQueryShowersCount')},
+          {'label': state.tr('aiPromptCashDrawer'), 'query': state.tr('aiQueryCashDrawer')},
+          {'label': state.tr('aiPromptCars'), 'query': state.tr('aiQueryCars')},
         ];
         break;
       case UserRole.storekeeper:
         chips = [
-          {'label': state.tr('aiPromptEmptyExchange'), 'query': 'Empty-for-full container exchange balance and missing cans'},
-          {'label': state.tr('aiPromptAssetHealth'), 'query': 'Fixed asset equipment health, service due, and repairs'},
-          {'label': state.tr('aiPromptConsumableReorder'), 'query': 'Consumables stock levels and low-stock re-order alerts'},
-          {'label': state.tr('aiPromptYield'), 'query': 'Chemical yield and average shampoo and perfume used per car'},
+          {'label': state.tr('aiPromptEmptyExchange'), 'query': state.tr('aiQueryEmptyExchange')},
+          {'label': state.tr('aiPromptAssetHealth'), 'query': state.tr('aiQueryAssetHealth')},
+          {'label': state.tr('aiPromptConsumableReorder'), 'query': state.tr('aiQueryConsumableReorder')},
+          {'label': state.tr('aiPromptYield'), 'query': state.tr('aiQueryYield')},
         ];
         break;
       case UserRole.accountant:
         chips = [
-          {'label': state.tr('aiPromptPnL'), 'query': 'Today\'s P&L and net operating profit statement'},
-          {'label': state.tr('aiPromptBankReconciliation'), 'query': 'Bank deposit slips vs cashier drawer settlements audit'},
-          {'label': state.tr('aiPromptVatSummary'), 'query': '15% VAT on car wash vs 0% exempt shower reconciliation'},
-          {'label': state.tr('aiPromptWashers'), 'query': 'Active washers on duty and their commissions'},
+          {'label': state.tr('aiPromptPnL'), 'query': state.tr('aiQueryPnL')},
+          {'label': state.tr('aiPromptBankReconciliation'), 'query': state.tr('aiQueryBankReconciliation')},
+          {'label': state.tr('aiPromptVatSummary'), 'query': state.tr('aiQueryVatSummary')},
+          {'label': state.tr('aiPromptWashers'), 'query': state.tr('aiQueryWashers')},
         ];
         break;
       case UserRole.admin:
         chips = [
-          {'label': state.tr('aiPromptPnL'), 'query': 'Today\'s P&L and net profit summary'},
-          {'label': state.tr('aiPromptCars'), 'query': 'List cars washed today and vehicle types'},
-          {'label': state.tr('aiPromptWashers'), 'query': 'Active washers on duty and their commissions'},
-          {'label': state.tr('aiPromptYield'), 'query': 'Chemical yield and average shampoo and perfume used per car'},
-          {'label': state.tr('aiPromptAssetHealth'), 'query': 'Fixed asset equipment health, service due, and repairs'},
-          {'label': state.tr('aiPromptAlerts'), 'query': 'Check for low inventory stock and station discrepancies'},
+          {'label': state.tr('aiPromptPnL'), 'query': state.tr('aiQueryPnL')},
+          {'label': state.tr('aiPromptCars'), 'query': state.tr('aiQueryCars')},
+          {'label': state.tr('aiPromptWashers'), 'query': state.tr('aiQueryWashers')},
+          {'label': state.tr('aiPromptYield'), 'query': state.tr('aiQueryYield')},
+          {'label': state.tr('aiPromptAssetHealth'), 'query': state.tr('aiQueryAssetHealth')},
+          {'label': state.tr('aiPromptAlerts'), 'query': state.tr('aiQueryAlerts')},
         ];
         break;
     }
