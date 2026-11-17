@@ -187,5 +187,28 @@ void main() {
       expect(state.geminiApiKey, equals('AIzaSyTestApiKey123456'));
       expect(find.textContaining('Gemini AI Cloud'), findsOneWidget);
     });
+
+    testWidgets('Renders structured mobile tables with horizontal scroll and export actions', (tester) async {
+      tester.view.physicalSize = const Size(390, 844); // Standard mobile phone viewport
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open AI Co-Pilot'));
+      await tester.pumpAndSettle();
+
+      // Tap on P&L Statement chip (first visible chip)
+      await tester.tap(find.text(state.tr('aiPromptPnL')));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Verify table is rendered
+      expect(find.byType(Table), findsWidgets);
+      // Verify Export CSV and Copy Table buttons are present
+      expect(find.text(state.tr('aiExportCsv')), findsWidgets);
+      expect(find.text(state.tr('aiCopyTable')), findsWidgets);
+    });
   });
 }

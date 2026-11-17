@@ -22,4 +22,6 @@ class SoundPlatform {
   }
 
   static void stopListening() {}
+
+  static void exportCsvFile(String filename, String content) {}
 }

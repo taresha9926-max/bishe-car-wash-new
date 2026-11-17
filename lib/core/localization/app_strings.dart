@@ -4977,6 +4977,36 @@ class AppStrings {
       AppLanguage.om: 'Maayikiroofooniin dubbadhu',
       AppLanguage.am: 'በማይክሮፎን ተናገር',
     },
+    'aiExportCsv': {
+      AppLanguage.en: 'Export CSV',
+      AppLanguage.om: 'CSV Baasi',
+      AppLanguage.am: 'CSV ላክ',
+    },
+    'aiCopyTable': {
+      AppLanguage.en: 'Copy Table',
+      AppLanguage.om: 'Gabatee Waraabi',
+      AppLanguage.am: 'ሰንጠረዥ ቅዳ',
+    },
+    'aiCopyAll': {
+      AppLanguage.en: 'Copy Text',
+      AppLanguage.om: 'Barreeffama Waraabi',
+      AppLanguage.am: 'ጽሁፍ ቅዳ',
+    },
+    'aiCopiedToast': {
+      AppLanguage.en: 'Copied to clipboard!',
+      AppLanguage.om: 'Gara gabatee waraabbiitti kophameera!',
+      AppLanguage.am: 'ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
+    },
+    'aiExportSuccess': {
+      AppLanguage.en: 'CSV exported & copied to clipboard!',
+      AppLanguage.om: 'Galmeen CSV kophamee baafameera!',
+      AppLanguage.am: 'CSV በተሳካ ሁኔታ ተዘጋጅቷል ወደ ቅንጥብ ሰሌዳ ተቀድቷል!',
+    },
+    'aiTableHint': {
+      AppLanguage.en: 'Swipe ↔ to view table',
+      AppLanguage.om: 'Gabatee arguuf gara cinaatti dhiibi ↔',
+      AppLanguage.am: 'ሰንጠረዥ ለማየት ወደ ጎን ያንሸራትቱ ↔',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

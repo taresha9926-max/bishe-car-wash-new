@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/services/bishe_ai_executive_service.dart';
@@ -37,6 +38,58 @@ class _ChatMessage {
     required this.text,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
+}
+
+abstract class _AiBlock {}
+
+class _HeaderBlock extends _AiBlock {
+  final int level;
+  final String text;
+  _HeaderBlock(this.level, this.text);
+}
+
+class _KpiStripBlock extends _AiBlock {
+  final List<Map<String, String>> items;
+  _KpiStripBlock(this.items);
+}
+
+class _TableBlock extends _AiBlock {
+  final List<String> headers;
+  final List<List<String>> rows;
+  _TableBlock(this.headers, this.rows);
+
+  String toCsv() {
+    final buf = StringBuffer();
+    buf.writeln(headers.map((h) => '"${h.replaceAll('**', '').replaceAll('"', '""').trim()}"').join(','));
+    for (final row in rows) {
+      buf.writeln(row.map((c) => '"${c.replaceAll('**', '').replaceAll('`', '').replaceAll('"', '""').trim()}"').join(','));
+    }
+    return buf.toString();
+  }
+
+  String toPlainText() {
+    final buf = StringBuffer();
+    buf.writeln(headers.map((h) => h.replaceAll('**', '').trim()).join(' | '));
+    for (final row in rows) {
+      buf.writeln(row.map((c) => c.replaceAll('**', '').replaceAll('`', '').trim()).join(' | '));
+    }
+    return buf.toString();
+  }
+}
+
+class _BulletBlock extends _AiBlock {
+  final String text;
+  _BulletBlock(this.text);
+}
+
+class _CalloutBlock extends _AiBlock {
+  final String text;
+  _CalloutBlock(this.text);
+}
+
+class _ParagraphBlock extends _AiBlock {
+  final String text;
+  _ParagraphBlock(this.text);
 }
 
 class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
@@ -192,6 +245,29 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         _speakMessage(response);
       }
     }
+  }
+
+  void _copyToClipboard(String text, String confirmation) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(confirmation),
+        backgroundColor: AppColors.primary,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _exportCsv(String csvContent, String filename, dynamic state) {
+    Clipboard.setData(ClipboardData(text: csvContent));
+    SoundHelper.exportCsvFile(filename, csvContent);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(state.tr('aiExportSuccess')),
+        backgroundColor: AppColors.statusCompleted,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _showApiKeyDialog() {
@@ -363,7 +439,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
 
   Widget _buildHeader(BuildContext context, dynamic state, bool hasKey) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 12, 10),
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
       decoration: const BoxDecoration(
         color: Color(0xFF111827),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -372,71 +448,79 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF007791), Color(0xFF00E5FF)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.liquidCyanNeon.withOpacity(0.3),
-                  blurRadius: 10,
+                  blurRadius: 8,
                 ),
               ],
             ),
-            child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+            child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 18),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 6,
-                  runSpacing: 4,
+                Text(
+                  state.tr('aiExecutiveTitle'),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      state.tr('aiExecutiveTitle'),
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: (hasKey ? const Color(0xFF10B981) : AppColors.liquidCyanNeon).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: (hasKey ? const Color(0xFF10B981) : AppColors.liquidCyanNeon).withOpacity(0.4),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 6,
-                            color: hasKey ? const Color(0xFF10B981) : AppColors.liquidCyanNeon,
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: (hasKey ? const Color(0xFF10B981) : AppColors.liquidCyanNeon).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: (hasKey ? const Color(0xFF10B981) : AppColors.liquidCyanNeon).withOpacity(0.4),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            hasKey ? state.tr('aiCloudEngineBadge') : state.tr('aiLocalEngineBadge'),
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 5,
                               color: hasKey ? const Color(0xFF10B981) : AppColors.liquidCyanNeon,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                hasKey ? state.tr('aiCloudEngineBadge') : state.tr('aiLocalEngineBadge'),
+                                style: TextStyle(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: hasKey ? const Color(0xFF10B981) : AppColors.liquidCyanNeon,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
                 Text(
                   state.tr('aiExecutiveSub'),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -444,9 +528,12 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             ),
           ),
           IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 30, height: 30),
             icon: Icon(
               _autoVoiceEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
-              size: 20,
+              size: 18,
               color: _autoVoiceEnabled ? AppColors.liquidCyanNeon : AppColors.textMuted,
             ),
             tooltip: state.tr('aiVoiceMode'),
@@ -460,12 +547,18 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.key_rounded, size: 20, color: AppColors.liquidCyanNeon),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+            icon: const Icon(Icons.key_rounded, size: 18, color: AppColors.liquidCyanNeon),
             tooltip: state.tr('configureApiKey'),
             onPressed: _showApiKeyDialog,
           ),
           IconButton(
-            icon: const Icon(Icons.cleaning_services_rounded, size: 18, color: AppColors.textMuted),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+            icon: const Icon(Icons.cleaning_services_rounded, size: 16, color: AppColors.textMuted),
             tooltip: state.tr('clearChat'),
             onPressed: () {
               _stopSpeaking();
@@ -476,7 +569,10 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white70),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+            icon: const Icon(Icons.close_rounded, size: 18, color: Colors.white70),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -520,6 +616,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
 
   Widget _buildMessageBubble(_ChatMessage message, dynamic state) {
     final isUser = message.isUser;
+    final hasTable = !isUser && message.text.contains('|') && message.text.contains('\n|');
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -555,69 +652,181 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SelectableText(
-                    message.text,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      height: 1.4,
-                      color: isUser ? Colors.white : AppColors.textPrimary,
-                      fontFamily: 'NotoSansEthiopic',
-                    ),
-                  ),
+                  if (isUser)
+                    SelectableText(
+                      message.text,
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        height: 1.4,
+                        color: Colors.white,
+                        fontFamily: 'NotoSansEthiopic',
+                      ),
+                    )
+                  else
+                    _buildStructuredAiMessage(message.text, state),
                   if (!isUser) ...[
+                    const SizedBox(height: 10),
+                    const Divider(height: 1, color: Color(0xFF334155)),
                     const SizedBox(height: 8),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(6),
-                      onTap: () {
-                        if (_speakingText == message.text) {
-                          _stopSpeaking();
-                        } else {
-                          _speakMessage(message.text);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: (_speakingText == message.text
-                                  ? Colors.redAccent
-                                  : AppColors.liquidCyanNeon)
-                              .withOpacity(0.12),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        // Listen / Stop Audio
+                        InkWell(
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: (_speakingText == message.text
-                                    ? Colors.redAccent
-                                    : AppColors.liquidCyanNeon)
-                                .withOpacity(0.35),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _speakingText == message.text
-                                  ? Icons.stop_rounded
-                                  : Icons.volume_up_rounded,
-                              size: 13,
-                              color: _speakingText == message.text
-                                  ? Colors.redAccent
-                                  : AppColors.liquidCyanNeon,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _speakingText == message.text
-                                  ? state.tr('aiStopAudio')
-                                  : state.tr('aiListen'),
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: _speakingText == message.text
-                                    ? Colors.redAccent
-                                    : AppColors.liquidCyanNeon,
+                          onTap: () {
+                            if (_speakingText == message.text) {
+                              _stopSpeaking();
+                            } else {
+                              _speakMessage(message.text);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: (_speakingText == message.text
+                                      ? Colors.redAccent
+                                      : AppColors.liquidCyanNeon)
+                                  .withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: (_speakingText == message.text
+                                        ? Colors.redAccent
+                                        : AppColors.liquidCyanNeon)
+                                    .withOpacity(0.35),
                               ),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _speakingText == message.text
+                                      ? Icons.stop_rounded
+                                      : Icons.volume_up_rounded,
+                                  size: 13,
+                                  color: _speakingText == message.text
+                                      ? Colors.redAccent
+                                      : AppColors.liquidCyanNeon,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _speakingText == message.text
+                                      ? state.tr('aiStopAudio')
+                                      : state.tr('aiListen'),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: _speakingText == message.text
+                                        ? Colors.redAccent
+                                        : AppColors.liquidCyanNeon,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                        // Copy Text
+                        InkWell(
+                          borderRadius: BorderRadius.circular(6),
+                          onTap: () => _copyToClipboard(message.text, state.tr('aiCopiedToast')),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF334155)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.copy_rounded, size: 11, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  state.tr('aiCopyAll'),
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Export CSV if table exists in message
+                        if (hasTable)
+                          InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: () {
+                              final blocks = _parseMarkdownBlocks(message.text);
+                              final tables = blocks.whereType<_TableBlock>().toList();
+                              if (tables.isNotEmpty) {
+                                final csv = tables.map((t) => t.toCsv()).join('\n\n');
+                                _exportCsv(csv, 'bishe_export_${DateTime.now().millisecondsSinceEpoch}.csv', state);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.statusCompleted.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: AppColors.statusCompleted.withOpacity(0.4)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.download_rounded, size: 12, color: AppColors.statusCompleted),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    state.tr('aiExportCsv'),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.statusCompleted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        // Copy Table if table exists in message
+                        if (hasTable)
+                          InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: () {
+                              final blocks = _parseMarkdownBlocks(message.text);
+                              final tables = blocks.whereType<_TableBlock>().toList();
+                              if (tables.isNotEmpty) {
+                                final txt = tables.map((t) => t.toPlainText()).join('\n\n');
+                                _copyToClipboard(txt, state.tr('aiCopiedToast'));
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFF334155)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.table_chart_rounded, size: 12, color: AppColors.liquidCyanNeon),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    state.tr('aiCopyTable'),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.liquidCyanNeon,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ],
@@ -638,6 +847,563 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         ],
       ),
     );
+  }
+
+  Widget _buildStructuredAiMessage(String rawText, dynamic state) {
+    final blocks = _parseMarkdownBlocks(rawText);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: blocks.map((block) {
+        if (block is _HeaderBlock) {
+          return _buildHeaderBlock(block);
+        } else if (block is _KpiStripBlock) {
+          return _buildKpiStripBlock(block);
+        } else if (block is _TableBlock) {
+          return _buildTableBlock(block, state);
+        } else if (block is _BulletBlock) {
+          return _buildBulletBlock(block);
+        } else if (block is _CalloutBlock) {
+          return _buildCalloutBlock(block);
+        } else if (block is _ParagraphBlock) {
+          return _buildParagraphBlock(block);
+        }
+        return const SizedBox.shrink();
+      }).toList(),
+    );
+  }
+
+  List<_AiBlock> _parseMarkdownBlocks(String rawText) {
+    final List<_AiBlock> blocks = [];
+    final lines = rawText.split('\n');
+    int i = 0;
+
+    while (i < lines.length) {
+      final line = lines[i].trim();
+
+      if (line.isEmpty) {
+        i++;
+        continue;
+      }
+
+      // 1. Header 3 or 4
+      if (line.startsWith('### ')) {
+        blocks.add(_HeaderBlock(3, line.substring(4).trim()));
+        i++;
+        continue;
+      }
+      if (line.startsWith('#### ')) {
+        blocks.add(_HeaderBlock(4, line.substring(5).trim()));
+        i++;
+        continue;
+      }
+
+      // 2. Callout / Quote (starts with '>' or '⚠️ *[')
+      if (line.startsWith('>') || line.startsWith('⚠️ *[')) {
+        final calloutText = line.startsWith('>') ? line.substring(1).trim() : line;
+        blocks.add(_CalloutBlock(calloutText));
+        i++;
+        continue;
+      }
+
+      // 3. KPI summary line (e.g. *Total Registered: **10** | Completed: **8** ...*)
+      if (line.startsWith('*') && line.endsWith('*') && line.contains('|') && !line.contains(':---')) {
+        final inner = line.substring(1, line.length - 1).trim();
+        final parts = inner.split('|');
+        if (parts.length >= 2 && parts.any((p) => p.contains(':'))) {
+          final items = <Map<String, String>>[];
+          for (final part in parts) {
+            final colIdx = part.indexOf(':');
+            if (colIdx != -1) {
+              final label = part.substring(0, colIdx).replaceAll('**', '').trim();
+              final val = part.substring(colIdx + 1).replaceAll('**', '').trim();
+              items.add({'label': label, 'value': val});
+            } else {
+              items.add({'label': '', 'value': part.replaceAll('**', '').trim()});
+            }
+          }
+          blocks.add(_KpiStripBlock(items));
+          i++;
+          continue;
+        }
+      }
+
+      // 4. Markdown Table
+      if (line.startsWith('|') && line.endsWith('|')) {
+        final tableLines = <String>[];
+        while (i < lines.length && lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+          tableLines.add(lines[i].trim());
+          i++;
+        }
+
+        if (tableLines.length >= 2) {
+          final headerLine = tableLines[0];
+          final headers = headerLine
+              .substring(1, headerLine.length - 1)
+              .split('|')
+              .map((c) => c.trim())
+              .toList();
+
+          final rows = <List<String>>[];
+          for (int t = 1; t < tableLines.length; t++) {
+            final rLine = tableLines[t];
+            // Skip separator line | :--- | :--- |
+            if (RegExp(r'^\|[\s\-:]+\|\s*$').hasMatch(rLine)) {
+              continue;
+            }
+            final cells = rLine
+                .substring(1, rLine.length - 1)
+                .split('|')
+                .map((c) => c.trim())
+                .toList();
+
+            while (cells.length < headers.length) {
+              cells.add('');
+            }
+            rows.add(cells.take(headers.length).toList());
+          }
+
+          blocks.add(_TableBlock(headers, rows));
+          continue;
+        }
+      }
+
+      // 5. Bullet item
+      if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('• ')) {
+        final bulletText = line.substring(2).trim();
+        blocks.add(_BulletBlock(bulletText));
+        i++;
+        continue;
+      }
+
+      // 6. Default: Paragraph
+      blocks.add(_ParagraphBlock(line));
+      i++;
+    }
+
+    return blocks;
+  }
+
+  Widget _buildHeaderBlock(_HeaderBlock block) {
+    return Padding(
+      padding: EdgeInsets.only(top: block.level == 3 ? 12 : 8, bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 3.5,
+            height: block.level == 3 ? 16 : 13,
+            decoration: BoxDecoration(
+              color: block.level == 3 ? AppColors.liquidCyanNeon : AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              block.text,
+              style: TextStyle(
+                fontSize: block.level == 3 ? 13.5 : 12,
+                fontWeight: FontWeight.w800,
+                color: block.level == 3 ? Colors.white : AppColors.liquidCyanNeon,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKpiStripBlock(_KpiStripBlock block) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: block.items.map((item) {
+            final label = item['label'] ?? '';
+            final val = item['value'] ?? '';
+            return Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF141E33), Color(0xFF0F172A)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0x4400E5FF)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (label.isNotEmpty)
+                    Text(
+                      label,
+                      style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                    ),
+                  const SizedBox(height: 2),
+                  Text(
+                    val,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.liquidCyanNeon),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableBlock(_TableBlock block, dynamic state) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B132B),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF334155), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.35),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Action Header above the table
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: const BoxDecoration(
+              color: Color(0xFF162038),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(11)),
+              border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.table_chart_rounded, size: 13, color: AppColors.liquidCyanNeon),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    state.tr('aiTableHint'),
+                    style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted, fontStyle: FontStyle.italic),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    final csv = block.toCsv();
+                    _exportCsv(csv, 'bishe_report_${DateTime.now().millisecondsSinceEpoch}.csv', state);
+                  },
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppColors.statusCompleted.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppColors.statusCompleted.withOpacity(0.4)),
+                    ),
+                    child: const Icon(Icons.download_rounded, size: 13, color: AppColors.statusCompleted),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                InkWell(
+                  onTap: () {
+                    final txt = block.toPlainText();
+                    _copyToClipboard(txt, state.tr('aiCopiedToast'));
+                  },
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: const Color(0xFF334155)),
+                    ),
+                    child: const Icon(Icons.copy_rounded, size: 12, color: AppColors.liquidCyanNeon),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Horizontally Scrollable Table
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(6),
+              child: Table(
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                columnWidths: {
+                  for (int i = 0; i < block.headers.length; i++)
+                    i: const IntrinsicColumnWidth(),
+                },
+                children: [
+                  // Header row
+                  TableRow(
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1E293B),
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                    ),
+                    children: block.headers.map((h) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Text(
+                        h.replaceAll('**', '').trim(),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.liquidCyanNeon,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    )).toList(),
+                  ),
+                  // Data rows
+                  for (int rIdx = 0; rIdx < block.rows.length; rIdx++)
+                    TableRow(
+                      decoration: BoxDecoration(
+                        color: rIdx % 2 == 1 ? const Color(0xFF131D31) : Colors.transparent,
+                        border: const Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 0.8)),
+                      ),
+                      children: block.rows[rIdx].map((cell) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        child: _buildCellWidget(cell.trim()),
+                      )).toList(),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCellWidget(String rawCell) {
+    final cell = rawCell.trim();
+    final upper = cell.toUpperCase();
+
+    // Monospace code / license plate: `3-B12345` or WALK-IN
+    if (cell.startsWith('`') && cell.endsWith('`')) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: Colors.black45,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0x5500E5FF)),
+        ),
+        child: Text(
+          cell.replaceAll('`', ''),
+          style: const TextStyle(fontSize: 10.5, fontFamily: 'monospace', fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      );
+    }
+
+    // Completed / Healthy / Paid / On Duty Tag
+    if (upper.contains('COMPLETED') || upper.contains('HEALTHY') || upper.contains('ON DUTY') || upper.contains('PAID')) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0x2210B981),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0x6610B981)),
+        ),
+        child: Text(
+          cell.replaceAll('**', ''),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF34D399)),
+        ),
+      );
+    }
+
+    // Pending / In Queue / Re-order Tag
+    if (upper.contains('PENDING') || upper.contains('IN QUEUE') || upper.contains('RE-ORDER') || upper.contains('OFF DUTY')) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0x22F59E0B),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0x66F59E0B)),
+        ),
+        child: Text(
+          cell.replaceAll('**', ''),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFBBF24)),
+        ),
+      );
+    }
+
+    // Type A Tag
+    if (upper.contains('TYPE A') || upper.contains('AUTOMOBILE') || upper.contains('SEDAN')) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0x226366F1),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0x666366F1)),
+        ),
+        child: Text(
+          cell.replaceAll('**', ''),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF818CF8)),
+        ),
+      );
+    }
+
+    // Type B Tag
+    if (upper.contains('TYPE B') || upper.contains('SUV') || upper.contains('MINIBUS')) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0x220EA5E9),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0x660EA5E9)),
+        ),
+        child: Text(
+          cell.replaceAll('**', ''),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8)),
+        ),
+      );
+    }
+
+    // Type C Tag
+    if (upper.contains('TYPE C') || upper.contains('TRUCK')) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0x22EC4899),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: const Color(0x66EC4899)),
+        ),
+        child: Text(
+          cell.replaceAll('**', ''),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFF472B6)),
+        ),
+      );
+    }
+
+    // Default cell text with RichText (supports bold ** and ETB)
+    return SelectableText.rich(
+      _buildRichSpan(
+        cell,
+        defaultColor: cell.contains('ETB') ? Colors.white : AppColors.textPrimary,
+        fontSize: 11,
+      ),
+    );
+  }
+
+  Widget _buildBulletBlock(_BulletBlock block) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '•',
+            style: TextStyle(color: AppColors.liquidCyanNeon, fontSize: 13, height: 1.3),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SelectableText.rich(
+              _buildRichSpan(block.text, fontSize: 11.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalloutBlock(_CalloutBlock block) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0x1800E5FF),
+        borderRadius: BorderRadius.circular(8),
+        border: const Border(left: BorderSide(color: AppColors.liquidCyanNeon, width: 3)),
+      ),
+      child: SelectableText.rich(
+        _buildRichSpan(
+          block.text,
+          defaultColor: const Color(0xFFE2E8F0),
+          fontSize: 11,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildParagraphBlock(_ParagraphBlock block) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: SelectableText.rich(
+        _buildRichSpan(block.text, fontSize: 12),
+      ),
+    );
+  }
+
+  TextSpan _buildRichSpan(
+    String text, {
+    Color? defaultColor,
+    double fontSize = 12.0,
+  }) {
+    final spans = <InlineSpan>[];
+    final regex = RegExp(r'(\*\*.*?\*\*|`.*?`)');
+    int lastEnd = 0;
+
+    for (final match in regex.allMatches(text)) {
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(
+          text: text.substring(lastEnd, match.start),
+          style: TextStyle(
+            color: defaultColor ?? AppColors.textPrimary,
+            fontSize: fontSize,
+            fontFamily: 'NotoSansEthiopic',
+            height: 1.4,
+          ),
+        ));
+      }
+      final matchedText = match.group(0)!;
+      if (matchedText.startsWith('**') && matchedText.endsWith('**')) {
+        spans.add(TextSpan(
+          text: matchedText.substring(2, matchedText.length - 2),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: fontSize,
+            fontFamily: 'NotoSansEthiopic',
+            height: 1.4,
+          ),
+        ));
+      } else if (matchedText.startsWith('`') && matchedText.endsWith('`')) {
+        spans.add(TextSpan(
+          text: matchedText.substring(1, matchedText.length - 1),
+          style: TextStyle(
+            color: AppColors.liquidCyanNeon,
+            fontFamily: 'monospace',
+            fontWeight: FontWeight.bold,
+            fontSize: fontSize - 0.5,
+          ),
+        ));
+      }
+      lastEnd = match.end;
+    }
+
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastEnd),
+        style: TextStyle(
+          color: defaultColor ?? AppColors.textPrimary,
+          fontSize: fontSize,
+          fontFamily: 'NotoSansEthiopic',
+          height: 1.4,
+        ),
+      ));
+    }
+
+    return TextSpan(children: spans);
   }
 
   Widget _buildInputBar(dynamic state) {

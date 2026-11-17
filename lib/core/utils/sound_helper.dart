@@ -36,4 +36,8 @@ class SoundHelper {
   static void stopListening() {
     SoundPlatform.stopListening();
   }
+
+  static void exportCsvFile(String filename, String content) {
+    SoundPlatform.exportCsvFile(filename, content);
+  }
 }

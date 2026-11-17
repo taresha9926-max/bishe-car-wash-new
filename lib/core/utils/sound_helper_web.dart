@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:js' as js;
 import 'package:flutter/foundation.dart';
@@ -160,5 +161,17 @@ class SoundPlatform {
       }
     } catch (_) {}
     _isListening = false;
+  }
+
+  static void exportCsvFile(String filename, String content) {
+    try {
+      final bytes = utf8.encode(content);
+      final blob = html.Blob([bytes], 'text/csv;charset=utf-8');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      html.AnchorElement(href: url)
+        ..setAttribute('download', filename)
+        ..click();
+      html.Url.revokeObjectUrl(url);
+    } catch (_) {}
   }
 }
