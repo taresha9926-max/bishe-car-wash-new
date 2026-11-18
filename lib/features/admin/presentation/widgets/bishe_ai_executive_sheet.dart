@@ -7,6 +7,7 @@ import '../../../../core/utils/sound_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../auth_roles/domain/models/user_role.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
+import '../../../customer/presentation/screens/new_booking_screen.dart';
 
 class BisheAiExecutiveSheet extends StatefulWidget {
   const BisheAiExecutiveSheet({super.key});
@@ -91,6 +92,12 @@ class _CalloutBlock extends _AiBlock {
 class _ParagraphBlock extends _AiBlock {
   final String text;
   _ParagraphBlock(this.text);
+}
+
+class _ActionBlock extends _AiBlock {
+  final String label;
+  final String action;
+  _ActionBlock(this.label, this.action);
 }
 
 class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
@@ -805,7 +812,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                       ),
                     )
                   else
-                    _buildStructuredAiMessage(message.text, state),
+                    _buildStructuredAiMessage(message.text, state, context),
                   if (!isUser) ...[
                     const SizedBox(height: 10),
                     const Divider(height: 1, color: Color(0xFF334155)),
@@ -991,7 +998,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     );
   }
 
-  Widget _buildStructuredAiMessage(String rawText, dynamic state) {
+  Widget _buildStructuredAiMessage(String rawText, dynamic state, BuildContext context) {
     final blocks = _parseMarkdownBlocks(rawText);
 
     return Column(
@@ -1009,9 +1016,72 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
           return _buildCalloutBlock(block);
         } else if (block is _ParagraphBlock) {
           return _buildParagraphBlock(block);
+        } else if (block is _ActionBlock) {
+          return _buildActionBlock(block, context);
         }
         return const SizedBox.shrink();
       }).toList(),
+    );
+  }
+
+  Widget _buildActionBlock(_ActionBlock block, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            if (block.action == 'open_booking') {
+              final nav = Navigator.of(context, rootNavigator: true);
+              Navigator.of(context).pop();
+              nav.push(
+                MaterialPageRoute(
+                  builder: (_) => const NewBookingScreen(),
+                ),
+              );
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF007791), AppColors.liquidCyanNeon],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.liquidCyanNeon.withOpacity(0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.touch_app_rounded, color: Color(0xFF021B2B), size: 18),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    block.label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF021B2B),
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.arrow_forward_rounded, color: Color(0xFF021B2B), size: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1024,6 +1094,14 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
       final line = lines[i].trim();
 
       if (line.isEmpty) {
+        i++;
+        continue;
+      }
+
+      // Action button block: [label](action:target)
+      final actionMatch = RegExp(r'\[([^\]]+)\]\(action:([a-zA-Z0-9_]+)\)').firstMatch(line);
+      if (actionMatch != null) {
+        blocks.add(_ActionBlock(actionMatch.group(1)!, actionMatch.group(2)!));
         i++;
         continue;
       }

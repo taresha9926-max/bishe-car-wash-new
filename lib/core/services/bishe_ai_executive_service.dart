@@ -566,11 +566,13 @@ OUR SERVICE PACKAGES & PRICING:
 CONVERSATIONAL BOOKING & INTERACTION RULES:
 - When a customer asks to book their car or says "can you help me book my car?" without providing details, ALWAYS present the 4 required fields in a structured Markdown TABLE:
   | # | Required Field | Options & Details | Example Input |
-  | 1 | License Plate | Vehicle code & registration number | Code 2 - B48291 |
-  | 2 | Vehicle Category | Type A (Small: Corolla, Vitz, BYD), Type B (Medium: V8, Prado, Hilux, Dolphin), Type C (Truck: Isuzu 1200, FSR 1800) | Type A |
-  | 3 | Phone Number | For SMS ready alert & live tracking link | 0911234567 |
-  | 4 | Wash Package | Silver (Foam & Dry), Gold (Mud blast & tire shine), Platinum (Detailing & Engine) | Gold Wash |
-- Always provide the fast one-tap reply suggestion: "Code 2 - B48291, Type A, 0911234567, Gold Wash".
+  | 1 | Customer Name | Full name or driver name | Abebe Bikila |
+  | 2 | Phone Number | For SMS ready alert & live tracking link | 0911234567 |
+  | 3 | License Plate | Vehicle code & registration number | Code 2 - B48291 |
+  | 4 | Service Package & Model | Silver (Foam & Dry), Gold (Mud blast & tire shine), Platinum (Detailing & Engine), Diamond VIP • Type A (Small), Type B (Medium), Type C (Truck) | Gold Wash (Type A) |
+- Below the table, ALWAYS provide the direct Dashboard Redirection Button:
+  [🚗 Open Customer Booking Dashboard](action:open_booking)
+- And provide the fast one-tap reply suggestion: "Abebe Bikila, 0911234567, Code 2 - B48291, Gold Wash".
 - When all parameters are present, call `tool_book_wash(licensePlate, carType, packageId, targetBay)`.
 
 GPS, DIRECTIONS & CONTACT INQUIRIES:
@@ -863,43 +865,63 @@ TONE, STYLE & PLAIN-WRITING:
           lang: lang,
         );
       } else {
-        // Missing plate parameter: ask warm focused follow-up
+        // Missing plate parameter: present structured booking table with direct dashboard redirect
         switch (lang) {
           case AppLanguage.am:
             return '''
-### 🚗 መኪናዎን ለማስመዝገብ ዝግጁ ነኝ!
-*የቢሼ መኪና ማጠቢያ • ቢሾፍቱ*
+### 🚗 መኪናዎን በኦንላይን ለማስመዝገብ ዝግጁ ነኝ!
+*የቢሼ መኪና ማጠቢያ • ቢሾፍቱ (ደብረ ዘይት)*
 
-መኪናዎን ወረፋ ለማስያዝና ቦታ ለመመደብ እባክዎ የሚከተሉትን ይንገሩኝ፡
-1. **የሰሌዳ ቁጥርዎ** (ለምሳሌ፦ **ኮድ 2 - B48291**)
-2. **የመኪናዎ ዓይነት** (ለምሳሌ፦ ቪትዝ፣ ኮሮላ፣ ፕራዶ SUV፣ አይሱዙ)
-3. **የሚመርጡት ፓኬጅ** (ሲልቨር መደበኛ ወይስ ለሀይቅ አፈር ተመራጩ **ጎልድ ፖሊሽ**?)
+የማጠቢያ ቦታና ወረፋ ለመያዝ እባክዎ የሚከተሉትን 4 መረጃዎች ይንገሩኝ ወይም በቀጥታ በኦንላይን ዳሽቦርዱ ላይ ይክፈቱ፡
 
-ልክ ሰሌዳዎን ሲነግሩኝ ወዲያውኑ የቲኬት ቁጥርና የተራ ሰዓት እሰጥዎታለሁ!
+| # | የሚያስፈልግ መረጃ | ዝርዝርና አማራጮች | ምሳሌ |
+| :-: | :--- | :--- | :--- |
+| **1** | **የደንበኛ ስም** | ሙሉ ስም ወይም የአሽከርካሪ ስም | *አበበ ቢቂላ* |
+| **2** | **ስልክ ቁጥር** | የኤስኤምኤስ ማሳወቂያ እና የቀጥታ መከታተያ ሊንክ | *0911234567* |
+| **3** | **የሰሌዳ ቁጥር (License Plate)** | የመኪናው ኮድ እና ሰሌዳ ቁጥር | *ኮድ 2 - B48291* |
+| **4** | **የመኪና ዓይነትና ፓኬጅ (Vehicle Model)** | • 🥈 **ሲልቨር** (አረፋ እጥበትና ማድረቅ)<br>• 🥇 **ጎልድ** (የታችኛው ጭቃ ማጠብና ጎማ ፖሊሽ)<br>• 💎 **ፕላቲነም** (የውስጥ ቫኪዩምና ሞተር እጥበት)<br>• 👑 **ዳይመንድ VIP** (ሙሉ ጥገናና ሰም)<br>• **ዓይነት ሀ (አነስተኛ)** / **ዓይነት ለ (SUV)** / **ዓይነት ሐ (ኢሱዙ)** | *ጎልድ ዋሽ (ዓይነት ሀ)* |
+
+[🚗 በኦንላይን የደንበኛ ዳሽቦርድ ላይ ይመዝገቡ](action:open_booking)
+
+> *💡 ፈጣን ምላሽ ለመስጠት፦ "አበበ ቢቂላ፣ 0911234567፣ ኮድ 2 - B48291፣ ጎልድ ዋሽ" ብለው መላክ ይችላሉ!*
 ''';
+
           case AppLanguage.om:
             return '''
 ### 🚗 Makiinaa Keessan Galmeessuuf Qophiidha!
 *Giddugala Dhiqannaa BISHE • Bishooftuu*
 
-Dabaree qabsiisuuf maaloo odeeffannoo armaan gadii naaf himaa:
-1. **Lakkoofsa Gabatee** (Fkn: **Koodii 2 - B48291**)
-2. **Gosa Makiinaa** (Fkn: Vitz, Corolla, Prado SUV, Isuzu)
-3. **Paakeejii Filatan** (Silver Bu'uuraa moo dhoqqee harootaaf **Gold Polish**?)
+Dabaree fi iddoo dhiqa qabachuuf maaloo odeeffannoowwan 4 armaan gadii naaf himaa ykn kallattiin daashboordiirra bani:
 
-Gabatee keessan akkuma naaf himtaniin tikkeettii fi iddoo dhiqa isiniif qaba!
+| # | Odeeffannoo | Filannoowwan & Ibsa | Fakkeenya |
+| :-: | :--- | :--- | :--- |
+| **1** | **Maqaa Maamilaa** | Maqaa guutuu ykn konkolaachisaa | *Abarraa Mokonnon* |
+| **2** | **Lakkoofsa Bilbilaa** | Ergaa SMS fi liankii hordoffiif | *0911234567* |
+| **3** | **Lakkoofsa Gabatee (License Plate)** | Koodii fi lakkoofsa gabatee makiinaa | *Koodii 2 - B48291* |
+| **4** | **Gosa Makiinaa fi Paakeejii (Vehicle Model)** | • 🥈 **Silver** (Dhiqaa fi gogsuu)<br>• 🥇 **Gold** (Dhoqqee jalaa & faaya gommaa)<br>• 💎 **Platinum** (Keessaa fi mootora)<br>• 👑 **Diamond VIP** (Kunuunsa guutuu)<br>• **Gosa A (Xiqqaa)** / **Gosa B (SUV)** / **Gosa C (Fe'isa)** | *Gold Wash (Gosa A)* |
+
+[🚗 Daashboordii Maamilaa irratti Galmeessaa](action:open_booking)
+
+> *💡 Ergaa qaxxaamuraa: "Abarraa Mokonnon, 0911234567, Koodii 2 - B48291, Gold Wash" jettanii erguu dandeessu!*
 ''';
+
           case AppLanguage.en:
             return '''
 ### 🚗 Ready to Book Your Wash!
 *BISHE Car Wash Station • Bishoftu*
 
-To assign your bay and lock in your queue token, please tell me:
-1. **Your License Plate** (e.g., **Code 2 - B48291**)
-2. **Vehicle Model / Type** (e.g., Vitz, Corolla, Prado SUV, or Isuzu)
-3. **Preferred Package** (Silver Basic or our recommended **Gold Polish** for lake volcanic dust?)
+Please provide the 4 details below, or tap the button to book directly on the customer dashboard:
 
-As soon as you provide your license plate, I will issue your ticket and bay assignment immediately!
+| # | Required Field | Options & Details | Example Input |
+| :-: | :--- | :--- | :--- |
+| **1** | **Customer Name** | Full name or driver name | *Abebe Bikila* |
+| **2** | **Phone Number** | For SMS completion alert & live tracker link | *0911234567* |
+| **3** | **License Plate** | Vehicle code & registration number | *Code 2 - B48291* |
+| **4** | **Vehicle Model & Package** | • 🥈 **Silver Wash** (Foam wash & microfiber dry)<br>• 🥇 **Gold Wash** (Mud blast & tire shine)<br>• 💎 **Platinum Detailing** (Interior vacuum & engine steam)<br>• 👑 **Diamond VIP** (Complete restoration & wax)<br>• **Type A (Small)** / **Type B (Medium/SUV)** / **Type C (Truck)** | *Gold Wash (Type A)* |
+
+[🚗 Open Customer Booking Dashboard](action:open_booking)
+
+> *💡 Fast reply: You can simply message: "Abebe Bikila, 0911234567, Code 2 - B48291, Gold Wash" to book instantly!*
 ''';
         }
       }

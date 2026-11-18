@@ -412,8 +412,12 @@ void main() {
       );
 
       expect(response, contains('Ready to Book Your Wash'));
+      expect(response, contains('Customer Name'));
+      expect(response, contains('Phone Number'));
       expect(response, contains('License Plate'));
       expect(response, contains('Vehicle Model'));
+      expect(response, contains('action:open_booking'));
+      expect(response, contains('Open Customer Booking Dashboard'));
     });
 
     test('Customer Governance: Complete conversational prompt executes real booking into database', () async {
