@@ -4087,6 +4087,26 @@ class AppStrings {
       AppLanguage.om: 'Maallaqa Kaashii Harkaa (Baankiitti Hin Galin)',
       AppLanguage.am: 'በመሳቢያ ያለ ጥሬ ገንዘብ (ወደ ባንክ ያልገባ)',
     },
+    'managerPhysicalCashInCustody': {
+      AppLanguage.en: 'Manager Physical Cash in Custody',
+      AppLanguage.om: 'Maallaqa Kaashii Harkaa Hojii Geggeessaa',
+      AppLanguage.am: 'በስራ አስኪያጁ እጅ ያለ ጥሬ ገንዘብ',
+    },
+    'pendingCashierHandoverOtp': {
+      AppLanguage.en: 'Pending Cashier Handover (OTP Required)',
+      AppLanguage.om: 'Wal-harkaa Fuudhinsa Kaasharii Eegamaa (OTP)',
+      AppLanguage.am: 'የገንዘብ ተቀባይ ርክክብ በመጠባበቅ ላይ (OTP ያስፈልጋል)',
+    },
+    'cashWithDayCashier': {
+      AppLanguage.en: 'Cash with Day Cashier (Shift Active)',
+      AppLanguage.om: 'Maallaqni Kaasharii Guyyaa Harka Jira',
+      AppLanguage.am: 'ገንዘብ በቀን ገንዘብ ተቀባይ እጅ ነው (ፈረቃው ክፍት ነው)',
+    },
+    'noCustodyCashToDeposit': {
+      AppLanguage.en: 'No Custody Cash (0.00 ETB)',
+      AppLanguage.om: 'Maallaqa Harkaa Hin Jiru (0.00 ETB)',
+      AppLanguage.am: 'በእጅ ያለ ጥሬ ገንዘብ የለም (0.00 ብር)',
+    },
     'drawerEmptyHandedOver': {
       AppLanguage.en: 'Drawer 0 ETB • Handed Over',
       AppLanguage.om: 'Saanduqa 0 ETB • Dabarfameera',

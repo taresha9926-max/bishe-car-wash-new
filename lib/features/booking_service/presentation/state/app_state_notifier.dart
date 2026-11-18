@@ -1728,6 +1728,22 @@ class AppStateNotifier extends ChangeNotifier {
 
   /// Cash collected after subtracting day-shift carried cash already counted inside undepositedCashTodayETB.
   double get nightShiftAdditionalCashETB {
+    // If day shift is not closed yet, all cash collected belongs strictly to the day cashier drawer.
+    if (!isTodayDayShiftClosed) return 0.0;
+
+    final now = DateTime.now();
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'day' &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        // If day shift handover is pending OTP acceptance, manager has not assumed custody yet.
+        if (c.handoverMethod == 'manager_otp' && !c.isHandoverAccepted) {
+          return 0.0;
+        }
+      }
+    }
+
     final extra = undepositedCashTodayETB - managerCarriedCashETB;
     return extra > 0 ? extra : 0.0;
   }
@@ -1760,6 +1776,22 @@ class AppStateNotifier extends ChangeNotifier {
         return 0.0;
       }
     }
+
+    // If day shift is still running, manager holds 0.00 custody cash.
+    if (!isTodayDayShiftClosed) return 0.0;
+
+    // If day shift closed via OTP but manager hasn't accepted yet, custody remains 0.00.
+    for (final c in _dailyFinancialClosings) {
+      if (c.shiftType == 'day' &&
+          c.closingDate.year == now.year &&
+          c.closingDate.month == now.month &&
+          c.closingDate.day == now.day) {
+        if (c.handoverMethod == 'manager_otp' && !c.isHandoverAccepted) {
+          return 0.0;
+        }
+      }
+    }
+
     return managerCarriedCashETB + nightShiftAdditionalCashETB;
   }
 

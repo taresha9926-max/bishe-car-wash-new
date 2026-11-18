@@ -145,11 +145,7 @@ class _OperationalManagerDashboardScreenState
   Widget _buildActionTabBar(dynamic state, int activeCount, bool isMobile) {
     final isCarpet = state.isCarpetDivisionActive as bool;
     final activeColor = isCarpet ? const Color(0xFF7C3AED) : AppColors.primary;
-    final custodyCash = (state.managerCustodyCashETB as double) > 0
-        ? (state.managerCustodyCashETB as double)
-        : (state.pendingCashierHandover != null
-            ? (state.pendingCashierHandover!.handoverCashAmount as double)
-            : (state.undepositedCashTodayETB as double));
+    final custodyCash = state.managerCustodyCashETB as double;
 
     return Container(
       padding: const EdgeInsets.all(4),

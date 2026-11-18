@@ -40,7 +40,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
     final cashierDrawerCash = state.cashierDrawerBalanceETB as double;
     final managerCustodyCash = state.managerCustodyCashETB as double;
     final activeDrawerCash = widget.isManager
-        ? (managerCustodyCash > 0 ? managerCustodyCash : undepositedCash)
+        ? managerCustodyCash
         : cashierDrawerCash;
     final pendingCashierOtp = state.pendingCashierHandover ?? state.pendingCashierAdminHandover;
     final pendingNightOtp = state.pendingAdminNightHandover;
@@ -95,7 +95,35 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
                 CurrencyFormatter.format(activeDrawerCash),
                 style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
               ),
-              if (!widget.isManager && isDayClosed) ...[
+              if (widget.isManager) ...[
+                if (managerCustodyCash <= 0.01) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: pendingCashierOtp != null
+                          ? const Color(0xFFD97706).withValues(alpha: 0.25)
+                          : Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: pendingCashierOtp != null
+                          ? Border.all(color: const Color(0xFFD97706), width: 1)
+                          : null,
+                    ),
+                    child: Text(
+                      pendingCashierOtp != null
+                          ? state.tr('pendingCashierHandoverOtp')
+                          : (!isDayClosed
+                              ? state.tr('cashWithDayCashier')
+                              : state.tr('drawerEmptyHandedOver')),
+                      style: TextStyle(
+                        color: pendingCashierOtp != null ? const Color(0xFFFCD34D) : const Color(0xFFCBD5E1),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ] else if (isDayClosed) ...[
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -416,20 +444,20 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
                 : state.tr('reconcileAndCloseShift')));
 
     final cashierCanDeposit = !isClosed && pendingHandover == null && (state.cashierDrawerBalanceETB as double) > 0.01;
-    final managerCanDeposit = (state.managerCustodyCashETB as double) > 0.01 || (state.undepositedCashTodayETB as double) > 0.01;
+    final managerCanDeposit = (state.managerCustodyCashETB as double) > 0.01;
     final canDeposit = widget.isManager ? managerCanDeposit : cashierCanDeposit;
 
     final depositSubtitle = widget.isManager
-        ? CurrencyFormatter.formatShort((state.managerCustodyCashETB as double) > 0
-            ? (state.managerCustodyCashETB as double)
-            : (state.undepositedCashTodayETB as double))
+        ? ((state.managerCustodyCashETB as double) > 0.01
+            ? CurrencyFormatter.formatShort(state.managerCustodyCashETB as double)
+            : state.tr('noCustodyCashToDeposit'))
         : ((isClosed || pendingHandover != null)
             ? state.tr('drawerEmptyHandedOver')
             : CurrencyFormatter.formatShort(state.cashierDrawerBalanceETB as double));
 
     final actions = [
       _buildDeskActionButton(
-        onPressed: canDeposit ? () => BankDepositDialog.show(context) : null,
+        onPressed: canDeposit ? () => BankDepositDialog.show(context, isManager: widget.isManager) : null,
         color: Colors.indigo,
         icon: Icons.account_balance_rounded,
         title: state.tr('depositCashToBank'),

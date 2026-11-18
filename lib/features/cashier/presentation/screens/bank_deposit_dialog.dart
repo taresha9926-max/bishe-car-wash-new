@@ -11,10 +11,15 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 
 class BankDepositDialog extends StatefulWidget {
   final bool isBottomSheet;
+  final bool isManager;
 
-  const BankDepositDialog({super.key, this.isBottomSheet = false});
+  const BankDepositDialog({
+    super.key,
+    this.isBottomSheet = false,
+    this.isManager = false,
+  });
 
-  static Future<void> show(BuildContext context) {
+  static Future<void> show(BuildContext context, {bool isManager = false}) {
     final isMobile = MediaQuery.sizeOf(context).width < 600;
     if (isMobile) {
       return showModalBottomSheet(
@@ -32,14 +37,14 @@ class BankDepositDialog extends StatefulWidget {
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(_).viewInsets.bottom,
           ),
-          child: const BankDepositDialog(isBottomSheet: true),
+          child: BankDepositDialog(isBottomSheet: true, isManager: isManager),
         ),
       );
     }
     return showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) => const BankDepositDialog(),
+      builder: (_) => BankDepositDialog(isManager: isManager),
     );
   }
 
@@ -88,7 +93,9 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final availableCash = state.undepositedCashTodayETB;
+    final availableCash = widget.isManager
+        ? (state.managerCustodyCashETB as double)
+        : (state.cashierDrawerBalanceETB as double);
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final content = ConstrainedBox(
@@ -454,6 +461,19 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
         SnackBar(
           content: Text(state.tr('depositSlipMandatoryNotice')),
           backgroundColor: Colors.red.shade700,
+        ),
+      );
+      return;
+    }
+
+    final availableCash = widget.isManager
+        ? (state.managerCustodyCashETB as double)
+        : (state.cashierDrawerBalanceETB as double);
+    if (amount > availableCash + 0.01) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Deposit amount exceeds physical cash in custody (${CurrencyFormatter.format(availableCash)}).'),
+          backgroundColor: Colors.redAccent,
         ),
       );
       return;

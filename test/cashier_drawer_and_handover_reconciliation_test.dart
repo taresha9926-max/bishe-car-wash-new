@@ -64,6 +64,8 @@ void main() {
       // Drawer now has 600 - 50 = 550 ETB
       expect(state.cashierDrawerBalanceETB, equals(550.0));
       expect(state.undepositedCashTodayETB, equals(550.0));
+      // Manager has zero custody cash while cashier is actively working day shift
+      expect(state.managerCustodyCashETB, equals(0.0));
 
       // 5. Verify VAT rules: 15% VAT on Car Wash (500 * 0.15 = 75 ETB), 0% VAT on Shower (100 * 0 = 0 ETB)
       expect(state.vatDeductedTodayETB, equals(500.0 * 0.15));
@@ -89,8 +91,9 @@ void main() {
       expect(state.isTodayDayShiftClosed, isTrue);
       expect(state.cashierDrawerBalanceETB, equals(0.0));
 
-      // Manager has not accepted yet: carried cash is 0
+      // Manager has not accepted yet: carried cash is 0 and manager custody cash is strictly 0.00 ETB
       expect(state.managerCarriedCashETB, equals(0.0));
+      expect(state.managerCustodyCashETB, equals(0.0));
 
       // 8. Manager verifies OTP
       final accepted = await state.acceptCashierHandover(
@@ -208,6 +211,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Before OTP acceptance: Manager tab shows strictly 0 ETB custody cash!
+      expect(find.text('${state.tr("managerTabHandoverClose")} (${CurrencyFormatter.formatShort(0.0)})'), findsOneWidget);
+      expect(state.managerCustodyCashETB, equals(0.0));
+
       // Manager OTP Card must show exact handover amount
       expect(find.text(state.tr('acceptCashierHandover')), findsOneWidget);
       expect(find.text(CurrencyFormatter.format(closing.handoverCashAmount)), findsWidgets);
@@ -219,8 +226,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Banner clears
+      // Banner clears and Manager tab updates to 1.0k ETB
       expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
+      expect(find.text('${state.tr("managerTabHandoverClose")} (${CurrencyFormatter.formatShort(1000.0)})'), findsOneWidget);
+      expect(state.managerCustodyCashETB, equals(1000.0));
 
       // Switch to Money & Handover Tab
       await tester.tap(find.byType(Tab).at(1));
