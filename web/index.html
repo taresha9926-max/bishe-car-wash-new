@@ -28,18 +28,23 @@
 </head>
 <body>
   <script>
-    // Force purge stale Service Workers and CacheStorage from browser caches
+    // 1. Force purge stale Service Workers from browser
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(regs) {
         for (var r of regs) { r.unregister(); }
       });
     }
+    // 2. Force delete all browser CacheStorage buckets
     if ('caches' in window) {
       caches.keys().then(function(names) {
         for (var name of names) { caches.delete(name); }
       });
     }
+    // 3. Dynamically inject flutter_bootstrap.js with a timestamp cache-buster to prevent HTTP 304 stale caching
+    var bs = document.createElement('script');
+    bs.src = 'flutter_bootstrap.js?t=' + Date.now();
+    bs.async = true;
+    document.body.appendChild(bs);
   </script>
-  <script src="flutter_bootstrap.js?v=4.0.0" async></script>
 </body>
 </html>
