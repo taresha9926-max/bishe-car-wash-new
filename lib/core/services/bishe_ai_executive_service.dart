@@ -12,6 +12,7 @@ import '../../features/booking_service/domain/models/wash_package.dart';
 import '../../features/booking_service/domain/models/wash_status.dart';
 import '../../features/booking_service/presentation/state/app_state_notifier.dart';
 import '../../features/inventory/domain/models/fixed_asset.dart';
+import '../constants/app_constants.dart';
 import '../localization/app_strings.dart';
 import '../utils/currency_formatter.dart';
 
@@ -448,6 +449,7 @@ class BisheAiExecutiveService {
 You are "BisheAI", the Chief Operations Executive for "BISHE Car Wash & Auto Care Service" in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
 Caller Role: ${callerRole.displayName.toUpperCase()}
 GPS: 8°44'57.2"N 38°58'02.4"E | Behind Hirna Butchery, near Alemshet Fero.
+Station Contacts: Gate Desk & SMS: ${AppConstants.stationPhoneNumber} (0910046553) | Customer Support/Manager: ${AppConstants.stationPhoneNumberSecondary} (0983948888).
 
 OPERATIONAL KNOWLEDGE BASE (BISHE OPERATIONS MANUAL):
 1. Station Infrastructure:
@@ -934,6 +936,30 @@ As soon as you provide your license plate, I will issue your ticket and bay assi
         query.contains('dhoqqee') ||
         query.contains('haroo')) {
       return generateBishoftuMudRoadsReport(lang);
+    }
+
+    // GPS & Station Location Navigator
+    if (query.contains('gps') ||
+        query.contains('locate') ||
+        query.contains('location') ||
+        query.contains('map') ||
+        query.contains('where') ||
+        query.contains('direction') ||
+        query.contains('address') ||
+        query.contains('phone') ||
+        query.contains('contact') ||
+        query.contains('call') ||
+        query.contains('ቦታ') ||
+        query.contains('መገኛ') ||
+        query.contains('አቅጣጫ') ||
+        query.contains('ካርታ') ||
+        query.contains('ስልክ') ||
+        query.contains('አድራሻ') ||
+        query.contains('bakka') ||
+        query.contains('kallattii') ||
+        query.contains('teessoo') ||
+        query.contains('bilbila')) {
+      return _generateCustomerLocationGpsReport(lang);
     }
 
     if (query.contains('package') ||
@@ -1938,6 +1964,79 @@ ${feedbackRows.isEmpty ? '| No customer feedback submissions yet | - | - | - |' 
   // ==========================================
   // CUSTOMER CONCIERGE LOCAL REPORTS
   // ==========================================
+  static String _generateCustomerLocationGpsReport(AppLanguage lang) {
+    switch (lang) {
+      case AppLanguage.am:
+        return '''
+### 📍 ቢሼ የመኪና ማጠቢያ — የጂፒኤስ መገኛና ስልክ
+*የቢሾፍቱ ሃይቆች መኪና እጥበትና ዲቴይሊንግ ስቱዲዮ • ቢሾፍቱ (ደብረ ዘይት)*
+
+| መረጃ | የጣቢያው መገኛና የስልክ መስመሮች |
+| :--- | :--- |
+| **የጎግል ካርታ ቀጥታ ሊንክ** | [🗺️ በጎግል ካርታ ክፈት](${AppConstants.googleMapsLocationUrl}) |
+| **የጂፒኤስ መለያ (GPS)** | `${AppConstants.stationGpsCoordinates}` *(አስርዮሽ፦ `${AppConstants.stationGpsDecimal}`)* |
+| **ከተማ / ክልል** | ቢሾፍቱ (ደብረ ዘይት)፣ ሆራ ሐይቅ አጠገብ፣ ኦሮሚያ |
+| **መለያ ምልክቶች** | ከ**ሂርና ስጋ ቤት** ጀርባ፣ ወደ **አለምሸት ፌሮ** መታጠፊያ |
+| **የመግቢያ በር / ዴስክ** | [📞 **${AppConstants.stationPhoneNumber}**](tel:${AppConstants.stationPhoneNumber}) |
+| **ደንበኞች አገልግሎት / ሥራ አስኪያጅ** | [📞 **${AppConstants.stationPhoneNumberSecondary}**](tel:${AppConstants.stationPhoneNumberSecondary}) |
+
+---
+
+### 🚗 የመኪና መምጫ አቅጣጫዎች
+- **ከአዲስ አበባ በፈጣን መንገድ (Expressway)**፦ በቢሾፍቱ መውጫ በኩል ወጥተው ወደ ከተማው መሀል በሚወስደው ዋና አስፋልት አለምሸት ፌሮ አጠገብ ይታጠፉ።
+- **ከኩሪፍቱ / ባቦጋያ ሪዞርቶች**፦ ወደ ከተማው ዋና መንገድ 5–7 ደቂቃ በመጓዝ ከሂርና ስጋ ቤት ጀርባ ይግቡ።
+
+💡 *መኪናዎን ይዘው መምጣት ካልቻሉ* በ [**${AppConstants.stationPhoneNumber}**](tel:${AppConstants.stationPhoneNumber}) ወይም [**${AppConstants.stationPhoneNumberSecondary}**](tel:${AppConstants.stationPhoneNumberSecondary}) ደውለው **ተንቀሳቃሽ ቫናችን (Mobile Van)** እርስዎ ባሉበት ደጃፍ ድረስ መጥቶ እንዲያጥብ ማዘዝ ይችላሉ!
+''';
+
+      case AppLanguage.om:
+        return '''
+### 📍 Giddugala Dhiqannaa BISHE — Bakka GPS fi Bilbila
+*Istudiyoo Dhiqannaa fi Kunuunsa Konkolaataa Bishooftuu*
+
+| Odeeffannoo | Bakka Buufataafi Lakk. Bilbilaa |
+| :--- | :--- |
+| **Liankii Google Maps** | [🗺️ Google Maps irratti Bani](${AppConstants.googleMapsLocationUrl}) |
+| **Koordinaatii GPS** | `${AppConstants.stationGpsCoordinates}` *(Lakkoofsaan፦ `${AppConstants.stationGpsDecimal}`)* |
+| **Magaalaa** | Bishooftuu (Debre Zeyit), Haroo Hoolaa cinaa, Oromiyaa |
+| **Mallattoo Iddoo** | **Foon Hirnaa** duuba, **Alemshat Feeroo** biratti |
+| **Balbala Seensaa / Kaashiyara** | [📞 **${AppConstants.stationPhoneNumber}**](tel:${AppConstants.stationPhoneNumber}) |
+| **Tajaajila Maamiltootaa / Hogganaa** | [📞 **${AppConstants.stationPhoneNumberSecondary}**](tel:${AppConstants.stationPhoneNumberSecondary}) |
+
+---
+
+### 🚗 Kallattii Imalaa
+- **Finfinneerraa Daandii Ariititiin yoo dhuftan**: Bishooftuutti ba'uun gara magaalaatti fuulleffadhaa; Alemshat Feeroo biratti goraa.
+- **Haroo Kuriftuufi Baabogayyaarraa**: Daqiiqaa 5–7 gara magaalaatti deemsisuun Foon Hirnaa duubaan seenaa.
+
+💡 *As dhufuu yoo hin dandeenye*, bilbila [**${AppConstants.stationPhoneNumber}**](tel:${AppConstants.stationPhoneNumber}) ykn [**${AppConstants.stationPhoneNumberSecondary}**](tel:${AppConstants.stationPhoneNumberSecondary}) irratti bilbiluun **Makiinaan Socho'aa (Mobile Van)** keenya bakka jirtanitti dhufee akka isiniif dhiqu ajajuu dandeessu!
+''';
+
+      case AppLanguage.en:
+        return '''
+### 📍 BISHE Car Wash — GPS & Contact
+*Crater Lake Auto Detailing & Care Studio • Bishoftu (Debre Zeit)*
+
+| Detail | Station Location & Contact |
+| :--- | :--- |
+| **Google Maps Direct Pin** | [🗺️ Open in Google Maps](${AppConstants.googleMapsLocationUrl}) |
+| **GPS Coordinates** | `${AppConstants.stationGpsCoordinates}` *(Decimal: `${AppConstants.stationGpsDecimal}`)* |
+| **City / Area** | Bishoftu (Debre Zeit), Near Lake Hora, Oromia |
+| **Local Landmarks** | Right behind **Hirna Butchery (ሂርና ስጋ ቤት)**, near **Alemshet Fero (አለምሸት ፌሮ)** |
+| **Gate Desk / Reception** | [📞 **${AppConstants.stationPhoneNumber}**](tel:${AppConstants.stationPhoneNumber}) |
+| **Customer Support / Manager** | [📞 **${AppConstants.stationPhoneNumberSecondary}**](tel:${AppConstants.stationPhoneNumberSecondary}) |
+
+---
+
+### 🚗 Driving Directions
+- **Coming from Addis via Expressway**: Exit at Bishoftu toll gate, head down the main road towards town, and turn in near Alemshet Fero.
+- **From Kuriftu / Babogaya Resorts**: Head 5–7 minutes up the main asphalt towards town; turn in behind Hirna Butchery.
+
+💡 *Prefer not to drive?* Call [**${AppConstants.stationPhoneNumber}**](tel:${AppConstants.stationPhoneNumber}) or [**${AppConstants.stationPhoneNumberSecondary}**](tel:${AppConstants.stationPhoneNumberSecondary}) to book our **Mobile Van** to come directly to your house or resort anywhere in Bishoftu!
+''';
+    }
+  }
+
   static String _generateCustomerPackagesReport(AppStateNotifier state, AppLanguage lang) {
     switch (lang) {
       case AppLanguage.am:

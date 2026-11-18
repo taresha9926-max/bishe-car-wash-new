@@ -189,7 +189,7 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   // Cashier SMS Dispatch Gateway Configuration
-  String _cashierSmsPhone = '0962274450';
+  String _cashierSmsPhone = AppConstants.stationPhoneNumber;
   String get cashierSmsPhone => _cashierSmsPhone;
   void setCashierSmsPhone(String phone) {
     _cashierSmsPhone = phone.trim();

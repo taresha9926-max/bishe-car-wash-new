@@ -524,5 +524,21 @@ void main() {
 
       expect(response, contains('Station Watchdog Health Audit'));
     });
+
+    test('Customer Governance: Locates station via GPS and returns verified phone numbers', () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: 'Can you locate me to bishe car wash via gps',
+        state: state,
+        currentLang: AppLanguage.en,
+        callerRole: UserRole.customer,
+      );
+
+      expect(response, contains('BISHE Car Wash — GPS & Contact'));
+      expect(response, contains('8°44\'57.2"N 38°58\'02.4"E'));
+      expect(response, contains('0910046553'));
+      expect(response, contains('0983948888'));
+      expect(response, contains('Hirna Butchery'));
+      expect(response, contains('Alemshet Fero'));
+    });
   });
 }

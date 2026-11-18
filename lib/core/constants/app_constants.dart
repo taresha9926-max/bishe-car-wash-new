@@ -22,7 +22,8 @@ class AppConstants {
   static const String stationGpsCoordinates = '8°44\'57.2"N 38°58\'02.4"E';
   static const String stationGpsDecimal = '8.749222, 38.967333';
   static const String googleMapsLocationUrl = 'https://www.google.com/maps/search/?api=1&query=8%C2%B044%2757.2%22N+38%C2%B058%2702.4%22E';
-  static const String stationPhoneNumber = '+251911234567';
+  static const String stationPhoneNumber = '0910046553';
+  static const String stationPhoneNumberSecondary = '0983948888';
 
   // Live Supabase Backend Configuration (Project: bishe car wash)
   static const String supabaseUrl = 'https://siioobajphmwzwwarlrr.supabase.co';

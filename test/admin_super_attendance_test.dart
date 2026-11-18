@@ -280,11 +280,11 @@ void main() {
     });
 
     test('Walk-in booking lifecycle starts as pending and dispatches SMS on completion', () async {
-      // 1. Verify default cashier SMS phone is 0962274450 and can be configured
-      expect(state.cashierSmsPhone, equals('0962274450'));
+      // 1. Verify default cashier SMS phone is 0910046553 and can be configured
+      expect(state.cashierSmsPhone, equals('0910046553'));
       state.setCashierSmsPhone('0911223344');
       expect(state.cashierSmsPhone, equals('0911223344'));
-      state.setCashierSmsPhone('0962274450');
+      state.setCashierSmsPhone('0910046553');
 
       // 2. Register new walk-in vehicle
       final pkg = state.packages.first;

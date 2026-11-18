@@ -280,7 +280,7 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
                                   icon: Icons.phone_in_talk_rounded,
                                   label: 'Call',
                                   color: AppColors.warmAmberSunset,
-                                  onTap: () => UrlLauncherHelper.openUrl('tel:0962274450'),
+                                  onTap: () => UrlLauncherHelper.openUrl('tel:${AppConstants.stationPhoneNumber}'),
                                 ),
                                 const SizedBox(width: 8),
                                 _buildSocialPill(
