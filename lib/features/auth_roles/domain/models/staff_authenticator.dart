@@ -4,11 +4,13 @@ import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart'
 /// Deep authentication module encapsulating staff credential verification
 /// and role access policies. Strictly enforces Super Admin authority and database credentials.
 class StaffAuthenticator {
-  static const String defaultAdminPin = '1234';
+  static const String defaultAdminPin = '4450';
+  static const String defaultCashierPin = '2233';
+  static const String defaultManagerPin = '7788';
+  static const String defaultAccountantPin = '3344';
+  static const String defaultStorekeeperPin = '3344';
 
-  /// Verifies entered PIN strictly against active credentials.
-  /// Cashier, Manager, Storekeeper, and Accountant MUST be created by the Super Admin.
-  /// Hardcoded fallback PINs (0000, 7788, etc.) are strictly disallowed.
+  /// Verifies entered PIN against active database credentials, or default PINs if unconfigured.
   static bool authenticate({
     required UserRole role,
     required String enteredPin,
@@ -20,19 +22,25 @@ class StaffAuthenticator {
 
     final roleCredentials = credentials.where((c) => c.role == role && c.isActive).toList();
 
-    // If active credentials exist for this role, ONLY those exact credentials are valid
+    // If active credentials exist in the system for this role, ONLY those exact credentials are valid
     if (roleCredentials.isNotEmpty) {
       return roleCredentials.any((c) => c.pin.trim() == pin);
     }
 
-    // Initial Super Admin bootstrap fallback ONLY if the credentials list has no active admin record
-    if (role == UserRole.admin) {
-      final hasAdmin = credentials.any((c) => c.role == UserRole.admin && c.isActive);
-      if (!hasAdmin && pin == defaultAdminPin) return true;
+    // Default PIN fallback only if no active credentials exist in the system for that role
+    switch (role) {
+      case UserRole.admin:
+        return pin == defaultAdminPin;
+      case UserRole.cashier:
+        return pin == defaultCashierPin;
+      case UserRole.manager:
+        return pin == defaultManagerPin;
+      case UserRole.accountant:
+        return pin == defaultAccountantPin;
+      case UserRole.storekeeper:
+        return pin == defaultStorekeeperPin;
+      case UserRole.customer:
+        return true;
     }
-
-    // Cashier, Manager, Storekeeper, Accountant MUST be created by Super Admin.
-    // Zero hardcoded bypasses allowed.
-    return false;
   }
 }

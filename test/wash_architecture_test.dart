@@ -131,7 +131,39 @@ void main() {
       expect(
         StaffAuthenticator.authenticate(
           role: UserRole.admin,
-          enteredPin: '1234',
+          enteredPin: '4450',
+          credentials: [],
+        ),
+        isTrue,
+      );
+      expect(
+        StaffAuthenticator.authenticate(
+          role: UserRole.cashier,
+          enteredPin: '2233',
+          credentials: [],
+        ),
+        isTrue,
+      );
+      expect(
+        StaffAuthenticator.authenticate(
+          role: UserRole.manager,
+          enteredPin: '7788',
+          credentials: [],
+        ),
+        isTrue,
+      );
+      expect(
+        StaffAuthenticator.authenticate(
+          role: UserRole.accountant,
+          enteredPin: '3344',
+          credentials: [],
+        ),
+        isTrue,
+      );
+      expect(
+        StaffAuthenticator.authenticate(
+          role: UserRole.storekeeper,
+          enteredPin: '3344',
           credentials: [],
         ),
         isTrue,
@@ -196,10 +228,12 @@ void main() {
 
     test('Repository verifyStaffPin delegates verification securely', () async {
       final repo = WashRepositoryImpl();
-      expect(await repo.verifyStaffPin(UserRole.admin, '1234'), isTrue);
-      // Hardcoded backdoors (0000, 3344, etc.) are strictly disallowed without active database credentials
+      expect(await repo.verifyStaffPin(UserRole.admin, '4450'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.cashier, '2233'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.manager, '7788'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.accountant, '3344'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.storekeeper, '3344'), isTrue);
       expect(await repo.verifyStaffPin(UserRole.cashier, '0000'), isFalse);
-      expect(await repo.verifyStaffPin(UserRole.storekeeper, '3344'), isFalse);
       expect(await repo.verifyStaffPin(UserRole.admin, 'wrong_pin'), isFalse);
 
       // Once Super Admin creates an active credential, only that assigned PIN authenticates

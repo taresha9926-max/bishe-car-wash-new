@@ -19,14 +19,6 @@ void main() {
 
     setUp(() async {
       repo = WashRepositoryImpl();
-      await repo.addStaffCredential(const StaffCredential(
-        id: 'cred-cashier',
-        username: 'cashier',
-        pin: '0000',
-        role: UserRole.cashier,
-        fullName: 'Station Gate Cashier',
-        isActive: true,
-      ));
       state = AppStateNotifier(repository: repo);
       await state.loadData();
     });
@@ -147,20 +139,23 @@ void main() {
     });
 
     test('Strict PIN authentication: edited PIN is the ONLY valid entry PIN', () async {
-      // Super Admin edits their PIN from 1234 to 4450
+      // Default admin PIN 4450 authenticates
+      expect(await state.authenticateRoleAsync(UserRole.admin, '4450'), isTrue);
+
+      // Super Admin edits their PIN from 4450 to 9988
       state.setSuperAdminStatus(true);
       await state.updateStaffCredential(
         id: 'cred-admin',
-        pin: '4450',
+        pin: '9988',
         fullName: 'Super Admin',
       );
 
-      // Verify old hardcoded PIN 1234 fails
-      final oldAuth = await state.authenticateRoleAsync(UserRole.admin, '1234');
+      // Verify old PIN 4450 fails now that a custom PIN is active
+      final oldAuth = await state.authenticateRoleAsync(UserRole.admin, '4450');
       expect(oldAuth, isFalse);
 
-      // Verify newly edited PIN 4450 succeeds and sets Super Admin status
-      final newAuth = await state.authenticateRoleAsync(UserRole.admin, '4450');
+      // Verify newly edited PIN 9988 succeeds and sets Super Admin status
+      final newAuth = await state.authenticateRoleAsync(UserRole.admin, '9988');
       expect(newAuth, isTrue);
       expect(state.isSuperAdmin, isTrue);
     });

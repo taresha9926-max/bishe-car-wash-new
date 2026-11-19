@@ -1319,20 +1319,57 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           })
           .toList();
 
-      // Only bootstrap admin if no active admin credential exists yet in database
-      final hasAdmin = creds.any((c) => c.role == UserRole.admin && c.isActive);
-      if (!hasAdmin) {
-        creds.insert(
-          0,
-          const StaffCredential(
-            id: 'cred-admin',
-            username: 'admin',
-            pin: '1234',
-            role: UserRole.admin,
-            fullName: 'Bishe Super Admin',
-            isActive: true,
-          ),
-        );
+      // Ensure default initial credentials exist for unconfigured roles:
+      // admin = 4450, cashier = 2233, manager = 7788, accountant = 3344, storekeeper = 3344
+      if (!creds.any((c) => c.role == UserRole.admin && c.isActive)) {
+        creds.add(const StaffCredential(
+          id: 'cred-admin',
+          username: 'admin',
+          pin: '4450',
+          role: UserRole.admin,
+          fullName: 'Bishe Super Admin',
+          isActive: true,
+        ));
+      }
+      if (!creds.any((c) => c.role == UserRole.cashier && c.isActive)) {
+        creds.add(const StaffCredential(
+          id: 'cred-cashier',
+          username: 'cashier',
+          pin: '2233',
+          role: UserRole.cashier,
+          fullName: 'Station Gate Cashier',
+          isActive: true,
+        ));
+      }
+      if (!creds.any((c) => c.role == UserRole.manager && c.isActive)) {
+        creds.add(const StaffCredential(
+          id: 'cred-manager',
+          username: 'manager',
+          pin: '7788',
+          role: UserRole.manager,
+          fullName: 'Operational Manager',
+          isActive: true,
+        ));
+      }
+      if (!creds.any((c) => c.role == UserRole.accountant && c.isActive)) {
+        creds.add(const StaffCredential(
+          id: 'cred-accountant',
+          username: 'accountant',
+          pin: '3344',
+          role: UserRole.accountant,
+          fullName: 'Station Accountant',
+          isActive: true,
+        ));
+      }
+      if (!creds.any((c) => c.role == UserRole.storekeeper && c.isActive)) {
+        creds.add(const StaffCredential(
+          id: 'cred-storekeeper',
+          username: 'storekeeper',
+          pin: '3344',
+          role: UserRole.storekeeper,
+          fullName: 'Inventory Storekeeper',
+          isActive: true,
+        ));
       }
       return creds;
     } catch (_) {
@@ -1390,20 +1427,22 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           'pin_hash': pin.trim(),
           'full_name': fullName.trim(),
         });
-      } else if (id == 'cred-admin' || roleName == 'admin') {
-        final existing = await _get('staff_credentials?role=eq.admin&select=id');
+      } else {
+        // Initial synthetic credentials (e.g. cred-admin, cred-cashier, cred-manager, cred-accountant, cred-storekeeper)
+        final defaultUsername = cred?.username ?? roleName;
+        final existing = await _get('staff_credentials?role=eq.$roleName&select=id');
         if (existing is List && existing.isNotEmpty) {
-          final adminId = existing.first['id'];
-          await _patch('staff_credentials?id=eq.$adminId', {
+          final targetId = existing.first['id'];
+          await _patch('staff_credentials?id=eq.$targetId', {
             'pin_hash': pin.trim(),
             'full_name': fullName.trim(),
           });
         } else {
           await _post('staff_credentials', {
-            'username': 'admin',
+            'username': defaultUsername,
             'pin_hash': pin.trim(),
-            'role': 'admin',
-            'full_name': fullName.trim().isEmpty ? 'Bishe Super Admin' : fullName.trim(),
+            'role': roleName,
+            'full_name': fullName.trim().isEmpty ? cred?.fullName ?? roleName : fullName.trim(),
             'is_active': true,
           });
         }
@@ -1433,6 +1472,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     try {
       if (_isUuid(id)) {
         await _delete('staff_credentials?id=eq.$id');
+      } else {
+        final roleName = id.replaceFirst('cred-', '');
+        await _delete('staff_credentials?role=eq.$roleName');
       }
     } catch (e) {
       debugPrint('Supabase deleteStaffCredential exception: $e');
