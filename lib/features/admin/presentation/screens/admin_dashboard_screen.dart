@@ -203,8 +203,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             _matchesFilter(t.date) &&
             (t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
         .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
-    final vatDeducted = serviceRevenue * 0.15;
-    final netServiceRevenue = serviceRevenue - vatDeducted;
+    final vehicleWashRev = paidBookings.where((b) => !b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final carpetWashRev = paidBookings.where((b) => b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    // 15% VAT applies exclusively to Car Wash; Carpet and Shower are VAT exempt
+    final vatDeducted = vehicleWashRev * 0.15;
+    final netServiceRevenue = (vehicleWashRev - vatDeducted) + carpetWashRev;
     final commissionPool = (netServiceRevenue * state.teamCommissionRate) + tipsRevenue;
 
     final digitalBookings = allBookings.where((b) => b.payment.isPaid && b.payment.method.isDigital).toList();

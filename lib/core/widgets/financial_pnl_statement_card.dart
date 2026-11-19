@@ -158,6 +158,7 @@ class FinancialPnlStatementCard extends StatelessWidget {
           const SizedBox(height: 8),
           _buildRow(state.tr('opexRow'), '- ${CurrencyFormatter.format(totalPettyCash)}', Colors.deepOrange.shade900, isHeader: true),
           _buildSubRow('• ${state.tr("pettyCashOpexSub")}', '- ${CurrencyFormatter.format(totalPettyCash)}'),
+          _buildSubRow('• ${state.tr("facilityRent")} (Accrual)', '- ${CurrencyFormatter.format(state.dailyFacilityRentAccrualETB)}'),
           const Divider(thickness: 1.5, height: 16),
           _buildRow(state.tr('netOperatingProfitRow'), CurrencyFormatter.format(netOperatingProfit), netOperatingProfit >= 0 ? Colors.teal.shade800 : Colors.red, isBold: true, isLarge: true),
           const Divider(height: 16),

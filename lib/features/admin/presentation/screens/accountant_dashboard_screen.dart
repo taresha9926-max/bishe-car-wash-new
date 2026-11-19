@@ -280,6 +280,135 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           const SizedBox(height: 16),
 
+          // Ministry of Revenues • VAT & Tax Segregation Audit Card
+          Container(
+            padding: const EdgeInsets.all(14),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.amber.shade700.withOpacity(0.6), width: 1.2),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade900.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.account_balance_rounded, color: Colors.amber.shade400, size: 20),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            state.tr('vatAuditCard'),
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: Colors.white),
+                          ),
+                          Text(
+                            state.tr('vatSummaryNotice'),
+                            style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(state.tr('vatRateNotice'), style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
+                            const SizedBox(height: 2),
+                            Text(
+                              CurrencyFormatter.format(state.todayVehicleRevenueETB),
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.white),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '15% VAT: ${CurrencyFormatter.format(state.vatDeductedTodayETB)}',
+                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 10.5, color: Colors.amber.shade400),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(state.tr('vatExempt'), style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
+                            const SizedBox(height: 2),
+                            Text(
+                              CurrencyFormatter.format(state.todayCarpetRevenueETB + state.todayShowerRevenueETB),
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF38BDF8)),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Carpet & Shower (0%)',
+                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10, color: Color(0xFF94A3B8)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(state.tr('netRevenue'), style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
+                            const SizedBox(height: 2),
+                            Text(
+                              CurrencyFormatter.format(state.netBusinessRevenueTodayETB),
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF10B981)),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Pre-Tax Business Rev',
+                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10, color: Color(0xFF94A3B8)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
           // 1. Submitted Daily Closings
           ExpandableActionCard(
             icon: AutoCareAssets.buildPhotoThumbnail(
@@ -1239,6 +1368,14 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final grossRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final commissionPaid = (state.commissionLogs as List).cast<CommissionLog>().fold<double>(0.0, (sum, l) => sum + l.commissionEarnedETB);
 
+    // 15% VAT on Car Wash services; Carpet and Shower services are 100% VAT exempt
+    final vehicleWashRevenue = paidBookings.where((b) => !b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final vehicleVat = vehicleWashRevenue * 0.15;
+    final vehicleNet = vehicleWashRevenue - vehicleVat;
+    final carpetWashRevenue = paidBookings.where((b) => b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final showerRevenue = _isDailyPnlView ? (state.todayShowerRevenueETB as double) : ((state.todayShowerRevenueETB as double) * 30.0);
+    final totalNetRevenue = vehicleNet + carpetWashRevenue + showerRevenue;
+
     // COST OF GOODS SOLD (COGS): Only actual consumed soap via empty-full can exchange or bay consumption
     // NEVER deduct warehouse inventory restocks (receiveStock)
     final suppliesCost = (state.stockTransactions as List<StockTransaction>)
@@ -1255,7 +1392,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final monthlyDepreciation = dailyDepreciation * 30.0;
 
     final cogs = commissionPaid + suppliesCost;
-    final grossProfit = grossRevenue - cogs;
+    final grossProfit = totalNetRevenue - cogs;
 
     // OpEx calculation based on active view (Daily Accrual ÷ 30 vs Full Monthly)
     final opex = _isDailyPnlView
@@ -1405,10 +1542,27 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           const SizedBox(height: 12),
 
-          // Section 1: Revenue
-          const Text('I. OPERATING REVENUE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary)),
-          _buildPnLLine('Gross Vehicle Wash Services Revenue', CurrencyFormatter.format(grossRevenue), Colors.green.shade700, false),
-          const SizedBox(height: 8),
+          // Section 1: Revenue by Service Division & Tax Treatment
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('I. OPERATING REVENUE & TAX TREATMENT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                child: Text(state.tr('departmentalPnl'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          _buildPnLLine('1. Car Washing Services (Vatable Gross)', CurrencyFormatter.format(vehicleWashRevenue), Colors.white, false),
+          _buildPnLLine('   ↳ Less: 15% VAT Output (Gov Tax Liability)', '- ${CurrencyFormatter.format(vehicleVat)}', Colors.amberAccent, false),
+          _buildPnLLine('   ↳ Net Car Wash Revenue', CurrencyFormatter.format(vehicleNet), Colors.green.shade600, false),
+          _buildPnLLine('2. Carpet Washing Services (VAT Exempt 0%)', CurrencyFormatter.format(carpetWashRevenue), Colors.green.shade600, false),
+          _buildPnLLine('3. Shower Services Facility (VAT Exempt 0%)', CurrencyFormatter.format(showerRevenue), Colors.green.shade600, false),
+          const Divider(thickness: 0.8, height: 12, color: Colors.white24),
+          _buildPnLLine('TOTAL NET OPERATING REVENUE', CurrencyFormatter.format(totalNetRevenue), Colors.green.shade800, true),
+          const SizedBox(height: 10),
 
           // Section 2: COGS
           const Text('II. DIRECT COST OF GOODS SOLD (COGS)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.orange)),
@@ -1426,8 +1580,14 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           ...overheads.map((o) {
             final amt = _isDailyPnlView ? o.dailyAccrualEtb : o.monthlyAmountEtb;
-            final subtitle = _isDailyPnlView ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo ÷ 30)' : '(Monthly Budget)';
-            return _buildPnLLine('${o.name} $subtitle', '- ${CurrencyFormatter.format(amt)}', Colors.deepOrange.shade700, false);
+            final isRent = o.id == 'overhead_rent' || o.category.toLowerCase() == 'rent';
+            final subtitle = _isDailyPnlView ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo ÷ 30)' : '(Monthly Lease Budget)';
+            return _buildPnLLine(
+              isRent ? '★ ${o.name} $subtitle' : '${o.name} $subtitle',
+              '- ${CurrencyFormatter.format(amt)}',
+              isRent ? Colors.amber.shade300 : Colors.deepOrange.shade700,
+              isRent,
+            );
           }),
           _buildPnLLine(
             _isDailyPnlView ? 'Machinery Depreciation (÷ 30)' : 'Machinery Depreciation (Monthly)',

@@ -4152,6 +4152,66 @@ class AppStrings {
       AppLanguage.om: 'Dhuguma ba\'uudhaan gara fuula simannaatti deebi\'uu barbaadduu?',
       AppLanguage.am: 'እርግጠኛ ነዎት መውጣት እና ወደ መግቢያ ገጽ መመለስ ይፈልጋሉ?',
     },
+    'vatOutput': {
+      AppLanguage.en: 'VAT (15%)',
+      AppLanguage.om: 'VAT (15%)',
+      AppLanguage.am: 'ቫት (15%)',
+    },
+    'vatRateNotice': {
+      AppLanguage.en: '15% VAT (Car Wash)',
+      AppLanguage.om: 'VAT 15% (Dhiqannaa Konkolaataa)',
+      AppLanguage.am: '15% ቫት (የመኪና እጥበት)',
+    },
+    'vatExempt': {
+      AppLanguage.en: 'VAT Exempt (0%)',
+      AppLanguage.om: 'VAT Irraa Bilisoomte (0%)',
+      AppLanguage.am: 'ከቫት ነፃ (0%)',
+    },
+    'netRevenue': {
+      AppLanguage.en: 'Net Operating Revenue',
+      AppLanguage.om: 'Galii Hojii Qulqulluu',
+      AppLanguage.am: 'የተጣራ የሥራ ገቢ',
+    },
+    'carWashVat': {
+      AppLanguage.en: 'Car Wash VAT (15%)',
+      AppLanguage.om: 'VAT Dhiqannaa Konkolaataa (15%)',
+      AppLanguage.am: 'የመኪና እጥበት ቫት (15%)',
+    },
+    'facilityRent': {
+      AppLanguage.en: 'Facility & House Rent',
+      AppLanguage.om: 'Kiraa Buufataafi Manaa',
+      AppLanguage.am: 'የጣቢያው እና የቤት ኪራይ',
+    },
+    'facilityRentDesc': {
+      AppLanguage.en: 'Station yard, wash bays & office lease',
+      AppLanguage.om: 'Kiraa lafa buufataa fi waajjiraa',
+      AppLanguage.am: 'የጣቢያው ቦታ፣ የመታጠቢያ ክፍል እና የቢሮ ኪራይ',
+    },
+    'vatAuditCard': {
+      AppLanguage.en: 'Ministry of Revenues • VAT Audit',
+      AppLanguage.om: 'Ministeera Galiiwwanii • Oodiitii VAT',
+      AppLanguage.am: 'የገቢዎች ሚኒስቴር • የቫት ኦዲት',
+    },
+    'vatSummaryNotice': {
+      AppLanguage.en: 'Car wash services are vatable (15%). Carpet and shower services are VAT exempted (0%).',
+      AppLanguage.om: 'Tajaajilli dhiqannaa konkolaataa VAT (15%) qaba. Tajaajilli afataafi dhiqannaa qaamaa VAT irraa bilisa (0%).',
+      AppLanguage.am: 'የመኪና እጥበት አገልግሎቶች 15% ቫት የሚከፈልባቸው ሲሆን፣ ምንጣፍና ሻወር ከቫት ነፃ (0%) ናቸው።',
+    },
+    'exportVatReport': {
+      AppLanguage.en: 'Export VAT Declaration',
+      AppLanguage.om: 'Waraqaa VAT Baasi',
+      AppLanguage.am: 'የቫት ማስታወቂያ አውርድ',
+    },
+    'taxLiability': {
+      AppLanguage.en: 'Tax Liability (Fiduciary)',
+      AppLanguage.om: 'Itti Gaafatamummaa Gibiraa',
+      AppLanguage.am: 'የታክስ ዕዳ (ለመንግስት የሚከፈል)',
+    },
+    'departmentalPnl': {
+      AppLanguage.en: 'Departmental P&L Breakdown',
+      AppLanguage.om: 'Tarree Bu\'aafi Kisaaraa Dameedhaan',
+      AppLanguage.am: 'የትርፍና ኪሳራ ዝርዝር በዘርፍ',
+    },
     'drawerEmptyHandedOver': {
       AppLanguage.en: 'Drawer 0 ETB • Handed Over',
       AppLanguage.om: 'Saanduqa 0 ETB • Dabarfameera',

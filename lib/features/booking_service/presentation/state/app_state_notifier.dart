@@ -1114,14 +1114,49 @@ class AppStateNotifier extends ChangeNotifier {
     return _paidBookingsToday.fold(0.0, (sum, b) => sum + b.totalPrice);
   }
 
-  /// 15% VAT payable from collected wash + delivery fees (Shower & Tips exempt).
-  double get vatDeductedTodayETB => serviceRevenueTodayETB * vatRate;
+  /// 15% VAT payable exclusively from vehicle wash revenue (Carpet, Shower & Tips are VAT exempt).
+  double get vatDeductedTodayETB => todayVehicleRevenueETB * vatRate;
 
-  /// Wash revenue after deducting 15% VAT (commission base).
-  double get netServiceRevenueTodayETB => netWashRevenueAfterVat(serviceRevenueTodayETB);
+  /// Net vehicle wash revenue after deducting 15% VAT.
+  double get netVehicleRevenueTodayETB => netWashRevenueAfterVat(todayVehicleRevenueETB);
 
-  /// Net collected business revenue excl. VAT & tips (Net Wash + Shower).
+  /// Wash revenue after deducting 15% VAT (Car wash net + 100% exempt Carpet revenue).
+  double get netServiceRevenueTodayETB => netVehicleRevenueTodayETB + todayCarpetRevenueETB;
+
+  /// Net collected business revenue excl. VAT & tips (Net Wash + Carpet + Shower).
   double get netBusinessRevenueTodayETB => netServiceRevenueTodayETB + todayShowerRevenueETB;
+
+  /// Daily prorated facility & house rent accrual (Monthly Rent ÷ 30 days).
+  double get dailyFacilityRentAccrualETB {
+    final rent = _monthlyOverheads.firstWhere(
+      (o) => o.id == 'overhead_rent' || o.category.toLowerCase() == 'rent',
+      orElse: () => const MonthlyOverheadExpense(
+        id: 'overhead_rent',
+        name: 'Station Land / House Rent',
+        nameAmharic: 'የጣቢያው መሬት / የቦታ ኪራይ',
+        nameOromo: 'Kiraa Lafaa / Bakka Buufataa',
+        monthlyAmountEtb: 45000.0,
+        category: 'Rent',
+      ),
+    );
+    return rent.monthlyAmountEtb / 30.0;
+  }
+
+  /// Monthly facility rent total.
+  double get monthlyFacilityRentETB {
+    final rent = _monthlyOverheads.firstWhere(
+      (o) => o.id == 'overhead_rent' || o.category.toLowerCase() == 'rent',
+      orElse: () => const MonthlyOverheadExpense(
+        id: 'overhead_rent',
+        name: 'Station Land / House Rent',
+        nameAmharic: 'የጣቢያው መሬት / የቦታ ኪራይ',
+        nameOromo: 'Kiraa Lafaa / Bakka Buufataa',
+        monthlyAmountEtb: 45000.0,
+        category: 'Rent',
+      ),
+    );
+    return rent.monthlyAmountEtb;
+  }
 
   double get totalRevenueTodayETB {
     return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB;
