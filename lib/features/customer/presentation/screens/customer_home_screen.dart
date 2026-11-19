@@ -52,6 +52,8 @@ class CustomerHomeScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('appName'),
+        showBackButton: true,
+        onBack: () => state.goToWelcome(),
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 21),
@@ -59,21 +61,6 @@ class CustomerHomeScreen extends StatelessWidget {
             onPressed: () => BisheAiExecutiveSheet.show(context),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF111827),
-        foregroundColor: AppColors.liquidCyanNeon,
-        elevation: 6,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.4),
-        ),
-        icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 20),
-        label: Text(
-          state.tr('askBisheAiConcierge'),
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, letterSpacing: 0.3),
-        ),
-        onPressed: () => BisheAiExecutiveSheet.show(context),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -84,6 +71,44 @@ class CustomerHomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: InkWell(
+                    onTap: () => state.goToWelcome(),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF111827),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.cardBorder),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.arrow_back_rounded, size: 15, color: AppColors.primary),
+                          const SizedBox(width: 6),
+                          Text(
+                            state.tr('welcomeHub'),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 WelcomeServiceCarouselBanner(isMobile: isMobile),
                 const SizedBox(height: 18),
                 Text(
@@ -309,6 +334,8 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: isCarpet ? state.tr('carpetWashingService') : state.tr('carWashingService'),
+        showBackButton: true,
+        onBack: () => Navigator.of(context).pop(),
         onHomePressed: () {
           Navigator.of(context).pop();
         },

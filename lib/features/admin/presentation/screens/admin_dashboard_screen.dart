@@ -227,21 +227,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF111827),
-        foregroundColor: AppColors.liquidCyanNeon,
-        elevation: 6,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.liquidCyanNeon, width: 1.4),
-        ),
-        icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 20),
-        label: Text(
-          state.tr('aiExecutiveTitle'),
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12.5, letterSpacing: 0.3),
-        ),
-        onPressed: () => BisheAiExecutiveSheet.show(context),
-      ),
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
         child: SingleChildScrollView(

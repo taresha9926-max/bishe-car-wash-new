@@ -10,6 +10,10 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool showRoleSwitcher;
   final VoidCallback? onHomePressed;
+  final Widget? leading;
+  final bool showBackButton;
+  final VoidCallback? onBack;
+  final bool showLogoutButton;
 
   const AppRoleHeader({
     super.key,
@@ -17,6 +21,10 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.showRoleSwitcher = true,
     this.onHomePressed,
+    this.leading,
+    this.showBackButton = false,
+    this.onBack,
+    this.showLogoutButton = true,
   });
 
   @override
@@ -52,7 +60,26 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
       surfaceTintColor: Colors.transparent,
       iconTheme: const IconThemeData(color: Colors.white),
       centerTitle: false,
-      titleSpacing: isMobile ? 8 : 16,
+      automaticallyImplyLeading: showBackButton || leading != null,
+      leadingWidth: (showBackButton || leading != null) ? (isMobile ? 36 : 44) : null,
+      leading: (showBackButton || leading != null)
+          ? (leading ??
+              IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                tooltip: state.tr('back'),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                onPressed: onBack ??
+                    () {
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      } else {
+                        state.goToWelcome();
+                      }
+                    },
+              ))
+          : null,
+      titleSpacing: (showBackButton || leading != null) ? (isMobile ? 4 : 8) : (isMobile ? 8 : 16),
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -69,35 +96,37 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.45)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.liquidCyanNeon.withValues(alpha: 0.25),
-                        blurRadius: 6,
-                      ),
-                    ],
+                if (!showBackButton && leading == null) ...[
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(7),
+                      border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.45)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.liquidCyanNeon.withValues(alpha: 0.25),
+                          blurRadius: 6,
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      'assets/images/bishe_logo.jpg',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(Icons.local_car_wash, color: roleAccent, size: 16),
+                    ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Image.asset(
-                    'assets/images/bishe_logo.jpg',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Icon(Icons.local_car_wash, color: roleAccent, size: 18),
-                  ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 6),
+                ],
                 Flexible(
                   child: Text(
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                       letterSpacing: -0.3,
@@ -322,8 +351,82 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
         if (actions != null) ...actions!,
+        if (showLogoutButton)
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 20),
+            tooltip: state.tr('logout'),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+            onPressed: () => _confirmLogout(context, state),
+          ),
         const SizedBox(width: 4),
       ],
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context, dynamic state) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF334155)),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 22),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                state.tr('confirmLogout'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          state.tr('confirmLogoutMessage'),
+          style: const TextStyle(
+            fontSize: 13,
+            color: Color(0xFF94A3B8),
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              state.tr('cancel'),
+              style: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              state.tr('logout'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      state.logout();
+    }
   }
 }

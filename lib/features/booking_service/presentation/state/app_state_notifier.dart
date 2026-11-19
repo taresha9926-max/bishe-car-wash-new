@@ -174,6 +174,13 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void logout() {
+    clearActiveStaff();
+    setSuperAdminStatus(false);
+    _currentRole = UserRole.customer;
+    goToWelcome();
+  }
+
   String _currentLang = 'EN';
   String get currentLang => _currentLang;
   String get currentLanguage => _currentLang;

@@ -456,6 +456,16 @@ class AppStrings {
       AppLanguage.om: 'Dhiqannaafi Kunuunsa Makiinaa Qulqulluu Bishooftuutti',
       AppLanguage.am: 'በቢሾፍቱ ምርጡ የዲቴይሊንግ እና የመኪና እንክብካቤ ማዕከል',
     },
+    'welcomeHub': {
+      AppLanguage.en: 'Welcome Hub',
+      AppLanguage.om: 'Wiirtuu Simannaa',
+      AppLanguage.am: 'የመግቢያ ማዕከል',
+    },
+    'backToWelcome': {
+      AppLanguage.en: 'Back to Welcome Hub',
+      AppLanguage.om: 'Gara Wiirtuu Simannaatti Deebi\'i',
+      AppLanguage.am: 'ወደ መግቢያ ማዕከል ተመለስ',
+    },
     'carouselSlide1Title': {
       AppLanguage.en: 'Active Snow Foam Pre-Soak',
       AppLanguage.om: 'Dhiqannaa Hoomaa Qulqulluu',
@@ -4126,6 +4136,21 @@ class AppStrings {
       AppLanguage.en: 'Super Admin Protected',
       AppLanguage.om: 'Bulchaa Olaanaan Kan Eegame',
       AppLanguage.am: 'በሱፐር አስተዳዳሪ የተጠበቀ',
+    },
+    'logout': {
+      AppLanguage.en: 'Log Out',
+      AppLanguage.om: 'Ba\'i',
+      AppLanguage.am: 'ውጣ',
+    },
+    'confirmLogout': {
+      AppLanguage.en: 'Confirm Log Out',
+      AppLanguage.om: 'Bahuu Mirkaneessi',
+      AppLanguage.am: 'መውጣትዎን ያረጋግጡ',
+    },
+    'confirmLogoutMessage': {
+      AppLanguage.en: 'Are you sure you want to log out and return to the Welcome screen?',
+      AppLanguage.om: 'Dhuguma ba\'uudhaan gara fuula simannaatti deebi\'uu barbaadduu?',
+      AppLanguage.am: 'እርግጠኛ ነዎት መውጣት እና ወደ መግቢያ ገጽ መመለስ ይፈልጋሉ?',
     },
     'drawerEmptyHandedOver': {
       AppLanguage.en: 'Drawer 0 ETB • Handed Over',

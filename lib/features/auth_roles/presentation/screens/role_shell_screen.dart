@@ -86,10 +86,11 @@ class RoleShellScreen extends StatelessWidget {
       color: Colors.white,
       child: Container(
         width: 230,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           Row(
             children: [
               Container(
@@ -174,7 +175,67 @@ class RoleShellScreen extends StatelessWidget {
               ),
             );
           }),
-          const Spacer(),
+          const SizedBox(height: 16),
+          ListTile(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            tileColor: const Color(0xFFEF4444).withValues(alpha: 0.08),
+            leading: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 20),
+            title: Text(
+              state.tr('logout'),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFFEF4444)),
+            ),
+            onTap: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: const Color(0xFF1E293B),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: Color(0xFF334155)),
+                  ),
+                  title: Row(
+                    children: [
+                      const Icon(Icons.logout_rounded, color: Color(0xFFEF4444), size: 22),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          state.tr('confirmLogout'),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  content: Text(
+                    state.tr('confirmLogoutMessage'),
+                    style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8), height: 1.4),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: Text(state.tr('cancel'), style: const TextStyle(color: Color(0xFF94A3B8))),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFDC2626),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: Text(state.tr('logout'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true && context.mounted) {
+                state.logout();
+              }
+            },
+          ),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -197,6 +258,7 @@ class RoleShellScreen extends StatelessWidget {
         ],
       ),
     ),
-  );
+  ),
+);
 }
 }
