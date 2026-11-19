@@ -607,11 +607,13 @@ class AppStateNotifier extends ChangeNotifier {
   /// Live verification: calls server-side verify_staff_pin RPC first, then falls back to local.
   Future<bool> authenticateRoleAsync(UserRole role, String enteredPin) async {
     final serverOk = await _repository.verifyStaffPin(role, enteredPin);
+    final hasAdminInCreds = _credentials.any((c) => c.role == UserRole.admin && c.isActive);
+
     if (serverOk) {
       if (role == UserRole.admin) {
         final cred = getMatchedCredential(role, enteredPin);
         final isSuper = (cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin')) ||
-            enteredPin.trim() == '1234';
+            (!hasAdminInCreds && enteredPin.trim() == '1234');
         setSuperAdminStatus(isSuper);
       }
       return true;
@@ -620,7 +622,8 @@ class AppStateNotifier extends ChangeNotifier {
     if (authenticateRole(role, enteredPin)) {
       if (role == UserRole.admin) {
         final cred = getMatchedCredential(role, enteredPin);
-        final isSuper = cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin');
+        final isSuper = (cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin')) ||
+            (!hasAdminInCreds && enteredPin.trim() == '1234');
         setSuperAdminStatus(isSuper);
       }
       return true;

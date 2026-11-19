@@ -65,9 +65,11 @@ class _RoleAuthDialogState extends State<RoleAuthDialog> {
       }
       Navigator.of(context).pop(true);
     } else {
+      final roleCreds = state.credentials.where((c) => c.role == widget.targetRole && c.isActive).toList();
+      final hasRoleCreds = roleCreds.isNotEmpty || widget.targetRole == UserRole.admin;
       setState(() {
         _isLoading = false;
-        _error = state.tr('incorrectPin');
+        _error = hasRoleCreds ? state.tr('incorrectPin') : state.tr('noStaffPinConfigured');
       });
     }
   }

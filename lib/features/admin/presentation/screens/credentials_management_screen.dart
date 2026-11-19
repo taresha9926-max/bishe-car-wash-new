@@ -149,6 +149,15 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
 
   void _showEditPinDialog(BuildContext context, StaffCredential cred) {
     final state = AppStateProvider.read(context);
+    if (!state.isSuperAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('superAdminOnlyPinsNotice')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
     final pinController = TextEditingController(text: cred.pin);
     final nameController = TextEditingController(text: cred.fullName);
     bool obscure = false;
@@ -233,6 +242,15 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
 
   void _showDeleteCredentialDialog(BuildContext context, StaffCredential cred) {
     final state = AppStateProvider.read(context);
+    if (!state.isSuperAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('superAdminOnlyPinsNotice')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -272,6 +290,15 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
 
   void _showAddCredentialDialog(BuildContext context) {
     final state = AppStateProvider.read(context);
+    if (!state.isSuperAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('superAdminOnlyPinsNotice')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
     final nameCtrl = TextEditingController();
     final usernameCtrl = TextEditingController();
     final pinCtrl = TextEditingController();
@@ -414,6 +441,32 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                if (!state.isSuperAdmin)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.amber.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.lock_person_rounded, color: Colors.amber.shade900, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            state.tr('superAdminOnlyPinsNotice'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.amber.shade900,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -590,27 +643,52 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                               ],
                             ),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              OutlinedButton.icon(
-                                onPressed: () => _showEditPinDialog(context, cred),
-                                icon: const Icon(Icons.edit, size: 16),
-                                label: Text(state.tr('changePin')),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: color,
-                                  side: BorderSide(color: color.withOpacity(0.4)),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          if (state.isSuperAdmin)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: () => _showEditPinDialog(context, cred),
+                                  icon: const Icon(Icons.edit, size: 16),
+                                  label: Text(state.tr('changePin')),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: color,
+                                    side: BorderSide(color: color.withOpacity(0.4)),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
                                 ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                  tooltip: 'Delete PIN',
+                                  onPressed: () => _showDeleteCredentialDialog(context, cred),
+                                ),
+                              ],
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade300),
                               ),
-                              const SizedBox(width: 4),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-                                tooltip: 'Delete PIN',
-                                onPressed: () => _showDeleteCredentialDialog(context, cred),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.shield_rounded, size: 14, color: Colors.grey.shade600),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    state.tr('superAdminManagedBadge'),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
                         ],
                       ),
                     ),
@@ -618,12 +696,14 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
                 }),
               ],
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Assign PIN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        onPressed: () => _showAddCredentialDialog(context),
-      ),
+      floatingActionButton: state.isSuperAdmin
+          ? FloatingActionButton.extended(
+              backgroundColor: AppColors.primary,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text('Assign PIN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              onPressed: () => _showAddCredentialDialog(context),
+            )
+          : null,
     );
   }
 }

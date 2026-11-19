@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/pending_approval_request.dart';
+import 'package:bishe_car_wash/features/admin/domain/models/staff_credential.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
@@ -18,6 +19,14 @@ void main() {
 
     setUp(() async {
       repo = WashRepositoryImpl();
+      await repo.addStaffCredential(const StaffCredential(
+        id: 'cred-cashier',
+        username: 'cashier',
+        pin: '0000',
+        role: UserRole.cashier,
+        fullName: 'Station Gate Cashier',
+        isActive: true,
+      ));
       state = AppStateNotifier(repository: repo);
       await state.loadData();
     });

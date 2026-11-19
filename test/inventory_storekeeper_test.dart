@@ -124,7 +124,26 @@ void main() {
       expect(shampooAfter, shampooBefore - 3.5);
     });
 
-    test('UserRole authentication supports Storekeeper (3344) and Accountant (5566)', () {
+    test('UserRole authentication requires Super Admin configured PINs for Storekeeper and Accountant', () async {
+      // Before PIN is configured, login fails (zero hardcoded bypass)
+      expect(notifier.authenticateRole(UserRole.storekeeper, '3344'), isFalse);
+      expect(notifier.authenticateRole(UserRole.accountant, '5566'), isFalse);
+
+      // Once Super Admin configures PINs, authenticates successfully
+      notifier.setSuperAdminStatus(true);
+      await notifier.addStaffCredential(
+        username: 'storekeeper_main',
+        pin: '3344',
+        role: UserRole.storekeeper,
+        fullName: 'Storekeeper User',
+      );
+      await notifier.addStaffCredential(
+        username: 'accountant_main',
+        pin: '5566',
+        role: UserRole.accountant,
+        fullName: 'Accountant User',
+      );
+
       expect(notifier.authenticateRole(UserRole.storekeeper, '3344'), isTrue);
       expect(notifier.authenticateRole(UserRole.storekeeper, 'wrong'), isFalse);
 

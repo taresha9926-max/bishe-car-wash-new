@@ -434,8 +434,13 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     }
     try {
       final dynamic data = await _get('staff_members?select=*&order=created_at.asc');
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return await _fallbackLocalRepo.getStaffMembers();
+      }
+      if (data.isEmpty) {
+        _cachedStaff = [];
+        _staffFetchedAt = DateTime.now();
+        return [];
       }
 
       final staff = data.map((json) {
@@ -1283,24 +1288,26 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<List<StaffCredential>> getStaffCredentials() async {
     try {
       final dynamic data = await _get('staff_credentials?select=*&order=role.asc');
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return _fallbackLocalRepo.getStaffCredentials();
       }
       final creds = data
+          .where((json) => json is Map && !(json['username']?.toString() ?? '').startsWith('app_config_'))
           .map((json) {
             final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
-            final role = roleStr == 'admin'
-                ? UserRole.admin
-                : (roleStr == 'storekeeper'
-                    ? UserRole.storekeeper
-                    : (roleStr == 'accountant' ? UserRole.accountant : UserRole.cashier));
-            final rawPin = json['pin_hash']?.toString() ?? '';
-            final defaultPin = role == UserRole.admin
-                ? '1234'
-                : (role == UserRole.storekeeper
-                    ? '3344'
-                    : (role == UserRole.accountant ? '5566' : '0000'));
-            final pin = (rawPin.length > 6 || rawPin.isEmpty) ? defaultPin : rawPin;
+            final UserRole role;
+            if (roleStr == 'admin') {
+              role = UserRole.admin;
+            } else if (roleStr == 'manager') {
+              role = UserRole.manager;
+            } else if (roleStr == 'storekeeper') {
+              role = UserRole.storekeeper;
+            } else if (roleStr == 'accountant') {
+              role = UserRole.accountant;
+            } else {
+              role = UserRole.cashier;
+            }
+            final pin = (json['pin_hash'] ?? '').toString().trim();
             return StaffCredential(
               id: json['id'].toString(),
               username: json['username']?.toString() ?? 'staff',
@@ -1310,11 +1317,22 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               isActive: json['is_active'] == true,
             );
           })
-          .where((cred) => !cred.username.startsWith('app_config_'))
           .toList();
 
-      if (creds.isEmpty) {
-        return _fallbackLocalRepo.getStaffCredentials();
+      // Only bootstrap admin if no active admin credential exists yet in database
+      final hasAdmin = creds.any((c) => c.role == UserRole.admin && c.isActive);
+      if (!hasAdmin) {
+        creds.insert(
+          0,
+          const StaffCredential(
+            id: 'cred-admin',
+            username: 'admin',
+            pin: '1234',
+            role: UserRole.admin,
+            fullName: 'Bishe Super Admin',
+            isActive: true,
+          ),
+        );
       }
       return creds;
     } catch (_) {
@@ -1329,17 +1347,17 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'p_role': role.name,
         'p_pin': enteredPin.trim(),
       });
-      if (res is bool) return res;
-      if (res is num) return res == 1;
-      if (res is String) return res.toLowerCase() == 'true';
+      if (res is bool && res == true) return true;
+      if (res is num && res == 1) return true;
+      if (res is String && res.toLowerCase() == 'true') return true;
     } catch (e) {
       debugPrint('Supabase verifyStaffPin exception: $e');
     }
-    final localCreds = await _fallbackLocalRepo.getStaffCredentials();
+    final creds = await getStaffCredentials();
     return StaffAuthenticator.authenticate(
       role: role,
       enteredPin: enteredPin,
-      credentials: localCreds,
+      credentials: creds,
     );
   }
 
@@ -1347,12 +1365,14 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<void> updateStaffCredential(String id, String pin, String fullName) async {
     try {
       String roleName = 'admin';
-      final localCreds = await _fallbackLocalRepo.getStaffCredentials();
-      final cred = localCreds.where((c) => c.id == id).firstOrNull;
+      final liveCreds = await getStaffCredentials();
+      final cred = liveCreds.where((c) => c.id == id).firstOrNull;
       if (cred != null) {
         roleName = cred.role.name;
       } else if (id.toLowerCase().contains('cashier')) {
         roleName = 'cashier';
+      } else if (id.toLowerCase().contains('manager')) {
+        roleName = 'manager';
       } else if (id.toLowerCase().contains('storekeeper')) {
         roleName = 'storekeeper';
       } else if (id.toLowerCase().contains('accountant')) {
@@ -1367,9 +1387,26 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
       if (_isUuid(id)) {
         await _patch('staff_credentials?id=eq.$id', {
-          'pin_hash': pin,
-          'full_name': fullName,
+          'pin_hash': pin.trim(),
+          'full_name': fullName.trim(),
         });
+      } else if (id == 'cred-admin' || roleName == 'admin') {
+        final existing = await _get('staff_credentials?role=eq.admin&select=id');
+        if (existing is List && existing.isNotEmpty) {
+          final adminId = existing.first['id'];
+          await _patch('staff_credentials?id=eq.$adminId', {
+            'pin_hash': pin.trim(),
+            'full_name': fullName.trim(),
+          });
+        } else {
+          await _post('staff_credentials', {
+            'username': 'admin',
+            'pin_hash': pin.trim(),
+            'role': 'admin',
+            'full_name': fullName.trim().isEmpty ? 'Bishe Super Admin' : fullName.trim(),
+            'is_active': true,
+          });
+        }
       }
     } catch (e) {
       debugPrint('Supabase updateStaffCredential exception: $e');

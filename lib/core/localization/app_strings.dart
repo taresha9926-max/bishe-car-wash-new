@@ -4107,6 +4107,26 @@ class AppStrings {
       AppLanguage.om: 'Maallaqa Harkaa Hin Jiru (0.00 ETB)',
       AppLanguage.am: 'በእጅ ያለ ጥሬ ገንዘብ የለም (0.00 ብር)',
     },
+    'noStaffPinConfigured': {
+      AppLanguage.en: 'No active PIN configured for this role. Only the Super Admin can create staff PINs.',
+      AppLanguage.om: 'Koodiin PIN kanaaf hin qophoofne. Bulchaa Olaanaa qofatu PIN uumuu danda\'a.',
+      AppLanguage.am: 'ለዚህ የስራ ድርሻ ገና PIN አልተፈጠረም። ሱፐር አስተዳዳሪ ብቻ የሰራተኛ PIN መፍጠር ይችላል።',
+    },
+    'superAdminOnlyPinsNotice': {
+      AppLanguage.en: 'Restricted Access: Only the Super Admin has permission to create, edit, or delete staff PINs.',
+      AppLanguage.om: 'Daangaa Eegumsaa: Bulchaa Olaanaa qofatu koodii PIN qindeessuu ykn jijjiiruu danda\'a.',
+      AppLanguage.am: 'የተገደበ መብት፡ ሱፐር አስተዳዳሪ ብቻ የሰራተኛ PIN የመፍጠር፣ የመቀየር ወይም የመሰረዝ ፈቃድ አለው።',
+    },
+    'superAdminOnlyStaffNotice': {
+      AppLanguage.en: 'Roster Notice: Only the Super Admin has permission to add, edit salaries, or delete staff personnel.',
+      AppLanguage.om: 'Beeksisa Garee: Bulchaa Olaanaa qofatu hojjettoota galmeessuu, mindaa jijjiiruu ykn haquu danda\'a.',
+      AppLanguage.am: 'የሰራተኞች ማስታወቂያ፡ ሱፐር አስተዳዳሪ ብቻ ሰራተኞችን የመጨመር፣ ደመወዝ የማስተካከል ወይም የመሰረዝ ፈቃድ አለው።',
+    },
+    'superAdminManagedBadge': {
+      AppLanguage.en: 'Super Admin Protected',
+      AppLanguage.om: 'Bulchaa Olaanaan Kan Eegame',
+      AppLanguage.am: 'በሱፐር አስተዳዳሪ የተጠበቀ',
+    },
     'drawerEmptyHandedOver': {
       AppLanguage.en: 'Drawer 0 ETB • Handed Over',
       AppLanguage.om: 'Saanduqa 0 ETB • Dabarfameera',

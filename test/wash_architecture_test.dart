@@ -142,7 +142,7 @@ void main() {
           enteredPin: '0000',
           credentials: [],
         ),
-        isTrue,
+        isFalse,
       );
       expect(
         StaffAuthenticator.authenticate(
@@ -197,10 +197,22 @@ void main() {
     test('Repository verifyStaffPin delegates verification securely', () async {
       final repo = WashRepositoryImpl();
       expect(await repo.verifyStaffPin(UserRole.admin, '1234'), isTrue);
-      expect(await repo.verifyStaffPin(UserRole.cashier, '0000'), isTrue);
-      expect(await repo.verifyStaffPin(UserRole.storekeeper, '3344'), isTrue);
-      expect(await repo.verifyStaffPin(UserRole.accountant, '5566'), isTrue);
+      // Hardcoded backdoors (0000, 3344, etc.) are strictly disallowed without active database credentials
+      expect(await repo.verifyStaffPin(UserRole.cashier, '0000'), isFalse);
+      expect(await repo.verifyStaffPin(UserRole.storekeeper, '3344'), isFalse);
       expect(await repo.verifyStaffPin(UserRole.admin, 'wrong_pin'), isFalse);
+
+      // Once Super Admin creates an active credential, only that assigned PIN authenticates
+      await repo.addStaffCredential(const StaffCredential(
+        id: 'cred-cashier-test',
+        username: 'chaltu_cashier',
+        pin: '2580',
+        role: UserRole.cashier,
+        fullName: 'Chaltu B.',
+        isActive: true,
+      ));
+      expect(await repo.verifyStaffPin(UserRole.cashier, '2580'), isTrue);
+      expect(await repo.verifyStaffPin(UserRole.cashier, '0000'), isFalse);
     });
   });
 

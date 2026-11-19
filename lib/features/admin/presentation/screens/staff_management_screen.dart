@@ -22,18 +22,46 @@ class StaffManagementScreen extends StatelessWidget {
           LanguageSwitcherAction(isDark: false),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.person_add_rounded),
-        label: Text(state.tr('addStaff'), style: const TextStyle(fontWeight: FontWeight.w700)),
-        onPressed: () => _showAddStaffDialog(context),
-      ),
+      floatingActionButton: state.isSuperAdmin
+          ? FloatingActionButton.extended(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.person_add_rounded),
+              label: Text(state.tr('addStaff'), style: const TextStyle(fontWeight: FontWeight.w700)),
+              onPressed: () => _showAddStaffDialog(context),
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (!state.isSuperAdmin)
+              Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.amber.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_person_rounded, color: Colors.amber.shade900, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        state.tr('superAdminOnlyStaffNotice'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.amber.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             // Team Commission Pooling Banner
             _buildTeamCommissionCard(context, state),
             const SizedBox(height: 14),
@@ -151,21 +179,42 @@ class StaffManagementScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
-                    tooltip: 'Edit Salary & Commission',
-                    onPressed: () => _showEditSalaryDialog(context, member),
+              if (state.isSuperAdmin)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
+                      tooltip: 'Edit Salary & Commission',
+                      onPressed: () => _showEditSalaryDialog(context, member),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                      tooltip: 'Delete Staff Member',
+                      onPressed: () => _showDeleteStaffDialog(context, member),
+                    ),
+                  ],
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.white.withOpacity(0.15)),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-                    tooltip: 'Delete Staff Member',
-                    onPressed: () => _showDeleteStaffDialog(context, member),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.shield_rounded, size: 12, color: Colors.white70),
+                      const SizedBox(width: 4),
+                      Text(
+                        state.tr('superAdminManagedBadge'),
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white70),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
             ],
           ),
           const Divider(height: 20),
@@ -380,6 +429,15 @@ class StaffManagementScreen extends StatelessWidget {
 
   void _showEditSalaryDialog(BuildContext context, StaffMember member) {
     final state = AppStateProvider.read(context);
+    if (!state.isSuperAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('superAdminOnlyStaffNotice')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
     final salaryCtrl = TextEditingController(text: member.baseSalaryMonthlyETB.toStringAsFixed(0));
     final commissionCtrl = TextEditingController(text: (member.commissionRate * 100).toStringAsFixed(0));
 
@@ -450,6 +508,15 @@ class StaffManagementScreen extends StatelessWidget {
 
   void _showDeleteStaffDialog(BuildContext context, StaffMember member) {
     final state = AppStateProvider.read(context);
+    if (!state.isSuperAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('superAdminOnlyStaffNotice')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -492,6 +559,15 @@ class StaffManagementScreen extends StatelessWidget {
 
   void _showAddStaffDialog(BuildContext context) {
     final state = AppStateProvider.read(context);
+    if (!state.isSuperAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.tr('superAdminOnlyStaffNotice')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
     final nameCtrl = TextEditingController();
     final phoneCtrl = TextEditingController(text: '+251 9');
     final salaryCtrl = TextEditingController(text: '4200');

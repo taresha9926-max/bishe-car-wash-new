@@ -50,13 +50,15 @@ void main() {
     final updated = await repo.updateWashStatus(created.id, WashStatus.completed);
     expect(updated.status, WashStatus.completed);
 
-    // 4. Verify staff credentials loaded safely
+    // 4. Verify staff credentials loaded safely (Super Admin bootstrap present)
     final creds = await repo.getStaffCredentials();
     expect(creds, isNotEmpty);
     final adminCred = creds.firstWhere((c) => c.role == UserRole.admin);
-    final cashierCred = creds.firstWhere((c) => c.role == UserRole.cashier);
     expect(adminCred.pin, isNotEmpty);
-    expect(cashierCred.pin, isNotEmpty);
+    final cashierCred = creds.where((c) => c.role == UserRole.cashier).firstOrNull;
+    if (cashierCred != null) {
+      expect(cashierCred.pin, isNotEmpty);
+    }
 
     // 5. Verify live commission log was created upon completion (if cloud connected)
     final commLogs = await repo.getCommissionLogs();
