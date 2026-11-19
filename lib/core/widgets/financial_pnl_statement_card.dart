@@ -14,6 +14,7 @@ class FinancialPnlStatementCard extends StatelessWidget {
   final double commissionPool;
   final double totalPettyCash;
   final double totalSupplies;
+  final int rangeDays;
 
   const FinancialPnlStatementCard({
     super.key,
@@ -25,6 +26,7 @@ class FinancialPnlStatementCard extends StatelessWidget {
     required this.commissionPool,
     required this.totalPettyCash,
     required this.totalSupplies,
+    this.rangeDays = 1,
   });
 
   @override
@@ -34,7 +36,12 @@ class FinancialPnlStatementCard extends StatelessWidget {
     final grossProfit = netAfterVat - cogs;
     final netOperatingProfit = grossProfit - totalPettyCash;
     final monthlySalaryObligation = state.monthlyTotalBaseSalary as double;
-    final netRetainedProfit = netOperatingProfit - monthlySalaryObligation;
+    final periodSalaryObligation = rangeDays == 30
+        ? monthlySalaryObligation
+        : (monthlySalaryObligation / 30.0) * rangeDays;
+    final dailyFacilityRent = state.dailyFacilityRentAccrualETB as double;
+    final periodFacilityRent = dailyFacilityRent * rangeDays;
+    final netRetainedProfit = netOperatingProfit - periodSalaryObligation;
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 14 : 18),
@@ -158,11 +165,18 @@ class FinancialPnlStatementCard extends StatelessWidget {
           const SizedBox(height: 8),
           _buildRow(state.tr('opexRow'), '- ${CurrencyFormatter.format(totalPettyCash)}', Colors.deepOrange.shade900, isHeader: true),
           _buildSubRow('• ${state.tr("pettyCashOpexSub")}', '- ${CurrencyFormatter.format(totalPettyCash)}'),
-          _buildSubRow('• ${state.tr("facilityRent")} (Accrual)', '- ${CurrencyFormatter.format(state.dailyFacilityRentAccrualETB)}'),
+          _buildSubRow('• ${state.tr("facilityRent")} (${rangeDays == 1 ? "Daily Accrual" : "$rangeDays-day Accrual"})', '- ${CurrencyFormatter.format(periodFacilityRent)}'),
           const Divider(thickness: 1.5, height: 16),
           _buildRow(state.tr('netOperatingProfitRow'), CurrencyFormatter.format(netOperatingProfit), netOperatingProfit >= 0 ? Colors.teal.shade800 : Colors.red, isBold: true, isLarge: true),
           const Divider(height: 16),
-          _buildRow(state.tr('salaryReserveRow'), CurrencyFormatter.format(monthlySalaryObligation), Colors.blueGrey, isHeader: true),
+          _buildRow(
+            rangeDays == 30
+                ? state.tr('salaryReserveRow')
+                : '${state.tr("salaryReserveRow")} ($rangeDays-day Accrual)',
+            CurrencyFormatter.format(periodSalaryObligation),
+            Colors.blueGrey,
+            isHeader: true,
+          ),
           const SizedBox(height: 4),
           _buildRow(state.tr('netRetainedProfitRow'), CurrencyFormatter.format(netRetainedProfit), netRetainedProfit >= 0 ? Colors.indigo.shade800 : Colors.red, isBold: true),
         ],

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -164,6 +165,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         return r == null
             ? state.tr('filterToday')
             : '${r.start.day}/${r.start.month}/${r.start.year} - ${r.end.day}/${r.end.month}/${r.end.year}';
+    }
+  }
+
+  int get _selectedRangeDays {
+    switch (_selectedFilter) {
+      case AdminTimeFilter.today:
+        return 1;
+      case AdminTimeFilter.thisWeek:
+        return 7;
+      case AdminTimeFilter.thisMonth:
+        return 30;
+      case AdminTimeFilter.customRange:
+        final r = _selectedCustomRange;
+        if (r != null) {
+          return math.max(1, r.end.difference(r.start).inDays + 1);
+        }
+        return 1;
     }
   }
 
@@ -636,6 +654,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           commissionPool: commissionPool,
           totalPettyCash: totalPettyCash,
           totalSupplies: totalSupplies,
+          rangeDays: _selectedRangeDays,
         ),
       ],
     );

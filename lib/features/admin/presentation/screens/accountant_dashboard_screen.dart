@@ -33,7 +33,8 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   String _auditDateRange = 'All'; // All, Today, This Week, This Month
-  bool _isDailyPnlView = true; // Default to True: Real-truth Daily Accrual P&L
+  String _pnlDateRange = 'Today'; // Today, This Week, This Month, Custom Range
+  DateTimeRange? _pnlCustomRange;
 
   @override
   void initState() {
@@ -1363,119 +1364,184 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   // ==========================================
 
   Widget _buildPnLTab(BuildContext context, dynamic state, bool isMobile) {
+    final now = DateTime.now();
+    late DateTime rangeStart;
+    late DateTime rangeEnd;
+    int rangeDays = 1;
+
+    switch (_pnlDateRange) {
+      case 'This Week':
+        final monday = now.subtract(Duration(days: now.weekday - 1));
+        rangeStart = DateTime(monday.year, monday.month, monday.day);
+        rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+        rangeDays = 7;
+        break;
+      case 'This Month':
+        rangeStart = DateTime(now.year, now.month, 1);
+        rangeEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+        rangeDays = 30;
+        break;
+      case 'Custom Range':
+        if (_pnlCustomRange != null) {
+          rangeStart = DateTime(_pnlCustomRange!.start.year, _pnlCustomRange!.start.month, _pnlCustomRange!.start.day);
+          rangeEnd = DateTime(_pnlCustomRange!.end.year, _pnlCustomRange!.end.month, _pnlCustomRange!.end.day, 23, 59, 59);
+          rangeDays = math.max(1, _pnlCustomRange!.end.difference(_pnlCustomRange!.start).inDays + 1);
+        } else {
+          rangeStart = DateTime(now.year, now.month, now.day);
+          rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+          rangeDays = 1;
+        }
+        break;
+      case 'Today':
+      default:
+        rangeStart = DateTime(now.year, now.month, now.day);
+        rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+        rangeDays = 1;
+        break;
+    }
+
+    bool isInRange(DateTime dt) => !dt.isBefore(rangeStart) && !dt.isAfter(rangeEnd);
+
     final bookingsList = (state.bookings as List).cast<WashBooking>();
-    final paidBookings = bookingsList.where((WashBooking b) => b.payment.isPaid).toList();
-    final grossRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final commissionPaid = (state.commissionLogs as List).cast<CommissionLog>().fold<double>(0.0, (sum, l) => sum + l.commissionEarnedETB);
+    final paidBookings = bookingsList.where((WashBooking b) {
+      if (!b.payment.isPaid) return false;
+      final dt = b.payment.paidAt ?? b.createdAt;
+      return isInRange(dt);
+    }).toList();
 
     // 15% VAT on Car Wash services; Carpet and Shower services are 100% VAT exempt
     final vehicleWashRevenue = paidBookings.where((b) => !b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final vehicleVat = vehicleWashRevenue * 0.15;
     final vehicleNet = vehicleWashRevenue - vehicleVat;
     final carpetWashRevenue = paidBookings.where((b) => b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final showerRevenue = _isDailyPnlView ? (state.todayShowerRevenueETB as double) : ((state.todayShowerRevenueETB as double) * 30.0);
+    final showerRevenue = (state.showerRecords as List)
+        .where((s) => isInRange(s.recordedAt))
+        .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final grossRevenue = vehicleWashRevenue + carpetWashRevenue + showerRevenue;
     final totalNetRevenue = vehicleNet + carpetWashRevenue + showerRevenue;
+
+    // Direct commissions for the active range
+    final logsInRange = (state.commissionLogs as List)
+        .cast<CommissionLog>()
+        .where((l) => isInRange(l.completedAt))
+        .toList();
+    final commissionPaid = logsInRange.isNotEmpty
+        ? logsInRange.fold<double>(0.0, (sum, l) => sum + l.commissionEarnedETB)
+        : (vehicleNet + carpetWashRevenue) * (state.teamCommissionRate as double);
 
     // COST OF GOODS SOLD (COGS): Only actual consumed soap via empty-full can exchange or bay consumption
     // NEVER deduct warehouse inventory restocks (receiveStock)
     final suppliesCost = (state.stockTransactions as List<StockTransaction>)
-        .where((t) => t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption')
+        .where((t) => isInRange(t.date) && (t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
         .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
 
     final pettyCost = (state.pettyCashExpenses as List<PettyCashExpense>)
+        .where((p) => isInRange(p.loggedAt))
         .fold<double>(0.0, (sum, p) => sum + p.amount);
 
     final List<MonthlyOverheadExpense> overheads = state.monthlyOverheads;
-    final totalMonthlyOverheads = state.totalMonthlyOverheads as double;
-    final totalDailyOverheads = state.totalDailyOverheadAccrual as double;
     final dailyDepreciation = state.dailyMachineryDepreciation as double;
-    final monthlyDepreciation = dailyDepreciation * 30.0;
+    final periodDepreciation = dailyDepreciation * rangeDays;
+
+    final periodOverheads = overheads.fold<double>(0.0, (sum, o) => sum + (o.dailyAccrualEtb * rangeDays));
 
     final cogs = commissionPaid + suppliesCost;
     final grossProfit = totalNetRevenue - cogs;
 
-    // OpEx calculation based on active view (Daily Accrual ÷ 30 vs Full Monthly)
-    final opex = _isDailyPnlView
-        ? (totalDailyOverheads + dailyDepreciation + pettyCost)
-        : (totalMonthlyOverheads + monthlyDepreciation + pettyCost);
-
+    // OpEx calculation prorated by exact rangeDays (Monthly ÷ 30 × rangeDays)
+    final opex = periodOverheads + periodDepreciation + pettyCost;
     final netOperatingProfit = grossProfit - opex;
+
+    String heroTitle;
+    String heroSubtitle;
+    switch (_pnlDateRange) {
+      case 'This Week':
+        heroTitle = 'THIS WEEK NET OPERATING PROFIT (EBITDA)';
+        heroSubtitle = 'Gross Revenue − Direct COGS − 7-Day Accrued Overheads (Rent, Utilities, Staff Salaries) & Machinery Depreciation';
+        break;
+      case 'This Month':
+        heroTitle = 'THIS MONTH NET OPERATING PROFIT (EBITDA)';
+        heroSubtitle = 'Gross Revenue − Direct COGS − Full Monthly Fixed Overheads (Rent, Utilities, Staff Salaries) & Machinery Depreciation';
+        break;
+      case 'Custom Range':
+        heroTitle = 'PERIOD NET OPERATING PROFIT ($rangeDays DAYS)';
+        heroSubtitle = 'Gross Revenue − Direct COGS − $rangeDays-Day Accrued Overheads (Rent, Utilities, Staff Salaries) & Machinery Depreciation';
+        break;
+      case 'Today':
+      default:
+        heroTitle = 'TODAY NET OPERATING PROFIT (EBITDA)';
+        heroSubtitle = 'Gross Revenue − Direct COGS (Commissions + Soap) − Daily Accrued Overheads (Rent/30, Utilities/30, Salaries/30)';
+        break;
+    }
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Timeframe Mode Switcher (Today Live P&L vs Full Monthly Statement)
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF111827),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.cardBorder.withOpacity(0.8)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => setState(() => _isDailyPnlView = true),
-                    borderRadius: BorderRadius.circular(9),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _isDailyPnlView ? AppColors.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.today_rounded, size: 16, color: _isDailyPnlView ? Colors.white : AppColors.textMuted),
-                          const SizedBox(width: 6),
-                          Text(
-                            state.tr('pnlDailyView'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: _isDailyPnlView ? Colors.white : AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => setState(() => _isDailyPnlView = false),
-                    borderRadius: BorderRadius.circular(9),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: !_isDailyPnlView ? AppColors.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.calendar_month_rounded, size: 16, color: !_isDailyPnlView ? Colors.white : AppColors.textMuted),
-                          const SizedBox(width: 6),
-                          Text(
-                            state.tr('pnlMonthlyView'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: !_isDailyPnlView ? Colors.white : AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          // 1. Timeframe Date Range Toolbar
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildPnlFilterChip(
+                label: state.tr('filterToday'),
+                icon: Icons.today_rounded,
+                isSelected: _pnlDateRange == 'Today',
+                onTap: () => setState(() => _pnlDateRange = 'Today'),
+              ),
+              _buildPnlFilterChip(
+                label: state.tr('filterThisWeek'),
+                icon: Icons.view_week_rounded,
+                isSelected: _pnlDateRange == 'This Week',
+                onTap: () {
+                  setState(() => _pnlDateRange = 'This Week');
+                  final monday = now.subtract(Duration(days: now.weekday - 1));
+                  final startMonday = DateTime(monday.year, monday.month, monday.day);
+                  final endSunday = startMonday.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+                  state.fetchBookingsForDateRange(startMonday, endSunday);
+                },
+              ),
+              _buildPnlFilterChip(
+                label: state.tr('filterThisMonth'),
+                icon: Icons.calendar_month_rounded,
+                isSelected: _pnlDateRange == 'This Month',
+                onTap: () {
+                  setState(() => _pnlDateRange = 'This Month');
+                  final startMonth = DateTime(now.year, now.month, 1);
+                  final endMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+                  state.fetchBookingsForDateRange(startMonth, endMonth);
+                },
+              ),
+              _buildPnlFilterChip(
+                label: _pnlDateRange == 'Custom Range' && _pnlCustomRange != null
+                    ? '${_pnlCustomRange!.start.day}/${_pnlCustomRange!.start.month} - ${_pnlCustomRange!.end.day}/${_pnlCustomRange!.end.month}'
+                    : state.tr('filterCustomRange'),
+                icon: Icons.date_range_rounded,
+                isSelected: _pnlDateRange == 'Custom Range',
+                onTap: () async {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2022),
+                    lastDate: now.add(const Duration(days: 365)),
+                    initialDateRange: _pnlCustomRange ??
+                        DateTimeRange(
+                          start: now.subtract(const Duration(days: 7)),
+                          end: now,
+                        ),
+                  );
+                  if (picked != null && mounted) {
+                    setState(() {
+                      _pnlCustomRange = picked;
+                      _pnlDateRange = 'Custom Range';
+                    });
+                    final start = DateTime(picked.start.year, picked.start.month, picked.start.day);
+                    final end = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+                    state.fetchBookingsForDateRange(start, end);
+                  }
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 14),
 
@@ -1506,7 +1572,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _isDailyPnlView ? 'TODAY NET OPERATING PROFIT (EBITDA)' : 'MONTHLY NET OPERATING PROFIT',
+                      heroTitle,
                       style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
                     ),
                     Container(
@@ -1526,9 +1592,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _isDailyPnlView
-                      ? 'Gross Revenue − Direct COGS (Commissions + Soap) − Daily Accrued Overheads (Rent/30, Utilities/30, Salaries/30)'
-                      : 'Gross Revenue − Direct COGS − Full Monthly Fixed Overheads & Machinery Depreciation',
+                  heroSubtitle,
                   style: const TextStyle(color: Colors.white70, fontSize: 10.5),
                 ),
               ],
@@ -1537,7 +1601,11 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           const SizedBox(height: 18),
 
           Text(
-            _isDailyPnlView ? 'Daily Operational Income Statement (Real-Truth Model):' : 'Full Monthly Station Income Statement:',
+            rangeDays == 1
+                ? 'Daily Operational Income Statement (Real-Truth Model):'
+                : (rangeDays == 30
+                    ? 'Full Monthly Station Income Statement (30-Day Budget):'
+                    : 'Station Operational Income Statement ($rangeDays-Day Period):'),
             style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 12),
@@ -1575,13 +1643,21 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // Section 3: Operating Overheads (OpEx)
           Text(
-            _isDailyPnlView ? 'III. DAILY ACCRUED OPERATING OVERHEADS (Monthly ÷ 30)' : 'III. MONTHLY OPERATING OVERHEADS (OpEx)',
+            rangeDays == 1
+                ? 'III. DAILY ACCRUED OPERATING OVERHEADS (Monthly ÷ 30)'
+                : (rangeDays == 30
+                    ? 'III. FULL MONTHLY OPERATING OVERHEADS (30 Days Budget)'
+                    : 'III. ACCRUED OPERATING OVERHEADS ($rangeDays Days: Monthly ÷ 30 × $rangeDays)'),
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.deepOrange),
           ),
           ...overheads.map((o) {
-            final amt = _isDailyPnlView ? o.dailyAccrualEtb : o.monthlyAmountEtb;
+            final amt = o.dailyAccrualEtb * rangeDays;
             final isRent = o.id == 'overhead_rent' || o.category.toLowerCase() == 'rent';
-            final subtitle = _isDailyPnlView ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo ÷ 30)' : '(Monthly Lease Budget)';
+            final subtitle = rangeDays == 1
+                ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo ÷ 30)'
+                : (rangeDays == 30
+                    ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo Budget)'
+                    : '(${CurrencyFormatter.format(o.dailyAccrualEtb)}/day × $rangeDays days)');
             return _buildPnLLine(
               isRent ? '★ ${o.name} $subtitle' : '${o.name} $subtitle',
               '- ${CurrencyFormatter.format(amt)}',
@@ -1590,8 +1666,12 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             );
           }),
           _buildPnLLine(
-            _isDailyPnlView ? 'Machinery Depreciation (÷ 30)' : 'Machinery Depreciation (Monthly)',
-            '- ${CurrencyFormatter.format(_isDailyPnlView ? dailyDepreciation : monthlyDepreciation)}',
+            rangeDays == 1
+                ? 'Machinery Depreciation (÷ 30)'
+                : (rangeDays == 30
+                    ? 'Machinery Depreciation (Monthly)'
+                    : 'Machinery Depreciation ($rangeDays Days)'),
+            '- ${CurrencyFormatter.format(periodDepreciation)}',
             Colors.deepOrange.shade700,
             false,
           ),
@@ -1602,12 +1682,61 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // Section 4: Final Net Operating Profit
           _buildPnLLine(
-            _isDailyPnlView ? 'NET STATION OPERATING PROFIT (TODAY)' : 'NET STATION OPERATING PROFIT (MONTH)',
+            rangeDays == 1
+                ? 'NET STATION OPERATING PROFIT (TODAY)'
+                : (rangeDays == 30
+                    ? 'NET STATION OPERATING PROFIT (MONTH)'
+                    : 'NET STATION OPERATING PROFIT ($rangeDays DAYS)'),
             CurrencyFormatter.format(netOperatingProfit),
             netOperatingProfit >= 0 ? Colors.green.shade800 : Colors.red,
             true,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPnlFilterChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.cardBorder,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 15,
+                color: isSelected ? Colors.white : AppColors.textMuted,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

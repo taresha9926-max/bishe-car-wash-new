@@ -120,6 +120,27 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         break;
     }
 
+    final int rangeDays;
+    switch (_periodFilter) {
+      case FinancialReportFilter.today:
+      case FinancialReportFilter.yesterday:
+        rangeDays = 1;
+        break;
+      case FinancialReportFilter.thisWeek:
+        rangeDays = 7;
+        break;
+      case FinancialReportFilter.thisMonth:
+        rangeDays = 30;
+        break;
+      case FinancialReportFilter.customRange:
+        if (_customRange != null) {
+          rangeDays = math.max(1, _customRange!.end.difference(_customRange!.start).inDays + 1);
+        } else {
+          rangeDays = 1;
+        }
+        break;
+    }
+
     bool inRange(DateTime dt) =>
         (dt.isAfter(rangeStart) || dt.isAtSameMomentAs(rangeStart)) &&
         (dt.isBefore(rangeEnd) || dt.isAtSameMomentAs(rangeEnd));
@@ -229,6 +250,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
             commissionPool: commissionDeducted,
             totalPettyCash: periodPettyCash,
             totalSupplies: periodSupplies,
+            rangeDays: rangeDays,
           ),
           const SizedBox(height: 16),
         ],
