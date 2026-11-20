@@ -597,20 +597,60 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isDigital ? AppColors.telebirrBlue.withOpacity(0.1) : Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  '${state.tr('statusPaid').toUpperCase()} • ${method.localizedName(state.currentLanguage).toUpperCase()}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: isDigital ? AppColors.telebirrBlue : Colors.green.shade800,
+              Wrap(
+                spacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isDigital ? AppColors.telebirrBlue.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      b.payment.isSplit
+                          ? '${state.tr('splitPayment').toUpperCase()} • ${method.localizedName(state.currentLanguage).toUpperCase()}'
+                          : '${state.tr('statusPaid').toUpperCase()} • ${method.localizedName(state.currentLanguage).toUpperCase()}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: isDigital ? AppColors.telebirrBlue : Colors.green.shade800,
+                      ),
+                    ),
                   ),
-                ),
+                  if (b.payment.isBankVerified)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF059669).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        state.tr('bankVerifiedBadge'),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF059669),
+                        ),
+                      ),
+                    )
+                  else if (b.payment.isPendingSms)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD97706).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        state.tr('bankPendingSmsBadge'),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFFD97706),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),

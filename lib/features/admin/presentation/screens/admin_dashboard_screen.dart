@@ -19,6 +19,7 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../welcome/domain/models/tiktok_ad_video.dart';
 import '../widgets/admin_feedback_moderation_card.dart';
 import '../widgets/bishe_ai_executive_sheet.dart';
+import '../widgets/sentinel_cross_ref_card.dart';
 import 'credentials_management_screen.dart';
 import 'pricing_management_screen.dart';
 import 'staff_management_screen.dart';
@@ -735,7 +736,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       children: [
         const AdminFeedbackModerationCard(),
         const SizedBox(height: 14),
-        _buildDigitalReceiptsSection(context, state, digitalBookings, isMobile),
+        SentinelCrossRefCard(digitalBookings: digitalBookings, isMobile: isMobile),
         const SizedBox(height: 14),
         _buildCashierSmsConfigCard(context, state, isMobile),
         const SizedBox(height: 14),

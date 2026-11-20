@@ -421,6 +421,12 @@ class _StationQueueTabState extends State<StationQueueTab> {
                             ),
                           if (b.payment.isPaid && b.status != WashStatus.completed && b.status != WashStatus.readyForPickup)
                             _buildMiniPill(state.tr('prepaidFinishWashBadge'), const Color(0xFF059669), icon: Icons.verified_rounded),
+                          if (b.payment.isPaid && b.payment.isBankVerified)
+                            _buildMiniPill(state.tr('bankVerifiedBadge'), const Color(0xFF059669), icon: Icons.verified_user_rounded),
+                          if (b.payment.isPaid && b.payment.isPendingSms)
+                            _buildMiniPill(state.tr('bankPendingSmsBadge'), const Color(0xFFD97706), icon: Icons.hourglass_top_rounded),
+                          if (b.payment.isPaid && b.payment.isSplit)
+                            _buildMiniPill(state.tr('splitPayment'), const Color(0xFF6366F1), icon: Icons.pie_chart_rounded),
                           if (b.isPhoneBooking)
                             _buildMiniPill(state.tr('phoneOrderBadge'), AppColors.primary, icon: Icons.phone_in_talk_rounded),
                           if (b.serviceType == ServiceType.valetPickUp)

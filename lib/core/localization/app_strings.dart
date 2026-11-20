@@ -2782,6 +2782,136 @@ class AppStrings {
       AppLanguage.om: 'Kaffaltii dijitaalaaf suuraan nagahee fi lakkoofsi mirkaneessaa dirqama.',
       AppLanguage.am: 'ለዲጂታል ክፍያዎች የደረሰኝ ስክሪንሾት እና የማረጋገጫ ቁጥር ግዴታ ነው።',
     },
+    'splitPayment': {
+      AppLanguage.en: 'Split Payment (Cash + Digital)',
+      AppLanguage.om: 'Kaffaltii Qoodamaa (Qarshii + Dijitaala)',
+      AppLanguage.am: 'የተከፈለ ክፍያ (ጥሬ ገንዘብ + ዲጂታል)',
+    },
+    'cashPortion': {
+      AppLanguage.en: 'Cash Portion (ETB)',
+      AppLanguage.om: 'Qooda Qarshii (ETB)',
+      AppLanguage.am: 'የጥሬ ገንዘብ መጠን (ETB)',
+    },
+    'digitalPortion': {
+      AppLanguage.en: 'Digital Portion (ETB)',
+      AppLanguage.om: 'Qooda Dijitaalaa (ETB)',
+      AppLanguage.am: 'የዲጂታል ክፍያ መጠን (ETB)',
+    },
+    'splitTotalMismatch': {
+      AppLanguage.en: 'Cash + Digital must equal the total amount due.',
+      AppLanguage.om: 'Qarshiin fi Dijitaalli walitti qabamee gatii guutuu wajjin walqixa ta\'uu qaba.',
+      AppLanguage.am: 'ጥሬ ገንዘብ እና ዲጂታል ድምር ከሚፈለገው ጠቅላላ ክፍያ ጋር እኩል መሆን አለበት።',
+    },
+    'bankVerifiedBadge': {
+      AppLanguage.en: 'Bank Verified',
+      AppLanguage.om: 'Baankin Mirkanaa\'e',
+      AppLanguage.am: 'በባንክ የተረጋገጠ',
+    },
+    'bankPendingSmsBadge': {
+      AppLanguage.en: 'Pending Bank SMS',
+      AppLanguage.om: 'SMS Baankii Eegaa Jira',
+      AppLanguage.am: 'የባንክ SMS በመጠበቅ ላይ',
+    },
+    'bankDiscrepancyBadge': {
+      AppLanguage.en: 'Payment Discrepancy',
+      AppLanguage.om: 'Garaagarummaa Kaffaltii',
+      AppLanguage.am: 'የክፍያ ልዩነት',
+    },
+    'overpaymentDetected': {
+      AppLanguage.en: 'Overpayment Detected',
+      AppLanguage.om: 'Kaffaltii Dabalataa Argame',
+      AppLanguage.am: 'ተጨማሪ ክፍያ ተገኝቷል',
+    },
+    'refundCashDrawer': {
+      AppLanguage.en: 'Refund Difference in Cash',
+      AppLanguage.om: 'Garaagarummaa Qarshiin Deebisi',
+      AppLanguage.am: 'ልዩነቱን በጥሬ ገንዘብ መልስ',
+    },
+    'addAsWasherTip': {
+      AppLanguage.en: 'Add Difference to Washer Tip',
+      AppLanguage.om: 'Garaagarummaa Badhaasa Miiccootaatti Dabali',
+      AppLanguage.am: 'ልዩነቱን ለአጣቢዎች ጉርሻ ጨምር',
+    },
+    'targetAccountNotice': {
+      AppLanguage.en: 'Send payment to',
+      AppLanguage.om: 'Kaffaltii asitti ergaa',
+      AppLanguage.am: 'ክፍያውን ወደዚህ ይላኩ',
+    },
+    'sentinelStatusOnline': {
+      AppLanguage.en: 'Sentinel Online',
+      AppLanguage.om: 'Seentineelii Hojirra Jira',
+      AppLanguage.am: 'ሴንቲኔል ዝግጁ ነው',
+    },
+    'sentinelStatusOffline': {
+      AppLanguage.en: 'Sentinel Offline',
+      AppLanguage.om: 'Seentineeliin Dhaabbateera',
+      AppLanguage.am: 'ሴንቲኔል መስመር ላይ አይደለም',
+    },
+    'policyFlexibleMode': {
+      AppLanguage.en: 'Flexible Mode (Photo + Delayed SMS)',
+      AppLanguage.om: 'Haala Salphaa (Suuraa + SMS Booda)',
+      AppLanguage.am: 'ተለዋዋጭ ሁነታ (ፎቶ + የዘገየ SMS)',
+    },
+    'policyStrictMode': {
+      AppLanguage.en: 'Strict Lockdown (Bank SMS Required)',
+      AppLanguage.om: 'Haala Cimaa (SMS Baankii Dirqama)',
+      AppLanguage.am: 'ጥብቅ ሁነታ (የባንክ SMS ግዴታ)',
+    },
+    'sentinelTitle': {
+      AppLanguage.en: 'Bishe PayGuard Sentinel',
+      AppLanguage.om: 'Tiksaa Kaffaltii Seentineelii',
+      AppLanguage.am: 'ቢሼ ፔይጋርድ ሴንቲነል',
+    },
+    'incomingBankSmsTab': {
+      AppLanguage.en: 'Incoming Bank SMS',
+      AppLanguage.om: 'Ergaa Baankii Galte',
+      AppLanguage.am: 'ገቢ የባንክ SMS',
+    },
+    'stationReceiptsTab': {
+      AppLanguage.en: 'Station Receipts',
+      AppLanguage.om: 'Nagahee Buufataa',
+      AppLanguage.am: 'የጣቢያ ደረሰኞች',
+    },
+    'unmatchedCredits': {
+      AppLanguage.en: 'Unmatched Bank Credits',
+      AppLanguage.om: 'Kaffaltii Baankii Hin Walsimne',
+      AppLanguage.am: 'ያልተመሳሰሉ የባንክ ገቢዎች',
+    },
+    'matchedBooking': {
+      AppLanguage.en: 'Matched Vehicle',
+      AppLanguage.om: 'Konkolaataa Walsime',
+      AppLanguage.am: 'የተመሳሰለ መኪና',
+    },
+    'payerInfo': {
+      AppLanguage.en: 'Payer',
+      AppLanguage.om: 'Kaffalaa',
+      AppLanguage.am: 'ከፋይ',
+    },
+    'copyRef': {
+      AppLanguage.en: 'Copy Reference',
+      AppLanguage.om: 'Lakkoofsa Waraabi',
+      AppLanguage.am: 'የማረጋገጫ ቁጥር ኮፒ',
+    },
+    'batteryLevel': {
+      AppLanguage.en: 'Battery',
+      AppLanguage.om: 'Baatrii',
+      AppLanguage.am: 'ባትሪ',
+    },
+    'lastHeartbeat': {
+      AppLanguage.en: 'Last Heartbeat',
+      AppLanguage.om: 'Yeroo Dhumaa Argamuu',
+      AppLanguage.am: 'የመጨረሻ ግንኙነት',
+    },
+    'switchSecurityMode': {
+      AppLanguage.en: 'Security Mode',
+      AppLanguage.om: 'Haala Nageenyaa',
+      AppLanguage.am: 'የደህንነት ሁነታ',
+    },
+    'rawSms': {
+      AppLanguage.en: 'Raw Bank SMS',
+      AppLanguage.om: 'Ergaa Guutuu',
+      AppLanguage.am: 'ሙሉ የSMS መልዕክት',
+    },
     'depositSlipMandatoryNotice': {
       AppLanguage.en: 'Stamped bank deposit teller slip photo and reference number are strictly mandatory.',
       AppLanguage.om: 'Suuraan nagahee baankii mallatteeffamee fi lakkoofsi nagahee dirqama.',

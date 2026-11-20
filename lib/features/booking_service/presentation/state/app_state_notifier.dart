@@ -26,6 +26,8 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booki
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/customer_feedback.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
@@ -581,6 +583,12 @@ class AppStateNotifier extends ChangeNotifier {
   List<CarWashServiceItem> _serviceItems = [];
   List<CarWashServiceItem> get serviceItems => _serviceItems;
   List<CarWashServiceItem> get activeServiceItems => _serviceItems.where((i) => i.isActive).toList();
+
+  List<BankIncomingTransaction> _bankIncomingTransactions = [];
+  List<BankIncomingTransaction> get bankIncomingTransactions => _bankIncomingTransactions;
+
+  SentinelConfig _sentinelConfig = SentinelConfig(lastHeartbeat: DateTime.now());
+  SentinelConfig get sentinelConfig => _sentinelConfig;
 
   List<StaffMember> _staff = [];
   List<StaffMember> get staff => _staff;
@@ -1155,8 +1163,16 @@ class AppStateNotifier extends ChangeNotifier {
   double get totalCashRevenueETB {
     final now = DateTime.now();
     final bookCash = _bookings
-        .where((b) => b.payment.method == PaymentMethod.cash && _isBookingPaidOnDate(b, now))
-        .fold(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+        .where((b) => _isBookingPaidOnDate(b, now))
+        .fold(0.0, (sum, b) {
+          if (b.payment.isSplit) {
+            return sum + b.payment.splitCashAmount;
+          }
+          if (b.payment.method == PaymentMethod.cash) {
+            return sum + b.totalPrice + b.payment.tipAmount;
+          }
+          return sum;
+        });
     return bookCash + todayShowerCashETB;
   }
 
@@ -1166,8 +1182,16 @@ class AppStateNotifier extends ChangeNotifier {
   double get totalDigitalRevenueETB {
     final now = DateTime.now();
     final bookDig = _bookings
-        .where((b) => b.payment.method != PaymentMethod.cash && _isBookingPaidOnDate(b, now))
-        .fold(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+        .where((b) => _isBookingPaidOnDate(b, now))
+        .fold(0.0, (sum, b) {
+          if (b.payment.isSplit) {
+            return sum + b.payment.splitDigitalAmount + b.payment.tipAmount;
+          }
+          if (b.payment.method != PaymentMethod.cash) {
+            return sum + b.totalPrice + b.payment.tipAmount;
+          }
+          return sum;
+        });
     return bookDig + todayShowerDigitalETB;
   }
 
@@ -2493,6 +2517,12 @@ class AppStateNotifier extends ChangeNotifier {
       } catch (_) {
         _serviceItems = List.from(CarWashServiceItem.getInitialServiceItems());
       }
+
+      try {
+        final txs = await _repository.getBankIncomingTransactions();
+        _bankIncomingTransactions = List.from(txs);
+        _sentinelConfig = await _repository.getSentinelConfig();
+      } catch (_) {}
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -2826,7 +2856,7 @@ class AppStateNotifier extends ChangeNotifier {
     await _refreshBookingsAndBays();
   }
 
-  /// Cashier collects payment (Cash or Digital Money Transfer - Telebirr, CBE Birr)
+  /// Cashier collects payment (Cash, Digital Money Transfer - Telebirr, CBE Birr, or Split Payment)
   Future<void> processPayment({
     required String bookingId,
     required PaymentMethod method,
@@ -2834,7 +2864,23 @@ class AppStateNotifier extends ChangeNotifier {
     double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
+    double? splitCashAmount,
+    double? splitDigitalAmount,
+    String? overpaymentAction,
+    String? verificationStatus,
   }) async {
+    // If a transaction reference is provided, check if it already matches an incoming bank transaction
+    String effectiveStatus = verificationStatus ?? 'unverified';
+    if (transactionRef != null && transactionRef.trim().isNotEmpty) {
+      final cleanRef = transactionRef.trim().toLowerCase();
+      final hasBankMatch = _bankIncomingTransactions.any((tx) => tx.refNo.trim().toLowerCase() == cleanRef);
+      if (hasBankMatch) {
+        effectiveStatus = 'verified';
+      } else if (method.isDigital || (splitDigitalAmount != null && splitDigitalAmount > 0)) {
+        effectiveStatus = 'pending_sms';
+      }
+    }
+
     await _repository.processPayment(
       bookingId: bookingId,
       method: method,
@@ -2842,8 +2888,52 @@ class AppStateNotifier extends ChangeNotifier {
       tipAmount: tipAmount,
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
+      splitCashAmount: splitCashAmount,
+      splitDigitalAmount: splitDigitalAmount,
+      overpaymentAction: overpaymentAction,
+      verificationStatus: effectiveStatus,
     );
     await _refreshBookingsAndBays();
+    await fetchBankIncomingTransactions();
+  }
+
+  Future<void> fetchBankIncomingTransactions() async {
+    try {
+      final txs = await _repository.getBankIncomingTransactions();
+      _bankIncomingTransactions = List.from(txs);
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> setSentinelSecurityMode(String mode) async {
+    _sentinelConfig = SentinelConfig(
+      status: _sentinelConfig.status,
+      batteryLevel: _sentinelConfig.batteryLevel,
+      targetCbeAccount: _sentinelConfig.targetCbeAccount,
+      targetCbeName: _sentinelConfig.targetCbeName,
+      targetTelebirrPhone: _sentinelConfig.targetTelebirrPhone,
+      targetTelebirrName: _sentinelConfig.targetTelebirrName,
+      securityMode: mode,
+      secretToken: _sentinelConfig.secretToken,
+      lastHeartbeat: _sentinelConfig.lastHeartbeat,
+    );
+    await _repository.updateSentinelConfig(_sentinelConfig);
+    notifyListeners();
+  }
+
+  Future<Map<String, dynamic>> ingestBankSms({
+    required String provider,
+    required String rawSms,
+    String? secretToken,
+  }) async {
+    final res = await _repository.ingestBankSms(
+      provider: provider,
+      rawSms: rawSms,
+      secretToken: secretToken,
+    );
+    await fetchBankIncomingTransactions();
+    await _refreshBookingsAndBays();
+    return res;
   }
 
   Future<void> updatePackagePrice({

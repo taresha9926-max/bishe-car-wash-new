@@ -22,6 +22,8 @@ import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.
 import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
 import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inventory_seed.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
 
 class WashRepositoryImpl implements IWashRepository {
   List<WashPackage> _packages = [];
@@ -268,6 +270,10 @@ class WashRepositoryImpl implements IWashRepository {
     double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
+    double? splitCashAmount,
+    double? splitDigitalAmount,
+    String? overpaymentAction,
+    String? verificationStatus,
   }) async {
     final index = _bookings.indexWhere((b) => b.id == bookingId);
     if (index == -1) {
@@ -283,6 +289,10 @@ class WashRepositoryImpl implements IWashRepository {
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
       paidAt: DateTime.now(),
+      splitCashAmount: splitCashAmount,
+      splitDigitalAmount: splitDigitalAmount,
+      overpaymentAction: overpaymentAction,
+      verificationStatus: verificationStatus,
     );
 
     var updatedBooking = booking.copyWith(payment: updatedPayment);
@@ -689,5 +699,129 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<void> recordStockTransaction(StockTransaction tx) async {
     _stockTransactions.insert(0, tx);
+  }
+
+  // --- DIGITAL PAYMENTS & SENTINEL ---
+  final List<BankIncomingTransaction> _bankIncomingTransactions = [];
+  SentinelConfig _sentinelConfig = SentinelConfig(lastHeartbeat: DateTime.now());
+
+  @override
+  Future<List<BankIncomingTransaction>> getBankIncomingTransactions() async {
+    return List.unmodifiable(_bankIncomingTransactions);
+  }
+
+  @override
+  Future<SentinelConfig> getSentinelConfig() async {
+    return _sentinelConfig;
+  }
+
+  @override
+  Future<void> updateSentinelConfig(SentinelConfig config) async {
+    _sentinelConfig = config;
+  }
+
+  @override
+  Future<Map<String, dynamic>> ingestBankSms({
+    required String provider,
+    required String rawSms,
+    String? secretToken,
+  }) async {
+    final cleanProvider = provider.toLowerCase().trim();
+    final cleanSms = rawSms.trim();
+
+    String? extractedRef;
+    double? extractedAmount;
+    String? extractedPayer;
+    String? extractedPhone;
+
+    if (cleanProvider == 'telebirr') {
+      final amountMatch = RegExp(r'received ETB\s*([0-9,]+\.?[0-9]*)', caseSensitive: false).firstMatch(cleanSms);
+      if (amountMatch != null) {
+        extractedAmount = double.tryParse(amountMatch.group(1)?.replaceAll(',', '') ?? '');
+      }
+      final refMatch = RegExp(r'transaction number is\s+([A-Za-z0-9]+)', caseSensitive: false).firstMatch(cleanSms);
+      if (refMatch != null) {
+        extractedRef = refMatch.group(1);
+      }
+      final payerMatch = RegExp(r'from\s+([^(]+)\((2519[0-9*]+)\)', caseSensitive: false).firstMatch(cleanSms);
+      if (payerMatch != null) {
+        extractedPayer = payerMatch.group(1)?.trim();
+        extractedPhone = payerMatch.group(2);
+      }
+    } else if (cleanProvider == 'cbe') {
+      final amountMatch = RegExp(r'received ETB\s*([0-9,]+\.?[0-9]*)', caseSensitive: false).firstMatch(cleanSms);
+      if (amountMatch != null) {
+        extractedAmount = double.tryParse(amountMatch.group(1)?.replaceAll(',', '') ?? '');
+      }
+      final refMatch = RegExp(r'\b(FT[0-9A-Za-z]{8,14})\b', caseSensitive: false).firstMatch(cleanSms);
+      if (refMatch != null) {
+        extractedRef = refMatch.group(1);
+      } else {
+        final urlMatch = RegExp(r'mbreciept\.cbe\.com\.et/([A-Za-z0-9_-]+)', caseSensitive: false).firstMatch(cleanSms);
+        if (urlMatch != null) {
+          extractedRef = urlMatch.group(1);
+        }
+      }
+      final payerMatch = RegExp(r'\(([A-Za-z\s]+)\)\s+to your account', caseSensitive: false).firstMatch(cleanSms);
+      if (payerMatch != null) {
+        extractedPayer = payerMatch.group(1)?.trim();
+      }
+    }
+
+    if (extractedRef == null || extractedAmount == null) {
+      return {'success': false, 'error': 'Could not parse SMS'};
+    }
+
+    // Check duplicate
+    if (_bankIncomingTransactions.any((t) => t.provider == cleanProvider && t.refNo.toLowerCase() == extractedRef!.toLowerCase())) {
+      return {'success': true, 'is_duplicate': true, 'ref_no': extractedRef, 'amount': extractedAmount};
+    }
+
+    // Match with pending booking
+    String? matchedBookingId;
+    final bIndex = _bookings.indexWhere((b) =>
+        b.payment.transactionRef != null &&
+        b.payment.transactionRef!.trim().toLowerCase() == extractedRef!.toLowerCase());
+
+    if (bIndex != -1) {
+      matchedBookingId = _bookings[bIndex].id;
+      final existingBooking = _bookings[bIndex];
+      _bookings[bIndex] = existingBooking.copyWith(
+        payment: existingBooking.payment.copyWith(verificationStatus: 'verified'),
+      );
+    }
+
+    final tx = BankIncomingTransaction(
+      id: 'tx-${DateTime.now().millisecondsSinceEpoch}',
+      provider: cleanProvider,
+      refNo: extractedRef,
+      amount: extractedAmount,
+      payerName: extractedPayer,
+      payerPhone: extractedPhone,
+      rawSms: cleanSms,
+      matchedBookingId: matchedBookingId,
+      matchStatus: matchedBookingId != null ? 'matched' : 'unmatched',
+      receivedAt: DateTime.now(),
+    );
+
+    _bankIncomingTransactions.insert(0, tx);
+    _sentinelConfig = SentinelConfig(
+      status: 'online',
+      batteryLevel: _sentinelConfig.batteryLevel,
+      targetCbeAccount: _sentinelConfig.targetCbeAccount,
+      targetTelebirrPhone: _sentinelConfig.targetTelebirrPhone,
+      securityMode: _sentinelConfig.securityMode,
+      lastHeartbeat: DateTime.now(),
+    );
+
+    return {
+      'success': true,
+      'id': tx.id,
+      'provider': cleanProvider,
+      'ref_no': extractedRef,
+      'amount': extractedAmount,
+      'matched_booking_id': matchedBookingId,
+      'is_matched': matchedBookingId != null,
+    };
   }
 }

@@ -16,6 +16,8 @@ import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart
 import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
 
 /// Domain port for active bookings, washing bay allocations, and payment processing.
 abstract class IBookingRepository {
@@ -39,6 +41,10 @@ abstract class IBookingRepository {
     double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
+    double? splitCashAmount,
+    double? splitDigitalAmount,
+    String? overpaymentAction,
+    String? verificationStatus,
   });
   Future<WashBooking> postponeBooking({
     required String bookingId,
@@ -115,6 +121,24 @@ abstract class IInventoryRepository {
   Future<void> recordStockTransaction(StockTransaction tx);
 }
 
-/// Unified repository interface combining booking, pricing, staff, marketing, and inventory domain ports.
+/// Domain port for digital payments, bank incoming credit verification, and sentinel health.
+abstract class IDigitalPaymentRepository {
+  Future<List<BankIncomingTransaction>> getBankIncomingTransactions();
+  Future<SentinelConfig> getSentinelConfig();
+  Future<void> updateSentinelConfig(SentinelConfig config);
+  Future<Map<String, dynamic>> ingestBankSms({
+    required String provider,
+    required String rawSms,
+    String? secretToken,
+  });
+}
+
+/// Unified repository interface combining booking, pricing, staff, marketing, inventory, and digital payment ports.
 abstract class IWashRepository
-    implements IBookingRepository, IPricingRepository, IStaffRepository, IMarketingRepository, IInventoryRepository {}
+    implements
+        IBookingRepository,
+        IPricingRepository,
+        IStaffRepository,
+        IMarketingRepository,
+        IInventoryRepository,
+        IDigitalPaymentRepository {}

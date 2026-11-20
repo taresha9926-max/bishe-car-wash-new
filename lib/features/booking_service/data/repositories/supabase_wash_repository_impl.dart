@@ -23,6 +23,8 @@ import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart
 import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
 
 class SupabaseWashRepositoryImpl implements IWashRepository {
   static const String _handoverMetaPrefix = '[HANDOVER_META:';
@@ -153,9 +155,13 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     DateTime? handedOverAt,
     String? gpsCoordinates,
     DateTime? paidAt,
+    double splitCashAmount = 0.0,
+    double splitDigitalAmount = 0.0,
+    String overpaymentAction = 'none',
+    String verificationStatus = 'unverified',
   }) {
     final clean = extractCleanDeliveryLocation(baseText);
-    if (!isOnlineBooking && !isPostponed && !isHandedOverToManager && paidAt == null && (gpsCoordinates == null || gpsCoordinates.isEmpty)) {
+    if (!isOnlineBooking && !isPostponed && !isHandedOverToManager && paidAt == null && (gpsCoordinates == null || gpsCoordinates.isEmpty) && splitCashAmount <= 0 && splitDigitalAmount <= 0 && overpaymentAction == 'none' && verificationStatus == 'unverified') {
       return clean;
     }
     final meta = <String, dynamic>{
@@ -170,6 +176,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (handedOverAt != null) 'handedOverAt': handedOverAt.toIso8601String(),
       if (gpsCoordinates != null && gpsCoordinates.isNotEmpty) 'gps': gpsCoordinates,
       if (paidAt != null) 'paidAt': paidAt.toIso8601String(),
+      if (splitCashAmount > 0) 'splitCash': splitCashAmount,
+      if (splitDigitalAmount > 0) 'splitDigital': splitDigitalAmount,
+      if (overpaymentAction != 'none') 'overpaymentAction': overpaymentAction,
+      if (verificationStatus != 'unverified') 'verifStatus': verificationStatus,
     };
     final tag = '$_bookingMetaPrefix${jsonEncode(meta)}]';
     return (clean == null || clean.isEmpty) ? tag : '$clean\n$tag';
@@ -193,6 +203,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       handedOverAt: b.handedOverAt,
       gpsCoordinates: b.gpsCoordinates,
       paidAt: b.payment.paidAt,
+      splitCashAmount: b.payment.splitCashAmount,
+      splitDigitalAmount: b.payment.splitDigitalAmount,
+      overpaymentAction: b.payment.overpaymentAction,
+      verificationStatus: b.payment.verificationStatus,
     );
   }
 
@@ -685,6 +699,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         transactionRef: json['transaction_ref'],
         receiptScreenshot: json['receipt_url'],
         paidAt: paidAt,
+        splitCashAmount: double.tryParse(bookingMeta['splitCash']?.toString() ?? '0') ?? 0.0,
+        splitDigitalAmount: double.tryParse(bookingMeta['splitDigital']?.toString() ?? '0') ?? 0.0,
+        overpaymentAction: bookingMeta['overpaymentAction']?.toString() ?? 'none',
+        verificationStatus: bookingMeta['verifStatus']?.toString() ?? 'unverified',
       ),
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       scheduledTime: json['scheduled_time'] != null ? DateTime.tryParse(json['scheduled_time'].toString()) : null,
@@ -1006,11 +1024,28 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     double tipAmount = 0.0,
     String? transactionRef,
     String? receiptScreenshot,
+    double? splitCashAmount,
+    double? splitDigitalAmount,
+    String? overpaymentAction,
+    String? verificationStatus,
   }) async {
     try {
       if (_isUuid(bookingId)) {
         final now = DateTime.now();
         final existing = await getBookingById(bookingId);
+        final updatedPayment = (existing?.payment ?? const PaymentInfo(amount: 0)).copyWith(
+          isPaid: true,
+          method: method,
+          amount: amount,
+          tipAmount: tipAmount,
+          transactionRef: transactionRef,
+          receiptScreenshot: receiptScreenshot,
+          paidAt: now,
+          splitCashAmount: splitCashAmount,
+          splitDigitalAmount: splitDigitalAmount,
+          overpaymentAction: overpaymentAction,
+          verificationStatus: verificationStatus,
+        );
         await _patch('wash_bookings?id=eq.$bookingId', {
           'is_paid': true,
           'payment_method': method.name,
@@ -1019,7 +1054,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           'receipt_url': receiptScreenshot,
           if (existing != null)
             'delivery_location': _encodeMetaFromBooking(
-              existing.copyWith(payment: existing.payment.copyWith(paidAt: now)),
+              existing.copyWith(payment: updatedPayment),
             ),
         });
 
@@ -1052,15 +1087,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           }
 
           final updated = booking.copyWith(
-            payment: booking.payment.copyWith(
-              isPaid: true,
-              method: method,
-              amount: amount,
-              tipAmount: tipAmount,
-              transactionRef: transactionRef,
-              receiptScreenshot: receiptScreenshot,
-              paidAt: DateTime.now(),
-            ),
+            payment: updatedPayment,
           );
           try {
             await _fallbackLocalRepo.processPayment(
@@ -1070,6 +1097,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               tipAmount: tipAmount,
               transactionRef: transactionRef,
               receiptScreenshot: receiptScreenshot,
+              splitCashAmount: splitCashAmount,
+              splitDigitalAmount: splitDigitalAmount,
+              overpaymentAction: overpaymentAction,
+              verificationStatus: verificationStatus,
             );
           } catch (_) {}
           return updated;
@@ -1085,6 +1116,10 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       tipAmount: tipAmount,
       transactionRef: transactionRef,
       receiptScreenshot: receiptScreenshot,
+      splitCashAmount: splitCashAmount,
+      splitDigitalAmount: splitDigitalAmount,
+      overpaymentAction: overpaymentAction,
+      verificationStatus: verificationStatus,
     );
   }
 
@@ -1828,4 +1863,63 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> recordStockTransaction(StockTransaction tx) => _fallbackLocalRepo.recordStockTransaction(tx);
+
+  // --- DIGITAL PAYMENTS & SENTINEL (SUPABASE + CACHED FALLBACK) ---
+  @override
+  Future<List<BankIncomingTransaction>> getBankIncomingTransactions() async {
+    try {
+      final dynamic data = await _get('bank_incoming_transactions?select=*&order=received_at.desc&limit=60');
+      if (data is List) {
+        return data.whereType<Map<String, dynamic>>().map((j) => BankIncomingTransaction.fromJson(j)).toList();
+      }
+    } catch (e) {
+      debugPrint('Supabase getBankIncomingTransactions error: $e');
+    }
+    return _fallbackLocalRepo.getBankIncomingTransactions();
+  }
+
+  @override
+  Future<SentinelConfig> getSentinelConfig() async {
+    try {
+      final dynamic data = await _get('app_config_sentinel?id=eq.primary&select=*');
+      if (data is List && data.isNotEmpty && data.first is Map) {
+        return SentinelConfig.fromJson(Map<String, dynamic>.from(data.first as Map));
+      }
+    } catch (e) {
+      debugPrint('Supabase getSentinelConfig error: $e');
+    }
+    return _fallbackLocalRepo.getSentinelConfig();
+  }
+
+  @override
+  Future<void> updateSentinelConfig(SentinelConfig config) async {
+    try {
+      await _patch('app_config_sentinel?id=eq.primary', config.toJson());
+    } catch (e) {
+      debugPrint('Supabase updateSentinelConfig error: $e');
+    }
+    await _fallbackLocalRepo.updateSentinelConfig(config);
+  }
+
+  @override
+  Future<Map<String, dynamic>> ingestBankSms({
+    required String provider,
+    required String rawSms,
+    String? secretToken,
+  }) async {
+    try {
+      final dynamic result = await _post('rpc/ingest_bank_sms', {
+        'p_provider': provider,
+        'p_raw_sms': rawSms,
+        if (secretToken != null) 'p_secret_token': secretToken,
+      });
+      if (result is Map) {
+        await _fallbackLocalRepo.ingestBankSms(provider: provider, rawSms: rawSms, secretToken: secretToken);
+        return Map<String, dynamic>.from(result);
+      }
+    } catch (e) {
+      debugPrint('Supabase ingestBankSms error: $e');
+    }
+    return _fallbackLocalRepo.ingestBankSms(provider: provider, rawSms: rawSms, secretToken: secretToken);
+  }
 }

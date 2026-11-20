@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -36,20 +37,32 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   final _refCodeController = TextEditingController();
   final _tipController = TextEditingController();
   final _agreedPriceController = TextEditingController();
+  final _splitCashController = TextEditingController();
+  final _splitDigitalController = TextEditingController();
+
   bool _isProcessing = false;
+  bool _isSplitPayment = false;
   String? _uploadedScreenshotName;
   String? _screenshotBase64;
   double _tipAmount = 0.0;
+  String _overpaymentAction = 'refund_cash'; // 'refund_cash' or 'washer_tip'
 
   @override
   void initState() {
     super.initState();
-    _selectedMethod = widget.booking.payment.method;
+    _selectedMethod = widget.booking.payment.method == PaymentMethod.cash
+        ? PaymentMethod.cash
+        : widget.booking.payment.method;
     _agreedPriceController.text = widget.booking.totalPrice.toStringAsFixed(0);
     _tipAmount = widget.booking.payment.tipAmount;
     if (_tipAmount > 0) {
       _tipController.text = _tipAmount.toStringAsFixed(0);
     }
+
+    // Default split values if split payment is toggled
+    final half = (widget.booking.totalPrice / 2).roundToDouble();
+    _splitCashController.text = half.toStringAsFixed(0);
+    _splitDigitalController.text = (widget.booking.totalPrice - half).toStringAsFixed(0);
   }
 
   @override
@@ -57,6 +70,8 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
     _refCodeController.dispose();
     _tipController.dispose();
     _agreedPriceController.dispose();
+    _splitCashController.dispose();
+    _splitDigitalController.dispose();
     super.dispose();
   }
 
@@ -263,23 +278,246 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               ),
               const SizedBox(height: 14),
 
-              Text(
-                state.tr('paymentMethod'),
-                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              const SizedBox(height: 14),
+
+              // Mode Toggle: Standard Method vs Split Payment
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _isSplitPayment ? AppColors.primary : AppColors.cardBorder),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.call_split_rounded,
+                            size: 18,
+                            color: _isSplitPayment ? AppColors.primary : AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.tr('splitPayment'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: _isSplitPayment ? Colors.white : AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: _isSplitPayment,
+                      activeColor: AppColors.primary,
+                      onChanged: (val) {
+                        setState(() {
+                          _isSplitPayment = val;
+                          if (val) {
+                            final half = (amountDue / 2).roundToDouble();
+                            _splitCashController.text = half.toStringAsFixed(0);
+                            _splitDigitalController.text = (amountDue - half).toStringAsFixed(0);
+                            if (_selectedMethod == PaymentMethod.cash) {
+                              _selectedMethod = PaymentMethod.telebirr;
+                            }
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
 
-              // Payment Options
-              _buildOption(PaymentMethod.cash, state.tr('payCash')),
-              _buildOption(PaymentMethod.telebirr, state.tr('payTelebirr')),
-              _buildOption(PaymentMethod.cbeBirr, state.tr('payCbeBirr')),
-              _buildOption(PaymentMethod.bankOfAbyssinia, state.tr('payBankOfAbyssinia')),
-              _buildOption(PaymentMethod.awashBank, state.tr('payAwashBank')),
-              _buildOption(PaymentMethod.dashenBank, state.tr('payDashenBank')),
-              _buildOption(PaymentMethod.otherBankTransfer, state.tr('payBank')),
+              if (_isSplitPayment) ...[
+                // Split Payment Inputs
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: _splitCashController,
+                        label: state.tr('cashPortion'),
+                        hint: 'e.g. 200',
+                        keyboardType: TextInputType.number,
+                        prefixIcon: Icons.payments_rounded,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: CustomTextField(
+                        controller: _splitDigitalController,
+                        label: state.tr('digitalPortion'),
+                        hint: 'e.g. 300',
+                        keyboardType: TextInputType.number,
+                        prefixIcon: Icons.phone_android_rounded,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Digital Channel for Split Payment:',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildOption(PaymentMethod.telebirr, state.tr('payTelebirr')),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildOption(PaymentMethod.cbeBirr, state.tr('payCbeBirr')),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                Text(
+                  state.tr('paymentMethod'),
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 8),
 
-              // Digital Payment Fields
-              if (_selectedMethod.isDigital) ...[
+                // Payment Options
+                _buildOption(PaymentMethod.cash, state.tr('payCash')),
+                _buildOption(PaymentMethod.telebirr, state.tr('payTelebirr')),
+                _buildOption(PaymentMethod.cbeBirr, state.tr('payCbeBirr')),
+                _buildOption(PaymentMethod.bankOfAbyssinia, state.tr('payBankOfAbyssinia')),
+                _buildOption(PaymentMethod.awashBank, state.tr('payAwashBank')),
+                _buildOption(PaymentMethod.dashenBank, state.tr('payDashenBank')),
+                _buildOption(PaymentMethod.otherBankTransfer, state.tr('payBank')),
+              ],
+
+              // Target Account Notice Banner
+              if (_selectedMethod.isDigital || _isSplitPayment) ...[
+                const SizedBox(height: 10),
+                Builder(
+                  builder: (ctx) {
+                    final isTelebirr = _selectedMethod == PaymentMethod.telebirr;
+                    final sentinel = state.sentinelConfig;
+                    final targetNumber = isTelebirr
+                        ? (sentinel?.targetTelebirrPhone ?? '0910046553')
+                        : (sentinel?.targetCbeAccount ?? '10004388');
+                    final targetName = isTelebirr
+                        ? (sentinel?.targetTelebirrName ?? 'Tariku Gebretsadike')
+                        : (sentinel?.targetCbeName ?? 'Tariku G/tsadik G/silase');
+                    final providerTitle = isTelebirr ? 'Telebirr' : 'CBE';
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: (isTelebirr ? AppColors.telebirrBlue : AppColors.cbeBirrPurple).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: (isTelebirr ? AppColors.telebirrBlue : AppColors.cbeBirrPurple).withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isTelebirr ? Icons.phone_android_rounded : Icons.account_balance_rounded,
+                            color: isTelebirr ? AppColors.telebirrBlue : AppColors.cbeBirrPurple,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '$providerTitle: $targetNumber',
+                                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900, color: Colors.white),
+                                ),
+                                Text(
+                                  targetName,
+                                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.copy_rounded, size: 18, color: Colors.white70),
+                            tooltip: 'Copy Number',
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: targetNumber));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Copied $providerTitle account ($targetNumber) to clipboard'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+
+              // Overpayment Prompt (if paid > reference tariff)
+              if (parsedAgreed != null && parsedAgreed > widget.booking.totalPrice) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade900.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade400, width: 1.2),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.info_outline_rounded, color: Colors.lightBlueAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${state.tr("overpaymentDetected")}: +ETB ${(parsedAgreed - widget.booking.totalPrice).toStringAsFixed(0)}',
+                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.lightBlueAccent),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Column(
+                        children: [
+                          RadioListTile<String>(
+                            title: Text(state.tr('refundCashDrawer'), style: const TextStyle(fontSize: 11)),
+                            value: 'refund_cash',
+                            groupValue: _overpaymentAction,
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            onChanged: (val) => setState(() => _overpaymentAction = val ?? 'refund_cash'),
+                          ),
+                          RadioListTile<String>(
+                            title: Text(state.tr('addAsWasherTip'), style: const TextStyle(fontSize: 11)),
+                            value: 'washer_tip',
+                            groupValue: _overpaymentAction,
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            onChanged: (val) => setState(() => _overpaymentAction = val ?? 'washer_tip'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              // Digital Payment Fields & Sentinel Live Verification
+              if (_selectedMethod.isDigital || _isSplitPayment) ...[
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -304,9 +542,93 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 const SizedBox(height: 10),
                 CustomTextField(
                   controller: _refCodeController,
-                  label: '${state.tr('transactionRef')} (Optional)',
-                  hint: 'e.g. TB-8932014 or CBE-9923184',
+                  label: '${state.tr('transactionRef')} *',
+                  hint: 'e.g. DKK0G3C37O or FT263237JRB8',
                   prefixIcon: Icons.confirmation_number_outlined,
+                  onChanged: (_) => setState(() {}),
+                ),
+
+                // Live Bank Cross-Reference Status Banner
+                Builder(
+                  builder: (ctx) {
+                    final cleanRef = _refCodeController.text.trim().toLowerCase();
+                    if (cleanRef.isEmpty) return const SizedBox.shrink();
+
+                    final matchedTx = state.bankIncomingTransactions
+                        .where((tx) => tx.refNo.trim().toLowerCase() == cleanRef)
+                        .firstOrNull;
+
+                    if (matchedTx != null) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF064E3B),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.statusCompleted),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.verified_rounded, color: Colors.greenAccent, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${state.tr("bankVerifiedBadge")}: ETB ${CurrencyFormatter.format(matchedTx.amount)} (${matchedTx.payerName ?? "Customer"})',
+                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Colors.greenAccent),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    // No match yet
+                    if (state.sentinelConfig?.isStrict == true) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade900.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.red.shade400),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.gpp_bad_rounded, color: Colors.redAccent, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                state.tr('policyStrictMode'),
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.redAccent),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade900.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.amber.shade400),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.hourglass_top_rounded, color: Colors.amberAccent, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              state.tr('bankPendingSmsBadge'),
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.amberAccent),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
 
@@ -433,7 +755,28 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
     final state = AppStateProvider.read(context);
     final navigator = Navigator.of(context, rootNavigator: true);
 
-    if (_selectedMethod != PaymentMethod.cash) {
+    double splitCash = 0.0;
+    double splitDigital = 0.0;
+
+    if (_isSplitPayment) {
+      splitCash = double.tryParse(_splitCashController.text.trim()) ?? 0.0;
+      splitDigital = double.tryParse(_splitDigitalController.text.trim()) ?? 0.0;
+
+      if ((splitCash + splitDigital - amount).abs() > 0.5) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.tr('splitTotalMismatch')),
+            backgroundColor: Colors.red.shade700,
+          ),
+        );
+        return;
+      }
+    }
+
+    final isDigitalOrSplitDigital = (!_isSplitPayment && _selectedMethod.isDigital) ||
+        (_isSplitPayment && splitDigital > 0);
+
+    if (isDigitalOrSplitDigital) {
       if (_screenshotBase64 == null || _screenshotBase64!.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -443,24 +786,62 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         );
         return;
       }
+
+      if (_refCodeController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter the transaction reference number from the receipt.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+        return;
+      }
     }
+
+    final refCode = isDigitalOrSplitDigital && _refCodeController.text.trim().isNotEmpty
+        ? _refCodeController.text.trim()
+        : null;
+
+    // Check against live incoming bank transactions
+    final cleanRef = (refCode ?? '').trim().toLowerCase();
+    final matchedTx = cleanRef.isNotEmpty
+        ? state.bankIncomingTransactions
+            .where((tx) => tx.refNo.trim().toLowerCase() == cleanRef)
+            .firstOrNull
+        : null;
+
+    // Enforce Policy 2 (Strict Lockdown)
+    if (isDigitalOrSplitDigital && state.sentinelConfig.isStrict && matchedTx == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${state.tr("policyStrictMode")}: Bank credit SMS must be received by Sentinel before vehicle release.'),
+          backgroundColor: Colors.red.shade800,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
+
+    final verificationStatus = matchedTx != null
+        ? 'verified'
+        : (isDigitalOrSplitDigital ? 'pending_sms' : 'unverified');
 
     setState(() {
       _isProcessing = true;
     });
 
     try {
-      final refCode = _selectedMethod.isDigital && _refCodeController.text.trim().isNotEmpty
-          ? _refCodeController.text.trim()
-          : null;
-
       await state.processPayment(
         bookingId: widget.booking.id,
-        method: _selectedMethod,
+        method: _isSplitPayment ? PaymentMethod.cash : _selectedMethod,
         amount: amount,
         tipAmount: _tipAmount,
         transactionRef: refCode,
         receiptScreenshot: _screenshotBase64,
+        splitCashAmount: _isSplitPayment ? splitCash : 0.0,
+        splitDigitalAmount: _isSplitPayment ? splitDigital : 0.0,
+        overpaymentAction: _overpaymentAction,
+        verificationStatus: verificationStatus,
       );
 
       navigator.pop();

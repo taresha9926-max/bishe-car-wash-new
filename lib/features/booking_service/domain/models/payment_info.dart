@@ -101,6 +101,10 @@ class PaymentInfo {
   final String? transactionRef;
   final String? receiptScreenshot; // Base64 or receipt URL
   final DateTime? paidAt;
+  final double splitCashAmount;
+  final double splitDigitalAmount;
+  final String overpaymentAction; // 'none', 'refund_cash', 'washer_tip'
+  final String verificationStatus; // 'unverified', 'pending_sms', 'verified', 'discrepancy'
 
   const PaymentInfo({
     this.isPaid = false,
@@ -110,9 +114,16 @@ class PaymentInfo {
     this.transactionRef,
     this.receiptScreenshot,
     this.paidAt,
+    this.splitCashAmount = 0.0,
+    this.splitDigitalAmount = 0.0,
+    this.overpaymentAction = 'none',
+    this.verificationStatus = 'unverified',
   });
 
   double get totalPaid => amount + tipAmount;
+  bool get isSplit => splitCashAmount > 0 && splitDigitalAmount > 0;
+  bool get isBankVerified => verificationStatus == 'verified';
+  bool get isPendingSms => verificationStatus == 'pending_sms';
 
   PaymentInfo copyWith({
     bool? isPaid,
@@ -122,6 +133,10 @@ class PaymentInfo {
     String? transactionRef,
     String? receiptScreenshot,
     DateTime? paidAt,
+    double? splitCashAmount,
+    double? splitDigitalAmount,
+    String? overpaymentAction,
+    String? verificationStatus,
   }) {
     return PaymentInfo(
       isPaid: isPaid ?? this.isPaid,
@@ -131,6 +146,10 @@ class PaymentInfo {
       transactionRef: transactionRef ?? this.transactionRef,
       receiptScreenshot: receiptScreenshot ?? this.receiptScreenshot,
       paidAt: paidAt ?? this.paidAt,
+      splitCashAmount: splitCashAmount ?? this.splitCashAmount,
+      splitDigitalAmount: splitDigitalAmount ?? this.splitDigitalAmount,
+      overpaymentAction: overpaymentAction ?? this.overpaymentAction,
+      verificationStatus: verificationStatus ?? this.verificationStatus,
     );
   }
 }
