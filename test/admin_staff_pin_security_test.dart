@@ -152,5 +152,79 @@ void main() {
       final cashier = creds.firstWhere((c) => c.role == UserRole.cashier);
       expect(cashier.pin, equals('1234'));
     });
+
+    test('SupabaseWashRepositoryImpl deduplicates multiple admin rows (admin, tare, dawit) into exactly one Bishe Super Admin', () async {
+      final mockClient = MockClient((request) async {
+        final path = request.url.path;
+        if (path.contains('staff_credentials') || path.contains('get_staff_credentials')) {
+          return http.Response(jsonEncode([
+            {
+              'id': '918897ec-6137-4f0f-9bac-65ec0b4329b9',
+              'username': 'admin',
+              'role': 'admin',
+              'pin_hash': '4450',
+              'full_name': 'Bishe Super Admin',
+              'is_active': true,
+            },
+            {
+              'id': '5953b067-0e63-4d64-93c2-054b2337ed21',
+              'username': 'tare',
+              'role': 'admin',
+              'pin_hash': '4450',
+              'full_name': 'Bishe Super Admin',
+              'is_active': true,
+            },
+            {
+              'id': '5ffbe051-3ee9-45fb-8fd8-930c4c13b45a',
+              'username': 'dawit',
+              'role': 'admin',
+              'pin_hash': '4450',
+              'full_name': 'Bishe Super Admin',
+              'is_active': true,
+            },
+            {
+              'id': '1ea559ec-9dcc-498d-aeb9-936682a6a4a1',
+              'username': 'cashier',
+              'role': 'cashier',
+              'pin_hash': '1234',
+              'full_name': 'Station Gate Cashier',
+              'is_active': true,
+            },
+          ]), 200);
+        }
+        return http.Response('[]', 200);
+      });
+
+      final repo = SupabaseWashRepositoryImpl(
+        supabaseUrl: 'https://siioobajphmwzwwarlrr.supabase.co',
+        anonKey: 'dummy_anon_key',
+        httpClient: mockClient,
+      );
+
+      final creds = await repo.getStaffCredentials();
+
+      // Exactly ONE admin credential must exist and must be Bishe Super Admin (@admin)
+      final adminCreds = creds.where((c) => c.role == UserRole.admin).toList();
+      expect(adminCreds.length, equals(1), reason: 'Must never duplicate Bishe Super Admin');
+      expect(adminCreds.first.username, equals('admin'));
+      expect(adminCreds.first.fullName, equals('Bishe Super Admin'));
+
+      // All 5 operational roles must be present without duplicates
+      final roles = creds.map((c) => c.role).toList();
+      expect(roles.toSet().length, equals(roles.length), reason: 'Zero duplicate roles allowed');
+      expect(creds.any((c) => c.role == UserRole.admin), isTrue);
+      expect(creds.any((c) => c.role == UserRole.cashier), isTrue);
+      expect(creds.any((c) => c.role == UserRole.manager), isTrue);
+      expect(creds.any((c) => c.role == UserRole.accountant), isTrue);
+      expect(creds.any((c) => c.role == UserRole.storekeeper), isTrue);
+    });
+
+    test('AppStateNotifier strictly maintains unique roles with single Bishe Super Admin', () async {
+      final creds = state.credentials;
+      final adminCount = creds.where((c) => c.role == UserRole.admin).length;
+      expect(adminCount, equals(1), reason: 'Bishe Super Admin must appear exactly once');
+      final uniqueRoles = creds.map((c) => c.role).toSet();
+      expect(uniqueRoles.length, equals(creds.length), reason: 'Each role has exactly one primary credential');
+    });
   });
 }

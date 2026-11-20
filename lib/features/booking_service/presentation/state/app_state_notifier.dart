@@ -2403,7 +2403,7 @@ class AppStateNotifier extends ChangeNotifier {
       _bookings = List.from(results[3] as List<WashBooking>);
       _syncOnlineBookingAlerts(_bookings);
       _commissionLogs = List.from(results[4] as List<CommissionLog>);
-      _credentials = List.from(results[5] as List<StaffCredential>);
+      _credentials = _deduplicateCredentials(results[5] as List<StaffCredential>);
       final reels = results[6] as List<TikTokAdVideo>;
       if (reels.isNotEmpty) {
         _tiktokReels = List.from(reels);
@@ -3457,7 +3457,26 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   Future<void> _refreshCredentials() async {
-    _credentials = await _repository.getStaffCredentials();
+    final raw = await _repository.getStaffCredentials();
+    _credentials = _deduplicateCredentials(raw);
     notifyListeners();
+  }
+
+  static List<StaffCredential> _deduplicateCredentials(List<StaffCredential> raw) {
+    final Map<String, StaffCredential> uniqueMap = {};
+    for (final c in raw) {
+      if (c.role == UserRole.admin &&
+          c.username.toLowerCase() != 'admin' &&
+          (c.fullName.toLowerCase() == 'bishe super admin' ||
+              c.username.toLowerCase() == 'tare' ||
+              c.username.toLowerCase() == 'dawit')) {
+        continue;
+      }
+      final key = (c.role == UserRole.admin || c.fullName.toLowerCase() == 'bishe super admin')
+          ? 'role_admin'
+          : '${c.role.name}_${c.username.toLowerCase()}';
+      uniqueMap.putIfAbsent(key, () => c);
+    }
+    return uniqueMap.values.toList();
   }
 }

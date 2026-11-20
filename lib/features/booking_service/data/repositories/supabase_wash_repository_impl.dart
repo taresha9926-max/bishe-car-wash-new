@@ -1325,23 +1325,49 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             }));
       }
 
+      // Deduplicate credentials: each standard role has exactly one primary credential.
+      final Map<UserRole, StaffCredential> primaryRoleCreds = {};
+      final List<StaffCredential> customStaff = [];
+
+      for (final c in creds) {
+        // Drop duplicate / obsolete admin test rows (e.g. tare, dawit with Bishe Super Admin name)
+        if (c.role == UserRole.admin &&
+            c.username.toLowerCase() != 'admin' &&
+            (c.fullName.toLowerCase() == 'bishe super admin' ||
+                c.username.toLowerCase() == 'tare' ||
+                c.username.toLowerCase() == 'dawit')) {
+          continue;
+        }
+
+        if (c.username.toLowerCase() == c.role.name ||
+            (c.role == UserRole.admin && c.username.toLowerCase() == 'admin')) {
+          primaryRoleCreds[c.role] = c;
+        } else if (!primaryRoleCreds.containsKey(c.role)) {
+          primaryRoleCreds[c.role] = c;
+        } else {
+          if (!customStaff.any((s) => s.username.toLowerCase() == c.username.toLowerCase())) {
+            customStaff.add(c);
+          }
+        }
+      }
+
       // Check fallback repository to retain locally updated credentials if unreturned by Supabase
       final localCreds = await _fallbackLocalRepo.getStaffCredentials();
 
       void ensureRole(UserRole role, String defaultId, String defaultUsername, String defaultPin, String defaultName) {
-        if (!creds.any((c) => c.role == role && c.isActive)) {
+        if (!primaryRoleCreds.containsKey(role)) {
           final localMatch = localCreds.where((c) => c.role == role && c.isActive).firstOrNull;
           if (localMatch != null) {
-            creds.add(localMatch);
+            primaryRoleCreds[role] = localMatch;
           } else {
-            creds.add(StaffCredential(
+            primaryRoleCreds[role] = StaffCredential(
               id: defaultId,
               username: defaultUsername,
               pin: defaultPin,
               role: role,
               fullName: defaultName,
               isActive: true,
-            ));
+            );
           }
         }
       }
@@ -1354,7 +1380,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       ensureRole(UserRole.accountant, 'cred-accountant', 'accountant', '3344', 'Station Accountant');
       ensureRole(UserRole.storekeeper, 'cred-storekeeper', 'storekeeper', '3344', 'Inventory Storekeeper');
 
-      return creds;
+      return [...primaryRoleCreds.values, ...customStaff];
     } catch (_) {
       return _fallbackLocalRepo.getStaffCredentials();
     }

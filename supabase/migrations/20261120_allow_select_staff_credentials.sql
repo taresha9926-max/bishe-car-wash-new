@@ -65,7 +65,7 @@ LANGUAGE sql
 SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
-    SELECT 
+    SELECT DISTINCT ON (role)
         id::text,
         username::text,
         pin_hash::text,
@@ -73,7 +73,9 @@ AS $$
         full_name::text,
         is_active::boolean
     FROM public.staff_credentials
-    WHERE username NOT LIKE 'app_config_%';
+    WHERE username NOT LIKE 'app_config_%'
+      AND username NOT IN ('tare', 'dawit')
+    ORDER BY role, (CASE WHEN username = 'admin' THEN 0 ELSE 1 END), updated_at DESC;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_staff_credentials() TO anon, authenticated, service_role;
@@ -130,5 +132,53 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.verify_staff_pin(TEXT, TEXT) TO anon, authenticated, service_role;
 
--- 6. Reload PostgREST schema cache
+-- 6. Clean up legacy duplicate test credentials (e.g. tare, dawit test accounts)
+DELETE FROM public.staff_credentials
+WHERE role = 'admin' AND username IN ('tare', 'dawit');
+
+-- 7. Update update_staff_pin function to prevent updating multiple accounts when role is admin
+CREATE OR REPLACE FUNCTION public.update_staff_pin(p_role TEXT, p_new_pin TEXT, p_full_name TEXT DEFAULT NULL)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+DECLARE
+    role_norm TEXT;
+    clean_pin TEXT;
+BEGIN
+    role_norm := lower(trim(p_role));
+    clean_pin := trim(p_new_pin);
+
+    IF clean_pin IS NULL OR clean_pin = '' THEN
+        RETURN FALSE;
+    END IF;
+
+    -- Update existing staff credential for this role (primary account)
+    UPDATE public.staff_credentials
+    SET pin_hash = clean_pin,
+        full_name = COALESCE(p_full_name, full_name),
+        is_active = TRUE
+    WHERE lower(trim(role)) = role_norm
+      AND (lower(trim(username)) = role_norm OR lower(trim(username)) = 'admin');
+
+    -- If no row exists yet for this role, insert fresh active record
+    IF NOT FOUND THEN
+        INSERT INTO public.staff_credentials (role, username, pin_hash, full_name, is_active)
+        VALUES (
+            role_norm,
+            role_norm,
+            clean_pin,
+            COALESCE(p_full_name, initcap(role_norm) || ' Staff'),
+            TRUE
+        );
+    END IF;
+
+    RETURN TRUE;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.update_staff_pin(TEXT, TEXT, TEXT) TO anon, authenticated, service_role;
+
+-- 8. Reload PostgREST schema cache
 NOTIFY pgrst, 'reload schema';

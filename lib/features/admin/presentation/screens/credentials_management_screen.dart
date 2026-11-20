@@ -420,7 +420,22 @@ class _CredentialsManagementScreenState extends State<CredentialsManagementScree
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final credentials = state.credentials;
+    final rawCredentials = state.credentials;
+    final Map<String, StaffCredential> uniqueMap = {};
+    for (final c in rawCredentials) {
+      if (c.role == UserRole.admin &&
+          c.username.toLowerCase() != 'admin' &&
+          (c.fullName.toLowerCase() == 'bishe super admin' ||
+              c.username.toLowerCase() == 'tare' ||
+              c.username.toLowerCase() == 'dawit')) {
+        continue;
+      }
+      final key = (c.role == UserRole.admin || c.fullName.toLowerCase() == 'bishe super admin')
+          ? 'role_admin'
+          : '${c.role.name}_${c.username.toLowerCase()}';
+      uniqueMap.putIfAbsent(key, () => c);
+    }
+    final credentials = uniqueMap.values.toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
