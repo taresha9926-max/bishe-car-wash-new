@@ -14,6 +14,14 @@ ALTER TABLE IF EXISTS public.staff_credentials ENABLE ROW LEVEL SECURITY;
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.staff_credentials TO anon, authenticated, service_role;
 
+-- Ensure role check constraint permits all station staff roles
+ALTER TABLE IF EXISTS public.staff_credentials
+    DROP CONSTRAINT IF EXISTS staff_credentials_role_check;
+
+ALTER TABLE IF EXISTS public.staff_credentials
+    ADD CONSTRAINT staff_credentials_role_check
+    CHECK (lower(trim(role)) IN ('admin', 'cashier', 'manager', 'accountant', 'storekeeper'));
+
 -- 2. Clean up legacy or restrictive policies on staff_credentials
 DROP POLICY IF EXISTS "Allow anon manage tiktok reels config" ON public.staff_credentials;
 DROP POLICY IF EXISTS "Allow updating staff credentials" ON public.staff_credentials;

@@ -240,5 +240,100 @@ void main() {
       final mgrButton = tester.widget<ElevatedButton>(mgrDepositFinder);
       expect(mgrButton.onPressed, isNotNull);
     });
+
+    testWidgets('Operational Manager Money Tab disables Deposit to Bank button once Night Shift is handed over to Admin via OTP, and unlocks upon cancel', (tester) async {
+      tester.binding.setSurfaceSize(const Size(1280, 800));
+
+      // 1. Day cash collected: 1,000 ETB and handed over to Manager
+      await state.registerWalkIn(
+        licensePlate: 'ET-TEST-04',
+        customerName: 'Kenenisa Bekele',
+        customerPhone: '0911778899',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.cash,
+      );
+      await state.processPayment(
+        bookingId: state.bookings.first.id,
+        method: PaymentMethod.cash,
+        amount: state.bookings.first.totalPrice,
+      );
+      state.markDailyCommissionDisbursed();
+      final dayClosing = await state.confirmDailyClosing(
+        cashierName: 'Chaltu Tadesse',
+        shiftType: 'day',
+        closedByRole: 'cashier',
+        handoverTo: 'Operational Manager',
+        handoverMethod: 'manager_otp',
+      );
+      await state.acceptCashierHandover(
+        managerName: 'Gedion Worku',
+        enteredOtp: dayClosing.handoverOtp,
+      );
+
+      expect(state.managerCustodyCashETB, equals(500.0));
+
+      // Launch Operational Manager Dashboard
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: const MaterialApp(home: OperationalManagerDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Switch to Money Tab
+      await tester.tap(find.byType(Tab).at(1));
+      await tester.pumpAndSettle();
+
+      // Deposit to Bank is enabled before night handover
+      final depositFinder = find.widgetWithText(ElevatedButton, state.tr('depositCashToBank'));
+      expect(depositFinder, findsOneWidget);
+      expect(tester.widget<ElevatedButton>(depositFinder).onPressed, isNotNull);
+
+      // 2. Perform Night Shift Closing with OTP handover to Admin
+      final nightClosing = await state.confirmDailyClosing(
+        cashierName: 'Gedion Worku',
+        shiftType: 'night',
+        closedByRole: 'manager',
+        handoverTo: 'Owner / Bishe Super Admin',
+        handoverMethod: 'admin_otp',
+      );
+      await tester.pumpAndSettle();
+
+      // 3. Manager custody cash evaluates to 0.00 ETB
+      expect(state.isTodayNightShiftClosed, isTrue);
+      expect(state.managerCustodyCashETB, equals(0.0));
+      expect(nightClosing.handoverOtp, isNotNull);
+
+      // 4. Deposit button MUST now be disabled!
+      expect(tester.widget<ElevatedButton>(depositFinder).onPressed, isNull);
+      expect(find.text(state.tr('drawerEmptyHandedOver')), findsWidgets);
+
+      // 5. Switch back to Queue tab to see Admin Handover Banner
+      await tester.tap(find.byType(Tab).at(0));
+      await tester.pumpAndSettle();
+
+      expect(find.text(state.tr('adminNightHandoverCode')), findsOneWidget);
+      expect(find.text('[ ${nightClosing.handoverOtp} ]'), findsOneWidget);
+      expect(find.text(state.tr('cancelHandoverAndAddCars')), findsOneWidget);
+      expect(find.text(state.tr('viewClosingVoucher')), findsOneWidget);
+
+      // 6. Unlock Night Shift Closing
+      final unlocked = await state.unlockNightShiftClosing();
+      expect(unlocked, isTrue);
+      await tester.pumpAndSettle();
+
+      // Banner clears
+      expect(find.text(state.tr('adminNightHandoverCode')), findsNothing);
+      expect(state.isTodayNightShiftClosed, isFalse);
+      expect(state.managerCustodyCashETB, equals(500.0));
+
+      // Money tab re-enables deposit button
+      await tester.tap(find.byType(Tab).at(1));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ElevatedButton>(depositFinder).onPressed, isNotNull);
+    });
   });
 }

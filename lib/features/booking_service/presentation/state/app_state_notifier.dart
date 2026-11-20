@@ -1806,7 +1806,6 @@ class AppStateNotifier extends ChangeNotifier {
     for (final c in _dailyFinancialClosings) {
       if (c.shiftType == 'night' &&
           c.isConfirmed &&
-          (c.isHandoverAccepted || c.handoverMethod == 'bank_deposit') &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
           c.closingDate.day == now.day) {
@@ -1960,6 +1959,29 @@ class AppStateNotifier extends ChangeNotifier {
         await _repository.deleteDailyFinancialClosing(closing.id);
       } catch (e) {
         debugPrint('Failed to delete daily closing during unlock: $e');
+      }
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  /// Unlocks today's night shift closing so the operational manager can continue recording, washing, and collecting payments for new cars before Admin handover.
+  Future<bool> unlockNightShiftClosing() async {
+    final now = DateTime.now();
+    final index = _dailyFinancialClosings.indexWhere((c) =>
+        c.shiftType == 'night' &&
+        c.closingDate.year == now.year &&
+        c.closingDate.month == now.month &&
+        c.closingDate.day == now.day);
+
+    if (index != -1) {
+      final closing = _dailyFinancialClosings.removeAt(index);
+      _repository.clearClosingSyncError();
+      try {
+        await _repository.deleteDailyFinancialClosing(closing.id);
+      } catch (e) {
+        debugPrint('Failed to delete night closing during unlock: $e');
       }
       notifyListeners();
       return true;

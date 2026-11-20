@@ -96,6 +96,11 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
     final availableCash = widget.isManager
         ? (state.managerCustodyCashETB as double)
         : (state.cashierDrawerBalanceETB as double);
+    final isClosed = widget.isManager ? state.isTodayNightShiftClosed : state.isTodayDayShiftClosed;
+    final hasPendingHandover = widget.isManager
+        ? state.pendingAdminNightHandover != null
+        : (state.pendingCashierHandover != null || state.pendingCashierAdminHandover != null);
+    final isDepositLocked = isClosed || hasPendingHandover || availableCash <= 0.01;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
     final content = ConstrainedBox(
@@ -155,6 +160,38 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               ),
               const SizedBox(height: 16),
 
+              if (isDepositLocked) ...[
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.amber.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock_rounded, color: Colors.amber.shade900, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          isClosed || hasPendingHandover
+                              ? (widget.isManager
+                                  ? 'Physical cash in custody has already been handed over to Admin via OTP. Bank deposits are disabled.'
+                                  : 'Cash drawer has already been handed over. Bank deposits are disabled.')
+                              : 'No physical cash available in custody to deposit.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.amber.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               // Available Cash in Drawer Banner
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -200,6 +237,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 bankName: 'Commercial Bank of Ethiopia',
                 color: AppColors.cbeBirrPurple,
                 icon: Icons.account_balance_rounded,
+                enabled: !isDepositLocked,
               ),
               const SizedBox(height: 8),
 
@@ -211,6 +249,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 bankName: 'Awash Bank',
                 color: const Color(0xFFEA580C),
                 icon: Icons.account_balance_wallet_rounded,
+                enabled: !isDepositLocked,
               ),
               const SizedBox(height: 16),
 
@@ -222,7 +261,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                     '${state.tr('depositAmount')}:',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
-                  if (availableCash > 0)
+                  if (availableCash > 0 && !isDepositLocked)
                     TextButton.icon(
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -242,6 +281,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 controller: _amountController,
                 label: 'Deposit Amount',
                 hint: 'e.g. 5000',
+                enabled: !isDepositLocked,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 prefixIcon: Icons.attach_money_rounded,
               ),
@@ -275,6 +315,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 controller: _slipController,
                 label: '${state.tr('bankSlipNumber')} *',
                 hint: 'e.g. CBE-SLIP-984210 or AW-DEP-4491',
+                enabled: !isDepositLocked,
                 prefixIcon: Icons.receipt_long_rounded,
               ),
               const SizedBox(height: 12),
@@ -291,7 +332,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               ),
               const SizedBox(height: 6),
               InkWell(
-                onTap: _pickReceiptImage,
+                onTap: isDepositLocked ? null : _pickReceiptImage,
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   width: double.infinity,
@@ -336,6 +377,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 controller: _cashierNameController,
                 label: 'Deposited By (Cashier Name)',
                 hint: 'Cashier full name',
+                enabled: !isDepositLocked,
                 prefixIcon: Icons.person_outline_rounded,
               ),
               const SizedBox(height: 10),
@@ -343,6 +385,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 controller: _notesController,
                 label: 'Deposit Remarks (Optional)',
                 hint: 'e.g. Deposited before branch closing',
+                enabled: !isDepositLocked,
                 prefixIcon: Icons.notes_rounded,
               ),
               const SizedBox(height: 20),
@@ -353,7 +396,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
                 icon: Icons.check_circle_rounded,
                 backgroundColor: AppColors.primary,
                 isLoading: _isSubmitting,
-                onPressed: _isSubmitting ? null : _handleDepositSubmit,
+                onPressed: (_isSubmitting || isDepositLocked) ? null : _handleDepositSubmit,
               ),
             ],
           ),
@@ -378,38 +421,43 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
     required String bankName,
     required Color color,
     required IconData icon,
+    bool enabled = true,
   }) {
     final isSelected = _selectedAccountKey == accountKey;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedAccountKey = accountKey;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? color : AppColors.cardBorder,
-            width: isSelected ? 1.8 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, color: color, size: 20),
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: GestureDetector(
+        onTap: enabled
+            ? () {
+                setState(() {
+                  _selectedAccountKey = accountKey;
+                });
+              }
+            : null,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? color : AppColors.cardBorder,
+              width: isSelected ? 1.8 : 1,
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -438,8 +486,9 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Future<void> _handleDepositSubmit() async {
     final state = AppStateProvider.read(context);
