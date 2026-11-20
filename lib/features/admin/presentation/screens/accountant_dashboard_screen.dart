@@ -9,6 +9,7 @@ import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../domain/models/staff_member.dart';
+import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/bank_deposit_record.dart';
@@ -19,6 +20,9 @@ import '../../domain/models/commission_log.dart';
 import '../../../inventory/domain/models/stock_transaction.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../../core/widgets/expandable_action_card.dart';
+import '../../../../core/widgets/financial_balance_sheet_card.dart';
+import '../../../../core/widgets/financial_cash_flow_card.dart';
+import '../../../../core/widgets/storekeeper_chemical_reconciliation_card.dart';
 import '../../domain/models/monthly_overhead_expense.dart';
 import '../widgets/bishe_ai_executive_sheet.dart';
 
@@ -35,6 +39,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   String _auditDateRange = 'All'; // All, Today, This Week, This Month
   String _pnlDateRange = 'Today'; // Today, This Week, This Month, Custom Range
   DateTimeRange? _pnlCustomRange;
+  int _selectedFinancialStatementView = 0; // 0 = P&L, 1 = Balance Sheet, 2 = Cash Flow, 3 = Chemical Audit
 
   @override
   void initState() {
@@ -1420,6 +1425,24 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final grossRevenue = vehicleWashRevenue + carpetWashRevenue + showerRevenue;
     final totalNetRevenue = vehicleNet + carpetWashRevenue + showerRevenue;
 
+    final cashCarWash = paidBookings
+        .where((b) => !b.isCarpet && b.payment.method == PaymentMethod.cash)
+        .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final digitalCarWash = paidBookings
+        .where((b) => !b.isCarpet && b.payment.method != PaymentMethod.cash)
+        .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final cashCarpet = paidBookings
+        .where((b) => b.isCarpet && b.payment.method == PaymentMethod.cash)
+        .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final digitalCarpet = paidBookings
+        .where((b) => b.isCarpet && b.payment.method != PaymentMethod.cash)
+        .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final totalDigitalInflows = digitalCarWash + digitalCarpet;
+    final totalCashOnHand = cashCarWash + cashCarpet + showerRevenue;
+
+    final carsWashedCount = paidBookings.where((b) => !b.isCarpet).length;
+    final carpetsWashedCount = paidBookings.where((b) => b.isCarpet).length;
+
     // Direct commissions for the active range
     final logsInRange = (state.commissionLogs as List)
         .cast<CommissionLog>()
@@ -1545,152 +1568,222 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           const SizedBox(height: 14),
 
-          // 2. Net Operating Profit Hero Banner
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: netOperatingProfit >= 0
-                    ? [const Color(0xFF065F46), const Color(0xFF047857)]
-                    : [Colors.red.shade900, Colors.red.shade700],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: (netOperatingProfit >= 0 ? Colors.green : Colors.red).withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // 2. Executive Financial Statement Selector Bar
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      heroTitle,
-                      style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(6)),
-                      child: Text(
-                        grossRevenue > 0 ? '${((netOperatingProfit / grossRevenue) * 100).toStringAsFixed(1)}% Margin' : '0.0% Margin',
-                        style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900),
-                      ),
-                    ),
-                  ],
+                _buildStatementTypeChip(
+                  label: state.tr('statementPnlTab'),
+                  icon: Icons.analytics_rounded,
+                  index: 0,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  CurrencyFormatter.format(netOperatingProfit),
-                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
+                const SizedBox(width: 8),
+                _buildStatementTypeChip(
+                  label: state.tr('statementBalanceSheetTab'),
+                  icon: Icons.account_balance_rounded,
+                  index: 1,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  heroSubtitle,
-                  style: const TextStyle(color: Colors.white70, fontSize: 10.5),
+                const SizedBox(width: 8),
+                _buildStatementTypeChip(
+                  label: state.tr('statementCashFlowTab'),
+                  icon: Icons.sync_alt_rounded,
+                  index: 2,
+                ),
+                const SizedBox(width: 8),
+                _buildStatementTypeChip(
+                  label: state.tr('statementReconciliationTab'),
+                  icon: Icons.compare_arrows_rounded,
+                  index: 3,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
-          Text(
-            rangeDays == 1
-                ? 'Daily Operational Income Statement (Real-Truth Model):'
-                : (rangeDays == 30
-                    ? 'Full Monthly Station Income Statement (30-Day Budget):'
-                    : 'Station Operational Income Statement ($rangeDays-Day Period):'),
-            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 12),
-
-          // Section 1: Revenue by Service Division & Tax Treatment
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('I. OPERATING REVENUE & TAX TREATMENT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-                child: Text(state.tr('departmentalPnl'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary)),
+          if (_selectedFinancialStatementView == 1)
+            FinancialBalanceSheetCard(
+              state: state,
+              isMobile: isMobile,
+              cashOnHand: totalCashOnHand,
+              bankBalance: totalDigitalInflows,
+              vatPayable: vehicleVat,
+              commissionPayable: commissionPaid,
+              netRetainedProfit: netOperatingProfit,
+              rangeDays: rangeDays,
+            )
+          else if (_selectedFinancialStatementView == 2)
+            FinancialCashFlowCard(
+              state: state,
+              isMobile: isMobile,
+              cashFromCarWash: cashCarWash,
+              cashFromCarpet: cashCarpet,
+              cashFromShower: showerRevenue,
+              digitalCollections: totalDigitalInflows,
+              suppliesPaid: suppliesCost,
+              commissionsPaid: commissionPaid,
+              pettyCashPaid: pettyCost,
+              rentPaid: ((state.dailyFacilityRentAccrualETB as double?) ?? 833.33) * rangeDays,
+              rangeDays: rangeDays,
+            )
+          else if (_selectedFinancialStatementView == 3)
+            StorekeeperChemicalReconciliationCard(
+              state: state,
+              isMobile: isMobile,
+              carsWashedCount: carsWashedCount,
+              carpetsWashedCount: carpetsWashedCount,
+              rangeDays: rangeDays,
+              rangeStart: rangeStart,
+              rangeEnd: rangeEnd,
+            )
+          else ...[
+            // 3. Net Operating Profit Hero Banner
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: netOperatingProfit >= 0
+                      ? [const Color(0xFF065F46), const Color(0xFF047857)]
+                      : [Colors.red.shade900, Colors.red.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: (netOperatingProfit >= 0 ? Colors.green : Colors.red).withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          _buildPnLLine('1. Car Washing Services (Vatable Gross)', CurrencyFormatter.format(vehicleWashRevenue), Colors.white, false),
-          _buildPnLLine('   ↳ Less: 15% VAT Output (Gov Tax Liability)', '- ${CurrencyFormatter.format(vehicleVat)}', Colors.amberAccent, false),
-          _buildPnLLine('   ↳ Net Car Wash Revenue', CurrencyFormatter.format(vehicleNet), Colors.green.shade600, false),
-          _buildPnLLine('2. Carpet Washing Services (VAT Exempt 0%)', CurrencyFormatter.format(carpetWashRevenue), Colors.green.shade600, false),
-          _buildPnLLine('3. Shower Services Facility (VAT Exempt 0%)', CurrencyFormatter.format(showerRevenue), Colors.green.shade600, false),
-          const Divider(thickness: 0.8, height: 12, color: Colors.white24),
-          _buildPnLLine('TOTAL NET OPERATING REVENUE', CurrencyFormatter.format(totalNetRevenue), Colors.green.shade800, true),
-          const SizedBox(height: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        heroTitle,
+                        style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(6)),
+                        child: Text(
+                          grossRevenue > 0 ? '${((netOperatingProfit / grossRevenue) * 100).toStringAsFixed(1)}% Margin' : '0.0% Margin',
+                          style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    CurrencyFormatter.format(netOperatingProfit),
+                    style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    heroSubtitle,
+                    style: const TextStyle(color: Colors.white70, fontSize: 10.5),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
 
-          // Section 2: COGS
-          const Text('II. DIRECT COST OF GOODS SOLD (COGS)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.orange)),
-          _buildPnLLine('Washer Team 15% Net Commission', '- ${CurrencyFormatter.format(commissionPaid)}', Colors.orange.shade800, false),
-          _buildPnLLine('Storekeeper Soap Consumed (ዕቃ በዕቃ Exchange)', '- ${CurrencyFormatter.format(suppliesCost)}', Colors.orange.shade800, false),
-          _buildPnLLine('Total Cost of Goods Sold', '- ${CurrencyFormatter.format(cogs)}', Colors.orange.shade900, true),
-          const Divider(thickness: 1, height: 16),
-          _buildPnLLine('GROSS OPERATING PROFIT', CurrencyFormatter.format(grossProfit), grossProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
-          const SizedBox(height: 10),
+            Text(
+              rangeDays == 1
+                  ? 'Daily Operational Income Statement (Real-Truth Model):'
+                  : (rangeDays == 30
+                      ? 'Full Monthly Station Income Statement (30-Day Budget):'
+                      : 'Station Operational Income Statement ($rangeDays-Day Period):'),
+              style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 12),
 
-          // Section 3: Operating Overheads (OpEx)
-          Text(
-            rangeDays == 1
-                ? 'III. DAILY ACCRUED OPERATING OVERHEADS (Monthly ÷ 30)'
-                : (rangeDays == 30
-                    ? 'III. FULL MONTHLY OPERATING OVERHEADS (30 Days Budget)'
-                    : 'III. ACCRUED OPERATING OVERHEADS ($rangeDays Days: Monthly ÷ 30 × $rangeDays)'),
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.deepOrange),
-          ),
-          ...overheads.map((o) {
-            final amt = o.dailyAccrualEtb * rangeDays;
-            final isRent = o.id == 'overhead_rent' || o.category.toLowerCase() == 'rent';
-            final subtitle = rangeDays == 1
-                ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo ÷ 30)'
-                : (rangeDays == 30
-                    ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo Budget)'
-                    : '(${CurrencyFormatter.format(o.dailyAccrualEtb)}/day × $rangeDays days)');
-            return _buildPnLLine(
-              isRent ? '★ ${o.name} $subtitle' : '${o.name} $subtitle',
-              '- ${CurrencyFormatter.format(amt)}',
-              isRent ? Colors.amber.shade300 : Colors.deepOrange.shade700,
-              isRent,
-            );
-          }),
-          _buildPnLLine(
-            rangeDays == 1
-                ? 'Machinery Depreciation (÷ 30)'
-                : (rangeDays == 30
-                    ? 'Machinery Depreciation (Monthly)'
-                    : 'Machinery Depreciation ($rangeDays Days)'),
-            '- ${CurrencyFormatter.format(periodDepreciation)}',
-            Colors.deepOrange.shade700,
-            false,
-          ),
-          _buildPnLLine('Cashier Petty Cash / Emergency Spends', '- ${CurrencyFormatter.format(pettyCost)}', Colors.deepOrange.shade700, false),
-          const Divider(thickness: 1, height: 16),
-          _buildPnLLine('Total Operating Expenses (OpEx)', '- ${CurrencyFormatter.format(opex)}', Colors.deepOrange.shade900, true),
-          const Divider(thickness: 1.5, height: 20),
+            // Section 1: Revenue by Service Division & Tax Treatment
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('I. OPERATING REVENUE & TAX TREATMENT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+                  child: Text(state.tr('departmentalPnl'), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            _buildPnLLine('1. Car Washing Services (Vatable Gross)', CurrencyFormatter.format(vehicleWashRevenue), Colors.white, false),
+            _buildPnLLine('   ↳ Less: 15% VAT Output (Gov Tax Liability)', '- ${CurrencyFormatter.format(vehicleVat)}', Colors.amberAccent, false),
+            _buildPnLLine('   ↳ Net Car Wash Revenue', CurrencyFormatter.format(vehicleNet), Colors.green.shade600, false),
+            _buildPnLLine('2. Carpet Washing Services (VAT Exempt 0%)', CurrencyFormatter.format(carpetWashRevenue), Colors.green.shade600, false),
+            _buildPnLLine('3. Shower Services Facility (VAT Exempt 0%)', CurrencyFormatter.format(showerRevenue), Colors.green.shade600, false),
+            const Divider(thickness: 0.8, height: 12, color: Colors.white24),
+            _buildPnLLine('TOTAL NET OPERATING REVENUE', CurrencyFormatter.format(totalNetRevenue), Colors.green.shade800, true),
+            const SizedBox(height: 10),
 
-          // Section 4: Final Net Operating Profit
-          _buildPnLLine(
-            rangeDays == 1
-                ? 'NET STATION OPERATING PROFIT (TODAY)'
-                : (rangeDays == 30
-                    ? 'NET STATION OPERATING PROFIT (MONTH)'
-                    : 'NET STATION OPERATING PROFIT ($rangeDays DAYS)'),
-            CurrencyFormatter.format(netOperatingProfit),
-            netOperatingProfit >= 0 ? Colors.green.shade800 : Colors.red,
-            true,
-          ),
+            // Section 2: COGS
+            const Text('II. DIRECT COST OF GOODS SOLD (COGS)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.orange)),
+            _buildPnLLine('Washer Team 15% Net Commission', '- ${CurrencyFormatter.format(commissionPaid)}', Colors.orange.shade800, false),
+            _buildPnLLine('Storekeeper Soap Consumed (ዕቃ በዕቃ Exchange)', '- ${CurrencyFormatter.format(suppliesCost)}', Colors.orange.shade800, false),
+            _buildPnLLine('Total Cost of Goods Sold', '- ${CurrencyFormatter.format(cogs)}', Colors.orange.shade900, true),
+            const Divider(thickness: 1, height: 16),
+            _buildPnLLine('GROSS OPERATING PROFIT', CurrencyFormatter.format(grossProfit), grossProfit >= 0 ? Colors.green.shade800 : Colors.red, true),
+            const SizedBox(height: 10),
+
+            // Section 3: Operating Overheads (OpEx)
+            Text(
+              rangeDays == 1
+                  ? 'III. DAILY ACCRUED OPERATING OVERHEADS (Monthly ÷ 30)'
+                  : (rangeDays == 30
+                      ? 'III. FULL MONTHLY OPERATING OVERHEADS (30 Days Budget)'
+                      : 'III. ACCRUED OPERATING OVERHEADS ($rangeDays Days: Monthly ÷ 30 × $rangeDays)'),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.deepOrange),
+            ),
+            ...overheads.map((o) {
+              final amt = o.dailyAccrualEtb * rangeDays;
+              final isRent = o.id == 'overhead_rent' || o.category.toLowerCase() == 'rent';
+              final subtitle = rangeDays == 1
+                  ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo ÷ 30)'
+                  : (rangeDays == 30
+                      ? '(${CurrencyFormatter.format(o.monthlyAmountEtb)}/mo Budget)'
+                      : '(${CurrencyFormatter.format(o.dailyAccrualEtb)}/day × $rangeDays days)');
+              return _buildPnLLine(
+                isRent ? '★ ${o.name} $subtitle' : '${o.name} $subtitle',
+                '- ${CurrencyFormatter.format(amt)}',
+                isRent ? Colors.amber.shade300 : Colors.deepOrange.shade700,
+                isRent,
+              );
+            }),
+            _buildPnLLine(
+              rangeDays == 1
+                  ? 'Machinery Depreciation (÷ 30)'
+                  : (rangeDays == 30
+                      ? 'Machinery Depreciation (Monthly)'
+                      : 'Machinery Depreciation ($rangeDays Days)'),
+              '- ${CurrencyFormatter.format(periodDepreciation)}',
+              Colors.deepOrange.shade700,
+              false,
+            ),
+            _buildPnLLine('Cashier Petty Cash / Emergency Spends', '- ${CurrencyFormatter.format(pettyCost)}', Colors.deepOrange.shade700, false),
+            const Divider(thickness: 1, height: 16),
+            _buildPnLLine('Total Operating Expenses (OpEx)', '- ${CurrencyFormatter.format(opex)}', Colors.deepOrange.shade900, true),
+            const Divider(thickness: 1.5, height: 20),
+
+            // Section 4: Final Net Operating Profit
+            _buildPnLLine(
+              rangeDays == 1
+                  ? 'NET STATION OPERATING PROFIT (TODAY)'
+                  : (rangeDays == 30
+                      ? 'NET STATION OPERATING PROFIT (MONTH)'
+                      : 'NET STATION OPERATING PROFIT ($rangeDays DAYS)'),
+              CurrencyFormatter.format(netOperatingProfit),
+              netOperatingProfit >= 0 ? Colors.green.shade800 : Colors.red,
+              true,
+            ),
+          ],
         ],
       ),
     );
@@ -1709,6 +1802,51 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
         borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.cardBorder,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 15,
+                color: isSelected ? Colors.white : AppColors.textMuted,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatementTypeChip({
+    required String label,
+    required IconData icon,
+    required int index,
+  }) {
+    final isSelected = _selectedFinancialStatementView == index;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() => _selectedFinancialStatementView = index),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primary : const Color(0xFF1E293B),
             borderRadius: BorderRadius.circular(10),

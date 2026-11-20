@@ -4557,6 +4557,296 @@ class AppStrings {
       AppLanguage.om: 'Bu\'aa Kaashii Qulqulluu Hafe',
       AppLanguage.am: 'የተጣራ የተረፈ ትርፍ',
     },
+    'statementPnlTab': {
+      AppLanguage.en: 'P&L Statement',
+      AppLanguage.om: 'Bu\'aa fi Kasaaraa',
+      AppLanguage.am: 'የትርፍ እና ኪሳራ',
+    },
+    'statementBalanceSheetTab': {
+      AppLanguage.en: 'Balance Sheet',
+      AppLanguage.om: 'Qabeenya fi Idhaa',
+      AppLanguage.am: 'የሃብት እና እዳ',
+    },
+    'statementCashFlowTab': {
+      AppLanguage.en: 'Cash Flow',
+      AppLanguage.om: 'Yaatuu Maallaqaa',
+      AppLanguage.am: 'የጥሬ ገንዘብ ፍሰት',
+    },
+    'statementReconciliationTab': {
+      AppLanguage.en: 'Chemical Audit',
+      AppLanguage.om: 'Walsimsiisa Saamunaa',
+      AppLanguage.am: 'የሳሙና ኦዲት',
+    },
+    'balanceSheetTitle': {
+      AppLanguage.en: 'Balance Sheet (Statement of Financial Position)',
+      AppLanguage.om: 'Gabaasa Qabeenyaa fi Idhaa (Balance Sheet)',
+      AppLanguage.am: 'የሃብት እና ዕዳ መግለጫ (ሚዛን ሉህ)',
+    },
+    'balanceSheetSub': {
+      AppLanguage.en: 'Current & Fixed Assets, Liabilities and Retained Equity',
+      AppLanguage.om: 'Qabeenya, Idhaa fi Kaappitaala',
+      AppLanguage.am: 'ወቅታዊ እና ቋሚ ሃብቶች፣ እዳዎች እና የተጣራ ካፒታል',
+    },
+    'assetsHeader': {
+      AppLanguage.en: '1. TOTAL ASSETS',
+      AppLanguage.om: '1. QABEENYA WALIIGALAA',
+      AppLanguage.am: '1. ጠቅላላ ሃብት',
+    },
+    'currentAssets': {
+      AppLanguage.en: 'Current Assets (Liquid)',
+      AppLanguage.om: 'Qabeenya Socho\'aa',
+      AppLanguage.am: 'ወቅታዊ (ፈሳሽ) ሃብቶች',
+    },
+    'cashInRegister': {
+      AppLanguage.en: 'Cash on Hand (Drawer & Safe)',
+      AppLanguage.om: 'Kaashii Harka Irraa',
+      AppLanguage.am: 'በእጅ ያለ ጥሬ ገንዘብ',
+    },
+    'bankAndDigital': {
+      AppLanguage.en: 'Bank & Mobile Money (Telebirr/CBE)',
+      AppLanguage.om: 'Baankii fi Moobaayilii',
+      AppLanguage.am: 'የባንክ እና የቴሌብር ሂሳብ',
+    },
+    'inventoryAsset': {
+      AppLanguage.en: 'Consumables & Soap Inventory',
+      AppLanguage.om: 'Kuusa Saamunaa fi Meeshaalee',
+      AppLanguage.am: 'የሳሙና እና ኬሚካል ክምችት',
+    },
+    'nonCurrentAssets': {
+      AppLanguage.en: 'Fixed Assets (Machinery & Gear)',
+      AppLanguage.om: 'Qabeenya Dhaabbataa (Maashinoota)',
+      AppLanguage.am: 'ቋሚ ሃብቶች (ማሽኖች እና መሳሪያዎች)',
+    },
+    'grossFixedAssets': {
+      AppLanguage.en: 'Gross Machinery & Station Equipment',
+      AppLanguage.om: 'Gatii Maashinootaa Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ የማሽነሪ እና የጣቢያ ዋጋ',
+    },
+    'accumulatedDepr': {
+      AppLanguage.en: 'Less: Accumulated Depreciation',
+      AppLanguage.om: 'Hir\'ifama: Dulloma Maashinaa',
+      AppLanguage.am: 'ሲቀነስ፡ የተጠራቀመ እርጅና (ዴፕሪሴሽን)',
+    },
+    'netFixedAssets': {
+      AppLanguage.en: 'Net Plant & Equipment',
+      AppLanguage.om: 'Qabeenya Dhaabbataa Qulqulluu',
+      AppLanguage.am: 'የተጣራ ቋሚ ሃብት',
+    },
+    'liabilitiesHeader': {
+      AppLanguage.en: '2. LIABILITIES (OBLIGATIONS)',
+      AppLanguage.om: '2. IDHAA WALIIGALAA',
+      AppLanguage.am: '2. እዳዎች እና ግዴታዎች',
+    },
+    'currentLiabilities': {
+      AppLanguage.en: 'Current Operating Liabilities',
+      AppLanguage.om: 'Idhaa Yeroo Gabaabaa',
+      AppLanguage.am: 'የአጭር ጊዜ እዳዎች',
+    },
+    'commissionsPayable': {
+      AppLanguage.en: 'Washer Commissions Payable',
+      AppLanguage.om: 'Koomishinii Dhiqxootaa Kan Kaffalamu',
+      AppLanguage.am: 'የሚከፈል የአጣቢዎች ኮሚሽን',
+    },
+    'facilityRentPayable': {
+      AppLanguage.en: 'Accrued Facility Rent Payable',
+      AppLanguage.om: 'Kiraa Gamoo Kan Kaffalamu',
+      AppLanguage.am: 'የጣቢያው የቤት ኪራይ እዳ',
+    },
+    'vatPayable': {
+      AppLanguage.en: 'VAT Payable (15% Car Wash Tax)',
+      AppLanguage.om: 'Taaksii VAT (15% Kan Mootummaa)',
+      AppLanguage.am: 'የሚከፈል የተጨማሪ እሴት ታክስ (15% ቫት)',
+    },
+    'salariesPayable': {
+      AppLanguage.en: 'Accrued Staff Wages Payable',
+      AppLanguage.om: 'Mindaa Hojjattootaa Kan Kaffalamu',
+      AppLanguage.am: 'የሚከፈል የሰራተኞች ደሞዝ',
+    },
+    'equityHeader': {
+      AppLanguage.en: '3. OWNER\'S EQUITY',
+      AppLanguage.om: '3. KAAPPITAALA ABBAA QABEENYAA',
+      AppLanguage.am: '3. የባለቤቱ የተጣራ ካፒታል',
+    },
+    'initialCapital': {
+      AppLanguage.en: 'Station Startup Capital',
+      AppLanguage.om: 'Kaappitaala Jalqabaa',
+      AppLanguage.am: 'የመጀመሪያ መነሻ ካፒታል',
+    },
+    'retainedEarnings': {
+      AppLanguage.en: 'Retained Earnings (Cumulative Net Profit)',
+      AppLanguage.om: 'Bu\'aa Kuufame (Retained Earnings)',
+      AppLanguage.am: 'የተጠራቀመ የተጣራ ትርፍ',
+    },
+    'totalEquity': {
+      AppLanguage.en: 'Total Owner Equity',
+      AppLanguage.om: 'Kaappitaala Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ የባለቤቱ ካፒታል',
+    },
+    'balancedAccountingEquation': {
+      AppLanguage.en: 'BALANCED: Assets = Liabilities + Equity',
+      AppLanguage.om: 'MIZANAWA: Qabeenya = Idhaa + Kaappitaala',
+      AppLanguage.am: 'የተመጣጠነ፡ ሃብት = እዳ + ካፒታል',
+    },
+    'cashFlowTitle': {
+      AppLanguage.en: 'Cash Flow Statement',
+      AppLanguage.om: 'Gabaasa Yaatuu Maallaqaa (Cash Flow)',
+      AppLanguage.am: 'የጥሬ ገንዘብ ፍሰት መግለጫ (ካሽ ፍሎው)',
+    },
+    'cashFlowSub': {
+      AppLanguage.en: 'Inflows & outflows: Operations, Investing & Financing',
+      AppLanguage.om: 'Seensa fi Baasii Maallaqaa',
+      AppLanguage.am: 'የገቢ እና ወጪ ጥሬ ገንዘብ እንቅስቃሴ',
+    },
+    'cfoHeader': {
+      AppLanguage.en: 'Operating Activities (CFO)',
+      AppLanguage.om: 'Hojiiwwan Bu\'uuraa (CFO)',
+      AppLanguage.am: 'የስራ ማስኬጃ እንቅስቃሴዎች (CFO)',
+    },
+    'cashFromCarWash': {
+      AppLanguage.en: 'Cash Receipts from Car Washes',
+      AppLanguage.om: 'Galii Kaashii Dhiqa Konkolaataa',
+      AppLanguage.am: 'ከመኪና እጥበት የተሰበሰበ ጥሬ ገንዘብ',
+    },
+    'cashFromCarpet': {
+      AppLanguage.en: 'Cash Receipts from Carpet Cleanings',
+      AppLanguage.om: 'Galii Kaashii Dhiqa Afataa',
+      AppLanguage.am: 'ከምንጣፍ እጥበት የተሰበሰበ ጥሬ ገንዘብ',
+    },
+    'cashFromShower': {
+      AppLanguage.en: 'Cash Receipts from Shower Services',
+      AppLanguage.om: 'Galii Kaashii Shaworii',
+      AppLanguage.am: 'ከሻወር አገልግሎት የተሰበሰበ ጥሬ ገንዘብ',
+    },
+    'digitalCollections': {
+      AppLanguage.en: 'Digital Inflows (Telebirr & CBE)',
+      AppLanguage.om: 'Galii Moobaayilii (Telebirr/CBE)',
+      AppLanguage.am: 'የዲጂታል ገቢዎች (ቴሌብር እና ንግድ ባንክ)',
+    },
+    'outflowSupplies': {
+      AppLanguage.en: 'Cash Paid for Soaps & Restocks',
+      AppLanguage.om: 'Kaffaltii Saamunaa fi Bittaa',
+      AppLanguage.am: 'ለሳሙና እና ኬሚካል ግዢ የተከፈለ',
+    },
+    'outflowCommissions': {
+      AppLanguage.en: 'Cash Paid for Washer Commissions',
+      AppLanguage.om: 'Kaffaltii Koomishinii Dhiqxootaa',
+      AppLanguage.am: 'ለአጣቢዎች ኮሚሽን የተከፈለ',
+    },
+    'outflowPettyCash': {
+      AppLanguage.en: 'Cash Paid for Station Petty Expenses',
+      AppLanguage.om: 'Kaffaltii Baasii Xixiqqaa Buufataa',
+      AppLanguage.am: 'ለጣቢያው ጥቃቅን ወጪዎች የተከፈለ',
+    },
+    'outflowRent': {
+      AppLanguage.en: 'Cash Paid for Facility Rent',
+      AppLanguage.om: 'Kaffaltii Kiraa Gamoo',
+      AppLanguage.am: 'ለጣቢያው የቤት ኪራይ የተከፈለ',
+    },
+    'netCfo': {
+      AppLanguage.en: 'Net Cash from Operating Activities',
+      AppLanguage.om: 'Yaatuu Maallaqa Hojii Qulqulluu',
+      AppLanguage.am: 'የተጣራ የስራ እንቅስቃሴ የገንዘብ ፍሰት',
+    },
+    'cfiHeader': {
+      AppLanguage.en: 'Investing Activities (CFI)',
+      AppLanguage.om: 'Sochii Invastimantii (CFI)',
+      AppLanguage.am: 'የኢንቨስትመንት እንቅስቃሴዎች (CFI)',
+    },
+    'capexEquipment': {
+      AppLanguage.en: 'Machinery & Equipment Capital Outlay',
+      AppLanguage.om: 'Bittaa fi Haaromsa Maashinaa',
+      AppLanguage.am: 'ለማሽኖች እና መሳሪያዎች ግዢ የወጣ',
+    },
+    'netCfi': {
+      AppLanguage.en: 'Net Cash Used in Investing Activities',
+      AppLanguage.om: 'Maallaqa Invastimantiif Oole',
+      AppLanguage.am: 'ለኢንቨስትመንት የዋለ የተጣራ ገንዘብ',
+    },
+    'cffHeader': {
+      AppLanguage.en: 'Financing Activities (CFF)',
+      AppLanguage.om: 'Sochii Faayinaansii (CFF)',
+      AppLanguage.am: 'የፋይናንስ እንቅስቃሴዎች (CFF)',
+    },
+    'ownerDrawings': {
+      AppLanguage.en: 'Owner Capital Drawings / Distributions',
+      AppLanguage.om: 'Baasii Abbaa Qabeenyaa',
+      AppLanguage.am: 'የባለቤቱ የትርፍ ድርሻ ወጪ',
+    },
+    'netCff': {
+      AppLanguage.en: 'Net Cash from Financing Activities',
+      AppLanguage.om: 'Maallaqa Faayinaansii Qulqulluu',
+      AppLanguage.am: 'የተጣራ የፋይናንስ እንቅስቃሴ ገንዘብ',
+    },
+    'netChangeInCash': {
+      AppLanguage.en: 'Net Change in Cash',
+      AppLanguage.om: 'Jijjiirama Maallaqaa Qulqulluu',
+      AppLanguage.am: 'የተጣራ የገንዘብ ለውጥ',
+    },
+    'openingCash': {
+      AppLanguage.en: 'Cash at Beginning of Period',
+      AppLanguage.om: 'Maallaqa Jalqaba Yeroo',
+      AppLanguage.am: 'የመጀመሪያ የጥሬ ገንዘብ መነሻ',
+    },
+    'closingCash': {
+      AppLanguage.en: 'Cash & Cash Equivalents at End of Period',
+      AppLanguage.om: 'Maallaqa Dhuma Yeroo',
+      AppLanguage.am: 'የመጨረሻ የጥሬ ገንዘብ መጠን',
+    },
+    'reconciliationTitle': {
+      AppLanguage.en: 'Storekeeper vs Cashier Reconciliation',
+      AppLanguage.om: 'Walsimsiisa Kuusaa fi Dhiqxootaa',
+      AppLanguage.am: 'የእቃ ግምጃ ቤት እና የካሸር እጥበት ማስታረቂያ',
+    },
+    'reconciliationSub': {
+      AppLanguage.en: 'Chemical issue logs compared to cars washed',
+      AppLanguage.om: 'Saamunaa bahe fi konkolaataa dhiqame',
+      AppLanguage.am: 'የወጣው ሳሙና እና የታጠበው መኪና ብዛት ንጽጽር',
+    },
+    'carsWashedCount': {
+      AppLanguage.en: 'Cars Washed Count',
+      AppLanguage.om: 'Baay\'ina Konkolaataa Dhiqame',
+      AppLanguage.am: 'የታጠቡ መኪኖች ብዛት',
+    },
+    'carpetsWashedCount': {
+      AppLanguage.en: 'Carpets Cleaned Count',
+      AppLanguage.om: 'Baay\'ina Afata Dhiqame',
+      AppLanguage.am: 'የታጠቡ ምንጣፎች ብዛት',
+    },
+    'expectedChemical': {
+      AppLanguage.en: 'Theoretical Expected Usage',
+      AppLanguage.om: 'Hamma Fayyadama Tilmaamame',
+      AppLanguage.am: 'የሚጠበቅ የኬሚካል ፍጆታ',
+    },
+    'actualIssued': {
+      AppLanguage.en: 'Actual Storekeeper Issues',
+      AppLanguage.om: 'Hamma Kuusaa Irraa Bahe',
+      AppLanguage.am: 'በእርግጥ ከግምጃ ቤት የወጣ',
+    },
+    'varianceLabel': {
+      AppLanguage.en: 'Variance (Discrepancy)',
+      AppLanguage.om: 'Garaagarummaa (Hir\'ina/Dabalata)',
+      AppLanguage.am: 'ልዩነት (ብክነት/ጉድለት)',
+    },
+    'optimalUsage': {
+      AppLanguage.en: 'Optimal Usage (Efficient)',
+      AppLanguage.om: 'Fayyadama Qusatamaa',
+      AppLanguage.am: 'ተገቢ እና ቆጣቢ አጠቃቀም',
+    },
+    'moderateWaste': {
+      AppLanguage.en: 'Moderate Waste / Overfoaming',
+      AppLanguage.om: 'Qisaasama Giddu-galeessaa',
+      AppLanguage.am: 'መጠነኛ ብክነት / ከመጠን ያለፈ ሳሙና',
+    },
+    'highLeakage': {
+      AppLanguage.en: 'High Discrepancy / Audit Required',
+      AppLanguage.om: 'Garaagarummaa Guddaa / Qorannoo',
+      AppLanguage.am: 'ከፍተኛ ልዩነት / ኦዲት ያስፈልገዋል',
+    },
+    'dilutedUsage': {
+      AppLanguage.en: 'Diluted Usage / Under-foaming',
+      AppLanguage.om: 'Fayyadama Bishaaniin Xiqqaate',
+      AppLanguage.am: 'የቀጠነ ውህድ / ዝቅተኛ ሳሙና',
+    },
     'washHistoryAuditDesc': {
       AppLanguage.en: 'Audit paid washes & receipts by date',
       AppLanguage.om: 'Seenaa dhiqannaa kaffalamee sakatta\'i',

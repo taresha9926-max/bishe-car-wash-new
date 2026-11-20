@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import '../../../../core/widgets/expandable_action_card.dart';
+import '../../../../core/widgets/storekeeper_chemical_reconciliation_card.dart';
 import '../../../../core/widgets/liquid_level_gauge.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -144,6 +145,39 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 0. Chemical Consumption vs Cashier Vehicle Wash Count Reconciliation
+          ExpandableActionCard(
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.assetShampooUrl,
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              fallbackIcon: Icons.compare_arrows_rounded,
+              fallbackColor: Colors.amber,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
+            borderColor: Colors.amber,
+            title: state.tr('reconciliationTitle'),
+            subtitle: state.tr('reconciliationSub'),
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: Colors.amber.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: const Text('Live Audit', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.amber)),
+            ),
+            initiallyExpanded: false,
+            child: StorekeeperChemicalReconciliationCard(
+              state: state,
+              isMobile: isMobile,
+              carsWashedCount: (state.bookings as List).where((b) => b.payment.isPaid && !b.isCarpet).length,
+              carpetsWashedCount: (state.bookings as List).where((b) => b.payment.isPaid && b.isCarpet).length,
+              rangeDays: 1,
+              rangeStart: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+              rangeEnd: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59, 59),
+            ),
+          ),
+          const SizedBox(height: 12),
+
           // 1. Primary Empty-for-Full Refill Exchange Desk
           ExpandableActionCard(
             icon: AutoCareAssets.buildPhotoThumbnail(
