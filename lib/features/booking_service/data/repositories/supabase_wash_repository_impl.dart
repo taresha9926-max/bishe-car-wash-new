@@ -1287,90 +1287,73 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   @override
   Future<List<StaffCredential>> getStaffCredentials() async {
     try {
-      final dynamic data = await _get('staff_credentials?select=*&order=role.asc');
-      if (data == null || data is! List) {
-        return _fallbackLocalRepo.getStaffCredentials();
+      dynamic data = await _get('staff_credentials?select=*&order=role.asc');
+      if (data is! List || data.where((j) => j is Map && !(j['username']?.toString() ?? '').startsWith('app_config_')).isEmpty) {
+        final rpcData = await _post('rpc/get_staff_credentials', {});
+        if (rpcData is List && rpcData.isNotEmpty) {
+          data = rpcData;
+        }
       }
-      final creds = data
-          .where((json) => json is Map && !(json['username']?.toString() ?? '').startsWith('app_config_'))
-          .map((json) {
-            final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
-            final UserRole role;
-            if (roleStr == 'admin') {
-              role = UserRole.admin;
-            } else if (roleStr == 'manager') {
-              role = UserRole.manager;
-            } else if (roleStr == 'storekeeper') {
-              role = UserRole.storekeeper;
-            } else if (roleStr == 'accountant') {
-              role = UserRole.accountant;
-            } else {
-              role = UserRole.cashier;
-            }
-            final pin = (json['pin_hash'] ?? '').toString().trim();
-            return StaffCredential(
-              id: json['id'].toString(),
-              username: json['username']?.toString() ?? 'staff',
-              pin: pin,
+
+      final List<StaffCredential> creds = [];
+      if (data is List) {
+        creds.addAll(data
+            .where((json) => json is Map && !(json['username']?.toString() ?? '').startsWith('app_config_'))
+            .map((json) {
+              final roleStr = (json['role'] ?? 'cashier').toString().toLowerCase();
+              final UserRole role;
+              if (roleStr == 'admin') {
+                role = UserRole.admin;
+              } else if (roleStr == 'manager') {
+                role = UserRole.manager;
+              } else if (roleStr == 'storekeeper') {
+                role = UserRole.storekeeper;
+              } else if (roleStr == 'accountant') {
+                role = UserRole.accountant;
+              } else {
+                role = UserRole.cashier;
+              }
+              final pin = (json['pin_hash'] ?? '').toString().trim();
+              return StaffCredential(
+                id: json['id'].toString(),
+                username: json['username']?.toString() ?? 'staff',
+                pin: pin,
+                role: role,
+                fullName: json['full_name']?.toString() ?? 'Staff Member',
+                isActive: json['is_active'] == true,
+              );
+            }));
+      }
+
+      // Check fallback repository to retain locally updated credentials if unreturned by Supabase
+      final localCreds = await _fallbackLocalRepo.getStaffCredentials();
+
+      void ensureRole(UserRole role, String defaultId, String defaultUsername, String defaultPin, String defaultName) {
+        if (!creds.any((c) => c.role == role && c.isActive)) {
+          final localMatch = localCreds.where((c) => c.role == role && c.isActive).firstOrNull;
+          if (localMatch != null) {
+            creds.add(localMatch);
+          } else {
+            creds.add(StaffCredential(
+              id: defaultId,
+              username: defaultUsername,
+              pin: defaultPin,
               role: role,
-              fullName: json['full_name']?.toString() ?? 'Staff Member',
-              isActive: json['is_active'] == true,
-            );
-          })
-          .toList();
+              fullName: defaultName,
+              isActive: true,
+            ));
+          }
+        }
+      }
 
       // Ensure default initial credentials exist for unconfigured roles:
       // admin = 4450, cashier = 2233, manager = 7788, accountant = 3344, storekeeper = 3344
-      if (!creds.any((c) => c.role == UserRole.admin && c.isActive)) {
-        creds.add(const StaffCredential(
-          id: 'cred-admin',
-          username: 'admin',
-          pin: '4450',
-          role: UserRole.admin,
-          fullName: 'Bishe Super Admin',
-          isActive: true,
-        ));
-      }
-      if (!creds.any((c) => c.role == UserRole.cashier && c.isActive)) {
-        creds.add(const StaffCredential(
-          id: 'cred-cashier',
-          username: 'cashier',
-          pin: '2233',
-          role: UserRole.cashier,
-          fullName: 'Station Gate Cashier',
-          isActive: true,
-        ));
-      }
-      if (!creds.any((c) => c.role == UserRole.manager && c.isActive)) {
-        creds.add(const StaffCredential(
-          id: 'cred-manager',
-          username: 'manager',
-          pin: '7788',
-          role: UserRole.manager,
-          fullName: 'Operational Manager',
-          isActive: true,
-        ));
-      }
-      if (!creds.any((c) => c.role == UserRole.accountant && c.isActive)) {
-        creds.add(const StaffCredential(
-          id: 'cred-accountant',
-          username: 'accountant',
-          pin: '3344',
-          role: UserRole.accountant,
-          fullName: 'Station Accountant',
-          isActive: true,
-        ));
-      }
-      if (!creds.any((c) => c.role == UserRole.storekeeper && c.isActive)) {
-        creds.add(const StaffCredential(
-          id: 'cred-storekeeper',
-          username: 'storekeeper',
-          pin: '3344',
-          role: UserRole.storekeeper,
-          fullName: 'Inventory Storekeeper',
-          isActive: true,
-        ));
-      }
+      ensureRole(UserRole.admin, 'cred-admin', 'admin', '4450', 'Bishe Super Admin');
+      ensureRole(UserRole.cashier, 'cred-cashier', 'cashier', '2233', 'Station Gate Cashier');
+      ensureRole(UserRole.manager, 'cred-manager', 'manager', '7788', 'Operational Manager');
+      ensureRole(UserRole.accountant, 'cred-accountant', 'accountant', '3344', 'Station Accountant');
+      ensureRole(UserRole.storekeeper, 'cred-storekeeper', 'storekeeper', '3344', 'Inventory Storekeeper');
+
       return creds;
     } catch (_) {
       return _fallbackLocalRepo.getStaffCredentials();
@@ -1384,9 +1367,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         'p_role': role.name,
         'p_pin': enteredPin.trim(),
       });
-      if (res is bool && res == true) return true;
-      if (res is num && res == 1) return true;
-      if (res is String && res.toLowerCase() == 'true') return true;
+      if (res is bool) return res;
+      if (res is num) return res == 1;
+      if (res is String) return res.toLowerCase() == 'true';
     } catch (e) {
       debugPrint('Supabase verifyStaffPin exception: $e');
     }

@@ -627,16 +627,6 @@ class AppStateNotifier extends ChangeNotifier {
       return true;
     }
 
-    if (authenticateRole(role, enteredPin)) {
-      if (role == UserRole.admin) {
-        final cred = getMatchedCredential(role, enteredPin);
-        final isSuper = (cred != null && (cred.username.toLowerCase() == 'admin' || cred.id == 'cred-admin')) ||
-            (!hasAdminInCreds && enteredPin.trim() == StaffAuthenticator.defaultAdminPin) ||
-            enteredPin.trim() == '4450';
-        setSuperAdminStatus(isSuper);
-      }
-      return true;
-    }
     return false;
   }
 
@@ -3050,6 +3040,18 @@ class AppStateNotifier extends ChangeNotifier {
         },
       );
       return;
+    }
+    final nextCreds = List<StaffCredential>.from(_credentials);
+    int idx = nextCreds.indexWhere((c) => c.id == id);
+    if (idx == -1) {
+      idx = nextCreds.indexWhere((c) =>
+          c.role.name.toLowerCase() == id.toLowerCase() ||
+          id.toLowerCase().contains(c.role.name.toLowerCase()) ||
+          c.username.toLowerCase() == id.toLowerCase());
+    }
+    if (idx != -1) {
+      nextCreds[idx] = nextCreds[idx].copyWith(pin: pin, fullName: fullName);
+      _credentials = nextCreds;
     }
     await _repository.updateStaffCredential(id, pin, fullName);
     await _refreshCredentials();
