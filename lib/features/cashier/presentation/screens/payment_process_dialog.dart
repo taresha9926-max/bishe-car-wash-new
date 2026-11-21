@@ -121,8 +121,10 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
+    final liveBooking = state.bookings.where((b) => b.id == widget.booking.id).firstOrNull ?? widget.booking;
+    final isAlreadyPaid = liveBooking.payment.isPaid;
     final parsedAgreed = double.tryParse(_agreedPriceController.text.trim());
-    final amountDue = (parsedAgreed != null && parsedAgreed > 0) ? parsedAgreed : widget.booking.totalPrice;
+    final amountDue = (parsedAgreed != null && parsedAgreed > 0) ? parsedAgreed : liveBooking.totalPrice;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -160,6 +162,39 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 ],
               ),
               const Divider(height: 16),
+
+              if (isAlreadyPaid)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF064E3B).withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF10B981), width: 1.5),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 24),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.tr('paymentAlreadyCollected'),
+                              style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF10B981), fontSize: 13),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${state.tr("doubleCollectionDisabled")} (${liveBooking.payment.method.localizedName(state.currentLang)}: ${CurrencyFormatter.format(liveBooking.payment.amount)})',
+                              style: const TextStyle(fontSize: 11, color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // Amount Due Box
               Container(
@@ -853,13 +888,21 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
               const SizedBox(height: 20),
 
               // Action Buttons
-              CustomButton(
-                text: state.tr('confirmAndPay'),
-                icon: Icons.check_circle_outline,
-                backgroundColor: AppColors.cashGreen,
-                isLoading: _isProcessing,
-                onPressed: _isProcessing ? null : () => _handlePaymentConfirm(context, amountDue),
-              ),
+              if (isAlreadyPaid)
+                CustomButton(
+                  text: '${state.tr("settledPaidBadge")} (${state.tr("close")})',
+                  icon: Icons.check_circle_rounded,
+                  backgroundColor: const Color(0xFF064E3B),
+                  onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                )
+              else
+                CustomButton(
+                  text: state.tr('confirmAndPay'),
+                  icon: Icons.check_circle_outline,
+                  backgroundColor: AppColors.cashGreen,
+                  isLoading: _isProcessing,
+                  onPressed: (_isProcessing || isAlreadyPaid) ? null : () => _handlePaymentConfirm(context, amountDue),
+                ),
             ],
           ),
         ),
@@ -909,8 +952,22 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   }
 
   Future<void> _handlePaymentConfirm(BuildContext context, double amount) async {
+    if (_isProcessing) return;
+
     final state = AppStateProvider.read(context);
     final navigator = Navigator.of(context, rootNavigator: true);
+
+    final liveBooking = state.bookings.where((b) => b.id == widget.booking.id).firstOrNull ?? widget.booking;
+    if (liveBooking.payment.isPaid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🚨 ${state.tr("paymentAlreadyCollected")}! ${state.tr("doubleCollectionDisabled")}'),
+          backgroundColor: Colors.orange.shade900,
+        ),
+      );
+      navigator.pop();
+      return;
+    }
 
     double splitCash = 0.0;
     double splitDigital = 0.0;

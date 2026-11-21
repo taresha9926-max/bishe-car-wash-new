@@ -2869,6 +2869,13 @@ class AppStateNotifier extends ChangeNotifier {
     String? overpaymentAction,
     String? verificationStatus,
   }) async {
+    // 0. Double-Payment Guard: strictly block any attempt to collect payment twice
+    final existingIdx = _bookings.indexWhere((b) => b.id == bookingId);
+    if (existingIdx != -1 && _bookings[existingIdx].payment.isPaid) {
+      debugPrint('🚨 [Double-Payment Guard]: Booking $bookingId is already paid. Aborting duplicate collection.');
+      return;
+    }
+
     // If a transaction reference is provided, check if it already matches an incoming bank transaction
     String effectiveStatus = verificationStatus ?? 'unverified';
     if (transactionRef != null && transactionRef.trim().isNotEmpty) {
@@ -2879,6 +2886,28 @@ class AppStateNotifier extends ChangeNotifier {
       } else if (method.isDigital || (splitDigitalAmount != null && splitDigitalAmount > 0)) {
         effectiveStatus = 'pending_sms';
       }
+    }
+
+    // Immediate in-memory optimistic update so UI, queue card & dialog disable "Collect Payment" synchronously
+    if (existingIdx != -1) {
+      final b = _bookings[existingIdx];
+      final optimisticPayment = b.payment.copyWith(
+        isPaid: true,
+        method: method,
+        amount: amount,
+        tipAmount: tipAmount,
+        transactionRef: transactionRef,
+        receiptScreenshot: receiptScreenshot,
+        paidAt: DateTime.now(),
+        splitCashAmount: splitCashAmount,
+        splitDigitalAmount: splitDigitalAmount,
+        overpaymentAction: overpaymentAction,
+        verificationStatus: effectiveStatus,
+      );
+      final updatedList = List<WashBooking>.from(_bookings);
+      updatedList[existingIdx] = b.copyWith(payment: optimisticPayment);
+      _bookings = updatedList;
+      notifyListeners();
     }
 
     await _repository.processPayment(

@@ -628,12 +628,14 @@ class _StationQueueTabState extends State<StationQueueTab> {
         onPressed: () => _advanceBookingStatus(context, b, targetStatus: WashStatus.completed),
       );
     }
-    if (_isPayReady(b)) {
+    // Look up live booking from state to guarantee zero-lag freshness and block double payment
+    final liveB = (state.bookings as List<WashBooking>).where((x) => x.id == b.id).firstOrNull ?? b;
+    if (_isPayReady(liveB)) {
       return _actionButton(
         color: AppColors.cashGreen,
         icon: Icons.payments_rounded,
-        label: '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(b.totalPrice)})',
-        onPressed: () => PaymentProcessDialog.show(context, b),
+        label: '${state.tr("collectPaymentAction")} (${CurrencyFormatter.formatShort(liveB.totalPrice)})',
+        onPressed: () => PaymentProcessDialog.show(context, liveB),
       );
     }
     return Container(
@@ -643,7 +645,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        '${state.tr("settledPaidBadge")} (${b.payment.method.localizedName(langCode)})',
+        '${state.tr("settledPaidBadge")} (${liveB.payment.method.localizedName(langCode)})',
         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.statusCompleted),
       ),
     );

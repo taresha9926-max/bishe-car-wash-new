@@ -198,5 +198,47 @@ void main() {
       expect(config.targetTelebirrPhone, equals('0962274450'));
       expect(config.targetCbeAccount, equals('1000542824388'));
     });
+
+    test('Double Payment Guard: processPayment strictly prevents collecting payment twice for the same booking', () async {
+      await state.registerWalkIn(
+        licensePlate: 'NO-DOUBLE-01',
+        customerName: 'Abebe Bikila',
+        customerPhone: '0911002233',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.telebirr,
+      );
+
+      final booking = state.bookings.firstWhere((b) => b.licensePlate == 'NO-DOUBLE-01');
+
+      // 1. First collection
+      await state.processPayment(
+        bookingId: booking.id,
+        method: PaymentMethod.telebirr,
+        amount: 350.0,
+        transactionRef: 'DKKFIRST01',
+      );
+
+      final paidBooking = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(paidBooking.payment.isPaid, isTrue);
+      expect(paidBooking.payment.amount, equals(350.0));
+      expect(paidBooking.payment.transactionRef, equals('DKKFIRST01'));
+
+      // 2. Second collection attempt (e.g. accidental double-tap or re-submission)
+      await state.processPayment(
+        bookingId: booking.id,
+        method: PaymentMethod.cash,
+        amount: 999.0,
+        transactionRef: 'DKKSECOND02',
+      );
+
+      // Must remain identical to the first confirmed payment, rejecting second collection
+      final guardedBooking = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(guardedBooking.payment.isPaid, isTrue);
+      expect(guardedBooking.payment.amount, equals(350.0));
+      expect(guardedBooking.payment.transactionRef, equals('DKKFIRST01'));
+      expect(guardedBooking.payment.method, equals(PaymentMethod.telebirr));
+    });
   });
 }

@@ -2239,6 +2239,16 @@ class AppStrings {
       AppLanguage.om: 'Mirkaneessiitii Kaffali',
       AppLanguage.am: 'አረጋግጥና ክፍያ ፈፅም',
     },
+    'paymentAlreadyCollected': {
+      AppLanguage.en: 'Payment Already Collected & Confirmed',
+      AppLanguage.om: 'Kaffaltiin kanaan dura walitti qabamee mirkanaa\'eera',
+      AppLanguage.am: 'ክፍያው አስቀድሞ ተሰብስቦ ተረጋግጧል',
+    },
+    'doubleCollectionDisabled': {
+      AppLanguage.en: 'Double payment collection is strictly disabled.',
+      AppLanguage.om: 'Kaffaltii dachaa walitti qabuun guutummaatti cufameera.',
+      AppLanguage.am: 'ድርብ ክፍያ መሰብሰብ ሙሉ በሙሉ ታግዷል።',
+    },
     'assignBayWasher': {
       AppLanguage.en: 'Assign Bay / Washer',
       AppLanguage.om: 'Kutaa / Dhiqaa Ramadi',
