@@ -13731,7 +13731,7 @@ b6j:function b6j(a,b){this.a=a
 this.b=b},
 b6i:function b6i(a){this.a=a},
 b6o:function b6o(a){this.a=a},
-bBM(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2=null,a3="bishe_sentinel_token_2026",a4="flexible",a5="10004388",a6="Tariku G/tsadik G/silase",a7="Tariku Gebretsadike",a8="0910046553"
+bBM(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2=null,a3="bishe_sentinel_sec_2026_x89",a4="flexible",a5="10004388",a6="Tariku G/tsadik G/silase",a7="Tariku Gebretsadike",a8="0910046553"
 if($.aA==null)A.K7()
 $.aA.toString
 s=t.Bl
@@ -62318,7 +62318,7 @@ d=d==null?null:J.aF(d)
 if(d==null)d="flexible"
 c=k.i(0,"secret_token")
 c=c==null?null:J.aF(c)
-if(c==null)c="bishe_sentinel_token_2026"
+if(c==null)c="bishe_sentinel_sec_2026_x89"
 if(k.i(0,"last_heartbeat")!=null){k=A.jJ(J.aF(k.i(0,"last_heartbeat")))
 if(k==null)k=new A.aB(Date.now(),0,!1)}else k=new A.aB(Date.now(),0,!1)
 q=new A.we(j,i,h,g,f,e,d,c,k)

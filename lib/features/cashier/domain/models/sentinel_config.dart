@@ -17,7 +17,7 @@ class SentinelConfig {
     this.targetTelebirrPhone = '0910046553',
     this.targetTelebirrName = 'Tariku Gebretsadike',
     this.securityMode = 'flexible',
-    this.secretToken = 'bishe_sentinel_token_2026',
+    this.secretToken = 'bishe_sentinel_sec_2026_x89',
     this.lastHeartbeat,
   });
 
@@ -39,7 +39,7 @@ class SentinelConfig {
       targetTelebirrPhone: json['target_telebirr_phone']?.toString() ?? '0910046553',
       targetTelebirrName: json['target_telebirr_name']?.toString() ?? 'Tariku Gebretsadike',
       securityMode: json['security_mode']?.toString() ?? 'flexible',
-      secretToken: json['secret_token']?.toString() ?? 'bishe_sentinel_token_2026',
+      secretToken: json['secret_token']?.toString() ?? 'bishe_sentinel_sec_2026_x89',
       lastHeartbeat: json['last_heartbeat'] != null
           ? DateTime.tryParse(json['last_heartbeat'].toString()) ?? DateTime.now()
           : DateTime.now(),
