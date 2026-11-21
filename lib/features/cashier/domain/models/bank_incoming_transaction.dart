@@ -32,6 +32,36 @@ class BankIncomingTransaction {
   bool get isTelebirr => provider.toLowerCase() == 'telebirr';
   bool get isCbe => provider.toLowerCase() == 'cbe' || provider.toLowerCase() == 'cbebirr';
 
+  BankIncomingTransaction copyWith({
+    String? id,
+    String? provider,
+    String? refNo,
+    double? amount,
+    String? payerName,
+    String? payerPhone,
+    String? targetAccount,
+    String? rawSms,
+    String? matchedBookingId,
+    String? matchStatus,
+    String? receiptUrl,
+    DateTime? receivedAt,
+  }) {
+    return BankIncomingTransaction(
+      id: id ?? this.id,
+      provider: provider ?? this.provider,
+      refNo: refNo ?? this.refNo,
+      amount: amount ?? this.amount,
+      payerName: payerName ?? this.payerName,
+      payerPhone: payerPhone ?? this.payerPhone,
+      targetAccount: targetAccount ?? this.targetAccount,
+      rawSms: rawSms ?? this.rawSms,
+      matchedBookingId: matchedBookingId ?? this.matchedBookingId,
+      matchStatus: matchStatus ?? this.matchStatus,
+      receiptUrl: receiptUrl ?? this.receiptUrl,
+      receivedAt: receivedAt ?? this.receivedAt,
+    );
+  }
+
   factory BankIncomingTransaction.fromJson(Map<String, dynamic> json) {
     return BankIncomingTransaction(
       id: json['id']?.toString() ?? '',

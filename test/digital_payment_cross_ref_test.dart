@@ -135,6 +135,10 @@ void main() {
       // It must be automatically verified!
       expect(paidBooking.payment.isBankVerified, isTrue);
       expect(paidBooking.payment.isPendingSms, isFalse);
+
+      final matchedBankTx = state.bankIncomingTransactions.firstWhere((t) => t.refNo == 'DKKMATCH88');
+      expect(matchedBankTx.isMatched, isTrue);
+      expect(matchedBankTx.matchedBookingId, equals(booking.id));
     });
 
     test('Post-payment arrival of bank SMS matches previously pending booking', () async {

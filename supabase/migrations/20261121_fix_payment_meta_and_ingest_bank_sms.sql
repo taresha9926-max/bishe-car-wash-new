@@ -177,12 +177,35 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.ingest_bank_sms(TEXT, TEXT, TEXT) TO anon, authenticated, service_role;
 
--- 4. Enable DELETE policy for bank_incoming_transactions
+-- 4. Enable UPDATE & DELETE policies for bank_incoming_transactions
+DROP POLICY IF EXISTS "bank_incoming_public_update" ON public.bank_incoming_transactions;
+CREATE POLICY "bank_incoming_public_update" ON public.bank_incoming_transactions FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
 DROP POLICY IF EXISTS "bank_incoming_public_delete" ON public.bank_incoming_transactions;
 CREATE POLICY "bank_incoming_public_delete" ON public.bank_incoming_transactions FOR DELETE TO anon, authenticated USING (true);
 
--- 5. Delete setup mock transactions
+-- 5. Bidirectional Auto-Match Trigger: When a booking is marked paid with transaction_ref, automatically link matching bank SMS
+CREATE OR REPLACE FUNCTION public.sync_booking_to_bank_sms()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.is_paid = true AND NEW.transaction_ref IS NOT NULL AND trim(NEW.transaction_ref) <> '' THEN
+        UPDATE public.bank_incoming_transactions
+        SET match_status = 'matched',
+            matched_booking_id = NEW.id::text
+        WHERE lower(trim(ref_no)) = lower(trim(NEW.transaction_ref));
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_sync_booking_to_bank_sms ON public.wash_bookings;
+CREATE TRIGGER trg_sync_booking_to_bank_sms
+AFTER INSERT OR UPDATE OF is_paid, transaction_ref ON public.wash_bookings
+FOR EACH ROW
+EXECUTE FUNCTION public.sync_booking_to_bank_sms();
+
+-- 6. Delete setup mock transactions
 DELETE FROM public.bank_incoming_transactions WHERE ref_no IN ('DKK9TEST01', 'v2-test1234567890');
 
--- 6. Reload schema cache
+-- 7. Reload schema cache
 NOTIFY pgrst, 'reload schema';

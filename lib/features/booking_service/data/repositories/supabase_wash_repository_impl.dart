@@ -1058,6 +1058,16 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             ),
         });
 
+        // Link and match incoming bank SMS credit in cloud
+        if (transactionRef != null && transactionRef.trim().isNotEmpty) {
+          try {
+            await _patch('bank_incoming_transactions?ref_no=ilike.${transactionRef.trim()}', {
+              'match_status': 'matched',
+              'matched_booking_id': bookingId,
+            });
+          } catch (_) {}
+        }
+
         final booking = await getBookingById(bookingId);
         if (booking != null) {
           if (booking.status == WashStatus.completed && !booking.commissionLogged) {

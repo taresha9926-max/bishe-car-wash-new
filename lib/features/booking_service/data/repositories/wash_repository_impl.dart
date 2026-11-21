@@ -304,6 +304,19 @@ class WashRepositoryImpl implements IWashRepository {
     }
 
     _bookings[index] = updatedBooking;
+
+    // Cross-reference and match any pending incoming bank SMS
+    if (transactionRef != null && transactionRef.trim().isNotEmpty) {
+      final cleanRef = transactionRef.trim().toLowerCase();
+      final matchIdx = _bankIncomingTransactions.indexWhere((t) => t.refNo.trim().toLowerCase() == cleanRef);
+      if (matchIdx != -1) {
+        _bankIncomingTransactions[matchIdx] = _bankIncomingTransactions[matchIdx].copyWith(
+          matchStatus: 'matched',
+          matchedBookingId: bookingId,
+        );
+      }
+    }
+
     return updatedBooking;
   }
 
