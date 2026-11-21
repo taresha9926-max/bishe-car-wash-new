@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/receipt_ocr_service.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
@@ -42,6 +43,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
 
   bool _isProcessing = false;
   bool _isSplitPayment = false;
+  bool _isScanningReceipt = false;
   String? _uploadedScreenshotName;
   String? _screenshotBase64;
   double _tipAmount = 0.0;
@@ -76,11 +78,43 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
   }
 
   void _pickScreenshot() {
-    ImagePickerHelper.pickImage(onPicked: (img) {
+    ImagePickerHelper.pickImage(onPicked: (img) async {
       setState(() {
         _uploadedScreenshotName = img.name;
         _screenshotBase64 = img.base64Data;
       });
+
+      // Auto-scan reference number if not manually entered
+      if (_refCodeController.text.trim().isEmpty && img.base64Data != null && mounted) {
+        final state = AppStateProvider.read(context);
+        setState(() {
+          _isScanningReceipt = true;
+        });
+        try {
+          final scannedRef = await ReceiptOcrService.scanReferenceFromBase64(
+            base64Image: img.base64Data!,
+            geminiApiKey: state.geminiApiKey,
+          );
+          if (mounted && scannedRef != null && scannedRef.isNotEmpty) {
+            setState(() {
+              _refCodeController.text = scannedRef;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${state.tr("autoDetectedRef")}$scannedRef'),
+                backgroundColor: AppColors.cashGreen,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isScanningReceipt = false;
+            });
+          }
+        }
+      }
     });
   }
 
@@ -542,11 +576,103 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 const SizedBox(height: 10),
                 CustomTextField(
                   controller: _refCodeController,
-                  label: '${state.tr('transactionRef')} *',
+                  label: state.tr('transactionRef'),
                   hint: 'e.g. DKK0G3C37O or FT263237JRB8',
                   prefixIcon: Icons.confirmation_number_outlined,
                   onChanged: (_) => setState(() {}),
                 ),
+
+                // Intelligent 1-Tap Auto-Suggest from Sentinel
+                Builder(
+                  builder: (ctx) {
+                    final digitalDue = _isSplitPayment
+                        ? (double.tryParse(_splitDigitalController.text.trim()) ?? 0.0)
+                        : amountDue;
+                    final targetProvider = _selectedMethod.name.toLowerCase();
+                    final matchingIncoming = state.bankIncomingTransactions.where((tx) =>
+                      tx.isUnmatched &&
+                      tx.provider.toLowerCase() == targetProvider &&
+                      (tx.amount - digitalDue).abs() < 1.0
+                    ).firstOrNull;
+
+                    if (matchingIncoming != null && _refCodeController.text.trim().isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _refCodeController.text = matchingIncoming.refNo;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF064E3B),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.6)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.auto_awesome, color: Colors.greenAccent, size: 16),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${state.tr("detectedRecentBankSms")}: ${matchingIncoming.refNo} (ETB ${matchingIncoming.amount.toStringAsFixed(0)})',
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.greenAccent),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade900.withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    state.tr('tapToUseRef'),
+                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.amberAccent),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+
+                // OCR Scanning Progress indicator
+                if (_isScanningReceipt) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state.tr('scanningReceipt'),
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white70),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
 
                 // Live Bank Cross-Reference Status Banner
                 Builder(
@@ -786,21 +912,24 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         );
         return;
       }
-
-      if (_refCodeController.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter the transaction reference number from the receipt.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-        return;
-      }
     }
 
-    final refCode = isDigitalOrSplitDigital && _refCodeController.text.trim().isNotEmpty
+    String? refCode = isDigitalOrSplitDigital && _refCodeController.text.trim().isNotEmpty
         ? _refCodeController.text.trim()
         : null;
+
+    // If reference was omitted, check if Sentinel already captured an exact matching bank SMS
+    if (refCode == null && isDigitalOrSplitDigital) {
+      final digitalAmount = _isSplitPayment ? splitDigital : amount;
+      final autoMatch = state.bankIncomingTransactions.where((tx) =>
+        tx.isUnmatched &&
+        tx.provider.toLowerCase() == _selectedMethod.name.toLowerCase() &&
+        (tx.amount - digitalAmount).abs() < 1.0
+      ).firstOrNull;
+      if (autoMatch != null) {
+        refCode = autoMatch.refNo;
+      }
+    }
 
     // Check against live incoming bank transactions
     final cleanRef = (refCode ?? '').trim().toLowerCase();

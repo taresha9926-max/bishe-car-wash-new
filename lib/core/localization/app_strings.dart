@@ -2214,6 +2214,26 @@ class AppStrings {
       AppLanguage.om: 'Suuraan nagahee qabsiifameera',
       AppLanguage.am: 'የደረሰኙ ፎቶ በተሳካ ሁኔታ ተያይዟል',
     },
+    'scanningReceipt': {
+      AppLanguage.en: 'Scanning receipt for transaction reference...',
+      AppLanguage.om: 'Nagahee irraa koodii dabarsaa barbaadaa jira...',
+      AppLanguage.am: 'ከደረሰኙ ላይ የክፍያ ማረጋገጫ ቁጥር በመቃኘት ላይ...',
+    },
+    'autoDetectedRef': {
+      AppLanguage.en: 'Auto-scanned reference: ',
+      AppLanguage.om: 'Koodii nagahee irraa argame: ',
+      AppLanguage.am: 'ከደረሰኙ የተገኘ የክፍያ ቁጥር: ',
+    },
+    'detectedRecentBankSms': {
+      AppLanguage.en: 'Recent Bank SMS Detected',
+      AppLanguage.om: 'Ergaan Baankii Dhiyoo Argameera',
+      AppLanguage.am: 'የቅርብ ጊዜ የባንክ ኤስኤምኤስ ተገኝቷል',
+    },
+    'tapToUseRef': {
+      AppLanguage.en: 'Tap to Auto-Fill',
+      AppLanguage.om: 'Guutuuf Tuqi',
+      AppLanguage.am: 'ለመሙላት ይንኩ',
+    },
     'confirmAndPay': {
       AppLanguage.en: 'Confirm & Complete Payment',
       AppLanguage.om: 'Mirkaneessiitii Kaffali',

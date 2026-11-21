@@ -298,6 +298,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       commissionPool,
                       totalPettyCash,
                       totalSupplies,
+                      digitalBookings: digitalBookings,
                       vatDeducted: vatDeducted,
                     )
                   else if (_tabController.index == 1)
@@ -598,12 +599,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     double commissionPool,
     double totalPettyCash,
     double totalSupplies, {
+    List<WashBooking> digitalBookings = const [],
     double vatDeducted = 0.0,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildExecutiveBanner(state, isMobile),
+        const SizedBox(height: 12),
+
+        // Live Sentinel Cross-Reference & Digital Bank Transactions Hub
+        SentinelCrossRefCard(digitalBookings: digitalBookings, isMobile: isMobile),
         const SizedBox(height: 12),
 
         _buildTimeFilterBar(state),
@@ -855,6 +861,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   Widget _buildExecutiveBanner(dynamic state, bool isMobile) {
     final isSuper = state.isSuperAdmin as bool;
+    final sentinel = state.sentinelConfig;
+    final isOnline = sentinel?.isOnline == true;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 12 : 16),
@@ -922,6 +930,39 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ],
             ),
           ),
+          if (!isMobile) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: (isOnline ? const Color(0xFF064E3B) : const Color(0xFF450A0A)).withValues(alpha: 0.75),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: (isOnline ? Colors.greenAccent : Colors.redAccent).withValues(alpha: 0.5),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.phone_android_rounded,
+                    size: 14,
+                    color: isOnline ? Colors.greenAccent : Colors.redAccent,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    isOnline ? 'Sentinel ${sentinel?.batteryLevel ?? 100}%' : 'Sentinel Off',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: isOnline ? Colors.greenAccent : Colors.redAccent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
