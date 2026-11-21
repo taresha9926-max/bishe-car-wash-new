@@ -122,7 +122,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun isNetworkConnected(): Boolean {
+        val cm = getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager ?: return false
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val net = cm.activeNetwork ?: return false
+            val cap = cm.getNetworkCapabilities(net) ?: return false
+            cap.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        } else {
+            @Suppress("DEPRECATION")
+            val netInfo = cm.activeNetworkInfo
+            @Suppress("DEPRECATION")
+            netInfo != null && netInfo.isConnected
+        }
+    }
+
     private fun sendMockTelebirrSms() {
+        if (!isNetworkConnected()) {
+            Toast.makeText(this, "⚠️ No Internet! Please turn ON Mobile Data or connect to Wi-Fi on this phone.", Toast.LENGTH_LONG).show()
+            return
+        }
         val mockSms = "Dear Tariku You have received ETB 350.00 from Abebe Bikila(2519****8888) on 20/11/2026 21:00:00. Your transaction number is DKK9TEST01. Your current E-Money Account balance is ETB 15,000.00. Thank you for using telebirr Ethio telecom"
         Toast.makeText(this, "Sending mock Telebirr SMS to Supabase...", Toast.LENGTH_SHORT).show()
         SupabaseClient.ingestBankSms(mockSms, "telebirr") { success, resp ->
@@ -133,6 +151,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendMockCbeSms() {
+        if (!isNetworkConnected()) {
+            Toast.makeText(this, "⚠️ No Internet! Please turn ON Mobile Data or connect to Wi-Fi on this phone.", Toast.LENGTH_LONG).show()
+            return
+        }
         val mockSms = "Dear Tariku Gebretsadik Gebresilasie You have received ETB 1,200.00 from account 1*********9999 (Almaz Ayana) to your account 1*********4388. Your current balance is ETB 28,000.00. Thanks for Banking with CBE. https://mbreciept.cbe.com.et/v2-test1234567890 for feedback: https://forms.gle/kGNGQpG3mQCCk3iD6"
         Toast.makeText(this, "Sending mock CBE SMS to Supabase...", Toast.LENGTH_SHORT).show()
         SupabaseClient.ingestBankSms(mockSms, "cbe") { success, resp ->

@@ -54,8 +54,13 @@ object SupabaseClient {
 
             httpClient.newCall(request).enqueue(object : okhttp3.Callback {
                 override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
-                    Log.e(TAG, "Failed to send bank SMS to Supabase: ${e.message}", e)
-                    callback(false, e.message)
+                    val msg = if (e is java.net.UnknownHostException) {
+                        "No Internet access on phone! Check Mobile Data or Wi-Fi."
+                    } else {
+                        e.message ?: "Network error"
+                    }
+                    Log.e(TAG, "Failed to send bank SMS to Supabase: $msg", e)
+                    callback(false, msg)
                 }
 
                 override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
