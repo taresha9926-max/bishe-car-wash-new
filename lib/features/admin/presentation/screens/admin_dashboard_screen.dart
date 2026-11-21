@@ -115,16 +115,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   bool _matchesFilter(DateTime dt) {
     final now = DateTime.now();
+    final localDt = dt.toLocal();
     switch (_selectedFilter) {
       case AdminTimeFilter.today:
-        return dt.year == now.year && dt.month == now.month && dt.day == now.day;
+        return localDt.year == now.year && localDt.month == now.month && localDt.day == now.day;
       case AdminTimeFilter.thisWeek:
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         final startMonday = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
         final endSunday = startMonday.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-        return !dt.isBefore(startMonday) && !dt.isAfter(endSunday);
+        return !localDt.isBefore(startMonday) && !localDt.isAfter(endSunday);
       case AdminTimeFilter.thisMonth:
-        return dt.year == now.year && dt.month == now.month;
+        return localDt.year == now.year && localDt.month == now.month;
       case AdminTimeFilter.customRange:
         final range = _selectedCustomRange ??
             DateTimeRange(
@@ -133,7 +134,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             );
         final rangeStart = DateTime(range.start.year, range.start.month, range.start.day);
         final rangeEnd = DateTime(range.end.year, range.end.month, range.end.day, 23, 59, 59);
-        return !dt.isBefore(rangeStart) && !dt.isAfter(rangeEnd);
+        return !localDt.isBefore(rangeStart) && !localDt.isAfter(rangeEnd);
     }
   }
 
@@ -209,10 +210,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         .length;
 
     final filteredShowers = state.showerRecords.where((s) => _matchesFilter(s.recordedAt)).toList();
-    final serviceRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final serviceRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
     final tipsRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
     final showerRevenue = filteredShowers.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
-    final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue;
+    final directBank = (_selectedFilter == AdminTimeFilter.today) ? (state.todayDirectBankCreditsETB as double) : 0.0;
+    final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue + directBank;
 
     final totalPettyCash = state.pettyCashExpenses
         .where((e) => _matchesFilter(e.loggedAt))

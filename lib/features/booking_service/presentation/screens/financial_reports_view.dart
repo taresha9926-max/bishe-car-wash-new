@@ -141,9 +141,11 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         break;
     }
 
-    bool inRange(DateTime dt) =>
-        (dt.isAfter(rangeStart) || dt.isAtSameMomentAs(rangeStart)) &&
-        (dt.isBefore(rangeEnd) || dt.isAtSameMomentAs(rangeEnd));
+    bool inRange(DateTime dt) {
+      final localDt = dt.toLocal();
+      return (localDt.isAfter(rangeStart) || localDt.isAtSameMomentAs(rangeStart)) &&
+          (localDt.isBefore(rangeEnd) || localDt.isAtSameMomentAs(rangeEnd));
+    }
 
     final periodBookings = state.bookings
         .where((b) => b.payment.isPaid && inRange(b.payment.paidAt ?? b.createdAt))
@@ -153,19 +155,20 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     final periodCarpetBookings = periodBookings.where((b) => b.isCarpet).toList();
     final periodShowers = state.showerRecords.where((s) => inRange(s.recordedAt)).toList();
 
-    final carRevenue = periodCarBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final carpetRevenue = periodCarpetBookings.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
+    final carRevenue = periodCarBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
+    final carpetRevenue = periodCarpetBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
     final totalTips = periodBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
     final showerRevenue = periodShowers.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
     final showerCount = periodShowers.fold<int>(0, (sum, s) => sum + s.userCount);
     final showerCash = periodShowers
         .where((s) => s.paymentMethod == PaymentMethod.cash)
         .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final directBankCredits = (_periodFilter == FinancialReportFilter.today) ? (state.todayDirectBankCreditsETB as double) : 0.0;
 
-    final grossRevenue = carRevenue + carpetRevenue + totalTips + showerRevenue;
+    final grossRevenue = carRevenue + carpetRevenue + totalTips + showerRevenue + directBankCredits;
     final serviceCash = periodBookings
         .where((b) => b.payment.method == PaymentMethod.cash)
-        .fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+        .fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice) + b.payment.tipAmount);
     final cashRevenue = serviceCash + showerCash;
     final digitalRevenue = grossRevenue - cashRevenue;
     final vatDeducted = (carRevenue + carpetRevenue) * 0.15;

@@ -79,7 +79,11 @@ class WashBooking {
     this.handedOverAt,
   });
 
-  double get totalPrice => customTotalPrice ?? package.getPriceFor(carType);
+  double get totalPrice {
+    if (customTotalPrice != null && customTotalPrice! > 0) return customTotalPrice!;
+    if (payment.amount > 0) return payment.amount;
+    return package.getPriceFor(carType);
+  }
 
   String get serviceDisplayName {
     if (isCarpet) {

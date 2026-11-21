@@ -646,7 +646,7 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     final carpetDimensions = json['carpet_dimensions']?.toString();
     final customTotalPrice = json['custom_total_price'] != null
         ? double.tryParse(json['custom_total_price'].toString())
-        : (isCarpet && json['total_amount'] != null ? double.tryParse(json['total_amount'].toString()) : null);
+        : (json['total_amount'] != null ? double.tryParse(json['total_amount'].toString()) : null);
 
     final rawLoc = json['delivery_location']?.toString();
     final cleanLoc = extractCleanDeliveryLocation(rawLoc);
@@ -671,7 +671,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
     final paidAt = bookingMeta['paidAt'] != null
         ? DateTime.tryParse(bookingMeta['paidAt'].toString())
-        : null;
+        : (json['payment_meta'] != null && json['payment_meta'] is Map && json['payment_meta']['paidAt'] != null
+            ? DateTime.tryParse(json['payment_meta']['paidAt'].toString())
+            : (json['completed_at'] != null ? DateTime.tryParse(json['completed_at'].toString()) : null));
     final postponedAt = bookingMeta['postponedAt'] != null
         ? DateTime.tryParse(bookingMeta['postponedAt'].toString())
         : null;

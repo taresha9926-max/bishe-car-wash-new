@@ -1003,19 +1003,21 @@ class AppStateNotifier extends ChangeNotifier {
     }).toList();
   }
 
-  DateTime _bookingRevenueDate(WashBooking b) => b.payment.paidAt ?? b.createdAt;
+  DateTime _bookingRevenueDate(WashBooking b) =>
+      (b.payment.paidAt ?? b.completedAt ?? b.createdAt).toLocal();
 
   bool _isBookingPaidOnDate(WashBooking b, DateTime target) {
     if (!b.payment.isPaid) return false;
     final d = _bookingRevenueDate(b);
-    return d.year == target.year && d.month == target.month && d.day == target.day;
+    final t = target.toLocal();
+    return d.year == t.year && d.month == t.month && d.day == t.day;
   }
 
   // Computed Properties for Dashboard & Metrics
   int get totalCompletedCarsToday {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final d = b.completedAt ?? b.createdAt;
+      final d = (b.completedAt ?? b.createdAt).toLocal();
       return !b.isCarpet && b.status == WashStatus.completed && d.year == now.year && d.month == now.month && d.day == now.day;
     }).length;
   }
@@ -1023,7 +1025,7 @@ class AppStateNotifier extends ChangeNotifier {
   int get totalCompletedCarpetsToday {
     final now = DateTime.now();
     return _bookings.where((b) {
-      final d = b.completedAt ?? b.createdAt;
+      final d = (b.completedAt ?? b.createdAt).toLocal();
       return b.isCarpet && b.status == WashStatus.completed && d.year == now.year && d.month == now.month && d.day == now.day;
     }).length;
   }
@@ -1039,7 +1041,7 @@ class AppStateNotifier extends ChangeNotifier {
   int get todayShowerUserCount {
     final now = DateTime.now();
     return _showerRecords.where((s) {
-      final d = s.recordedAt;
+      final d = s.recordedAt.toLocal();
       return d.year == now.year && d.month == now.month && d.day == now.day;
     }).fold(0, (sum, s) => sum + s.userCount);
   }
@@ -1047,7 +1049,7 @@ class AppStateNotifier extends ChangeNotifier {
   double get todayShowerRevenueETB {
     final now = DateTime.now();
     return _showerRecords.where((s) {
-      final d = s.recordedAt;
+      final d = s.recordedAt.toLocal();
       return d.year == now.year && d.month == now.month && d.day == now.day;
     }).fold(0.0, (sum, s) => sum + s.totalAmount);
   }
@@ -1055,7 +1057,7 @@ class AppStateNotifier extends ChangeNotifier {
   double get todayShowerCashETB {
     final now = DateTime.now();
     return _showerRecords.where((s) {
-      final d = s.recordedAt;
+      final d = s.recordedAt.toLocal();
       return s.isCash && d.year == now.year && d.month == now.month && d.day == now.day;
     }).fold(0.0, (sum, s) => sum + s.totalAmount);
   }
@@ -1063,7 +1065,7 @@ class AppStateNotifier extends ChangeNotifier {
   double get todayShowerDigitalETB {
     final now = DateTime.now();
     return _showerRecords.where((s) {
-      final d = s.recordedAt;
+      final d = s.recordedAt.toLocal();
       return s.isDigital && d.year == now.year && d.month == now.month && d.day == now.day;
     }).fold(0.0, (sum, s) => sum + s.totalAmount);
   }
@@ -1093,14 +1095,14 @@ class AppStateNotifier extends ChangeNotifier {
     final now = DateTime.now();
     return _bookings
         .where((b) => b.isCarpet && _isBookingPaidOnDate(b, now))
-        .fold(0.0, (sum, b) => sum + b.totalPrice);
+        .fold(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
   }
 
   double get todayVehicleRevenueETB {
     final now = DateTime.now();
     return _bookings
         .where((b) => !b.isCarpet && _isBookingPaidOnDate(b, now))
-        .fold(0.0, (sum, b) => sum + b.totalPrice);
+        .fold(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
   }
 
   List<WashBooking> get _paidBookingsToday {
@@ -1109,7 +1111,26 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   double get serviceRevenueTodayETB {
-    return _paidBookingsToday.fold(0.0, (sum, b) => sum + b.totalPrice);
+    return _paidBookingsToday.fold(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
+  }
+
+  /// Direct bank SMS credits (Telebirr or CBE) received today on Bishe Sentinel phone
+  /// that have not yet been matched or attached to an existing paid booking.
+  double get todayDirectBankCreditsETB {
+    final now = DateTime.now();
+    return _bankIncomingTransactions.where((tx) {
+      final recDate = tx.receivedAt.toLocal();
+      final isToday = recDate.year == now.year && recDate.month == now.month && recDate.day == now.day;
+      if (!isToday) return false;
+      final alreadyCounted = _bookings.any((b) =>
+        _isBookingPaidOnDate(b, now) &&
+        (b.id == tx.matchedBookingId ||
+         (b.payment.transactionRef != null &&
+          b.payment.transactionRef!.trim().isNotEmpty &&
+          b.payment.transactionRef!.trim().toLowerCase() == tx.refNo.trim().toLowerCase()))
+      );
+      return !alreadyCounted;
+    }).fold(0.0, (sum, tx) => sum + tx.amount);
   }
 
   /// 15% VAT payable exclusively from vehicle wash revenue (Carpet, Shower & Tips are VAT exempt).
@@ -1157,7 +1178,7 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   double get totalRevenueTodayETB {
-    return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB;
+    return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB + todayDirectBankCreditsETB;
   }
 
   double get totalCashRevenueETB {
@@ -1165,11 +1186,12 @@ class AppStateNotifier extends ChangeNotifier {
     final bookCash = _bookings
         .where((b) => _isBookingPaidOnDate(b, now))
         .fold(0.0, (sum, b) {
+          final amt = b.payment.amount > 0 ? b.payment.amount : b.totalPrice;
           if (b.payment.isSplit) {
             return sum + b.payment.splitCashAmount;
           }
           if (b.payment.method == PaymentMethod.cash) {
-            return sum + b.totalPrice + b.payment.tipAmount;
+            return sum + amt + b.payment.tipAmount;
           }
           return sum;
         });
@@ -1184,15 +1206,16 @@ class AppStateNotifier extends ChangeNotifier {
     final bookDig = _bookings
         .where((b) => _isBookingPaidOnDate(b, now))
         .fold(0.0, (sum, b) {
+          final amt = b.payment.amount > 0 ? b.payment.amount : b.totalPrice;
           if (b.payment.isSplit) {
             return sum + b.payment.splitDigitalAmount + b.payment.tipAmount;
           }
           if (b.payment.method != PaymentMethod.cash) {
-            return sum + b.totalPrice + b.payment.tipAmount;
+            return sum + amt + b.payment.tipAmount;
           }
           return sum;
         });
-    return bookDig + todayShowerDigitalETB;
+    return bookDig + todayShowerDigitalETB + todayDirectBankCreditsETB;
   }
 
   double get totalCommissionsPaidETB {
@@ -1687,12 +1710,20 @@ class AppStateNotifier extends ChangeNotifier {
 
   /// Checks if a given date has an approved daily closing report
   bool isDateClosed(DateTime date, {String? shiftType}) {
-    return _dailyFinancialClosings.any((c) =>
-        c.closingDate.year == date.year &&
-        c.closingDate.month == date.month &&
-        c.closingDate.day == date.day &&
-        c.isConfirmed &&
-        (shiftType == null || c.shiftType == shiftType));
+    final dayClosing = latestDayClosing;
+    return _dailyFinancialClosings.any((c) {
+      final matchesDate = c.closingDate.year == date.year &&
+          c.closingDate.month == date.month &&
+          c.closingDate.day == date.day &&
+          c.isConfirmed &&
+          (shiftType == null || c.shiftType == shiftType);
+      if (!matchesDate) return false;
+      // If evaluating night closing for today, ensure it did not occur prior to the day closing
+      if (shiftType == 'night' && dayClosing != null && c.closingDate.isBefore(dayClosing.closingDate)) {
+        return false;
+      }
+      return true;
+    });
   }
 
   bool get isTodayClosed => isDateClosed(DateTime.now());
@@ -1827,12 +1858,16 @@ class AppStateNotifier extends ChangeNotifier {
   /// Role-specific physical cash in Operational Manager custody.
   double get managerCustodyCashETB {
     final now = DateTime.now();
+    final dayClosing = latestDayClosing;
     for (final c in _dailyFinancialClosings) {
       if (c.shiftType == 'night' &&
           c.isConfirmed &&
           c.closingDate.year == now.year &&
           c.closingDate.month == now.month &&
           c.closingDate.day == now.day) {
+        if (dayClosing != null && c.closingDate.isBefore(dayClosing.closingDate)) {
+          continue;
+        }
         return 0.0;
       }
     }
