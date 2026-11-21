@@ -544,8 +544,15 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     }
     try {
       final dynamic data = await _get('station_bays?select=*&order=bay_number.asc');
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return await _fallbackLocalRepo.getBays();
+      }
+      if (data.isEmpty) {
+        return const [
+          StationBay(type: BayType.bay1, status: BayStatus.vacant),
+          StationBay(type: BayType.bay2, status: BayStatus.vacant),
+          StationBay(type: BayType.mobileVan, status: BayStatus.vacant),
+        ];
       }
 
       final bays = data.map((json) {
@@ -734,8 +741,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<List<WashBooking>> getBookings() async {
     try {
       final dynamic data = await _get('wash_bookings?select=*&order=created_at.desc&limit=60');
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return await _fallbackLocalRepo.getBookings();
+      }
+      if (data.isEmpty) {
+        return [];
       }
 
       final packages = await getPackages();
@@ -752,8 +762,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       final dynamic data = await _get(
         'wash_bookings?select=*&status=eq.pending&order=created_at.desc&limit=10',
       );
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return await _fallbackLocalRepo.getPendingOnlineAlerts();
+      }
+      if (data.isEmpty) {
+        return [];
       }
 
       final packages = await getPackages();
@@ -774,8 +787,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       final dynamic data = await _get(
         'wash_bookings?select=*&order=created_at.desc&offset=$offset&limit=$limit',
       );
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return await _fallbackLocalRepo.getOlderBookings(offset: offset, limit: limit);
+      }
+      if (data.isEmpty) {
+        return [];
       }
 
       final packages = await getPackages();
@@ -794,8 +810,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       final dynamic data = await _get(
         'wash_bookings?select=*&created_at=gte.$startIso&created_at=lte.$endIso&order=created_at.desc&limit=500',
       );
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return await _fallbackLocalRepo.getBookingsForDateRange(start, end);
+      }
+      if (data.isEmpty) {
+        return [];
       }
 
       final packages = await getPackages();
@@ -1301,8 +1320,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   Future<List<CommissionLog>> getCommissionLogs() async {
     try {
       final dynamic data = await _get('commission_logs?select=*&order=logged_at.desc&limit=50');
-      if (data == null || data is! List || data.isEmpty) {
+      if (data == null || data is! List) {
         return _fallbackLocalRepo.getCommissionLogs();
+      }
+      if (data.isEmpty) {
+        return [];
       }
 
       return data.map((json) {
