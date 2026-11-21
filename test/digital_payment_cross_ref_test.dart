@@ -188,5 +188,11 @@ void main() {
       await state.setSentinelSecurityMode('flexible');
       expect(state.sentinelConfig?.isFlexible, isTrue);
     });
+
+    test('Target accounts are configured to 0962274450 for Telebirr and 1000542824388 for CBE', () {
+      final config = const SentinelConfig();
+      expect(config.targetTelebirrPhone, equals('0962274450'));
+      expect(config.targetCbeAccount, equals('1000542824388'));
+    });
   });
 }

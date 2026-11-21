@@ -440,8 +440,8 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                     final isTelebirr = _selectedMethod == PaymentMethod.telebirr;
                     final sentinel = state.sentinelConfig;
                     final targetNumber = isTelebirr
-                        ? (sentinel?.targetTelebirrPhone ?? '0910046553')
-                        : (sentinel?.targetCbeAccount ?? '10004388');
+                        ? (sentinel?.targetTelebirrPhone ?? '0962274450')
+                        : (sentinel?.targetCbeAccount ?? '1000542824388');
                     final targetName = isTelebirr
                         ? (sentinel?.targetTelebirrName ?? 'Tariku Gebretsadike')
                         : (sentinel?.targetCbeName ?? 'Tariku G/tsadik G/silase');
@@ -679,6 +679,37 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                   builder: (ctx) {
                     final cleanRef = _refCodeController.text.trim().toLowerCase();
                     if (cleanRef.isEmpty) return const SizedBox.shrink();
+
+                    // Check duplicate receipt usage across station bookings
+                    final duplicateBooking = state.bookings.where((b) =>
+                      b.id != widget.booking.id &&
+                      b.payment.transactionRef != null &&
+                      b.payment.transactionRef!.trim().toLowerCase() == cleanRef
+                    ).firstOrNull;
+
+                    if (duplicateBooking != null) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF450A0A),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.redAccent, width: 1.5),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.block_rounded, color: Colors.redAccent, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '🚨 DUPLICATE RECEIPT: Already used for ${duplicateBooking.licensePlate} (${duplicateBooking.customerName})!',
+                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900, color: Colors.redAccent),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
                     final matchedTx = state.bankIncomingTransactions
                         .where((tx) => tx.refNo.trim().toLowerCase() == cleanRef)
@@ -933,11 +964,49 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
 
     // Check against live incoming bank transactions
     final cleanRef = (refCode ?? '').trim().toLowerCase();
+
+    // Strict Double Receipt Reference Protection
+    if (isDigitalOrSplitDigital && cleanRef.isNotEmpty) {
+      // 1. Block if another station booking already claimed this reference
+      final duplicateBooking = state.bookings.where((b) =>
+        b.id != widget.booking.id &&
+        b.payment.transactionRef != null &&
+        b.payment.transactionRef!.trim().toLowerCase() == cleanRef
+      ).firstOrNull;
+
+      if (duplicateBooking != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '🚨 DUPLICATE RECEIPT BLOCKED: Reference "$refCode" was already used for ${duplicateBooking.licensePlate} (${duplicateBooking.customerName})! Reusing receipts is strictly prohibited.',
+            ),
+            backgroundColor: Colors.red.shade900,
+            duration: const Duration(seconds: 6),
+          ),
+        );
+        return;
+      }
+    }
+
     final matchedTx = cleanRef.isNotEmpty
         ? state.bankIncomingTransactions
             .where((tx) => tx.refNo.trim().toLowerCase() == cleanRef)
             .firstOrNull
         : null;
+
+    // 2. Block if this bank SMS was already claimed by another completed wash
+    if (matchedTx != null && matchedTx.isMatched && matchedTx.matchedBookingId != null && matchedTx.matchedBookingId != widget.booking.id) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '🚨 REUSED BANK SMS BLOCKED: Bank reference "$refCode" was already claimed by booking #${matchedTx.matchedBookingId}!',
+          ),
+          backgroundColor: Colors.red.shade900,
+          duration: const Duration(seconds: 6),
+        ),
+      );
+      return;
+    }
 
     // Enforce Policy 2 (Strict Lockdown)
     if (isDigitalOrSplitDigital && state.sentinelConfig.isStrict && matchedTx == null) {

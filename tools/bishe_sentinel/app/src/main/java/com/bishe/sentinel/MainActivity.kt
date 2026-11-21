@@ -20,8 +20,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var btnToggleService: Button
     private lateinit var btnBatteryOpt: Button
-    private lateinit var btnTestTelebirr: Button
-    private lateinit var btnTestCbe: Button
     private lateinit var infoText: TextView
 
     companion object {
@@ -35,8 +33,6 @@ class MainActivity : AppCompatActivity() {
         statusText = findViewById(R.id.tvStatus)
         btnToggleService = findViewById(R.id.btnToggleService)
         btnBatteryOpt = findViewById(R.id.btnBatteryOpt)
-        btnTestTelebirr = findViewById(R.id.btnTestTelebirr)
-        btnTestCbe = findViewById(R.id.btnTestCbe)
         infoText = findViewById(R.id.tvInfo)
 
         checkAndRequestPermissions()
@@ -47,14 +43,6 @@ class MainActivity : AppCompatActivity() {
 
         btnBatteryOpt.setOnClickListener {
             requestIgnoreBatteryOptimizations()
-        }
-
-        btnTestTelebirr.setOnClickListener {
-            sendMockTelebirrSms()
-        }
-
-        btnTestCbe.setOnClickListener {
-            sendMockCbeSms()
         }
 
         updateUiStatus(true)
@@ -133,34 +121,6 @@ class MainActivity : AppCompatActivity() {
             val netInfo = cm.activeNetworkInfo
             @Suppress("DEPRECATION")
             netInfo != null && netInfo.isConnected
-        }
-    }
-
-    private fun sendMockTelebirrSms() {
-        if (!isNetworkConnected()) {
-            Toast.makeText(this, "⚠️ No Internet! Please turn ON Mobile Data or connect to Wi-Fi on this phone.", Toast.LENGTH_LONG).show()
-            return
-        }
-        val mockSms = "Dear Tariku You have received ETB 350.00 from Abebe Bikila(2519****8888) on 20/11/2026 21:00:00. Your transaction number is DKK9TEST01. Your current E-Money Account balance is ETB 15,000.00. Thank you for using telebirr Ethio telecom"
-        Toast.makeText(this, "Sending mock Telebirr SMS to Supabase...", Toast.LENGTH_SHORT).show()
-        SupabaseClient.ingestBankSms(mockSms, "telebirr") { success, resp ->
-            runOnUiThread {
-                Toast.makeText(this, "Telebirr Test: Success=$success ($resp)", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    private fun sendMockCbeSms() {
-        if (!isNetworkConnected()) {
-            Toast.makeText(this, "⚠️ No Internet! Please turn ON Mobile Data or connect to Wi-Fi on this phone.", Toast.LENGTH_LONG).show()
-            return
-        }
-        val mockSms = "Dear Tariku Gebretsadik Gebresilasie You have received ETB 1,200.00 from account 1*********9999 (Almaz Ayana) to your account 1*********4388. Your current balance is ETB 28,000.00. Thanks for Banking with CBE. https://mbreciept.cbe.com.et/v2-test1234567890 for feedback: https://forms.gle/kGNGQpG3mQCCk3iD6"
-        Toast.makeText(this, "Sending mock CBE SMS to Supabase...", Toast.LENGTH_SHORT).show()
-        SupabaseClient.ingestBankSms(mockSms, "cbe") { success, resp ->
-            runOnUiThread {
-                Toast.makeText(this, "CBE Test: Success=$success ($resp)", Toast.LENGTH_LONG).show()
-            }
         }
     }
 

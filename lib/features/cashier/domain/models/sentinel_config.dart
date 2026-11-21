@@ -12,9 +12,9 @@ class SentinelConfig {
   const SentinelConfig({
     this.status = 'online',
     this.batteryLevel = 100,
-    this.targetCbeAccount = '10004388',
+    this.targetCbeAccount = '1000542824388',
     this.targetCbeName = 'Tariku G/tsadik G/silase',
-    this.targetTelebirrPhone = '0910046553',
+    this.targetTelebirrPhone = '0962274450',
     this.targetTelebirrName = 'Tariku Gebretsadike',
     this.securityMode = 'flexible',
     this.secretToken = 'bishe_sentinel_sec_2026_x89',
@@ -34,9 +34,9 @@ class SentinelConfig {
     return SentinelConfig(
       status: json['sentinel_status']?.toString() ?? 'online',
       batteryLevel: int.tryParse(json['battery_level']?.toString() ?? '100') ?? 100,
-      targetCbeAccount: json['target_cbe_account']?.toString() ?? '10004388',
+      targetCbeAccount: json['target_cbe_account']?.toString() ?? '1000542824388',
       targetCbeName: json['target_cbe_name']?.toString() ?? 'Tariku G/tsadik G/silase',
-      targetTelebirrPhone: json['target_telebirr_phone']?.toString() ?? '0910046553',
+      targetTelebirrPhone: json['target_telebirr_phone']?.toString() ?? '0962274450',
       targetTelebirrName: json['target_telebirr_name']?.toString() ?? 'Tariku Gebretsadike',
       securityMode: json['security_mode']?.toString() ?? 'flexible',
       secretToken: json['secret_token']?.toString() ?? 'bishe_sentinel_sec_2026_x89',

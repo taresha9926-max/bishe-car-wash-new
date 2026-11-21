@@ -70,30 +70,30 @@
         android:textColor="#FFFFFF"
         android:layout_marginBottom="24dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Developer Diagnostics / Simulation"
-        android:textColor="#64748B"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="10dp" />
-
-    <Button
-        android:id="@+id/btnTestTelebirr"
+    <!-- Live Station Protection Info Card -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Test Mock Telebirr SMS (350 ETB)"
-        android:backgroundTint="#0369A1"
-        android:textColor="#FFFFFF"
-        android:layout_marginBottom="10dp" />
+        android:background="#1E293B"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <Button
-        android:id="@+id/btnTestCbe"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test Mock CBE SMS (1,200 ETB)"
-        android:backgroundTint="#7C3AED"
-        android:textColor="#FFFFFF" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STATION PRODUCTION MODE 🛡️"
+            android:textColor="#38BDF8"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="• Target Telebirr: 0962274450 (127)\n• Target CBE Acc: 1000542824388 (CBE)\n• Active Protection: Double-Receipt &amp; Fake SMS Blocking\n• 24/7 Background Sentinel Active"
+            android:textColor="#94A3B8"
+            android:textSize="11.5sp"
+            android:lineSpacingExtra="3dp" />
+    </LinearLayout>
 
 </LinearLayout>

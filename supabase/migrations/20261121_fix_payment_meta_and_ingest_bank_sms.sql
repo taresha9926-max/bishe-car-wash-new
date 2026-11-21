@@ -176,4 +176,13 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.ingest_bank_sms(TEXT, TEXT, TEXT) TO anon, authenticated, service_role;
+
+-- 4. Enable DELETE policy for bank_incoming_transactions
+DROP POLICY IF EXISTS "bank_incoming_public_delete" ON public.bank_incoming_transactions;
+CREATE POLICY "bank_incoming_public_delete" ON public.bank_incoming_transactions FOR DELETE TO anon, authenticated USING (true);
+
+-- 5. Delete setup mock transactions
+DELETE FROM public.bank_incoming_transactions WHERE ref_no IN ('DKK9TEST01', 'v2-test1234567890');
+
+-- 6. Reload schema cache
 NOTIFY pgrst, 'reload schema';
