@@ -37,3 +37,6 @@ app.*.symbols
 .env*
 !.env.example
 agent/config.json
+
+*.apk
+
