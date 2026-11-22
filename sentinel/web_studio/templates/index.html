@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BISHE SUPER AI SENTINEL — Developer Cockpit</title>
+  <style>
+    :root {
+      --bg: #0A0A10;
+      --card-bg: #12121C;
+      --card-border: #1F2233;
+      --text: #E2E8F0;
+      --text-muted: #8E9BAE;
+      --cyan: #00E5FF;
+      --gold: #FFD700;
+      --green: #10B981;
+      --red: #EF4444;
+      --yellow: #F59E0B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 24px;
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid var(--green); }
+    .badge-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid var(--red); }
+    .badge-gold { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid var(--gold); }
+    
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+    .nav-btn.active, .nav-btn:hover {
+      background: rgba(0,229,255,0.1);
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+    
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .card-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #FFF;
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    tr:hover { background: rgba(255,255,255,0.02); }
+
+    .anomaly-card {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid var(--red);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      background: var(--cyan);
+      color: #000;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn-gold { background: var(--gold); }
+    .btn-red { background: var(--red); color: #FFF; }
+    
+    .chat-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 14px;
+      min-height: 200px;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #0A0A10;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #FFF;
+      font-size: 14px;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="brand-title">
+        <span>🛡️ BISHE SUPER AI SENTINEL</span>
+        <span class="badge badge-green">LIVE DAEMON</span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+        Bishoftu Station Ground Truth Engine • 127.0.0.1:8088 • Tamper-Proof Audit
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <span id="syncStatus" class="badge badge-gold">SYNCING...</span>
+      <button class="btn btn-gold" onclick="loadAllData()">REFRESH</button>
+    </div>
+  </header>
+
+  <!-- Top Metrics -->
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Live Synced Mutations</div>
+      <div class="card-val" id="statLastId">0</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Incremental Cursor (WHERE id > last_synced)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Discrepancies</div>
+      <div class="card-val" id="statAnomalies" style="color: var(--red);">0</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">High-Risk Thefts & Downgrades</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Today's Workload</div>
+      <div class="card-val" id="statEvu" style="color: var(--cyan);">0.0 EVU</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Equivalent Vehicle Units Settled</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Chemical Consumables</div>
+      <div class="card-val" id="statShampoo" style="color: var(--green);">0.0 L</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">5L Snow Foam (125 ml / EVU)</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-tabs">
+    <button class="nav-btn active" onclick="switchTab('tab-feed')">[1] Live Audit Feed</button>
+    <button class="nav-btn" onclick="switchTab('tab-anomalies')">[2] Forensic Discrepancies</button>
+    <button class="nav-btn" onclick="switchTab('tab-yield')">[3] Consumables Yield</button>
+    <button class="nav-btn" onclick="switchTab('tab-closing')">[4] Shift Closing & EBITDA</button>
+    <button class="nav-btn" onclick="switchTab('tab-ai')">[5] Ask AI (EN / OM / AM)</button>
+    <button class="nav-btn" onclick="switchTab('tab-project')">[6] Feature Projection Studio</button>
+  </div>
+
+  <!-- TAB 1: Live Feed -->
+  <div id="tab-feed" class="tab-content active">
+    <div class="card">
+      <div class="card-title">Incremental Database Mutations (Cold Storage Stream)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Recorded At</th>
+            <th>Table</th>
+            <th>Action</th>
+            <th>Actor</th>
+            <th>Risk</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="feedTableBody">
+          <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Awaiting events from Supabase...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2: Forensic Discrepancies -->
+  <div id="tab-anomalies" class="tab-content">
+    <div class="card">
+      <div class="card-title">Detected High-Risk Anomalies & Theft Vectors</div>
+      <div id="anomaliesList" style="margin-top: 14px;">
+        <div style="color: var(--green);">✅ No active discrepancies detected. Station operating at 100% integrity.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Consumables Yield -->
+  <div id="tab-yield" class="tab-content">
+    <div class="card">
+      <div class="card-title">Empty-for-Full Rolling Chemical Yield Benchmarks</div>
+      <div style="margin-top: 14px; font-size: 14px; line-height: 1.8;" id="yieldContent">
+        Loading yield benchmarks...
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: Shift Closing & EBITDA -->
+  <div id="tab-closing" class="tab-content">
+    <div class="card">
+      <div class="card-title">Automated Executive Closing Reconciler (8:30 PM & 6:00 AM)</div>
+      <div class="chat-box" id="closingReportBox">Loading closing report...</div>
+      <button class="btn btn-gold" style="margin-top: 12px;" onclick="refreshClosing()">RECOMPILE TODAY'S CLOSING</button>
+    </div>
+  </div>
+
+  <!-- TAB 5: Ask AI Anything -->
+  <div id="tab-ai" class="tab-content">
+    <div class="card">
+      <div class="card-title">Natural Language Operations Executive (EN / OM / AM)</div>
+      <div class="chat-box" id="aiChatBox">Ask anything about today's bookings, EBITDA, washer payouts, or anomalies...</div>
+      <div class="input-row">
+        <input type="text" id="aiInput" placeholder="E.g., What is today's net EBITDA? or Show me washer commissions" onkeydown="if(event.key==='Enter') sendAiQuery()">
+        <button class="btn" onclick="sendAiQuery()">ASK AI</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: Feature Projection Studio -->
+  <div id="tab-project" class="tab-content">
+    <div class="card">
+      <div class="card-title">Stage 5: Scaffolding Generator (.scratch/proposals/)</div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 6px;">
+        Generates production-ready Flutter widgets, trilingual translations (EN/OM/AM), and hermetic unit tests.
+      </p>
+      <div class="input-row">
+        <input type="text" id="featureInput" value="quick-walkin" placeholder="Enter feature name (e.g. quick-walkin, loyalty-punchcard)">
+        <button class="btn btn-gold" onclick="scaffoldFeature()">SCAFFOLD FEATURE</button>
+      </div>
+      <div class="chat-box" id="scaffoldOutputBox" style="margin-top: 14px;">Click 'SCAFFOLD FEATURE' to generate proposal code...</div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    async function loadAllData() {
+      try {
+        const statusRes = await fetch('/api/status');
+        const status = await statusRes.json();
+        document.getElementById('statLastId').innerText = status.last_synced_id || 0;
+        document.getElementById('statAnomalies').innerText = status.unresolved_anomalies_count || 0;
+        document.getElementById('syncStatus').innerText = 'ONLINE (' + status.last_synced_id + ' EVENTS)';
+        document.getElementById('syncStatus').className = 'badge badge-green';
+
+        // Load Feed
+        const eventsRes = await fetch('/api/events');
+        const events = await eventsRes.json();
+        renderEvents(events);
+
+        // Load Anomalies
+        const anomRes = await fetch('/api/anomalies');
+        const anomalies = await anomRes.json();
+        renderAnomalies(anomalies);
+
+        // Load Yield
+        const yieldRes = await fetch('/api/yield');
+        const yieldData = await yieldRes.json();
+        renderYield(yieldData);
+
+        // Load Closing
+        const closeRes = await fetch('/api/closing');
+        const closeData = await closeRes.json();
+        document.getElementById('closingReportBox').innerText = closeData.audit_summary || 'No data';
+
+      } catch (e) {
+        document.getElementById('syncStatus').innerText = 'STANDBY / OFFLINE';
+        document.getElementById('syncStatus').className = 'badge badge-red';
+      }
+    }
+
+    function renderEvents(events) {
+      const tbody = document.getElementById('feedTableBody');
+      if (!events || events.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No mutations recorded yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = events.slice(0, 25).map(e => `
+        <tr>
+          <td><code>#${e.id}</code></td>
+          <td>${(e.recorded_at || '').substring(11, 19)}</td>
+          <td><strong>${e.table_name}</strong></td>
+          <td><span class="badge badge-cyan">${e.action}</span></td>
+          <td>${e.actor_name || 'System'}</td>
+          <td><span class="badge ${e.risk_score >= 2 ? 'badge-red' : (e.risk_score === 1 ? 'badge-gold' : 'badge-green')}">${e.risk_score >= 2 ? 'CRITICAL' : (e.risk_score === 1 ? 'WARN' : 'NORMAL')}</span></td>
+          <td style="font-size:12px; color:var(--text-muted);">${e.notes || ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAnomalies(anomalies) {
+      const container = document.getElementById('anomaliesList');
+      if (!anomalies || anomalies.length === 0) {
+        container.innerHTML = '<div style="color: var(--green);">✅ No active discrepancies detected. Station operating at 100% integrity.</div>';
+        return;
+      }
+      container.innerHTML = anomalies.map(a => `
+        <div class="anomaly-card">
+          <div>
+            <div style="font-weight:bold; color:var(--red);">[${a.severity}] ${a.category}</div>
+            <div style="font-size:13px; margin-top:4px;">${a.description}</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Actor: ${a.actor_name} | Detected: ${a.detected_at}</div>
+          </div>
+          <button class="btn btn-red" onclick="resolveAnomaly(${a.id})">RESOLVE</button>
+        </div>
+      `).join('');
+    }
+
+    function renderYield(y) {
+      document.getElementById('statEvu').innerText = (y.total_evu || 0) + ' EVU';
+      document.getElementById('statShampoo').innerText = (y.shampoo_liters_consumed || 0) + ' L';
+      document.getElementById('yieldContent').innerHTML = `
+        <p>• <strong>Total Equivalent Workload:</strong> ${y.total_evu || 0} EVU (${y.cars_count || 0} vehicles)</p>
+        <p>• <strong>Active Snow Foam Shampoo (CS-009):</strong> ~${y.shampoo_liters_consumed || 0} L consumed (~${y.shampoo_canisters_estimated || 0} canisters of 5L @ 125 ml/EVU)</p>
+        <p>• <strong>Interior Air Freshener Perfume (CS-006):</strong> ~${y.perfume_ml_consumed || 0} ml consumed (~${y.perfume_bottles_estimated || 0} bottles of 500ml @ 5 ml/car)</p>
+        <p>• <strong>Direct Materials COGS Estimate:</strong> ~${y.chemical_cost_etb || 0} ETB (@ 28.50 ETB / EVU)</p>
+        <p style="color:var(--green); margin-top:10px;">🛡️ <em>Empty-for-Full protocol active: 5L canisters require physical empty container exchange before storekeeper release.</em></p>
+      `;
+    }
+
+    async function resolveAnomaly(id) {
+      const notes = prompt("Enter resolution notes:", "Verified with station manager");
+      if (!notes) return;
+      await fetch('/api/resolve_anomaly', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({anomaly_id: id, notes: notes})
+      });
+      loadAllData();
+    }
+
+    async function sendAiQuery() {
+      const input = document.getElementById('aiInput');
+      const q = input.value.trim();
+      if (!q) return;
+      const box = document.getElementById('aiChatBox');
+      box.innerText += `\n\n> Tare: ${q}\nThinking...`;
+      input.value = '';
+      try {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({query: q})
+        });
+        const data = await res.json();
+        box.innerText += `\nSentinel: ${data.answer || 'No response.'}`;
+        box.scrollTop = box.scrollHeight;
+      } catch (e) {
+        box.innerText += `\nError contacting Sentinel AI: ${e}`;
+      }
+    }
+
+    async function scaffoldFeature() {
+      const feat = document.getElementById('featureInput').value.trim() || 'quick-walkin';
+      const box = document.getElementById('scaffoldOutputBox');
+      box.innerText = `Scaffolding feature '${feat}' into .scratch/proposals/...`;
+      try {
+        const res = await fetch('/api/project', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({feature_name: feat})
+        });
+        const data = await res.json();
+        box.innerText = `✅ SUCCESS!\nTarget Directory: ${data.target_dir}\n\nGenerated Assets:\n` + data.files_generated.map(f => `• ${f}`).join('\n');
+      } catch (e) {
+        box.innerText = `Error scaffolding feature: ${e}`;
+      }
+    }
+
+    async function refreshClosing() {
+      const closeRes = await fetch('/api/closing');
+      const closeData = await closeRes.json();
+      document.getElementById('closingReportBox').innerText = closeData.audit_summary || 'No data';
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadAllData, 30000);
+    loadAllData();
+  </script>
+</body>
+</html>

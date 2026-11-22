@@ -37,6 +37,11 @@ app.*.symbols
 .env*
 !.env.example
 agent/config.json
+sentinel/config.json
+sentinel/data/
+.scratch/
+__pycache__/
+*.pyc
 
 *.apk
 
