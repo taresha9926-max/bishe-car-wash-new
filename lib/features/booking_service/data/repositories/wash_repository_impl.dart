@@ -740,7 +740,7 @@ class WashRepositoryImpl implements IWashRepository {
       final b = _bookings[idx];
       _bookings[idx] = b.copyWith(
         payment: b.payment.copyWith(
-          receiptScreenshot: null,
+          clearReceiptScreenshot: true,
           verificationStatus: 'unverified',
         ),
       );
@@ -754,7 +754,7 @@ class WashRepositoryImpl implements IWashRepository {
       if (b.payment.receiptScreenshot != null) {
         _bookings[i] = b.copyWith(
           payment: b.payment.copyWith(
-            receiptScreenshot: null,
+            clearReceiptScreenshot: true,
             verificationStatus: 'unverified',
           ),
         );

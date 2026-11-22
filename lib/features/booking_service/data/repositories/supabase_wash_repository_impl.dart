@@ -1914,27 +1914,67 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> deleteBankIncomingTransaction(String id) async {
+    // 1. Try RPC delete_bank_incoming_transaction first (bypasses RLS via SECURITY DEFINER)
+    try {
+      final res = await _post('rpc/delete_bank_incoming_transaction', {'p_id': id});
+      if (res != null) {
+        await _fallbackLocalRepo.deleteBankIncomingTransaction(id);
+        return;
+      }
+    } catch (e) {
+      debugPrint('Supabase deleteBankIncomingTransaction RPC note: $e');
+    }
+
+    // 2. Direct REST DELETE fallback
     try {
       final encodedId = Uri.encodeComponent(id);
-      await _delete('bank_incoming_transactions?id=eq.$encodedId');
+      if (_isUuid(id)) {
+        await _delete('bank_incoming_transactions?id=eq.$encodedId');
+      } else {
+        await _delete('bank_incoming_transactions?ref_no=eq.$encodedId');
+      }
     } catch (e) {
-      debugPrint('Supabase deleteBankIncomingTransaction error: $e');
+      debugPrint('Supabase deleteBankIncomingTransaction REST error: $e');
     }
     await _fallbackLocalRepo.deleteBankIncomingTransaction(id);
   }
 
   @override
   Future<void> clearAllBankIncomingTransactions() async {
+    // 1. Try RPC clear_all_bank_incoming_transactions first (bypasses RLS via SECURITY DEFINER)
     try {
-      await _delete('bank_incoming_transactions?id=neq.00000000-0000-0000-0000-000000000000');
+      final res = await _post('rpc/clear_all_bank_incoming_transactions', {});
+      if (res != null) {
+        await _fallbackLocalRepo.clearAllBankIncomingTransactions();
+        return;
+      }
     } catch (e) {
-      debugPrint('Supabase clearAllBankIncomingTransactions error: $e');
+      debugPrint('Supabase clearAllBankIncomingTransactions RPC note: $e');
+    }
+
+    // 2. Direct REST DELETE fallback
+    try {
+      await _delete('bank_incoming_transactions?id=not.is.null');
+    } catch (e) {
+      debugPrint('Supabase clearAllBankIncomingTransactions REST error: $e');
     }
     await _fallbackLocalRepo.clearAllBankIncomingTransactions();
   }
 
   @override
   Future<void> deleteStationReceipt(String bookingId) async {
+    // 1. Try RPC delete_station_receipt first (bypasses RLS via SECURITY DEFINER)
+    try {
+      final res = await _post('rpc/delete_station_receipt', {'p_booking_id': bookingId});
+      if (res != null) {
+        await _fallbackLocalRepo.deleteStationReceipt(bookingId);
+        return;
+      }
+    } catch (e) {
+      debugPrint('Supabase deleteStationReceipt RPC note: $e');
+    }
+
+    // 2. Direct REST PATCH fallback
     try {
       final encodedId = Uri.encodeComponent(bookingId);
       await _patch('wash_bookings?id=eq.$encodedId', {
@@ -1948,8 +1988,20 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> clearAllStationReceipts() async {
+    // 1. Try RPC clear_all_station_receipts first (bypasses RLS via SECURITY DEFINER)
     try {
-      await _patch('wash_bookings?receipt_url=neq.null', {
+      final res = await _post('rpc/clear_all_station_receipts', {});
+      if (res != null) {
+        await _fallbackLocalRepo.clearAllStationReceipts();
+        return;
+      }
+    } catch (e) {
+      debugPrint('Supabase clearAllStationReceipts RPC note: $e');
+    }
+
+    // 2. Direct REST PATCH fallback (PostgREST syntax: not.is.null)
+    try {
+      await _patch('wash_bookings?receipt_url=not.is.null', {
         'receipt_url': null,
       });
     } catch (e) {

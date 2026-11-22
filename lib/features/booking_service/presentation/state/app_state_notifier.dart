@@ -587,6 +587,12 @@ class AppStateNotifier extends ChangeNotifier {
   List<BankIncomingTransaction> _bankIncomingTransactions = [];
   List<BankIncomingTransaction> get bankIncomingTransactions => _bankIncomingTransactions;
 
+  final Set<String> _deletedBankTxnIds = {};
+  final Set<String> _deletedStationReceiptBookingIds = {};
+
+  bool isStationReceiptDeleted(String bookingId) => _deletedStationReceiptBookingIds.contains(bookingId);
+  bool isBankTxnDeleted(String id) => _deletedBankTxnIds.contains(id);
+
   SentinelConfig _sentinelConfig = SentinelConfig(lastHeartbeat: DateTime.now());
   SentinelConfig get sentinelConfig => _sentinelConfig;
 
@@ -2939,6 +2945,7 @@ class AppStateNotifier extends ChangeNotifier {
         overpaymentAction: overpaymentAction,
         verificationStatus: effectiveStatus,
       );
+      _deletedStationReceiptBookingIds.remove(bookingId);
       final updatedList = List<WashBooking>.from(_bookings);
       updatedList[existingIdx] = b.copyWith(payment: optimisticPayment);
       _bookings = updatedList;
@@ -2964,19 +2971,26 @@ class AppStateNotifier extends ChangeNotifier {
   Future<void> fetchBankIncomingTransactions() async {
     try {
       final txs = await _repository.getBankIncomingTransactions();
-      _bankIncomingTransactions = List.from(txs);
+      _bankIncomingTransactions = txs
+          .where((tx) => !_deletedBankTxnIds.contains(tx.id) && !_deletedBankTxnIds.contains(tx.refNo))
+          .toList();
       notifyListeners();
     } catch (_) {}
   }
 
   Future<void> deleteBankIncomingTransaction(String id) async {
-    _bankIncomingTransactions.removeWhere((tx) => tx.id == id);
+    _deletedBankTxnIds.add(id);
+    _bankIncomingTransactions.removeWhere((tx) => tx.id == id || tx.refNo == id);
     notifyListeners();
     await _repository.deleteBankIncomingTransaction(id);
     await fetchBankIncomingTransactions();
   }
 
   Future<void> clearAllBankIncomingTransactions() async {
+    for (final tx in _bankIncomingTransactions) {
+      _deletedBankTxnIds.add(tx.id);
+      _deletedBankTxnIds.add(tx.refNo);
+    }
     _bankIncomingTransactions.clear();
     notifyListeners();
     await _repository.clearAllBankIncomingTransactions();
@@ -2984,12 +2998,13 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   Future<void> deleteStationReceipt(String bookingId) async {
+    _deletedStationReceiptBookingIds.add(bookingId);
     final idx = _bookings.indexWhere((b) => b.id == bookingId);
     if (idx != -1) {
       final b = _bookings[idx];
       _bookings[idx] = b.copyWith(
         payment: b.payment.copyWith(
-          receiptScreenshot: null,
+          clearReceiptScreenshot: true,
           verificationStatus: 'unverified',
         ),
       );
@@ -3002,10 +3017,11 @@ class AppStateNotifier extends ChangeNotifier {
   Future<void> clearAllStationReceipts() async {
     for (int i = 0; i < _bookings.length; i++) {
       final b = _bookings[i];
+      _deletedStationReceiptBookingIds.add(b.id);
       if (b.payment.receiptScreenshot != null) {
         _bookings[i] = b.copyWith(
           payment: b.payment.copyWith(
-            receiptScreenshot: null,
+            clearReceiptScreenshot: true,
             verificationStatus: 'unverified',
           ),
         );
@@ -3326,7 +3342,18 @@ class AppStateNotifier extends ChangeNotifier {
 
   Future<void> _refreshBookingsAndBays() async {
     _bays = await _repository.getBays();
-    _bookings = await _repository.getBookings();
+    final freshBookings = await _repository.getBookings();
+    _bookings = freshBookings.map((b) {
+      if (_deletedStationReceiptBookingIds.contains(b.id)) {
+        return b.copyWith(
+          payment: b.payment.copyWith(
+            clearReceiptScreenshot: true,
+            verificationStatus: 'unverified',
+          ),
+        );
+      }
+      return b;
+    }).toList();
     _syncOnlineBookingAlerts(_bookings);
     _commissionLogs = await _repository.getCommissionLogs();
     notifyListeners();

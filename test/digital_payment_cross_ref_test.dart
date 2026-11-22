@@ -240,5 +240,69 @@ void main() {
       expect(guardedBooking.payment.transactionRef, equals('DKKFIRST01'));
       expect(guardedBooking.payment.method, equals(PaymentMethod.telebirr));
     });
+
+    test('Station Receipts deletion and clearing filters out receipts immediately', () async {
+      await state.registerWalkIn(
+        licensePlate: 'DEL-RCP-01',
+        customerName: 'Tadesse Gemechu',
+        customerPhone: '0911223344',
+        package: state.packages.first,
+        carType: CarType.automobile,
+        assignedBay: BayType.bay1,
+        paymentMethod: PaymentMethod.telebirr,
+      );
+
+      final booking = state.bookings.firstWhere((b) => b.licensePlate == 'DEL-RCP-01');
+      await state.processPayment(
+        bookingId: booking.id,
+        method: PaymentMethod.telebirr,
+        amount: 350.0,
+        transactionRef: 'DKKDEL01',
+        receiptScreenshot: 'data:image/png;base64,mockReceiptData',
+      );
+
+      expect(state.isStationReceiptDeleted(booking.id), isFalse);
+      var b = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(b.payment.receiptScreenshot, isNotNull);
+
+      // Delete individual station receipt
+      await state.deleteStationReceipt(booking.id);
+      expect(state.isStationReceiptDeleted(booking.id), isTrue);
+      b = state.bookings.firstWhere((b) => b.id == booking.id);
+      expect(b.payment.receiptScreenshot, isNull);
+
+      // Clear all station receipts
+      await state.clearAllStationReceipts();
+      expect(state.isStationReceiptDeleted(booking.id), isTrue);
+    });
+
+    test('Bank Incoming SMS deletion and clearing immediately removes rows without resurrection', () async {
+      // Ingest test SMS
+      final res = await state.ingestBankSms(
+        provider: 'telebirr',
+        rawSms: 'you have received ETB 400.00 from Test Sender on 22/11/2026. transaction number is DKKDELTEST99.',
+      );
+      expect(res['success'], isTrue);
+
+      final tx = state.bankIncomingTransactions.firstWhere((t) => t.refNo == 'DKKDELTEST99');
+      expect(tx, isNotNull);
+
+      // Delete individual transaction
+      await state.deleteBankIncomingTransaction(tx.id);
+      expect(state.isBankTxnDeleted(tx.id), isTrue);
+      expect(state.bankIncomingTransactions.any((t) => t.id == tx.id || t.refNo == 'DKKDELTEST99'), isFalse);
+
+      // Simulate re-fetch: must not resurrect deleted transaction
+      await state.fetchBankIncomingTransactions();
+      expect(state.bankIncomingTransactions.any((t) => t.id == tx.id || t.refNo == 'DKKDELTEST99'), isFalse);
+
+      // Clear all incoming transactions
+      await state.clearAllBankIncomingTransactions();
+      expect(state.bankIncomingTransactions, isEmpty);
+
+      // Re-fetch after clear-all: must remain empty
+      await state.fetchBankIncomingTransactions();
+      expect(state.bankIncomingTransactions, isEmpty);
+    });
   });
 }

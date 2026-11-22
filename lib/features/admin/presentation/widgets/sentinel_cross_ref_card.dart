@@ -35,6 +35,10 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
     final bankTxns = state.bankIncomingTransactions;
     final isOnline = sentinel.isOnline;
 
+    final activeStationReceipts = widget.digitalBookings
+        .where((b) => !state.isStationReceiptDeleted(b.id))
+        .toList();
+
     final filteredTxns = _onlyUnmatchedSms
         ? bankTxns.where((t) => t.isUnmatched).toList()
         : bankTxns;
@@ -84,7 +88,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                   border: Border.all(color: AppColors.cardBorder),
                 ),
                 child: Text(
-                  '${widget.digitalBookings.length} ${state.tr("digitalPay")}',
+                  '${activeStationReceipts.length} ${state.tr("digitalPay")}',
                   style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                 ),
               ),
@@ -105,7 +109,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
             children: [
               Expanded(
                 child: _buildSubTabButton(
-                  title: '${state.tr("stationReceiptsTab")} (${widget.digitalBookings.length})',
+                  title: '${state.tr("stationReceiptsTab")} (${activeStationReceipts.length})',
                   icon: Icons.receipt_long_rounded,
                   isActive: _activeSubTab == 0,
                   onTap: () => setState(() => _activeSubTab = 0),
@@ -126,7 +130,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
 
           // Tab Content
           if (_activeSubTab == 0)
-            _buildStationReceiptsView(context, state)
+            _buildStationReceiptsView(context, state, activeStationReceipts)
           else
             _buildBankSmsFeedView(context, state, filteredTxns),
         ],
@@ -402,7 +406,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
     );
   }
 
-  Widget _buildStationReceiptsView(BuildContext context, dynamic state) {
+  Widget _buildStationReceiptsView(BuildContext context, dynamic state, List<WashBooking> receipts) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -414,7 +418,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
           runSpacing: 4,
           children: [
             Text(
-              '${widget.digitalBookings.length} ${state.tr("stationReceiptsTab")}',
+              '${receipts.length} ${state.tr("stationReceiptsTab")}',
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
             ),
             Row(
@@ -425,14 +429,14 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                   tooltip: state.tr('print'),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(6),
-                  onPressed: widget.digitalBookings.isEmpty
+                  onPressed: receipts.isEmpty
                       ? null
                       : () {
                           PrintExportHelper.printTableReport(
                             title: 'Station Digital Receipts & Verification Log',
                             subtitle: 'BISHE Car Wash Station • Bishoftu',
                             headers: ['Plate', 'Customer', 'Service', 'Method', 'Amount (ETB)', 'Ref No', 'Status', 'Date'],
-                            rows: widget.digitalBookings.map((b) => [
+                            rows: receipts.map((b) => [
                               b.licensePlate,
                               b.customerName,
                               b.isCarpet ? 'Carpet' : b.package.name,
@@ -450,13 +454,13 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                   tooltip: state.tr('exportCsv'),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(6),
-                  onPressed: widget.digitalBookings.isEmpty
+                  onPressed: receipts.isEmpty
                       ? null
                       : () {
                           PrintExportHelper.exportCsv(
                             fileName: 'bishe_station_receipts_${DateTime.now().toIso8601String().split('T')[0]}.csv',
                             headers: ['Booking ID', 'Plate', 'Customer', 'Phone', 'Service', 'Method', 'Amount (ETB)', 'Ref No', 'Verified', 'Date'],
-                            rows: widget.digitalBookings.map((b) => [
+                            rows: receipts.map((b) => [
                               b.id,
                               b.licensePlate,
                               b.customerName,
@@ -480,7 +484,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                   tooltip: state.tr('clearAll'),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(6),
-                  onPressed: widget.digitalBookings.isEmpty
+                  onPressed: receipts.isEmpty
                       ? null
                       : () => _confirmAction(
                             context: context,
@@ -490,7 +494,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                               await state.clearAllStationReceipts();
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('All station receipts cleared'), duration: Duration(seconds: 2)),
+                                  SnackBar(content: Text(state.tr('allReceiptsClearedSuccess')), duration: const Duration(seconds: 2)),
                                 );
                               }
                             },
@@ -501,7 +505,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
           ],
         ),
         const SizedBox(height: 8),
-        if (widget.digitalBookings.isEmpty)
+        if (receipts.isEmpty)
           Container(
             padding: const EdgeInsets.symmetric(vertical: 24),
             alignment: Alignment.center,
@@ -514,10 +518,10 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: widget.digitalBookings.take(20).length,
+            itemCount: receipts.take(20).length,
             separatorBuilder: (_, __) => const Divider(height: 14, color: AppColors.cardBorder),
             itemBuilder: (context, index) {
-              final b = widget.digitalBookings[index];
+              final b = receipts[index];
               final hasScreenshot = b.payment.receiptScreenshot != null &&
                   b.payment.receiptScreenshot!.trim().isNotEmpty;
               final isVerified = b.payment.isBankVerified;
@@ -640,7 +644,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                         await state.deleteStationReceipt(b.id);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Station receipt deleted'), duration: Duration(seconds: 1)),
+                            SnackBar(content: Text(state.tr('receiptDeletedSuccess')), duration: const Duration(seconds: 1)),
                           );
                         }
                       },
@@ -772,7 +776,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                               await state.clearAllBankIncomingTransactions();
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('All incoming bank SMS records cleared'), duration: Duration(seconds: 2)),
+                                  SnackBar(content: Text(state.tr('allSmsClearedSuccess')), duration: const Duration(seconds: 2)),
                                 );
                               }
                             },
@@ -897,7 +901,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                           await state.deleteBankIncomingTransaction(t.id);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Bank SMS record deleted'), duration: Duration(seconds: 1)),
+                              SnackBar(content: Text(state.tr('smsDeletedSuccess')), duration: const Duration(seconds: 1)),
                             );
                           }
                         },
@@ -918,6 +922,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
     required String message,
     required Future<void> Function() onConfirm,
   }) {
+    final state = AppStateProvider.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -928,7 +933,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: Text(state.tr('cancel'), style: const TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
@@ -936,7 +941,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
               Navigator.of(ctx).pop();
               await onConfirm();
             },
-            child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(state.tr('deleteItem'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),

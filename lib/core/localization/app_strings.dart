@@ -1893,6 +1893,26 @@ class AppStrings {
       AppLanguage.om: 'Nagahee buufataa kana haquu barbaaddaa?',
       AppLanguage.am: 'ይህን የጣቢያ ደረሰኝ መሰረዝ እርግጠኛ ኖት?',
     },
+    'receiptDeletedSuccess': {
+      AppLanguage.en: 'Station receipt deleted successfully',
+      AppLanguage.om: 'Nagaheen buufataa milkaa\'inaan haqameera',
+      AppLanguage.am: 'የጣቢያው ደረሰኝ በተሳካ ሁኔታ ተሰርዟል',
+    },
+    'allReceiptsClearedSuccess': {
+      AppLanguage.en: 'All station receipts cleared successfully',
+      AppLanguage.om: 'Nagaheen buufataa hundi milkaa\'inaan haqamaniiru',
+      AppLanguage.am: 'ሁሉም የጣቢያ ደረሰኞች በተሳካ ሁኔታ ጸድተዋል',
+    },
+    'smsDeletedSuccess': {
+      AppLanguage.en: 'Bank SMS record deleted successfully',
+      AppLanguage.om: 'Galmeen SMS baankii milkaa\'inaan haqameera',
+      AppLanguage.am: 'የባንክ SMS መዝገብ በተሳካ ሁኔታ ተሰርዟል',
+    },
+    'allSmsClearedSuccess': {
+      AppLanguage.en: 'All incoming bank SMS records cleared successfully',
+      AppLanguage.om: 'Galmeen SMS baankii hundi milkaa\'inaan haqamaniiru',
+      AppLanguage.am: 'ሁሉም የባንክ SMS መዝገቦች በተሳካ ሁኔታ ጸድተዋል',
+    },
     'pricingManagementTitle': {
       AppLanguage.en: 'Service Pricing & Master Inventory',
       AppLanguage.om: 'Gatii Tajaajilaa fi Qabeenyaa Waliigalaa',
