@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
@@ -2463,6 +2464,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   Future<void> loadData() async {
     _geminiApiKey = LocalStorageHelper.getString(LocalStorageHelper.keyGeminiApiKey);
+    _loadDeletedIdsFromStorage();
     _isLoading = true;
     _errorMessage = null;
     _repository.clearClosingSyncError();
@@ -2978,8 +2980,42 @@ class AppStateNotifier extends ChangeNotifier {
     } catch (_) {}
   }
 
+  void _loadDeletedIdsFromStorage() {
+    try {
+      final savedBank = LocalStorageHelper.getString(LocalStorageHelper.keyDeletedBankTxnIds);
+      if (savedBank != null && savedBank.isNotEmpty) {
+        final List<dynamic> list = jsonDecode(savedBank);
+        _deletedBankTxnIds.addAll(list.map((e) => e.toString()));
+      }
+      final savedReceipts = LocalStorageHelper.getString(LocalStorageHelper.keyDeletedStationReceiptBookingIds);
+      if (savedReceipts != null && savedReceipts.isNotEmpty) {
+        final List<dynamic> list = jsonDecode(savedReceipts);
+        _deletedStationReceiptBookingIds.addAll(list.map((e) => e.toString()));
+      }
+    } catch (_) {}
+  }
+
+  void _persistDeletedBankTxnIds() {
+    try {
+      LocalStorageHelper.setString(
+        LocalStorageHelper.keyDeletedBankTxnIds,
+        jsonEncode(_deletedBankTxnIds.toList()),
+      );
+    } catch (_) {}
+  }
+
+  void _persistDeletedStationReceiptBookingIds() {
+    try {
+      LocalStorageHelper.setString(
+        LocalStorageHelper.keyDeletedStationReceiptBookingIds,
+        jsonEncode(_deletedStationReceiptBookingIds.toList()),
+      );
+    } catch (_) {}
+  }
+
   Future<void> deleteBankIncomingTransaction(String id) async {
     _deletedBankTxnIds.add(id);
+    _persistDeletedBankTxnIds();
     _bankIncomingTransactions.removeWhere((tx) => tx.id == id || tx.refNo == id);
     notifyListeners();
     await _repository.deleteBankIncomingTransaction(id);
@@ -2991,6 +3027,7 @@ class AppStateNotifier extends ChangeNotifier {
       _deletedBankTxnIds.add(tx.id);
       _deletedBankTxnIds.add(tx.refNo);
     }
+    _persistDeletedBankTxnIds();
     _bankIncomingTransactions.clear();
     notifyListeners();
     await _repository.clearAllBankIncomingTransactions();
@@ -2999,6 +3036,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   Future<void> deleteStationReceipt(String bookingId) async {
     _deletedStationReceiptBookingIds.add(bookingId);
+    _persistDeletedStationReceiptBookingIds();
     final idx = _bookings.indexWhere((b) => b.id == bookingId);
     if (idx != -1) {
       final b = _bookings[idx];
@@ -3027,6 +3065,7 @@ class AppStateNotifier extends ChangeNotifier {
         );
       }
     }
+    _persistDeletedStationReceiptBookingIds();
     notifyListeners();
     await _repository.clearAllStationReceipts();
     await _refreshBookingsAndBays();

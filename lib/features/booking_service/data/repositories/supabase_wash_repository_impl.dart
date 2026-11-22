@@ -1928,11 +1928,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     // 2. Direct REST DELETE fallback
     try {
       final encodedId = Uri.encodeComponent(id);
-      if (_isUuid(id)) {
-        await _delete('bank_incoming_transactions?id=eq.$encodedId');
-      } else {
-        await _delete('bank_incoming_transactions?ref_no=eq.$encodedId');
-      }
+      await _delete('bank_incoming_transactions?id=eq.$encodedId');
+      await _delete('bank_incoming_transactions?ref_no=eq.$encodedId');
     } catch (e) {
       debugPrint('Supabase deleteBankIncomingTransaction REST error: $e');
     }

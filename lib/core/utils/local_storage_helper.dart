@@ -5,6 +5,8 @@ class LocalStorageHelper {
   LocalStorageHelper._();
 
   static const String keyGeminiApiKey = 'bishe_gemini_api_key';
+  static const String keyDeletedBankTxnIds = 'bishe_deleted_bank_txn_ids';
+  static const String keyDeletedStationReceiptBookingIds = 'bishe_deleted_station_receipt_booking_ids';
 
   static String? getString(String key) => storage.getLocalStorageItem(key);
   static void setString(String key, String? value) => storage.setLocalStorageItem(key, value);
