@@ -1178,7 +1178,7 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   double get totalRevenueTodayETB {
-    return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB + todayDirectBankCreditsETB;
+    return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB;
   }
 
   double get totalCashRevenueETB {
@@ -1215,7 +1215,7 @@ class AppStateNotifier extends ChangeNotifier {
           }
           return sum;
         });
-    return bookDig + todayShowerDigitalETB + todayDirectBankCreditsETB;
+    return bookDig + todayShowerDigitalETB;
   }
 
   double get totalCommissionsPaidETB {

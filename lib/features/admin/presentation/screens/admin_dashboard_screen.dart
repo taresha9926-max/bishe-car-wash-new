@@ -214,7 +214,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     final tipsRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
     final showerRevenue = filteredShowers.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
     final directBank = (_selectedFilter == AdminTimeFilter.today) ? (state.todayDirectBankCreditsETB as double) : 0.0;
-    final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue + directBank;
+    final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue;
 
     final totalPettyCash = state.pettyCashExpenses
         .where((e) => _matchesFilter(e.loggedAt))

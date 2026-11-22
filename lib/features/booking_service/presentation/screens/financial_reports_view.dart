@@ -167,7 +167,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
     final directBankCredits = (_periodFilter == FinancialReportFilter.today) ? (state.todayDirectBankCreditsETB as double) : 0.0;
 
-    final grossRevenue = carRevenue + carpetRevenue + totalTips + showerRevenue + directBankCredits;
+    final grossRevenue = carRevenue + carpetRevenue + totalTips + showerRevenue;
     final serviceCash = periodBookings
         .where((b) => b.payment.method == PaymentMethod.cash)
         .fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice) + b.payment.tipAmount);

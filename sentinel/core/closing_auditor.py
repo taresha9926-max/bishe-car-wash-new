@@ -49,6 +49,9 @@ class ShiftClosingAuditor:
         cars_count = len(today_bookings)
 
         for b in today_bookings:
+            # Only count confirmed and paid bookings in revenue
+            if not b.get("is_paid") and b.get("status") != "completed":
+                continue
             amt = float(b.get("total_amount") or 0.0)
             gross_revenue += amt
 

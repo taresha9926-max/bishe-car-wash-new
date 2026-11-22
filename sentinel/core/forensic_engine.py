@@ -99,31 +99,9 @@ class ForensicEngine:
                         }
                     })
 
-            # Rule 1D: Below Minimum Station Tariff (Underbilling)
-            if action in ["INSERT", "UPDATE"]:
-                ctype = str(new_rec.get("car_type", "")).lower()
-                amt = float(new_rec.get("total_amount") or 0.0)
-                is_carpet = new_rec.get("is_carpet", False)
-                service = str(new_rec.get("service_type", "")).lower()
+            # Note: Super Admin has full pricing authority. No minimum price floor is enforced.
 
-                if not is_carpet and "shower" not in service:
-                    min_price = 300.0
-                    if any(t in ctype for t in ["truck", "heavy"]):
-                        min_price = 600.0
-                    elif any(t in ctype for t in ["minibus", "suv", "pickup"]):
-                        min_price = 450.0
-
-                    if amt > 0 and amt < min_price:
-                        anomalies.append({
-                            "event_id": event.get("id"),
-                            "category": "TARIFF_UNDERCUTTING",
-                            "severity": "WARNING",
-                            "actor_name": actor,
-                            "description": f"Service billed at {amt:,.2f} ETB, below the station minimum tariff of {min_price:,.2f} ETB for category '{ctype}'.",
-                            "details": {"billed_amount": amt, "min_tariff": min_price, "car_type": ctype}
-                        })
-
-            # Rule 1E: 15% Statutory VAT Tampering
+            # Rule 1D: 15% Statutory VAT Tampering
             if action in ["INSERT", "UPDATE"]:
                 service = str(new_rec.get("service_type", "")).lower()
                 is_shower = "shower" in service

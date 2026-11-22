@@ -60,13 +60,8 @@ class SentinelConfig:
             "heavy": 2.5,
         }
 
-        # Minimum Base Tariffs (ETB)
-        self.min_tariffs = {
-            "automobile": 300.0,
-            "minibus": 450.0,
-            "truck": 600.0,
-            "carpet_m2": 80.0,
-        }
+        # Super Admin has full pricing authority: no artificial minimum tariff floor is enforced.
+        self.min_tariffs = {}
 
         # Consumable Yield Benchmarks
         self.foam_shampoo_yield_standard = 40.0   # 40 EVU cars per 5L (125 ml/EVU)
@@ -79,7 +74,7 @@ class SentinelConfig:
     def load(self):
         if os.path.exists(self.config_path):
             try:
-                with open(self.config_path, "r", encoding="utf-8") as f:
+                with open(self.config_path, "r", encoding="utf-8-sig") as f:
                     data = json.load(f)
                     self.supabase_url = data.get("supabase_url", self.supabase_url)
                     self.supabase_anon_key = data.get("supabase_anon_key", self.supabase_anon_key)
