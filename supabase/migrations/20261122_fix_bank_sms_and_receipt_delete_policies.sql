@@ -78,3 +78,6 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.clear_all_station_receipts() TO anon, authenticated, service_role;
+
+-- 6. Immediately reload PostgREST schema cache
+NOTIFY pgrst, 'reload schema';
