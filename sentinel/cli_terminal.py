@@ -44,7 +44,21 @@ def run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, 
                 for e in events:
                     risk_color = CLR_RED if e["risk_score"] >= 2 else (CLR_YELLOW if e["risk_score"] == 1 else CLR_GREEN)
                     print(f"#{e['id']} | {e['recorded_at'][:19]} | {CLR_BOLD}{e['table_name']}{CLR_RESET} [{e['action']}] | Actor: {e['actor_name']} | Risk: {risk_color}{e['risk_score']}{CLR_RESET} | {e['notes'] or ''}")
-            input("\nPress Enter to return to menu...")
+            
+            sub = input(f"\n{CLR_YELLOW}[d] Delete event | [c] Clear all events | [p] Prune to latest 20 | [Enter] Return: {CLR_RESET}").strip().lower()
+            if sub == "d":
+                eid = input("Enter Event ID to delete: ").strip()
+                if eid.isdigit():
+                    ok = db.delete_audit_event(int(eid))
+                    print(f"{CLR_GREEN}Event #{eid} deleted.{CLR_RESET}" if ok else f"{CLR_RED}Event not found.{CLR_RESET}")
+            elif sub == "c":
+                confirm = input("Confirm delete ALL events? (y/N): ").strip().lower()
+                if confirm == "y":
+                    cnt = db.clear_all_audit_events()
+                    print(f"{CLR_GREEN}Cleared {cnt} events.{CLR_RESET}")
+            elif sub == "p":
+                cnt = db.prune_events(keep_latest=20)
+                print(f"{CLR_GREEN}Pruned {cnt} older events.{CLR_RESET}")
 
         elif choice == "2":
             print(f"\n{CLR_RED}{CLR_BOLD}--- Station Forensic Audit (Active Discrepancies) ---{CLR_RESET}")
@@ -53,10 +67,21 @@ def run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, 
                 print(f"{CLR_GREEN}✅ ZERO DISCREPANCIES: Station operating with 100% integrity.{CLR_RESET}")
             else:
                 for a in anomalies:
-                    print(f"\n{CLR_RED}🚨 [{a['severity']}] {a['category']}{CLR_RESET}")
+                    print(f"\n{CLR_RED}🚨 [{a['severity']}] #{a['id']} {a['category']}{CLR_RESET}")
                     print(f"   Actor: {a['actor_name']} | Time: {a['detected_at']}")
                     print(f"   Event: {a['description']}")
-            input("\nPress Enter to return to menu...")
+            
+            sub = input(f"\n{CLR_YELLOW}[d] Delete anomaly | [c] Clear all anomalies | [Enter] Return: {CLR_RESET}").strip().lower()
+            if sub == "d":
+                aid = input("Enter Anomaly ID to delete: ").strip()
+                if aid.isdigit():
+                    ok = db.delete_anomaly(int(aid))
+                    print(f"{CLR_GREEN}Anomaly #{aid} deleted.{CLR_RESET}" if ok else f"{CLR_RED}Anomaly not found.{CLR_RESET}")
+            elif sub == "c":
+                confirm = input("Confirm delete ALL anomalies? (y/N): ").strip().lower()
+                if confirm == "y":
+                    cnt = db.clear_all_anomalies()
+                    print(f"{CLR_GREEN}Cleared {cnt} anomalies.{CLR_RESET}")
 
         elif choice == "3":
             print(f"\n{CLR_GREEN}--- Consumables Yield & Chemical Benchmarks ---{CLR_RESET}")

@@ -379,7 +379,25 @@
   <!-- TAB 1: Live Feed -->
   <div id="tab-feed" class="tab-content">
     <div class="card">
-      <div class="card-title">Incremental Database Mutations (Cold Storage Stream)</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <div>
+          <div class="card-title">Incremental Database Mutations (Cold Storage Stream)</div>
+          <div style="font-size:12px; color:var(--text-muted);">
+            Local SQLite audit records synced from Supabase • Zero egress consumption
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span class="badge badge-cyan" id="feedCountBadge">0 EVENTS</span>
+          <select id="feedLimitSelect" onchange="loadEvents()" style="background:#0E0E17; color:var(--text); border:1px solid var(--card-border); padding:6px 10px; border-radius:6px; font-size:12px;">
+            <option value="15">Show 15</option>
+            <option value="30" selected>Show 30</option>
+            <option value="50">Show 50</option>
+            <option value="100">Show 100</option>
+          </select>
+          <button class="btn btn-outline" style="font-size:11px; padding:6px 10px;" onclick="pruneEvents(50)">✂️ Prune to 50</button>
+          <button class="btn btn-red" style="font-size:11px; padding:6px 10px;" onclick="clearAllEvents()">🗑️ Clear All Events</button>
+        </div>
+      </div>
       <table>
         <thead>
           <tr>
@@ -390,10 +408,11 @@
             <th>Actor</th>
             <th>Risk</th>
             <th>Notes</th>
+            <th style="text-align:center;">Delete</th>
           </tr>
         </thead>
         <tbody id="feedTableBody">
-          <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Awaiting events from Supabase...</td></tr>
+          <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Awaiting events from Supabase...</td></tr>
         </tbody>
       </table>
     </div>
@@ -402,7 +421,18 @@
   <!-- TAB 2: Forensic Discrepancies -->
   <div id="tab-anomalies" class="tab-content">
     <div class="card">
-      <div class="card-title">Detected High-Risk Anomalies & Theft Vectors</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+        <div>
+          <div class="card-title">Detected High-Risk Anomalies & Theft Vectors</div>
+          <div style="font-size:12px; color:var(--text-muted);">
+            Automated forensic rules evaluated by Station Ground Truth Engine
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge badge-gold" id="anomaliesCountBadge">0 ANOMALIES</span>
+          <button class="btn btn-red" style="font-size:11px; padding:6px 10px;" onclick="clearAllAnomalies()">🗑️ Clear All Anomalies</button>
+        </div>
+      </div>
       <div id="anomaliesList" style="margin-top: 14px;">
         <div style="color: var(--green);">✅ No active discrepancies detected. Station operating at 100% integrity.</div>
       </div>
@@ -554,10 +584,15 @@
         document.getElementById('syncStatus').innerText = 'ONLINE (' + (status.last_synced_id || 0) + ' EVENTS)';
         document.getElementById('syncStatus').className = 'badge badge-green';
 
+        if (document.getElementById('feedCountBadge')) {
+          document.getElementById('feedCountBadge').innerText = (status.total_cached_events || 0) + ' EVENTS IN DB';
+        }
+        if (document.getElementById('anomaliesCountBadge')) {
+          document.getElementById('anomaliesCountBadge').innerText = (status.unresolved_anomalies_count || 0) + ' ACTIVE';
+        }
+
         // Load Feed
-        const eventsRes = await fetch('/api/events');
-        const events = await eventsRes.json();
-        renderEvents(events);
+        await loadEvents();
 
         // Load Anomalies
         const anomRes = await fetch('/api/anomalies');
@@ -584,14 +619,24 @@
       }
     }
 
+    async function loadEvents() {
+      const select = document.getElementById('feedLimitSelect');
+      const limit = select ? (select.value || 30) : 30;
+      try {
+        const eventsRes = await fetch(`/api/events?limit=${limit}`);
+        const events = await eventsRes.json();
+        renderEvents(events);
+      } catch (_) {}
+    }
+
     function renderEvents(events) {
       const tbody = document.getElementById('feedTableBody');
       if (!events || events.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No mutations recorded yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">No mutations recorded in cold storage.</td></tr>';
         return;
       }
-      tbody.innerHTML = events.slice(0, 25).map(e => `
-        <tr>
+      tbody.innerHTML = events.map(e => `
+        <tr id="event-row-${e.id}">
           <td><code>#${e.id}</code></td>
           <td>${(e.recorded_at || '').substring(11, 19)}</td>
           <td><strong>${e.table_name}</strong></td>
@@ -599,26 +644,121 @@
           <td>${e.actor_name || 'System'}</td>
           <td><span class="badge ${e.risk_score >= 2 ? 'badge-red' : (e.risk_score === 1 ? 'badge-gold' : 'badge-green')}">${e.risk_score >= 2 ? 'CRITICAL' : (e.risk_score === 1 ? 'WARN' : 'NORMAL')}</span></td>
           <td style="font-size:12px; color:var(--text-muted);">${e.notes || ''}</td>
+          <td style="text-align:center;">
+            <button class="btn-sm" style="color:var(--red); border-color:rgba(239,68,68,0.4);" onclick="deleteEvent(${e.id})" title="Delete event #${e.id}">🗑️</button>
+          </td>
         </tr>
       `).join('');
     }
 
+    async function deleteEvent(id) {
+      if (!confirm(`Delete audit event #${id} from local cold storage?`)) return;
+      try {
+        const res = await fetch('/api/delete_event', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({event_id: id})
+        });
+        const data = await res.json();
+        if (data.success) {
+          const row = document.getElementById(`event-row-${id}`);
+          if (row) row.remove();
+          loadAllData();
+        }
+      } catch (e) {
+        alert('Error deleting event: ' + e);
+      }
+    }
+
+    async function clearAllEvents() {
+      if (!confirm('Are you sure you want to CLEAR ALL audit events from local storage? This prevents infinite data buildup.')) return;
+      try {
+        const res = await fetch('/api/clear_events', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        alert(`Cleared ${data.cleared_count || 0} events.`);
+        loadAllData();
+      } catch (e) {
+        alert('Error clearing events: ' + e);
+      }
+    }
+
+    async function pruneEvents(keepCount = 50) {
+      if (!confirm(`Prune audit events to keep only the latest ${keepCount} records? Older events will be permanently deleted.`)) return;
+      try {
+        const res = await fetch('/api/prune_events', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({keep_latest: keepCount})
+        });
+        const data = await res.json();
+        alert(`Pruned ${data.pruned_count || 0} older events.`);
+        loadAllData();
+      } catch (e) {
+        alert('Error pruning events: ' + e);
+      }
+    }
+
     function renderAnomalies(anomalies) {
       const container = document.getElementById('anomaliesList');
+      if (document.getElementById('anomaliesCountBadge')) {
+        document.getElementById('anomaliesCountBadge').innerText = (anomalies ? anomalies.length : 0) + ' ACTIVE';
+      }
       if (!anomalies || anomalies.length === 0) {
-        container.innerHTML = '<div style="color: var(--green);">✅ No active discrepancies detected. Station operating at 100% integrity.</div>';
+        container.innerHTML = '<div style="color: var(--green); padding:10px 0;">✅ No active discrepancies detected. Station operating at 100% integrity.</div>';
         return;
       }
       container.innerHTML = anomalies.map(a => `
-        <div class="anomaly-card">
+        <div class="anomaly-card" id="anom-${a.id}">
           <div>
-            <div style="font-weight:bold; color:var(--red);">[${a.severity}] ${a.category}</div>
+            <div style="font-weight:bold; color:var(--red);">[${a.severity}] #${a.id} ${a.category}</div>
             <div style="font-size:13px; margin-top:4px;">${a.description}</div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Actor: ${a.actor_name} | Detected: ${a.detected_at}</div>
           </div>
-          <button class="btn btn-red" onclick="resolveAnomaly(${a.id})">RESOLVE</button>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-gold" style="font-size:11px; padding:6px 10px;" onclick="resolveAnomaly(${a.id})">RESOLVE</button>
+            <button class="btn btn-red" style="font-size:11px; padding:6px 10px;" onclick="deleteAnomaly(${a.id})">🗑️ DELETE</button>
+          </div>
         </div>
       `).join('');
+    }
+
+    async function deleteAnomaly(id) {
+      if (!confirm(`Delete discrepancy alert #${id}?`)) return;
+      try {
+        const res = await fetch('/api/delete_anomaly', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({anomaly_id: id})
+        });
+        const data = await res.json();
+        if (data.success) {
+          const card = document.getElementById(`anom-${id}`);
+          if (card) card.remove();
+          loadAllData();
+        }
+      } catch (e) {
+        alert('Error deleting anomaly: ' + e);
+      }
+    }
+
+    async function clearAllAnomalies() {
+      if (!confirm('Are you sure you want to CLEAR ALL discrepancies from the list?')) return;
+      try {
+        const res = await fetch('/api/clear_anomalies', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        alert(`Cleared ${data.cleared_count || 0} anomalies.`);
+        loadAllData();
+      } catch (e) {
+        alert('Error clearing anomalies: ' + e);
+      }
     }
 
     function renderYield(y) {
@@ -648,19 +788,28 @@
       submitChat();
     }
 
+    let chatCounter = 0;
+
+    function deleteChatMessage(btn) {
+      const bubble = btn.closest('.chat-bubble');
+      if (bubble) bubble.remove();
+    }
+
     async function submitChat() {
       const input = document.getElementById('aiChatInput');
       const q = input.value.trim();
       if (!q) return;
 
       const thread = document.getElementById('chatThread');
+      chatCounter++;
       
       // Append user bubble
       const userBubble = document.createElement('div');
       userBubble.className = 'chat-bubble chat-bubble-user';
       userBubble.innerHTML = `
-        <div class="bubble-sender bubble-user-sender">
+        <div class="bubble-sender bubble-user-sender" style="display:flex; justify-content:space-between; align-items:center;">
           <span>👤 TARE (LEAD DEVELOPER)</span>
+          <button class="btn-sm" style="padding:1px 5px; font-size:10px; color:var(--text-muted);" onclick="deleteChatMessage(this)" title="Delete bubble">✕</button>
         </div>
         <div>${q}</div>
       `;
@@ -697,9 +846,12 @@
         const aiBubble = document.createElement('div');
         aiBubble.className = 'chat-bubble chat-bubble-ai';
         aiBubble.innerHTML = `
-          <div class="bubble-sender bubble-ai-sender">
-            <span>🧠 BISHE SUPER AI BRAIN</span>
-            <span class="badge badge-cyan" style="font-size:9px;">${data.source || 'AI BRAIN'}</span>
+          <div class="bubble-sender bubble-ai-sender" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span>🧠 BISHE SUPER AI BRAIN</span>
+              <span class="badge badge-cyan" style="font-size:9px;">${data.source || 'AI BRAIN'}</span>
+            </div>
+            <button class="btn-sm" style="padding:1px 5px; font-size:10px; color:var(--text-muted);" onclick="deleteChatMessage(this)" title="Delete bubble">✕</button>
           </div>
           <div>${formatMarkdown(data.answer || 'No response recorded.')}</div>
         `;
@@ -712,7 +864,13 @@
         }
         const errBubble = document.createElement('div');
         errBubble.className = 'chat-bubble chat-bubble-ai';
-        errBubble.innerHTML = `<div style="color:var(--red);">Error contacting Super AI Brain: ${e}</div>`;
+        errBubble.innerHTML = `
+          <div class="bubble-sender bubble-ai-sender" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:var(--red);">ERROR</span>
+            <button class="btn-sm" style="padding:1px 5px; font-size:10px; color:var(--text-muted);" onclick="deleteChatMessage(this)" title="Delete bubble">✕</button>
+          </div>
+          <div style="color:var(--red);">Error contacting Super AI Brain: ${e}</div>
+        `;
         thread.appendChild(errBubble);
       }
     }

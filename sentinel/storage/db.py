@@ -206,6 +206,41 @@ class LocalAuditDB:
             rows = cursor.fetchall()
             return [dict(r) for r in rows]
 
+    def get_total_events_count(self) -> int:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) AS cnt FROM audit_events")
+            row = cursor.fetchone()
+            return row["cnt"] if row else 0
+
+    def delete_audit_event(self, event_id: int) -> bool:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM audit_events WHERE id = ?", (event_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def clear_all_audit_events(self) -> int:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM audit_events")
+            count = cursor.rowcount
+            conn.commit()
+            return count
+
+    def prune_events(self, keep_latest: int = 50) -> int:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            DELETE FROM audit_events 
+            WHERE id NOT IN (
+                SELECT id FROM audit_events ORDER BY id DESC LIMIT ?
+            )
+            """, (keep_latest,))
+            count = cursor.rowcount
+            conn.commit()
+            return count
+
     def get_unresolved_anomalies(self) -> list[dict]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -214,6 +249,21 @@ class LocalAuditDB:
             """)
             rows = cursor.fetchall()
             return [dict(r) for r in rows]
+
+    def delete_anomaly(self, anomaly_id: int) -> bool:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM forensic_anomalies WHERE id = ?", (anomaly_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def clear_all_anomalies(self) -> int:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM forensic_anomalies")
+            count = cursor.rowcount
+            conn.commit()
+            return count
 
     def resolve_anomaly(self, anomaly_id: int, resolved_by: str, notes: str) -> bool:
         now = datetime.now().isoformat()

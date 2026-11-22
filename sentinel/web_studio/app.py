@@ -50,18 +50,20 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
         elif path == "/api/status":
             last_id = self.db.get_last_synced_id()
             anomalies = self.db.get_unresolved_anomalies()
-            events = self.db.get_recent_events(limit=10)
+            total_events = self.db.get_total_events_count()
             self._serve_json({
                 "status": "online",
                 "last_synced_id": last_id,
                 "unresolved_anomalies_count": len(anomalies),
-                "total_cached_events": len(events),
+                "total_cached_events": total_events,
                 "telegram_configured": bool(self.config.telegram_bot_token and self.config.telegram_chat_id),
                 "gemini_active": bool(self.config.gemini_api_key),
                 "port": self.config.web_port
             })
         elif path == "/api/events":
-            events = self.db.get_recent_events(limit=60)
+            query_params = urllib.parse.parse_qs(parsed.query)
+            limit = int(query_params.get("limit", [50])[0])
+            events = self.db.get_recent_events(limit=limit)
             self._serve_json(events)
         elif path == "/api/anomalies":
             anomalies = self.db.get_unresolved_anomalies()
@@ -126,6 +128,29 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
             notes = payload.get("notes", "Resolved by developer")
             success = self.db.resolve_anomaly(anom_id, "Tare (Lead Developer)", notes)
             self._serve_json({"success": success})
+        elif path == "/api/delete_anomaly":
+            anom_id = int(payload.get("anomaly_id", 0))
+            success = self.db.delete_anomaly(anom_id)
+            self._serve_json({"success": success, "anomaly_id": anom_id})
+        elif path == "/api/clear_anomalies":
+            cleared = self.db.clear_all_anomalies()
+            self._serve_json({"success": True, "cleared_count": cleared})
+        elif path == "/api/delete_event":
+            event_id = int(payload.get("event_id", 0))
+            success = self.db.delete_audit_event(event_id)
+            self._serve_json({"success": success, "event_id": event_id})
+        elif path == "/api/clear_events":
+            cleared = self.db.clear_all_audit_events()
+            self._serve_json({"success": True, "cleared_count": cleared})
+        elif path == "/api/prune_events":
+            keep = int(payload.get("keep_latest", 50))
+            pruned = self.db.prune_events(keep_latest=keep)
+            self._serve_json({"success": True, "pruned_count": pruned})
+        elif path == "/api/delete_chat_message":
+            idx = int(payload.get("index", -1))
+            if self.super_brain and 0 <= idx < len(self.super_brain.conversation_history):
+                self.super_brain.conversation_history.pop(idx)
+            self._serve_json({"success": True})
         elif path == "/api/project":
             feature_name = payload.get("feature_name", "quick-walkin")
             result = self.developer_projector.scaffold_feature(feature_name)
