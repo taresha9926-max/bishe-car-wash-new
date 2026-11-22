@@ -25,6 +25,7 @@ from sentinel.core.event_ingestion import EventIngestionEngine
 from sentinel.core.forensic_engine import ForensicEngine
 from sentinel.core.closing_auditor import ShiftClosingAuditor
 from sentinel.core.developer_projector import DeveloperProjector
+from sentinel.core.super_brain import SuperBrainController
 from sentinel.alerts.telegram_notifier import TelegramNotifier
 from sentinel.alerts.desktop_notifier import DesktopNotifier
 from sentinel.web_studio.app import start_sentinel_web_studio
@@ -78,6 +79,7 @@ def main():
     ingestion = EventIngestionEngine(config, db, on_event_synced=on_event_synced)
     closing = ShiftClosingAuditor(config, db)
     projector = DeveloperProjector()
+    super_brain = SuperBrainController(config, db, closing, projector)
 
     # Fast Scaffold Command Line Switch
     if args.project:
@@ -104,6 +106,7 @@ def main():
         forensic=forensic,
         closing=closing,
         projector=projector,
+        super_brain=super_brain,
         port=config.web_port
     )
     config.web_port = port
@@ -118,7 +121,7 @@ def main():
 
     # 8. Run Master CLI Terminal or Wait
     if args.cli or sys.stdin.isatty():
-        run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, desktop)
+        run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, desktop, super_brain=super_brain)
     else:
         print(f"[Sentinel Daemon] Running in background on {studio_url}. Press Ctrl+C to stop.")
         try:

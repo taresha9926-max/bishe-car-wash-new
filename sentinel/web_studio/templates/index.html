@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BISHE SUPER AI SENTINEL — Developer Cockpit</title>
+  <title>BISHE SUPER AI SENTINEL — Master Brain Controller</title>
   <style>
     :root {
       --bg: #0A0A10;
@@ -54,6 +54,7 @@
     .badge-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid var(--green); }
     .badge-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid var(--red); }
     .badge-gold { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid var(--gold); }
+    .badge-cyan { background: rgba(0,229,255,0.15); color: var(--cyan); border: 1px solid var(--cyan); }
     
     .nav-tabs {
       display: flex;
@@ -102,6 +103,7 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* Tables */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -114,10 +116,11 @@
       border-bottom: 1px solid var(--card-border);
     }
     th {
-      color: var(--text-muted);
+      color: var(--cyan);
       font-weight: 600;
       text-transform: uppercase;
       font-size: 11px;
+      background: rgba(0,229,255,0.04);
     }
     tr:hover { background: rgba(255,255,255,0.02); }
 
@@ -140,41 +143,137 @@
       font-weight: 700;
       cursor: pointer;
       font-size: 12px;
+      transition: all 0.2s ease;
     }
+    .btn:hover { opacity: 0.9; }
     .btn-gold { background: var(--gold); }
     .btn-red { background: var(--red); color: #FFF; }
-    
-    .chat-box {
+    .btn-outline { background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); }
+    .btn-outline:hover { color: #FFF; border-color: var(--cyan); }
+
+    /* AI Studio Chat Thread */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 600px;
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 16px;
-      margin-top: 14px;
-      min-height: 200px;
-      max-height: 380px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-family: monospace;
-      font-size: 13px;
+      overflow: hidden;
     }
-    .input-row {
+    .chat-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--card-border);
       display: flex;
-      gap: 10px;
-      margin-top: 12px;
+      justify-content: space-between;
+      align-items: center;
+      background: #0E0E17;
     }
-    input[type="text"] {
+    .chat-messages {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-bubble {
+      max-width: 88%;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .chat-bubble-user {
+      align-self: flex-end;
+      background: rgba(0,229,255,0.12);
+      border: 1px solid rgba(0,229,255,0.3);
+      color: #FFF;
+      border-bottom-right-radius: 2px;
+    }
+    .chat-bubble-ai {
+      align-self: flex-start;
+      background: #161824;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      border-bottom-left-radius: 2px;
+    }
+    .bubble-sender {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bubble-user-sender { color: var(--cyan); }
+    .bubble-ai-sender { color: var(--gold); }
+
+    .suggestion-pills {
+      display: flex;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #0E0E17;
+      border-top: 1px solid var(--card-border);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .pill {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .pill:hover {
+      background: rgba(0,229,255,0.1);
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .chat-input-bar {
+      padding: 14px 18px;
+      display: flex;
+      gap: 12px;
+      background: #0E0E17;
+      border-top: 1px solid var(--card-border);
+    }
+    .chat-input {
       flex: 1;
       background: #0A0A10;
       border: 1px solid var(--card-border);
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 12px 16px;
       color: #FFF;
       font-size: 14px;
     }
-    input[type="text"]:focus {
+    .chat-input:focus {
       outline: none;
       border-color: var(--cyan);
     }
+
+    .table-tools {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+    }
+    .btn-sm:hover { color: #FFF; border-color: var(--cyan); }
   </style>
 </head>
 <body>
@@ -182,55 +281,103 @@
   <header>
     <div>
       <div class="brand-title">
-        <span>🛡️ BISHE SUPER AI SENTINEL</span>
-        <span class="badge badge-green">LIVE DAEMON</span>
+        <span>🧠 BISHE SUPER AI SENTINEL</span>
+        <span class="badge badge-green">BRAIN CONTROLLER</span>
       </div>
       <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
-        Bishoftu Station Ground Truth Engine • 127.0.0.1:8088 • Tamper-Proof Audit
+        Bishoftu Station Supreme Intelligence Engine • 127.0.0.1:8088 • Full App Knowledge
       </div>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
       <span id="syncStatus" class="badge badge-gold">SYNCING...</span>
-      <button class="btn btn-gold" onclick="loadAllData()">REFRESH</button>
+      <button class="btn btn-gold" onclick="loadAllData()">REFRESH DATA</button>
     </div>
   </header>
 
-  <!-- Top Metrics -->
+  <!-- Top Metrics Overview -->
   <div class="grid">
     <div class="card">
-      <div class="card-title">Live Synced Mutations</div>
-      <div class="card-val" id="statLastId">0</div>
-      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Incremental Cursor (WHERE id > last_synced)</div>
+      <div class="card-title">Today's Settled Revenue</div>
+      <div class="card-val" id="statGrossRev" style="color: var(--gold);">0.00 ETB</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="statPaySplit">Cash: 0 | Digital: 0</div>
     </div>
     <div class="card">
-      <div class="card-title">Active Discrepancies</div>
-      <div class="card-val" id="statAnomalies" style="color: var(--red);">0</div>
-      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">High-Risk Thefts & Downgrades</div>
+      <div class="card-title">Retained EBITDA (Profit)</div>
+      <div class="card-val" id="statEbitda" style="color: var(--green);">0.00 ETB</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="statVatSplit">15% VAT & COGS Deducted</div>
     </div>
     <div class="card">
-      <div class="card-title">Today's Workload</div>
+      <div class="card-title">Today's Workload Volume</div>
       <div class="card-val" id="statEvu" style="color: var(--cyan);">0.0 EVU</div>
-      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Equivalent Vehicle Units Settled</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="statCarsCount">0 Vehicles Completed</div>
     </div>
     <div class="card">
-      <div class="card-title">Chemical Consumables</div>
-      <div class="card-val" id="statShampoo" style="color: var(--green);">0.0 L</div>
-      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">5L Snow Foam (125 ml / EVU)</div>
+      <div class="card-title">Forensic Audit Integrity</div>
+      <div class="card-val" id="statAnomalies">0</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Active Operational Discrepancies</div>
     </div>
   </div>
 
-  <!-- Navigation -->
+  <!-- Navigation Tabs -->
   <div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchTab('tab-feed')">[1] Live Audit Feed</button>
-    <button class="nav-btn" onclick="switchTab('tab-anomalies')">[2] Forensic Discrepancies</button>
-    <button class="nav-btn" onclick="switchTab('tab-yield')">[3] Consumables Yield</button>
-    <button class="nav-btn" onclick="switchTab('tab-closing')">[4] Shift Closing & EBITDA</button>
-    <button class="nav-btn" onclick="switchTab('tab-ai')">[5] Ask AI (EN / OM / AM)</button>
-    <button class="nav-btn" onclick="switchTab('tab-project')">[6] Feature Projection Studio</button>
+    <button class="nav-btn active" onclick="switchTab('tab-ai')">💬 [5] AI Brain Studio (Ask Anything)</button>
+    <button class="nav-btn" onclick="switchTab('tab-feed')">📋 [1] Live Audit Feed</button>
+    <button class="nav-btn" onclick="switchTab('tab-anomalies')">🚨 [2] Forensic Discrepancies</button>
+    <button class="nav-btn" onclick="switchTab('tab-yield')">🧪 [3] Consumables Yield</button>
+    <button class="nav-btn" onclick="switchTab('tab-closing')">📊 [4] Shift Closing & EBITDA</button>
+    <button class="nav-btn" onclick="switchTab('tab-project')">💡 [6] Feature Projection Studio</button>
+  </div>
+
+  <!-- TAB 5: AI Brain Studio (Default View) -->
+  <div id="tab-ai" class="tab-content active">
+    <div class="chat-container">
+      <div class="chat-header">
+        <div>
+          <span style="font-weight: 800; color: #FFF;">EXECUTIVE AI CHAT & CONTROL STUDIO</span>
+          <span style="font-size: 12px; color: var(--text-muted); margin-left: 10px;">Full live DB knowledge, code reasoning & past/future analytics</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <span class="badge badge-cyan" id="aiModelBadge">GEMINI FLASH ONLINE</span>
+          <button class="btn btn-outline" style="padding:4px 10px; font-size:11px;" onclick="clearChat()">CLEAR CHAT</button>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chatThread">
+        <!-- AI Welcome Message -->
+        <div class="chat-bubble chat-bubble-ai">
+          <div class="bubble-sender bubble-ai-sender">
+            <span>🛡️ BISHE SUPER AI BRAIN</span>
+            <span class="badge badge-green" style="font-size:9px;">OPERATIONAL MASTER</span>
+          </div>
+          <div>
+            Greetings Tare! I am your station's <strong>Central Brain Controller</strong>, fully connected to your live Bishoftu database, staff roster, chemical yields, and Flutter codebase.
+            <br><br>
+            I can answer anything about past and present operations, or plan and generate code for future features. Click any prompt below or type your question in English, Afaan Oromoo, or Amharic!
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Suggestion Pills -->
+      <div class="suggestion-pills">
+        <span class="pill" onclick="sendPrompt('Show me the full list of cars washed today with status, prices, and assigned washers')">🚗 Cars Washed Today</span>
+        <span class="pill" onclick="sendPrompt('Break down the active washer technicians and their earned commissions today')">👷 Washer Commissions</span>
+        <span class="pill" onclick="sendPrompt('Show today\'s complete live P&L statement including 15% VAT, labor, chemicals, and EBITDA')">📊 Today's P&L Statement</span>
+        <span class="pill" onclick="sendPrompt('Audit today\'s chemical consumable usage: 5L shampoo canisters and interior perfume yield')">🧪 Chemical Yield Audit</span>
+        <span class="pill" onclick="sendPrompt('Reconcile today\'s cash drawer, shift handover OTP, and bank deposit status')">🔐 Cash Drawer & Shift Handover</span>
+        <span class="pill" onclick="sendPrompt('Check incoming Telebirr and CBE bank SMS credits and matched booking status')">📱 Bank SMS Cross-Reference</span>
+        <span class="pill" onclick="sendPrompt('What are the main UX bottlenecks and what features should we build next?')">💡 Future Feature Roadmap</span>
+      </div>
+
+      <!-- Chat Input Bar -->
+      <div class="chat-input-bar">
+        <input type="text" id="aiChatInput" class="chat-input" placeholder="Ask anything about today's cars, washer commissions, P&L, chemical yield, or future features..." onkeydown="if(event.key==='Enter') submitChat()">
+        <button class="btn btn-gold" onclick="submitChat()">SEND INQUIRY</button>
+      </div>
+    </div>
   </div>
 
   <!-- TAB 1: Live Feed -->
-  <div id="tab-feed" class="tab-content active">
+  <div id="tab-feed" class="tab-content">
     <div class="card">
       <div class="card-title">Incremental Database Mutations (Cold Storage Stream)</div>
       <table>
@@ -276,20 +423,8 @@
   <div id="tab-closing" class="tab-content">
     <div class="card">
       <div class="card-title">Automated Executive Closing Reconciler (8:30 PM & 6:00 AM)</div>
-      <div class="chat-box" id="closingReportBox">Loading closing report...</div>
+      <div class="chat-bubble chat-bubble-ai" style="max-width:100%; white-space:pre-wrap; font-family:monospace; margin-top:12px;" id="closingReportBox">Loading closing report...</div>
       <button class="btn btn-gold" style="margin-top: 12px;" onclick="refreshClosing()">RECOMPILE TODAY'S CLOSING</button>
-    </div>
-  </div>
-
-  <!-- TAB 5: Ask AI Anything -->
-  <div id="tab-ai" class="tab-content">
-    <div class="card">
-      <div class="card-title">Natural Language Operations Executive (EN / OM / AM)</div>
-      <div class="chat-box" id="aiChatBox">Ask anything about today's bookings, EBITDA, washer payouts, or anomalies...</div>
-      <div class="input-row">
-        <input type="text" id="aiInput" placeholder="E.g., What is today's net EBITDA? or Show me washer commissions" onkeydown="if(event.key==='Enter') sendAiQuery()">
-        <button class="btn" onclick="sendAiQuery()">ASK AI</button>
-      </div>
     </div>
   </div>
 
@@ -298,13 +433,13 @@
     <div class="card">
       <div class="card-title">Stage 5: Scaffolding Generator (.scratch/proposals/)</div>
       <p style="font-size: 13px; color: var(--text-muted); margin-top: 6px;">
-        Generates production-ready Flutter widgets, trilingual translations (EN/OM/AM), and hermetic unit tests.
+        Generates production-ready Flutter widgets, trilingual translations (EN/OM/AM per Rule 4), and hermetic unit tests.
       </p>
-      <div class="input-row">
-        <input type="text" id="featureInput" value="quick-walkin" placeholder="Enter feature name (e.g. quick-walkin, loyalty-punchcard)">
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <input type="text" id="featureInput" class="chat-input" value="quick-walkin" placeholder="Enter feature name (e.g. quick-walkin, loyalty-punchcard)">
         <button class="btn btn-gold" onclick="scaffoldFeature()">SCAFFOLD FEATURE</button>
       </div>
-      <div class="chat-box" id="scaffoldOutputBox" style="margin-top: 14px;">Click 'SCAFFOLD FEATURE' to generate proposal code...</div>
+      <div class="chat-bubble chat-bubble-ai" id="scaffoldOutputBox" style="max-width:100%; margin-top: 14px; font-family:monospace; white-space:pre-wrap;">Click 'SCAFFOLD FEATURE' to generate proposal code...</div>
     </div>
   </div>
 
@@ -316,13 +451,107 @@
       event.target.classList.add('active');
     }
 
+    // Markdown Table to HTML Parser with Copy/Export Tools
+    function formatMarkdown(text) {
+      if (!text) return '';
+      const lines = text.split('\n');
+      let out = [];
+      let inTable = false;
+      let tableLines = [];
+      let tblIdx = 0;
+
+      function renderTable(tLines, idx) {
+        if (tLines.length < 2) return tLines.join('\n');
+        const headers = tLines[0].split('|').map(c => c.trim()).filter(c => c);
+        const rows = tLines.slice(2).map(r => r.split('|').map(c => c.trim()).filter(c => c));
+        const thHtml = headers.map(h => `<th>${h}</th>`).join('');
+        const trHtml = rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+        const tblId = 'aiTbl_' + Date.now() + '_' + idx;
+        return `
+          <div style="margin: 14px 0;">
+            <div class="table-tools">
+              <button class="btn-sm" onclick="copyTableText('${tblId}')">📋 Copy Table</button>
+              <button class="btn-sm" onclick="exportTableCsv('${tblId}')">📥 Export CSV</button>
+            </div>
+            <table id="${tblId}">
+              <thead><tr>${thHtml}</tr></thead>
+              <tbody>${trHtml}</tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      for (let i = 0; i < lines.length; i++) {
+        const l = lines[i].trim();
+        if (l.startsWith('|') && l.endsWith('|') && l.includes('|')) {
+          if (!inTable) { inTable = true; tableLines = []; }
+          tableLines.append ? tableLines.append(l) : tableLines.push(l);
+        } else {
+          if (inTable) {
+            inTable = false;
+            tblIdx++;
+            out.push(renderTable(tableLines, tblIdx));
+            tableLines = [];
+          }
+          if (l.startsWith('### ')) {
+            out.push(`<h3 style="color:var(--cyan); margin:14px 0 6px 0; font-size:16px;">${l.substring(4)}</h3>`);
+          } else if (l.startsWith('## ')) {
+            out.push(`<h2 style="color:var(--cyan); margin:16px 0 8px 0; font-size:18px;">${l.substring(3)}</h2>`);
+          } else if (l.startsWith('# ')) {
+            out.push(`<h1 style="color:var(--cyan); margin:18px 0 10px 0; font-size:20px;">${l.substring(2)}</h1>`);
+          } else if (l.startsWith('- ') || l.startsWith('• ')) {
+            let item = l.substring(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code>$1</code>');
+            out.push(`<li style="margin-left:20px; margin-bottom:4px;">${item}</li>`);
+          } else if (l) {
+            let p = l.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code>$1</code>');
+            out.push(`<p style="margin-bottom:8px;">${p}</p>`);
+          } else {
+            out.push('<br>');
+          }
+        }
+      }
+      if (inTable && tableLines.length) {
+        tblIdx++;
+        out.push(renderTable(tableLines, tblIdx));
+      }
+      return out.join('\n');
+    }
+
+    function copyTableText(tableId) {
+      const tbl = document.getElementById(tableId);
+      if (!tbl) return;
+      let text = '';
+      for (const row of tbl.rows) {
+        const cols = Array.from(row.cells).map(c => c.innerText.trim());
+        text += cols.join('\t') + '\n';
+      }
+      navigator.clipboard.writeText(text);
+      alert('Table copied to clipboard!');
+    }
+
+    function exportTableCsv(tableId) {
+      const tbl = document.getElementById(tableId);
+      if (!tbl) return;
+      let csv = '';
+      for (const row of tbl.rows) {
+        const cols = Array.from(row.cells).map(c => '"' + c.innerText.replace(/"/g, '""').trim() + '"');
+        csv += cols.join(',') + '\n';
+      }
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bishe_${tableId}.csv`;
+      a.click();
+    }
+
     async function loadAllData() {
       try {
         const statusRes = await fetch('/api/status');
         const status = await statusRes.json();
-        document.getElementById('statLastId').innerText = status.last_synced_id || 0;
         document.getElementById('statAnomalies').innerText = status.unresolved_anomalies_count || 0;
-        document.getElementById('syncStatus').innerText = 'ONLINE (' + status.last_synced_id + ' EVENTS)';
+        document.getElementById('statAnomalies').style.color = status.unresolved_anomalies_count > 0 ? 'var(--red)' : 'var(--green)';
+        document.getElementById('syncStatus').innerText = 'ONLINE (' + (status.last_synced_id || 0) + ' EVENTS)';
         document.getElementById('syncStatus').className = 'badge badge-green';
 
         // Load Feed
@@ -340,10 +569,14 @@
         const yieldData = await yieldRes.json();
         renderYield(yieldData);
 
-        // Load Closing
+        // Load Closing KPI
         const closeRes = await fetch('/api/closing');
         const closeData = await closeRes.json();
         document.getElementById('closingReportBox').innerText = closeData.audit_summary || 'No data';
+        document.getElementById('statGrossRev').innerText = (closeData.gross_revenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ETB';
+        document.getElementById('statEbitda').innerText = (closeData.ebitda || 0).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' ETB';
+        document.getElementById('statPaySplit').innerText = `Cash: ${(closeData.cash_drawer||0).toFixed(0)} | Telebirr: ${(closeData.telebirr_total||0).toFixed(0)} | CBE: ${(closeData.cbe_total||0).toFixed(0)}`;
+        document.getElementById('statCarsCount').innerText = `${closeData.cars_count || 0} Vehicles Registered Today`;
 
       } catch (e) {
         document.getElementById('syncStatus').innerText = 'STANDBY / OFFLINE';
@@ -390,10 +623,9 @@
 
     function renderYield(y) {
       document.getElementById('statEvu').innerText = (y.total_evu || 0) + ' EVU';
-      document.getElementById('statShampoo').innerText = (y.shampoo_liters_consumed || 0) + ' L';
       document.getElementById('yieldContent').innerHTML = `
-        <p>• <strong>Total Equivalent Workload:</strong> ${y.total_evu || 0} EVU (${y.cars_count || 0} vehicles)</p>
-        <p>• <strong>Active Snow Foam Shampoo (CS-009):</strong> ~${y.shampoo_liters_consumed || 0} L consumed (~${y.shampoo_canisters_estimated || 0} canisters of 5L @ 125 ml/EVU)</p>
+        <p>• <strong>Total Workload Volume:</strong> ${y.total_evu || 0} EVU (${y.cars_count || 0} vehicles)</p>
+        <p>• <strong>Active Snow Foam Car Shampoo (CS-009):</strong> ~${y.shampoo_liters_consumed || 0} L consumed (~${y.shampoo_canisters_estimated || 0} canisters of 5L @ 125 ml/EVU)</p>
         <p>• <strong>Interior Air Freshener Perfume (CS-006):</strong> ~${y.perfume_ml_consumed || 0} ml consumed (~${y.perfume_bottles_estimated || 0} bottles of 500ml @ 5 ml/car)</p>
         <p>• <strong>Direct Materials COGS Estimate:</strong> ~${y.chemical_cost_etb || 0} ETB (@ 28.50 ETB / EVU)</p>
         <p style="color:var(--green); margin-top:10px;">🛡️ <em>Empty-for-Full protocol active: 5L canisters require physical empty container exchange before storekeeper release.</em></p>
@@ -411,13 +643,43 @@
       loadAllData();
     }
 
-    async function sendAiQuery() {
-      const input = document.getElementById('aiInput');
+    function sendPrompt(text) {
+      document.getElementById('aiChatInput').value = text;
+      submitChat();
+    }
+
+    async function submitChat() {
+      const input = document.getElementById('aiChatInput');
       const q = input.value.trim();
       if (!q) return;
-      const box = document.getElementById('aiChatBox');
-      box.innerText += `\n\n> Tare: ${q}\nThinking...`;
+
+      const thread = document.getElementById('chatThread');
+      
+      // Append user bubble
+      const userBubble = document.createElement('div');
+      userBubble.className = 'chat-bubble chat-bubble-user';
+      userBubble.innerHTML = `
+        <div class="bubble-sender bubble-user-sender">
+          <span>👤 TARE (LEAD DEVELOPER)</span>
+        </div>
+        <div>${q}</div>
+      `;
+      thread.appendChild(userBubble);
       input.value = '';
+
+      // Append thinking bubble
+      const thinkingBubble = document.createElement('div');
+      thinkingBubble.className = 'chat-bubble chat-bubble-ai';
+      thinkingBubble.id = 'thinkingBubble';
+      thinkingBubble.innerHTML = `
+        <div class="bubble-sender bubble-ai-sender">
+          <span>🧠 BISHE SUPER AI BRAIN</span>
+        </div>
+        <div style="color:var(--cyan);">Thinking and auditing station database...</div>
+      `;
+      thread.appendChild(thinkingBubble);
+      thread.scrollTop = thread.scrollHeight;
+
       try {
         const res = await fetch('/api/ask', {
           method: 'POST',
@@ -425,11 +687,48 @@
           body: JSON.stringify({query: q})
         });
         const data = await res.json();
-        box.innerText += `\nSentinel: ${data.answer || 'No response.'}`;
-        box.scrollTop = box.scrollHeight;
+        
+        // Remove thinking bubble
+        if (thinkingBubble.parentNode) {
+          thinkingBubble.parentNode.removeChild(thinkingBubble);
+        }
+
+        // Append AI response bubble with formatted markdown
+        const aiBubble = document.createElement('div');
+        aiBubble.className = 'chat-bubble chat-bubble-ai';
+        aiBubble.innerHTML = `
+          <div class="bubble-sender bubble-ai-sender">
+            <span>🧠 BISHE SUPER AI BRAIN</span>
+            <span class="badge badge-cyan" style="font-size:9px;">${data.source || 'AI BRAIN'}</span>
+          </div>
+          <div>${formatMarkdown(data.answer || 'No response recorded.')}</div>
+        `;
+        thread.appendChild(aiBubble);
+        thread.scrollTop = thread.scrollHeight;
+
       } catch (e) {
-        box.innerText += `\nError contacting Sentinel AI: ${e}`;
+        if (thinkingBubble.parentNode) {
+          thinkingBubble.parentNode.removeChild(thinkingBubble);
+        }
+        const errBubble = document.createElement('div');
+        errBubble.className = 'chat-bubble chat-bubble-ai';
+        errBubble.innerHTML = `<div style="color:var(--red);">Error contacting Super AI Brain: ${e}</div>`;
+        thread.appendChild(errBubble);
       }
+    }
+
+    async function clearChat() {
+      await fetch('/api/clear_chat', { method: 'POST' });
+      const thread = document.getElementById('chatThread');
+      thread.innerHTML = `
+        <div class="chat-bubble chat-bubble-ai">
+          <div class="bubble-sender bubble-ai-sender">
+            <span>🛡️ BISHE SUPER AI BRAIN</span>
+            <span class="badge badge-green" style="font-size:9px;">OPERATIONAL MASTER</span>
+          </div>
+          <div>Conversation cleared. Ask any new question about cars, commissions, P&L, chemicals, or future features.</div>
+        </div>
+      `;
     }
 
     async function scaffoldFeature() {
@@ -453,6 +752,7 @@
       const closeRes = await fetch('/api/closing');
       const closeData = await closeRes.json();
       document.getElementById('closingReportBox').innerText = closeData.audit_summary || 'No data';
+      loadAllData();
     }
 
     // Auto-refresh every 30 seconds

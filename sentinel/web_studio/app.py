@@ -16,7 +16,7 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
     forensic_engine = None
     closing_auditor = None
     developer_projector = None
-    gemini_client = None
+    super_brain = None
 
     def log_message(self, format, *args):
         # Keep terminal clean; silence routine asset queries
@@ -57,6 +57,7 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
                 "unresolved_anomalies_count": len(anomalies),
                 "total_cached_events": len(events),
                 "telegram_configured": bool(self.config.telegram_bot_token and self.config.telegram_chat_id),
+                "gemini_active": bool(self.config.gemini_api_key),
                 "port": self.config.web_port
             })
         elif path == "/api/events":
@@ -106,6 +107,9 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
         elif path == "/api/proposals":
             suggestions = self.developer_projector.detect_ux_friction_patterns(self.db.get_recent_events(limit=50))
             self._serve_json(suggestions)
+        elif path == "/api/chat_history":
+            history = self.super_brain.conversation_history if self.super_brain else []
+            self._serve_json(history)
         else:
             self.send_response(404)
             self.end_headers()
@@ -127,30 +131,22 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
             result = self.developer_projector.scaffold_feature(feature_name)
             self._serve_json(result)
         elif path == "/api/ask":
-            query = payload.get("query", "")
-            # Process query via Gemini Flash or local fallback
-            ans = self._ask_ai(query)
-            self._serve_json({"answer": ans})
+            query = payload.get("query", "").strip()
+            if not query:
+                self._serve_json({"answer": "Please ask a question."})
+                return
+            if self.super_brain:
+                result = self.super_brain.ask(query)
+                self._serve_json(result)
+            else:
+                self._serve_json({"answer": "Super AI Brain initializing..."})
+        elif path == "/api/clear_chat":
+            if self.super_brain:
+                self.super_brain.conversation_history = []
+            self._serve_json({"status": "cleared"})
         else:
             self.send_response(404)
             self.end_headers()
-
-    def _ask_ai(self, query: str) -> str:
-        q_lower = query.lower()
-        if "close" in q_lower or "revenue" in q_lower or "p&l" in q_lower or "shift" in q_lower:
-            audit = self.closing_auditor.compile_shift_audit("day_shift")
-            return audit.get("audit_summary", "Audit compiled successfully.")
-        elif "anomaly" in q_lower or "theft" in q_lower or "discrepancy" in q_lower:
-            anomalies = self.db.get_unresolved_anomalies()
-            if not anomalies:
-                return "✅ No active forensic discrepancies detected. Station operations are running with 100% integrity."
-            lines = [f"⚠️ {len(anomalies)} Active Forensic Discrepancies:"]
-            for a in anomalies:
-                lines.append(f"• [{a['severity']}] {a['actor_name']}: {a['description']}")
-            return "\n".join(lines)
-        elif "yield" in q_lower or "soap" in q_lower or "chemical" in q_lower or "shampoo" in q_lower:
-            return "🧪 5L Snow Foam Standard: 40 EVU (~125 ml/car, 25-55 tolerance). Perfume: 100 sprays/500ml."
-        return f"Sentinel AI grounded in BISHE_OPERATIONS_MANUAL.md received: '{query}'. System is operating normally on localhost:8088."
 
     def _serve_json(self, data, status=200):
         content = json.dumps(data).encode("utf-8")
@@ -161,12 +157,13 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
-def start_sentinel_web_studio(config, db, forensic, closing, projector, port=8088):
+def start_sentinel_web_studio(config, db, forensic, closing, projector, super_brain, port=8088):
     SentinelWebHandler.config = config
     SentinelWebHandler.db = db
     SentinelWebHandler.forensic_engine = forensic
     SentinelWebHandler.closing_auditor = closing
     SentinelWebHandler.developer_projector = projector
+    SentinelWebHandler.super_brain = super_brain
 
     server_address = ("127.0.0.1", port)
     try:

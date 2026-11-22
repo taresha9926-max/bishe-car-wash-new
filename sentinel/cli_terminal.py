@@ -30,7 +30,7 @@ def render_banner(port=8088):
 └────────────────────────────────────────────────────────────────────────┘{CLR_RESET}
 """)
 
-def run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, notifier):
+def run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, notifier, super_brain=None):
     while True:
         render_banner(config.web_port)
         choice = input(f"{CLR_BOLD}Sentinel> {CLR_RESET}").strip()
@@ -60,19 +60,11 @@ def run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, 
 
         elif choice == "3":
             print(f"\n{CLR_GREEN}--- Consumables Yield & Chemical Benchmarks ---{CLR_RESET}")
-            events = db.get_recent_events(limit=100)
-            total_evu = 0.0
-            cars = 0
-            for e in events:
-                if e.get("table_name") == "wash_bookings":
-                    cars += 1
-                    total_evu += 1.2 # average EVU
-            shampoo_l = (total_evu * 125.0) / 1000.0
-            perfume_ml = total_evu * 5.0
-            print(f"• Total Workload: {total_evu:.1f} EVU ({cars} vehicles registered)")
-            print(f"• 5L Snow Foam (CS-009): {shampoo_l:.2f} Liters dispensed (~{shampoo_l/5.0:.1f} canisters @ 125 ml/EVU)")
-            print(f"• 500ml Interior Perfume (CS-006): {perfume_ml:.0f} ml dispensed (~100 sprays/canister)")
-            print(f"• Status: Empty-for-Full protocol active. Storekeeper requires physical canister return.")
+            if super_brain:
+                ans = super_brain.ask("Show chemical consumables and yield audit")
+                print(ans.get("answer", ""))
+            else:
+                print("Yield engine loading...")
             input("\nPress Enter to return to menu...")
 
         elif choice == "4":
@@ -82,19 +74,23 @@ def run_cli_loop(config, db, ingestion, forensic, closing, projector, telegram, 
             print(f"• Supabase Cloud URL: {config.supabase_url}")
             print(f"• Web Studio URL: http://127.0.0.1:{config.web_port}")
             print(f"• Local Cold Storage: {db.db_path}")
+            print(f"• Gemini Flash AI: {'CONFIGURED & ACTIVE' if config.gemini_api_key else 'OFFLINE (Local math fallback active)'}")
             print(f"• Telegram Alerts: {'CONFIGURED' if telegram.is_configured() else 'NOT CONFIGURED (Add token in config.json)'}")
             input("\nPress Enter to return to menu...")
 
         elif choice == "5":
-            q = input(f"\n{CLR_CYAN}Ask Sentinel AI (or Enter to cancel): {CLR_RESET}").strip()
-            if q:
-                print(f"{CLR_YELLOW}Thinking...{CLR_RESET}")
-                if "closing" in q.lower() or "p&l" in q.lower() or "revenue" in q.lower():
-                    audit = closing.compile_shift_audit("day_shift")
-                    print(audit.get("audit_summary", ""))
+            print(f"\n{CLR_CYAN}{CLR_BOLD}=== BISHE SUPER AI CHAT TERMINAL (EN / OM / AM) ==={CLR_RESET}")
+            print("Type your question (e.g. 'List of cars washed today', 'Washer commissions', 'P&L', 'Suggest features') or 'exit' to return:")
+            while True:
+                q = input(f"\n{CLR_YELLOW}Tare> {CLR_RESET}").strip()
+                if not q or q.lower() in ["exit", "quit", "q"]:
+                    break
+                print(f"{CLR_CYAN}Sentinel is thinking...{CLR_RESET}\n")
+                if super_brain:
+                    res = super_brain.ask(q)
+                    print(f"{CLR_BOLD}Sentinel [{res.get('source','ai')}]:{CLR_RESET}\n{res.get('answer','')}\n")
                 else:
-                    print(f"Sentinel: Analyzing station database for '{q}'. System is operating normally.")
-                input("\nPress Enter to return to menu...")
+                    print("Brain engine initializing...")
 
         elif choice == "6":
             feat = input(f"\n{CLR_YELLOW}Enter Feature Slug to Scaffold (e.g. quick-walkin, loyalty-punchcard): {CLR_RESET}").strip()
