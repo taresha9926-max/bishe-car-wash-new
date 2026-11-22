@@ -6,6 +6,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/print_export_helper.dart';
+import '../../../../core/utils/receipt_image_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
@@ -2334,54 +2335,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   }
 
   void _viewImageDialog(BuildContext context, String title, String imageUrl) {
-    Widget imageWidget;
-    try {
-      if (imageUrl.startsWith('data:image')) {
-        final commaIdx = imageUrl.indexOf(',');
-        final base64Data = commaIdx != -1 ? imageUrl.substring(commaIdx + 1) : imageUrl;
-        final bytes = base64Decode(base64Data);
-        imageWidget = Image.memory(
-          bytes,
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('Unable to preview image data.', style: TextStyle(color: AppColors.textMuted)),
-            ),
-          ),
-        );
-      } else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-        imageWidget = Image.network(
-          imageUrl,
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('Unable to load receipt image from web.', style: TextStyle(color: AppColors.textMuted)),
-            ),
-          ),
-        );
-      } else {
-        final bytes = base64Decode(imageUrl);
-        imageWidget = Image.memory(
-          bytes,
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('Unable to preview image data.', style: TextStyle(color: AppColors.textMuted)),
-            ),
-          ),
-        );
-      }
-    } catch (_) {
-      imageWidget = const Center(
+    final imageWidget = ReceiptImageHelper.buildImage(
+      imageUrl,
+      fit: BoxFit.contain,
+      fallback: const Center(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: Text('Invalid or corrupted image format.', style: TextStyle(color: AppColors.textMuted)),
+          child: Text('Unable to preview image data.', style: TextStyle(color: AppColors.textMuted)),
         ),
-      );
-    }
+      ),
+    );
 
     showDialog(
       context: context,

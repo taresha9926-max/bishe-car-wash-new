@@ -1355,6 +1355,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                 width: 42,
                                 height: 42,
                                 fit: BoxFit.cover,
+                                bookingContext: b,
                                 fallback: Icon(b.payment.method.icon, color: b.payment.method.color, size: 19),
                               )
                             : Icon(b.payment.method.icon, color: b.payment.method.color, size: 19),
@@ -1416,7 +1417,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     final imageWidget = ReceiptImageHelper.buildImage(
       screenshot,
       fit: BoxFit.contain,
-      fallback: Center(child: Text(state.tr('noReceipt'), style: const TextStyle(color: AppColors.textMuted))),
+      bookingContext: booking,
+      fallback: Center(child: Text(state.tr('noReceiptImageAvailable'), style: const TextStyle(color: AppColors.textMuted))),
     );
 
     final isMobile = MediaQuery.sizeOf(context).width < 600;

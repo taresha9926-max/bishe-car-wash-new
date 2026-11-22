@@ -1808,6 +1808,21 @@ class AppStrings {
       AppLanguage.om: 'Nagahee Hin Qabu',
       AppLanguage.am: 'ደረሰኝ የለም',
     },
+    'noReceiptImageAvailable': {
+      AppLanguage.en: 'No Receipt Image Available',
+      AppLanguage.om: 'Suurri Nagahee Hin Jiru',
+      AppLanguage.am: 'የደረሰኝ ምስል አይገኝም',
+    },
+    'openWebReceipt': {
+      AppLanguage.en: 'Open Web Receipt',
+      AppLanguage.om: 'Nagahee Weebii Bani',
+      AppLanguage.am: 'የድር ደረሰኝ ክፈት',
+    },
+    'verifiedDigitalReceipt': {
+      AppLanguage.en: 'Verified Digital Receipt Proof',
+      AppLanguage.om: 'Mirkaneessa Nagahee Dijitaalaa',
+      AppLanguage.am: 'የተረጋገጠ የዲጂታል ደረሰኝ ማረጋገጫ',
+    },
     'print': {
       AppLanguage.en: 'Print',
       AppLanguage.om: 'Maxxansi',

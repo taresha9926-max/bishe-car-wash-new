@@ -549,6 +549,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                               width: 44,
                               height: 44,
                               fit: BoxFit.cover,
+                              bookingContext: b,
                               fallback: Icon(b.payment.method.icon, color: b.payment.method.color, size: 20),
                             )
                           : Icon(b.payment.method.icon, color: b.payment.method.color, size: 20),
@@ -1015,6 +1016,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
     final imageWidget = ReceiptImageHelper.buildImage(
       booking.payment.receiptScreenshot,
       fit: BoxFit.contain,
+      bookingContext: booking,
       fallback: Center(
         child: Text(state.tr('noReceiptImageAvailable'), style: const TextStyle(color: Colors.white70)),
       ),
