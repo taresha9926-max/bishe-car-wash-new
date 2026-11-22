@@ -2969,6 +2969,53 @@ class AppStateNotifier extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> deleteBankIncomingTransaction(String id) async {
+    _bankIncomingTransactions.removeWhere((tx) => tx.id == id);
+    notifyListeners();
+    await _repository.deleteBankIncomingTransaction(id);
+    await fetchBankIncomingTransactions();
+  }
+
+  Future<void> clearAllBankIncomingTransactions() async {
+    _bankIncomingTransactions.clear();
+    notifyListeners();
+    await _repository.clearAllBankIncomingTransactions();
+    await fetchBankIncomingTransactions();
+  }
+
+  Future<void> deleteStationReceipt(String bookingId) async {
+    final idx = _bookings.indexWhere((b) => b.id == bookingId);
+    if (idx != -1) {
+      final b = _bookings[idx];
+      _bookings[idx] = b.copyWith(
+        payment: b.payment.copyWith(
+          receiptScreenshot: null,
+          verificationStatus: 'unverified',
+        ),
+      );
+      notifyListeners();
+    }
+    await _repository.deleteStationReceipt(bookingId);
+    await _refreshBookingsAndBays();
+  }
+
+  Future<void> clearAllStationReceipts() async {
+    for (int i = 0; i < _bookings.length; i++) {
+      final b = _bookings[i];
+      if (b.payment.receiptScreenshot != null) {
+        _bookings[i] = b.copyWith(
+          payment: b.payment.copyWith(
+            receiptScreenshot: null,
+            verificationStatus: 'unverified',
+          ),
+        );
+      }
+    }
+    notifyListeners();
+    await _repository.clearAllStationReceipts();
+    await _refreshBookingsAndBays();
+  }
+
   Future<void> setSentinelSecurityMode(String mode) async {
     _sentinelConfig = SentinelConfig(
       status: _sentinelConfig.status,

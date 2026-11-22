@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/service_type.dart';
@@ -192,7 +193,79 @@ class _StationQueueTabState extends State<StationQueueTab> {
             _buildFilterChip(QueueStageFilter.payReady, '${state.tr("cashierFilterPayReady")} ($payReadyCount)', isCarpet),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
+
+        // Queue Print & Export Actions Strip
+        Wrap(
+          alignment: WrapAlignment.end,
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            TextButton.icon(
+              icon: const Icon(Icons.print_rounded, size: 15, color: AppColors.primary),
+              label: Text(state.tr('print'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.primary)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed: filtered.isEmpty
+                  ? null
+                  : () {
+                      PrintExportHelper.printTableReport(
+                        title: isCarpet ? 'Carpet Detailing Service Queue' : 'Vehicle Wash Service Queue',
+                        subtitle: 'Station Queue • ${filtered.length} Orders Listed',
+                        headers: ['Plate / Tag', 'Customer', 'Phone', 'Service', 'Bay', 'Washer', 'Status', 'Price (ETB)'],
+                        rows: filtered.map((b) => [
+                          b.licensePlate,
+                          b.customerName,
+                          b.customerPhone,
+                          b.isCarpet ? 'Carpet' : b.package.name,
+                          b.assignedBay?.displayName ?? '-',
+                          b.assignedWasherName ?? '-',
+                          b.status.localizedName(state.currentLanguage),
+                          b.totalPrice.toStringAsFixed(2),
+                        ]).toList(),
+                      );
+                    },
+            ),
+            const SizedBox(width: 8),
+            TextButton.icon(
+              icon: const Icon(Icons.download_rounded, size: 15, color: Color(0xFF38BDF8)),
+              label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8))),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed: filtered.isEmpty
+                  ? null
+                  : () {
+                      PrintExportHelper.exportCsv(
+                        fileName: 'bishe_queue_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                        headers: ['Booking ID', 'Plate', 'Customer', 'Phone', 'Service', 'Car Type', 'Bay', 'Washer', 'Status', 'Price (ETB)', 'Paid'],
+                        rows: filtered.map((b) => [
+                          b.id,
+                          b.licensePlate,
+                          b.customerName,
+                          b.customerPhone,
+                          b.isCarpet ? 'Carpet' : b.package.name,
+                          b.carType.name,
+                          b.assignedBay?.displayName ?? '',
+                          b.assignedWasherName ?? '',
+                          b.status.name,
+                          b.totalPrice,
+                          b.payment.isPaid ? 'YES' : 'NO',
+                        ]).toList(),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Queue exported to CSV'), duration: Duration(seconds: 2)),
+                      );
+                    },
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
         TextField(
           controller: _searchController,
           decoration: InputDecoration(
@@ -533,6 +606,40 @@ class _StationQueueTabState extends State<StationQueueTab> {
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFFD97706)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                  ),
+                ),
+              if (b.payment.isPaid || b.status == WashStatus.completed)
+                OutlinedButton.icon(
+                  onPressed: () {
+                    final safeId = b.id.length >= 8 ? b.id.substring(0, 8).toUpperCase() : b.id.toUpperCase();
+                    PrintExportHelper.printReceipt(
+                      receiptNo: safeId,
+                      customerName: b.customerName,
+                      customerPhone: b.customerPhone,
+                      licensePlate: b.licensePlate,
+                      serviceName: b.isCarpet ? 'Carpet Detailing' : b.localizedServiceDisplayName(langCode),
+                      carType: b.carType.localizedName(langCode),
+                      servicePrice: b.payment.amount > 0 ? b.payment.amount : b.totalPrice,
+                      vatAmount: b.isCarpet ? 0.0 : (b.totalPrice * 0.15),
+                      tipAmount: b.payment.tipAmount,
+                      totalAmount: (b.payment.amount > 0 ? b.payment.amount : b.totalPrice) + b.payment.tipAmount,
+                      paymentMethod: b.payment.method.name.toUpperCase(),
+                      transactionRef: b.payment.transactionRef,
+                      cashierName: b.assignedWasherName ?? (widget.isManager ? 'Operational Manager' : 'Station Cashier'),
+                      timestamp: b.createdAt,
+                    );
+                  },
+                  icon: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
+                  label: Text(
+                    state.tr('printReceipt'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.primary),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,

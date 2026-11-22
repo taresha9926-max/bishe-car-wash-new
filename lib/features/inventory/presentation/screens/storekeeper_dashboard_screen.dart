@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
+import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
@@ -145,6 +147,82 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Action Bar: Print & Export
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  '${exchanges.length} Container Swaps • ${handovers.length} Handovers',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
+                      label: Text(state.tr('printReport'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: AppColors.primary, width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        PrintExportHelper.printTableReport(
+                          title: 'Empty Return & Refill (ዕቃ በዕቃ) Ledger',
+                          subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
+                          headers: ['Date', 'Item / Chemical', 'Quantity', 'Unit', 'Team Leader', 'Cost (ETB)', 'Notes'],
+                          rows: exchanges.map((ex) => [
+                            DateFormatter.formatDate(ex.date),
+                            ex.itemName,
+                            ex.quantity,
+                            ex.unit,
+                            ex.supplier,
+                            CurrencyFormatter.format(ex.totalCostEtb),
+                            ex.notes ?? '-',
+                          ]).toList(),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        PrintExportHelper.exportCsv(
+                          fileName: 'bishe_chemical_refills_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                          headers: ['ID', 'Date', 'Item Name', 'Quantity', 'Unit', 'Team Leader', 'Unit Cost (ETB)', 'Total Cost (ETB)', 'Notes'],
+                          rows: exchanges.map((ex) => [
+                            ex.id,
+                            DateFormatter.formatDate(ex.date),
+                            ex.itemName,
+                            ex.quantity,
+                            ex.unit,
+                            ex.supplier,
+                            ex.unitCostEtb,
+                            ex.totalCostEtb,
+                            ex.notes ?? '',
+                          ]).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
           // 0. Chemical Consumption vs Cashier Vehicle Wash Count Reconciliation
           ExpandableActionCard(
             icon: AutoCareAssets.buildPhotoThumbnail(
@@ -849,7 +927,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             color: const Color(0xFF111827),
             border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
           ),
-          child: Row(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -879,17 +961,75 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     ),
                 ],
               ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () => _showAddConsumableDialog(context, state),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Consumable', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
+                    label: Text(state.tr('print'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      side: const BorderSide(color: AppColors.primary, width: 1.1),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      PrintExportHelper.printTableReport(
+                        title: 'Consumables Stockroom Inventory (አላቂ እቃዎች)',
+                        subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
+                        headers: ['Item Name', 'Category', 'Current Stock', 'Unit', 'Reorder Min', 'Unit Cost (ETB)', 'Status'],
+                        rows: consumables.map((c) => [
+                          c.name,
+                          c.category,
+                          c.currentStock.toStringAsFixed(1),
+                          c.unit,
+                          c.minThreshold.toStringAsFixed(1),
+                          CurrencyFormatter.format(c.unitCostEtb),
+                          c.isDecommissioned ? 'Decommissioned' : (c.isLowStock ? 'LOW STOCK' : 'Healthy'),
+                        ]).toList(),
+                      );
+                    },
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                    label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      PrintExportHelper.exportCsv(
+                        fileName: 'bishe_consumables_inventory_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                        headers: ['ID', 'Item Name', 'Name (Amharic)', 'Category', 'Stock Level', 'Unit', 'Min Threshold', 'Unit Cost (ETB)', 'Decommissioned', 'Low Stock'],
+                        rows: consumables.map((c) => [
+                          c.id,
+                          c.name,
+                          c.nameAmharic,
+                          c.category,
+                          c.currentStock,
+                          c.unit,
+                          c.minThreshold,
+                          c.unitCostEtb,
+                          c.isDecommissioned ? 'Yes' : 'No',
+                          c.isLowStock ? 'Yes' : 'No',
+                        ]).toList(),
+                      );
+                    },
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showAddConsumableDialog(context, state),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text('Add Consumable', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1112,23 +1252,83 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             color: const Color(0xFF111827),
             border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
           ),
-          child: Row(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 '${assets.length} Fixed Assets',
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () => _showAddFixedAssetDialog(context, state),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Fixed Asset', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
+                    label: Text(state.tr('print'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      side: const BorderSide(color: AppColors.primary, width: 1.1),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      PrintExportHelper.printTableReport(
+                        title: 'Fixed Assets & Machinery Register (ቋሚ እቃዎች)',
+                        subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
+                        headers: ['Asset ID', 'Name', 'Category', 'Serial No', 'Location', 'Condition', 'Notes'],
+                        rows: filtered.map((a) => [
+                          a.id,
+                          a.name,
+                          a.category,
+                          a.serialNumber,
+                          a.assignedLocation,
+                          a.condition.displayName,
+                          a.notes,
+                        ]).toList(),
+                      );
+                    },
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                    label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      PrintExportHelper.exportCsv(
+                        fileName: 'bishe_fixed_assets_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                        headers: ['Asset ID', 'Name', 'Name (Amharic)', 'Category', 'Serial Number', 'Location', 'Condition', 'Notes'],
+                        rows: filtered.map((a) => [
+                          a.id,
+                          a.name,
+                          a.nameAmharic,
+                          a.category,
+                          a.serialNumber,
+                          a.assignedLocation,
+                          a.condition.displayName,
+                          a.notes,
+                        ]).toList(),
+                      );
+                    },
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showAddFixedAssetDialog(context, state),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text('Add Fixed Asset', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                  ),
+                ],
               ),
             ],
           ),

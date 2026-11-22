@@ -1808,6 +1808,91 @@ class AppStrings {
       AppLanguage.om: 'Nagahee Hin Qabu',
       AppLanguage.am: 'ደረሰኝ የለም',
     },
+    'print': {
+      AppLanguage.en: 'Print',
+      AppLanguage.om: 'Maxxansi',
+      AppLanguage.am: 'አትም',
+    },
+    'export': {
+      AppLanguage.en: 'Export',
+      AppLanguage.om: 'Gadhisiisi',
+      AppLanguage.am: 'ላክ (Export)',
+    },
+    'exportCsv': {
+      AppLanguage.en: 'Export CSV',
+      AppLanguage.om: 'CSV Gadhisiisi',
+      AppLanguage.am: 'CSV ላክ',
+    },
+    'printReceipt': {
+      AppLanguage.en: 'Print Receipt',
+      AppLanguage.om: 'Nagahee Maxxansi',
+      AppLanguage.am: 'ደረሰኝ አትም',
+    },
+    'printReport': {
+      AppLanguage.en: 'Print Report',
+      AppLanguage.om: 'Gabaasa Maxxansi',
+      AppLanguage.am: 'ሪፖርት አትም',
+    },
+    'printStatement': {
+      AppLanguage.en: 'Print Statement',
+      AppLanguage.om: 'Ibsa Maxxansi',
+      AppLanguage.am: 'መግለጫ አትም',
+    },
+    'exportStatement': {
+      AppLanguage.en: 'Export Statement',
+      AppLanguage.om: 'Ibsa Gadhisiisi',
+      AppLanguage.am: 'መግለጫ ላክ',
+    },
+    'printPayroll': {
+      AppLanguage.en: 'Print Payroll',
+      AppLanguage.om: 'Mindaa Maxxansi',
+      AppLanguage.am: 'ደመወዝ አትም',
+    },
+    'exportPayroll': {
+      AppLanguage.en: 'Export Payroll',
+      AppLanguage.om: 'Mindaa Gadhisiisi',
+      AppLanguage.am: 'ደመወዝ ላክ',
+    },
+    'deleteItem': {
+      AppLanguage.en: 'Delete',
+      AppLanguage.om: 'Haqi',
+      AppLanguage.am: 'ሰርዝ',
+    },
+    'clearAll': {
+      AppLanguage.en: 'Clear All',
+      AppLanguage.om: 'Hunda Haqi',
+      AppLanguage.am: 'ሁሉንም አጽዳ',
+    },
+    'confirmClearAll': {
+      AppLanguage.en: 'Confirm Clear All',
+      AppLanguage.om: 'Hunda Haqamuu Mirkaneessi',
+      AppLanguage.am: 'ሁሉንም ማጽዳት አረጋግጥ',
+    },
+    'deleteSmsConfirm': {
+      AppLanguage.en: 'Are you sure you want to delete this bank SMS?',
+      AppLanguage.om: 'SMS baankii kana haquu barbaaddaa?',
+      AppLanguage.am: 'ይህን የባንክ SMS መሰረዝ እርግጠኛ ኖት?',
+    },
+    'clearAllSmsConfirm': {
+      AppLanguage.en: 'Are you sure you want to clear all incoming bank SMS records?',
+      AppLanguage.om: 'Galmee SMS baankii hunda haquu mirkaneessaa?',
+      AppLanguage.am: 'ሁሉንም የገቢ ባንክ SMS መዝገቦች ማጽዳት እርግጠኛ ኖት?',
+    },
+    'clearAllReceiptsConfirm': {
+      AppLanguage.en: 'Are you sure you want to clear all station receipts?',
+      AppLanguage.om: 'Nagahee buufataa hunda haquu mirkaneessaa?',
+      AppLanguage.am: 'ሁሉንም የጣቢያ ደረሰኞች ማጽዳት እርግጠኛ ኖት?',
+    },
+    'receiptTitle': {
+      AppLanguage.en: 'Customer Receipt',
+      AppLanguage.om: 'Nagahee Maamilaa',
+      AppLanguage.am: 'የደንበኛ ደረሰኝ',
+    },
+    'deleteReceiptConfirm': {
+      AppLanguage.en: 'Are you sure you want to delete this station receipt?',
+      AppLanguage.om: 'Nagahee buufataa kana haquu barbaaddaa?',
+      AppLanguage.am: 'ይህን የጣቢያ ደረሰኝ መሰረዝ እርግጠኛ ኖት?',
+    },
     'pricingManagementTitle': {
       AppLanguage.en: 'Service Pricing & Master Inventory',
       AppLanguage.om: 'Gatii Tajaajilaa fi Qabeenyaa Waliigalaa',

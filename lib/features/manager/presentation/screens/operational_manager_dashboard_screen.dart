@@ -1,6 +1,8 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/closing_sync_warning_banner.dart';
 import '../../../../core/widgets/custom_button.dart';
@@ -11,6 +13,7 @@ import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
+import '../../../cashier/domain/models/shower_record.dart';
 import '../../../cashier/presentation/screens/daily_closing_dialog.dart';
 import '../../../cashier/presentation/widgets/station_money_tab.dart';
 import '../../../cashier/presentation/widgets/station_queue_tab.dart';
@@ -247,35 +250,96 @@ class _OperationalManagerDashboardScreenState
               gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.shower_rounded, color: Colors.white, size: 24),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        state.tr('stationShowerService'),
-                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white),
+                Row(
+                  children: [
+                    const Icon(Icons.shower_rounded, color: Colors.white, size: 24),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            state.tr('stationShowerService'),
+                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white),
+                          ),
+                          Text(
+                            '${showerPrice.toStringAsFixed(0)} ETB ${state.tr("perPerson")} • ${state.tr("showerCommissionNotice")}',
+                            style: const TextStyle(fontSize: 11, color: Colors.white70),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${showerPrice.toStringAsFixed(0)} ETB ${state.tr("perPerson")} • ${state.tr("showerCommissionNotice")}',
-                        style: const TextStyle(fontSize: 11, color: Colors.white70),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${state.todayShowerUserCount} ${state.tr("showerUsers")}',
-                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Colors.white),
-                  ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${state.todayShowerUserCount} ${state.tr("showerUsers")}',
+                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Colors.white),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.print_rounded, size: 16, color: Colors.white),
+                      tooltip: state.tr('printReport'),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(5),
+                      onPressed: state.showerRecords.isEmpty
+                          ? null
+                          : () {
+                              PrintExportHelper.printTableReport(
+                                title: 'Station Shower Service Admissions',
+                                subtitle: 'BISHE Car Wash Station',
+                                headers: ['ID', 'Persons', 'Method', 'Total (ETB)', 'Cashier', 'Time'],
+                                rows: (state.showerRecords as List<ShowerRecord>).map((s) => [
+                                  s.id.substring(0, math.min(8, s.id.length)),
+                                  s.userCount,
+                                  s.paymentMethod.name.toUpperCase(),
+                                  s.totalAmount.toStringAsFixed(2),
+                                  s.recordedBy,
+                                  s.recordedAt.toLocal().toString().split('.')[0],
+                                ]).toList(),
+                              );
+                            },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.download_rounded, size: 16, color: Colors.white),
+                      tooltip: state.tr('exportCsv'),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(5),
+                      onPressed: state.showerRecords.isEmpty
+                          ? null
+                          : () {
+                              PrintExportHelper.exportCsv(
+                                fileName: 'bishe_shower_log_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                                headers: ['ID', 'Persons', 'Method', 'Total (ETB)', 'Cashier', 'Time'],
+                                rows: (state.showerRecords as List<ShowerRecord>).map((s) => [
+                                  s.id,
+                                  s.userCount,
+                                  s.paymentMethod.name,
+                                  s.totalAmount,
+                                  s.recordedBy,
+                                  s.recordedAt.toIso8601String(),
+                                ]).toList(),
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Shower log exported to CSV'), duration: Duration(seconds: 2)),
+                              );
+                            },
+                    ),
+                  ],
                 ),
               ],
             ),

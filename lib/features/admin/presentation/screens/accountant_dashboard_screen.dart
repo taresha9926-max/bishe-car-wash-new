@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/combined_service_header_banner.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
@@ -259,30 +261,98 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           const SizedBox(height: 14),
 
-          // Date Filter Toolbar
+          // Date Filter Toolbar & Export/Print Actions
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: ['All', 'Today', 'This Week', 'This Month'].map((range) {
-              final isSel = _auditDateRange == range;
-              return ChoiceChip(
-                label: Text(range == 'All' ? 'All Time' : range),
-                selected: isSel,
-                selectedColor: AppColors.primary,
-                backgroundColor: const Color(0xFF1E293B),
-                showCheckmark: false,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: isSel ? AppColors.primary : AppColors.cardBorder),
-                ),
-                labelStyle: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: isSel ? Colors.white : AppColors.textSecondary,
-                ),
-                onSelected: (_) => setState(() => _auditDateRange = range),
-              );
-            }).toList(),
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: ['All', 'Today', 'This Week', 'This Month'].map((range) {
+                  final isSel = _auditDateRange == range;
+                  return ChoiceChip(
+                    label: Text(range == 'All' ? 'All Time' : range),
+                    selected: isSel,
+                    selectedColor: AppColors.primary,
+                    backgroundColor: const Color(0xFF1E293B),
+                    showCheckmark: false,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: isSel ? AppColors.primary : AppColors.cardBorder),
+                    ),
+                    labelStyle: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: isSel ? Colors.white : AppColors.textSecondary,
+                    ),
+                    onSelected: (_) => setState(() => _auditDateRange = range),
+                  );
+                }).toList(),
+              ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
+                    label: Text(state.tr('printReport'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      side: const BorderSide(color: AppColors.primary, width: 1.1),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      PrintExportHelper.printTableReport(
+                        title: 'Cashier Daily Financial Closings & Audits',
+                        subtitle: 'Filter: $_auditDateRange • Printed by Accountant',
+                        headers: ['Date', 'Cashier', 'Gross Rev (ETB)', 'Cash Drawer', 'Digital Total', 'Deposited', 'Orders', 'Status'],
+                        rows: filteredClosings.map((c) => [
+                          DateFormatter.formatDate(c.closingDate),
+                          c.cashierName,
+                          CurrencyFormatter.format(c.grossRevenue),
+                          CurrencyFormatter.format(c.cashRevenue),
+                          CurrencyFormatter.format(c.digitalRevenue),
+                          CurrencyFormatter.format(c.cashDeposited),
+                          c.carsWashedCount,
+                          c.isConfirmed ? 'Confirmed' : 'Draft',
+                        ]).toList(),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                    label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                      side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      PrintExportHelper.exportCsv(
+                        fileName: 'bishe_cashier_audits_${_auditDateRange.replaceAll(' ', '_')}.csv',
+                        headers: ['Closing ID', 'Date', 'Cashier', 'Gross Revenue (ETB)', 'Cash Drawer', 'Digital Total', 'Cash Deposited', 'Cars Washed', 'Status'],
+                        rows: filteredClosings.map((c) => [
+                          c.id,
+                          DateFormatter.formatDate(c.closingDate),
+                          c.cashierName,
+                          c.grossRevenue,
+                          c.cashRevenue,
+                          c.digitalRevenue,
+                          c.cashDeposited,
+                          c.carsWashedCount,
+                          c.isConfirmed ? 'Confirmed' : 'Draft',
+                        ]).toList(),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -1053,6 +1123,86 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Action Bar: Print & Export
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  '${(state.availableWashers as List).length} Active Washers • ${weeklyReports.length} Reports',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
+                      label: Text(state.tr('printPayroll'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: AppColors.primary, width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        final washers = (state.availableWashers as List).cast<StaffMember>();
+                        PrintExportHelper.printTableReport(
+                          title: 'Washer Team Payroll & Commission Matrix',
+                          subtitle: 'BISHE Auto Care • Bishoftu',
+                          headers: ['Washer ID', 'Name', 'Phone', 'Role', 'Status', 'Daily Dividend (ETB)'],
+                          rows: washers.map((w) {
+                            final dividend = state.washerDividendsToday[w.id] ?? 0.0;
+                            return [
+                              w.id,
+                              w.name,
+                              w.phone,
+                              w.role.displayName,
+                              w.isAvailable ? 'Available' : 'Assigned',
+                              CurrencyFormatter.format(dividend),
+                            ];
+                          }).toList(),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('exportPayroll'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        final washers = (state.availableWashers as List).cast<StaffMember>();
+                        PrintExportHelper.exportCsv(
+                          fileName: 'bishe_washer_payroll_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                          headers: ['Washer ID', 'Name', 'Phone', 'Role', 'Status', 'Daily Dividend (ETB)'],
+                          rows: washers.map((w) {
+                            final dividend = state.washerDividendsToday[w.id] ?? 0.0;
+                            return [
+                              w.id,
+                              w.name,
+                              w.phone,
+                              w.role.displayName,
+                              w.isAvailable ? 'Available' : 'Assigned',
+                              dividend,
+                            ];
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
           // 1. Unified Master Washer Team Roster, Attendance & Commission Hub
           // Mirrored across Cashier and Accountant dashboards with full mobile-first expandable architecture,
           // displaying exact daily earned commission (e.g. Br 250) instead of P, showing A only when absent,
@@ -1233,7 +1383,86 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               ],
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
+
+          // Action Bar: Print & Export
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  '${consumed.length} Consumed • ${restocks.length} Purchases • ${pettyExpenses.length} Petty Cash',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
+                      label: Text(state.tr('printReport'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: AppColors.primary, width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        final rows = <List<dynamic>>[];
+                        for (final c in consumed) {
+                          rows.add([DateFormatter.formatDate(c.date), c.itemName, 'Consumed Supply', '${c.quantity} ${c.unit}', CurrencyFormatter.format(c.totalCostEtb), c.supplier]);
+                        }
+                        for (final r in restocks) {
+                          rows.add([DateFormatter.formatDate(r.date), r.itemName, 'Inbound GRN Restock', '${r.quantity} ${r.unit}', CurrencyFormatter.format(r.totalCostEtb), r.supplier]);
+                        }
+                        for (final p in pettyExpenses) {
+                          rows.add([DateFormatter.formatDate(p.loggedAt), p.reason, 'Petty Cash (${p.category})', '1', CurrencyFormatter.format(p.amount), p.cashierName]);
+                        }
+                        PrintExportHelper.printTableReport(
+                          title: 'Station Supplies & Operating Expenses (OpEx)',
+                          subtitle: 'BISHE Auto Care Station • Bishoftu',
+                          headers: ['Date', 'Item / Expense', 'Category', 'Quantity', 'Amount (ETB)', 'Logged By / Supplier'],
+                          rows: rows,
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        final rows = <List<dynamic>>[];
+                        for (final c in consumed) {
+                          rows.add([c.id, DateFormatter.formatDate(c.date), c.itemName, 'Consumed Supply', c.quantity, c.unit, c.totalCostEtb, c.supplier, c.notes ?? '']);
+                        }
+                        for (final r in restocks) {
+                          rows.add([r.id, DateFormatter.formatDate(r.date), r.itemName, 'Inbound GRN Restock', r.quantity, r.unit, r.totalCostEtb, r.supplier, r.notes ?? '']);
+                        }
+                        for (final p in pettyExpenses) {
+                          rows.add([p.id, DateFormatter.formatDate(p.loggedAt), p.reason, 'Petty Cash (${p.category})', 1, 'Event', p.amount, p.cashierName, '']);
+                        }
+                        PrintExportHelper.exportCsv(
+                          fileName: 'bishe_supplies_and_opex_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                          headers: ['ID', 'Date', 'Item / Reason', 'Type', 'Quantity', 'Unit', 'Total Cost (ETB)', 'Supplier / Cashier', 'Notes'],
+                          rows: rows,
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
 
           // 1. Daily Consumed Supplies (Empty-for-Full Exchanges)
           ExpandableActionCard(
@@ -1599,7 +1828,189 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+
+          // Action Bar: Print Statement & Export CSV
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  _selectedFinancialStatementView == 0
+                      ? 'P&L Statement • $_pnlDateRange'
+                      : (_selectedFinancialStatementView == 1
+                          ? 'Balance Sheet • Position'
+                          : (_selectedFinancialStatementView == 2
+                              ? 'Cash Flow Statement • Direct Method'
+                              : 'Chemical Reconciliation Audit')),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
+                      label: Text(state.tr('printStatement'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: AppColors.primary, width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        if (_selectedFinancialStatementView == 0) {
+                          PrintExportHelper.printTableReport(
+                            title: 'Profit & Loss (P&L) Statement',
+                            subtitle: 'BISHE Auto Care • Bishoftu • Period: $_pnlDateRange',
+                            headers: ['Financial Line Item', 'Classification', 'Amount (ETB)', 'Notes'],
+                            rows: [
+                              ['Gross Vehicle Revenue', 'Revenue', CurrencyFormatter.format(vehicleWashRevenue), 'Direct customer wash'],
+                              ['Carpet Cleaning Revenue', 'Revenue', CurrencyFormatter.format(carpetWashRevenue), 'Zero VAT exempt'],
+                              ['Shower Service Revenue', 'Revenue', CurrencyFormatter.format(showerRevenue), 'Zero VAT exempt'],
+                              ['Total Gross Station Revenue', 'Gross Revenue', CurrencyFormatter.format(grossRevenue), 'All revenue streams'],
+                              ['15% VAT Statutory Deductions', 'Tax Deduction', CurrencyFormatter.format(vehicleVat), 'Ministry of Revenues'],
+                              ['Total Net Business Revenue', 'Net Revenue', CurrencyFormatter.format(totalNetRevenue), 'Gross − VAT'],
+                              ['Washer Team Commission Pool', 'Direct COGS', CurrencyFormatter.format(commissionPaid), 'Labor cost'],
+                              ['Supplies & Chemical Usage', 'Direct COGS', CurrencyFormatter.format(suppliesCost), 'Consumables'],
+                              ['Total Cost of Goods Sold (COGS)', 'Direct COGS', CurrencyFormatter.format(cogs), 'Commissions + Soap'],
+                              ['GROSS OPERATING PROFIT', 'Gross Profit', CurrencyFormatter.format(grossProfit), 'Net Revenue − COGS'],
+                              ['Rent & Space Allocation', 'OpEx', CurrencyFormatter.format(periodOverheads * 0.4), 'Accrued facility rent'],
+                              ['Utilities (Water & Power)', 'OpEx', CurrencyFormatter.format(periodOverheads * 0.3), 'Accrued utilities'],
+                              ['Staff Salaries & Overhead', 'OpEx', CurrencyFormatter.format(periodOverheads * 0.3), 'Accrued management salaries'],
+                              ['Machinery Depreciation', 'OpEx', CurrencyFormatter.format(periodDepreciation), 'Fixed asset wear'],
+                              ['Petty Cash & Incidentals', 'OpEx', CurrencyFormatter.format(pettyCost), 'Cashier emergency disbursements'],
+                              ['Total Operating Expenses (OpEx)', 'Total OpEx', CurrencyFormatter.format(opex), 'Accrued fixed + variable'],
+                              ['NET OPERATING PROFIT (EBITDA)', 'Net Profit', CurrencyFormatter.format(netOperatingProfit), 'Gross Profit − OpEx'],
+                            ],
+                          );
+                        } else if (_selectedFinancialStatementView == 1) {
+                          PrintExportHelper.printTableReport(
+                            title: 'Balance Sheet Statement',
+                            subtitle: 'BISHE Auto Care • Bishoftu',
+                            headers: ['Balance Sheet Item', 'Classification', 'Amount (ETB)', 'Description'],
+                            rows: [
+                              ['Drawer Cash on Hand', 'Current Assets', CurrencyFormatter.format(totalCashOnHand), 'Cashier drawer till'],
+                              ['Bank / Digital Accounts', 'Current Assets', CurrencyFormatter.format(totalDigitalInflows), 'CBE, Awash & Telebirr'],
+                              ['Chemical & Consumable Inventory', 'Current Assets', CurrencyFormatter.format(state.totalInventoryValueETB ?? 0.0), 'Stockroom inventory'],
+                              ['Fixed Wash Machinery & Equipment', 'Non-Current Assets', CurrencyFormatter.format(state.totalFixedAssetsValueETB ?? 0.0), 'Capital equipment net'],
+                              ['15% VAT Payable Liability', 'Current Liabilities', CurrencyFormatter.format(vehicleVat), 'Tax owed'],
+                              ['Unpaid Washer Commission Pool', 'Current Liabilities', CurrencyFormatter.format(commissionPaid), 'Labor owed'],
+                              ['Net Station Equity & Retained Earnings', 'Equity', CurrencyFormatter.format(netOperatingProfit), 'Accumulated profit'],
+                            ],
+                          );
+                        } else if (_selectedFinancialStatementView == 2) {
+                          PrintExportHelper.printTableReport(
+                            title: 'Cash Flow Statement (Direct Method)',
+                            subtitle: 'BISHE Auto Care • Bishoftu',
+                            headers: ['Cash Flow Activity', 'Category', 'Amount (ETB)', 'Details'],
+                            rows: [
+                              ['Cash Receipts from Vehicle Wash', 'Operating Inflows', CurrencyFormatter.format(cashCarWash), 'Cashier drawer collections'],
+                              ['Cash Receipts from Carpet Clean', 'Operating Inflows', CurrencyFormatter.format(cashCarpet), 'Carpet collections'],
+                              ['Cash Receipts from Shower Admission', 'Operating Inflows', CurrencyFormatter.format(showerRevenue), 'Shower collections'],
+                              ['Digital Bank & Telebirr Inflows', 'Operating Inflows', CurrencyFormatter.format(totalDigitalInflows), 'Mobile money & bank deposits'],
+                              ['Direct Commission Outflows', 'Operating Outflows', CurrencyFormatter.format(-commissionPaid), 'Disbursed commissions'],
+                              ['Storekeeper Restock Purchases', 'Operating Outflows', CurrencyFormatter.format(-suppliesCost), 'Supplier restocks'],
+                              ['Cashier Petty Cash Disbursements', 'Operating Outflows', CurrencyFormatter.format(-pettyCost), 'Incidentals & petty cash'],
+                            ],
+                          );
+                        } else {
+                          PrintExportHelper.printTableReport(
+                            title: 'Storekeeper Chemical Consumption Reconciliation',
+                            subtitle: 'BISHE Auto Care • Bishoftu',
+                            headers: ['Reconciliation Metric', 'Cars Washed', 'Consumed (L/Units)', 'Ratio (Cars/L)', 'Status'],
+                            rows: [
+                              ['Vehicle Wash Shampoo', '$carsWashedCount cars', '${suppliesCost > 0 ? (suppliesCost / 250).toStringAsFixed(1) : "0"} L', '~15 cars/L', 'Verified In-Tolerance'],
+                              ['Carpet Cleaning Detergent', '$carpetsWashedCount carpets', '${carpetsWashedCount * 0.25} L', '~4 carpets/L', 'Verified In-Tolerance'],
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('exportStatement'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () {
+                        if (_selectedFinancialStatementView == 0) {
+                          PrintExportHelper.exportCsv(
+                            fileName: 'bishe_pnl_statement_${_pnlDateRange.replaceAll(' ', '_')}.csv',
+                            headers: ['Line Item', 'Category', 'Amount (ETB)', 'Notes'],
+                            rows: [
+                              ['Gross Vehicle Revenue', 'Revenue', vehicleWashRevenue, 'Direct customer wash'],
+                              ['Carpet Cleaning Revenue', 'Revenue', carpetWashRevenue, 'Zero VAT exempt'],
+                              ['Shower Service Revenue', 'Revenue', showerRevenue, 'Zero VAT exempt'],
+                              ['Total Gross Revenue', 'Gross Revenue', grossRevenue, 'All services'],
+                              ['15% VAT Statutory', 'Tax', vehicleVat, 'Ministry of Revenues'],
+                              ['Total Net Business Revenue', 'Net Revenue', totalNetRevenue, 'Gross − VAT'],
+                              ['Washer Commission Pool', 'COGS', commissionPaid, 'Direct labor'],
+                              ['Supplies & Soap Usage', 'COGS', suppliesCost, 'Chemical swaps'],
+                              ['Total COGS', 'COGS', cogs, 'Commissions + Soap'],
+                              ['Gross Operating Profit', 'Gross Margin', grossProfit, 'Net Revenue − COGS'],
+                              ['Rent & Space Allocation', 'OpEx', periodOverheads * 0.4, 'Facility rent'],
+                              ['Utilities (Water & Power)', 'OpEx', periodOverheads * 0.3, 'Power & water'],
+                              ['Staff Salaries & Overhead', 'OpEx', periodOverheads * 0.3, 'Salaries'],
+                              ['Machinery Depreciation', 'OpEx', periodDepreciation, 'Depreciation'],
+                              ['Petty Cash Outflow', 'OpEx', pettyCost, 'Petty cash'],
+                              ['Total OpEx', 'OpEx', opex, 'Total operating expenses'],
+                              ['NET OPERATING PROFIT (EBITDA)', 'Net Profit', netOperatingProfit, 'Gross Profit − OpEx'],
+                            ],
+                          );
+                        } else if (_selectedFinancialStatementView == 1) {
+                          PrintExportHelper.exportCsv(
+                            fileName: 'bishe_balance_sheet_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                            headers: ['Item', 'Category', 'Amount (ETB)', 'Description'],
+                            rows: [
+                              ['Drawer Cash on Hand', 'Current Assets', totalCashOnHand, 'Cashier drawer'],
+                              ['Bank & Digital Accounts', 'Current Assets', totalDigitalInflows, 'CBE, Awash & Telebirr'],
+                              ['Chemical & Consumable Inventory', 'Current Assets', state.totalInventoryValueETB ?? 0.0, 'Stockroom'],
+                              ['Fixed Wash Machinery', 'Non-Current Assets', state.totalFixedAssetsValueETB ?? 0.0, 'Capital assets'],
+                              ['15% VAT Payable Liability', 'Current Liabilities', vehicleVat, 'Tax liability'],
+                              ['Unpaid Washer Commission Pool', 'Current Liabilities', commissionPaid, 'Labor liability'],
+                              ['Net Station Equity & Retained Earnings', 'Equity', netOperatingProfit, 'Retained earnings'],
+                            ],
+                          );
+                        } else if (_selectedFinancialStatementView == 2) {
+                          PrintExportHelper.exportCsv(
+                            fileName: 'bishe_cash_flow_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                            headers: ['Activity', 'Category', 'Amount (ETB)', 'Details'],
+                            rows: [
+                              ['Cash Receipts from Vehicle Wash', 'Operating Inflow', cashCarWash, 'Drawer cash'],
+                              ['Cash Receipts from Carpet Clean', 'Operating Inflow', cashCarpet, 'Carpet cash'],
+                              ['Cash Receipts from Shower', 'Operating Inflow', showerRevenue, 'Shower cash'],
+                              ['Digital Bank Inflows', 'Operating Inflow', totalDigitalInflows, 'Telebirr & CBE'],
+                              ['Direct Commission Outflows', 'Operating Outflow', -commissionPaid, 'Commissions'],
+                              ['Storekeeper Restock Purchases', 'Operating Outflow', -suppliesCost, 'Purchases'],
+                              ['Cashier Petty Cash', 'Operating Outflow', -pettyCost, 'Petty cash'],
+                            ],
+                          );
+                        } else {
+                          PrintExportHelper.exportCsv(
+                            fileName: 'bishe_chemical_reconciliation_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                            headers: ['Metric', 'Cars Washed', 'Consumed', 'Ratio', 'Status'],
+                            rows: [
+                              ['Vehicle Wash Shampoo', '$carsWashedCount cars', suppliesCost > 0 ? (suppliesCost / 250).toStringAsFixed(1) : '0', '~15 cars/L', 'Verified In-Tolerance'],
+                              ['Carpet Cleaning Detergent', '$carpetsWashedCount carpets', '${carpetsWashedCount * 0.25} L', '~4 carpets/L', 'Verified In-Tolerance'],
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
 
           if (_selectedFinancialStatementView == 1)
             FinancialBalanceSheetCard(

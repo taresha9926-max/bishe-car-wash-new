@@ -1,8 +1,10 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../../core/widgets/responsive_layout.dart';
@@ -402,6 +404,67 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 '${historyList.length} ${_viewCarpetMode ? "Carpet Orders" : "Vehicle Washes"} Recorded',
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
               ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.print_rounded, size: 16, color: AppColors.primary),
+                    tooltip: state.tr('print'),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(5),
+                    onPressed: historyList.isEmpty
+                        ? null
+                        : () {
+                            PrintExportHelper.printTableReport(
+                              title: _viewCarpetMode ? 'Carpet Detailing Service History' : 'Vehicle Wash Service History',
+                              subtitle: 'BISHE Car Wash Station • Bishoftu',
+                              headers: ['Plate / Tag', 'Customer', 'Phone', 'Service', 'Method', 'Amount (ETB)', 'Date'],
+                              rows: historyList.map((b) => [
+                                b.licensePlate,
+                                b.customerName,
+                                b.customerPhone,
+                                b.isCarpet ? 'Carpet Detailing' : b.localizedServiceDisplayName(state.currentLanguage),
+                                b.payment.method.name.toUpperCase(),
+                                b.totalPrice.toStringAsFixed(2),
+                                DateFormatter.formatDate(b.createdAt),
+                              ]).toList(),
+                              summaryTotals: {
+                                'Amount (ETB)': CurrencyFormatter.format(totalRevenue),
+                              },
+                            );
+                          },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
+                    tooltip: state.tr('exportCsv'),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(5),
+                    onPressed: historyList.isEmpty
+                        ? null
+                        : () {
+                            PrintExportHelper.exportCsv(
+                              fileName: 'bishe_${_viewCarpetMode ? "carpet" : "car"}_history_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                              headers: ['Booking ID', 'Plate / Tag', 'Customer Name', 'Phone', 'Service', 'Car Type', 'Payment Method', 'Amount (ETB)', 'Ref No', 'Date'],
+                              rows: historyList.map((b) => [
+                                b.id,
+                                b.licensePlate,
+                                b.customerName,
+                                b.customerPhone,
+                                b.isCarpet ? 'Carpet' : b.localizedServiceDisplayName(state.currentLanguage),
+                                b.carType.name,
+                                b.payment.method.name,
+                                b.totalPrice,
+                                b.payment.transactionRef ?? '',
+                                b.createdAt.toIso8601String(),
+                              ]).toList(),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('History exported to CSV'), duration: Duration(seconds: 2)),
+                            );
+                          },
+                  ),
+                ],
+              ),
               if (widget.allowClearAll)
                 TextButton.icon(
                   icon: const Icon(Icons.delete_sweep_rounded, size: 16, color: Colors.red),
@@ -682,6 +745,41 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
               style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
             ),
           ],
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              icon: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
+              label: Text(
+                state.tr('printReceipt'),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed: () {
+                final safeId = b.id.length >= 8 ? b.id.substring(0, 8).toUpperCase() : b.id.toUpperCase();
+                PrintExportHelper.printReceipt(
+                  receiptNo: safeId,
+                  customerName: b.customerName,
+                  customerPhone: b.customerPhone,
+                  licensePlate: b.licensePlate,
+                  serviceName: isCarpet ? 'Carpet Detailing' : b.localizedServiceDisplayName(state.currentLanguage),
+                  carType: b.carType.localizedName(state.currentLanguage),
+                  servicePrice: b.payment.amount > 0 ? b.payment.amount : b.totalPrice,
+                  vatAmount: isCarpet ? 0.0 : (b.totalPrice * 0.15),
+                  tipAmount: b.payment.tipAmount,
+                  totalAmount: (b.payment.amount > 0 ? b.payment.amount : b.totalPrice) + b.payment.tipAmount,
+                  paymentMethod: b.payment.method.name.toUpperCase(),
+                  transactionRef: b.payment.transactionRef,
+                  cashierName: b.assignedWasherName ?? 'Bishe Station Desk',
+                  timestamp: b.createdAt,
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

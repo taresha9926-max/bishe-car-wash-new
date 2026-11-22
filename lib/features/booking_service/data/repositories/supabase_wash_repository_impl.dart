@@ -1913,6 +1913,52 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<void> deleteBankIncomingTransaction(String id) async {
+    try {
+      final encodedId = Uri.encodeComponent(id);
+      await _delete('bank_incoming_transactions?id=eq.$encodedId');
+    } catch (e) {
+      debugPrint('Supabase deleteBankIncomingTransaction error: $e');
+    }
+    await _fallbackLocalRepo.deleteBankIncomingTransaction(id);
+  }
+
+  @override
+  Future<void> clearAllBankIncomingTransactions() async {
+    try {
+      await _delete('bank_incoming_transactions?id=neq.00000000-0000-0000-0000-000000000000');
+    } catch (e) {
+      debugPrint('Supabase clearAllBankIncomingTransactions error: $e');
+    }
+    await _fallbackLocalRepo.clearAllBankIncomingTransactions();
+  }
+
+  @override
+  Future<void> deleteStationReceipt(String bookingId) async {
+    try {
+      final encodedId = Uri.encodeComponent(bookingId);
+      await _patch('wash_bookings?id=eq.$encodedId', {
+        'receipt_url': null,
+      });
+    } catch (e) {
+      debugPrint('Supabase deleteStationReceipt error: $e');
+    }
+    await _fallbackLocalRepo.deleteStationReceipt(bookingId);
+  }
+
+  @override
+  Future<void> clearAllStationReceipts() async {
+    try {
+      await _patch('wash_bookings?receipt_url=neq.null', {
+        'receipt_url': null,
+      });
+    } catch (e) {
+      debugPrint('Supabase clearAllStationReceipts error: $e');
+    }
+    await _fallbackLocalRepo.clearAllStationReceipts();
+  }
+
+  @override
   Future<SentinelConfig> getSentinelConfig() async {
     try {
       final dynamic data = await _get('app_config_sentinel?id=eq.primary&select=*');

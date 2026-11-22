@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/receipt_image_helper.dart';
+import '../../../../core/utils/print_export_helper.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../cashier/domain/models/bank_incoming_transaction.dart';
@@ -402,135 +403,254 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
   }
 
   Widget _buildStationReceiptsView(BuildContext context, dynamic state) {
-    if (widget.digitalBookings.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        alignment: Alignment.center,
-        child: Text(
-          state.tr('noDigitalReceipts'),
-          style: const TextStyle(color: AppColors.textMuted, fontSize: 12.5),
-        ),
-      );
-    }
-
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: widget.digitalBookings.take(15).length,
-      separatorBuilder: (_, __) => const Divider(height: 14, color: AppColors.cardBorder),
-      itemBuilder: (context, index) {
-        final b = widget.digitalBookings[index];
-        final hasScreenshot = b.payment.receiptScreenshot != null &&
-            b.payment.receiptScreenshot!.trim().isNotEmpty;
-        final isVerified = b.payment.isBankVerified;
-        final isPending = b.payment.isPendingSms;
-        final isSplit = b.payment.isSplit;
-
-        return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Action toolbar: Print, Export, Clear All
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          runSpacing: 4,
           children: [
-            GestureDetector(
-              onTap: hasScreenshot ? () => _showScreenshotDialog(context, state, b) : null,
-              child: Container(
-                width: 44,
-                height: 44,
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  color: b.payment.method.color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                  border: hasScreenshot
-                      ? Border.all(color: AppColors.telebirrBlue.withValues(alpha: 0.45))
-                      : null,
-                ),
-                child: hasScreenshot
-                    ? ReceiptImageHelper.buildImage(
-                        b.payment.receiptScreenshot,
-                        width: 44,
-                        height: 44,
-                        fit: BoxFit.cover,
-                        fallback: Icon(b.payment.method.icon, color: b.payment.method.color, size: 20),
-                      )
-                    : Icon(b.payment.method.icon, color: b.payment.method.color, size: 20),
-              ),
+            Text(
+              '${widget.digitalBookings.length} ${state.tr("stationReceiptsTab")}',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.print_rounded, size: 16, color: AppColors.primary),
+                  tooltip: state.tr('print'),
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(6),
+                  onPressed: widget.digitalBookings.isEmpty
+                      ? null
+                      : () {
+                          PrintExportHelper.printTableReport(
+                            title: 'Station Digital Receipts & Verification Log',
+                            subtitle: 'BISHE Car Wash Station • Bishoftu',
+                            headers: ['Plate', 'Customer', 'Service', 'Method', 'Amount (ETB)', 'Ref No', 'Status', 'Date'],
+                            rows: widget.digitalBookings.map((b) => [
+                              b.licensePlate,
+                              b.customerName,
+                              b.isCarpet ? 'Carpet' : b.package.name,
+                              b.payment.method.name,
+                              b.payment.amount > 0 ? b.payment.amount : b.totalPrice,
+                              b.payment.transactionRef ?? '-',
+                              b.payment.isBankVerified ? 'Verified' : 'Pending',
+                              DateFormatter.formatDate(b.createdAt),
+                            ]).toList(),
+                          );
+                        },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
+                  tooltip: state.tr('exportCsv'),
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(6),
+                  onPressed: widget.digitalBookings.isEmpty
+                      ? null
+                      : () {
+                          PrintExportHelper.exportCsv(
+                            fileName: 'bishe_station_receipts_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                            headers: ['Booking ID', 'Plate', 'Customer', 'Phone', 'Service', 'Method', 'Amount (ETB)', 'Ref No', 'Verified', 'Date'],
+                            rows: widget.digitalBookings.map((b) => [
+                              b.id,
+                              b.licensePlate,
+                              b.customerName,
+                              b.customerPhone,
+                              b.isCarpet ? 'Carpet' : b.package.name,
+                              b.payment.method.name,
+                              b.payment.amount > 0 ? b.payment.amount : b.totalPrice,
+                              b.payment.transactionRef ?? '',
+                              b.payment.isBankVerified ? 'YES' : 'NO',
+                              b.createdAt.toIso8601String(),
+                            ]).toList(),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Station receipts exported to CSV'), duration: Duration(seconds: 2)),
+                          );
+                        },
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep_rounded, size: 17, color: Colors.redAccent),
+                  tooltip: state.tr('clearAll'),
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(6),
+                  onPressed: widget.digitalBookings.isEmpty
+                      ? null
+                      : () => _confirmAction(
+                            context: context,
+                            title: state.tr('confirmClearAll'),
+                            message: state.tr('clearAllReceiptsConfirm'),
+                            onConfirm: () async {
+                              await state.clearAllStationReceipts();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('All station receipts cleared'), duration: Duration(seconds: 2)),
+                                );
+                              }
+                            },
+                          ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (widget.digitalBookings.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            alignment: Alignment.center,
+            child: Text(
+              state.tr('noDigitalReceipts'),
+              style: const TextStyle(color: AppColors.textMuted, fontSize: 12.5),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: widget.digitalBookings.take(20).length,
+            separatorBuilder: (_, __) => const Divider(height: 14, color: AppColors.cardBorder),
+            itemBuilder: (context, index) {
+              final b = widget.digitalBookings[index];
+              final hasScreenshot = b.payment.receiptScreenshot != null &&
+                  b.payment.receiptScreenshot!.trim().isNotEmpty;
+              final isVerified = b.payment.isBankVerified;
+              final isPending = b.payment.isPendingSms;
+              final isSplit = b.payment.isSplit;
+
+              return Row(
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          '${b.licensePlate} • ${isSplit ? state.tr("splitPayment") : b.payment.method.localizedName(state.currentLang)}',
+                  GestureDetector(
+                    onTap: hasScreenshot ? () => _showScreenshotDialog(context, state, b) : null,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: b.payment.method.color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: hasScreenshot
+                            ? Border.all(color: AppColors.telebirrBlue.withValues(alpha: 0.45))
+                            : null,
+                      ),
+                      child: hasScreenshot
+                          ? ReceiptImageHelper.buildImage(
+                              b.payment.receiptScreenshot,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                              fallback: Icon(b.payment.method.icon, color: b.payment.method.color, size: 20),
+                            )
+                          : Icon(b.payment.method.icon, color: b.payment.method.color, size: 20),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                '${b.licensePlate} • ${isSplit ? state.tr("splitPayment") : b.payment.method.localizedName(state.currentLang)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            if (isVerified)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF059669).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  state.tr('bankVerifiedBadge'),
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF10B981),
+                                  ),
+                                ),
+                              )
+                            else if (isPending)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFD97706).withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  state.tr('bankPendingSmsBadge'),
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFFF59E0B),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Ref: ${b.payment.transactionRef ?? "N/A"} • ${CurrencyFormatter.format(b.payment.amount > 0 ? b.payment.amount : b.totalPrice)}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                          style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      if (isVerified)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF059669).withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            state.tr('bankVerifiedBadge'),
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF10B981),
-                            ),
-                          ),
-                        )
-                      else if (isPending)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFD97706).withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            state.tr('bankPendingSmsBadge'),
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFFF59E0B),
-                            ),
-                          ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Ref: ${b.payment.transactionRef ?? "N/A"} • ${CurrencyFormatter.format(b.payment.amount)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                  const SizedBox(width: 6),
+                  if (hasScreenshot)
+                    ElevatedButton.icon(
+                      onPressed: () => _showScreenshotDialog(context, state, b),
+                      icon: const Icon(Icons.image_rounded, size: 13),
+                      label: Text(state.tr('viewReceipt'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.telebirrBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        elevation: 0,
+                      ),
+                    ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.redAccent),
+                    tooltip: state.tr('deleteItem'),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(6),
+                    onPressed: () => _confirmAction(
+                      context: context,
+                      title: state.tr('deleteItem'),
+                      message: state.tr('deleteReceiptConfirm'),
+                      onConfirm: () async {
+                        await state.deleteStationReceipt(b.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Station receipt deleted'), duration: Duration(seconds: 1)),
+                          );
+                        }
+                      },
+                    ),
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(width: 6),
-            if (hasScreenshot)
-              ElevatedButton.icon(
-                onPressed: () => _showScreenshotDialog(context, state, b),
-                icon: const Icon(Icons.image_rounded, size: 13),
-                label: Text(state.tr('viewReceipt'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.telebirrBlue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  elevation: 0,
-                ),
-              ),
-          ],
-        );
-      },
+              );
+            },
+          ),
+      ],
     );
   }
 
@@ -542,35 +662,123 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          runSpacing: 4,
           children: [
-            Text(
-              '${txns.length} ${state.tr("incomingBankSmsTab")}',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${txns.length} ${state.tr("incomingBankSmsTab")}',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                ),
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: () => setState(() => _onlyUnmatchedSms = !_onlyUnmatchedSms),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: _onlyUnmatchedSms
+                          ? Colors.amber.shade900.withValues(alpha: 0.3)
+                          : const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: _onlyUnmatchedSms ? Colors.amber : Colors.white12,
+                      ),
+                    ),
+                    child: Text(
+                      state.tr('unmatchedCredits'),
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                        color: _onlyUnmatchedSms ? Colors.amberAccent : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            InkWell(
-              onTap: () => setState(() => _onlyUnmatchedSms = !_onlyUnmatchedSms),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _onlyUnmatchedSms
-                      ? Colors.amber.shade900.withValues(alpha: 0.3)
-                      : const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: _onlyUnmatchedSms ? Colors.amber : Colors.white12,
-                  ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.print_rounded, size: 16, color: AppColors.primary),
+                  tooltip: state.tr('print'),
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(5),
+                  onPressed: txns.isEmpty
+                      ? null
+                      : () {
+                          PrintExportHelper.printTableReport(
+                            title: 'Bishe Sentinel Incoming Bank SMS Credits',
+                            subtitle: 'Telebirr & CBE Live Mobile Credits • Bishoftu Station',
+                            headers: ['Provider', 'Ref No', 'Amount (ETB)', 'Payer Name', 'Phone', 'Status', 'Received At'],
+                            rows: txns.map((t) => [
+                              t.provider.toUpperCase(),
+                              t.refNo,
+                              t.amount.toStringAsFixed(2),
+                              t.payerName ?? '-',
+                              t.payerPhone ?? '-',
+                              t.isMatched ? 'Matched' : 'Unmatched',
+                              DateFormatter.formatDate(t.receivedAt),
+                            ]).toList(),
+                          );
+                        },
                 ),
-                child: Text(
-                  state.tr('unmatchedCredits'),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: _onlyUnmatchedSms ? Colors.amberAccent : AppColors.textSecondary,
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
+                  tooltip: state.tr('exportCsv'),
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(5),
+                  onPressed: txns.isEmpty
+                      ? null
+                      : () {
+                          PrintExportHelper.exportCsv(
+                            fileName: 'bishe_incoming_bank_sms_${DateTime.now().toIso8601String().split('T')[0]}.csv',
+                            headers: ['ID', 'Provider', 'Ref No', 'Amount (ETB)', 'Payer Name', 'Payer Phone', 'Status', 'Matched Booking ID', 'Received At'],
+                            rows: txns.map((t) => [
+                              t.id,
+                              t.provider,
+                              t.refNo,
+                              t.amount,
+                              t.payerName ?? '',
+                              t.payerPhone ?? '',
+                              t.matchStatus,
+                              t.matchedBookingId ?? '',
+                              t.receivedAt.toIso8601String(),
+                            ]).toList(),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Bank SMS feed exported to CSV'), duration: Duration(seconds: 2)),
+                          );
+                        },
                 ),
-              ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep_rounded, size: 17, color: Colors.redAccent),
+                  tooltip: state.tr('clearAll'),
+                  constraints: const BoxConstraints(),
+                  padding: const EdgeInsets.all(5),
+                  onPressed: txns.isEmpty
+                      ? null
+                      : () => _confirmAction(
+                            context: context,
+                            title: state.tr('confirmClearAll'),
+                            message: state.tr('clearAllSmsConfirm'),
+                            onConfirm: () async {
+                              await state.clearAllBankIncomingTransactions();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('All incoming bank SMS records cleared'), duration: Duration(seconds: 2)),
+                                );
+                              }
+                            },
+                          ),
+                ),
+              ],
             ),
           ],
         ),
@@ -588,21 +796,21 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: txns.take(15).length,
+            itemCount: txns.take(20).length,
             separatorBuilder: (_, __) => const Divider(height: 12, color: AppColors.cardBorder),
             itemBuilder: (context, index) {
               final t = txns[index];
               final isCbe = t.isCbe;
               final isMatched = t.isMatched;
 
-              return InkWell(
-                onTap: () => _showRawSmsDialog(context, state, t),
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    children: [
-                      Container(
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () => _showRawSmsDialog(context, state, t),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
                           color: isCbe
@@ -616,8 +824,12 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                           color: isCbe ? const Color(0xFFA78BFA) : const Color(0xFF38BDF8),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _showRawSmsDialog(context, state, t),
+                        borderRadius: BorderRadius.circular(6),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -665,18 +877,69 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        DateFormatter.formatTime(t.receivedAt),
-                        style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      DateFormatter.formatTime(t.receivedAt),
+                      style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.redAccent),
+                      tooltip: state.tr('deleteItem'),
+                      constraints: const BoxConstraints(),
+                      padding: const EdgeInsets.all(5),
+                      onPressed: () => _confirmAction(
+                        context: context,
+                        title: state.tr('deleteItem'),
+                        message: state.tr('deleteSmsConfirm'),
+                        onConfirm: () async {
+                          await state.deleteBankIncomingTransaction(t.id);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Bank SMS record deleted'), duration: Duration(seconds: 1)),
+                            );
+                          }
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
             },
           ),
       ],
+    );
+  }
+
+  void _confirmAction({
+    required BuildContext context,
+    required String title,
+    required String message,
+    required Future<void> Function() onConfirm,
+  }) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1F2937),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+        content: Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await onConfirm();
+            },
+            child: const Text('Delete', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
     );
   }
 

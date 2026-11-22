@@ -124,6 +124,10 @@ abstract class IInventoryRepository {
 /// Domain port for digital payments, bank incoming credit verification, and sentinel health.
 abstract class IDigitalPaymentRepository {
   Future<List<BankIncomingTransaction>> getBankIncomingTransactions();
+  Future<void> deleteBankIncomingTransaction(String id);
+  Future<void> clearAllBankIncomingTransactions();
+  Future<void> deleteStationReceipt(String bookingId);
+  Future<void> clearAllStationReceipts();
   Future<SentinelConfig> getSentinelConfig();
   Future<void> updateSentinelConfig(SentinelConfig config);
   Future<Map<String, dynamic>> ingestBankSms({

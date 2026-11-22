@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/utils/receipt_image_helper.dart';
 import '../../../../core/widgets/financial_pnl_statement_card.dart';
 import '../../../../core/widgets/language_switcher_action.dart';
@@ -197,7 +199,75 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildFilterBar(context, state),
-        const SizedBox(height: 14),
+        const SizedBox(height: 8),
+
+        // Action Toolbar: Print & Export CSV
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.print_rounded, size: 16, color: AppColors.primary),
+                label: Text(state.tr('printReport'), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12)),
+                onPressed: () {
+                  PrintExportHelper.printTableReport(
+                    title: dynamicTitle,
+                    subtitle: 'Period: $rangeCaption • Location: ${AppConstants.appLocation}',
+                    headers: ['Category / Metric', 'Detail', 'Amount (ETB)'],
+                    rows: [
+                      ['Vehicle Wash Subtotal', '${periodCarBookings.length} washes', CurrencyFormatter.format(carRevenue)],
+                      ['Carpet Wash Subtotal', '${periodCarpetBookings.length} orders', CurrencyFormatter.format(carpetRevenue)],
+                      ['Shower Service Subtotal', '$showerCount users', CurrencyFormatter.format(showerRevenue)],
+                      ['Customer Tips (100% Washers)', '${periodBookings.where((b) => b.payment.tipAmount > 0).length} tips', CurrencyFormatter.format(totalTips)],
+                      ['Direct Bank Mobile Credits', 'Sentinel phone', CurrencyFormatter.format(directBankCredits)],
+                      ['Gross Revenue (Combined)', 'Total station intake', CurrencyFormatter.format(grossRevenue)],
+                      ['Cash in Drawer', 'Physical cash', CurrencyFormatter.format(cashRevenue)],
+                      ['Digital Money (Telebirr/CBE)', 'E-money settlement', CurrencyFormatter.format(digitalRevenue)],
+                      ['15% VAT Liability', 'Car & Carpet wash', CurrencyFormatter.format(vatDeducted)],
+                      ['Team Commission Pool', '${(state.teamCommissionRate * 100).toInt()}% of net wash', CurrencyFormatter.format(commissionDeducted)],
+                      ['Operating Expenses (Petty Cash)', 'Approved vouchers', CurrencyFormatter.format(periodPettyCash)],
+                      ['Bank Cash Deposited', 'Confirmed bank slips', CurrencyFormatter.format(totalCashDeposited)],
+                      ['NET STATION PROFIT', 'Retained station earnings', CurrencyFormatter.format(netStationProfit)],
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              TextButton.icon(
+                icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
+                label: Text(state.tr('exportCsv'), style: const TextStyle(color: Color(0xFF38BDF8), fontWeight: FontWeight.bold, fontSize: 12)),
+                onPressed: () {
+                  PrintExportHelper.exportCsv(
+                    fileName: 'bishe_financial_report_${rangeStart.toIso8601String().split('T')[0]}_to_${rangeEnd.toIso8601String().split('T')[0]}.csv',
+                    headers: ['Metric', 'Detail', 'Amount (ETB)'],
+                    rows: [
+                      ['Vehicle Wash Subtotal', '${periodCarBookings.length} washes', carRevenue],
+                      ['Carpet Wash Subtotal', '${periodCarpetBookings.length} orders', carpetRevenue],
+                      ['Shower Service Subtotal', '$showerCount users', showerRevenue],
+                      ['Customer Tips', '${periodBookings.where((b) => b.payment.tipAmount > 0).length} tips', totalTips],
+                      ['Direct Bank Mobile Credits', 'Sentinel phone', directBankCredits],
+                      ['Gross Revenue', 'Total intake', grossRevenue],
+                      ['Cash in Drawer', 'Physical cash', cashRevenue],
+                      ['Digital Money', 'Telebirr/CBE', digitalRevenue],
+                      ['15% VAT Liability', 'Tax due', vatDeducted],
+                      ['Team Commission Pool', 'Washers share', commissionDeducted],
+                      ['Operating Expenses', 'Petty cash', periodPettyCash],
+                      ['Bank Cash Deposited', 'Slips', totalCashDeposited],
+                      ['NET STATION PROFIT', 'Retained profit', netStationProfit],
+                    ],
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Financial report exported to CSV'), duration: Duration(seconds: 2)),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
 
         // Header & Service Division Revenue Table
         _buildTabularSectionCard(

@@ -724,6 +724,45 @@ class WashRepositoryImpl implements IWashRepository {
   }
 
   @override
+  Future<void> deleteBankIncomingTransaction(String id) async {
+    _bankIncomingTransactions.removeWhere((t) => t.id == id);
+  }
+
+  @override
+  Future<void> clearAllBankIncomingTransactions() async {
+    _bankIncomingTransactions.clear();
+  }
+
+  @override
+  Future<void> deleteStationReceipt(String bookingId) async {
+    final idx = _bookings.indexWhere((b) => b.id == bookingId);
+    if (idx != -1) {
+      final b = _bookings[idx];
+      _bookings[idx] = b.copyWith(
+        payment: b.payment.copyWith(
+          receiptScreenshot: null,
+          verificationStatus: 'unverified',
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<void> clearAllStationReceipts() async {
+    for (int i = 0; i < _bookings.length; i++) {
+      final b = _bookings[i];
+      if (b.payment.receiptScreenshot != null) {
+        _bookings[i] = b.copyWith(
+          payment: b.payment.copyWith(
+            receiptScreenshot: null,
+            verificationStatus: 'unverified',
+          ),
+        );
+      }
+    }
+  }
+
+  @override
   Future<SentinelConfig> getSentinelConfig() async {
     return _sentinelConfig;
   }
