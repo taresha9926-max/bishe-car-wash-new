@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
+import 'package:bishe_car_wash/core/utils/receipt_image_helper.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_package.dart';
 
@@ -144,7 +145,7 @@ class AutoCareAssets {
   static const String assetDusterMopUrl =
       'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&auto=format&fit=crop&q=80';
   static const String assetHygieneSoapUrl =
-      'https://images.unsplash.com/photo-1607006314352-a567634f59fc?w=400&auto=format&fit=crop&q=80';
+      'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80';
 
   // Official @bishecarwash Published TikTok Video URLs (Latest 7 Videos)
   static const List<String> officialTikTokVideos = [
@@ -478,6 +479,15 @@ class AutoCareAssets {
     return packageFoamUrl;
   }
 
+  static Widget _buildThumbnailFallback(Color color, IconData icon, double width) {
+    return Container(
+      color: color.withOpacity(0.12),
+      child: Center(
+        child: Icon(icon, color: color, size: width * 0.45),
+      ),
+    );
+  }
+
   /// Reusable rounded automotive photo thumbnail with obsidian glass border,
   /// dark gradient scrim overlay, and smooth offline fallback icon.
   static Widget buildPhotoThumbnail({
@@ -489,6 +499,36 @@ class AutoCareAssets {
     Color fallbackColor = AppColors.primary,
     String? durationBadge,
   }) {
+    final trimmed = imageUrl.trim();
+    Widget imageChild;
+
+    if (trimmed.isEmpty) {
+      imageChild = _buildThumbnailFallback(fallbackColor, fallbackIcon, width);
+    } else if (trimmed.startsWith('assets/')) {
+      imageChild = Image.asset(
+        trimmed,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildThumbnailFallback(fallbackColor, fallbackIcon, width),
+      );
+    } else if (trimmed.startsWith('data:image') || !trimmed.startsWith('http')) {
+      final bytes = ReceiptImageHelper.tryDecodeBytes(trimmed);
+      if (bytes != null && bytes.isNotEmpty) {
+        imageChild = Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildThumbnailFallback(fallbackColor, fallbackIcon, width),
+        );
+      } else {
+        imageChild = _buildThumbnailFallback(fallbackColor, fallbackIcon, width);
+      }
+    } else {
+      imageChild = Image.network(
+        trimmed,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildThumbnailFallback(fallbackColor, fallbackIcon, width),
+      );
+    }
+
     return Container(
       width: width,
       height: height,
@@ -501,27 +541,7 @@ class AutoCareAssets {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            imageUrl.startsWith('assets/')
-                ? Image.asset(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: fallbackColor.withOpacity(0.12),
-                      child: Center(
-                        child: Icon(fallbackIcon, color: fallbackColor, size: width * 0.45),
-                      ),
-                    ),
-                  )
-                : Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: fallbackColor.withOpacity(0.12),
-                      child: Center(
-                        child: Icon(fallbackIcon, color: fallbackColor, size: width * 0.45),
-                      ),
-                    ),
-                  ),
+            imageChild,
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

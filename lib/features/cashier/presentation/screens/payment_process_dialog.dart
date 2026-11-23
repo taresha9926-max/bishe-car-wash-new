@@ -25,7 +25,7 @@ class PaymentProcessDialog extends StatefulWidget {
   static Future<void> show(BuildContext context, WashBooking booking) {
     return showDialog(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (_) => PaymentProcessDialog(booking: booking),
     );
   }
@@ -99,13 +99,15 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
           setState(() {
             _refCodeController.text = scannedRef;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${state.tr("autoDetectedRef")}$scannedRef'),
-              backgroundColor: AppColors.cashGreen,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          try {
+            ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+              SnackBar(
+                content: Text('${state.tr("autoDetectedRef")}$scannedRef'),
+                backgroundColor: AppColors.cashGreen,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          } catch (_) {}
         }
       } finally {
         if (mounted) {
@@ -990,17 +992,20 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
     if (_isProcessing) return;
 
     final state = AppStateProvider.read(context);
+    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context, rootNavigator: true);
 
     final liveBooking = state.bookings.where((b) => b.id == widget.booking.id).firstOrNull ?? widget.booking;
     if (liveBooking.payment.isPaid) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('🚨 ${state.tr("paymentAlreadyCollected")}! ${state.tr("doubleCollectionDisabled")}'),
           backgroundColor: Colors.orange.shade900,
         ),
       );
-      navigator.pop();
+      if (mounted && navigator.canPop()) {
+        navigator.pop();
+      }
       return;
     }
 
@@ -1139,13 +1144,15 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         collectedByName: collectorName,
       );
 
-      navigator.pop();
+      if (mounted && navigator.canPop()) {
+        navigator.pop();
+      }
 
-      if (mounted) {
-        final totalText = _tipAmount > 0
-            ? '${CurrencyFormatter.format(amount + _tipAmount)} (includes ETB ${_tipAmount.toStringAsFixed(0)} tip)'
-            : CurrencyFormatter.format(amount);
-        ScaffoldMessenger.of(context).showSnackBar(
+      final totalText = _tipAmount > 0
+          ? '${CurrencyFormatter.format(amount + _tipAmount)} (includes ETB ${_tipAmount.toStringAsFixed(0)} tip)'
+          : CurrencyFormatter.format(amount);
+      try {
+        messenger.showSnackBar(
           SnackBar(
             content: Row(
               children: [
@@ -1157,15 +1164,17 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
             backgroundColor: AppColors.statusCompleted,
           ),
         );
-      }
+      } catch (_) {}
     } catch (e) {
       if (mounted) {
         setState(() {
           _isProcessing = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment error: $e'), backgroundColor: Colors.red),
-        );
+        try {
+          messenger.showSnackBar(
+            SnackBar(content: Text('Payment error: $e'), backgroundColor: Colors.red),
+          );
+        } catch (_) {}
       }
     }
   }

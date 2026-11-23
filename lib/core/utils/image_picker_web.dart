@@ -40,7 +40,7 @@ void _processFile(html.File file, void Function(PickedReceiptImage image) onPick
       try {
         final naturalWidth = img.naturalWidth ?? 800;
         final naturalHeight = img.naturalHeight ?? 600;
-        const maxDim = 1200;
+        const maxDim = 800;
 
         int targetWidth = naturalWidth;
         int targetHeight = naturalHeight;
@@ -57,7 +57,7 @@ void _processFile(html.File file, void Function(PickedReceiptImage image) onPick
         final canvas = html.CanvasElement(width: targetWidth, height: targetHeight);
         final ctx = canvas.context2D;
         ctx.drawImageScaled(img, 0, 0, targetWidth, targetHeight);
-        final compressedDataUrl = canvas.toDataUrl('image/jpeg', 0.82);
+        final compressedDataUrl = canvas.toDataUrl('image/jpeg', 0.75);
         html.Url.revokeObjectUrl(blobUrl);
 
         onPicked(PickedReceiptImage(

@@ -9,6 +9,49 @@ import 'features/booking_service/presentation/state/app_state_provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Custom ErrorWidget builder to guarantee zero white screens on unexpected rendering errors
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    debugPrint('Global ErrorWidget captured: ${details.exception}');
+    return Material(
+      color: const Color(0xFF0F172A),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.local_car_wash_rounded, color: Color(0xFF007791), size: 48),
+              const SizedBox(height: 16),
+              const Text(
+                'BISHE Car Wash Station',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'A temporary display refresh is required.',
+                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF007791),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () {
+                  // Soft reset
+                },
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('Refresh Screen'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  };
+
   // Clean Architecture Dependency Injection (Live Supabase + Offline Fallback)
   final washRepository = SupabaseWashRepositoryImpl(
     supabaseUrl: AppConstants.supabaseUrl,

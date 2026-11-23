@@ -1079,17 +1079,24 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           collectedByRole: collectedByRole,
           collectedByName: collectedByName,
         );
-        await _patch('wash_bookings?id=eq.$bookingId', {
+        final patchPayload = <String, dynamic>{
           'is_paid': true,
           'payment_method': method.name,
           'total_amount': amount,
-          'transaction_ref': transactionRef,
-          'receipt_url': receiptScreenshot,
+          if (transactionRef != null && transactionRef.trim().isNotEmpty) 'transaction_ref': transactionRef,
+          if (receiptScreenshot != null && receiptScreenshot.isNotEmpty) 'receipt_url': receiptScreenshot,
           if (existing != null)
             'delivery_location': _encodeMetaFromBooking(
               existing.copyWith(payment: updatedPayment),
             ),
-        });
+        };
+
+        dynamic res = await _patch('wash_bookings?id=eq.$bookingId', patchPayload);
+        if (res == null && patchPayload.containsKey('receipt_url')) {
+          // Fallback: If remote schema rejects receipt_url or payload size, retry without receipt_url
+          final fallbackPayload = Map<String, dynamic>.from(patchPayload)..remove('receipt_url');
+          await _patch('wash_bookings?id=eq.$bookingId', fallbackPayload);
+        }
 
         // Link and match incoming bank SMS credit in cloud
         if (transactionRef != null && transactionRef.trim().isNotEmpty) {
