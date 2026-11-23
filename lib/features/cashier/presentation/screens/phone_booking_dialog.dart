@@ -915,7 +915,21 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
         serviceType: _serviceType,
         carType: _isCarpetMode ? CarType.automobile : _carType,
         licensePlate: _plateController.text.trim().toUpperCase(),
-        package: _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null)!,
+        package: _selectedPackage ??
+            (state.packages.isNotEmpty
+                ? state.packages.first
+                : const WashPackage(
+                    id: 'pkg-standard',
+                    name: 'Standard Wash',
+                    description: 'Standard exterior body wash',
+                    durationMinutes: 30,
+                    pricingByCarType: {
+                      CarType.automobile: 350.0,
+                      CarType.minibus: 450.0,
+                      CarType.truck: 650.0,
+                    },
+                    features: ['Foam wash', 'Rinse', 'Tire shine'],
+                  )),
         deliveryLocation: deliveryLoc,
         paymentMethod: PaymentMethod.cash,
         gpsCoordinates: gpsCoords,

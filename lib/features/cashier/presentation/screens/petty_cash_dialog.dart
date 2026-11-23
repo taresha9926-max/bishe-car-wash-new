@@ -87,30 +87,34 @@ class _PettyCashDialogState extends State<PettyCashDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      AutoCareAssets.buildPhotoThumbnail(
-                        imageUrl: AutoCareAssets.packageSteamEngineUrl,
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        fallbackIcon: Icons.outbox_rounded,
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            state.tr('logPettyCash'),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.packageSteamEngineUrl,
+                          width: 44,
+                          height: 44,
+                          borderRadius: 12,
+                          fallbackIcon: Icons.outbox_rounded,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('logPettyCash'),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              Text(
+                                state.tr('pettyCashExpense'),
+                                style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                              ),
+                            ],
                           ),
-                          Text(
-                            state.tr('pettyCashExpense'),
-                            style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
@@ -152,6 +156,7 @@ class _PettyCashDialogState extends State<PettyCashDialog> {
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
+                isExpanded: true,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.category_rounded, size: 20, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -164,7 +169,13 @@ class _PettyCashDialogState extends State<PettyCashDialog> {
                       children: [
                         Icon(cat['icon'] as IconData, size: 18, color: Colors.deepOrange),
                         const SizedBox(width: 8),
-                        Text(cat['label'] as String, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                        Expanded(
+                          child: Text(
+                            cat['label'] as String,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   );

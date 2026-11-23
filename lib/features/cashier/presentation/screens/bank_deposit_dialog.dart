@@ -127,30 +127,34 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      AutoCareAssets.buildPhotoThumbnail(
-                        imageUrl: AutoCareAssets.stationBayUrl,
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        fallbackIcon: Icons.account_balance_rounded,
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            state.tr('depositCashToBank'),
-                            style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        AutoCareAssets.buildPhotoThumbnail(
+                          imageUrl: AutoCareAssets.stationBayUrl,
+                          width: 44,
+                          height: 44,
+                          borderRadius: 12,
+                          fallbackIcon: Icons.account_balance_rounded,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('depositCashToBank'),
+                                style: const TextStyle(fontSize: 16.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              Text(
+                                state.tr('depositToOwnerAccounts'),
+                                style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                              ),
+                            ],
                           ),
-                          Text(
-                            state.tr('depositToOwnerAccounts'),
-                            style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),

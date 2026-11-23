@@ -2297,8 +2297,25 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: isBold ? 14 : 13, fontWeight: isBold ? FontWeight.w900 : FontWeight.w600, color: AppColors.textPrimary)),
-          Text(value, style: TextStyle(fontSize: isBold ? 15 : 13.5, fontWeight: isBold ? FontWeight.w900 : FontWeight.w700, color: color)),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: isBold ? 14 : 13,
+                fontWeight: isBold ? FontWeight.w900 : FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: isBold ? 15 : 13.5,
+              fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
+              color: color,
+            ),
+          ),
         ],
       ),
     );

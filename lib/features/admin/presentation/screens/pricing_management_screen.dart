@@ -2430,7 +2430,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
   }
 
   Widget _buildPackageCard(BuildContext context, dynamic state, WashPackage pkg, List<WashPackage> packages) {
-    final activeId = _selectedPackageId ?? packages.first.id;
+    final activeId = _selectedPackageId ?? (packages.isNotEmpty ? packages.first.id : '');
     final isSelected = pkg.id == activeId;
 
     return Container(

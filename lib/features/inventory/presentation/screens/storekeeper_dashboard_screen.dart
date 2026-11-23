@@ -849,7 +849,8 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
 
     final lowStockCount = consumables.where((c) => c.isLowStock).length;
 
-    return Column(
+    return ListView(
+      padding: EdgeInsets.zero,
       children: [
         // Top Action Bar
         Container(
@@ -1020,16 +1021,12 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           ),
 
         // Consumables List
-        Expanded(
+        Padding(
+          padding: EdgeInsets.all(isMobile ? 12 : 16),
           child: filtered.isEmpty
               ? _buildEmptyState('No inventory items match your search filter.', Icons.inventory_2_outlined)
-              : ListView.builder(
-                  padding: EdgeInsets.all(isMobile ? 12 : 16),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, idx) {
-                    final item = filtered[idx];
-                    return _buildConsumableItemTile(context, state, item, isMobile);
-                  },
+              : Column(
+                  children: filtered.map((item) => _buildConsumableItemTile(context, state, item, isMobile)).toList(),
                 ),
         ),
       ],
@@ -1189,7 +1186,8 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       return matchesSearch && matchesCondition;
     }).toList();
 
-    return Column(
+    return ListView(
+      padding: EdgeInsets.zero,
       children: [
         // Top Action Bar
         Container(
@@ -1294,16 +1292,12 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         ),
 
         // Assets List
-        Expanded(
+        Padding(
+          padding: EdgeInsets.all(isMobile ? 12 : 16),
           child: filtered.isEmpty
               ? _buildEmptyState('No machinery or tools match your search.', Icons.build_circle_outlined)
-              : ListView.builder(
-                  padding: EdgeInsets.all(isMobile ? 12 : 16),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, idx) {
-                    final asset = filtered[idx];
-                    return _buildFixedAssetCard(context, state, asset, isMobile);
-                  },
+              : Column(
+                  children: filtered.map((asset) => _buildFixedAssetCard(context, state, asset, isMobile)).toList(),
                 ),
         ),
       ],
@@ -1652,7 +1646,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) {
-          final selItem = items.firstWhere((c) => c.id == selectedItemId);
+          final selItem = items.firstWhere((c) => c.id == selectedItemId, orElse: () => items.first);
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -1773,7 +1767,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) {
-          final selItem = items.firstWhere((c) => c.id == selectedItemId);
+          final selItem = items.firstWhere((c) => c.id == selectedItemId, orElse: () => items.first);
           final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
           final unitCost = double.tryParse(costCtrl.text.trim()) ?? selItem.unitCostEtb;
           final totalCost = qty * unitCost;
@@ -1812,7 +1806,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                         if (val != null) {
                           setDialogState(() {
                             selectedItemId = val;
-                            costCtrl.text = items.firstWhere((c) => c.id == val).unitCostEtb.toStringAsFixed(0);
+                            costCtrl.text = items.firstWhere((c) => c.id == val, orElse: () => items.first).unitCostEtb.toStringAsFixed(0);
                           });
                         }
                       },

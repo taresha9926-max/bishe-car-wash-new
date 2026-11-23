@@ -448,12 +448,16 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           width: isChecked ? 1.5 : 1,
                         ),
                       ),
-                      child: CheckboxListTile(
-                        value: isChecked,
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        activeColor: AppColors.primary,
-                        title: Row(
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                        clipBehavior: Clip.antiAlias,
+                        child: CheckboxListTile(
+                          value: isChecked,
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                          activeColor: AppColors.primary,
+                          title: Row(
                           children: [
                             Expanded(
                               child: Column(
@@ -509,7 +513,8 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                           });
                         },
                       ),
-                    );
+                    ),
+                  );
                   }),
                 ] else ...[
                   ...packages.map((pkg) {

@@ -617,7 +617,20 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       }
     }
 
-    WashPackage pkg = packages.first;
+    WashPackage pkg = packages.isNotEmpty
+        ? packages.first
+        : const WashPackage(
+            id: 'pkg-standard',
+            name: 'Standard Wash',
+            description: 'Standard exterior body wash',
+            durationMinutes: 30,
+            pricingByCarType: {
+              CarType.automobile: 350.0,
+              CarType.minibus: 450.0,
+              CarType.truck: 650.0,
+            },
+            features: ['Foam wash', 'Rinse', 'Tire shine'],
+          );
     if (json['package_id'] != null) {
       final found = packages.where((p) => p.id == json['package_id'].toString());
       if (found.isNotEmpty) pkg = found.first;

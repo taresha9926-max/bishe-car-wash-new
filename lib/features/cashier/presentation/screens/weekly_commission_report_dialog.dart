@@ -65,31 +65,35 @@ class _WeeklyCommissionReportDialogState extends State<WeeklyCommissionReportDia
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: AppColors.oromiaGold.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.oromiaGold.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 24),
                         ),
-                        child: const Icon(Icons.stars_rounded, color: AppColors.oromiaGold, size: 24),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            state.tr('weeklyCommissionReportTitle'),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                state.tr('weeklyCommissionReportTitle'),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              Text(
+                                state.tr('disburseWeeklyCommission'),
+                                style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                              ),
+                            ],
                           ),
-                          Text(
-                            state.tr('disburseWeeklyCommission'),
-                            style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
@@ -110,10 +114,13 @@ class _WeeklyCommissionReportDialogState extends State<WeeklyCommissionReportDia
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      state.tr('weeklyCommissionAccrual'),
-                      style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    Expanded(
+                      child: Text(
+                        state.tr('weeklyCommissionAccrual'),
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       CurrencyFormatter.format(weeklyPool),
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.oromiaGold),

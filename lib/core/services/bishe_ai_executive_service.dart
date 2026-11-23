@@ -11,6 +11,7 @@ import '../../features/booking_service/domain/models/wash_booking.dart';
 import '../../features/booking_service/domain/models/wash_package.dart';
 import '../../features/booking_service/domain/models/wash_status.dart';
 import '../../features/booking_service/presentation/state/app_state_notifier.dart';
+import '../../features/inventory/domain/models/consumable_item.dart';
 import '../../features/inventory/domain/models/fixed_asset.dart';
 import '../constants/app_constants.dart';
 import '../localization/app_strings.dart';
@@ -1231,10 +1232,13 @@ Please provide the 4 details below, or tap the button to book directly on the cu
     required AppLanguage lang,
   }) async {
     final clean = plateOrId.trim().toUpperCase().replaceAll(' ', '');
-    final match = state.bookings.firstWhere(
+    final unpaid = state.bookings.where((b) => !b.payment.isPaid).toList();
+    if (state.bookings.isEmpty) {
+      return 'No active bookings found in system.';
+    }
+    final match = state.bookings.where(
       (b) => !b.payment.isPaid && (b.id.toUpperCase() == clean || b.licensePlate.toUpperCase().replaceAll(' ', '') == clean),
-      orElse: () => state.bookings.isNotEmpty ? state.bookings.first : state.bookings.first,
-    );
+    ).firstOrNull ?? (unpaid.isNotEmpty ? unpaid.first : state.bookings.first);
 
     PaymentMethod method = PaymentMethod.cash;
     final m = methodStr.toLowerCase();
@@ -1406,10 +1410,12 @@ To commit the register close and disburse washer commissions, a 6-digit OTP has 
     required AppLanguage lang,
   }) async {
     final query = chemicalNameOrId.toLowerCase();
-    final item = state.consumables.firstWhere(
+    if (state.consumables.isEmpty) {
+      return 'No consumable items found in inventory.';
+    }
+    final item = state.consumables.where(
       (c) => c.id.toLowerCase() == query || c.name.toLowerCase().contains(query),
-      orElse: () => state.consumables.isNotEmpty ? state.consumables.first : state.consumables.first,
-    );
+    ).firstOrNull ?? state.consumables.first;
 
     await state.exchangeConsumableEmptyForNew(
       itemId: item.id,
@@ -1979,8 +1985,32 @@ ${feedbackRows.isEmpty ? '| No customer feedback submissions yet | - | - | - |' 
   // ==========================================
   static String _generateEmptyExchangeReport(AppStateNotifier state) {
     final lowStock = state.consumables.where((c) => c.isLowStock).toList();
-    final shampoo = state.consumables.firstWhere((c) => c.id == 'CS-009', orElse: () => state.consumables.first);
-    final perfume = state.consumables.firstWhere((c) => c.id == 'CS-006', orElse: () => state.consumables.first);
+    final shampoo = state.consumables.where((c) => c.id == 'CS-009').firstOrNull ??
+        (state.consumables.isNotEmpty
+            ? state.consumables.first
+            : const ConsumableItem(
+                id: 'CS-009',
+                name: 'Snow Foam Shampoo (5L Canister)',
+                nameAmharic: 'የበረዶ አረፋ ሻምፑ',
+                category: 'Chemicals',
+                unit: 'cans',
+                currentStock: 0,
+                minThreshold: 4,
+                unitCostEtb: 1850.0,
+              ));
+    final perfume = state.consumables.where((c) => c.id == 'CS-006').firstOrNull ??
+        (state.consumables.isNotEmpty
+            ? state.consumables.first
+            : const ConsumableItem(
+                id: 'CS-006',
+                name: 'Interior Fragrance Perfume (500ml)',
+                nameAmharic: 'የመኪና ውስጥ ሽቶ',
+                category: 'Chemicals',
+                unit: 'bottles',
+                currentStock: 0,
+                minThreshold: 6,
+                unitCostEtb: 420.0,
+              ));
 
     return '''
 ### 🔄 Storekeeper Empty-for-Full Container Exchange (ዕቃ በዕቃ)
@@ -2412,6 +2442,9 @@ We prioritize transparency in our wash services, package quality, and customer p
     final totalDailyOpEx = dailyOverheadAccrual + dailyDepreciation + pettyExpenses;
     final netOperatingProfit = grossProfit - totalDailyOpEx;
 
+    final rentAmount = (state.monthlyOverheads.where((o) => o.id == 'overhead_rent').firstOrNull ??
+        (state.monthlyOverheads.isNotEmpty ? state.monthlyOverheads.first : null))?.monthlyAmountEtb ?? 45000.0;
+
     return '''
 ### 📊 Today's Executive Financial & P&L Statement (Real-Truth Model)
 *Station Date: ${now.day}/${now.month}/${now.year} • Daily Accrual (Monthly ÷ 30)*
@@ -2429,7 +2462,7 @@ We prioritize transparency in our wash services, package quality, and customer p
 | Less: Cashier & Yard Petty Cash | - ${CurrencyFormatter.format(pettyExpenses)} | General Emergency Overhead |
 | **NET OPERATING PROFIT (EBITDA)** | **${CurrencyFormatter.format(netOperatingProfit)}** | **Real-Truth Net Daily Earning** |
 
-> *Note: Station land rent (ETB ${(state.monthlyOverheads.firstWhere((o) => o.id == 'overhead_rent', orElse: () => state.monthlyOverheads.first).monthlyAmountEtb).toStringAsFixed(0)}/mo), utilities, and staff base salaries are accrued daily at 1/30th per day to display the real truth.*
+> *Note: Station land rent (ETB ${rentAmount.toStringAsFixed(0)}/mo), utilities, and staff base salaries are accrued daily at 1/30th per day to display the real truth.*
 ''';
   }
 
@@ -2549,18 +2582,45 @@ ${rows.isEmpty ? '| No active washer activity recorded yet | - | - | - | - |' : 
       }
     }
 
-    final shampoo = state.consumables.firstWhere(
-      (c) => c.id == 'CS-009',
-      orElse: () => state.consumables.first,
-    );
-    final perfume = state.consumables.firstWhere(
-      (c) => c.id == 'CS-006',
-      orElse: () => state.consumables.first,
-    );
-    final towels = state.consumables.firstWhere(
-      (c) => c.id == 'CS-013',
-      orElse: () => state.consumables.first,
-    );
+    final shampoo = state.consumables.where((c) => c.id == 'CS-009').firstOrNull ??
+        (state.consumables.isNotEmpty
+            ? state.consumables.first
+            : const ConsumableItem(
+                id: 'CS-009',
+                name: 'Snow Foam Shampoo',
+                nameAmharic: 'የበረዶ አረፋ ሻምፑ',
+                category: 'Chemicals',
+                unit: 'L',
+                currentStock: 0,
+                minThreshold: 4,
+                unitCostEtb: 1850.0,
+              ));
+    final perfume = state.consumables.where((c) => c.id == 'CS-006').firstOrNull ??
+        (state.consumables.isNotEmpty
+            ? state.consumables.first
+            : const ConsumableItem(
+                id: 'CS-006',
+                name: 'Air Freshener',
+                nameAmharic: 'የመኪና ውስጥ ሽቶ',
+                category: 'Chemicals',
+                unit: 'bottles',
+                currentStock: 0,
+                minThreshold: 6,
+                unitCostEtb: 420.0,
+              ));
+    final towels = state.consumables.where((c) => c.id == 'CS-013').firstOrNull ??
+        (state.consumables.isNotEmpty
+            ? state.consumables.first
+            : const ConsumableItem(
+                id: 'CS-013',
+                name: 'Microfiber Towel',
+                nameAmharic: 'የማይክሮፋይበር ፎጣ',
+                category: 'Towels',
+                unit: 'pcs',
+                currentStock: 0,
+                minThreshold: 10,
+                unitCostEtb: 150.0,
+              ));
 
     final double calcShampooLiters = totalEvu * 0.125;
     final double calcPerfumeMl = totalEvu * 5.0;

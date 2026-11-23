@@ -590,21 +590,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Row(
+                                              Wrap(
+                                                crossAxisAlignment: WrapCrossAlignment.center,
+                                                spacing: 8,
+                                                runSpacing: 4,
                                                 children: [
-                                                  Flexible(
-                                                    child: Text(
-                                                      state.tr('customerPortal'),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight: FontWeight.w900,
-                                                        color: AppColors.textPrimary,
-                                                      ),
+                                                  Text(
+                                                    state.tr('customerPortal'),
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w900,
+                                                      color: AppColors.textPrimary,
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 8),
                                                   Container(
                                                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                                     decoration: BoxDecoration(

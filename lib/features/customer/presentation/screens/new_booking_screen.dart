@@ -1073,7 +1073,21 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         serviceType: _selectedServiceType,
         carType: _isCarpet ? CarType.automobile : _selectedCarType,
         licensePlate: _plateController.text.trim().toUpperCase(),
-        package: activePackage ?? state.packages.first,
+        package: activePackage ??
+            (state.packages.isNotEmpty
+                ? state.packages.first
+                : const WashPackage(
+                    id: 'pkg-standard',
+                    name: 'Standard Wash',
+                    description: 'Standard exterior body wash',
+                    durationMinutes: 30,
+                    pricingByCarType: {
+                      CarType.automobile: 350.0,
+                      CarType.minibus: 450.0,
+                      CarType.truck: 650.0,
+                    },
+                    features: ['Foam wash', 'Rinse', 'Tire shine'],
+                  )),
         deliveryLocation: fullAddress,
         paymentMethod: PaymentMethod.cash,
         gpsCoordinates: gpsCoords,
