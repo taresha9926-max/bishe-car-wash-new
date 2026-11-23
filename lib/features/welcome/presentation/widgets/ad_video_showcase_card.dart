@@ -65,9 +65,10 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
   void _launchTikTok(BuildContext context, String url) {
     final cleanUrl = UrlLauncherHelper.cleanUrl(url);
     if (cleanUrl.isEmpty) {
+      final state = AppStateProvider.read(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('TikTok link is not configured yet'),
+        SnackBar(
+          content: Text(state.tr('linkNotConfigured')),
           backgroundColor: Colors.orange,
         ),
       );

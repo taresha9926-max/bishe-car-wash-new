@@ -134,8 +134,10 @@ class LiveWashStepper extends StatelessWidget {
                   ),
                   child: Text(
                     isDone
-                        ? 'DONE'
-                        : (isCurrent ? 'CURRENT' : 'STEP ${stepIndex + 1}'),
+                        ? state.tr('stepperDone').toUpperCase()
+                        : (isCurrent
+                            ? state.tr('stepperCurrent').toUpperCase()
+                            : '${state.tr('stepperStep').toUpperCase()} ${stepIndex + 1}'),
                     style: TextStyle(
                       fontSize: 8.5,
                       fontWeight: FontWeight.w800,

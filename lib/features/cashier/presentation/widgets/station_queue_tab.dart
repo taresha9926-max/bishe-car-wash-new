@@ -1124,7 +1124,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
 
   Future<void> _showPostponeDialog(BuildContext context, dynamic state, WashBooking b) async {
     String reason = '';
-    final requireReason = widget.isManager;
+    const requireReason = true;
     String? errorMsg;
     final confirmed = await showDialog<bool>(
       context: context,

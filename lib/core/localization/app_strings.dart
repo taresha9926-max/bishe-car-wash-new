@@ -6238,6 +6238,91 @@ class AppStrings {
       AppLanguage.om: 'Ibsa / Bakka Fooyyessi',
       AppLanguage.am: 'ዝርዝር መረጃ / ቦታ አስተካክል',
     },
+    'stepperDone': {
+      AppLanguage.en: 'DONE',
+      AppLanguage.om: 'XUMURAMEERA',
+      AppLanguage.am: 'ተጠናቋል',
+    },
+    'stepperCurrent': {
+      AppLanguage.en: 'CURRENT',
+      AppLanguage.om: 'HOJJETAMAA JIRA',
+      AppLanguage.am: 'በሂደት ላይ',
+    },
+    'stepperStep': {
+      AppLanguage.en: 'STEP',
+      AppLanguage.om: 'SADARKAA',
+      AppLanguage.am: 'ደረጃ',
+    },
+    'phaseCounter': {
+      AppLanguage.en: 'Phase',
+      AppLanguage.om: 'Marsaa',
+      AppLanguage.am: 'ምዕራፍ',
+    },
+    'ofTotal': {
+      AppLanguage.en: 'of',
+      AppLanguage.om: 'keessaa',
+      AppLanguage.am: 'ከ',
+    },
+    'liveBadge': {
+      AppLanguage.en: 'LIVE',
+      AppLanguage.om: 'KALLATTII',
+      AppLanguage.am: 'ቀጥታ',
+    },
+    'pendingStep': {
+      AppLanguage.en: 'Pending Step',
+      AppLanguage.om: 'Sadarkaa Eeggatu',
+      AppLanguage.am: 'ተራ የሚጠብቅ ደረጃ',
+    },
+    'stationHoursDaily': {
+      AppLanguage.en: 'Open daily 7:00 AM - 8:00 PM',
+      AppLanguage.om: "Guyyaa hundumaa sa'aatii 1:00 - 2:00 banaadha",
+      AppLanguage.am: 'በየቀኑ ከጠዋቱ 1:00 - ማታ 2:00 ክፍት ነው',
+    },
+    'viewDigitalReceipt': {
+      AppLanguage.en: 'View Digital Receipt',
+      AppLanguage.om: 'Nagahee Dijitaalaa Ilaali',
+      AppLanguage.am: 'ዲጂታል ደረሰኝ ይመልከቱ',
+    },
+    'digitalReceiptTitle': {
+      AppLanguage.en: 'Digital Receipt & Payment Voucher',
+      AppLanguage.om: 'Nagahee Dijitaalaa fi Ragaa Kaffaltii',
+      AppLanguage.am: 'ዲጂታል ደረሰኝ እና የክፍያ ማረጋገጫ',
+    },
+    'paymentVerifiedBadge': {
+      AppLanguage.en: 'Verified Paid',
+      AppLanguage.om: "Kaffaltiin Mirkanaa'e",
+      AppLanguage.am: 'ክፍያው ተረጋግጧል',
+    },
+    'offlineNotice': {
+      AppLanguage.en: 'Connection Unavailable',
+      AppLanguage.om: 'Koonneekshiniin Hin Jiru',
+      AppLanguage.am: 'የኔትወርክ ግንኙነት የለም',
+    },
+    'callStationDirect': {
+      AppLanguage.en: 'Call Bishoftu Station directly at 0910046553 to book your wash',
+      AppLanguage.om: 'Dhiqannaa keessan qabachuuf kallattiin Buufata Bishooftuu 0910046553 irratti bilbilaa',
+      AppLanguage.am: 'እጥበትዎን ለማስያዝ በቀጥታ ወደ ቢሾፍቱ ጣቢያ በ 0910046553 ይደውሉ',
+    },
+    'offlineCachedStatus': {
+      AppLanguage.en: 'Offline (showing latest cached status)',
+      AppLanguage.om: "Koonneekshinii malee (haala qabame mul'isa)",
+      AppLanguage.am: 'ከመስመር ውጭ (የመጨረሻውን መረጃ እያሳየ ነው)',
+    },
+    'offlineOrderHelp': {
+      AppLanguage.en: 'Network offline. Would you like to call the Bishoftu Station desk directly?',
+      AppLanguage.om: 'Koonneekshiniin addaan citeera. Kallattiin minjaala Buufata Bishooftuu bilbiluu barbaadduu?',
+      AppLanguage.am: 'የኔትወርክ መስመር ተቋርጧል። በቀጥታ ወደ ቢሾፍቱ ጣቢያ ቢሮ መደወል ይፈልጋሉ?',
+    },
+    'callStationNow': {
+      AppLanguage.en: 'Call Station Desk',
+      AppLanguage.om: 'Minjaala Buufataa Bilbili',
+      AppLanguage.am: 'ወደ ጣቢያው ቢሮ ይደውሉ',
+    },
+    'linkNotConfigured': {
+      AppLanguage.en: 'Video link is not configured yet',
+      AppLanguage.om: 'Liankiin viidiyoo ammayyuu hin qophoofne',
+      AppLanguage.am: 'የቪዲዮ ማያያዣ ገና አልተዘጋጀም',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

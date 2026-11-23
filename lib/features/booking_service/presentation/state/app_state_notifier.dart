@@ -3593,7 +3593,7 @@ class AppStateNotifier extends ChangeNotifier {
 
   /// Real-time single-booking status refresher for customer LiveTrackingScreen
   /// Pulls the latest live status from repository without querying unbounded tables.
-  Future<void> refreshActiveBooking(String bookingId) async {
+  Future<bool> refreshActiveBooking(String bookingId) async {
     try {
       final updated = await _repository.getBookingById(bookingId);
       if (updated != null) {
@@ -3612,8 +3612,10 @@ class AppStateNotifier extends ChangeNotifier {
           notifyListeners();
         }
       }
+      return true;
     } catch (e) {
       debugPrint('Real-time booking refresh error: $e');
+      return false;
     }
   }
 

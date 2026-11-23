@@ -2408,15 +2408,18 @@ We prioritize transparency in our wash services, package quality, and customer p
   // EXISTING EXECUTIVE REPORTS
   // ==========================================
   static String _generatePnlReport(AppStateNotifier state, DateTime now) {
+    final vehicleWashRevenue = state.todayVehicleRevenueETB;
+    final carpetWashRevenue = state.todayCarpetRevenueETB;
+    final showerRevenue = state.todayShowerRevenueETB;
+    final grossRevenue = vehicleWashRevenue + carpetWashRevenue + showerRevenue;
+    final vatDeducted = state.vatDeductedTodayETB;
+    final netAfterVat = state.netBusinessRevenueTodayETB;
+
     final todayBookings = state.bookings.where((b) {
       final d = b.createdAt;
       return d.year == now.year && d.month == now.month && d.day == now.day;
     }).toList();
-
     final paidToday = todayBookings.where((b) => b.payment.isPaid).toList();
-    final grossRevenue = paidToday.fold(0.0, (sum, b) => sum + b.totalPrice);
-    final vatDeducted = grossRevenue * 0.15;
-    final netAfterVat = grossRevenue - vatDeducted;
 
     final commissionsPaid = state.commissionLogs.where((l) {
       final d = l.completedAt;
@@ -2451,9 +2454,9 @@ We prioritize transparency in our wash services, package quality, and customer p
 
 | Financial Component | Amount (ETB) | Accounting Treatment |
 | :--- | :--- | :--- |
-| **Gross Revenue (${paidToday.length} settled)** | **${CurrencyFormatter.format(grossRevenue)}** | Operating Cash & Digital Inflow |
-| Less: 15% VAT Statutory Deduction | - ${CurrencyFormatter.format(vatDeducted)} | Tax Obligation |
-| **Net Service Revenue** | **${CurrencyFormatter.format(netAfterVat)}** | Net Taxable Income |
+| **Gross Revenue (${paidToday.length} settled)** | **${CurrencyFormatter.format(grossRevenue)}** | Car (${CurrencyFormatter.format(vehicleWashRevenue)}), Carpet (${CurrencyFormatter.format(carpetWashRevenue)}), Shower (${CurrencyFormatter.format(showerRevenue)}) |
+| Less: 15% VAT Statutory Deduction | - ${CurrencyFormatter.format(vatDeducted)} | Vehicle wash only (Carpet & Shower 0% exempt) |
+| **Net Operating Revenue** | **${CurrencyFormatter.format(netAfterVat)}** | Harmonized Taxable Business Revenue |
 | Less: Washer Commissions (15%) | - ${CurrencyFormatter.format(commissionsPaid)} | Direct Labor (COGS) |
 | Less: Storekeeper Soap Consumed (ዕቃ በዕቃ) | - ${CurrencyFormatter.format(suppliesConsumed)} | Direct Chemicals (COGS) |
 | **GROSS OPERATING PROFIT** | **${CurrencyFormatter.format(grossProfit)}** | **Margin: ${grossRevenue > 0 ? ((grossProfit / grossRevenue) * 100).toStringAsFixed(1) : '0'}%** |

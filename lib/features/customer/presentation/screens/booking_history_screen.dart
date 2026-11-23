@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/receipt_image_helper.dart';
 import '../../../../core/widgets/language_switcher_action.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -267,6 +268,25 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                                         ),
                                       ],
                                     ),
+                                    if (booking.payment.isPaid) ...[
+                                      const SizedBox(height: 6),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: TextButton.icon(
+                                          onPressed: () => ReceiptImageHelper.showDigitalReceiptDialog(context, booking, state: state),
+                                          icon: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.telebirrBlue),
+                                          label: Text(
+                                            state.tr('viewDigitalReceipt'),
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.telebirrBlue),
+                                          ),
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            minimumSize: Size.zero,
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),

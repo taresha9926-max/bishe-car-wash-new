@@ -706,27 +706,27 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   isLoading: false,
                   onPressed: null,
                 ),
-                if (!widget.isManagerClosing) ...[
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _handleUnlockShift(context, state),
-                      icon: const Icon(Icons.lock_open_rounded, color: AppColors.primary, size: 18),
-                      label: Text(
-                        (state.pendingCashierHandover != null || state.pendingCashierAdminHandover != null)
-                            ? state.tr('unlockAndResumeShift')
-                            : state.tr('unlockWithManagerPin'),
-                        style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 13),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.primary, width: 1.5),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _handleUnlockShift(context, state),
+                    icon: const Icon(Icons.lock_open_rounded, color: AppColors.primary, size: 18),
+                    label: Text(
+                      widget.isManagerClosing
+                          ? state.tr('unlockAndResumeShift')
+                          : ((state.pendingCashierHandover != null || state.pendingCashierAdminHandover != null)
+                              ? state.tr('unlockAndResumeShift')
+                              : state.tr('unlockWithManagerPin')),
+                      style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 13),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primary, width: 1.5),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
-                ],
+                ),
               ] else
                 CustomButton(
                   text: needsCommissionDisbursement
@@ -907,7 +907,9 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
   }
 
   Future<void> _handleUnlockShift(BuildContext context, dynamic state) async {
-    final isPending = state.pendingCashierHandover != null || state.pendingCashierAdminHandover != null;
+    final isPending = widget.isManagerClosing
+        ? true
+        : (state.pendingCashierHandover != null || state.pendingCashierAdminHandover != null);
     if (isPending) {
       final confirm = await showDialog<bool>(
         context: context,
@@ -948,7 +950,11 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
       );
 
       if (confirm == true) {
-        await state.unlockDayShiftClosing();
+        if (widget.isManagerClosing) {
+          await state.unlockNightShiftClosing();
+        } else {
+          await state.unlockDayShiftClosing();
+        }
         if (context.mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -1042,7 +1048,11 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                         final isAdmin = isMgr ? false : await state.authenticateRoleAsync(UserRole.admin, pin);
 
                         if (isMgr || isAdmin) {
-                          await state.unlockDayShiftClosing();
+                          if (widget.isManagerClosing) {
+                            await state.unlockNightShiftClosing();
+                          } else {
+                            await state.unlockDayShiftClosing();
+                          }
                           if (ctx.mounted) Navigator.pop(ctx, true);
                         } else {
                           setDialogState(() {

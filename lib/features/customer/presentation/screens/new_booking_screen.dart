@@ -3,6 +3,7 @@ import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
+import 'package:bishe_car_wash/core/utils/url_launcher_helper.dart';
 import 'package:bishe_car_wash/core/widgets/custom_button.dart';
 import 'package:bishe_car_wash/core/widgets/custom_text_field.dart';
 import 'package:bishe_car_wash/core/widgets/language_switcher_action.dart';
@@ -1114,9 +1115,72 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: Colors.redAccent, content: Text('${state.tr("bookingFailedPrefix")}: $e')),
-        );
+        final errStr = e.toString().toLowerCase();
+        final isNetworkErr = errStr.contains('socket') ||
+            errStr.contains('clientexception') ||
+            errStr.contains('network') ||
+            errStr.contains('failed host lookup') ||
+            errStr.contains('connection');
+
+        if (isNetworkErr) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              backgroundColor: const Color(0xFF1E293B),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Row(
+                children: [
+                  const Icon(Icons.wifi_off_rounded, color: Colors.amber, size: 22),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      state.tr('offlineNotice'),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    state.tr('offlineOrderHelp'),
+                    style: const TextStyle(fontSize: 13, color: Colors.white70, height: 1.4),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    state.tr('callStationDirect'),
+                    style: const TextStyle(fontSize: 12, color: AppColors.liquidCyanNeon, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(state.tr('close'), style: const TextStyle(color: Colors.white70)),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF059669),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    UrlLauncherHelper.openUrl('tel:0910046553');
+                  },
+                  icon: const Icon(Icons.phone, size: 16),
+                  label: Text(state.tr('callStationNow')),
+                ),
+              ],
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(backgroundColor: Colors.redAccent, content: Text('${state.tr("bookingFailedPrefix")}: $e')),
+          );
+        }
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

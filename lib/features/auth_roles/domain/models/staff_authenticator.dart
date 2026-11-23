@@ -24,23 +24,33 @@ class StaffAuthenticator {
 
     // If active credentials exist in the system for this role, ONLY those exact credentials are valid
     if (roleCredentials.isNotEmpty) {
-      return roleCredentials.any((c) => c.pin.trim() == pin);
+      return roleCredentials.any((c) => _secureCompare(c.pin.trim(), pin));
     }
 
     // Default PIN fallback only if no active credentials exist in the system for that role
     switch (role) {
       case UserRole.admin:
-        return pin == defaultAdminPin;
+        return _secureCompare(pin, defaultAdminPin);
       case UserRole.cashier:
-        return pin == defaultCashierPin;
+        return _secureCompare(pin, defaultCashierPin);
       case UserRole.manager:
-        return pin == defaultManagerPin;
+        return _secureCompare(pin, defaultManagerPin);
       case UserRole.accountant:
-        return pin == defaultAccountantPin;
+        return _secureCompare(pin, defaultAccountantPin);
       case UserRole.storekeeper:
-        return pin == defaultStorekeeperPin;
+        return _secureCompare(pin, defaultStorekeeperPin);
       case UserRole.customer:
         return true;
     }
+  }
+
+  /// Constant-time comparison to prevent timing analysis attacks on PIN verification.
+  static bool _secureCompare(String a, String b) {
+    if (a.length != b.length) return false;
+    int result = 0;
+    for (int i = 0; i < a.length; i++) {
+      result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
+    }
+    return result == 0;
   }
 }

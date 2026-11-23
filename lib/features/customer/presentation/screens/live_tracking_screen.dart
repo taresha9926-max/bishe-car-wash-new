@@ -5,6 +5,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/receipt_image_helper.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/language_switcher_action.dart';
@@ -32,6 +33,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
   final TextEditingController _searchController = TextEditingController();
   String? _queriedBookingId;
   bool _showSearchHeader = false;
+  bool _isOffline = false;
   Timer? _liveSyncTimer;
 
   @override
@@ -47,12 +49,19 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     if (isTesting) return;
 
     // Real-time automatic polling every 3.5 seconds to sync cashier/manager status updates instantly
-    _liveSyncTimer = Timer.periodic(const Duration(milliseconds: 3500), (_) {
+    _liveSyncTimer = Timer.periodic(const Duration(milliseconds: 3500), (_) async {
       if (!mounted) return;
       final state = AppStateProvider.of(context);
       final activeId = _queriedBookingId ?? state.activeTrackingBookingId;
       if (activeId != null && activeId.isNotEmpty) {
-        state.refreshActiveBooking(activeId);
+        final ok = await state.refreshActiveBooking(activeId);
+        if (mounted) {
+          if (!ok && !_isOffline) {
+            setState(() => _isOffline = true);
+          } else if (ok && _isOffline) {
+            setState(() => _isOffline = false);
+          }
+        }
       }
     });
   }
@@ -194,9 +203,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Text(
-                  'LIVE',
-                  style: TextStyle(
+                Text(
+                  state.tr('liveBadge'),
+                  style: const TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w900,
                     color: Color(0xFF10B981),
@@ -226,6 +235,29 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_isOffline) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade900.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.amber.shade700, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.cloud_off_rounded, color: Colors.amber, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.tr('offlineCachedStatus'),
+                        style: const TextStyle(fontSize: 11.5, color: Colors.amber, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (_showSearchHeader) ...[
               Container(
                 margin: const EdgeInsets.only(bottom: 14),
@@ -338,6 +370,58 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 ],
               ),
             ),
+            if (booking.payment.isPaid) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4), width: 1.2),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF10B981), size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            state.tr('digitalReceiptTitle'),
+                            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.white),
+                          ),
+                          Text(
+                            '${booking.payment.method.displayName} • ${state.tr('paymentVerifiedBadge')}',
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF10B981), fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => ReceiptImageHelper.showDigitalReceiptDialog(context, booking!, state: state),
+                      icon: const Icon(Icons.visibility_rounded, size: 14, color: AppColors.liquidCyanNeon),
+                      label: Text(
+                        state.tr('viewDigitalReceipt'),
+                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.liquidCyanNeon),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.liquidCyanNeon),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
 
             // Facility Contact Assistance
@@ -359,9 +443,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                           'Bishoftu Station Desk: ${state.customerPhoneBookingNumber}',
                           style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
                         ),
-                        const Text(
-                          'Open daily 7:00 AM - 8:00 PM',
-                          style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                        Text(
+                          state.tr('stationHoursDaily'),
+                          style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -633,7 +717,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
 
     final counterText = activePhase == 0
         ? state.tr('waitingArrival')
-        : (activePhase == 4 ? state.tr('completedPhaseBadge') : 'PHASE $activePhase OF 4');
+        : (activePhase == 4
+            ? state.tr('completedPhaseBadge')
+            : '${state.tr('phaseCounter').toUpperCase()} $activePhase ${state.tr('ofTotal').toUpperCase()} 4');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -705,6 +791,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     int activePhase,
     WashBooking booking,
   ) {
+    final state = AppStateProvider.of(context);
     final isReached = activePhase >= phase.stageNumber;
     final isCurrent = activePhase == phase.stageNumber && booking.status != WashStatus.completed;
     final isDone = activePhase > phase.stageNumber || booking.status == WashStatus.completed;
@@ -742,7 +829,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Pending Step ${phase.stageNumber}',
+              '${state.tr('pendingStep')} ${phase.stageNumber}',
               style: const TextStyle(
                 fontSize: 8.5,
                 fontWeight: FontWeight.w800,
@@ -808,7 +895,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    isCurrent ? 'ACTIVE' : 'DONE',
+                    isCurrent ? state.tr('stepperCurrent').toUpperCase() : state.tr('stepperDone').toUpperCase(),
                     style: TextStyle(
                       fontSize: 8.0,
                       fontWeight: FontWeight.w900,
