@@ -579,6 +579,25 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               });
             },
           ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+            icon: const Icon(Icons.refresh_rounded, size: 18, color: AppColors.liquidCyanNeon),
+            tooltip: state.tr('refresh'),
+            onPressed: () async {
+              await state.loadData();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.tr('refresh')),
+                    backgroundColor: AppColors.statusCompleted,
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+              }
+            },
+          ),
           if (state.currentRole != UserRole.customer)
             IconButton(
               visualDensity: VisualDensity.compact,

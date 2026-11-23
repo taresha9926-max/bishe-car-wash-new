@@ -99,7 +99,7 @@ class SuperBrainController:
         return "BISHE Operations Manual: 15% VAT on car/carpet, 0% on shower. Default washer commission 15% on Net Base."
 
     def _sb_request(self, endpoint: str):
-        """Minimal byte projection with strict limits."""
+        """Minimal byte projection with strict limits. Returns parsed list/dict on success, None on error."""
         url = f"{self.config.supabase_url.rstrip('/')}/rest/v1/{endpoint}"
         auth_key = self.config.supabase_service_role_key or self.config.supabase_anon_key
         req = urllib.request.Request(
@@ -113,68 +113,103 @@ class SuperBrainController:
         try:
             with urllib.request.urlopen(req, timeout=10) as response:
                 return json.loads(response.read().decode("utf-8"))
-        except Exception:
-            return []
+        except Exception as e:
+            return None
 
     # --- TTL-Cached Master Tables ---
-    def get_staff(self) -> list[dict]:
+    def get_staff(self, force_refresh: bool = False) -> list[dict]:
         now = time.time()
-        if self._staff_cache and now < self._staff_expiry:
+        if not force_refresh and self._staff_cache and now < self._staff_expiry:
             return self._staff_cache
         data = self._sb_request("staff_members?select=id,name,role,commission_rate,base_salary,is_active&order=name.asc")
-        if data:
+        if data is not None:
             self._staff_cache = data
             self._staff_expiry = now + 900  # 15 min TTL
         return self._staff_cache or []
 
-    def get_packages(self) -> list[dict]:
+    def get_packages(self, force_refresh: bool = False) -> list[dict]:
         now = time.time()
-        if self._packages_cache and now < self._packages_expiry:
+        if not force_refresh and self._packages_cache and now < self._packages_expiry:
             return self._packages_cache
         data = self._sb_request("wash_packages?select=id,name,price_automobile,price_minibus,price_truck&order=name.asc")
-        if data:
+        if data is not None:
             self._packages_cache = data
             self._packages_expiry = now + 1800  # 30 min TTL
         return self._packages_cache or []
 
-    def get_bays(self) -> list[dict]:
+    def get_bays(self, force_refresh: bool = False) -> list[dict]:
         now = time.time()
-        if self._bays_cache and now < self._bays_expiry:
+        if not force_refresh and self._bays_cache and now < self._bays_expiry:
             return self._bays_cache
         data = self._sb_request("station_bays?select=bay_number,bay_type,is_occupied,active_license_plate,assigned_washer_name&order=bay_number.asc")
-        if data:
+        if data is not None:
             self._bays_cache = data
             self._bays_expiry = now + 180  # 3 min TTL
         return self._bays_cache or []
 
-    def get_today_bookings(self) -> list[dict]:
+    def get_today_bookings(self, force_refresh: bool = False) -> list[dict]:
         now_ts = time.time()
-        if self._today_bookings_cache and now_ts < self._today_bookings_expiry:
+        if not force_refresh and self._today_bookings_cache is not None and now_ts < self._today_bookings_expiry:
             return self._today_bookings_cache
 
         now = datetime.now()
         s_iso = now.strftime("%Y-%m-%dT00:00:00Z")
         endpoint = f"wash_bookings?select=id,license_plate,car_type,total_amount,status,is_paid,payment_method,washer_1_name,washer_2_name,commission_amount,vat_amount,is_carpet,carpet_area_sq_meters,service_type,created_at,completed_at&created_at=gte.{s_iso}&order=created_at.desc&limit=60"
         data = self._sb_request(endpoint)
-        if not data:
-            # Fallback to local SQLite events (0 egress)
-            events = self.db.get_recent_events(limit=60)
-            local_list = []
-            for e in events:
-                if e.get("table_name") == "wash_bookings":
-                    rec = e.get("new_record")
-                    if rec and isinstance(rec, str):
-                        try:
-                            rec = json.loads(rec)
-                        except Exception:
-                            rec = {}
-                    if rec and rec.get("id") and not any(x.get("id") == rec.get("id") for x in local_list):
-                        local_list.append(rec)
-            data = local_list
+        if data is not None and isinstance(data, list):
+            # Authoritative live truth from Supabase (including empty list [] when table cleared)
+            self._today_bookings_cache = data
+            self._today_bookings_expiry = now_ts + 45  # 45 second cache
+            return data
 
-        self._today_bookings_cache = data
-        self._today_bookings_expiry = now_ts + 45  # 45 second cache
-        return data or []
+        # Fallback to local SQLite events ONLY when network query fails (None)
+        events = self.db.get_recent_events(limit=100)
+        today_date_str = now.strftime("%Y-%m-%d")
+        deleted_ids = {str(e.get("record_id")) for e in events if e.get("action") == "DELETE"}
+
+        local_list = []
+        for e in events:
+            if e.get("table_name") == "wash_bookings" and e.get("action") != "DELETE":
+                rec_id = str(e.get("record_id") or "")
+                if rec_id in deleted_ids:
+                    continue
+                rec = e.get("new_record")
+                if rec and isinstance(rec, str):
+                    try:
+                        rec = json.loads(rec)
+                    except Exception:
+                        rec = {}
+                if rec and rec.get("id"):
+                    b_id = str(rec.get("id"))
+                    if b_id in deleted_ids:
+                        continue
+                    rec_date = str(rec.get("created_at") or e.get("recorded_at") or "")
+                    if today_date_str not in rec_date:
+                        continue
+                    if not any(x.get("id") == rec.get("id") for x in local_list):
+                        local_list.append(rec)
+
+        self._today_bookings_cache = local_list
+        self._today_bookings_expiry = now_ts + 45
+        return local_list
+
+    def refresh_all_live_data(self) -> dict:
+        """Forces immediate cache invalidation and pulls live Supabase state."""
+        self._today_bookings_cache = None
+        self._today_bookings_expiry = 0
+        self._staff_cache = None
+        self._staff_expiry = 0
+        self._packages_cache = None
+        self._packages_expiry = 0
+        self._bays_cache = None
+        self._bays_expiry = 0
+
+        live_bookings = self.get_today_bookings(force_refresh=True)
+        live_kpis = self.compute_live_kpis()
+        return {
+            "bookings_count": len(live_bookings),
+            "kpi": live_kpis,
+        }
 
     def get_recent_feedback(self) -> list[dict]:
         """On-demand pull of customer feedback (limit 10, <500 bytes)."""

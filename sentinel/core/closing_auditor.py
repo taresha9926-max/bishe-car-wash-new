@@ -15,29 +15,46 @@ class ShiftClosingAuditor:
         self.config = config
         self.db = db
 
-    def compile_shift_audit(self, shift_type: str = "day_shift") -> dict:
+    def compile_shift_audit(self, shift_type: str = "day_shift", live_bookings: list[dict] = None) -> dict:
         """
         Reconciles today's operations against all financial and physical constraints.
         shift_type: 'day_shift' (07:00 - 20:30) or 'night_shift' (20:30 - 06:00)
+        live_bookings: If provided, authoritative live database records are used.
         """
         now = datetime.now()
-        events = self.db.get_recent_events(limit=200)
+        today_date_str = now.strftime('%Y-%m-%d')
 
-        # Filter events belonging to today's wash bookings
-        today_bookings = []
-        for e in events:
-            if e.get("table_name") == "wash_bookings":
-                rec = e.get("new_record")
-                if rec and isinstance(rec, str):
-                    try:
-                        import json
-                        rec = json.loads(rec)
-                    except Exception:
-                        rec = {}
-                if rec and rec.get("id"):
-                    # Check if already added (avoid multiple update entries for same booking)
-                    if not any(b.get("id") == rec.get("id") for b in today_bookings):
-                        today_bookings.append(rec)
+        if live_bookings is not None:
+            today_bookings = list(live_bookings)
+        else:
+            events = self.db.get_recent_events(limit=200)
+            deleted_ids = {str(e.get("record_id")) for e in events if e.get("action") == "DELETE"}
+
+            # Filter events belonging strictly to today's non-deleted wash bookings
+            today_bookings = []
+            for e in events:
+                if e.get("table_name") == "wash_bookings" and e.get("action") != "DELETE":
+                    rec_id = str(e.get("record_id") or "")
+                    if rec_id in deleted_ids:
+                        continue
+                    rec = e.get("new_record")
+                    if rec and isinstance(rec, str):
+                        try:
+                            import json
+                            rec = json.loads(rec)
+                        except Exception:
+                            rec = {}
+                    if rec and rec.get("id"):
+                        b_id = str(rec.get("id"))
+                        if b_id in deleted_ids:
+                            continue
+                        # Check that the booking belongs to today
+                        rec_date = str(rec.get("created_at") or e.get("recorded_at") or "")
+                        if today_date_str not in rec_date:
+                            continue
+                        # Check if already added (avoid multiple update entries for same booking)
+                        if not any(b.get("id") == rec.get("id") for b in today_bookings):
+                            today_bookings.append(rec)
 
         # Financial totals
         gross_revenue = 0.0
@@ -46,12 +63,13 @@ class ShiftClosingAuditor:
         cbe_total = 0.0
         total_commissions = 0.0
         total_evu = 0.0
-        cars_count = len(today_bookings)
+        cars_count = 0
 
         for b in today_bookings:
             # Only count confirmed and paid bookings in revenue
             if not b.get("is_paid") and b.get("status") != "completed":
                 continue
+            cars_count += 1
             amt = float(b.get("total_amount") or 0.0)
             gross_revenue += amt
 

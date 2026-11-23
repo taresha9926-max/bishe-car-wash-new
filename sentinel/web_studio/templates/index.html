@@ -290,7 +290,7 @@
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
       <span id="syncStatus" class="badge badge-gold">SYNCING...</span>
-      <button class="btn btn-gold" onclick="loadAllData()">REFRESH DATA</button>
+      <button id="refreshBtn" class="btn btn-gold" onclick="triggerLiveRefresh()">🔄 REFRESH DATA</button>
     </div>
   </header>
 
@@ -906,11 +906,45 @@
       }
     }
 
+    async function triggerLiveRefresh() {
+      const btn = document.getElementById('refreshBtn');
+      const oldHtml = btn ? btn.innerHTML : '🔄 REFRESH DATA';
+      if (btn) {
+        btn.innerHTML = '⏳ SYNCING SUPABASE...';
+        btn.disabled = true;
+      }
+      const syncBadge = document.getElementById('syncStatus');
+      if (syncBadge) {
+        syncBadge.innerText = 'SYNCING SUPABASE...';
+        syncBadge.className = 'badge badge-gold';
+      }
+
+      try {
+        const res = await fetch('/api/refresh', { method: 'POST' });
+        const data = await res.json();
+        await loadAllData();
+        if (syncBadge) {
+          syncBadge.innerText = 'LIVE SYNCED (' + (data.live_bookings_count || 0) + ' ACTIVE)';
+          syncBadge.className = 'badge badge-green';
+        }
+        if (btn) {
+          btn.innerHTML = '✅ SYNCED!';
+          setTimeout(() => {
+            btn.innerHTML = oldHtml;
+            btn.disabled = false;
+          }, 1500);
+        }
+      } catch (e) {
+        await loadAllData();
+        if (btn) {
+          btn.innerHTML = oldHtml;
+          btn.disabled = false;
+        }
+      }
+    }
+
     async function refreshClosing() {
-      const closeRes = await fetch('/api/closing');
-      const closeData = await closeRes.json();
-      document.getElementById('closingReportBox').innerText = closeData.audit_summary || 'No data';
-      loadAllData();
+      await triggerLiveRefresh();
     }
 
     // Auto-refresh every 30 seconds

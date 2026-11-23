@@ -107,6 +107,7 @@ def main():
         closing=closing,
         projector=projector,
         super_brain=super_brain,
+        ingestion=ingestion,
         port=config.web_port
     )
     config.web_port = port

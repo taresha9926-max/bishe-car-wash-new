@@ -17,6 +17,7 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
     closing_auditor = None
     developer_projector = None
     super_brain = None
+    ingestion_engine = None
 
     def log_message(self, format, *args):
         # Keep terminal clean; silence routine asset queries
@@ -51,11 +52,13 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
             last_id = self.db.get_last_synced_id()
             anomalies = self.db.get_unresolved_anomalies()
             total_events = self.db.get_total_events_count()
+            live_bookings = self.super_brain.get_today_bookings() if self.super_brain else []
             self._serve_json({
                 "status": "online",
                 "last_synced_id": last_id,
                 "unresolved_anomalies_count": len(anomalies),
                 "total_cached_events": total_events,
+                "today_live_bookings_count": len(live_bookings),
                 "telegram_configured": bool(self.config.telegram_bot_token and self.config.telegram_chat_id),
                 "gemini_active": bool(self.config.gemini_api_key),
                 "port": self.config.web_port
@@ -69,31 +72,27 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
             anomalies = self.db.get_unresolved_anomalies()
             self._serve_json(anomalies)
         elif path == "/api/closing":
-            report = self.closing_auditor.compile_shift_audit("day_shift")
+            live_bookings = self.super_brain.get_today_bookings() if self.super_brain else None
+            report = self.closing_auditor.compile_shift_audit("day_shift", live_bookings=live_bookings)
             self._serve_json(report)
         elif path == "/api/yield":
-            events = self.db.get_recent_events(limit=100)
+            bookings = self.super_brain.get_today_bookings() if self.super_brain else []
             total_evu = 0.0
             cars_count = 0
-            for e in events:
-                if e.get("table_name") == "wash_bookings":
-                    cars_count += 1
-                    rec = e.get("new_record")
-                    if rec and isinstance(rec, str):
-                        try:
-                            rec = json.loads(rec)
-                        except Exception:
-                            rec = {}
-                    if rec:
-                        ctype = str(rec.get("car_type", "")).lower()
-                        if any(k in ctype for k in ["truck", "heavy"]):
-                            total_evu += 2.5
-                        elif any(k in ctype for k in ["minibus", "van"]):
-                            total_evu += 1.8
-                        elif any(k in ctype for k in ["suv", "pickup"]):
-                            total_evu += 1.4
-                        else:
-                            total_evu += 1.0
+            for b in bookings:
+                cars_count += 1
+                ctype = str(b.get("car_type", "")).lower()
+                if b.get("is_carpet"):
+                    area = float(b.get("carpet_area_sq_meters") or 12.0)
+                    total_evu += round(area * 0.25, 2)
+                elif any(k in ctype for k in ["truck", "heavy"]):
+                    total_evu += 2.5
+                elif any(k in ctype for k in ["minibus", "van"]):
+                    total_evu += 1.8
+                elif any(k in ctype for k in ["suv", "pickup"]):
+                    total_evu += 1.4
+                else:
+                    total_evu += 1.0
 
             shampoo_liters = (total_evu * 125.0) / 1000.0
             perfume_ml = total_evu * 5.0
@@ -105,6 +104,31 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
                 "perfume_ml_consumed": round(perfume_ml, 0),
                 "perfume_bottles_estimated": round(perfume_ml / 500.0, 2),
                 "chemical_cost_etb": round(total_evu * 28.50, 2)
+            })
+        elif path == "/api/refresh":
+            synced_count = 0
+            if self.ingestion_engine:
+                try:
+                    new_events = self.ingestion_engine.sync_once()
+                    synced_count = len(new_events) if new_events else 0
+                except Exception as e:
+                    print(f"[Sentinel Web Studio] Sync error on refresh: {e}")
+
+            if self.super_brain:
+                self.super_brain.refresh_all_live_data()
+            live_bookings = self.super_brain.get_today_bookings(force_refresh=True) if self.super_brain else []
+            closing_report = self.closing_auditor.compile_shift_audit("day_shift", live_bookings=live_bookings) if self.closing_auditor else {}
+
+            self._serve_json({
+                "success": True,
+                "synced_events_count": synced_count,
+                "live_bookings_count": len(live_bookings),
+                "gross_revenue": closing_report.get("gross_revenue", 0.0),
+                "ebitda": closing_report.get("ebitda", 0.0),
+                "cash_drawer": closing_report.get("cash_drawer", 0.0),
+                "telebirr_total": closing_report.get("telebirr_total", 0.0),
+                "cbe_total": closing_report.get("cbe_total", 0.0),
+                "audit_summary": closing_report.get("audit_summary", "")
             })
         elif path == "/api/proposals":
             suggestions = self.developer_projector.detect_ux_friction_patterns(self.db.get_recent_events(limit=50))
@@ -169,6 +193,31 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
             if self.super_brain:
                 self.super_brain.conversation_history = []
             self._serve_json({"status": "cleared"})
+        elif path == "/api/refresh":
+            synced_count = 0
+            if self.ingestion_engine:
+                try:
+                    new_events = self.ingestion_engine.sync_once()
+                    synced_count = len(new_events) if new_events else 0
+                except Exception as e:
+                    print(f"[Sentinel Web Studio] Sync error on refresh: {e}")
+
+            if self.super_brain:
+                self.super_brain.refresh_all_live_data()
+            live_bookings = self.super_brain.get_today_bookings(force_refresh=True) if self.super_brain else []
+            closing_report = self.closing_auditor.compile_shift_audit("day_shift", live_bookings=live_bookings) if self.closing_auditor else {}
+
+            self._serve_json({
+                "success": True,
+                "synced_events_count": synced_count,
+                "live_bookings_count": len(live_bookings),
+                "gross_revenue": closing_report.get("gross_revenue", 0.0),
+                "ebitda": closing_report.get("ebitda", 0.0),
+                "cash_drawer": closing_report.get("cash_drawer", 0.0),
+                "telebirr_total": closing_report.get("telebirr_total", 0.0),
+                "cbe_total": closing_report.get("cbe_total", 0.0),
+                "audit_summary": closing_report.get("audit_summary", "")
+            })
         else:
             self.send_response(404)
             self.end_headers()
@@ -182,13 +231,14 @@ class SentinelWebHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(content)
 
-def start_sentinel_web_studio(config, db, forensic, closing, projector, super_brain, port=8088):
+def start_sentinel_web_studio(config, db, forensic, closing, projector, super_brain, ingestion=None, port=8088):
     SentinelWebHandler.config = config
     SentinelWebHandler.db = db
     SentinelWebHandler.forensic_engine = forensic
     SentinelWebHandler.closing_auditor = closing
     SentinelWebHandler.developer_projector = projector
     SentinelWebHandler.super_brain = super_brain
+    SentinelWebHandler.ingestion_engine = ingestion
 
     server_address = ("127.0.0.1", port)
     try:
