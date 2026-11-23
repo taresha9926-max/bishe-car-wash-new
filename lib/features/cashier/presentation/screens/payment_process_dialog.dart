@@ -9,6 +9,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_field.dart';
+import '../../../auth_roles/domain/models/user_role.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -77,45 +78,51 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
     super.dispose();
   }
 
-  void _pickScreenshot() {
-    ImagePickerHelper.pickImage(onPicked: (img) async {
-      setState(() {
-        _uploadedScreenshotName = img.name;
-        _screenshotBase64 = img.base64Data;
-      });
+  void _onImageLoaded(PickedReceiptImage img) async {
+    setState(() {
+      _uploadedScreenshotName = img.name;
+      _screenshotBase64 = img.base64Data;
+    });
 
-      // Auto-scan reference number if not manually entered
-      if (_refCodeController.text.trim().isEmpty && img.base64Data != null && mounted) {
-        final state = AppStateProvider.read(context);
-        setState(() {
-          _isScanningReceipt = true;
-        });
-        try {
-          final scannedRef = await ReceiptOcrService.scanReferenceFromBase64(
-            base64Image: img.base64Data!,
-            geminiApiKey: state.geminiApiKey,
+    // Auto-scan reference number if not manually entered
+    if (_refCodeController.text.trim().isEmpty && img.base64Data != null && mounted) {
+      final state = AppStateProvider.read(context);
+      setState(() {
+        _isScanningReceipt = true;
+      });
+      try {
+        final scannedRef = await ReceiptOcrService.scanReferenceFromBase64(
+          base64Image: img.base64Data!,
+          geminiApiKey: state.geminiApiKey,
+        );
+        if (mounted && scannedRef != null && scannedRef.isNotEmpty) {
+          setState(() {
+            _refCodeController.text = scannedRef;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${state.tr("autoDetectedRef")}$scannedRef'),
+              backgroundColor: AppColors.cashGreen,
+              duration: const Duration(seconds: 3),
+            ),
           );
-          if (mounted && scannedRef != null && scannedRef.isNotEmpty) {
-            setState(() {
-              _refCodeController.text = scannedRef;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${state.tr("autoDetectedRef")}$scannedRef'),
-                backgroundColor: AppColors.cashGreen,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-        } finally {
-          if (mounted) {
-            setState(() {
-              _isScanningReceipt = false;
-            });
-          }
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isScanningReceipt = false;
+          });
         }
       }
-    });
+    }
+  }
+
+  void _pickScreenshot() {
+    ImagePickerHelper.pickImage(onPicked: _onImageLoaded);
+  }
+
+  void _takePhoto() {
+    ImagePickerHelper.takePhoto(onPicked: _onImageLoaded);
   }
 
   @override
@@ -824,66 +831,94 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 ),
                 const SizedBox(height: 10),
 
-                // Screenshot Upload Box
-                InkWell(
-                  onTap: _pickScreenshot,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: _uploadedScreenshotName != null ? AppColors.cashGreen.withOpacity(0.06) : Colors.red.withOpacity(0.04),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _uploadedScreenshotName != null ? AppColors.cashGreen : Colors.red.shade300,
-                        width: _uploadedScreenshotName != null ? 1.5 : 1,
+                // Digital Receipt Proof: Take Photo (Camera) or Upload File
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _takePhoto,
+                        icon: const Icon(Icons.camera_alt_rounded, size: 18),
+                        label: Text(
+                          state.tr('takePhoto'),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF0284C7),
+                          side: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                       ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickScreenshot,
+                        icon: const Icon(Icons.upload_file_rounded, size: 18),
+                        label: Text(
+                          state.tr('uploadPhoto'),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF7C3AED),
+                          side: const BorderSide(color: Color(0xFF7C3AED), width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_uploadedScreenshotName != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.cashGreen.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.cashGreen, width: 1.2),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          _uploadedScreenshotName != null ? Icons.image_rounded : Icons.camera_alt_outlined,
-                          color: _uploadedScreenshotName != null ? AppColors.cashGreen : Colors.red.shade700,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 10),
+                        const Icon(Icons.check_circle_rounded, color: AppColors.cashGreen, size: 18),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    _uploadedScreenshotName != null
-                                        ? 'Attached: $_uploadedScreenshotName'
-                                        : state.tr('uploadReceipt'),
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: _uploadedScreenshotName != null ? AppColors.cashGreen : Colors.red.shade800,
-                                    ),
-                                  ),
-                                  const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              Text(
-                                _uploadedScreenshotName != null
-                                    ? state.tr('receiptUploaded')
-                                    : state.tr('pleaseUploadProof'),
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  color: _uploadedScreenshotName != null ? AppColors.textMuted : Colors.red.shade700,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            'Attached: $_uploadedScreenshotName',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.cashGreen),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (_uploadedScreenshotName != null)
-                          const Icon(Icons.check_circle_rounded, color: AppColors.cashGreen, size: 20),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () => setState(() {
+                            _uploadedScreenshotName = null;
+                            _screenshotBase64 = null;
+                          }),
+                        ),
                       ],
                     ),
                   ),
-                ),
+                ] else ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    '${state.tr("proofMandatoryNotice")} *',
+                    style: TextStyle(fontSize: 10.5, color: Colors.red.shade400, fontWeight: FontWeight.w600),
+                  ),
+                ],
+                if (_isScanningReceipt)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+                        SizedBox(width: 8),
+                        Text('AI Scanning receipt reference...', style: TextStyle(fontSize: 11, color: Colors.white70)),
+                      ],
+                    ),
+                  ),
               ],
               const SizedBox(height: 20),
 
@@ -1085,6 +1120,9 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
       _isProcessing = true;
     });
 
+    final collectorRole = state.currentRole == UserRole.manager ? 'operationalManager' : 'cashier';
+    final collectorName = state.activeStaffFullName ?? (state.currentRole == UserRole.manager ? 'Operational Manager' : 'Cashier');
+
     try {
       await state.processPayment(
         bookingId: widget.booking.id,
@@ -1097,6 +1135,8 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         splitDigitalAmount: _isSplitPayment ? splitDigital : 0.0,
         overpaymentAction: _overpaymentAction,
         verificationStatus: verificationStatus,
+        collectedByRole: collectorRole,
+        collectedByName: collectorName,
       );
 
       navigator.pop();

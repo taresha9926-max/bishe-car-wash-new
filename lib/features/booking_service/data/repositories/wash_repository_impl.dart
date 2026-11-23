@@ -274,6 +274,8 @@ class WashRepositoryImpl implements IWashRepository {
     double? splitDigitalAmount,
     String? overpaymentAction,
     String? verificationStatus,
+    String? collectedByRole,
+    String? collectedByName,
   }) async {
     final index = _bookings.indexWhere((b) => b.id == bookingId);
     if (index == -1) {
@@ -293,6 +295,8 @@ class WashRepositoryImpl implements IWashRepository {
       splitDigitalAmount: splitDigitalAmount,
       overpaymentAction: overpaymentAction,
       verificationStatus: verificationStatus,
+      collectedByRole: collectedByRole,
+      collectedByName: collectedByName,
     );
 
     var updatedBooking = booking.copyWith(payment: updatedPayment);
@@ -363,6 +367,52 @@ class WashRepositoryImpl implements IWashRepository {
       handedOverBy: handedOverBy.trim().isNotEmpty ? handedOverBy.trim() : 'Cashier',
       handoverNote: (note != null && note.trim().isNotEmpty) ? note.trim() : booking.handoverNote,
       handedOverAt: DateTime.now(),
+    );
+    _bookings[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<WashBooking> updateBookingDetails({
+    required String bookingId,
+    String? licensePlate,
+    String? customerName,
+    String? customerPhone,
+    CarType? carType,
+    WashPackage? package,
+    double? customTotalPrice,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    String? notes,
+  }) async {
+    final index = _bookings.indexWhere((b) => b.id == bookingId);
+    if (index == -1) {
+      throw Exception('Booking $bookingId not found');
+    }
+    final existing = _bookings[index];
+    final effectivePackage = package ?? existing.package;
+    final effectiveCarType = carType ?? existing.carType;
+    final effectivePrice = customTotalPrice ?? (customTotalPrice != null ? customTotalPrice : existing.customTotalPrice ?? effectivePackage.getPriceFor(effectiveCarType));
+
+    // If already paid, sync payment amount with updated price
+    PaymentInfo updatedPayment = existing.payment;
+    if (existing.payment.isPaid && customTotalPrice != null && customTotalPrice > 0) {
+      updatedPayment = existing.payment.copyWith(amount: customTotalPrice);
+    }
+
+    final updated = existing.copyWith(
+      licensePlate: (licensePlate != null && licensePlate.trim().isNotEmpty) ? licensePlate.trim().toUpperCase() : existing.licensePlate,
+      customerName: (customerName != null && customerName.trim().isNotEmpty) ? customerName.trim() : existing.customerName,
+      customerPhone: customerPhone != null ? customerPhone.trim() : existing.customerPhone,
+      carType: effectiveCarType,
+      package: effectivePackage,
+      customTotalPrice: effectivePrice,
+      carpetType: carpetType ?? existing.carpetType,
+      carpetAreaSqMeters: carpetAreaSqMeters ?? existing.carpetAreaSqMeters,
+      carpetDimensions: carpetDimensions ?? existing.carpetDimensions,
+      deliveryLocation: notes ?? existing.deliveryLocation,
+      payment: updatedPayment,
     );
     _bookings[index] = updated;
     return updated;

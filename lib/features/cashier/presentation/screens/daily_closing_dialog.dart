@@ -56,14 +56,14 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
-    final gross = state.totalRevenueTodayETB;
-    final cash = state.totalCashRevenueETB;
-    final digital = state.totalDigitalRevenueETB;
+    final gross = widget.isManagerClosing ? state.managerTodayRevenueETB : state.cashierTodayRevenueETB;
+    final cash = widget.isManagerClosing ? state.managerTodayCashETB : state.cashierTodayCashETB;
+    final digital = widget.isManagerClosing ? state.managerTodayDigitalETB : state.cashierTodayDigitalETB;
     final comm = state.teamCommissionPoolTodayETB;
     final net = gross - comm;
     final deposited = state.totalCashDepositedTodayETB;
     final petty = state.todayPettyCashExpensesETB;
-    final remainingCash = state.undepositedCashTodayETB;
+    final remainingCash = widget.isManagerClosing ? state.managerCustodyCashETB : state.cashierDrawerBalanceETB;
     final dividends = state.washerDividendsToday;
     final isAlreadyClosed = widget.isManagerClosing ? state.isTodayNightShiftClosed : state.isTodayDayShiftClosed;
     final needsCommissionDisbursement = !isAlreadyClosed && state.requiresDailyCommissionDisbursementBeforeClosing;

@@ -81,6 +81,7 @@ void main() {
       addTearDown(tester.view.reset);
 
       // Day shift collects ETB 500 cash
+      state.switchRole(UserRole.cashier);
       final dayCar = await state.registerWalkIn(
         customerName: 'Morning Client',
         licensePlate: 'OR-10001',
@@ -104,6 +105,7 @@ void main() {
         handoverMethod: 'manager_otp',
       );
 
+      state.switchRole(UserRole.manager);
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,

@@ -13,6 +13,7 @@ import '../../domain/models/payment_info.dart';
 import '../../domain/models/wash_booking.dart';
 import '../../domain/models/wash_status.dart';
 import '../state/app_state_provider.dart';
+import '../../../cashier/presentation/screens/edit_booking_dialog.dart';
 
 enum HistoryDateFilter {
   today,
@@ -746,20 +747,37 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
             ),
           ],
           const SizedBox(height: 6),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              icon: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
-              label: Text(
-                state.tr('printReceipt'),
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
+          Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFF38BDF8)),
+                label: Text(
+                  state.tr('editBooking'),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8)),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () => EditBookingDialog.show(context, b),
               ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              onPressed: () {
+              TextButton.icon(
+                icon: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
+                label: Text(
+                  state.tr('printReceipt'),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () {
                 final safeId = b.id.length >= 8 ? b.id.substring(0, 8).toUpperCase() : b.id.toUpperCase();
                 PrintExportHelper.printReceipt(
                   receiptNo: safeId,
@@ -779,8 +797,9 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 );
               },
             ),
-          ),
-        ],
+          ],
+        ),
+      ],
       ),
     );
   }

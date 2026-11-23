@@ -489,6 +489,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                 userCount: recordedCount,
                 paymentMethod: _showerPaymentMethod,
                 cashierName: cashierName,
+                role: 'cashier',
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -529,6 +530,50 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
               ),
             ],
           ),
+          if ((state.showerRecords as List<ShowerRecord>).isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColors.cardBorder),
+            const SizedBox(height: 8),
+            Text(
+              state.tr('recentShowerEntries'),
+              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 6),
+            ...((state.showerRecords as List<ShowerRecord>).take(5)).map((s) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.cardBorder, width: 0.8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      s.isCash ? Icons.payments_rounded : Icons.phone_android_rounded,
+                      size: 14,
+                      color: s.isCash ? AppColors.cashGreen : AppColors.telebirrBlue,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${s.userCount} ${state.tr("showerUsers")} • ${CurrencyFormatter.format(s.totalAmount)} (${s.isCash ? state.tr("payCash") : state.tr("payTelebirr")}) • ${s.recordedBy}',
+                        style: const TextStyle(fontSize: 11, color: Colors.white70),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFF38BDF8)),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => _showEditShowerDialog(context, state, s),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ],
       ),
     );
@@ -550,6 +595,91 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
             child: Text(value, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900, color: color)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEditShowerDialog(BuildContext context, dynamic state, ShowerRecord s) {
+    int userCount = s.userCount;
+    PaymentMethod method = s.paymentMethod;
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(state.tr('editRecord'), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Text(state.tr('showerUsers'), style: const TextStyle(color: Colors.white70)),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline, color: Colors.white70),
+                    onPressed: userCount > 1 ? () => setDlgState(() => userCount--) : null,
+                  ),
+                  Text('$userCount', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline, color: Colors.white70),
+                    onPressed: () => setDlgState(() => userCount++),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  ChoiceChip(
+                    label: Text(state.tr('payCash')),
+                    selected: method == PaymentMethod.cash,
+                    onSelected: (val) {
+                      if (val) setDlgState(() => method = PaymentMethod.cash);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: Text(state.tr('payTelebirr')),
+                    selected: method == PaymentMethod.telebirr,
+                    onSelected: (val) {
+                      if (val) setDlgState(() => method = PaymentMethod.telebirr);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await state.deleteShowerRecord(s.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.tr('recordDeletedToast')), backgroundColor: Colors.redAccent),
+                  );
+                }
+              },
+              child: Text(state.tr('deleteRecord'), style: const TextStyle(color: Colors.redAccent)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                await state.updateShowerRecord(
+                  id: s.id,
+                  userCount: userCount,
+                  paymentMethod: method,
+                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.tr('bookingUpdatedToast')), backgroundColor: AppColors.cashGreen),
+                  );
+                }
+              },
+              child: Text(state.tr('saveChanges')),
+            ),
+          ],
+        ),
       ),
     );
   }

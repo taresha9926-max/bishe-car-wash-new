@@ -45,6 +45,8 @@ abstract class IBookingRepository {
     double? splitDigitalAmount,
     String? overpaymentAction,
     String? verificationStatus,
+    String? collectedByRole,
+    String? collectedByName,
   });
   Future<WashBooking> postponeBooking({
     required String bookingId,
@@ -56,6 +58,19 @@ abstract class IBookingRepository {
     required String bookingId,
     required String handedOverBy,
     String? note,
+  });
+  Future<WashBooking> updateBookingDetails({
+    required String bookingId,
+    String? licensePlate,
+    String? customerName,
+    String? customerPhone,
+    CarType? carType,
+    WashPackage? package,
+    double? customTotalPrice,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    String? notes,
   });
   Future<void> deleteBooking(String bookingId);
   Future<void> clearAllBookings();

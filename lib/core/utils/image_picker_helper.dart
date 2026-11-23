@@ -13,4 +13,8 @@ class ImagePickerHelper {
   static void pickImage({required void Function(PickedReceiptImage image) onPicked}) {
     pickImagePlatform(onPicked: onPicked);
   }
+
+  static void takePhoto({required void Function(PickedReceiptImage image) onPicked}) {
+    takePhotoPlatform(onPicked: onPicked);
+  }
 }

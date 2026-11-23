@@ -159,9 +159,11 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     double splitDigitalAmount = 0.0,
     String overpaymentAction = 'none',
     String verificationStatus = 'unverified',
+    String? collectedByRole,
+    String? collectedByName,
   }) {
     final clean = extractCleanDeliveryLocation(baseText);
-    if (!isOnlineBooking && !isPostponed && !isHandedOverToManager && paidAt == null && (gpsCoordinates == null || gpsCoordinates.isEmpty) && splitCashAmount <= 0 && splitDigitalAmount <= 0 && overpaymentAction == 'none' && verificationStatus == 'unverified') {
+    if (!isOnlineBooking && !isPostponed && !isHandedOverToManager && paidAt == null && (gpsCoordinates == null || gpsCoordinates.isEmpty) && splitCashAmount <= 0 && splitDigitalAmount <= 0 && overpaymentAction == 'none' && verificationStatus == 'unverified' && (collectedByRole == null || collectedByRole.isEmpty) && (collectedByName == null || collectedByName.isEmpty)) {
       return clean;
     }
     final meta = <String, dynamic>{
@@ -180,6 +182,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       if (splitDigitalAmount > 0) 'splitDigital': splitDigitalAmount,
       if (overpaymentAction != 'none') 'overpaymentAction': overpaymentAction,
       if (verificationStatus != 'unverified') 'verifStatus': verificationStatus,
+      if (collectedByRole != null && collectedByRole.isNotEmpty) 'collectedByRole': collectedByRole,
+      if (collectedByName != null && collectedByName.isNotEmpty) 'collectedByName': collectedByName,
     };
     final tag = '$_bookingMetaPrefix${jsonEncode(meta)}]';
     return (clean == null || clean.isEmpty) ? tag : '$clean\n$tag';
@@ -207,6 +211,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       splitDigitalAmount: b.payment.splitDigitalAmount,
       overpaymentAction: b.payment.overpaymentAction,
       verificationStatus: b.payment.verificationStatus,
+      collectedByRole: b.payment.collectedByRole,
+      collectedByName: b.payment.collectedByName,
     );
   }
 
@@ -712,6 +718,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
         splitDigitalAmount: double.tryParse(bookingMeta['splitDigital']?.toString() ?? '0') ?? 0.0,
         overpaymentAction: bookingMeta['overpaymentAction']?.toString() ?? 'none',
         verificationStatus: bookingMeta['verifStatus']?.toString() ?? 'unverified',
+        collectedByRole: bookingMeta['collectedByRole']?.toString(),
+        collectedByName: bookingMeta['collectedByName']?.toString(),
       ),
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
       scheduledTime: json['scheduled_time'] != null ? DateTime.tryParse(json['scheduled_time'].toString()) : null,
@@ -1049,6 +1057,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
     double? splitDigitalAmount,
     String? overpaymentAction,
     String? verificationStatus,
+    String? collectedByRole,
+    String? collectedByName,
   }) async {
     try {
       if (_isUuid(bookingId)) {
@@ -1066,6 +1076,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           splitDigitalAmount: splitDigitalAmount,
           overpaymentAction: overpaymentAction,
           verificationStatus: verificationStatus,
+          collectedByRole: collectedByRole,
+          collectedByName: collectedByName,
         );
         await _patch('wash_bookings?id=eq.$bookingId', {
           'is_paid': true,
@@ -1132,6 +1144,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
               splitDigitalAmount: splitDigitalAmount,
               overpaymentAction: overpaymentAction,
               verificationStatus: verificationStatus,
+              collectedByRole: collectedByRole,
+              collectedByName: collectedByName,
             );
           } catch (_) {}
           return updated;
@@ -1151,6 +1165,8 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       splitDigitalAmount: splitDigitalAmount,
       overpaymentAction: overpaymentAction,
       verificationStatus: verificationStatus,
+      collectedByRole: collectedByRole,
+      collectedByName: collectedByName,
     );
   }
 
@@ -1249,6 +1265,96 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       bookingId: bookingId,
       handedOverBy: handedOverBy,
       note: note,
+    );
+  }
+
+  @override
+  Future<WashBooking> updateBookingDetails({
+    required String bookingId,
+    String? licensePlate,
+    String? customerName,
+    String? customerPhone,
+    CarType? carType,
+    WashPackage? package,
+    double? customTotalPrice,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    String? notes,
+  }) async {
+    try {
+      if (_isUuid(bookingId)) {
+        final existing = await getBookingById(bookingId);
+        if (existing != null) {
+          final effectivePackage = package ?? existing.package;
+          final effectiveCarType = carType ?? existing.carType;
+          final effectivePrice = customTotalPrice ?? (existing.customTotalPrice ?? effectivePackage.getPriceFor(effectiveCarType));
+
+          PaymentInfo updatedPayment = existing.payment;
+          if (existing.payment.isPaid && customTotalPrice != null && customTotalPrice > 0) {
+            updatedPayment = existing.payment.copyWith(amount: customTotalPrice);
+          }
+
+          final updated = existing.copyWith(
+            licensePlate: (licensePlate != null && licensePlate.trim().isNotEmpty) ? licensePlate.trim().toUpperCase() : existing.licensePlate,
+            customerName: (customerName != null && customerName.trim().isNotEmpty) ? customerName.trim() : existing.customerName,
+            customerPhone: customerPhone != null ? customerPhone.trim() : existing.customerPhone,
+            carType: effectiveCarType,
+            package: effectivePackage,
+            customTotalPrice: effectivePrice,
+            carpetType: carpetType ?? existing.carpetType,
+            carpetAreaSqMeters: carpetAreaSqMeters ?? existing.carpetAreaSqMeters,
+            carpetDimensions: carpetDimensions ?? existing.carpetDimensions,
+            deliveryLocation: notes ?? existing.deliveryLocation,
+            payment: updatedPayment,
+          );
+
+          await _patch('wash_bookings?id=eq.$bookingId', {
+            'license_plate': updated.licensePlate,
+            'owner_name': updated.customerName,
+            'customer_phone': updated.customerPhone,
+            'vehicle_type': updated.carType.name,
+            'package_id': updated.package.id,
+            'total_amount': updated.totalPrice,
+            if (updated.carpetType != null) 'carpet_type': updated.carpetType,
+            if (updated.carpetAreaSqMeters != null) 'carpet_area_sq_meters': updated.carpetAreaSqMeters,
+            if (updated.carpetDimensions != null) 'carpet_dimensions': updated.carpetDimensions,
+            'delivery_location': _encodeMetaFromBooking(updated),
+          });
+
+          try {
+            await _fallbackLocalRepo.updateBookingDetails(
+              bookingId: bookingId,
+              licensePlate: licensePlate,
+              customerName: customerName,
+              customerPhone: customerPhone,
+              carType: carType,
+              package: package,
+              customTotalPrice: customTotalPrice,
+              carpetType: carpetType,
+              carpetAreaSqMeters: carpetAreaSqMeters,
+              carpetDimensions: carpetDimensions,
+              notes: notes,
+            );
+          } catch (_) {}
+          return updated;
+        }
+      }
+    } catch (e) {
+      debugPrint('Supabase updateBookingDetails exception: $e');
+    }
+    return await _fallbackLocalRepo.updateBookingDetails(
+      bookingId: bookingId,
+      licensePlate: licensePlate,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      carType: carType,
+      package: package,
+      customTotalPrice: customTotalPrice,
+      carpetType: carpetType,
+      carpetAreaSqMeters: carpetAreaSqMeters,
+      carpetDimensions: carpetDimensions,
+      notes: notes,
     );
   }
 

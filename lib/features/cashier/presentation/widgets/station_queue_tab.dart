@@ -12,6 +12,7 @@ import '../../../booking_service/domain/models/wash_dispatcher.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../screens/bay_assignment_modal.dart';
+import '../screens/edit_booking_dialog.dart';
 import '../screens/payment_process_dialog.dart';
 import '../screens/phone_booking_dialog.dart';
 import '../screens/walk_in_registration_screen.dart';
@@ -646,6 +647,37 @@ class _StationQueueTabState extends State<StationQueueTab> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
                   ),
                 ),
+              OutlinedButton.icon(
+                onPressed: () => EditBookingDialog.show(context, b),
+                icon: const Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFF38BDF8)),
+                label: Text(
+                  state.tr('editBooking'),
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF38BDF8)),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF38BDF8)),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                ),
+              ),
+              if (b.status == WashStatus.pending || b.status == WashStatus.confirmed || b.status == WashStatus.assignedToBay)
+                OutlinedButton.icon(
+                  onPressed: () => _confirmCancelBooking(context, state, b),
+                  icon: const Icon(Icons.delete_outline_rounded, size: 14, color: Colors.redAccent),
+                  label: Text(
+                    state.tr('cancelBooking'),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.redAccent),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.redAccent.withOpacity(0.6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                  ),
+                ),
               _buildNextStepButton(context, state, b, langCode),
             ],
           ),
@@ -1180,5 +1212,53 @@ class _StationQueueTabState extends State<StationQueueTab> {
     final query = b.gpsCoordinates ?? b.deliveryLocation ?? 'Bishoftu, Ethiopia';
     final mapUrl = 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}';
     UrlLauncherHelper.openUrl(mapUrl);
+  }
+
+  Future<void> _confirmCancelBooking(BuildContext context, dynamic state, WashBooking b) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              state.tr('cancelBooking'),
+              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Text(
+          '${state.tr("confirmCancelBookingMsg")}\n${b.isCarpet ? state.tr("carpetTrackingTag") : state.tr("licensePlate")}: ${b.licensePlate}',
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(state.tr('confirm'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await state.cancelBooking(b.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.tr('bookingCancelledToast')),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 }

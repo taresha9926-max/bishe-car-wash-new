@@ -289,11 +289,16 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
 
                       CustomTextField(
                         controller: _phoneController,
-                        label: state.tr('customerPhone'),
+                        label: '${state.tr('customerPhone')} (${state.tr('optional')})',
                         hint: '+251 91 234 5678',
                         keyboardType: TextInputType.phone,
                         prefixIcon: Icons.phone_android,
-                        validator: (v) => v == null || v.length < 9 ? state.tr('enterValidPhone') : null,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty || v.trim() == '+251 9' || v.trim() == '+251') {
+                            return null;
+                          }
+                          return v.length < 9 ? state.tr('enterValidPhone') : null;
+                        },
                       ),
                       const SizedBox(height: 12),
 
@@ -901,9 +906,12 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
               .toList()
           : null;
 
+      final phoneText = _phoneController.text.trim();
+      final cleanPhone = (phoneText.isEmpty || phoneText == '+251 9' || phoneText == '+251') ? '' : phoneText;
+
       final booking = await state.bookNewWash(
         customerName: '${_callerNameController.text.trim()} [Phone]',
-        customerPhone: _phoneController.text.trim(),
+        customerPhone: cleanPhone,
         serviceType: _serviceType,
         carType: _isCarpetMode ? CarType.automobile : _carType,
         licensePlate: _plateController.text.trim().toUpperCase(),

@@ -105,6 +105,8 @@ class PaymentInfo {
   final double splitDigitalAmount;
   final String overpaymentAction; // 'none', 'refund_cash', 'washer_tip'
   final String verificationStatus; // 'unverified', 'pending_sms', 'verified', 'discrepancy'
+  final String? collectedByRole; // 'cashier', 'operationalManager', or 'admin'
+  final String? collectedByName;
 
   const PaymentInfo({
     this.isPaid = false,
@@ -118,6 +120,8 @@ class PaymentInfo {
     this.splitDigitalAmount = 0.0,
     this.overpaymentAction = 'none',
     this.verificationStatus = 'unverified',
+    this.collectedByRole,
+    this.collectedByName,
   });
 
   double get totalPaid => amount + tipAmount;
@@ -138,6 +142,8 @@ class PaymentInfo {
     double? splitDigitalAmount,
     String? overpaymentAction,
     String? verificationStatus,
+    String? collectedByRole,
+    String? collectedByName,
   }) {
     return PaymentInfo(
       isPaid: isPaid ?? this.isPaid,
@@ -151,6 +157,8 @@ class PaymentInfo {
       splitDigitalAmount: splitDigitalAmount ?? this.splitDigitalAmount,
       overpaymentAction: overpaymentAction ?? this.overpaymentAction,
       verificationStatus: verificationStatus ?? this.verificationStatus,
+      collectedByRole: collectedByRole ?? this.collectedByRole,
+      collectedByName: collectedByName ?? this.collectedByName,
     );
   }
 }

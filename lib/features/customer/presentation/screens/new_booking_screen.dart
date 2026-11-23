@@ -842,11 +842,16 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               const SizedBox(height: 12),
               CustomTextField(
                 controller: _phoneController,
-                label: state.tr('customerPhone'),
+                label: '${state.tr('customerPhone')} (${state.tr('optional')})',
                 hint: '+251 91 234 5678',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icons.phone_android,
-                validator: (val) => val == null || val.length < 9 ? state.tr('enterValidPhone') : null,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty || val.trim() == '+251 9' || val.trim() == '+251') {
+                    return null;
+                  }
+                  return val.length < 9 ? state.tr('enterValidPhone') : null;
+                },
               ),
               const SizedBox(height: 12),
               CustomTextField(
@@ -1059,9 +1064,12 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             .toList();
       }
 
+      final phoneText = _phoneController.text.trim();
+      final cleanPhone = (phoneText.isEmpty || phoneText == '+251 9' || phoneText == '+251') ? '' : phoneText;
+
       final booking = await state.bookNewWash(
         customerName: _nameController.text.trim(),
-        customerPhone: _phoneController.text.trim(),
+        customerPhone: cleanPhone,
         serviceType: _selectedServiceType,
         carType: _isCarpet ? CarType.automobile : _selectedCarType,
         licensePlate: _plateController.text.trim().toUpperCase(),

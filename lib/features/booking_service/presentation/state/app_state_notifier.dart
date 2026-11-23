@@ -738,8 +738,12 @@ class AppStateNotifier extends ChangeNotifier {
     required int userCount,
     required PaymentMethod paymentMethod,
     required String cashierName,
+    String? role,
+    String? receiptScreenshot,
+    String? transactionRef,
     String? notes,
   }) async {
+    final effectiveRole = role ?? (currentRole == UserRole.manager ? 'operationalManager' : 'cashier');
     final record = ShowerRecord(
       id: 'SHW-${DateTime.now().millisecondsSinceEpoch}',
       userCount: userCount,
@@ -748,9 +752,38 @@ class AppStateNotifier extends ChangeNotifier {
       paymentMethod: paymentMethod,
       recordedAt: DateTime.now(),
       recordedBy: cashierName,
+      recordedByRole: effectiveRole,
+      receiptScreenshot: receiptScreenshot,
+      transactionRef: transactionRef,
       notes: notes,
     );
     _showerRecords.insert(0, record);
+    notifyListeners();
+  }
+
+  Future<void> updateShowerRecord({
+    required String id,
+    int? userCount,
+    PaymentMethod? paymentMethod,
+    String? notes,
+  }) async {
+    final idx = _showerRecords.indexWhere((s) => s.id == id);
+    if (idx != -1) {
+      final existing = _showerRecords[idx];
+      final newCount = userCount ?? existing.userCount;
+      final newMethod = paymentMethod ?? existing.paymentMethod;
+      _showerRecords[idx] = existing.copyWith(
+        userCount: newCount,
+        totalAmount: newCount * existing.unitPrice,
+        paymentMethod: newMethod,
+        notes: notes ?? existing.notes,
+      );
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteShowerRecord(String id) async {
+    _showerRecords.removeWhere((s) => s.id == id);
     notifyListeners();
   }
 
@@ -1184,14 +1217,38 @@ class AppStateNotifier extends ChangeNotifier {
     return rent.monthlyAmountEtb;
   }
 
-  double get totalRevenueTodayETB {
-    return serviceRevenueTodayETB + todayShowerRevenueETB + todayCustomerTipsETB;
+  bool _isCashierBooking(WashBooking b) {
+    final role = (b.payment.collectedByRole ?? '').toLowerCase();
+    if (role == 'operationalmanager' || role == 'manager') return false;
+    return true;
   }
 
-  double get totalCashRevenueETB {
+  bool _isManagerBooking(WashBooking b) {
+    final role = (b.payment.collectedByRole ?? '').toLowerCase();
+    return role == 'operationalmanager' || role == 'manager';
+  }
+
+  bool _isCashierShower(ShowerRecord s) {
+    final role = (s.recordedByRole ?? '').toLowerCase();
+    if (role == 'operationalmanager' || role == 'manager') return false;
+    return true;
+  }
+
+  bool _isManagerShower(ShowerRecord s) {
+    final role = (s.recordedByRole ?? '').toLowerCase();
+    return role == 'operationalmanager' || role == 'manager';
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    final al = a.toLocal();
+    final bl = b.toLocal();
+    return al.year == bl.year && al.month == bl.month && al.day == bl.day;
+  }
+
+  double get cashierTodayCashETB {
     final now = DateTime.now();
     final bookCash = _bookings
-        .where((b) => _isBookingPaidOnDate(b, now))
+        .where((b) => _isBookingPaidOnDate(b, now) && _isCashierBooking(b))
         .fold(0.0, (sum, b) {
           final amt = b.payment.amount > 0 ? b.payment.amount : b.totalPrice;
           if (b.payment.isSplit) {
@@ -1202,16 +1259,36 @@ class AppStateNotifier extends ChangeNotifier {
           }
           return sum;
         });
-    return bookCash + todayShowerCashETB;
+    final showerCash = _showerRecords
+        .where((s) => s.isCash && _isCashierShower(s) && _isSameDay(s.recordedAt, now))
+        .fold(0.0, (sum, s) => sum + s.totalAmount);
+    return bookCash + showerCash;
   }
 
-  double get digitalRevenueETB => totalDigitalRevenueETB;
-  double get cashRevenueETB => totalCashRevenueETB;
+  double get managerTodayCashETB {
+    final now = DateTime.now();
+    final bookCash = _bookings
+        .where((b) => _isBookingPaidOnDate(b, now) && _isManagerBooking(b))
+        .fold(0.0, (sum, b) {
+          final amt = b.payment.amount > 0 ? b.payment.amount : b.totalPrice;
+          if (b.payment.isSplit) {
+            return sum + b.payment.splitCashAmount;
+          }
+          if (b.payment.method == PaymentMethod.cash) {
+            return sum + amt + b.payment.tipAmount;
+          }
+          return sum;
+        });
+    final showerCash = _showerRecords
+        .where((s) => s.isCash && _isManagerShower(s) && _isSameDay(s.recordedAt, now))
+        .fold(0.0, (sum, s) => sum + s.totalAmount);
+    return bookCash + showerCash;
+  }
 
-  double get totalDigitalRevenueETB {
+  double get cashierTodayDigitalETB {
     final now = DateTime.now();
     final bookDig = _bookings
-        .where((b) => _isBookingPaidOnDate(b, now))
+        .where((b) => _isBookingPaidOnDate(b, now) && _isCashierBooking(b))
         .fold(0.0, (sum, b) {
           final amt = b.payment.amount > 0 ? b.payment.amount : b.totalPrice;
           if (b.payment.isSplit) {
@@ -1222,8 +1299,43 @@ class AppStateNotifier extends ChangeNotifier {
           }
           return sum;
         });
-    return bookDig + todayShowerDigitalETB;
+    final showerDig = _showerRecords
+        .where((s) => s.isDigital && _isCashierShower(s) && _isSameDay(s.recordedAt, now))
+        .fold(0.0, (sum, s) => sum + s.totalAmount);
+    return bookDig + showerDig;
   }
+
+  double get managerTodayDigitalETB {
+    final now = DateTime.now();
+    final bookDig = _bookings
+        .where((b) => _isBookingPaidOnDate(b, now) && _isManagerBooking(b))
+        .fold(0.0, (sum, b) {
+          final amt = b.payment.amount > 0 ? b.payment.amount : b.totalPrice;
+          if (b.payment.isSplit) {
+            return sum + b.payment.splitDigitalAmount + b.payment.tipAmount;
+          }
+          if (b.payment.method != PaymentMethod.cash) {
+            return sum + amt + b.payment.tipAmount;
+          }
+          return sum;
+        });
+    final showerDig = _showerRecords
+        .where((s) => s.isDigital && _isManagerShower(s) && _isSameDay(s.recordedAt, now))
+        .fold(0.0, (sum, s) => sum + s.totalAmount);
+    return bookDig + showerDig;
+  }
+
+  double get cashierTodayRevenueETB => cashierTodayCashETB + cashierTodayDigitalETB;
+  double get managerTodayRevenueETB => managerTodayCashETB + managerTodayDigitalETB;
+
+  /// The total revenue during a working day is strictly the sum of money collected
+  /// by the cashier plus by the operational manager
+  double get totalRevenueTodayETB => cashierTodayRevenueETB + managerTodayRevenueETB;
+  double get totalCashRevenueETB => cashierTodayCashETB + managerTodayCashETB;
+  double get totalDigitalRevenueETB => cashierTodayDigitalETB + managerTodayDigitalETB;
+
+  double get digitalRevenueETB => totalDigitalRevenueETB;
+  double get cashRevenueETB => totalCashRevenueETB;
 
   double get totalCommissionsPaidETB {
     return _commissionLogs.fold(0.0, (sum, log) => sum + log.commissionEarnedETB);
@@ -1859,7 +1971,8 @@ class AppStateNotifier extends ChangeNotifier {
         return 0.0;
       }
     }
-    return undepositedCashTodayETB;
+    final diff = cashierTodayCashETB - totalCashDepositedTodayETB - todayPettyCashExpensesETB;
+    return diff < 0 ? 0.0 : diff;
   }
 
   /// Role-specific physical cash in Operational Manager custody.
@@ -1879,22 +1992,8 @@ class AppStateNotifier extends ChangeNotifier {
       }
     }
 
-    // If day shift is still running, manager holds 0.00 custody cash.
-    if (!isTodayDayShiftClosed) return 0.0;
-
-    // If day shift closed via OTP but manager hasn't accepted yet, custody remains 0.00.
-    for (final c in _dailyFinancialClosings) {
-      if (c.shiftType == 'day' &&
-          c.closingDate.year == now.year &&
-          c.closingDate.month == now.month &&
-          c.closingDate.day == now.day) {
-        if (c.handoverMethod == 'manager_otp' && !c.isHandoverAccepted) {
-          return 0.0;
-        }
-      }
-    }
-
-    return managerCarriedCashETB + nightShiftAdditionalCashETB;
+    final base = managerTodayCashETB + managerCarriedCashETB;
+    return base < 0 ? 0.0 : base;
   }
 
   bool _verifyHandoverOtp(String? expectedOtp, String? enteredOtp) {
@@ -2130,19 +2229,24 @@ class AppStateNotifier extends ChangeNotifier {
       }
     }
 
-    final vehiclePaid = paidToday.where((b) => !b.isCarpet).toList();
-    final carpetPaid = paidToday.where((b) => b.isCarpet).toList();
+    final isManager = shiftType == 'night' || closedByRole == 'operationalManager';
+    final rolePaidToday = paidToday.where((b) => isManager ? _isManagerBooking(b) : _isCashierBooking(b)).toList();
+    final roleShowerRecords = _showerRecords.where((s) => (isManager ? _isManagerShower(s) : _isCashierShower(s)) && _isSameDay(s.recordedAt, now)).toList();
+
+    final vehiclePaid = rolePaidToday.where((b) => !b.isCarpet).toList();
+    final carpetPaid = rolePaidToday.where((b) => b.isCarpet).toList();
 
     final vehicleRev = vehiclePaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final carpetRev = carpetPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final showerRev = todayShowerRevenueETB;
-    final tipsRev = paidToday.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+    final showerRev = roleShowerRecords.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final tipsRev = rolePaidToday.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
 
     final serviceGross = vehicleRev + carpetRev;
     final gross = serviceGross + showerRev + tipsRev;
 
-    final serviceCash = paidToday.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
-    final cash = serviceCash + todayShowerCashETB;
+    final serviceCash = rolePaidToday.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+    final showerCash = roleShowerRecords.where((s) => s.isCash).fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final cash = serviceCash + showerCash;
     final digital = gross - cash;
 
     final netServiceRev = netWashRevenueAfterVat(serviceGross);
@@ -2150,15 +2254,12 @@ class AppStateNotifier extends ChangeNotifier {
     final net = (netServiceRev - (netServiceRev * teamCommissionRate)) + showerRev;
     final deposited = totalCashDepositedTodayETB;
     final petty = todayPettyCashExpensesETB;
-    final remainingCash = cash > (deposited + petty) ? cash - (deposited + petty) : 0.0;
+    final remainingCash = isManager ? managerCustodyCashETB : cashierDrawerBalanceETB;
 
     final breakdown = <String, double>{};
     for (final m in PaymentMethod.values) {
-      final amt = paidToday.where((b) => b.payment.method == m).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
-      final showerAmt = _showerRecords.where((s) {
-        final d = s.recordedAt;
-        return s.paymentMethod == m && d.year == now.year && d.month == now.month && d.day == now.day;
-      }).fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+      final amt = rolePaidToday.where((b) => b.payment.method == m).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
+      final showerAmt = roleShowerRecords.where((s) => s.paymentMethod == m).fold<double>(0.0, (sum, s) => sum + s.totalAmount);
       if (amt + showerAmt > 0) {
         breakdown[m.shortName] = amt + showerAmt;
       }
@@ -2899,7 +3000,7 @@ class AppStateNotifier extends ChangeNotifier {
     await _refreshBookingsAndBays();
   }
 
-  /// Cashier collects payment (Cash, Digital Money Transfer - Telebirr, CBE Birr, or Split Payment)
+  /// Cashier or Operational Manager collects payment (Cash, Digital Money Transfer - Telebirr, CBE Birr, or Split Payment)
   Future<void> processPayment({
     required String bookingId,
     required PaymentMethod method,
@@ -2911,6 +3012,8 @@ class AppStateNotifier extends ChangeNotifier {
     double? splitDigitalAmount,
     String? overpaymentAction,
     String? verificationStatus,
+    String? collectedByRole,
+    String? collectedByName,
   }) async {
     // 0. Double-Payment Guard: strictly block any attempt to collect payment twice
     final existingIdx = _bookings.indexWhere((b) => b.id == bookingId);
@@ -2918,6 +3021,9 @@ class AppStateNotifier extends ChangeNotifier {
       debugPrint('🚨 [Double-Payment Guard]: Booking $bookingId is already paid. Aborting duplicate collection.');
       return;
     }
+
+    final effectiveRole = collectedByRole ?? (currentRole == UserRole.manager ? 'operationalManager' : 'cashier');
+    final effectiveStaffName = collectedByName ?? (activeStaffFullName ?? (currentRole == UserRole.manager ? 'Operational Manager' : 'Cashier'));
 
     // If a transaction reference is provided, check if it already matches an incoming bank transaction
     String effectiveStatus = verificationStatus ?? 'unverified';
@@ -2946,6 +3052,8 @@ class AppStateNotifier extends ChangeNotifier {
         splitDigitalAmount: splitDigitalAmount,
         overpaymentAction: overpaymentAction,
         verificationStatus: effectiveStatus,
+        collectedByRole: effectiveRole,
+        collectedByName: effectiveStaffName,
       );
       _deletedStationReceiptBookingIds.remove(bookingId);
       final updatedList = List<WashBooking>.from(_bookings);
@@ -2965,9 +3073,67 @@ class AppStateNotifier extends ChangeNotifier {
       splitDigitalAmount: splitDigitalAmount,
       overpaymentAction: overpaymentAction,
       verificationStatus: effectiveStatus,
+      collectedByRole: effectiveRole,
+      collectedByName: effectiveStaffName,
     );
     await _refreshBookingsAndBays();
     await fetchBankIncomingTransactions();
+  }
+
+  /// Updates booking details (plate, customer name, phone, car type, package, negotiated custom price, carpet details, notes)
+  Future<WashBooking> updateBookingDetails({
+    required String bookingId,
+    String? licensePlate,
+    String? customerName,
+    String? customerPhone,
+    CarType? carType,
+    WashPackage? package,
+    double? customTotalPrice,
+    String? carpetType,
+    double? carpetAreaSqMeters,
+    String? carpetDimensions,
+    String? notes,
+  }) async {
+    final updated = await _repository.updateBookingDetails(
+      bookingId: bookingId,
+      licensePlate: licensePlate,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      carType: carType,
+      package: package,
+      customTotalPrice: customTotalPrice,
+      carpetType: carpetType,
+      carpetAreaSqMeters: carpetAreaSqMeters,
+      carpetDimensions: carpetDimensions,
+      notes: notes,
+    );
+    final idx = _bookings.indexWhere((b) => b.id == bookingId);
+    if (idx != -1) {
+      final list = List<WashBooking>.from(_bookings);
+      list[idx] = updated;
+      _bookings = list;
+      notifyListeners();
+    }
+    await _refreshBookingsAndBays();
+    return updated;
+  }
+
+  /// Cancels / deletes an unstarted or mistaken booking from the queue and frees any assigned bay immediately
+  Future<void> cancelBooking(String bookingId) async {
+    final idx = _bookings.indexWhere((b) => b.id == bookingId);
+    if (idx != -1) {
+      final b = _bookings[idx];
+      if (b.assignedBay != null && !b.isCarpet) {
+        final bayIndex = _bays.indexWhere((bay) => bay.type == b.assignedBay);
+        if (bayIndex != -1) {
+          _bays[bayIndex] = _bays[bayIndex].copyWith(status: BayStatus.vacant, clearActive: true);
+        }
+      }
+      _bookings.removeAt(idx);
+      notifyListeners();
+    }
+    await _repository.deleteBooking(bookingId);
+    await _refreshBookingsAndBays();
   }
 
   Future<void> fetchBankIncomingTransactions() async {

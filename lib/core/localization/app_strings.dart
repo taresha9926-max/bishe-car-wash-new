@@ -6037,6 +6037,72 @@ class AppStrings {
       AppLanguage.om: 'Akeekkachiisa dhiphina iddoo dhiqa, hir\'ina meeshaalee fi dabarsa shiftii qoradhu',
       AppLanguage.am: 'የቦታዎች መዘግየት፣ የአላቂ ዕቃዎች እጥረትና የፈረቃ ርክክብ የስጋት ፍተሻ አድርግ',
     },
+
+    'editBooking': {
+      AppLanguage.en: 'Edit Booking',
+      AppLanguage.om: 'Qabiyyee Fooyyessi',
+      AppLanguage.am: 'ቦታ ማስያዣውን አስተካክል',
+    },
+    'cancelBooking': {
+      AppLanguage.en: 'Cancel Booking',
+      AppLanguage.om: 'Qabiyyee Haqii',
+      AppLanguage.am: 'ቦታ ማስያዣውን ሰርዝ',
+    },
+    'confirmCancelBookingMsg': {
+      AppLanguage.en: 'Are you sure you want to cancel and remove this booking from the queue? Any assigned bay will be released immediately.',
+      AppLanguage.om: 'Qabiyyee kana sarara irraa haquu fi bakka dhiqannaa bilisa gochuu barbaadduu?',
+      AppLanguage.am: 'እርግጠኛ ነዎት ይህንን ቦታ ማስያዣ ከሰልፉ መሰረዝ እና የተመደበውን የውሃ ማጠቢያ ክፍል መልቀቅ ይፈልጋሉ?',
+    },
+    'bookingCancelledToast': {
+      AppLanguage.en: 'Booking cancelled and bay released.',
+      AppLanguage.om: 'Qabiyyeen haqameera, bakki dhiqannaa bilisa ta\'eera.',
+      AppLanguage.am: 'ቦታ ማስያዣው ተሰርዟል፣ የውሃ ማጠቢያ ክፍሉም ነፃ ሆኗል።',
+    },
+    'bookingUpdatedToast': {
+      AppLanguage.en: 'Booking details updated successfully.',
+      AppLanguage.om: 'Odeeffannoon qabiyyee milkaa\'inaan haaromfameera.',
+      AppLanguage.am: 'የቦታ ማስያዣ መረጃ በተሳካ ሁኔታ ተስተካክሏል።',
+    },
+    'recordDeletedToast': {
+      AppLanguage.en: 'Record deleted successfully.',
+      AppLanguage.om: 'Galmeen milkaa\'inaan haqameera.',
+      AppLanguage.am: 'መዝገቡ በተሳካ ሁኔታ ተሰርዟል።',
+    },
+    'takePhoto': {
+      AppLanguage.en: 'Take a Photo',
+      AppLanguage.om: 'Suuraa Kaasi',
+      AppLanguage.am: 'ፎቶ አንሳ',
+    },
+    'uploadPhoto': {
+      AppLanguage.en: 'Upload Photo',
+      AppLanguage.om: 'Suuraa Olfe\'i',
+      AppLanguage.am: 'ፎቶ ስቀል',
+    },
+    'optional': {
+      AppLanguage.en: 'Optional',
+      AppLanguage.om: 'Dirqama Miti',
+      AppLanguage.am: 'አማራጭ',
+    },
+    'recentShowerEntries': {
+      AppLanguage.en: 'Recent Shower Entries',
+      AppLanguage.om: 'Galmee Dhiqannaa Qaamaa Dhihoo',
+      AppLanguage.am: 'የቅርብ ጊዜ የሻወር መዝገቦች',
+    },
+    'editRecord': {
+      AppLanguage.en: 'Edit Record',
+      AppLanguage.om: 'Galmee Fooyyessi',
+      AppLanguage.am: 'መዝገብ አስተካክል',
+    },
+    'deleteRecord': {
+      AppLanguage.en: 'Delete Record',
+      AppLanguage.om: 'Galmee Haqii',
+      AppLanguage.am: 'መዝገብ ሰርዝ',
+    },
+    'saveChanges': {
+      AppLanguage.en: 'Save Changes',
+      AppLanguage.om: 'Jijjiirama Galmeessi',
+      AppLanguage.am: 'ለውጦችን መዝግብ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {
