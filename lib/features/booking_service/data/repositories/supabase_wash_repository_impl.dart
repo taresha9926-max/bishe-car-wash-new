@@ -1309,18 +1309,30 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
             payment: updatedPayment,
           );
 
-          await _patch('wash_bookings?id=eq.$bookingId', {
+          final patchPayload = <String, dynamic>{
             'license_plate': updated.licensePlate,
             'owner_name': updated.customerName,
             'customer_phone': updated.customerPhone,
-            'vehicle_type': updated.carType.name,
-            'package_id': updated.package.id,
+            'car_type': updated.carType.name,
+            if (_isUuid(updated.package.id)) 'package_id': updated.package.id,
             'total_amount': updated.totalPrice,
+            if (updated.customTotalPrice != null) 'custom_total_price': updated.customTotalPrice,
             if (updated.carpetType != null) 'carpet_type': updated.carpetType,
             if (updated.carpetAreaSqMeters != null) 'carpet_area_sq_meters': updated.carpetAreaSqMeters,
             if (updated.carpetDimensions != null) 'carpet_dimensions': updated.carpetDimensions,
             'delivery_location': _encodeMetaFromBooking(updated),
-          });
+          };
+
+          dynamic res = await _patch('wash_bookings?id=eq.$bookingId', patchPayload);
+          if (res == null) {
+            // Fallback for schemas missing carpet or custom_total_price columns
+            final fallbackPayload = Map<String, dynamic>.from(patchPayload)
+              ..remove('carpet_type')
+              ..remove('carpet_area_sq_meters')
+              ..remove('carpet_dimensions')
+              ..remove('custom_total_price');
+            await _patch('wash_bookings?id=eq.$bookingId', fallbackPayload);
+          }
 
           try {
             await _fallbackLocalRepo.updateBookingDetails(
