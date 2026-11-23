@@ -61,7 +61,7 @@ void main() {
 
     testWidgets('Storekeeper all tabs on mobile', (tester) async {
       notifier.switchRole(UserRole.storekeeper);
-      await testAllTabs(tester, const StorekeeperDashboardScreen(), 4, mobileSize);
+      await testAllTabs(tester, const StorekeeperDashboardScreen(), 3, mobileSize);
     });
 
     testWidgets('Admin all tabs on mobile', (tester) async {
@@ -85,7 +85,7 @@ void main() {
 
     testWidgets('Storekeeper all tabs on desktop', (tester) async {
       notifier.switchRole(UserRole.storekeeper);
-      await testAllTabs(tester, const StorekeeperDashboardScreen(), 4, desktopSize);
+      await testAllTabs(tester, const StorekeeperDashboardScreen(), 3, desktopSize);
     });
 
     testWidgets('Admin all tabs on desktop', (tester) async {

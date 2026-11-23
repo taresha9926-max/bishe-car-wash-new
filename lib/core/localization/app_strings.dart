@@ -6103,6 +6103,141 @@ class AppStrings {
       AppLanguage.om: 'Jijjiirama Galmeessi',
       AppLanguage.am: 'ለውጦችን መዝግብ',
     },
+    'rapidRefillTab': {
+      AppLanguage.en: 'Rapid Refill (ዕቃ በዕቃ)',
+      AppLanguage.om: 'Bakka Buusa Saffisaa (ዕቃ በዕቃ)',
+      AppLanguage.am: 'ፈጣን ዕቃ በዕቃ መመዝገቢያ',
+    },
+    'storeroomStockTab': {
+      AppLanguage.en: 'Storeroom Stock (ክምችት)',
+      AppLanguage.om: 'Kuusaa Meeshaalee',
+      AppLanguage.am: 'አጠቃላይ የመጋዘን ክምችት',
+    },
+    'fixedAssetsTab': {
+      AppLanguage.en: 'Fixed Assets (ቋሚ እቃዎች)',
+      AppLanguage.om: 'Qabeenya Dhaabbataa',
+      AppLanguage.am: 'ቋሚ ንብረቶችና ማሽኖች',
+    },
+    'fastTurnoverItems': {
+      AppLanguage.en: 'Fast-Turnover Items (Rapid Exchanges)',
+      AppLanguage.om: 'Meeshaalee Saffisaan Dhumatan',
+      AppLanguage.am: 'ፈጣን አላቂ እቃዎች (ዕለታዊ ቅያሬ)',
+    },
+    'slowTurnoverItems': {
+      AppLanguage.en: 'Slow-Moving / Detailing Items',
+      AppLanguage.om: 'Meeshaalee Suuta Dhumatan',
+      AppLanguage.am: 'ዝግተኛ አላቂ / የዲቴይሊንግ እቃዎች',
+    },
+    'confirmExchangeBtn': {
+      AppLanguage.en: 'Confirm Exchange (Received Empty & Issued Full)',
+      AppLanguage.om: 'Jijjiirraa Mirkaneessi (Qullaa Fudhadhee Guutuu Kennuu)',
+      AppLanguage.am: 'ቅያሬ አረጋግጥ (ዕቃ ተረክቤ ሰጥቻለሁ)',
+    },
+    'receiverLabel': {
+      AppLanguage.en: 'Receiver / Head Washer',
+      AppLanguage.om: 'Fudhataa / Hojjetaa Dhiqa',
+      AppLanguage.am: 'ተረካቢ / የዋሸሮች ኃላፊ',
+    },
+    'todayExchangesTitle': {
+      AppLanguage.en: "Today's Returned Empties & Exchanges",
+      AppLanguage.om: 'Jijjiirraa fi Qullaa Har\'aa Deebi\'an',
+      AppLanguage.am: 'የዛሬ የተመለሱ ባዶዎችና የዕቃ ቅያሬ መዝገብ',
+    },
+    'receiveDeliveryBtn': {
+      AppLanguage.en: 'Receive Delivery',
+      AppLanguage.om: 'Meeshaa Haaraa Fudhadhu',
+      AppLanguage.am: 'ዕቃ መረከቢያ',
+    },
+    'undoExchange': {
+      AppLanguage.en: 'Undo Exchange',
+      AppLanguage.om: 'Jijjiirraa Basi',
+      AppLanguage.am: 'ቅያሬ ሰርዝ (Undo)',
+    },
+    'undoExchangeConfirm': {
+      AppLanguage.en: 'Undo this exchange and restore stock to warehouse?',
+      AppLanguage.om: 'Jijjiirraa kana haquun kuusaatti deebisuu barbaaddaa?',
+      AppLanguage.am: 'ይህን የዕቃ ቅያሬ ሰርዘው ክምችቱን ወደ መጋዘን መመለስ ይፈልጋሉ?',
+    },
+    'itemOperational': {
+      AppLanguage.en: 'Operational',
+      AppLanguage.om: 'Hojii irra jira',
+      AppLanguage.am: 'ሰላም ነው (በስራ ላይ)',
+    },
+    'itemNeedsRepair': {
+      AppLanguage.en: 'Needs Repair',
+      AppLanguage.om: 'Suphaa barbaada',
+      AppLanguage.am: 'ጥገና ያስፈልገዋል',
+    },
+    'markNeedsRepair': {
+      AppLanguage.en: 'Flag Needs Repair',
+      AppLanguage.om: 'Suphaa Barbaada Jedhi',
+      AppLanguage.am: 'ብልሽት መዝግብ',
+    },
+    'markOperational': {
+      AppLanguage.en: 'Mark Operational',
+      AppLanguage.om: 'Hojii Irra Jira Jedhi',
+      AppLanguage.am: 'ተጠግኗል / ሰላም ነው በል',
+    },
+    'quantityExchanged': {
+      AppLanguage.en: 'Quantity',
+      AppLanguage.om: 'Baay\'ina',
+      AppLanguage.am: 'ብዛት',
+    },
+    'searchInventoryHint': {
+      AppLanguage.en: 'Search items by name or code...',
+      AppLanguage.om: 'Maqaa ykn koodiin barbaadi...',
+      AppLanguage.am: 'በስም ወይም በኮድ ፈልግ...',
+    },
+    'healthyStock': {
+      AppLanguage.en: 'Healthy Stock',
+      AppLanguage.om: 'Sadarkaa Gaarii',
+      AppLanguage.am: 'በቂ ክምችት',
+    },
+    'reorderAlert': {
+      AppLanguage.en: 'Reorder Alert',
+      AppLanguage.om: 'Akeekkachiisa Dhumachuu',
+      AppLanguage.am: 'የማዘዣ ማስጠንቀቂያ',
+    },
+    'exchangeSuccessMsg': {
+      AppLanguage.en: 'Successfully recorded exchange! Stock updated.',
+      AppLanguage.om: 'Jijjiirraan milkaa\'inaan galmaa\'eera!',
+      AppLanguage.am: 'የዕቃ በዕቃ ቅያሬው በተሳካ ሁኔታ ተመዝግቧል!',
+    },
+    'undoSuccessMsg': {
+      AppLanguage.en: 'Exchange successfully undone. Stock restored.',
+      AppLanguage.om: 'Jijjiirraan haqamee kuusaan deebi\'eera.',
+      AppLanguage.am: 'ቅያሬው ተሰርዞ ክምችቱ ወደ መጋዘን ተመልሷል።',
+    },
+    'issueInitialFloat': {
+      AppLanguage.en: 'Issue Initial Working Float / Supplies',
+      AppLanguage.om: 'Meeshaalee Jalqabaa Hojii Kenni',
+      AppLanguage.am: 'የመጀመሪያ የሥራ ዕቃ ማውጫ',
+    },
+    'allFixedAssetsCount': {
+      AppLanguage.en: 'All Machinery & Equipment',
+      AppLanguage.om: 'Maashinoota fi Meeshaalee Hunda',
+      AppLanguage.am: 'ሁሉም ማሽኖችና መሳሪያዎች',
+    },
+    'fastRefillSubtitle': {
+      AppLanguage.en: 'Quick empty-for-full container exchange with Head Washer',
+      AppLanguage.om: 'Jijjiirraa saffisaa qullaa-guutuutti hojjetaa dhiqa wajjin',
+      AppLanguage.am: 'ከዋሸሮች ኃላፊ ጋር የሚደረግ ፈጣን የባዶና ሙሉ ዕቃ ቅያሬ',
+    },
+    'inStoreStock': {
+      AppLanguage.en: 'in store',
+      AppLanguage.om: 'kuusaa keessa',
+      AppLanguage.am: 'በመጋዘን',
+    },
+    'outOfStock': {
+      AppLanguage.en: 'Out of Stock',
+      AppLanguage.om: 'Kuusaan dhumatee',
+      AppLanguage.am: 'ክምችት አልቋል',
+    },
+    'editAssetDetails': {
+      AppLanguage.en: 'Edit Details / Location',
+      AppLanguage.om: 'Ibsa / Bakka Fooyyessi',
+      AppLanguage.am: 'ዝርዝር መረጃ / ቦታ አስተካክል',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

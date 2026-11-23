@@ -1,7 +1,4 @@
 import 'dart:math' as math;
-import '../../../../core/widgets/expandable_action_card.dart';
-import '../../../../core/widgets/storekeeper_chemical_reconciliation_card.dart';
-import '../../../../core/widgets/liquid_level_gauge.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -11,11 +8,12 @@ import '../../../../core/utils/image_picker_helper.dart';
 import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/combined_service_header_banner.dart';
-import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
+import '../../../../core/widgets/expandable_action_card.dart';
+import '../../../../core/widgets/liquid_level_gauge.dart';
 import '../../../../core/widgets/responsive_layout.dart';
+import '../../../../core/widgets/storekeeper_chemical_reconciliation_card.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/consumable_item.dart';
-import '../../domain/models/daily_handover.dart';
 import '../../domain/models/fixed_asset.dart';
 import '../../domain/models/stock_transaction.dart';
 import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
@@ -30,8 +28,30 @@ class StorekeeperDashboardScreen extends StatefulWidget {
 class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  String _assetFilter = 'All';
-  String _consumableFilter = 'All';
+
+  // Tab 1 (Rapid Refill) state
+  String _selectedReceiver = 'Washer Team Leader';
+  final Map<String, double> _fastItemQuantities = {};
+  String _slowCategoryFilter = 'All';
+
+  // Tab 2 (Storeroom Stock) state
+  final TextEditingController _consumableSearchCtrl = TextEditingController();
+  String _consumableCategoryFilter = 'All';
+  String _stockLevelFilter = 'All';
+
+  // Tab 3 (Fixed Assets) state
+  final TextEditingController _assetSearchCtrl = TextEditingController();
+  String _assetConditionFilter = 'All';
+
+  // Fast-turnover item codes
+  static const Set<String> _fastItemIds = {
+    'CS-009',  // Car Shampoo
+    'CS-004',  // Foaming Tire Cleaner
+    'CS-003',  // Dashboard Protectant
+    'CS-010A', // Dashboard Sprays
+    'CS-006',  // Air Freshener Perfume
+    'CS-013',  // Microfiber Towels
+  };
 
   @override
   void initState() {
@@ -42,6 +62,8 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _consumableSearchCtrl.dispose();
+    _assetSearchCtrl.dispose();
     super.dispose();
   }
 
@@ -70,7 +92,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             badgeText: state.tr('unifiedDesk'),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           ),
-          // Sub-header tabs
+          // Sub-header 3 Tabs
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -110,10 +132,19 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               labelColor: Colors.white,
               unselectedLabelColor: AppColors.textSecondary,
               labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
-              tabs: const [
-                Tab(icon: Icon(Icons.autorenew_rounded, size: 17), text: 'Empty Return & Refill (ዕቃ በዕቃ)'),
-                Tab(icon: Icon(Icons.inventory_2_rounded, size: 17), text: 'Consumables (አላቂ)'),
-                Tab(icon: Icon(Icons.build_circle_rounded, size: 17), text: 'Fixed Assets (ቋሚ)'),
+              tabs: [
+                Tab(
+                  icon: const Icon(Icons.autorenew_rounded, size: 17),
+                  text: state.tr('rapidRefillTab'),
+                ),
+                Tab(
+                  icon: const Icon(Icons.inventory_2_rounded, size: 17),
+                  text: state.tr('storeroomStockTab'),
+                ),
+                Tab(
+                  icon: const Icon(Icons.build_circle_rounded, size: 17),
+                  text: state.tr('fixedAssetsTab'),
+                ),
               ],
             ),
           ),
@@ -121,8 +152,8 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildHandoverTab(context, state, isMobile),
-                _buildConsumablesTab(context, state, isMobile),
+                _buildRapidRefillTab(context, state, isMobile),
+                _buildStoreroomStockTab(context, state, isMobile),
                 _buildFixedAssetsTab(context, state, isMobile),
               ],
             ),
@@ -133,103 +164,225 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   }
 
   // ==========================================
-  // TAB 1: DAILY HANDOVER DESK
+  // TAB 1: 🔄 RAPID REFILL DESK (ዕቃ በዕቃ መመዝገቢያ)
   // ==========================================
 
-  Widget _buildHandoverTab(BuildContext context, dynamic state, bool isMobile) {
-    final active = state.activeHandover;
-    final handovers = state.dailyHandovers as List<DailyHandover>;
+  Widget _buildRapidRefillTab(BuildContext context, dynamic state, bool isMobile) {
     final transactions = state.stockTransactions as List<StockTransaction>;
-    final exchanges = transactions.where((t) => t.type == 'emptyExchangeConsumption').toList();
+    final today = DateTime.now();
+    final todayExchanges = transactions.where((t) {
+      final isExchange = t.type == 'emptyExchangeConsumption' || t.type == 'initialFloatIssue';
+      final isSameDay = t.date.year == today.year && t.date.month == today.month && t.date.day == today.day;
+      return isExchange && isSameDay;
+    }).toList();
+
+    final allConsumables = (state.consumables as List<ConsumableItem>).where((c) => !c.isDecommissioned).toList();
+    final fastItems = allConsumables.where((c) => _fastItemIds.contains(c.id)).toList();
+    final slowItems = allConsumables.where((c) => !_fastItemIds.contains(c.id)).toList();
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(isMobile ? 12 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Action Bar: Print & Export
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
+          // 1. Top Action & Summary Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.7)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${exchanges.length} Container Swaps • ${handovers.length} Handovers',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0D9488).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.flash_on_rounded, color: Color(0xFF14B8A6), size: 18),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${todayExchanges.length} Exchanges Today',
+                            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800),
+                          ),
+                          Text(
+                            state.tr('fastRefillSubtitle'),
+                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.playlist_add_rounded, size: 15, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('issueInitialFloat'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onPressed: () => _showInitialFloatDialog(context, state, allConsumables),
+                    ),
                     OutlinedButton.icon(
                       icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
                       label: Text(state.tr('printReport'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         side: const BorderSide(color: AppColors.primary, width: 1.1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: () {
-                        PrintExportHelper.printTableReport(
-                          title: 'Empty Return & Refill (ዕቃ በዕቃ) Ledger',
-                          subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
-                          headers: ['Date', 'Item / Chemical', 'Quantity', 'Unit', 'Team Leader', 'Cost (ETB)', 'Notes'],
-                          rows: exchanges.map((ex) => [
-                            DateFormatter.formatDate(ex.date),
-                            ex.itemName,
-                            ex.quantity,
-                            ex.unit,
-                            ex.supplier,
-                            CurrencyFormatter.format(ex.totalCostEtb),
-                            ex.notes ?? '-',
-                          ]).toList(),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
-                      label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      onPressed: () {
-                        PrintExportHelper.exportCsv(
-                          fileName: 'bishe_chemical_refills_${DateTime.now().toIso8601String().split('T')[0]}.csv',
-                          headers: ['ID', 'Date', 'Item Name', 'Quantity', 'Unit', 'Team Leader', 'Unit Cost (ETB)', 'Total Cost (ETB)', 'Notes'],
-                          rows: exchanges.map((ex) => [
-                            ex.id,
-                            DateFormatter.formatDate(ex.date),
-                            ex.itemName,
-                            ex.quantity,
-                            ex.unit,
-                            ex.supplier,
-                            ex.unitCostEtb,
-                            ex.totalCostEtb,
-                            ex.notes ?? '',
-                          ]).toList(),
-                        );
-                      },
+                      onPressed: () => _printExchangeReport(todayExchanges),
                     ),
                   ],
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 14),
 
-          // 0. Chemical Consumption vs Cashier Vehicle Wash Count Reconciliation
+          // 2. Receiver (Head Washer) Selector Bar
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111827),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.4)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.person_pin_rounded, color: Color(0xFF14B8A6), size: 18),
+                const SizedBox(width: 6),
+                Flexible(
+                  flex: 2,
+                  child: Text(
+                    '${state.tr('receiverLabel')}:',
+                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 3,
+                  child: InkWell(
+                    onTap: () => _showReceiverSelectionDialog(context, state),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.cardBorder),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _selectedReceiver,
+                              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary, size: 18),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 3. Fast-Turnover Cards Grid (⚡ CS-009, CS-004, CS-003, CS-010A, CS-006, CS-013)
+          Row(
+            children: [
+              const Icon(Icons.bolt_rounded, color: Colors.amber, size: 20),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  state.tr('fastTurnoverItems'),
+                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final crossAxisCount = constraints.maxWidth < 600 ? 1 : (constraints.maxWidth < 1000 ? 2 : 3);
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisExtent: 172,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: fastItems.length,
+                itemBuilder: (context, idx) {
+                  final item = fastItems[idx];
+                  return _buildFastExchangeCard(context, state, item);
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // 4. Slow-Moving / Detailing Items
+          ExpandableActionCard(
+            icon: AutoCareAssets.buildPhotoThumbnail(
+              imageUrl: AutoCareAssets.assetTowelsUrl,
+              width: 40,
+              height: 40,
+              borderRadius: 8,
+              fallbackIcon: Icons.access_time_rounded,
+              fallbackColor: Colors.deepPurpleAccent,
+            ),
+            iconPadding: EdgeInsets.zero,
+            iconBackgroundColor: Colors.transparent,
+            borderColor: Colors.deepPurpleAccent.shade200,
+            title: state.tr('slowTurnoverItems'),
+            subtitle: 'Abro Polish, Grinder Pads, Water Spot Remover, Headlight, Degreasers',
+            badge: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: Colors.deepPurple.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
+              child: Text('${slowItems.length} Items', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.deepPurpleAccent)),
+            ),
+            initiallyExpanded: false,
+            child: _buildSlowItemsSection(context, state, slowItems),
+          ),
+          const SizedBox(height: 14),
+
+          // 5. Chemical Reconciliation Audit (Live cars washed vs chemicals consumed)
           ExpandableActionCard(
             icon: AutoCareAssets.buildPhotoThumbnail(
               imageUrl: AutoCareAssets.assetShampooUrl,
-              width: 44,
-              height: 44,
-              borderRadius: 10,
+              width: 40,
+              height: 40,
+              borderRadius: 8,
               fallbackIcon: Icons.compare_arrows_rounded,
               fallbackColor: Colors.amber,
             ),
@@ -240,7 +393,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             subtitle: state.tr('reconciliationSub'),
             badge: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: Colors.amber.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              decoration: BoxDecoration(color: Colors.amber.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
               child: const Text('Live Audit', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.amber)),
             ),
             initiallyExpanded: false,
@@ -254,236 +407,206 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               rangeEnd: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59, 59),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          // 1. Primary Empty-for-Full Refill Exchange Desk
-          ExpandableActionCard(
-            icon: AutoCareAssets.buildPhotoThumbnail(
-              imageUrl: AutoCareAssets.assetShampooUrl,
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              fallbackIcon: Icons.autorenew_rounded,
-              fallbackColor: const Color(0xFF0D9488),
-            ),
-            iconPadding: EdgeInsets.zero,
-            iconBackgroundColor: Colors.transparent,
-            borderColor: const Color(0xFF0D9488),
-            title: state.tr('emptyRefillExchangeTitle'),
-            subtitle: state.tr('emptyRefillExchangeSub'),
-            badge: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-              child: const Text('Daily Exchange', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF0D9488))),
-            ),
-            initiallyExpanded: false,
-            child: _buildEmptyRefillExchangeCard(context, state, isMobile),
+          // 6. Today's Returned Empties & Exchanges Audit Timeline
+          Row(
+            children: [
+              const Icon(Icons.history_rounded, color: Color(0xFF38BDF8), size: 18),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  state.tr('todayExchangesTitle'),
+                  style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w900),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${todayExchanges.length} Recorded',
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w700),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-
-          // 2. Recent Empty-for-Full Refill Exchange Logs
-          ExpandableActionCard(
-            icon: AutoCareAssets.buildPhotoThumbnail(
-              imageUrl: AutoCareAssets.assetTowelsUrl,
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              fallbackIcon: Icons.history_rounded,
-              fallbackColor: Colors.blueAccent,
-            ),
-            iconPadding: EdgeInsets.zero,
-            iconBackgroundColor: Colors.transparent,
-            borderColor: Colors.blueAccent,
-            title: state.tr('recentRefillLogs'),
-            subtitle: 'Chemical & detergent swap audit ledger',
-            badge: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-              child: Text('${exchanges.length} Logged', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.blueAccent)),
-            ),
-            initiallyExpanded: false,
-            child: exchanges.isEmpty
-                ? _buildEmptyState('No empty container refill exchanges logged yet.', Icons.autorenew_rounded)
-                : Column(
-                    children: exchanges.map((ex) => Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        leading: AutoCareAssets.buildPhotoThumbnail(
-                          imageUrl: AutoCareAssets.getInventoryImage(ex.itemName),
-                          width: 40,
-                          height: 40,
-                          borderRadius: 8,
-                          fallbackIcon: Icons.water_drop_rounded,
-                          fallbackColor: Colors.teal,
-                        ),
-                        title: Text(ex.itemName, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
-                        subtitle: Text(
-                          '${ex.quantity} ${ex.unit} • Team Leader: ${ex.supplier} (${ex.date.day}/${ex.date.month})\n${ex.notes}',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                        ),
-                        trailing: Text(
-                          CurrencyFormatter.format(ex.totalCostEtb),
-                          style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange, fontSize: 13),
-                        ),
-                      ),
-                    )).toList(),
-                  ),
-          ),
-          const SizedBox(height: 12),
-
-          // 3. Shift Handover Desk
-          ExpandableActionCard(
-            icon: AutoCareAssets.buildPhotoThumbnail(
-              imageUrl: AutoCareAssets.stationBayUrl,
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              fallbackIcon: Icons.schedule_rounded,
-              fallbackColor: Colors.amber,
-            ),
-            iconPadding: EdgeInsets.zero,
-            iconBackgroundColor: Colors.transparent,
-            borderColor: Colors.amber.shade700,
-            title: state.tr('shiftHandoverDesk'),
-            subtitle: 'Issue daily equipment & chemicals to team leader',
-            badge: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: Colors.amber.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
-              child: Text(active != null ? 'Open Shift' : 'New Shift', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.amber.shade900)),
-            ),
-            initiallyExpanded: false,
-            child: active != null
-                ? _buildActiveHandoverCard(context, state, active, isMobile)
-                : _buildStartHandoverCard(context, state, isMobile),
-          ),
-          const SizedBox(height: 12),
-
-          // 4. Shift Handover Audit Logs
-          ExpandableActionCard(
-            icon: AutoCareAssets.buildPhotoThumbnail(
-              imageUrl: AutoCareAssets.assetEquipmentUrl,
-              width: 44,
-              height: 44,
-              borderRadius: 10,
-              fallbackIcon: Icons.fact_check_rounded,
-              fallbackColor: AppColors.primary,
-            ),
-            iconPadding: EdgeInsets.zero,
-            iconBackgroundColor: Colors.transparent,
-            borderColor: AppColors.primary,
-            title: state.tr('shiftHandoverLogs'),
-            subtitle: 'Signed inventory handoffs between shifts',
-            badge: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-              child: Text('${handovers.length} Logs', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.primary)),
-            ),
-            initiallyExpanded: false,
-            child: handovers.isEmpty
-                ? _buildEmptyState('No past shift handovers recorded yet.', Icons.assignment_outlined)
-                : Column(children: handovers.map((h) => _buildHandoverHistoryCard(context, state, h, isMobile)).toList()),
-          ),
+          const SizedBox(height: 10),
+          todayExchanges.isEmpty
+              ? _buildEmptyState('No container refill exchanges logged yet today.', Icons.autorenew_rounded)
+              : Column(
+                  children: todayExchanges.map((ex) => _buildTodayExchangeTile(context, state, ex)).toList(),
+                ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyRefillExchangeCard(BuildContext context, dynamic state, bool isMobile) {
+  // --- Fast Item Card (1-Tap Empty-for-Full Exchange) ---
+  Widget _buildFastExchangeCard(BuildContext context, dynamic state, ConsumableItem item) {
+    final qty = _fastItemQuantities[item.id] ?? 1.0;
+    final isOutOfStock = item.currentStock <= 0;
+
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 14 : 18),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isOutOfStock
+              ? Colors.red.withValues(alpha: 0.5)
+              : const Color(0xFF0D9488).withValues(alpha: 0.35),
+          width: 1.2,
         ),
-        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Row 1: Image + Name + Stock badge
           Row(
             children: [
               AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: AutoCareAssets.assetShampooUrl,
-                width: 44,
-                height: 44,
-                borderRadius: 10,
-                fallbackIcon: Icons.autorenew_rounded,
-                fallbackColor: Colors.tealAccent,
+                imageUrl: AutoCareAssets.getConsumableImage(item.name, id: item.id),
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(item.name, id: item.id),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Empty Return & Refill Exchange Desk',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 2),
                     Text(
-                      'ዕቃ በዕቃ መመለሻና መተኪያ • Washer leader returns empty containers to take fresh full ones',
-                      style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11.5),
+                      item.name,
+                      style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w800),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    if (item.nameAmharic.isNotEmpty)
+                      Text(
+                        item.nameAmharic,
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 10.5),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                   ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: isOutOfStock
+                      ? Colors.red.withValues(alpha: 0.15)
+                      : (item.isLowStock
+                          ? Colors.amber.withValues(alpha: 0.15)
+                          : const Color(0xFF0D9488).withValues(alpha: 0.15)),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  isOutOfStock
+                      ? state.tr('outOfStock')
+                      : '${item.currentStock.toStringAsFixed(0)} ${item.unit}',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: isOutOfStock
+                        ? Colors.redAccent
+                        : (item.isLowStock ? Colors.amber : const Color(0xFF14B8A6)),
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.verified_outlined, color: Colors.tealAccent, size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'No rigid daily return needed. Leader keeps working until containers empty, then brings back empty shampoo/wax containers to receive fresh replacements.',
-                    style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 11),
-                  ),
+
+          // Row 2: Quantity Stepper
+          Row(
+            children: [
+              Text(
+                '${state.tr('quantityExchanged')}:',
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.cardBorder),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        if (qty > 1) {
+                          setState(() => _fastItemQuantities[item.id] = qty - 1);
+                        }
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        child: Icon(Icons.remove, size: 13, color: Colors.white70),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        '${qty.toInt()}',
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        setState(() => _fastItemQuantities[item.id] = qty + 1);
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        child: Icon(Icons.add, size: 13, color: Colors.white70),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  item.unit,
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14),
+
+          // Row 3: 1-Tap Big Green Exchange Confirmation Button
           SizedBox(
             width: double.infinity,
+            height: 38,
             child: ElevatedButton.icon(
-              onPressed: () => _showEmptyRefillExchangeDialog(context, state),
-              icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-              label: const Text('Log Empty Return & Issue New Refill', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+              onPressed: isOutOfStock
+                  ? null
+                  : () => _executeFastExchange(context, state, item, qty),
+              icon: const Icon(Icons.autorenew_rounded, size: 16),
+              label: Text(
+                state.tr('confirmExchangeBtn'),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0D9488),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                disabledBackgroundColor: Colors.grey.shade800,
+                disabledForegroundColor: Colors.white38,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                elevation: 0,
               ),
             ),
           ),
@@ -492,437 +615,245 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     );
   }
 
-  void _showEmptyRefillExchangeDialog(BuildContext context, dynamic state) {
-    final activeConsumables = (state.consumables as List<ConsumableItem>)
-        .where((c) => !c.isDecommissioned)
-        .toList();
-    if (activeConsumables.isEmpty) {
+  Future<void> _executeFastExchange(
+    BuildContext context,
+    dynamic state,
+    ConsumableItem item,
+    double qty,
+  ) async {
+    await state.exchangeConsumableEmptyForNew(
+      itemId: item.id,
+      quantity: qty,
+      washerTeamLeaderName: _selectedReceiver,
+      notes: 'Fast 1-tap empty-for-full swap with $_selectedReceiver',
+    );
+
+    // Reset stepper to 1
+    setState(() => _fastItemQuantities[item.id] = 1.0);
+
+    if (context.mounted) {
+      final transactions = state.stockTransactions as List<StockTransaction>;
+      final latestTx = transactions.isNotEmpty ? transactions.first : null;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No active consumable items available in inventory.')),
+        SnackBar(
+          content: Text('${state.tr('exchangeSuccessMsg')} ($qty ${item.unit} ${item.name})'),
+          backgroundColor: const Color(0xFF0D9488),
+          duration: const Duration(seconds: 6),
+          action: latestTx != null
+              ? SnackBarAction(
+                  label: state.tr('undoExchange'),
+                  textColor: Colors.amberAccent,
+                  onPressed: () async {
+                    await state.undoExchangeConsumable(latestTx.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.tr('undoSuccessMsg')), backgroundColor: Colors.blueGrey),
+                      );
+                    }
+                  },
+                )
+              : null,
+        ),
       );
-      return;
     }
-
-    String selectedItemId = activeConsumables.first.id;
-    final qtyController = TextEditingController(text: '1.0');
-    final leaderController = TextEditingController(text: 'Washer Team Leader');
-    final notesController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          final item = activeConsumables.firstWhere((c) => c.id == selectedItemId);
-
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Row(
-              children: [
-                const Icon(Icons.autorenew_rounded, color: Color(0xFF0D9488), size: 22),
-                const SizedBox(width: 8),
-                const Text('Refill Exchange (ዕቃ በዕቃ)', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-              ],
-            ),
-            content: SizedBox(
-              width: math.min(440.0, MediaQuery.sizeOf(ctx).width - 32),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Select Consumable Item to Refill:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 6),
-                    DropdownButtonFormField<String>(
-                      value: selectedItemId,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: AppColors.surfaceVariant,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      ),
-                      items: activeConsumables.map((c) {
-                        return DropdownMenuItem(
-                          value: c.id,
-                          child: Text('${c.name} (${c.currentStock.toStringAsFixed(1)} ${c.unit} in store)', style: const TextStyle(fontSize: 12)),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setDialogState(() => selectedItemId = val);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: qtyController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: InputDecoration(
-                              labelText: 'Empties Returned / Fresh Issued',
-                              hintText: 'e.g. 2',
-                              suffixText: item.unit,
-                              filled: true,
-                              fillColor: AppColors.surfaceVariant,
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: leaderController,
-                      decoration: InputDecoration(
-                        labelText: 'Washer Team Leader Name',
-                        hintText: 'e.g. Abebe / Leader on duty',
-                        filled: true,
-                        fillColor: AppColors.surfaceVariant,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: notesController,
-                      decoration: InputDecoration(
-                        labelText: 'Notes / Remarks (Optional)',
-                        hintText: 'e.g. Returned empty 5L drum, took full drum',
-                        filled: true,
-                        fillColor: AppColors.surfaceVariant,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final qty = double.tryParse(qtyController.text.trim()) ?? 0.0;
-                  if (qty <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a valid quantity.')),
-                    );
-                    return;
-                  }
-                  await state.exchangeConsumableEmptyForNew(
-                    itemId: selectedItemId,
-                    quantity: qty,
-                    washerTeamLeaderName: leaderController.text.trim().isNotEmpty ? leaderController.text.trim() : 'Washer Team Leader',
-                    notes: notesController.text.trim(),
-                  );
-                  if (context.mounted) {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Successfully logged exchange of $qty ${item.unit} for ${item.name}!'),
-                        backgroundColor: AppColors.statusCompleted,
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D9488),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text('Confirm Refill Exchange', style: TextStyle(fontWeight: FontWeight.w800)),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 
-  Widget _buildStartHandoverCard(BuildContext context, dynamic state, bool isMobile) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 16 : 20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  // --- Slow-Moving Items Section ---
+  Widget _buildSlowItemsSection(BuildContext context, dynamic state, List<ConsumableItem> slowItems) {
+    final categories = ['All', 'Detailing Compound', 'Interior Care', 'Engine & Bay Care', 'Workshop Supplies', 'Hardware Fasteners'];
+    final filtered = _slowCategoryFilter == 'All'
+        ? slowItems
+        : slowItems.where((c) => c.category.toLowerCase().contains(_slowCategoryFilter.toLowerCase())).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Category chips
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: categories.map((cat) {
+              final isSel = _slowCategoryFilter == cat;
+              return Padding(
+                padding: const EdgeInsets.only(right: 6, bottom: 8),
+                child: FilterChip(
+                  label: Text(cat, style: TextStyle(fontSize: 10.5, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600, color: isSel ? Colors.white : AppColors.textSecondary)),
+                  selected: isSel,
+                  onSelected: (_) => setState(() => _slowCategoryFilter = cat),
+                  selectedColor: const Color(0xFF0D9488),
+                  backgroundColor: const Color(0xFF1E293B),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  checkmarkColor: Colors.white,
+                ),
+              );
+            }).toList(),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        ),
+        const SizedBox(height: 6),
+        ...filtered.map((item) => Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.6)),
+          ),
+          child: Row(
             children: [
               AutoCareAssets.buildPhotoThumbnail(
-                imageUrl: AutoCareAssets.stationBayUrl,
-                width: 44,
-                height: 44,
-                borderRadius: 10,
-                fallbackIcon: Icons.schedule_rounded,
-                fallbackColor: Colors.amber,
+                imageUrl: AutoCareAssets.getConsumableImage(item.name, id: item.id),
+                width: 32,
+                height: 32,
+                borderRadius: 6,
+                fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(item.name, id: item.id),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
+                    Text(item.name, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
                     Text(
-                      'Morning Shift Handover',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
-                    ),
-                    Text(
-                      'Issue daily consumables & supplies to Washer Team Leader',
-                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                      '${item.currentStock.toStringAsFixed(1)} ${item.unit} in store • ${item.category}',
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 10),
                     ),
                   ],
                 ),
               ),
+              ElevatedButton.icon(
+                onPressed: item.currentStock <= 0
+                    ? null
+                    : () => _showSlowItemExchangeDialog(context, state, item),
+                icon: const Icon(Icons.swap_horiz_rounded, size: 14),
+                label: const Text('Exchange', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0D9488),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-
-          // 3-Category Handling Protocol Badges
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCategoryProtocolRow(Icons.published_with_changes_rounded, state.tr('categoryExchangeNote')),
-                const SizedBox(height: 4),
-                _buildCategoryProtocolRow(Icons.format_list_numbered_rounded, state.tr('categoryCountNote')),
-                const SizedBox(height: 4),
-                _buildCategoryProtocolRow(Icons.opacity_rounded, state.tr('categoryLiquidNote')),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          ElevatedButton.icon(
-            onPressed: () => _showStartHandoverDialog(context, state),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            icon: const Icon(Icons.outgoing_mail, size: 18),
-            label: const Text('Start Morning Handover', style: TextStyle(fontWeight: FontWeight.w800)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryProtocolRow(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: Colors.amberAccent),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w500),
-          ),
-        ),
+        )),
       ],
     );
   }
 
-  Widget _buildActiveHandoverCard(BuildContext context, dynamic state, DailyHandover active, bool isMobile) {
+  // --- Today's Exchange Tile with Undo Action ---
+  Widget _buildTodayExchangeTile(BuildContext context, dynamic state, StockTransaction ex) {
     return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 16 : 20),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.amber.shade300, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.amber.withOpacity(0.12),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.7)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle)),
-                    const SizedBox(width: 6),
-                    Text(
-                      'ACTIVE SHIFT HANDOVER',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.amber.shade900),
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              Text(
-                'Checked out: ${_formatTime(active.checkedOutAt)}',
-                style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-              ),
-            ],
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        leading: AutoCareAssets.buildPhotoThumbnail(
+          imageUrl: AutoCareAssets.getInventoryImage(ex.itemName),
+          width: 38,
+          height: 38,
+          borderRadius: 8,
+          fallbackIcon: Icons.autorenew_rounded,
+          fallbackColor: const Color(0xFF14B8A6),
+        ),
+        title: Text(
+          ex.itemName,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13),
+        ),
+        subtitle: Text(
+          '${ex.quantity} ${ex.unit} • ${ex.supplier} • ${_formatTime(ex.date)}\n${ex.notes ?? ""}',
+          style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+        ),
+        trailing: OutlinedButton.icon(
+          icon: const Icon(Icons.undo_rounded, size: 13, color: Colors.amberAccent),
+          label: Text(state.tr('undoExchange'), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Colors.amberAccent)),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            side: const BorderSide(color: Colors.amberAccent, width: 1.0),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Washer Team Leader: ${active.washerTeamLeaderName}',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 10),
-          const Text('Issued Morning Supplies:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: active.issuedQuantities.entries.map((e) {
-              final item = state.consumables.cast<ConsumableItem?>().firstWhere((c) => c?.id == e.key, orElse: () => null);
-              final name = item != null ? item.name : e.key;
-              final unit = item != null ? item.unit : '';
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Text('$name: ${e.value} $unit', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () => _showCompleteHandoverDialog(context, state, active),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade700,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            icon: const Icon(Icons.assignment_turned_in_rounded, size: 18),
-            label: const Text('Evening Return & Reconcile', style: TextStyle(fontWeight: FontWeight.w800)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHandoverHistoryCard(BuildContext context, dynamic state, DailyHandover h, bool isMobile) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  '${_formatDate(h.date)} • ${h.washerTeamLeaderName}',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
-                ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: h.status == HandoverStatus.completed ? Colors.green.shade50 : Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: h.status == HandoverStatus.completed ? Colors.green.shade300 : Colors.amber.shade300),
-                  ),
-                  child: Text(
-                    h.status.displayName,
-                    style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: h.status == HandoverStatus.completed ? Colors.green.shade800 : Colors.amber.shade900),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (h.carsWashedDuringShift > 0)
-              Row(
-                children: [
-                  const Icon(Icons.directions_car_rounded, size: 14, color: AppColors.primary),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Cars Washed During Shift: ${h.carsWashedDuringShift}',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: h.consumedQuantities.entries.map((e) {
-                final item = state.consumables.cast<ConsumableItem?>().firstWhere((c) => c?.id == e.key, orElse: () => null);
-                final name = item != null ? item.name : e.key;
-                final unit = item != null ? item.unit : '';
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  decoration: BoxDecoration(color: Colors.blueGrey.shade50, borderRadius: BorderRadius.circular(6)),
-                  child: Text('Consumed: $name (${e.value} $unit)', style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
-                );
-              }).toList(),
-            ),
-          ],
+          onPressed: () => _confirmUndoExchange(context, state, ex),
         ),
       ),
     );
   }
 
+  void _confirmUndoExchange(BuildContext context, dynamic state, StockTransaction ex) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 22),
+            const SizedBox(width: 8),
+            Text(state.tr('undoExchange'), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
+          ],
+        ),
+        content: Text(
+          '${state.tr('undoExchangeConfirm')}\n\nItem: ${ex.itemName}\nQty: ${ex.quantity} ${ex.unit}\nReceiver: ${ex.supplier}',
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await state.undoExchangeConsumable(ex.id);
+              if (context.mounted) {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.tr('undoSuccessMsg')), backgroundColor: Colors.blueGrey),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.amber.shade800, foregroundColor: Colors.white),
+            child: Text(state.tr('undoExchange'), style: const TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ==========================================
-  // TAB 2: CONSUMABLES STOCKROOM (አላቂ እቃዎች)
+  // TAB 2: 📦 STOREROOM STOCK (አጠቃላይ ክምችት)
   // ==========================================
 
-  Widget _buildConsumablesTab(BuildContext context, dynamic state, bool isMobile) {
-    final consumables = state.consumables as List<ConsumableItem>;
-    final lowStockCount = consumables.where((c) => c.isLowStock && !c.isDecommissioned).length;
+  Widget _buildStoreroomStockTab(BuildContext context, dynamic state, bool isMobile) {
+    final consumables = (state.consumables as List<ConsumableItem>).where((c) => !c.isDecommissioned).toList();
+    final searchQuery = _consumableSearchCtrl.text.trim().toLowerCase();
+
+    final filtered = consumables.where((c) {
+      final matchesSearch = searchQuery.isEmpty ||
+          c.name.toLowerCase().contains(searchQuery) ||
+          c.nameAmharic.toLowerCase().contains(searchQuery) ||
+          c.id.toLowerCase().contains(searchQuery) ||
+          c.category.toLowerCase().contains(searchQuery);
+
+      final matchesCategory = _consumableCategoryFilter == 'All' ||
+          c.category.toLowerCase().contains(_consumableCategoryFilter.toLowerCase());
+
+      final matchesStock = _stockLevelFilter == 'All' ||
+          (_stockLevelFilter == 'Low Stock' && c.isLowStock) ||
+          (_stockLevelFilter == 'Healthy' && !c.isLowStock);
+
+      return matchesSearch && matchesCategory && matchesStock;
+    }).toList();
+
+    final lowStockCount = consumables.where((c) => c.isLowStock).length;
 
     return Column(
       children: [
-        // Top action bar
+        // Top Action Bar
         Container(
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 10),
           decoration: BoxDecoration(
             color: const Color(0xFF111827),
             border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
@@ -937,26 +868,26 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${consumables.length} Registered Consumables',
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    '${consumables.length} ${state.tr('storeroomStockTab')}',
+                    style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: Colors.white),
                   ),
                   if (lowStockCount > 0)
                     Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, size: 14, color: Colors.red.shade700),
+                        const Icon(Icons.warning_amber_rounded, size: 13, color: Colors.redAccent),
                         const SizedBox(width: 4),
                         Text(
                           '$lowStockCount item(s) below reorder threshold',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.red.shade700),
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.redAccent),
                         ),
                       ],
                     )
                   else
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.check_circle_rounded, size: 14, color: Colors.green),
-                        SizedBox(width: 4),
-                        Text('All stock levels healthy', style: TextStyle(fontSize: 11.5, color: Colors.green)),
+                        const Icon(Icons.check_circle_rounded, size: 13, color: Colors.green),
+                        const SizedBox(width: 4),
+                        Text(state.tr('healthyStock'), style: const TextStyle(fontSize: 11, color: Colors.green)),
                       ],
                     ),
                 ],
@@ -966,6 +897,17 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 runSpacing: 6,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
+                  ElevatedButton.icon(
+                    onPressed: () => _showReceiveDeliveryForAnyItemDialog(context, state, consumables),
+                    icon: const Icon(Icons.add_business_rounded, size: 15),
+                    label: Text(state.tr('receiveDeliveryBtn'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade700,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+                    ),
+                  ),
                   OutlinedButton.icon(
                     icon: const Icon(Icons.print_rounded, size: 14, color: AppColors.primary),
                     label: Text(state.tr('print'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
@@ -974,60 +916,18 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       side: const BorderSide(color: AppColors.primary, width: 1.1),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () {
-                      PrintExportHelper.printTableReport(
-                        title: 'Consumables Stockroom Inventory (አላቂ እቃዎች)',
-                        subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
-                        headers: ['Item Name', 'Category', 'Current Stock', 'Unit', 'Reorder Min', 'Unit Cost (ETB)', 'Status'],
-                        rows: consumables.map((c) => [
-                          c.name,
-                          c.category,
-                          c.currentStock.toStringAsFixed(1),
-                          c.unit,
-                          c.minThreshold.toStringAsFixed(1),
-                          CurrencyFormatter.format(c.unitCostEtb),
-                          c.isDecommissioned ? 'Decommissioned' : (c.isLowStock ? 'LOW STOCK' : 'Healthy'),
-                        ]).toList(),
-                      );
-                    },
-                  ),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
-                    label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () {
-                      PrintExportHelper.exportCsv(
-                        fileName: 'bishe_consumables_inventory_${DateTime.now().toIso8601String().split('T')[0]}.csv',
-                        headers: ['ID', 'Item Name', 'Name (Amharic)', 'Category', 'Stock Level', 'Unit', 'Min Threshold', 'Unit Cost (ETB)', 'Decommissioned', 'Low Stock'],
-                        rows: consumables.map((c) => [
-                          c.id,
-                          c.name,
-                          c.nameAmharic,
-                          c.category,
-                          c.currentStock,
-                          c.unit,
-                          c.minThreshold,
-                          c.unitCostEtb,
-                          c.isDecommissioned ? 'Yes' : 'No',
-                          c.isLowStock ? 'Yes' : 'No',
-                        ]).toList(),
-                      );
-                    },
+                    onPressed: () => _printConsumablesReport(consumables),
                   ),
                   ElevatedButton.icon(
                     onPressed: () => _showAddConsumableDialog(context, state),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: const Color(0xFF0D9488),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add Consumable', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                    icon: const Icon(Icons.add, size: 15),
+                    label: const Text('Add Item', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
@@ -1035,11 +935,63 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           ),
         ),
 
-        // 3D Animated Chemical Tank Gauges
+        // Search Bar & Filter Chips
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+          child: TextField(
+            controller: _consumableSearchCtrl,
+            onChanged: (_) => setState(() {}),
+            style: const TextStyle(color: Colors.white, fontSize: 12.5),
+            decoration: InputDecoration(
+              hintText: state.tr('searchInventoryHint'),
+              hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary, size: 18),
+              suffixIcon: _consumableSearchCtrl.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: AppColors.textSecondary, size: 16),
+                      onPressed: () => setState(() => _consumableSearchCtrl.clear()),
+                    )
+                  : null,
+              filled: true,
+              fillColor: const Color(0xFF1E293B),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: ['All', 'Low Stock', 'Healthy'].map((flt) {
+                final isSel = _stockLevelFilter == flt;
+                Color chipColor = const Color(0xFF0D9488);
+                if (flt == 'Low Stock') chipColor = Colors.redAccent;
+                if (flt == 'Healthy') chipColor = Colors.green;
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: FilterChip(
+                    label: Text(flt, style: TextStyle(fontSize: 10.5, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600, color: isSel ? Colors.white : AppColors.textSecondary)),
+                    selected: isSel,
+                    onSelected: (_) => setState(() => _stockLevelFilter = flt),
+                    selectedColor: chipColor,
+                    backgroundColor: const Color(0xFF1E293B),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    checkmarkColor: Colors.white,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+
+        // 3D Animated Chemical Tank Gauges (top 6 items)
         if (consumables.isNotEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: const Color(0xFF0F172A),
               border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.6))),
@@ -1052,202 +1004,196 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       ? (c.currentStock / (c.minThreshold * 2.5)).clamp(0.0, 1.0)
                       : (c.currentStock > 0 ? 0.75 : 0.0);
                   return Padding(
-                    padding: const EdgeInsets.only(right: 14),
+                    padding: const EdgeInsets.only(right: 12),
                     child: LiquidLevelGauge(
                       title: c.name,
                       currentLevel: ratio,
                       currentAmountStr: '${c.currentStock.toStringAsFixed(0)} ${c.unit}',
                       maxAmountStr: '${(c.minThreshold * 2.5).toStringAsFixed(0)} ${c.unit}',
-                      height: 100,
-                      width: 58,
+                      height: 90,
+                      width: 54,
                     ),
                   );
                 }).toList(),
               ),
             ),
           ),
+
+        // Consumables List
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.all(isMobile ? 12 : 20),
-            itemCount: consumables.length,
-            itemBuilder: (context, idx) {
-              final item = consumables[idx];
-              return _buildConsumableCard(context, state, item, isMobile);
-            },
-          ),
+          child: filtered.isEmpty
+              ? _buildEmptyState('No inventory items match your search filter.', Icons.inventory_2_outlined)
+              : ListView.builder(
+                  padding: EdgeInsets.all(isMobile ? 12 : 16),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, idx) {
+                    final item = filtered[idx];
+                    return _buildConsumableItemTile(context, state, item, isMobile);
+                  },
+                ),
         ),
       ],
     );
   }
 
-  Widget _buildConsumableCard(BuildContext context, dynamic state, ConsumableItem item, bool isMobile) {
-    final isLow = item.isLowStock && !item.isDecommissioned;
+  Widget _buildConsumableItemTile(BuildContext context, dynamic state, ConsumableItem item, bool isMobile) {
+    final isLow = item.isLowStock;
+    final isOutOfStock = item.currentStock <= 0;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: item.isDecommissioned
-              ? Colors.grey.shade300
-              : (isLow ? Colors.red.shade400 : AppColors.cardBorder),
-          width: isLow ? 1.6 : 1.0,
+          color: isOutOfStock
+              ? Colors.red.withValues(alpha: 0.6)
+              : (isLow ? Colors.amber.withValues(alpha: 0.6) : AppColors.cardBorder.withValues(alpha: 0.7)),
+          width: isLow ? 1.4 : 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: isLow
-                ? Colors.red.withValues(alpha: 0.1)
-                : Colors.black.withValues(alpha: 0.03),
-            blurRadius: isLow ? 10 : 8,
-            offset: const Offset(0, 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: AutoCareAssets.getConsumableImage(item.name, id: item.id),
+                width: 42,
+                height: 42,
+                borderRadius: 9,
+                fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(item.name, id: item.id),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w800),
+                    ),
+                    if (item.nameAmharic.isNotEmpty)
+                      Text(item.nameAmharic, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isOutOfStock
+                      ? Colors.red.withValues(alpha: 0.2)
+                      : (isLow ? Colors.amber.withValues(alpha: 0.2) : Colors.green.withValues(alpha: 0.15)),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isOutOfStock
+                        ? Colors.redAccent
+                        : (isLow ? Colors.amber : Colors.green),
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  isOutOfStock
+                      ? 'EMPTY (0)'
+                      : (isLow ? 'REORDER ALERT' : 'HEALTHY'),
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                    color: isOutOfStock
+                        ? Colors.redAccent
+                        : (isLow ? Colors.amber : Colors.greenAccent),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(4)),
+                child: Text(item.category, style: const TextStyle(color: Colors.white70, fontSize: 10.5, fontWeight: FontWeight.w600)),
+              ),
+              Text(
+                'Stock: ${item.currentStock.toStringAsFixed(1)} ${item.unit}',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                  color: isLow ? Colors.redAccent : Colors.white,
+                ),
+              ),
+              Text('(Min: ${item.minThreshold.toStringAsFixed(0)} ${item.unit})', style: const TextStyle(color: AppColors.textSecondary, fontSize: 10.5)),
+              Text('ETB ${item.unitCostEtb.toStringAsFixed(0)} / ${item.unit}', style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w700)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => _showReceiveStockDialog(context, state, item),
+                icon: const Icon(Icons.add_shopping_cart, size: 14),
+                label: Text(state.tr('receiveDeliveryBtn'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  side: const BorderSide(color: Colors.green),
+                  foregroundColor: Colors.greenAccent,
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton.icon(
+                onPressed: () => _showDecommissionConsumableDialog(context, state, item),
+                icon: const Icon(Icons.archive_outlined, size: 14),
+                label: const Text('Decommission', style: TextStyle(fontSize: 11)),
+                style: TextButton.styleFrom(foregroundColor: Colors.orange.shade400),
+              ),
+              if (state.isSuperAdmin) ...[
+                const SizedBox(width: 6),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 17, color: Colors.redAccent),
+                  tooltip: 'Super Admin Permanent Delete',
+                  onPressed: () => _showDeleteConsumableDialog(context, state, item),
+                ),
+              ],
+            ],
           ),
         ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.getConsumableImage(item.name, id: item.id),
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
-                  fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(item.name, id: item.id),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: item.isDecommissioned ? Colors.grey : AppColors.textPrimary,
-                          decoration: item.isDecommissioned ? TextDecoration.lineThrough : null,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          if (item.nameAmharic.isNotEmpty)
-                            Text(
-                              item.nameAmharic,
-                              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
-                            ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                            decoration: BoxDecoration(
-                              color: item.name.toLowerCase().contains('carpet')
-                                  ? const Color(0xFF7C3AED).withValues(alpha: 0.1)
-                                  : const Color(0xFF0284C7).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              item.name.toLowerCase().contains('carpet') ? 'Carpet Care' : 'Car Detailing',
-                              style: TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w700,
-                                color: item.name.toLowerCase().contains('carpet') ? const Color(0xFF7C3AED) : const Color(0xFF0284C7),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (item.isDecommissioned)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.white24)),
-                    child: const Text('DECOMMISSIONED', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Colors.white70)),
-                  )
-                else if (isLow)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.red.withValues(alpha: 0.45))),
-                    child: const Text('REORDER ALERT', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Colors.redAccent)),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.08), borderRadius: BorderRadius.circular(6)),
-                  child: Text(item.category, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Stock: ${item.currentStock} ${item.unit}',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: isLow ? Colors.red.shade700 : AppColors.textPrimary),
-                ),
-                const SizedBox(width: 8),
-                Text('(Min: ${item.minThreshold} ${item.unit})', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                const Spacer(),
-                Text('ETB ${item.unitCostEtb.toStringAsFixed(0)} / ${item.unit}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black87)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (!item.isDecommissioned) ...[
-                  OutlinedButton.icon(
-                    onPressed: () => _showReceiveStockDialog(context, state, item),
-                    icon: const Icon(Icons.add_shopping_cart, size: 14),
-                    label: const Text('Receive Stock', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      side: const BorderSide(color: Colors.green),
-                      foregroundColor: Colors.green.shade800,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => _showDecommissionConsumableDialog(context, state, item),
-                    icon: const Icon(Icons.archive_outlined, size: 14),
-                    label: const Text('Decommission', style: TextStyle(fontSize: 11.5)),
-                    style: TextButton.styleFrom(foregroundColor: Colors.orange.shade800),
-                  ),
-                ],
-                if (state.isSuperAdmin) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                    tooltip: 'Super Admin Permanent Delete',
-                    onPressed: () => _showDeleteConsumableDialog(context, state, item),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
 
   // ==========================================
-  // TAB 3: FIXED ASSETS REGISTRY (ቋሚ እቃዎች)
+  // TAB 3: 🛠️ FIXED ASSETS (የመሳሪያዎች ሁኔታ)
   // ==========================================
 
   Widget _buildFixedAssetsTab(BuildContext context, dynamic state, bool isMobile) {
     final assets = state.fixedAssets as List<FixedAsset>;
-    final filtered = _assetFilter == 'All'
-        ? assets
-        : assets.where((a) => a.condition.name.toLowerCase() == _assetFilter.toLowerCase()).toList();
+    final searchQuery = _assetSearchCtrl.text.trim().toLowerCase();
+
+    final filtered = assets.where((a) {
+      final matchesSearch = searchQuery.isEmpty ||
+          a.name.toLowerCase().contains(searchQuery) ||
+          a.nameAmharic.toLowerCase().contains(searchQuery) ||
+          a.id.toLowerCase().contains(searchQuery) ||
+          a.serialNumber.toLowerCase().contains(searchQuery) ||
+          a.assignedLocation.toLowerCase().contains(searchQuery);
+
+      final matchesCondition = _assetConditionFilter == 'All' ||
+          a.condition.name.toLowerCase() == _assetConditionFilter.toLowerCase();
+
+      return matchesSearch && matchesCondition;
+    }).toList();
 
     return Column(
       children: [
+        // Top Action Bar
         Container(
-          padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 10),
           decoration: BoxDecoration(
             color: const Color(0xFF111827),
             border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
@@ -1259,8 +1205,8 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
-                '${assets.length} Fixed Assets',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                '${assets.length} ${state.tr('allFixedAssetsCount')}',
+                style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: Colors.white),
               ),
               Wrap(
                 spacing: 6,
@@ -1275,582 +1221,660 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       side: const BorderSide(color: AppColors.primary, width: 1.1),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    onPressed: () {
-                      PrintExportHelper.printTableReport(
-                        title: 'Fixed Assets & Machinery Register (ቋሚ እቃዎች)',
-                        subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
-                        headers: ['Asset ID', 'Name', 'Category', 'Serial No', 'Location', 'Condition', 'Notes'],
-                        rows: filtered.map((a) => [
-                          a.id,
-                          a.name,
-                          a.category,
-                          a.serialNumber,
-                          a.assignedLocation,
-                          a.condition.displayName,
-                          a.notes,
-                        ]).toList(),
-                      );
-                    },
-                  ),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
-                    label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: () {
-                      PrintExportHelper.exportCsv(
-                        fileName: 'bishe_fixed_assets_${DateTime.now().toIso8601String().split('T')[0]}.csv',
-                        headers: ['Asset ID', 'Name', 'Name (Amharic)', 'Category', 'Serial Number', 'Location', 'Condition', 'Notes'],
-                        rows: filtered.map((a) => [
-                          a.id,
-                          a.name,
-                          a.nameAmharic,
-                          a.category,
-                          a.serialNumber,
-                          a.assignedLocation,
-                          a.condition.displayName,
-                          a.notes,
-                        ]).toList(),
-                      );
-                    },
+                    onPressed: () => _printFixedAssetsReport(filtered),
                   ),
                   ElevatedButton.icon(
                     onPressed: () => _showAddFixedAssetDialog(context, state),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: const Color(0xFF0D9488),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Add Fixed Asset', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                    icon: const Icon(Icons.add, size: 15),
+                    label: const Text('Add Asset', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
                   ),
                 ],
               ),
             ],
           ),
         ),
-        // Filter chips
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: ['All', 'operational', 'needsService', 'underRepair', 'decommissioned'].map((cond) {
-              final isSel = _assetFilter == cond;
-              String label = cond;
-              if (cond == 'operational') label = 'Operational';
-              if (cond == 'needsService') label = 'Needs Service';
-              if (cond == 'underRepair') label = 'Under Repair';
-              if (cond == 'decommissioned') label = 'Decommissioned';
 
-              return FilterChip(
-                label: Text(label, style: TextStyle(fontSize: 11, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600, color: isSel ? Colors.white : AppColors.textSecondary)),
-                selected: isSel,
-                onSelected: (_) => setState(() => _assetFilter = cond),
-                selectedColor: AppColors.primary,
-                backgroundColor: const Color(0xFF1E293B),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: isSel ? AppColors.primary : AppColors.cardBorder),
-                ),
-                checkmarkColor: Colors.white,
-              );
-            }).toList(),
+        // Search Bar & Condition Filter Chips
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+          child: TextField(
+            controller: _assetSearchCtrl,
+            onChanged: (_) => setState(() {}),
+            style: const TextStyle(color: Colors.white, fontSize: 12.5),
+            decoration: InputDecoration(
+              hintText: 'Search machinery by name, ID, or bay...',
+              hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary, size: 18),
+              suffixIcon: _assetSearchCtrl.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: AppColors.textSecondary, size: 16),
+                      onPressed: () => setState(() => _assetSearchCtrl.clear()),
+                    )
+                  : null,
+              filled: true,
+              fillColor: const Color(0xFF1E293B),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
           ),
         ),
-        Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.all(isMobile ? 12 : 20),
-            itemCount: filtered.length,
-            itemBuilder: (context, idx) {
-              final asset = filtered[idx];
-              return _buildFixedAssetCard(context, state, asset, isMobile);
-            },
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: ['All', 'operational', 'needsService', 'decommissioned'].map((cond) {
+                final isSel = _assetConditionFilter == cond;
+                String label = cond;
+                if (cond == 'operational') label = state.tr('itemOperational');
+                if (cond == 'needsService') label = state.tr('itemNeedsRepair');
+                if (cond == 'decommissioned') label = 'Decommissioned';
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: FilterChip(
+                    label: Text(label, style: TextStyle(fontSize: 10.5, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600, color: isSel ? Colors.white : AppColors.textSecondary)),
+                    selected: isSel,
+                    onSelected: (_) => setState(() => _assetConditionFilter = cond),
+                    selectedColor: cond == 'needsService' ? Colors.amber.shade800 : const Color(0xFF0D9488),
+                    backgroundColor: const Color(0xFF1E293B),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    checkmarkColor: Colors.white,
+                  ),
+                );
+              }).toList(),
+            ),
           ),
+        ),
+
+        // Assets List
+        Expanded(
+          child: filtered.isEmpty
+              ? _buildEmptyState('No machinery or tools match your search.', Icons.build_circle_outlined)
+              : ListView.builder(
+                  padding: EdgeInsets.all(isMobile ? 12 : 16),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, idx) {
+                    final asset = filtered[idx];
+                    return _buildFixedAssetCard(context, state, asset, isMobile);
+                  },
+                ),
         ),
       ],
     );
   }
 
   Widget _buildFixedAssetCard(BuildContext context, dynamic state, FixedAsset asset, bool isMobile) {
-    Color condColor;
-    switch (asset.condition) {
-      case AssetCondition.operational:
-        condColor = Colors.green;
-        break;
-      case AssetCondition.needsService:
-        condColor = Colors.amber.shade800;
-        break;
-      case AssetCondition.underRepair:
-        condColor = Colors.orange.shade800;
-        break;
-      case AssetCondition.decommissioned:
-        condColor = Colors.grey;
-        break;
-    }
+    final isOperational = asset.condition == AssetCondition.operational;
+    final isNeedsRepair = asset.condition == AssetCondition.needsService || asset.condition == AssetCondition.underRepair;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: asset.condition == AssetCondition.decommissioned
-              ? Colors.grey.shade300
-              : condColor.withValues(alpha: 0.35),
+          color: isOperational
+              ? Colors.green.withValues(alpha: 0.4)
+              : (isNeedsRepair ? Colors.amber.withValues(alpha: 0.6) : Colors.white24),
           width: 1.2,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: AutoCareAssets.getFixedAssetImage(asset.name, id: asset.id),
-                  width: 44,
-                  height: 44,
-                  borderRadius: 10,
-                  fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(asset.name, id: asset.id),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${asset.id} • ${asset.name}',
-                        style: TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          color: asset.condition == AssetCondition.decommissioned ? Colors.grey : AppColors.textPrimary,
-                        ),
-                      ),
-                      if (asset.nameAmharic.isNotEmpty)
-                        Text(asset.nameAmharic, style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600)),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: condColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: condColor.withOpacity(0.4)),
-                  ),
-                  child: Text(
-                    asset.condition.displayName.toUpperCase(),
-                    style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: condColor),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.location_on_outlined, size: 14, color: AppColors.primary),
-                const SizedBox(width: 4),
-                Text(asset.assignedLocation, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                const SizedBox(width: 14),
-                Text('Category: ${asset.category}', style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-              ],
-            ),
-            if (asset.notes.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(asset.notes, style: const TextStyle(fontSize: 11.5, color: Colors.black54)),
-            ],
-            if (asset.decommissionReason != null) ...[
-              const SizedBox(height: 4),
-              Text('Decommission Reason: ${asset.decommissionReason}', style: const TextStyle(fontSize: 11.5, color: Colors.redAccent, fontStyle: FontStyle.italic)),
-            ],
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () => _showUpdateAssetConditionDialog(context, state, asset),
-                  icon: const Icon(Icons.tune, size: 14),
-                  label: const Text('Update Condition', style: TextStyle(fontSize: 11)),
-                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4)),
-                ),
-                if (asset.condition != AssetCondition.decommissioned) ...[
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => _showDecommissionAssetDialog(context, state, asset),
-                    icon: const Icon(Icons.archive_outlined, size: 14),
-                    label: const Text('Decommission', style: TextStyle(fontSize: 11)),
-                    style: TextButton.styleFrom(foregroundColor: Colors.orange.shade800),
-                  ),
-                ],
-                if (state.isSuperAdmin) ...[
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                    tooltip: 'Super Admin Permanent Delete',
-                    onPressed: () => _showDeleteAssetDialog(context, state, asset),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ==========================================
-  // DIALOGS & ACTIONS
-  // ==========================================
-
-  void _showStartHandoverDialog(BuildContext context, dynamic state) {
-    final leaderCtrl = TextEditingController(text: 'Washer Team Leader');
-    final dailyItems = (state.consumables as List<ConsumableItem>).where((c) => c.isDailyHandoverItem && !c.isDecommissioned).toList();
-    final quantities = <String, TextEditingController>{};
-    for (var item in dailyItems) {
-      double defaultQty = 2.0;
-      if (item.name.toLowerCase().contains('shampoo')) defaultQty = 5.0;
-      if (item.name.toLowerCase().contains('towel')) defaultQty = 20.0;
-      if (item.name.toLowerCase().contains('cloth')) defaultQty = 10.0;
-      quantities[item.id] = TextEditingController(text: defaultQty.toString());
-    }
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Morning Handover to Team Leader', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-        content: SizedBox(
-          width: math.min(480.0, MediaQuery.sizeOf(ctx).width - 32),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: leaderCtrl,
-                  decoration: InputDecoration(
-                    labelText: 'Washer Team Leader Name',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                const Text('Daily Consumables to Issue:', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                const SizedBox(height: 8),
-                ...dailyItems.map((item) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text('${item.name} (${item.unit})', style: const TextStyle(fontSize: 12.5)),
-                        ),
-                        SizedBox(
-                          width: 80,
-                          child: TextField(
-                            controller: quantities[item.id],
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
-                        ),
-                      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AutoCareAssets.buildPhotoThumbnail(
+                imageUrl: AutoCareAssets.getFixedAssetImage(asset.name, id: asset.id),
+                width: 42,
+                height: 42,
+                borderRadius: 9,
+                fallbackIcon: AutoCareAssets.getInventoryFallbackIcon(asset.name, id: asset.id),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${asset.id} • ${asset.name}',
+                      style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w800),
                     ),
-                  );
-                }),
-              ],
-            ),
+                    if (asset.nameAmharic.isNotEmpty)
+                      Text(asset.nameAmharic, style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isOperational
+                      ? Colors.green.withValues(alpha: 0.15)
+                      : (isNeedsRepair ? Colors.amber.withValues(alpha: 0.2) : Colors.white12),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isOperational
+                        ? Colors.greenAccent
+                        : (isNeedsRepair ? Colors.amber : Colors.white30),
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  isOperational
+                      ? state.tr('itemOperational').toUpperCase()
+                      : (isNeedsRepair ? state.tr('itemNeedsRepair').toUpperCase() : 'DECOMMISSIONED'),
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                    color: isOperational
+                        ? Colors.greenAccent
+                        : (isNeedsRepair ? Colors.amberAccent : Colors.white70),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              final issued = <String, double>{};
-              quantities.forEach((id, ctrl) {
-                final qty = double.tryParse(ctrl.text.trim()) ?? 0.0;
-                if (qty > 0) issued[id] = qty;
-              });
-              await state.startDailyHandover(
-                washerTeamLeaderName: leaderCtrl.text.trim(),
-                issuedQuantities: issued,
-              );
-              Navigator.pop(ctx);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            child: const Text('Confirm Handover'),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined, size: 13, color: Color(0xFF14B8A6)),
+              const SizedBox(width: 4),
+              Text(asset.assignedLocation, style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w700)),
+              const SizedBox(width: 12),
+              Text('Qty: ${asset.quantity} • ${asset.category}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+            ],
+          ),
+          if (asset.notes.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(asset.notes, style: const TextStyle(color: AppColors.textSecondary, fontSize: 10.5)),
+          ],
+          const SizedBox(height: 10),
+
+          // 1-Tap Toggle & Details Buttons
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              // 1-Tap Operational / Needs Repair Toggle
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final newCond = isOperational ? AssetCondition.needsService : AssetCondition.operational;
+                  await state.saveFixedAsset(asset.copyWith(condition: newCond));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          newCond == AssetCondition.operational
+                              ? '${asset.name} marked operational!'
+                              : '${asset.name} flagged as needing repair.',
+                        ),
+                        backgroundColor: newCond == AssetCondition.operational ? Colors.green : Colors.amber.shade800,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                icon: Icon(
+                  isOperational ? Icons.build_rounded : Icons.check_circle_rounded,
+                  size: 14,
+                ),
+                label: Text(
+                  isOperational ? state.tr('markNeedsRepair') : state.tr('markOperational'),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isOperational ? Colors.amber.shade800 : Colors.green.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
+                onPressed: () => _showUpdateAssetConditionDialog(context, state, asset),
+                icon: const Icon(Icons.tune, size: 14),
+                label: Text(state.tr('editAssetDetails'), style: const TextStyle(fontSize: 11)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  side: const BorderSide(color: AppColors.cardBorder),
+                  foregroundColor: Colors.white70,
+                ),
+              ),
+              if (state.isSuperAdmin) ...[
+                const SizedBox(width: 6),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 17, color: Colors.redAccent),
+                  tooltip: 'Super Admin Permanent Delete',
+                  onPressed: () => _showDeleteAssetDialog(context, state, asset),
+                ),
+              ],
+            ],
           ),
         ],
       ),
     );
   }
 
-  void _showCompleteHandoverDialog(BuildContext context, dynamic state, DailyHandover active) {
-    final returnedCtrls = <String, TextEditingController>{};
-    active.issuedQuantities.forEach((id, issued) {
-      returnedCtrls[id] = TextEditingController(text: '0.0');
-    });
+  // ==========================================
+  // DIALOGS & ACTION HANDLERS
+  // ==========================================
 
-    final carsWashed = state.totalCompletedCarsToday as int;
+  void _showReceiverSelectionDialog(BuildContext context, dynamic state) {
+    final staff = state.staff as List;
+    final washerStaff = staff.where((s) {
+      final role = s.role.name.toLowerCase();
+      return role.contains('washer') || role.contains('head') || role.contains('lead');
+    }).toList();
+
+    final customCtrl = TextEditingController(text: _selectedReceiver);
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Row(
           children: [
-            const Icon(Icons.assignment_turned_in_rounded, color: Colors.green, size: 22),
+            const Icon(Icons.person_pin_rounded, color: Color(0xFF14B8A6), size: 20),
             const SizedBox(width: 8),
-            const Expanded(
-              child: Text('Evening Return & Reconcile', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-            ),
+            Text(state.tr('receiverLabel'), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
           ],
         ),
         content: SizedBox(
-          width: math.min(480.0, MediaQuery.sizeOf(ctx).width - 32),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Leader: ${active.washerTeamLeaderName}', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
-                          const Text('Benchmark: ~12–15 cars/L shampoo', style: TextStyle(fontSize: 10.5, color: Colors.blueGrey)),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade700,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '$carsWashed Cars Washed',
-                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text('Enter Remaining Supplies Returned to Store:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5)),
-                const SizedBox(height: 8),
-                ...active.issuedQuantities.entries.map((e) {
-                  final item = state.consumables.cast<ConsumableItem?>().firstWhere((c) => c?.id == e.key, orElse: () => null);
-                  final name = item != null ? item.name : e.key;
-                  final unit = item != null ? item.unit : '';
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text('$name\nIssued: ${e.value} $unit', style: const TextStyle(fontSize: 12)),
-                        ),
-                        SizedBox(
-                          width: 90,
-                          child: TextField(
-                            controller: returnedCtrls[e.key],
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              labelText: 'Returned',
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Select Washer Leader or type name:', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  'Washer Team Leader',
+                  ...washerStaff.map((s) => s.name.toString()),
+                ].map((name) {
+                  final isSel = _selectedReceiver == name;
+                  return ActionChip(
+                    label: Text(name, style: TextStyle(color: isSel ? Colors.white : Colors.white70, fontSize: 11, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600)),
+                    backgroundColor: isSel ? const Color(0xFF0D9488) : const Color(0xFF0F172A),
+                    onPressed: () {
+                      setState(() => _selectedReceiver = name);
+                      Navigator.pop(ctx);
+                    },
                   );
-                }),
-              ],
-            ),
+                }).toList(),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: customCtrl,
+                style: const TextStyle(color: Colors.white, fontSize: 12.5),
+                decoration: InputDecoration(
+                  labelText: 'Custom Receiver Name',
+                  labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  filled: true,
+                  fillColor: const Color(0xFF0F172A),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                ),
+              ),
+            ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60)),
+          ),
           ElevatedButton(
-            onPressed: () async {
-              final returned = <String, double>{};
-              returnedCtrls.forEach((id, ctrl) {
-                final qty = double.tryParse(ctrl.text.trim()) ?? 0.0;
-                returned[id] = qty;
-              });
-              await state.completeDailyHandover(
-                handoverId: active.id,
-                returnedQuantities: returned,
-              );
+            onPressed: () {
+              if (customCtrl.text.trim().isNotEmpty) {
+                setState(() => _selectedReceiver = customCtrl.text.trim());
+              }
               Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700, foregroundColor: Colors.white),
-            child: const Text('Complete & Close Shift'),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            child: const Text('Set Receiver'),
           ),
         ],
       ),
     );
   }
 
-  void _showReceiveStockDialog(BuildContext context, dynamic state, ConsumableItem item) {
-    final qtyCtrl = TextEditingController();
-    final costCtrl = TextEditingController(text: item.unitCostEtb > 0 ? item.unitCostEtb.toStringAsFixed(0) : '');
-    final supplierCtrl = TextEditingController();
-    String selectedUnit = item.unit.isNotEmpty ? item.unit : 'Liters';
-    String? invoiceName;
-    String? invoiceBase64;
+  void _showSlowItemExchangeDialog(BuildContext context, dynamic state, ConsumableItem item) {
+    final qtyCtrl = TextEditingController(text: '1.0');
+    final notesCtrl = TextEditingController();
 
-    const availableUnits = [
-      'Liters',
-      'Pieces',
-      'Cans/Tins',
-      'Bottles',
-      'Kg',
-      'Packs/Boxes',
-      'Bars',
-    ];
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Row(
+          children: [
+            const Icon(Icons.swap_horiz_rounded, color: Color(0xFF14B8A6), size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Exchange: ${item.name}',
+                style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w800),
+              ),
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Current Stock: ${item.currentStock.toStringAsFixed(1)} ${item.unit} • Receiver: $_selectedReceiver',
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: qtyCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                decoration: InputDecoration(
+                  labelText: 'Quantity Exchanged (${item.unit})',
+                  labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  filled: true,
+                  fillColor: const Color(0xFF0F172A),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: notesCtrl,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+                decoration: InputDecoration(
+                  labelText: 'Notes (Optional)',
+                  labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  filled: true,
+                  fillColor: const Color(0xFF0F172A),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
+              if (qty <= 0) return;
+              await state.exchangeConsumableEmptyForNew(
+                itemId: item.id,
+                quantity: qty,
+                washerTeamLeaderName: _selectedReceiver,
+                notes: notesCtrl.text.trim(),
+              );
+              if (context.mounted) {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.tr('exchangeSuccessMsg')), backgroundColor: const Color(0xFF0D9488)),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            child: Text(state.tr('confirmExchangeBtn'), style: const TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+  }
 
-    if (!availableUnits.contains(selectedUnit)) {
-      selectedUnit = 'Pieces';
-    }
+  void _showInitialFloatDialog(BuildContext context, dynamic state, List<ConsumableItem> items) {
+    if (items.isEmpty) return;
+    String selectedItemId = items.first.id;
+    final qtyCtrl = TextEditingController(text: '1.0');
+    final receiverCtrl = TextEditingController(text: _selectedReceiver);
+    final notesCtrl = TextEditingController();
 
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) {
-          final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
-          final unitCost = double.tryParse(costCtrl.text.trim()) ?? (item.unitCostEtb > 0 ? item.unitCostEtb : 0.0);
-          final totalCost = qty * unitCost;
-
+          final selItem = items.firstWhere((c) => c.id == selectedItemId);
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            backgroundColor: const Color(0xFF1E293B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             title: Row(
               children: [
-                const Icon(Icons.add_shopping_cart_rounded, color: Colors.green, size: 22),
+                const Icon(Icons.playlist_add_rounded, color: Color(0xFF38BDF8), size: 20),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Receive: ${item.name}',
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
-                  ),
+                  child: Text(state.tr('issueInitialFloat'), style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w800)),
                 ),
               ],
             ),
             content: SizedBox(
-              width: math.min(440.0, MediaQuery.sizeOf(ctx).width - 32),
+              width: 380,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Select Item to Issue:', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    value: selectedItemId,
+                    dropdownColor: const Color(0xFF0F172A),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFF0F172A),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    ),
+                    items: items.map((c) => DropdownMenuItem(value: c.id, child: Text('${c.name} (${c.currentStock.toStringAsFixed(1)} ${c.unit})'))).toList(),
+                    onChanged: (val) {
+                      if (val != null) setDialogState(() => selectedItemId = val);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: qtyCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      labelText: 'Quantity to Issue (${selItem.unit})',
+                      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      filled: true,
+                      fillColor: const Color(0xFF0F172A),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: receiverCtrl,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      labelText: 'Receiver Name',
+                      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      filled: true,
+                      fillColor: const Color(0xFF0F172A),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: notesCtrl,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      labelText: 'Notes (e.g. New washer assigned, monthly float)',
+                      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      filled: true,
+                      fillColor: const Color(0xFF0F172A),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60)),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
+                  if (qty <= 0) return;
+                  await state.issueInitialFloat(
+                    itemId: selectedItemId,
+                    quantity: qty,
+                    receiverName: receiverCtrl.text.trim().isNotEmpty ? receiverCtrl.text.trim() : 'Washer Team Leader',
+                    notes: notesCtrl.text.trim(),
+                  );
+                  if (context.mounted) {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Issued $qty ${selItem.unit} of ${selItem.name} successfully!'), backgroundColor: const Color(0xFF0D9488)),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+                child: const Text('Confirm Issue', style: TextStyle(fontWeight: FontWeight.w800)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showReceiveDeliveryForAnyItemDialog(BuildContext context, dynamic state, List<ConsumableItem> items) {
+    if (items.isEmpty) return;
+    String selectedItemId = items.first.id;
+    final qtyCtrl = TextEditingController();
+    final costCtrl = TextEditingController();
+    final supplierCtrl = TextEditingController(text: 'Local Bishoftu Supplier');
+    String? invoiceName;
+    String? invoiceBase64;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final selItem = items.firstWhere((c) => c.id == selectedItemId);
+          final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
+          final unitCost = double.tryParse(costCtrl.text.trim()) ?? selItem.unitCostEtb;
+          final totalCost = qty * unitCost;
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1E293B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            title: Row(
+              children: [
+                const Icon(Icons.add_business_rounded, color: Colors.greenAccent, size: 20),
+                const SizedBox(width: 8),
+                Text(state.tr('receiveDeliveryBtn'), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
+              ],
+            ),
+            content: SizedBox(
+              width: 380,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Unit of measurement dropdown
-                    Text(state.tr('unitOfMeasurement'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 4),
+                    const Text('Select Item Received:', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                    const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      value: selectedUnit,
+                      value: selectedItemId,
+                      dropdownColor: const Color(0xFF0F172A),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                       decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
-                      items: availableUnits.map((u) {
-                        return DropdownMenuItem<String>(
-                          value: u,
-                          child: Text(u, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                        );
-                      }).toList(),
+                      items: items.map((c) => DropdownMenuItem(value: c.id, child: Text('${c.name} (${c.unit})'))).toList(),
                       onChanged: (val) {
-                        if (val != null) setDialogState(() => selectedUnit = val);
+                        if (val != null) {
+                          setDialogState(() {
+                            selectedItemId = val;
+                            costCtrl.text = items.firstWhere((c) => c.id == val).unitCostEtb.toStringAsFixed(0);
+                          });
+                        }
                       },
                     ),
                     const SizedBox(height: 10),
-
-                    // Quantity
                     TextField(
                       controller: qtyCtrl,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (_) => setDialogState(() {}),
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: 'Quantity to Add ($selectedUnit) *',
+                        labelText: 'Quantity to Add (${selItem.unit}) *',
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       ),
                     ),
                     const SizedBox(height: 10),
-
-                    // Unit Cost
                     TextField(
                       controller: costCtrl,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (_) => setDialogState(() {}),
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                       decoration: InputDecoration(
                         labelText: 'Unit Cost (ETB) *',
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       ),
                     ),
                     const SizedBox(height: 10),
-
-                    // Total Calculated Price Live Display Box
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.green.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            state.tr('totalCalculatedCost'),
-                            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Colors.green),
-                          ),
-                          Text(
-                            CurrencyFormatter.format(totalCost),
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.green),
-                          ),
+                          const Text('Total Calculated Cost:', style: TextStyle(color: Colors.greenAccent, fontSize: 11.5, fontWeight: FontWeight.w700)),
+                          Text(CurrencyFormatter.format(totalCost), style: const TextStyle(color: Colors.greenAccent, fontSize: 13.5, fontWeight: FontWeight.w900)),
                         ],
                       ),
                     ),
                     const SizedBox(height: 10),
-
-                    // Supplier Name
                     TextField(
                       controller: supplierCtrl,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                       decoration: InputDecoration(
-                        labelText: 'Supplier Name / Vendor',
-                        hintText: 'e.g. TotalEnergies Bishoftu / National Chemical',
+                        labelText: 'Supplier / Vendor',
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       ),
                     ),
                     const SizedBox(height: 10),
-
-                    // Invoice Screenshot / Delivery Note
                     InkWell(
                       onTap: () {
                         ImagePickerHelper.pickImage(onPicked: (img) {
@@ -1860,32 +1884,22 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                           });
                         });
                       },
-                      borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(10),
+                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: invoiceName != null ? Colors.green : AppColors.cardBorder),
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              invoiceName != null ? Icons.check_circle_rounded : Icons.camera_alt_outlined,
-                              size: 18,
-                              color: invoiceName != null ? Colors.green : AppColors.textSecondary,
-                            ),
+                            Icon(invoiceName != null ? Icons.check_circle : Icons.camera_alt_outlined, size: 16, color: invoiceName != null ? Colors.greenAccent : AppColors.textSecondary),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                invoiceName ?? 'Attach Invoice / Delivery Note Photo',
-                                maxLines: 1,
+                                invoiceName ?? 'Attach Delivery Note / Slip Photo',
+                                style: TextStyle(color: invoiceName != null ? Colors.greenAccent : AppColors.textSecondary, fontSize: 11),
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: invoiceName != null ? Colors.green : AppColors.textSecondary,
-                                ),
                               ),
                             ),
                           ],
@@ -1897,29 +1911,183 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60)),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final validQty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
+                  final validCost = double.tryParse(costCtrl.text.trim()) ?? selItem.unitCostEtb;
+                  if (validQty <= 0) return;
+                  await state.receiveStock(
+                    itemId: selectedItemId,
+                    quantity: validQty,
+                    unitCostEtb: validCost,
+                    supplier: supplierCtrl.text.trim().isNotEmpty ? supplierCtrl.text.trim() : 'Local Supplier',
+                    unit: selItem.unit,
+                    invoiceScreenshot: invoiceBase64,
+                  );
+                  if (context.mounted) {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Received $validQty ${selItem.unit} of ${selItem.name} successfully!'), backgroundColor: Colors.green),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700, foregroundColor: Colors.white),
+                child: const Text('Confirm Receive', style: TextStyle(fontWeight: FontWeight.w800)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showReceiveStockDialog(BuildContext context, dynamic state, ConsumableItem item) {
+    final qtyCtrl = TextEditingController();
+    final costCtrl = TextEditingController(text: item.unitCostEtb > 0 ? item.unitCostEtb.toStringAsFixed(0) : '');
+    final supplierCtrl = TextEditingController();
+    String? invoiceName;
+    String? invoiceBase64;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          final qty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
+          final unitCost = double.tryParse(costCtrl.text.trim()) ?? item.unitCostEtb;
+          final totalCost = qty * unitCost;
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1E293B),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            title: Text('Receive: ${item.name}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
+            content: SizedBox(
+              width: 380,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: qtyCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => setDialogState(() {}),
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: 'Quantity to Add (${item.unit}) *',
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: costCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => setDialogState(() {}),
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: 'Unit Cost (ETB) *',
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Total Cost:', style: TextStyle(color: Colors.greenAccent, fontSize: 11.5, fontWeight: FontWeight.w700)),
+                          Text(CurrencyFormatter.format(totalCost), style: const TextStyle(color: Colors.greenAccent, fontSize: 13.5, fontWeight: FontWeight.w900)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: supplierCtrl,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      decoration: InputDecoration(
+                        labelText: 'Supplier Name',
+                        labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        filled: true,
+                        fillColor: const Color(0xFF0F172A),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    InkWell(
+                      onTap: () {
+                        ImagePickerHelper.pickImage(onPicked: (img) {
+                          setDialogState(() {
+                            invoiceName = img.name;
+                            invoiceBase64 = img.base64Data;
+                          });
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: invoiceName != null ? Colors.green : AppColors.cardBorder),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(invoiceName != null ? Icons.check_circle : Icons.camera_alt_outlined, size: 16, color: invoiceName != null ? Colors.greenAccent : AppColors.textSecondary),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                invoiceName ?? 'Attach Delivery Note Photo',
+                                style: TextStyle(color: invoiceName != null ? Colors.greenAccent : AppColors.textSecondary, fontSize: 11),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60)),
+              ),
               ElevatedButton(
                 onPressed: () async {
                   final validQty = double.tryParse(qtyCtrl.text.trim()) ?? 0.0;
                   final validCost = double.tryParse(costCtrl.text.trim()) ?? item.unitCostEtb;
-                  if (validQty <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a valid quantity greater than 0')),
-                    );
-                    return;
-                  }
+                  if (validQty <= 0) return;
                   await state.receiveStock(
                     itemId: item.id,
                     quantity: validQty,
                     unitCostEtb: validCost,
-                    supplier: supplierCtrl.text.trim().isNotEmpty ? supplierCtrl.text.trim() : 'Local Bishoftu Supplier',
-                    unit: selectedUnit,
+                    supplier: supplierCtrl.text.trim().isNotEmpty ? supplierCtrl.text.trim() : 'Local Supplier',
+                    unit: item.unit,
                     invoiceScreenshot: invoiceBase64,
                   );
-                  Navigator.pop(ctx);
+                  if (context.mounted) {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Received $validQty ${item.unit} successfully!'), backgroundColor: Colors.green),
+                    );
+                  }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-                child: const Text('Confirm Receive'),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green.shade700, foregroundColor: Colors.white),
+                child: const Text('Confirm Receive', style: TextStyle(fontWeight: FontWeight.w800)),
               ),
             ],
           );
@@ -1931,7 +2099,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   void _showAddConsumableDialog(BuildContext context, dynamic state) {
     final nameCtrl = TextEditingController();
     final amharicCtrl = TextEditingController();
-    final categoryCtrl = TextEditingController(text: 'Washing & Supplies');
+    final categoryCtrl = TextEditingController(text: 'Wash Station Core');
     final unitCtrl = TextEditingController(text: 'Liters');
     final stockCtrl = TextEditingController(text: '10');
     final minCtrl = TextEditingController(text: '5');
@@ -1940,30 +2108,31 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Add New Consumable Item', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text('Add Consumable Item', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Item Name (English)')),
+              TextField(controller: nameCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Item Name (English)', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: amharicCtrl, decoration: const InputDecoration(labelText: 'Item Name (Amharic)')),
+              TextField(controller: amharicCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Item Name (Amharic)', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: 'Category')),
+              TextField(controller: categoryCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Category', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: unitCtrl, decoration: const InputDecoration(labelText: 'Unit (e.g. Liters, Cans, Pieces)')),
+              TextField(controller: unitCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Unit (e.g. Liters, Pieces, Cans)', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: stockCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Current Stock')),
+              TextField(controller: stockCtrl, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Initial Stock', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: minCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Min Reorder Threshold')),
+              TextField(controller: minCtrl, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Min Reorder Threshold', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: costCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Unit Cost (ETB)')),
+              TextField(controller: costCtrl, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Unit Cost (ETB)', labelStyle: TextStyle(color: AppColors.textSecondary))),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60))),
           ElevatedButton(
             onPressed: () async {
               if (nameCtrl.text.trim().isNotEmpty) {
@@ -1979,10 +2148,10 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 );
                 await state.saveConsumable(newItem);
               }
-              Navigator.pop(ctx);
+              if (context.mounted) Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            child: const Text('Save Item'),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            child: const Text('Save Item', style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -1994,38 +2163,39 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Decommission ${item.name}'),
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Text('Decommission ${item.name}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Under Option B, decommissioning marks this item as retired from daily use while preserving historical audit logs.',
-              style: TextStyle(fontSize: 12, color: Colors.black87),
-            ),
-            const SizedBox(height: 12),
+            const Text('Mark item as retired from daily use while preserving historical audit logs.', style: TextStyle(color: AppColors.textSecondary, fontSize: 11.5)),
+            const SizedBox(height: 10),
             TextField(
               controller: reasonCtrl,
+              style: const TextStyle(color: Colors.white, fontSize: 13),
               decoration: InputDecoration(
                 labelText: 'Reason for Decommissioning',
-                hintText: 'e.g. Expired batch, replaced with new formula',
+                labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60))),
           ElevatedButton(
             onPressed: () async {
               if (reasonCtrl.text.trim().isNotEmpty) {
                 await state.decommissionConsumable(item.id, reasonCtrl.text.trim());
               }
-              Navigator.pop(ctx);
+              if (context.mounted) Navigator.pop(ctx);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade800, foregroundColor: Colors.white),
-            child: const Text('Confirm Decommission'),
+            child: const Text('Decommission'),
           ),
         ],
       ),
@@ -2036,14 +2206,15 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Super Admin: Permanent Delete'),
-        content: Text('Are you sure you want to permanently delete "${item.name}" from the database? This cannot be undone.'),
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text('Super Admin: Delete Consumable', style: TextStyle(color: Colors.redAccent, fontSize: 15, fontWeight: FontWeight.w800)),
+        content: Text('Are you sure you want to permanently delete "${item.name}" from the database?', style: const TextStyle(color: Colors.white70, fontSize: 12)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60))),
           ElevatedButton(
             onPressed: () async {
               await state.deleteConsumable(item.id);
-              Navigator.pop(ctx);
+              if (context.mounted) Navigator.pop(ctx);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Delete Permanently'),
@@ -2064,28 +2235,29 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Add New Fixed Asset', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text('Add Fixed Asset', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Asset Name (English)')),
+              TextField(controller: nameCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Asset Name (English)', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: amharicCtrl, decoration: const InputDecoration(labelText: 'Asset Name (Amharic)')),
+              TextField(controller: amharicCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Asset Name (Amharic)', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: catCtrl, decoration: const InputDecoration(labelText: 'Category')),
+              TextField(controller: catCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Category', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: snCtrl, decoration: const InputDecoration(labelText: 'Serial Number / Asset Tag')),
+              TextField(controller: snCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Serial Number / Asset Tag', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: locCtrl, decoration: const InputDecoration(labelText: 'Assigned Location')),
+              TextField(controller: locCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Assigned Location', labelStyle: TextStyle(color: AppColors.textSecondary))),
               const SizedBox(height: 8),
-              TextField(controller: notesCtrl, decoration: const InputDecoration(labelText: 'Notes / Specifications')),
+              TextField(controller: notesCtrl, style: const TextStyle(color: Colors.white, fontSize: 13), decoration: const InputDecoration(labelText: 'Notes / Specifications', labelStyle: TextStyle(color: AppColors.textSecondary))),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60))),
           ElevatedButton(
             onPressed: () async {
               if (nameCtrl.text.trim().isNotEmpty) {
@@ -2101,10 +2273,10 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 );
                 await state.saveFixedAsset(newAsset);
               }
-              Navigator.pop(ctx);
+              if (context.mounted) Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            child: const Text('Save Asset'),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            child: const Text('Save Asset', style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
       ),
@@ -2120,15 +2292,21 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('Update ${asset.name} Condition'),
+          backgroundColor: const Color(0xFF1E293B),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          title: Text('Edit ${asset.name}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<AssetCondition>(
                 value: selectedCondition,
+                dropdownColor: const Color(0xFF0F172A),
+                style: const TextStyle(color: Colors.white, fontSize: 12),
                 decoration: InputDecoration(
                   labelText: 'Working Condition',
+                  labelStyle: const TextStyle(color: AppColors.textSecondary),
+                  filled: true,
+                  fillColor: const Color(0xFF0F172A),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 items: AssetCondition.values.map((cond) {
@@ -2141,23 +2319,31 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               const SizedBox(height: 10),
               TextField(
                 controller: locCtrl,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
                 decoration: InputDecoration(
                   labelText: 'Assigned Location',
+                  labelStyle: const TextStyle(color: AppColors.textSecondary),
+                  filled: true,
+                  fillColor: const Color(0xFF0F172A),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
               const SizedBox(height: 10),
               TextField(
                 controller: notesCtrl,
+                style: const TextStyle(color: Colors.white, fontSize: 13),
                 decoration: InputDecoration(
                   labelText: 'Maintenance Notes',
+                  labelStyle: const TextStyle(color: AppColors.textSecondary),
+                  filled: true,
+                  fillColor: const Color(0xFF0F172A),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60))),
             ElevatedButton(
               onPressed: () async {
                 final updated = asset.copyWith(
@@ -2166,9 +2352,9 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   notes: notesCtrl.text.trim(),
                 );
                 await state.saveFixedAsset(updated);
-                Navigator.pop(ctx);
+                if (context.mounted) Navigator.pop(ctx);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
               child: const Text('Update'),
             ),
           ],
@@ -2177,61 +2363,19 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     );
   }
 
-  void _showDecommissionAssetDialog(BuildContext context, dynamic state, FixedAsset asset) {
-    final reasonCtrl = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Decommission ${asset.name}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Under Option B, decommissioning marks this machinery as retired/scrapped with an official reason while preserving asset records.',
-              style: TextStyle(fontSize: 12, color: Colors.black87),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: reasonCtrl,
-              decoration: InputDecoration(
-                labelText: 'Reason for Decommissioning',
-                hintText: 'e.g. Motor burnt beyond repair, replaced with new unit',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              if (reasonCtrl.text.trim().isNotEmpty) {
-                await state.decommissionFixedAsset(asset.id, reasonCtrl.text.trim());
-              }
-              Navigator.pop(ctx);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade800, foregroundColor: Colors.white),
-            child: const Text('Confirm Decommission'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showDeleteAssetDialog(BuildContext context, dynamic state, FixedAsset asset) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Super Admin: Permanent Delete'),
-        content: Text('Are you sure you want to permanently delete asset "${asset.name}" (${asset.id}) from the database?'),
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text('Super Admin: Delete Asset', style: TextStyle(color: Colors.redAccent, fontSize: 15, fontWeight: FontWeight.w800)),
+        content: Text('Are you sure you want to permanently delete "${asset.name}" (${asset.id})?', style: const TextStyle(color: Colors.white70, fontSize: 12)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(state.tr('cancel'), style: const TextStyle(color: Colors.white60))),
           ElevatedButton(
             onPressed: () async {
               await state.deleteFixedAsset(asset.id);
-              Navigator.pop(ctx);
+              if (context.mounted) Navigator.pop(ctx);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Delete Permanently'),
@@ -2246,27 +2390,73 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.6)),
       ),
       child: Column(
         children: [
           Icon(icon, size: 36, color: AppColors.textSecondary),
           const SizedBox(height: 10),
-          Text(msg, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text(msg, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime dt) {
-    return '${dt.day}/${dt.month}/${dt.year}';
   }
 
   String _formatTime(DateTime dt) {
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     return '$h:$m';
+  }
+
+  void _printExchangeReport(List<StockTransaction> exchanges) {
+    PrintExportHelper.printTableReport(
+      title: 'Rapid Refill (ዕቃ በዕቃ) Ledger',
+      subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
+      headers: ['Date', 'Item', 'Quantity', 'Unit', 'Receiver', 'Total Cost (ETB)', 'Notes'],
+      rows: exchanges.map((ex) => [
+        DateFormatter.formatDate(ex.date),
+        ex.itemName,
+        ex.quantity,
+        ex.unit,
+        ex.supplier,
+        CurrencyFormatter.format(ex.totalCostEtb),
+        ex.notes ?? '-',
+      ]).toList(),
+    );
+  }
+
+  void _printConsumablesReport(List<ConsumableItem> consumables) {
+    PrintExportHelper.printTableReport(
+      title: 'Consumables Stockroom Inventory (አላቂ እቃዎች)',
+      subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
+      headers: ['Item Name', 'Category', 'Current Stock', 'Unit', 'Min Threshold', 'Unit Cost (ETB)', 'Status'],
+      rows: consumables.map((c) => [
+        c.name,
+        c.category,
+        c.currentStock.toStringAsFixed(1),
+        c.unit,
+        c.minThreshold.toStringAsFixed(1),
+        CurrencyFormatter.format(c.unitCostEtb),
+        c.isLowStock ? 'LOW STOCK' : 'Healthy',
+      ]).toList(),
+    );
+  }
+
+  void _printFixedAssetsReport(List<FixedAsset> assets) {
+    PrintExportHelper.printTableReport(
+      title: 'Fixed Assets & Machinery Register (ቋሚ እቃዎች)',
+      subtitle: 'BISHE Auto Care Storekeeper • Bishoftu',
+      headers: ['Asset ID', 'Name', 'Category', 'Location', 'Condition', 'Notes'],
+      rows: assets.map((a) => [
+        a.id,
+        a.name,
+        a.category,
+        a.assignedLocation,
+        a.condition.displayName,
+        a.notes,
+      ]).toList(),
+    );
   }
 }

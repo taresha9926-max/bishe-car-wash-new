@@ -3762,6 +3762,59 @@ class AppStateNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> undoExchangeConsumable(String transactionId) async {
+    final txIdx = _stockTransactions.indexWhere((t) => t.id == transactionId);
+    if (txIdx != -1) {
+      final tx = _stockTransactions[txIdx];
+      final cIdx = _consumables.indexWhere((c) => c.id == tx.itemId);
+      if (cIdx != -1) {
+        final item = _consumables[cIdx];
+        final restoredStock = item.currentStock + tx.quantity;
+        final updated = item.copyWith(currentStock: restoredStock);
+        _consumables[cIdx] = updated;
+        await _repository.saveConsumable(updated);
+      }
+      _stockTransactions.removeAt(txIdx);
+      notifyListeners();
+    }
+  }
+
+  Future<void> issueInitialFloat({
+    required String itemId,
+    required double quantity,
+    required String receiverName,
+    String? notes,
+  }) async {
+    final idx = _consumables.indexWhere((c) => c.id == itemId);
+    if (idx != -1) {
+      final item = _consumables[idx];
+      final newStock = (item.currentStock - quantity).clamp(0.0, double.infinity);
+      final updated = item.copyWith(currentStock: newStock);
+      _consumables[idx] = updated;
+
+      final tx = StockTransaction(
+        id: 'FLT-${DateTime.now().millisecondsSinceEpoch}',
+        date: DateTime.now(),
+        itemId: item.id,
+        itemName: item.name,
+        type: 'initialFloatIssue',
+        quantity: quantity,
+        unit: item.unit,
+        unitCostEtb: item.unitCostEtb,
+        totalCostEtb: quantity * item.unitCostEtb,
+        supplier: receiverName,
+        notes: (notes != null && notes.isNotEmpty)
+            ? 'Initial Working Float issued to $receiverName. $notes'
+            : 'Initial Working Float issued to $receiverName.',
+      );
+      _stockTransactions.insert(0, tx);
+      notifyListeners();
+
+      await _repository.saveConsumable(updated);
+      await _repository.recordStockTransaction(tx);
+    }
+  }
+
   Future<void> exchangeConsumableEmptyForNew({
     required String itemId,
     required double quantity,
