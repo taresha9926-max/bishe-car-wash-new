@@ -94,6 +94,17 @@ void main() {
       expect(response, contains('Lifetime Completed'));
     });
 
+    test("Local analytics engine queries yesterday's washed cars without error", () async {
+      final response = await BisheAiExecutiveService.askExecutive(
+        userQuestion: "List yesterday's washed cars",
+        state: state,
+        currentLang: AppLanguage.en,
+      );
+
+      expect(response, contains("Yesterday's Vehicle & Carpet Wash Activity"));
+      expect(response, contains('Dynamic Category & Workload Breakdown'));
+    });
+
     test('Blind Spot 1: Ingests showers and reports 0% VAT statutory exemption', () async {
       final response = await BisheAiExecutiveService.askExecutive(
         userQuestion: 'How many showers were used today and what is the VAT?',

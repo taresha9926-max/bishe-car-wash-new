@@ -446,6 +446,22 @@ class BisheAiExecutiveService {
       return '• $p ($t) -> $st [ETB ${b.totalPrice.toStringAsFixed(0)}]';
     }).join('\n');
 
+    final yesterday = now.subtract(const Duration(days: 1));
+    final yesterdayBookings = state.bookings.where((b) {
+      final d = b.createdAt;
+      return d.year == yesterday.year && d.month == yesterday.month && d.day == yesterday.day;
+    }).toList();
+    final yesterdayCompleted = yesterdayBookings.where((b) => b.status.name == 'completed').toList();
+    final yesterdayRevenue = yesterdayBookings
+        .where((b) => b.payment.isPaid)
+        .fold(0.0, (sum, b) => sum + b.totalPrice);
+    final yesterdayVehicleDetails = yesterdayBookings.take(15).map((b) {
+      final p = b.licensePlate.isNotEmpty ? b.licensePlate : 'WALK-IN';
+      final t = b.isCarpet ? 'Carpet' : b.carType.displayName;
+      final st = b.status.name.toUpperCase();
+      return '• $p ($t) -> $st [ETB ${b.totalPrice.toStringAsFixed(0)}]';
+    }).join('\n');
+
     return '''
 You are "BisheAI", the Chief Operations Executive for "BISHE Car Wash & Auto Care Service" in Bishoftu (Debre Zeyit), Oromia, Ethiopia.
 Caller Role: ${callerRole.displayName.toUpperCase()}
@@ -496,8 +512,20 @@ LIVE STATION SNAPSHOT (${now.year}-${now.month.toString().padLeft(2, '0')}-${now
   * Night Shift Manager Close: ${nightHandoverPending ? '⏳ PENDING OTP' : '✅ NORMAL'}
 - CUSTOMER REVIEWS & SENTIMENT:
   * Average Satisfaction: ${avgRating.toStringAsFixed(1)} / 4.0 Stars (${feedbacks.length} ratings, $pendingFeedbacks pending moderation)
-- Live Queue Vehicles:
-$vehicleDetails
+- Live Queue Vehicles (Today):
+${vehicleDetails.isEmpty ? 'No vehicles registered today yet' : vehicleDetails}
+
+PREVIOUS DAY SNAPSHOT (YESTERDAY: ${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}):
+- Total Yesterday Bookings: ${yesterdayBookings.length} (Completed: ${yesterdayCompleted.length})
+- Yesterday Settled Wash Revenue: ETB ${yesterdayRevenue.toStringAsFixed(2)}
+- Yesterday Washed Vehicles & Details:
+${yesterdayVehicleDetails.isEmpty ? 'No vehicles recorded for yesterday in active memory cache' : yesterdayVehicleDetails}
+
+ACTIVE DATA RETENTION WINDOW & CAPABILITIES:
+- Live Memory Cache: The system actively retains the latest 60 bookings in live memory (covering the past 2 to 4 days of operations).
+- Historical Retention: Daily shift financial closings cover the last 30 days (1 full month).
+- Commission Logs: The last 50 commission events (~past 2 to 3 days) are in live memory.
+- Deeper Historical Lookups: For dates older than 3-4 days, inform the user that records can be queried via the Accountant Date Range filter or Vehicle History tab which pulls full archives from Supabase on demand.
 
 INSTRUCTIONS & PLAIN-WRITING RULES:
 - Lead with the answer: State the exact key metric, finding, or result in Sentence 1.
@@ -611,6 +639,11 @@ TONE, STYLE & PLAIN-WRITING:
   ) async {
     final query = rawQuery.toLowerCase().trim();
     final now = DateTime.now();
+    final isYesterday = query.contains('yesterday') ||
+        query.contains('kaleessa') ||
+        query.contains('ትናንት') ||
+        query.contains('ትላንት');
+    final targetDate = isYesterday ? now.subtract(const Duration(days: 1)) : now;
 
     // 0. Duty Execution: Cashier Daily Register Closing
     if (query.contains('close register') ||
@@ -684,7 +717,7 @@ TONE, STYLE & PLAIN-WRITING:
         query.contains('ሻወር') ||
         query.contains('dhiqannaa') ||
         query.contains('bathing')) {
-      return _generateShowersReport(state, now);
+      return _generateShowersReport(state, targetDate, isYesterday: isYesterday);
     }
 
     // 2. Bay Turnaround, Queue & Dispatching Speed
@@ -725,7 +758,7 @@ TONE, STYLE & PLAIN-WRITING:
         query.contains('ተቀማጭ') ||
         query.contains('ደረሰኝ') ||
         query.contains('baankii')) {
-      return _generateBankDepositsReport(state, now);
+      return _generateBankDepositsReport(state, targetDate, isYesterday: isYesterday);
     }
 
     // 5. Shift Handover & 6-digit OTP Status
@@ -773,7 +806,7 @@ TONE, STYLE & PLAIN-WRITING:
         query.contains('ትርፍ') ||
         query.contains('bu\'aa') ||
         query.contains('galii')) {
-      return _generatePnlReport(state, now);
+      return _generatePnlReport(state, targetDate, isYesterday: isYesterday);
     }
 
     // 9. Washers, Staff & Commissions
@@ -786,7 +819,7 @@ TONE, STYLE & PLAIN-WRITING:
         query.contains('ኮሚሽን') ||
         query.contains('hojjetaa') ||
         query.contains('komishinii')) {
-      return _generateWashersReport(state, now);
+      return _generateWashersReport(state, targetDate, isYesterday: isYesterday);
     }
 
     // 10. Consumables, Shampoo, Perfume & Yield
@@ -827,7 +860,7 @@ TONE, STYLE & PLAIN-WRITING:
         query.contains('የታጠቡ') ||
         query.contains('konkolaataa') ||
         query.contains('dhiqa')) {
-      return _generateCarsWashedReport(state, now);
+      return _generateCarsWashedReport(state, targetDate, isYesterday: isYesterday);
     }
 
     // Default: Executive Station Overview
@@ -1776,39 +1809,43 @@ Before your vehicle enters Bay 1 or Bay 2, our intake attendants perform a compl
   // ==========================================
   // BLIND SPOT 1: SHOWERS & 0% VAT EXEMPTION
   // ==========================================
-  static String _generateShowersReport(AppStateNotifier state, DateTime now) {
-    final todayShowers = state.showerRecords.where((s) {
+  static String _generateShowersReport(AppStateNotifier state, DateTime targetDate, {bool isYesterday = false}) {
+    final showersOnDate = state.showerRecords.where((s) {
       final d = s.recordedAt;
-      return d.year == now.year && d.month == now.month && d.day == now.day;
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
     }).toList();
 
-    final totalUsers = todayShowers.fold(0, (sum, s) => sum + s.userCount);
-    final totalAmount = todayShowers.fold(0.0, (sum, s) => sum + s.totalAmount);
-    final cashAmount = todayShowers.where((s) => s.isCash).fold(0.0, (sum, s) => sum + s.totalAmount);
-    final digitalAmount = todayShowers.where((s) => s.isDigital).fold(0.0, (sum, s) => sum + s.totalAmount);
+    final totalUsers = showersOnDate.fold(0, (sum, s) => sum + s.userCount);
+    final totalAmount = showersOnDate.fold(0.0, (sum, s) => sum + s.totalAmount);
+    final cashAmount = showersOnDate.where((s) => s.isCash).fold(0.0, (sum, s) => sum + s.totalAmount);
+    final digitalAmount = showersOnDate.where((s) => s.isDigital).fold(0.0, (sum, s) => sum + s.totalAmount);
 
-    final rows = todayShowers.take(8).map((s) {
+    final rows = showersOnDate.take(8).map((s) {
       final timeStr = '${s.recordedAt.hour.toString().padLeft(2, '0')}:${s.recordedAt.minute.toString().padLeft(2, '0')}';
       final method = s.isCash ? '💵 Cash' : '📱 Telebirr/Digital';
       return '| `$timeStr` | ${s.userCount} person(s) | ${CurrencyFormatter.format(s.unitPrice)} | **${CurrencyFormatter.format(s.totalAmount)}** | $method | ${s.recordedBy} |';
     }).join('\n');
 
+    final title = isYesterday
+        ? "Yesterday's Shower Service & 0% VAT Statutory Audit"
+        : "Today's Shower Service & 0% VAT Statutory Audit";
+
     return '''
-### 🚿 Today's Shower Service & 0% VAT Statutory Audit
-*Station Date: ${now.day}/${now.month}/${now.year} | Statutory Tax Treatment: **0% VAT EXEMPT***
+### 🚿 $title
+*Station Date: ${targetDate.day}/${targetDate.month}/${targetDate.year} | Statutory Tax Treatment: **0% VAT EXEMPT***
 
 | Metric | Recorded Value | Accounting Compliance |
 | :--- | :--- | :--- |
-| **Total Shower Guests Today** | **$totalUsers persons** | Clean hot water suite visits |
+| **Total Shower Guests ${isYesterday ? "Yesterday" : "Today"}** | **$totalUsers persons** | Clean hot water suite visits |
 | **Total Shower Collections** | **${CurrencyFormatter.format(totalAmount)}** | Gross Inflow (0% VAT exempt) |
 | • Cash Drawer Receipts | ${CurrencyFormatter.format(cashAmount)} | Subject to physical 15:30 shift handover |
 | • Telebirr / Digital Receipts | ${CurrencyFormatter.format(digitalAmount)} | Verified via digital merchant ledger |
 | **Statutory VAT Obligation** | **ETB 0.00 (Exempt)** | Certified statutory hygiene exemption |
 
-#### Live Shower Tickets Log:
+#### Shower Tickets Log:
 | Time | Guests | Unit Price | Total Settled | Payment Method | Attendant |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-${rows.isEmpty ? '| No shower visits logged yet today | - | - | - | - | - |' : rows}
+${rows.isEmpty ? '| No shower visits logged in active cache for this date | - | - | - | - | - |' : rows}
 
 > *Note: Shower revenue is never co-mingled with car wash commission pools and is 100% exempt from the 15% vehicle VAT deduction.*
 ''';
@@ -1893,10 +1930,10 @@ ${alertRows.isEmpty ? '| ✅ All station equipment (Kärcher washers, vacuums, c
   // ==========================================
   // BLIND SPOT 4: BANK DEPOSITS & RECONCILIATION
   // ==========================================
-  static String _generateBankDepositsReport(AppStateNotifier state, DateTime now) {
+  static String _generateBankDepositsReport(AppStateNotifier state, DateTime targetDate, {bool isYesterday = false}) {
     final deposits = state.bankDeposits.where((d) {
       final dt = d.depositedAt;
-      return dt.year == now.year && dt.month == now.month && dt.day == now.day;
+      return dt.year == targetDate.year && dt.month == targetDate.month && dt.day == targetDate.day;
     }).toList();
 
     final totalDeposited = deposits.fold(0.0, (sum, d) => sum + d.amount);
@@ -1906,16 +1943,20 @@ ${alertRows.isEmpty ? '| ✅ All station equipment (Kärcher washers, vacuums, c
       return '| `$timeStr` | **${d.bankName}** | `${d.accountNumber}` | `${d.referenceSlipNumber}` | **${CurrencyFormatter.format(d.amount)}** | ${d.cashierName} |';
     }).join('\n');
 
+    final title = isYesterday
+        ? "Yesterday's Bank Deposit Slips & Cash Drawer Reconciliation"
+        : "Today's Bank Deposit Slips & Cash Drawer Reconciliation";
+
     return '''
-### 🏦 Bank Deposit Slips & Cash Drawer Reconciliation
-*Station Date: ${now.day}/${now.month}/${now.year} | Verified Slips Logged: **${deposits.length} deposits***
+### 🏦 $title
+*Station Date: ${targetDate.day}/${targetDate.month}/${targetDate.year} | Verified Slips Logged: **${deposits.length} deposits***
 
 | Target Account | Bank Slip Reference | Deposited Amount | Cashier Name | Audit Status |
 | :--- | :--- | :--- | :--- | :--- |
-${rows.isEmpty ? '| No bank deposit slips logged yet today | - | - | - | - |' : rows}
+${rows.isEmpty ? '| No bank deposit slips logged in active cache for this date | - | - | - | - |' : rows}
 
 #### Reconciliation Summary:
-- **Total Deposited to Bank Today**: **${CurrencyFormatter.format(totalDeposited)}**
+- **Total Deposited to Bank ${isYesterday ? "Yesterday" : "Today"}**: **${CurrencyFormatter.format(totalDeposited)}**
 - **Bank Destination Accounts**: Commercial Bank of Ethiopia (CBE) & Awash Bank
 - **Loss Prevention Standard**: Physical bank stamped deposit slips must be attached to the closing envelope and matched against the cashier's daily cash drawer settlement.
 ''';
@@ -2407,28 +2448,34 @@ We prioritize transparency in our wash services, package quality, and customer p
   // ==========================================
   // EXISTING EXECUTIVE REPORTS
   // ==========================================
-  static String _generatePnlReport(AppStateNotifier state, DateTime now) {
-    final vehicleWashRevenue = state.todayVehicleRevenueETB;
-    final carpetWashRevenue = state.todayCarpetRevenueETB;
-    final showerRevenue = state.todayShowerRevenueETB;
-    final grossRevenue = vehicleWashRevenue + carpetWashRevenue + showerRevenue;
-    final vatDeducted = state.vatDeductedTodayETB;
-    final netAfterVat = state.netBusinessRevenueTodayETB;
-
-    final todayBookings = state.bookings.where((b) {
+  static String _generatePnlReport(AppStateNotifier state, DateTime targetDate, {bool isYesterday = false}) {
+    final bookingsOnDate = state.bookings.where((b) {
       final d = b.createdAt;
-      return d.year == now.year && d.month == now.month && d.day == now.day;
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
     }).toList();
-    final paidToday = todayBookings.where((b) => b.payment.isPaid).toList();
+    final paidOnDate = bookingsOnDate.where((b) => b.payment.isPaid).toList();
+
+    final vehicleWashRevenue = paidOnDate.where((b) => !b.isCarpet).fold(0.0, (sum, b) => sum + b.totalPrice);
+    final carpetWashRevenue = paidOnDate.where((b) => b.isCarpet).fold(0.0, (sum, b) => sum + b.totalPrice);
+
+    final showersOnDate = state.showerRecords.where((s) {
+      final d = s.recordedAt;
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
+    }).toList();
+    final showerRevenue = showersOnDate.fold(0.0, (sum, s) => sum + s.totalAmount);
+
+    final grossRevenue = vehicleWashRevenue + carpetWashRevenue + showerRevenue;
+    final vatDeducted = vehicleWashRevenue * 0.15;
+    final netAfterVat = grossRevenue - vatDeducted;
 
     final commissionsPaid = state.commissionLogs.where((l) {
       final d = l.completedAt;
-      return d.year == now.year && d.month == now.month && d.day == now.day;
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
     }).fold(0.0, (sum, l) => sum + l.commissionEarnedETB);
 
     final suppliesConsumed = state.stockTransactions.where((t) {
       final d = t.date;
-      return d.year == now.year && d.month == now.month && d.day == now.day &&
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day &&
           (t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption');
     }).fold(0.0, (sum, t) => sum + t.totalCostEtb);
 
@@ -2437,7 +2484,7 @@ We prioritize transparency in our wash services, package quality, and customer p
 
     final pettyExpenses = state.pettyCashExpenses.where((p) {
       final d = p.loggedAt;
-      return d.year == now.year && d.month == now.month && d.day == now.day;
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
     }).fold(0.0, (sum, p) => sum + p.amount);
 
     final dailyOverheadAccrual = state.totalDailyOverheadAccrual;
@@ -2448,13 +2495,17 @@ We prioritize transparency in our wash services, package quality, and customer p
     final rentAmount = (state.monthlyOverheads.where((o) => o.id == 'overhead_rent').firstOrNull ??
         (state.monthlyOverheads.isNotEmpty ? state.monthlyOverheads.first : null))?.monthlyAmountEtb ?? 45000.0;
 
+    final title = isYesterday
+        ? "Yesterday's Executive Financial & P&L Statement (Real-Truth Model)"
+        : "Today's Executive Financial & P&L Statement (Real-Truth Model)";
+
     return '''
-### 📊 Today's Executive Financial & P&L Statement (Real-Truth Model)
-*Station Date: ${now.day}/${now.month}/${now.year} • Daily Accrual (Monthly ÷ 30)*
+### 📊 $title
+*Station Date: ${targetDate.day}/${targetDate.month}/${targetDate.year} • Daily Accrual (Monthly ÷ 30)*
 
 | Financial Component | Amount (ETB) | Accounting Treatment |
 | :--- | :--- | :--- |
-| **Gross Revenue (${paidToday.length} settled)** | **${CurrencyFormatter.format(grossRevenue)}** | Car (${CurrencyFormatter.format(vehicleWashRevenue)}), Carpet (${CurrencyFormatter.format(carpetWashRevenue)}), Shower (${CurrencyFormatter.format(showerRevenue)}) |
+| **Gross Revenue (${paidOnDate.length} settled)** | **${CurrencyFormatter.format(grossRevenue)}** | Car (${CurrencyFormatter.format(vehicleWashRevenue)}), Carpet (${CurrencyFormatter.format(carpetWashRevenue)}), Shower (${CurrencyFormatter.format(showerRevenue)}) |
 | Less: 15% VAT Statutory Deduction | - ${CurrencyFormatter.format(vatDeducted)} | Vehicle wash only (Carpet & Shower 0% exempt) |
 | **Net Operating Revenue** | **${CurrencyFormatter.format(netAfterVat)}** | Harmonized Taxable Business Revenue |
 | Less: Washer Commissions (15%) | - ${CurrencyFormatter.format(commissionsPaid)} | Direct Labor (COGS) |
@@ -2469,15 +2520,15 @@ We prioritize transparency in our wash services, package quality, and customer p
 ''';
   }
 
-  static String _generateCarsWashedReport(AppStateNotifier state, DateTime now) {
-    final todayBookings = state.bookings.where((b) {
+  static String _generateCarsWashedReport(AppStateNotifier state, DateTime targetDate, {bool isYesterday = false}) {
+    final bookingsOnDate = state.bookings.where((b) {
       final d = b.createdAt;
-      return d.year == now.year && d.month == now.month && d.day == now.day;
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
     }).toList();
 
     int typeA = 0, typeB = 0, typeC = 0, carpets = 0;
     double totalCarpetM2 = 0.0;
-    for (final b in todayBookings) {
+    for (final b in bookingsOnDate) {
       if (b.isCarpet) {
         carpets++;
         totalCarpetM2 += (b.carpetAreaSqMeters ?? 12.0);
@@ -2497,10 +2548,10 @@ We prioritize transparency in our wash services, package quality, and customer p
     }
 
     final double totalEvu = (typeA * 1.0) + (typeB * 1.5) + (typeC * 2.5) + (totalCarpetM2 * 0.25);
-    final completed = todayBookings.where((b) => b.status.name == 'completed').length;
-    final inProgress = todayBookings.length - completed;
+    final completed = bookingsOnDate.where((b) => b.status.name == 'completed').length;
+    final inProgress = bookingsOnDate.length - completed;
 
-    final tableRows = todayBookings.take(8).map((b) {
+    final tableRows = bookingsOnDate.take(15).map((b) {
       final plate = b.licensePlate.isNotEmpty ? b.licensePlate : 'WALK-IN';
       final type = b.isCarpet ? 'Carpet' : b.carType.displayName;
       final mult = b.isCarpet ? '${b.carpetAreaSqMeters ?? 12} m²' : (b.carType == CarType.truck ? '2.5x' : (b.carType == CarType.minibus ? '1.5x' : '1.0x'));
@@ -2508,9 +2559,13 @@ We prioritize transparency in our wash services, package quality, and customer p
       return '| `$plate` | $type | $mult | **$status** | ${CurrencyFormatter.format(b.totalPrice)} |';
     }).join('\n');
 
+    final headerTitle = isYesterday
+        ? "Yesterday's Vehicle & Carpet Wash Activity (${targetDate.day}/${targetDate.month}/${targetDate.year})"
+        : "Today's Vehicle & Carpet Wash Activity (${targetDate.day}/${targetDate.month}/${targetDate.year})";
+
     return '''
-### 🚗 Today's Vehicle & Carpet Wash Activity
-*Total Registered: **${todayBookings.length}** | Completed: **$completed** | In-Queue/Bays: **$inProgress** | Total Workload: **${totalEvu.toStringAsFixed(1)} EVU***
+### 🚗 $headerTitle
+*Total Registered: **${bookingsOnDate.length}** | Completed: **$completed** | In-Queue/Bays: **$inProgress** | Total Workload: **${totalEvu.toStringAsFixed(1)} EVU***
 
 #### Dynamic Category & Workload Breakdown:
 - **Type A (Small / Corolla, Vitz, BYD)**: $typeA vehicles (~1.0× chemical coefficient)
@@ -2520,21 +2575,23 @@ We prioritize transparency in our wash services, package quality, and customer p
 
 | License Plate | Category | Multiplier | Status | Total Settled |
 | :--- | :--- | :--- | :--- | :--- |
-${tableRows.isEmpty ? '| No registered activity yet | - | - | - | - |' : tableRows}
+${tableRows.isEmpty ? '| No registered wash activity found in active cache for this date | - | - | - | - |' : tableRows}
+
+> *Note: Active in-memory buffer holds the latest 60 bookings (~2–4 days). For older archives beyond 4 days, view the Accountant Date Range filter or Vehicle History tab.*
 ''';
   }
 
-  static String _generateWashersReport(AppStateNotifier state, DateTime now) {
+  static String _generateWashersReport(AppStateNotifier state, DateTime targetDate, {bool isYesterday = false}) {
     final washers = state.presentWashersToday;
-    final logsToday = state.commissionLogs.where((l) {
+    final logsOnDate = state.commissionLogs.where((l) {
       final d = l.completedAt;
-      return d.year == now.year && d.month == now.month && d.day == now.day;
+      return d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day;
     }).toList();
 
     final Map<String, double> earnings = {};
     final Map<String, int> counts = {};
 
-    for (final l in logsToday) {
+    for (final l in logsOnDate) {
       earnings[l.washerName] = (earnings[l.washerName] ?? 0.0) + l.commissionEarnedETB;
       counts[l.washerName] = (counts[l.washerName] ?? 0) + 1;
     }
@@ -2545,15 +2602,19 @@ ${tableRows.isEmpty ? '| No registered activity yet | - | - | - | - |' : tableRo
       return '| **${w.name}** | ${w.role.displayName} | $jobs cars | ${CurrencyFormatter.format(cEarned)} | On Duty |';
     }).join('\n');
 
-    final totalComm = logsToday.fold(0.0, (s, l) => s + l.commissionEarnedETB);
+    final totalComm = logsOnDate.fold(0.0, (s, l) => s + l.commissionEarnedETB);
+
+    final title = isYesterday
+        ? "Yesterday's Active Washers & Commission Performance (${targetDate.day}/${targetDate.month}/${targetDate.year})"
+        : "Active Washers & Commission Performance (${targetDate.day}/${targetDate.month}/${targetDate.year})";
 
     return '''
-### 👥 Active Washers & Commission Performance
+### 👥 $title
 *Active On-Duty Washers: **${washers.length}** | Total Commissions Settled: **${CurrencyFormatter.format(totalComm)}***
 
 | Washer Name | Station Bay | Jobs Completed | Commission Earned | Duty Status |
 | :--- | :--- | :--- | :--- | :--- |
-${rows.isEmpty ? '| No active washer activity recorded yet | - | - | - | - |' : rows}
+${rows.isEmpty ? '| No active washer activity recorded in active cache for this date | - | - | - | - |' : rows}
 
 > *Commissions are calculated at the station default rate (15%) of settled vehicle tickets.*
 ''';
