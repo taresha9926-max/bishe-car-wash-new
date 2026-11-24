@@ -1,15 +1,17 @@
-# BISHE Car Wash Service Mobile App
+# BISHE Car Wash Service Blueprint
 **Location:** Bishoftu (Debre Zeyit), Oromia, Ethiopia  
 **Architecture:** Clean Architecture (Domain, Data, Presentation)  
 **State Management:** Native Reactive State Pattern (`AppStateNotifier` / `InheritedNotifier` / `ChangeNotifier`)
 
 ---
 
-## Overview
-**BISHE Car Wash Service** is a multi-role mobile application built with Flutter for a car wash business located in Bishoftu, Oromia. The app provides specialized user experiences for **three distinct roles**:
+## System Overview
+**BISHE Car Wash Service** is a multi-role mobile application built with Flutter for a car wash business located in Bishoftu, Oromia. The app provides specialized user experiences for **five distinct roles**:
 1. **Customer**: Online booking for stationary washing (2 bays) or at-home mobile service (1 van), vehicle category selection, and live wash status tracking.
 2. **Cashier**: Gate entry registration, vehicle bay assignment (Bay 1, Bay 2, Mobile Van), washer dispatching, and Cash / Digital Money Transfer (Telebirr, CBE Birr) payment collection.
 3. **Admin**: Control panel to edit service pricing by car type, manage staff base salaries, and track automated washer commission logs generated upon wash completion.
+4. **Operational Manager**: Operational supervision and night-shift desk custody mirroring cashier capabilities with daily handover logging.
+5. **Storekeeper**: Warehouse stock tracking, chemical container usage benchmarks, fixed machinery maintenance, and shift handovers.
 
 ---
 
@@ -50,7 +52,8 @@ lib/
 │   │   │       └── i_wash_repository.dart    # Abstract contract
 │   │   ├── data/
 │   │   │   ├── datasources/mock_wash_datasource.dart # Bishoftu seed data
-│   │   │   └── repositories/wash_repository_impl.dart # Concrete repository
+│   │   │   └── repositories/supabase_wash_repository_impl.dart # Live Supabase production repository
+│   │   │   └── repositories/wash_repository_impl.dart # Concrete repository contract
 │   │   └── presentation/state/
 │   │       ├── app_state_notifier.dart       # Central reactive business logic
 │   │       └── app_state_provider.dart       # InheritedNotifier for UI tree
@@ -163,3 +166,30 @@ lib/
 You can switch roles at any moment using:
 - **Top AppBar Dropdown**: Tap the role indicator in the top right of the header to pick `Customer`, `Cashier`, or `Admin`.
 - **Bottom Navigation Bar**: Tap any of the 3 tabs (`Customer`, `Cashier`, `Admin`) for immediate switching.
+
+---
+
+## Subdirectories & System Boundaries
+- [agent](./agent/README.md): Executive AI Agent running on Python 3.12, providing instant financial P&L calculations, car volume breakdowns, washer commission audits, inventory alerts, and optional Telegram bot remote reporting.
+- [android](./android/README.md): Android platform runner project hosting the Flutter engine, native Gradle configuration, and permissions for Android mobile deployment.
+- [lib](./lib/README.md): Root Flutter Dart application package implementing clean architecture across core foundations and modular business feature domains.
+- [sentinel](./sentinel/README.md): Bishe PayGuard Sentinel Python backend suite providing automated bank SMS ingestion, closing audits, and alert dispatchers.
+- [supabase](./supabase/README.md): Supabase backend configuration, PostgreSQL database DDL schema, and automated migration scripts.
+- [tool](./tool/README.md): Developer CLI utilities and localization synchronization tools for the Bishe Car Wash platform.
+- [tools](./tools/README.md): Companion tools and background daemon services supporting station hardware and mobile operations.
+- [web](./web/README.md): Flutter web platform bootstrap hosting HTML shell, CanvasKit/Wasm rendering initialization, and service worker registration.
+
+## Global Invariants
+- [AGENTS.md:immutability] Zero Data Deletion: Never execute truncation queries, seed resets, or destructive migrations on live station production data.
+- [AGENTS.md:zero_mock] Zero Test/Mock Data: Never insert synthetic or demo records into live production tables or client storage.
+- [AGENTS.md:symmetry] Shift Symmetry: Any payment, queue, receipt, or commission feature available to Cashier must be identically supported in Operational Manager desk.
+- [AGENTS.md:localization] Complete Trilingual Localization: All user-facing strings must be localized across EN, OM, and AM via `AppStrings`.
+- [AGENTS.md:network_egress] Network Egress Economy: Never poll unbounded tables or execute `select=*` on growing collections.
+
+## Global Side Effects
+- [Supabase:Cloud] Database Persistence: Primary cloud transaction ledger, staff credentials, and shift handovers hosted on Supabase PostgreSQL.
+- [PayGuard:Telemetry] Real-time Telephony Ingestion: Intercepts mobile SMS transactions and streams them to Supabase database RPCs.
+- [Executive:AI] Local Agent Analysis: Interrogates Supabase REST API and provides natural-language financial P&L answers and Telegram push alerts.
+
+## System Verification
+- Run: `flutter test`

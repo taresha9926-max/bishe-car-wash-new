@@ -595,7 +595,7 @@ OUR SERVICE PACKAGES & PRICING:
 CONVERSATIONAL BOOKING & INTERACTION RULES:
 - When a customer asks to book their car or says "can you help me book my car?" without providing details, ALWAYS present the 4 required fields in a structured Markdown TABLE:
   | # | Required Field | Options & Details | Example Input |
-  | 1 | Customer Name | Full name or driver name | Abebe Bikila |
+  | 1 | Customer Name (Full Name or Car Type) | Full name or car type (e.g. Toyota Vitz) | Abebe Bikila / Toyota Vitz |
   | 2 | Phone Number | For SMS ready alert & live tracking link | 0911234567 |
   | 3 | License Plate | Vehicle code & registration number | Code 2 - B48291 |
   | 4 | Service Package & Model | Silver (Foam & Dry), Gold (Mud blast & tire shine), Platinum (Detailing & Engine), Diamond VIP • Type A (Small), Type B (Medium), Type C (Truck) | Gold Wash (Type A) |
@@ -948,7 +948,7 @@ Please provide the 4 details below, or tap the button to book directly on the cu
 
 | # | Required Field | Options & Details | Example Input |
 | :-: | :--- | :--- | :--- |
-| **1** | **Customer Name** | Full name or driver name | *Abebe Bikila* |
+| **1** | **Customer Name (Full Name or Car Type)** | Full name or car type (e.g. Toyota Vitz) | *Abebe Bikila / Toyota Vitz* |
 | **2** | **Phone Number** | For SMS completion alert & live tracker link | *0911234567* |
 | **3** | **License Plate** | Vehicle code & registration number | *Code 2 - B48291* |
 | **4** | **Vehicle Model & Package** | • 🥈 **Silver Wash** (Foam wash & microfiber dry)<br>• 🥇 **Gold Wash** (Mud blast & tire shine)<br>• 💎 **Platinum Detailing** (Interior vacuum & engine steam)<br>• 👑 **Diamond VIP** (Complete restoration & wax)<br>• **Type A (Small)** / **Type B (Medium/SUV)** / **Type C (Truck)** | *Gold Wash (Type A)* |

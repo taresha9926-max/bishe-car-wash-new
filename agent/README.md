@@ -1,6 +1,7 @@
 # BISHE Car Wash — Executive AI Agent (Option A)
 **Location:** Bishoftu (Debre Zeyit), Oromia, Ethiopia
 
+## Overview
 A high-performance, lightweight local AI agent running on your laptop. Connects live to your station's Supabase database and answers operational queries on demand.
 
 ---
@@ -56,3 +57,27 @@ This agent adheres to strict network egress economics:
 - **Selective Projections**: Only requests minimal necessary columns (`id`, `license_plate`, `car_type`, `total_amount`, `status`, `created_at`), transferring $<400$ bytes per query.
 - **In-Memory TTL Caching**: The staff roster is cached for 15 minutes in memory, eliminating redundant calls.
 - **Zero Heavy Dependencies**: Written entirely in pure Python standard library (`urllib`, `json`, `datetime`) — no external package downloads required.
+
+---
+
+## Interface
+### Public Symbols
+- [bishe_agent.py:BisheConfig] Class `BisheConfig`
+- [bishe_agent.py:SupabaseClient] Class `SupabaseClient`
+- [bishe_agent.py:BisheAnalyticsEngine] Class `BisheAnalyticsEngine`
+- [bishe_agent.py:BisheHttpHandler] Class `BisheHttpHandler`
+- [bishe_agent.py:load_operations_manual] Function `load_operations_manual()`
+- [bishe_agent.py:markdown_to_html] Function `markdown_to_html()`
+- [bishe_agent.py:start_web_server] Function `start_web_server()`
+- [bishe_agent.py:main] Function `main()`
+
+## Invariants
+- None
+
+## Side Effects
+- [bishe_agent.py:network] Network I/O: Dispatches HTTP requests to external APIs or Supabase REST
+- [bishe_agent.py:filesystem] File I/O: Writes or updates local filesystem files
+- [bishe_agent.py:telegram] Network Messaging: Communicates with Telegram Bot API
+
+## Verification
+- Run: `python -m unittest`

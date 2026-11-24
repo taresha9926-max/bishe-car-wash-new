@@ -835,10 +835,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             children: [
               CustomTextField(
                 controller: _nameController,
-                label: state.tr('customerName'),
-                hint: 'e.g. Girma Tadesse',
+                label: state.tr('fullNameOrCarType'),
+                hint: 'e.g. Girma Tadesse / Toyota Vitz',
                 prefixIcon: Icons.person_outline,
-                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterName') : null,
+                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterNameOrCarType') : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(

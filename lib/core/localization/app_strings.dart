@@ -2583,9 +2583,19 @@ class AppStrings {
       AppLanguage.am: 'ዋጋ በብር',
     },
     'fullName': {
-      AppLanguage.en: 'Full Name',
-      AppLanguage.om: 'Maqaa Guutuu',
-      AppLanguage.am: 'ሙሉ ስም',
+      AppLanguage.en: 'Full Name or Car Type',
+      AppLanguage.om: 'Maqaa Guutuu ykn Gosa Konkolaataa',
+      AppLanguage.am: 'ሙሉ ስም ወይም የመኪና ዓይነት',
+    },
+    'fullNameOrCarType': {
+      AppLanguage.en: 'Full Name or Car Type',
+      AppLanguage.om: 'Maqaa Guutuu ykn Gosa Konkolaataa',
+      AppLanguage.am: 'ሙሉ ስም ወይም የመኪና ዓይነት',
+    },
+    'enterNameOrCarType': {
+      AppLanguage.en: 'Please enter full name or car type',
+      AppLanguage.om: 'Maaloo maqaa guutuu ykn gosa konkolaataa galchaa',
+      AppLanguage.am: 'እባክዎ ሙሉ ስም ወይም የመኪና ዓይነት ያስገቡ',
     },
     'receiptImageError': {
       AppLanguage.en: 'Unable to load receipt image',

@@ -281,10 +281,10 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
               const SizedBox(height: 10),
               CustomTextField(
                 controller: _nameController,
-                label: state.tr('fullName'),
-                hint: 'e.g. Abebe Kebede',
+                label: state.tr('fullNameOrCarType'),
+                hint: 'e.g. Abebe Kebede / Toyota V8',
                 prefixIcon: Icons.person_outline_rounded,
-                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterName') : null,
+                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterNameOrCarType') : null,
               ),
               const SizedBox(height: 12),
               CustomTextField(

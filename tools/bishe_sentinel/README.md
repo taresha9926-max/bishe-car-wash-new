@@ -1,5 +1,6 @@
 # Bishe PayGuard Sentinel: Standalone Android Companion
 
+## Overview
 A dedicated, lightweight Android service app designed to run silently on the phone with the official SIM card (or Admin's phone) to automate real-time digital payment cross-referencing for Bishe Car Wash.
 
 ---
@@ -66,3 +67,19 @@ The app includes 2 diagnostic buttons in the UI:
 2. **"Test Mock CBE SMS (1,200 ETB)"**: Sends a sample CBE credit alert with receipt link to Supabase.
 
 You can verify instant reception in the Admin Dashboard under **"Bank SMS Feed"**!
+
+---
+
+## Subdirectories & Boundaries
+- [app](./app/README.md): Bishe Sentinel Android Application Module
+
+## Verification
+- Run: `./gradlew test`
+
+## Invariants
+- [AndroidManifest.xml:RECEIVE_SMS] Requires high-priority SMS broadcast permission grant
+- [SentinelService:lifecycle] Runs as persistent foreground service with battery optimization exclusion
+
+## Side Effects
+- [SmsReceiver:rpc] Network I/O: Posts intercepted SMS payloads to Supabase `ingest_bank_sms` RPC
+- [SentinelService:heartbeat] Network I/O: Sends periodic heartbeat telemetry to Supabase `update_sentinel_heartbeat`
