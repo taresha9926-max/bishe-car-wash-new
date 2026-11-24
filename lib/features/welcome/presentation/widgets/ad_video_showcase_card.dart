@@ -145,80 +145,85 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
           // 1. Header Bar: TikTok Branding + Verified Account Badge (100% Read-only)
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(
-                        color: Colors.black,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.music_note_rounded, size: 14, color: Color(0xFF00F2FE)),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      state.tr('tiktokReelsTitle'),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00F2FE), Color(0xFFFE2C55)],
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(
+                          color: Colors.black,
+                          shape: BoxShape.circle,
                         ),
-                        borderRadius: BorderRadius.circular(6),
+                        child: const Icon(Icons.music_note_rounded, size: 14, color: Color(0xFF00F2FE)),
                       ),
-                      child: Text(
-                        '${state.tr('reelCounter')} ${_currentPage + 1} ${state.tr('ofWord')} ${reels.length}',
+                      const SizedBox(width: 8),
+                      Text(
+                        state.tr('tiktokReelsTitle'),
                         style: const TextStyle(
-                          fontSize: 8.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w900,
                           color: Colors.white,
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.8,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                // Official TikTok Handle Pill (Interactive, Opens @bishecarwash)
-                InkWell(
-                  onTap: () => _launchTikTok(context, 'https://www.tiktok.com/@bishecarwash'),
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withOpacity(0.15)),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.verified_rounded, size: 12, color: Color(0xFF00F2FE)),
-                        SizedBox(width: 4),
-                        Text(
-                          '@bishecarwash',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF00F2FE), Color(0xFFFE2C55)],
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '${state.tr('reelCounter')} ${_currentPage + 1} ${state.tr('ofWord')} ${reels.length}',
+                          style: const TextStyle(
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
                             color: Colors.white,
-                            letterSpacing: 0.2,
+                            letterSpacing: 0.3,
                           ),
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
+                  // Official TikTok Handle Pill (Interactive, Opens @bishecarwash)
+                  InkWell(
+                    onTap: () => _launchTikTok(context, 'https://www.tiktok.com/@bishecarwash'),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white.withOpacity(0.15)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified_rounded, size: 12, color: Color(0xFF00F2FE)),
+                          SizedBox(width: 4),
+                          Text(
+                            '@bishecarwash',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 

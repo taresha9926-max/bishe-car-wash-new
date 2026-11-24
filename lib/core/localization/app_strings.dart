@@ -6328,6 +6328,199 @@ class AppStrings {
       AppLanguage.om: 'Minjaala Buufataa Bilbili',
       AppLanguage.am: 'ወደ ጣቢያው ቢሮ ይደውሉ',
     },
+    // ==========================================
+    // Prototype Sandbox & Dual-Gateway Strings
+    // ==========================================
+    'bookingConfirmedTitle': {
+      AppLanguage.en: 'Booking Confirmed!',
+      AppLanguage.om: 'Dhiqannaan Mirkanaa\'eera!',
+      AppLanguage.am: 'ትዕዛዝዎ ተረጋግጧል!',
+    },
+    'backBtn': {
+      AppLanguage.en: 'Back',
+      AppLanguage.om: 'Deebi\'i',
+      AppLanguage.am: 'ተመለስ',
+    },
+    'selectVehicle': {
+      AppLanguage.en: '1. Select Vehicle',
+      AppLanguage.om: '1. Gosa Konkolaataa Filadhaa',
+      AppLanguage.am: '1. የመኪና አይነት ይምረጡ',
+    },
+    'selectPackage': {
+      AppLanguage.en: '2. Select Service Package',
+      AppLanguage.om: '2. Paakeejii Dhiqannaa Filadhaa',
+      AppLanguage.am: '2. የእጥበት ፓኬጅ ይምረጡ',
+    },
+    'ticketRef': {
+      AppLanguage.en: 'Ticket Ref',
+      AppLanguage.om: 'Koodii Tikkeettii',
+      AppLanguage.am: 'የቲኬት ቁጥር',
+    },
+    'washProgressStepperTitle': {
+      AppLanguage.en: 'Live Wash Progress',
+      AppLanguage.om: 'Adeemsa Dhiqannaa Kallattii',
+      AppLanguage.am: 'የቀጥታ እጥበት ሂደት',
+    },
+    'exploreStationLoungeBtn': {
+      AppLanguage.en: 'Waiting for your wash? Explore Station Lounge & Reels',
+      AppLanguage.om: 'Eegaa jirtuu? Boqonnaa Laawunjii & Viidiyoo Daawwadhaa',
+      AppLanguage.am: 'እየጠበቁ ነው? ላውንጅ እና አጫጭር ቪዲዮዎችን ይመልከቱ',
+    },
+    'bookAnotherVehicleBtn': {
+      AppLanguage.en: 'Book Another Vehicle',
+      AppLanguage.om: 'Konkolaataa Biraa Galmeessi',
+      AppLanguage.am: 'ሌላ መኪና ያስመዝግቡ',
+    },
+    'step1ChooseVehicle': {
+      AppLanguage.en: 'Step 1: Choose Vehicle',
+      AppLanguage.om: 'Tarkaanfii 1: Konkolaataa Filadhaa',
+      AppLanguage.am: 'ደረጃ 1፡ የመኪና አይነት ይምረጡ',
+    },
+    'step1ChooseVehicleSub': {
+      AppLanguage.en: 'Select your vehicle category to preview pricing.',
+      AppLanguage.om: 'Gosa konkolaataa keessanii filachuun gatii ilaalaa.',
+      AppLanguage.am: 'ዋጋውን ለማየት የተሽከርካሪዎን አይነት ይምረጡ።',
+    },
+    'nextChoosePackageBtn': {
+      AppLanguage.en: 'Next: Choose Package',
+      AppLanguage.om: 'Itti Fufi: Paakeejii Filadhaa',
+      AppLanguage.am: 'ቀጣይ፡ ፓኬጅ ይምረጡ',
+    },
+    'step2ChoosePackage': {
+      AppLanguage.en: 'Step 2: Wash Package',
+      AppLanguage.om: 'Tarkaanfii 2: Paakeejii Dhiqannaa',
+      AppLanguage.am: 'ደረጃ 2፡ የእጥበት ፓኬጅ',
+    },
+    'step2ChoosePackageSub': {
+      AppLanguage.en: 'Select the optimal cleaning tier for your car.',
+      AppLanguage.om: 'Paakeejii qulqullinaa mijataa ta\'e filadhaa.',
+      AppLanguage.am: 'ለመኪናዎ ተስማሚ የሆነውን የእጥበት ደረጃ ይምረጡ።',
+    },
+    'nextContactDetailsBtn': {
+      AppLanguage.en: 'Next: Contact Details',
+      AppLanguage.om: 'Itti Fufi: Odeeffannoo Quunnamtii',
+      AppLanguage.am: 'ቀጣይ፡ የእውቂያ መረጃ',
+    },
+    'step3ContactDetails': {
+      AppLanguage.en: 'Step 3: Contact Details',
+      AppLanguage.om: 'Tarkaanfii 3: Odeeffannoo Quunnamtii',
+      AppLanguage.am: 'ደረጃ 3፡ የእውቂያ መረጃ',
+    },
+    'step3ContactDetailsSub': {
+      AppLanguage.en: 'Enter your license plate and phone number.',
+      AppLanguage.om: 'Lakk. Gabatee fi bilbila keessan galchaa.',
+      AppLanguage.am: 'የሰሌዳ ቁጥርዎን እና ስልክዎን ያስገቡ።',
+    },
+    'confirmAndDriveInBtn': {
+      AppLanguage.en: 'Confirm & Drive In',
+      AppLanguage.om: 'Mirkaneessi & Ol Seenaa',
+      AppLanguage.am: 'ያረጋግጡ እና ወደ ውስጥ ይግቡ',
+    },
+    'liveStationTelemetry': {
+      AppLanguage.en: 'Live Station Pulse',
+      AppLanguage.om: 'Haala Buufataa Kallattii',
+      AppLanguage.am: 'የጣቢያው የቀጥታ ሁኔታ',
+    },
+    'bayAvailability': {
+      AppLanguage.en: 'Bay Status',
+      AppLanguage.om: 'Haala Kilaasii',
+      AppLanguage.am: 'የክፍል ሁኔታ',
+    },
+    'estWaitTime': {
+      AppLanguage.en: 'Est. Wait Time',
+      AppLanguage.om: 'Turtii Tilmaamaa',
+      AppLanguage.am: 'የሚገመት የጥበቃ ጊዜ',
+    },
+    'activeQueue': {
+      AppLanguage.en: 'Active Queue',
+      AppLanguage.om: 'Dabareerra Kan Jiran',
+      AppLanguage.am: 'በተራ ላይ ያሉ',
+    },
+    'staffOnDuty': {
+      AppLanguage.en: 'Washers on Duty',
+      AppLanguage.om: 'Dhiqxoota Hojiirra Jiran',
+      AppLanguage.am: 'በስራ ላይ ያሉ አጣቢዎች',
+    },
+    'expressBookingPortal': {
+      AppLanguage.en: 'Express Booking Portal',
+      AppLanguage.om: 'Fuula Galmee Ariifachiisaa',
+      AppLanguage.am: 'ፈጣን የማስመዝገቢያ ገጽ',
+    },
+    'vehicleCategory': {
+      AppLanguage.en: 'Vehicle Category',
+      AppLanguage.om: 'Gosa Konkolaataa',
+      AppLanguage.am: 'የተሽከርካሪ ምድብ',
+    },
+    'servicePackage': {
+      AppLanguage.en: 'Service Package',
+      AppLanguage.om: 'Paakeejii Tajaajilaa',
+      AppLanguage.am: 'የአገልግሎት ፓኬጅ',
+    },
+    'calculatedTotal': {
+      AppLanguage.en: 'Total Price',
+      AppLanguage.om: 'Gatii Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ ዋጋ',
+    },
+    'confirmBookingBtn': {
+      AppLanguage.en: 'Confirm Wash Booking',
+      AppLanguage.om: 'Galmee Dhiqannaa Mirkaneessi',
+      AppLanguage.am: 'የእጥበት ምዝገባውን ያረጋግጡ',
+    },
+    'expressWashIntakeTitle': {
+      AppLanguage.en: 'Express Wash Intake',
+      AppLanguage.om: 'Simannaa Dhiqannaa Saffisaa',
+      AppLanguage.am: 'ፈጣን የመኪና እጥበት መግቢያ',
+    },
+    'instantBookAndDriveInBtn': {
+      AppLanguage.en: 'Instant Book & Drive In',
+      AppLanguage.om: 'Saffisaan Galmeessi & Seenaa',
+      AppLanguage.am: 'አሁኑኑ ያስመዝግቡና ይግቡ',
+    },
+    'stationLoungeTitle': {
+      AppLanguage.en: 'Station Lounge & Media',
+      AppLanguage.om: 'Laawunjii Buufataa & Miidiyaa',
+      AppLanguage.am: 'የጣቢያው ላውንጅ እና ሚዲያ',
+    },
+    'stationLoungeHeader': {
+      AppLanguage.en: 'Bishe Station Lounge & Ad Hub',
+      AppLanguage.om: 'Laawunjii Buufata Biishee & Beeksisa',
+      AppLanguage.am: 'የቢሼ ጣቢያ ላውንጅ እና የማስታወቂያ ማዕከል',
+    },
+    'stationLoungeHeaderSub': {
+      AppLanguage.en: 'Relax while your vehicle undergoes premier auto care',
+      AppLanguage.om: 'Konkolaataan keessan qulqullaa\'aa jiruutti boqodhaa',
+      AppLanguage.am: 'መኪናዎ እየታጠበ ባለበት ወቅት ዘና ይበሉ',
+    },
+    'carCareReelsTitle': {
+      AppLanguage.en: 'Car Care & Detailing Reels',
+      AppLanguage.om: 'Viidiyoowwan Eegumsa Konkolaataa',
+      AppLanguage.am: 'የመኪና እንክብካቤ እና ዲቴይሊንግ ቪዲዮዎች',
+    },
+    'carCareReelsSub': {
+      AppLanguage.en: 'Watch our active foam cannons and ceramic treatment highlights',
+      AppLanguage.om: 'Hojii saamuunaa foamii fi poolishii keenya daawwadhaa',
+      AppLanguage.am: 'የፎም እና የፖሊሽ ስራዎቻችንን በቪዲዮ ይመልከቱ',
+    },
+    'stationAmenitiesTitle': {
+      AppLanguage.en: 'Station Amenities',
+      AppLanguage.om: 'Tajaajiloota Dabalataa Buufataa',
+      AppLanguage.am: 'የጣቢያው ተጨማሪ አገልግሎቶች',
+    },
+    'stationAmenitiesSub': {
+      AppLanguage.en: 'Comfortable waiting area, fast Wi-Fi, and fresh drinks',
+      AppLanguage.om: 'Bakka boqonnaa qabbanaawaa, Wi-Fi saffisaa fi dhugaatii',
+      AppLanguage.am: 'ምቹ የማረፊያ ቦታ፣ ፈጣን ዋይፋይ እና ቀዝቃዛ መጠጦች',
+    },
+    'amenitiesWifiCoffee': {
+      AppLanguage.en: 'Complimentary High-Speed Wi-Fi & Lounge Area',
+      AppLanguage.om: 'Wi-Fi Saffisaa Bilaashaa & Iddoo Boqonnaa',
+      AppLanguage.am: 'ነጻ ፈጣን ዋይፋይ እና ምቹ ማረፊያ',
+    },
+    'amenitiesWifiCoffeeSub': {
+      AppLanguage.en: 'Ask our reception desk for the guest Wi-Fi code',
+      AppLanguage.om: 'Koodii Wi-Fi keessummaa kashiyara gaafadhaa',
+      AppLanguage.am: 'የእንግዳ ዋይፋይ ኮድ ከካሺየሩ ይጠይቁ',
+    },
     'linkNotConfigured': {
       AppLanguage.en: 'Video link is not configured yet',
       AppLanguage.om: 'Liankiin viidiyoo ammayyuu hin qophoofne',
@@ -6545,6 +6738,7 @@ class AppStrings {
         'የሞተር ቱቦዎችን እና የጎማ ክፍሎችን በሲሊኮን ማደስ',
       ],
     },
+
   };
 
   static String get(String key, AppLanguage lang) {
