@@ -7,6 +7,7 @@ import '../../../../core/widgets/responsive_layout.dart';
 import '../../../auth_roles/domain/models/user_role.dart';
 import '../../../auth_roles/presentation/widgets/role_auth_dialog.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
+import '../../../prototypes/presentation/screens/prototype_evaluator_screen.dart';
 import '../widgets/ad_video_showcase_card.dart';
 import '../widgets/customer_feedback_sheet.dart';
 import '../widgets/welcome_service_carousel_banner.dart';
@@ -189,6 +190,47 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                               onChanged: (lang) {
                                 if (lang != null) state.setLanguage(lang);
                               },
+                            ),
+                          ),
+                        ),
+
+                        // Center: Design Prototypes Launcher Pill
+                        InkWell(
+                          key: const Key('welcome_prototypes_pill_btn'),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const PrototypeEvaluatorScreen()),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0071E3),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF0071E3).withValues(alpha: 0.35),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.auto_awesome_rounded, size: 15, color: Colors.white),
+                                SizedBox(width: 5),
+                                Text(
+                                  'Prototypes',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
