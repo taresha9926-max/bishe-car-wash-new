@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/prototypes/domain/models/prototype_model_type.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/screens/prototype_station_lounge_screen.dart';
@@ -8,8 +7,8 @@ import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototyp
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_3_express_kiosk_view.dart';
 
 /// Interactive evaluation workbench allowing testers and stakeholders to
-/// compare the 3 candidate interaction paradigms side-by-side, toggle
-/// mobile vs tablet viewport simulation, and test trilingual responsiveness.
+/// compare the 3 distinct Apple-styled interaction paradigms side-by-side,
+/// toggle mobile vs desktop viewport simulation, and test trilingual responsiveness.
 class PrototypeEvaluatorScreen extends StatefulWidget {
   const PrototypeEvaluatorScreen({super.key});
 
@@ -33,42 +32,64 @@ class _PrototypeEvaluatorScreenState extends State<PrototypeEvaluatorScreen> {
     final state = AppStateProvider.of(context);
 
     Widget activeView;
+    Color canvasBg;
     switch (_activeModel) {
       case PrototypeModelType.stepper:
         activeView = Prototype1StepperView(onOpenLounge: _openLounge);
+        canvasBg = const Color(0xFFF5F5F7);
         break;
       case PrototypeModelType.saasPortal:
         activeView = Prototype2SaasPortalView(onOpenLounge: _openLounge);
+        canvasBg = const Color(0xFF161617);
         break;
       case PrototypeModelType.expressKiosk:
         activeView = Prototype3ExpressKioskView(onOpenLounge: _openLounge);
+        canvasBg = const Color(0xFFFBF9F6);
         break;
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: const Color(0xFFF5F5F7), // Apple Parchment Canvas
       appBar: AppBar(
-        title: const Text('Prototype Evaluator'),
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Prototype Evaluator',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.3,
+              color: Color(0xFF1D1D1F),
+            ),
+          ),
+        ),
         backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 1,
+        foregroundColor: const Color(0xFF1D1D1F),
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: const Color(0xFFE5E5EA), height: 1),
+        ),
         actions: [
-          // Language Switcher (EN, OM, AM)
+          // Language Capsule Switcher (EN, OM, AM)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.cardBorder),
-                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xFFF5F5F7),
+                borderRadius: BorderRadius.circular(9999),
+                border: Border.all(color: const Color(0xFFE5E5EA)),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: state.currentLang,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Color(0xFF86868B)),
                   items: const [
-                    DropdownMenuItem(value: 'EN', child: Text('🇬🇧 EN')),
-                    DropdownMenuItem(value: 'OM', child: Text('🌳 OM')),
-                    DropdownMenuItem(value: 'AM', child: Text('🇪🇹 AM')),
+                    DropdownMenuItem(value: 'EN', child: Text('EN', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                    DropdownMenuItem(value: 'OM', child: Text('OM', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
+                    DropdownMenuItem(value: 'AM', child: Text('AM', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
                   ],
                   onChanged: (val) {
                     if (val != null) state.setLanguage(val);
@@ -77,97 +98,115 @@ class _PrototypeEvaluatorScreenState extends State<PrototypeEvaluatorScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
 
-          // Mobile Viewport Toggle
+          // Mobile Viewport Frame Toggle
           IconButton(
             icon: Icon(
               _isMobilePreviewFrame ? Icons.stay_current_portrait_rounded : Icons.desktop_windows_rounded,
-              color: _isMobilePreviewFrame ? AppColors.primary : Colors.grey,
+              color: _isMobilePreviewFrame ? const Color(0xFF0071E3) : const Color(0xFF86868B),
+              size: 22,
             ),
             tooltip: 'Toggle Mobile Preview Frame',
             onPressed: () => setState(() => _isMobilePreviewFrame = !_isMobilePreviewFrame),
           ),
-          const SizedBox(width: 8),
 
-          // Station Lounge Direct Button
-          TextButton.icon(
-            onPressed: _openLounge,
-            icon: const Icon(Icons.ondemand_video_rounded, size: 18),
-            label: const Text('Lounge'),
+          // Station Lounge Pill
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            child: TextButton.icon(
+              onPressed: _openLounge,
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFF5F5F7),
+                foregroundColor: const Color(0xFF1D1D1F),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: const StadiumBorder(),
+              ),
+              icon: const Icon(Icons.ondemand_video_rounded, size: 16),
+              label: const Text('Lounge', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            ),
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
-          // Top Model Selector Bar
+          // Apple Segmented Pill Selector Bar (Horizontally scrollable on narrow viewports)
           Container(
             color: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: PrototypeModelType.values.map((type) {
-                final isSelected = type == _activeModel;
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: InkWell(
-                      onTap: () => setState(() => _activeModel = type),
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+            child: Center(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE5E5EA), // Apple Segmented Track
+                    borderRadius: BorderRadius.circular(9999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: PrototypeModelType.values.map((type) {
+                      final isSelected = type == _activeModel;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: InkWell(
+                          onTap: () => setState(() => _activeModel = type),
+                          borderRadius: BorderRadius.circular(9999),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.white : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9999),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.08),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   type.icon,
-                                  size: 16,
-                                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                                  size: 15,
+                                  color: isSelected ? const Color(0xFF1D1D1F) : const Color(0xFF86868B),
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   type.title,
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                                     fontSize: 13,
-                                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                                    color: isSelected ? const Color(0xFF1D1D1F) : const Color(0xFF86868B),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              type.targetCompletionTime,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: isSelected ? Colors.white70 : AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
+                ),
+              ),
             ),
           ),
 
           // Active Model Description Ribbon
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: const Color(0xFFE2E8F0),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+            color: const Color(0xFFF5F5F7),
             child: Text(
               _activeModel.description,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+              style: const TextStyle(fontSize: 12, color: Color(0xFF86868B), fontWeight: FontWeight.w500),
             ),
           ),
 
@@ -179,22 +218,41 @@ class _PrototypeEvaluatorScreenState extends State<PrototypeEvaluatorScreen> {
                       width: 390,
                       margin: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: Colors.black87, width: 6),
+                        color: canvasBg,
+                        borderRadius: BorderRadius.circular(44), // iPhone 16 Pro curved corners
+                        border: Border.all(color: const Color(0xFF1D1D1F), width: 8), // Ceramic bezel
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
+                            color: Colors.black.withOpacity(0.18),
+                            blurRadius: 32,
+                            offset: const Offset(0, 12),
                           ),
                         ],
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: activeView,
+                      child: Column(
+                        children: [
+                          // Dynamic Island pill
+                          Container(
+                            height: 32,
+                            color: canvasBg,
+                            child: Center(
+                              child: Container(
+                                width: 96,
+                                height: 22,
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(child: activeView),
+                        ],
+                      ),
                     )
                   : ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 850),
+                      constraints: const BoxConstraints(maxWidth: 880),
                       child: activeView,
                     ),
             ),

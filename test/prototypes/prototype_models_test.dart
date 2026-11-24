@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/constants/app_theme.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
-import 'package:bishe_car_wash/features/prototypes/domain/models/prototype_model_type.dart';
 import 'package:bishe_car_wash/features/prototypes/data/mock_prototype_wash_repository.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/screens/prototype_evaluator_screen.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/screens/prototype_station_lounge_screen.dart';
