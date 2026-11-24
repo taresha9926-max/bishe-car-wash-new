@@ -41,11 +41,7 @@ class PrototypeStationLoungeScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: const Color(0xFF0F172A),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -56,10 +52,10 @@ class PrototypeStationLoungeScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.2),
+                              color: Colors.white.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.coffee_rounded, color: AppColors.liquidCyanNeon, size: 24),
+                            child: const Icon(Icons.coffee_rounded, color: Colors.white, size: 22),
                           ),
                           const SizedBox(width: 12),
                           Expanded(

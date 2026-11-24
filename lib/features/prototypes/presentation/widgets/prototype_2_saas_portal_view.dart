@@ -120,28 +120,12 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFF34D399)),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.circle, size: 8, color: Color(0xFF34D399)),
-                          SizedBox(width: 6),
-                          Text(
-                            'LIVE PULSE',
-                            style: TextStyle(
-                              color: Color(0xFF34D399),
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'Bishoftu Station',
+                      style: const TextStyle(
+                        color: Color(0xFF94A3B8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -153,16 +137,12 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
                       child: _buildTelemetryMetric(
                         label: state.tr('bayAvailability'),
                         value: '${telemetry.availableBays} / ${telemetry.totalBays} Open',
-                        icon: Icons.local_car_wash_rounded,
-                        color: Colors.tealAccent,
                       ),
                     ),
                     Expanded(
                       child: _buildTelemetryMetric(
                         label: state.tr('estWaitTime'),
-                        value: '~${telemetry.estimatedWaitMinutes} mins',
-                        icon: Icons.timer_outlined,
-                        color: Colors.amberAccent,
+                        value: '~${telemetry.estimatedWaitMinutes} min',
                       ),
                     ),
                   ],
@@ -173,17 +153,13 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
                     Expanded(
                       child: _buildTelemetryMetric(
                         label: state.tr('activeQueue'),
-                        value: '${telemetry.activeQueueCount} Vehicles',
-                        icon: Icons.format_list_numbered_rounded,
-                        color: Colors.lightBlueAccent,
+                        value: '${telemetry.activeQueueCount} in line',
                       ),
                     ),
                     Expanded(
                       child: _buildTelemetryMetric(
                         label: state.tr('staffOnDuty'),
                         value: '${telemetry.activeWashersCount} Washers',
-                        icon: Icons.people_outline_rounded,
-                        color: Colors.purpleAccent,
                       ),
                     ),
                   ],
@@ -372,37 +348,29 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
   Widget _buildTelemetryMetric({
     required String label,
     required String value,
-    required IconData icon,
-    required Color color,
   }) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(10),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.2,
           ),
-          child: Icon(icon, color: color, size: 20),
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(color: Colors.white70, fontSize: 11),
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF94A3B8),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
           ),
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

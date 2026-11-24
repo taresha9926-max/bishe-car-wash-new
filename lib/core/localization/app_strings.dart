@@ -6342,14 +6342,14 @@ class AppStrings {
       AppLanguage.am: 'ተመለስ',
     },
     'selectVehicle': {
-      AppLanguage.en: '1. Select Vehicle',
-      AppLanguage.om: '1. Gosa Konkolaataa Filadhaa',
-      AppLanguage.am: '1. የመኪና አይነት ይምረጡ',
+      AppLanguage.en: 'Select Vehicle',
+      AppLanguage.om: 'Gosa Konkolaataa Filadhaa',
+      AppLanguage.am: 'የመኪና አይነት ይምረጡ',
     },
     'selectPackage': {
-      AppLanguage.en: '2. Select Service Package',
-      AppLanguage.om: '2. Paakeejii Dhiqannaa Filadhaa',
-      AppLanguage.am: '2. የእጥበት ፓኬጅ ይምረጡ',
+      AppLanguage.en: 'Select Service Package',
+      AppLanguage.om: 'Paakeejii Dhiqannaa Filadhaa',
+      AppLanguage.am: 'የእጥበት ፓኬጅ ይምረጡ',
     },
     'ticketRef': {
       AppLanguage.en: 'Ticket Ref',
@@ -6372,9 +6372,9 @@ class AppStrings {
       AppLanguage.am: 'ሌላ መኪና ያስመዝግቡ',
     },
     'step1ChooseVehicle': {
-      AppLanguage.en: 'Step 1: Choose Vehicle',
-      AppLanguage.om: 'Tarkaanfii 1: Konkolaataa Filadhaa',
-      AppLanguage.am: 'ደረጃ 1፡ የመኪና አይነት ይምረጡ',
+      AppLanguage.en: 'Choose Vehicle',
+      AppLanguage.om: 'Gosa Konkolaataa Filadhaa',
+      AppLanguage.am: 'የመኪና አይነት ይምረጡ',
     },
     'step1ChooseVehicleSub': {
       AppLanguage.en: 'Select your vehicle category to preview pricing.',
@@ -6382,14 +6382,14 @@ class AppStrings {
       AppLanguage.am: 'ዋጋውን ለማየት የተሽከርካሪዎን አይነት ይምረጡ።',
     },
     'nextChoosePackageBtn': {
-      AppLanguage.en: 'Next: Choose Package',
+      AppLanguage.en: 'Next: Wash Package',
       AppLanguage.om: 'Itti Fufi: Paakeejii Filadhaa',
       AppLanguage.am: 'ቀጣይ፡ ፓኬጅ ይምረጡ',
     },
     'step2ChoosePackage': {
-      AppLanguage.en: 'Step 2: Wash Package',
-      AppLanguage.om: 'Tarkaanfii 2: Paakeejii Dhiqannaa',
-      AppLanguage.am: 'ደረጃ 2፡ የእጥበት ፓኬጅ',
+      AppLanguage.en: 'Wash Package',
+      AppLanguage.om: 'Paakeejii Dhiqannaa',
+      AppLanguage.am: 'የእጥበት ፓኬጅ',
     },
     'step2ChoosePackageSub': {
       AppLanguage.en: 'Select the optimal cleaning tier for your car.',
@@ -6402,9 +6402,9 @@ class AppStrings {
       AppLanguage.am: 'ቀጣይ፡ የእውቂያ መረጃ',
     },
     'step3ContactDetails': {
-      AppLanguage.en: 'Step 3: Contact Details',
-      AppLanguage.om: 'Tarkaanfii 3: Odeeffannoo Quunnamtii',
-      AppLanguage.am: 'ደረጃ 3፡ የእውቂያ መረጃ',
+      AppLanguage.en: 'Contact Details',
+      AppLanguage.om: 'Odeeffannoo Quunnamtii',
+      AppLanguage.am: 'የእውቂያ መረጃ',
     },
     'step3ContactDetailsSub': {
       AppLanguage.en: 'Enter your license plate and phone number.',

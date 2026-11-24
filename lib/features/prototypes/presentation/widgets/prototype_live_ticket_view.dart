@@ -42,25 +42,14 @@ class PrototypeLiveTicketView extends StatelessWidget {
         children: [
           // Success Banner
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: const Color(0xFF007791),
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.teal.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Column(
               children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.white, size: 48),
+                const Icon(Icons.check_circle_rounded, color: Colors.white, size: 44),
                 const SizedBox(height: 8),
                 Text(
                   state.tr('bookingConfirmedTitle'),
@@ -68,6 +57,7 @@ class PrototypeLiveTicketView extends StatelessWidget {
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: -0.3,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -76,7 +66,7 @@ class PrototypeLiveTicketView extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 13,
-                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],

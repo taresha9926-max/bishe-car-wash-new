@@ -92,23 +92,23 @@ void main() {
       await tester.pumpAndSettle();
 
       // Step 1: Select vehicle
-      expect(find.text('Step 1: Choose Vehicle'), findsOneWidget);
+      expect(find.text('Choose Vehicle'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.directions_car_rounded).first);
       await tester.pumpAndSettle();
 
       // Advance to Step 2
-      await tester.tap(find.text('Next: Choose Package'));
+      await tester.tap(find.text('Next: Wash Package'));
       await tester.pumpAndSettle();
 
       // Step 2: Choose package
-      expect(find.text('Step 2: Wash Package'), findsOneWidget);
+      expect(find.text('Wash Package'), findsOneWidget);
       final nextContactBtn = find.text('Next: Contact Details');
       await tester.ensureVisible(nextContactBtn);
       await tester.tap(nextContactBtn);
       await tester.pumpAndSettle();
 
       // Step 3: Enter contact info
-      expect(find.text('Step 3: Contact Details'), findsOneWidget);
+      expect(find.text('Contact Details'), findsOneWidget);
       await tester.enterText(find.byKey(const Key('stepper_plate_input')), 'A12345');
       await tester.enterText(find.byKey(const Key('stepper_phone_input')), '0911223344');
       await tester.pumpAndSettle();
