@@ -6526,6 +6526,61 @@ class AppStrings {
       AppLanguage.om: 'Liankiin viidiyoo ammayyuu hin qophoofne',
       AppLanguage.am: 'የቪዲዮ ማያያዣ ገና አልተዘጋጀም',
     },
+    'flagshipServedClone': {
+      AppLanguage.en: 'Flagship: Served Clone',
+      AppLanguage.om: 'Moodeela Flagship: Buufata Qajeelaa',
+      AppLanguage.am: 'ዋና ሞዴል፡ የቀጥታ አገልግሎት',
+    },
+    'flagshipServedCloneDesc': {
+      AppLanguage.en: 'Streamlined single-page clone of the served app with photography-first Apple design and collapsible modules.',
+      AppLanguage.om: 'Fakkiilee dhugaa fi caasaa qulqulluu Apple\'n tajaajila buufataa fuula tokkoon qindeessu.',
+      AppLanguage.am: 'በአንድ ገጽ ላይ የተስተካከለ የቀጥታ መተግበሪያ ቅጂ በንጹህ የአፕል ዲዛይን እና ተጣጣፊ ክፍሎች።',
+    },
+    'carpetLengthMeters': {
+      AppLanguage.en: 'Length (m)',
+      AppLanguage.om: 'Dheerina (m)',
+      AppLanguage.am: 'ርዝመት (ሜ)',
+    },
+    'carpetWidthMeters': {
+      AppLanguage.en: 'Width (m)',
+      AppLanguage.om: 'Dalga (m)',
+      AppLanguage.am: 'ወርድ (ሜ)',
+    },
+    'carpetAreaCalculated': {
+      AppLanguage.en: 'Total Area',
+      AppLanguage.om: 'Baldhina Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ ስፋት',
+    },
+    'stationLocationAndHours': {
+      AppLanguage.en: 'Station Location & Hours',
+      AppLanguage.om: 'Bakka Buufataa & Sa\'aatii Hojii',
+      AppLanguage.am: 'የጣቢያው አድራሻ እና የስራ ሰዓት',
+    },
+    'trackExistingBooking': {
+      AppLanguage.en: 'Track Past or Active Wash',
+      AppLanguage.om: 'Dhiqannaa Duraanii Hordofaa',
+      AppLanguage.am: 'ያለፈ ወይም የቀጥታ እጥበትን ይከታተሉ',
+    },
+    'pricesNegotiableNote': {
+      AppLanguage.en: 'Standard pricing shown. Final price negotiable upon inspection.',
+      AppLanguage.om: 'Gatiin barame agarsiifameera. Gatiin xumuraa mariidhaan murtaa\'a.',
+      AppLanguage.am: 'መደበኛ ዋጋ ተቀምጧል። የመጨረሻው ዋጋ ተሽከርካሪው ታይቶ በድርድር ይወሰናል።',
+    },
+    'deliveryModeStation': {
+      AppLanguage.en: 'Drive-In Station',
+      AppLanguage.om: 'Buufata Qajeelaa',
+      AppLanguage.am: 'ጣቢያው ድረስ መምጣት',
+    },
+    'deliveryModeValet': {
+      AppLanguage.en: 'Valet Pick-up & Return',
+      AppLanguage.om: 'Fudhatamee Deebifamu',
+      AppLanguage.am: 'ተወስዶ የሚመለስ',
+    },
+    'deliveryModeMobile': {
+      AppLanguage.en: 'VIP Mobile Van',
+      AppLanguage.om: 'Mobaayil Vaan VIP',
+      AppLanguage.am: 'ሞባይል ቫን',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

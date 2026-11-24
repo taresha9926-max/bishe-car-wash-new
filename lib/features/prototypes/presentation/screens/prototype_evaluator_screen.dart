@@ -5,9 +5,10 @@ import 'package:bishe_car_wash/features/prototypes/presentation/screens/prototyp
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_1_stepper_view.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_2_saas_portal_view.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_3_express_kiosk_view.dart';
+import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_served_unified_clone_view.dart';
 
 /// Interactive evaluation workbench allowing testers and stakeholders to
-/// compare the 3 distinct Apple-styled interaction paradigms side-by-side,
+/// compare the distinct Apple-styled interaction paradigms side-by-side,
 /// toggle mobile vs desktop viewport simulation, and test trilingual responsiveness.
 class PrototypeEvaluatorScreen extends StatefulWidget {
   const PrototypeEvaluatorScreen({super.key});
@@ -17,7 +18,7 @@ class PrototypeEvaluatorScreen extends StatefulWidget {
 }
 
 class _PrototypeEvaluatorScreenState extends State<PrototypeEvaluatorScreen> {
-  PrototypeModelType _activeModel = PrototypeModelType.stepper;
+  PrototypeModelType _activeModel = PrototypeModelType.unifiedServedClone;
   bool _isMobilePreviewFrame = false;
 
   void _openLounge() {
@@ -34,6 +35,10 @@ class _PrototypeEvaluatorScreenState extends State<PrototypeEvaluatorScreen> {
     Widget activeView;
     Color canvasBg;
     switch (_activeModel) {
+      case PrototypeModelType.unifiedServedClone:
+        activeView = PrototypeServedUnifiedCloneView(onOpenLounge: _openLounge);
+        canvasBg = const Color(0xFFF5F5F7);
+        break;
       case PrototypeModelType.stepper:
         activeView = Prototype1StepperView(onOpenLounge: _openLounge);
         canvasBg = const Color(0xFFF5F5F7);
