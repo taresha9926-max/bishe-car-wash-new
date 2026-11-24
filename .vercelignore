@@ -1,0 +1,15 @@
+# Vercel Deployment Ignore Rules
+# Exclude container files and tooling so Vercel exclusively serves static build/web from vercel.json
+Dockerfile
+Dockerfile.*
+Containerfile
+docker-compose.yml
+docker-compose.*.yml
+nginx.conf
+tools/
+agent/
+sentinel/
+android/
+test/
+*.bat
+*.sh

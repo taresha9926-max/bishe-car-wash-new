@@ -1,0 +1,18 @@
+# Ignore files to keep Docker build context minimal & fast
+.git
+.github
+.idea
+.dart_tool
+.scratch
+.vscode
+agent/__pycache__
+sentinel/__pycache__
+android/
+test/
+tool/
+tools/bishe_sentinel/
+*.apk
+*.docx
+*.pdf
+*.xlsx
+*.csv
