@@ -471,23 +471,9 @@ class _StationQueueTabState extends State<StationQueueTab> {
                         runSpacing: 4,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: const Color(0xFF334155), width: 1),
-                            ),
-                            child: Text(
-                              b.licensePlate,
-                              style: const TextStyle(
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13.5,
-                                letterSpacing: 0.5,
-                                color: Colors.white,
-                              ),
-                            ),
+                          Text(
+                            b.licensePlate,
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14.5, color: AppColors.textPrimary),
                           ),
                           if (b.isCarpet)
                             _buildMiniPill(
@@ -828,19 +814,15 @@ class _StationQueueTabState extends State<StationQueueTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: neutral ? const Color(0xFF1E293B) : color.withOpacity(0.12),
+        color: neutral ? AppColors.surfaceVariant : color.withOpacity(0.11),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: neutral ? AppColors.cardBorder : color.withOpacity(0.35),
-          width: 0.8,
-        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
             Icon(icon, size: 10, color: color),
-            const SizedBox(width: 3.5),
+            const SizedBox(width: 3),
           ],
           Flexible(
             child: Text(

@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Defines the three candidate interaction paradigms evaluated in the prototype sandbox.
 enum PrototypeModelType {
-  /// Flagship: Streamlined single-page clone of the served app with photography-first Apple design and collapsible modules.
-  unifiedServedClone,
-
   /// Model 1: Progressive 3-step linear wizard (Vehicle -> Package -> Details -> Ticket).
   stepper,
 
@@ -18,8 +15,6 @@ enum PrototypeModelType {
 extension PrototypeModelTypeExt on PrototypeModelType {
   String get title {
     switch (this) {
-      case PrototypeModelType.unifiedServedClone:
-        return 'Flagship: Served Clone';
       case PrototypeModelType.stepper:
         return 'Model 1: Stepper';
       case PrototypeModelType.saasPortal:
@@ -31,8 +26,6 @@ extension PrototypeModelTypeExt on PrototypeModelType {
 
   String get targetCompletionTime {
     switch (this) {
-      case PrototypeModelType.unifiedServedClone:
-        return '<15 sec';
       case PrototypeModelType.stepper:
         return '~25–35 sec';
       case PrototypeModelType.saasPortal:
@@ -44,8 +37,6 @@ extension PrototypeModelTypeExt on PrototypeModelType {
 
   String get description {
     switch (this) {
-      case PrototypeModelType.unifiedServedClone:
-        return 'Full served app clone redesigned with photography-first Apple styling, 1-page booking, and collapsible media/amenity modules.';
       case PrototypeModelType.stepper:
         return 'Step-by-step consumer wizard with tactile cards. Lowest cognitive load for first-time private car owners.';
       case PrototypeModelType.saasPortal:
@@ -57,8 +48,6 @@ extension PrototypeModelTypeExt on PrototypeModelType {
 
   IconData get icon {
     switch (this) {
-      case PrototypeModelType.unifiedServedClone:
-        return Icons.auto_awesome_rounded;
       case PrototypeModelType.stepper:
         return Icons.linear_scale_rounded;
       case PrototypeModelType.saasPortal:

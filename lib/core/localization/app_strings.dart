@@ -2607,31 +2607,6 @@ class AppStrings {
       AppLanguage.om: 'Dhiqannaa Konkolaataa Koo Hordofi',
       AppLanguage.am: 'የመኪናዬን እጥበት ሁኔታ ተከታተል',
     },
-    'quickAssistance': {
-      AppLanguage.en: 'Quick Assistance & Actions',
-      AppLanguage.om: 'Deeggarsa Saffisaa fi Tajaajila',
-      AppLanguage.am: 'ፈጣን ድጋፍ እና አገልግሎቶች',
-    },
-    'trackOrderTile': {
-      AppLanguage.en: 'Track Wash',
-      AppLanguage.om: 'Hordofi',
-      AppLanguage.am: 'ሁኔታ ተከታተል',
-    },
-    'callStationTile': {
-      AppLanguage.en: 'Call Gate',
-      AppLanguage.om: 'Balbala Bilbili',
-      AppLanguage.am: 'ለጣቢያው ደውል',
-    },
-    'directionsTile': {
-      AppLanguage.en: 'Maps / GPS',
-      AppLanguage.om: 'Kaartaa / GPS',
-      AppLanguage.am: 'ካርታ / አቅጣጫ',
-    },
-    'feedbackTile': {
-      AppLanguage.en: 'Rate & Review',
-      AppLanguage.om: 'Madaali',
-      AppLanguage.am: 'ደረጃ ስጥ',
-    },
     'trackVehiclePrompt': {
       AppLanguage.en: 'Enter your plate number or phone to see your vehicle\'s live progress',
       AppLanguage.om: 'Haala dhiqannaa ilaaluuf gabatee makiinaa ykn bilbila keessan galchaa',
@@ -6367,14 +6342,14 @@ class AppStrings {
       AppLanguage.am: 'ተመለስ',
     },
     'selectVehicle': {
-      AppLanguage.en: 'Select Vehicle',
-      AppLanguage.om: 'Gosa Konkolaataa Filadhaa',
-      AppLanguage.am: 'የመኪና አይነት ይምረጡ',
+      AppLanguage.en: '1. Select Vehicle',
+      AppLanguage.om: '1. Gosa Konkolaataa Filadhaa',
+      AppLanguage.am: '1. የመኪና አይነት ይምረጡ',
     },
     'selectPackage': {
-      AppLanguage.en: 'Select Service Package',
-      AppLanguage.om: 'Paakeejii Dhiqannaa Filadhaa',
-      AppLanguage.am: 'የእጥበት ፓኬጅ ይምረጡ',
+      AppLanguage.en: '2. Select Service Package',
+      AppLanguage.om: '2. Paakeejii Dhiqannaa Filadhaa',
+      AppLanguage.am: '2. የእጥበት ፓኬጅ ይምረጡ',
     },
     'ticketRef': {
       AppLanguage.en: 'Ticket Ref',
@@ -6397,9 +6372,9 @@ class AppStrings {
       AppLanguage.am: 'ሌላ መኪና ያስመዝግቡ',
     },
     'step1ChooseVehicle': {
-      AppLanguage.en: 'Choose Vehicle',
-      AppLanguage.om: 'Gosa Konkolaataa Filadhaa',
-      AppLanguage.am: 'የመኪና አይነት ይምረጡ',
+      AppLanguage.en: 'Step 1: Choose Vehicle',
+      AppLanguage.om: 'Tarkaanfii 1: Konkolaataa Filadhaa',
+      AppLanguage.am: 'ደረጃ 1፡ የመኪና አይነት ይምረጡ',
     },
     'step1ChooseVehicleSub': {
       AppLanguage.en: 'Select your vehicle category to preview pricing.',
@@ -6407,14 +6382,14 @@ class AppStrings {
       AppLanguage.am: 'ዋጋውን ለማየት የተሽከርካሪዎን አይነት ይምረጡ።',
     },
     'nextChoosePackageBtn': {
-      AppLanguage.en: 'Next: Wash Package',
+      AppLanguage.en: 'Next: Choose Package',
       AppLanguage.om: 'Itti Fufi: Paakeejii Filadhaa',
       AppLanguage.am: 'ቀጣይ፡ ፓኬጅ ይምረጡ',
     },
     'step2ChoosePackage': {
-      AppLanguage.en: 'Wash Package',
-      AppLanguage.om: 'Paakeejii Dhiqannaa',
-      AppLanguage.am: 'የእጥበት ፓኬጅ',
+      AppLanguage.en: 'Step 2: Wash Package',
+      AppLanguage.om: 'Tarkaanfii 2: Paakeejii Dhiqannaa',
+      AppLanguage.am: 'ደረጃ 2፡ የእጥበት ፓኬጅ',
     },
     'step2ChoosePackageSub': {
       AppLanguage.en: 'Select the optimal cleaning tier for your car.',
@@ -6427,9 +6402,9 @@ class AppStrings {
       AppLanguage.am: 'ቀጣይ፡ የእውቂያ መረጃ',
     },
     'step3ContactDetails': {
-      AppLanguage.en: 'Contact Details',
-      AppLanguage.om: 'Odeeffannoo Quunnamtii',
-      AppLanguage.am: 'የእውቂያ መረጃ',
+      AppLanguage.en: 'Step 3: Contact Details',
+      AppLanguage.om: 'Tarkaanfii 3: Odeeffannoo Quunnamtii',
+      AppLanguage.am: 'ደረጃ 3፡ የእውቂያ መረጃ',
     },
     'step3ContactDetailsSub': {
       AppLanguage.en: 'Enter your license plate and phone number.',
@@ -6550,61 +6525,6 @@ class AppStrings {
       AppLanguage.en: 'Video link is not configured yet',
       AppLanguage.om: 'Liankiin viidiyoo ammayyuu hin qophoofne',
       AppLanguage.am: 'የቪዲዮ ማያያዣ ገና አልተዘጋጀም',
-    },
-    'flagshipServedClone': {
-      AppLanguage.en: 'Flagship: Served Clone',
-      AppLanguage.om: 'Moodeela Flagship: Buufata Qajeelaa',
-      AppLanguage.am: 'ዋና ሞዴል፡ የቀጥታ አገልግሎት',
-    },
-    'flagshipServedCloneDesc': {
-      AppLanguage.en: 'Streamlined single-page clone of the served app with photography-first Apple design and collapsible modules.',
-      AppLanguage.om: 'Fakkiilee dhugaa fi caasaa qulqulluu Apple\'n tajaajila buufataa fuula tokkoon qindeessu.',
-      AppLanguage.am: 'በአንድ ገጽ ላይ የተስተካከለ የቀጥታ መተግበሪያ ቅጂ በንጹህ የአፕል ዲዛይን እና ተጣጣፊ ክፍሎች።',
-    },
-    'carpetLengthMeters': {
-      AppLanguage.en: 'Length (m)',
-      AppLanguage.om: 'Dheerina (m)',
-      AppLanguage.am: 'ርዝመት (ሜ)',
-    },
-    'carpetWidthMeters': {
-      AppLanguage.en: 'Width (m)',
-      AppLanguage.om: 'Dalga (m)',
-      AppLanguage.am: 'ወርድ (ሜ)',
-    },
-    'carpetAreaCalculated': {
-      AppLanguage.en: 'Total Area',
-      AppLanguage.om: 'Baldhina Waliigalaa',
-      AppLanguage.am: 'ጠቅላላ ስፋት',
-    },
-    'stationLocationAndHours': {
-      AppLanguage.en: 'Station Location & Hours',
-      AppLanguage.om: 'Bakka Buufataa & Sa\'aatii Hojii',
-      AppLanguage.am: 'የጣቢያው አድራሻ እና የስራ ሰዓት',
-    },
-    'trackExistingBooking': {
-      AppLanguage.en: 'Track Past or Active Wash',
-      AppLanguage.om: 'Dhiqannaa Duraanii Hordofaa',
-      AppLanguage.am: 'ያለፈ ወይም የቀጥታ እጥበትን ይከታተሉ',
-    },
-    'pricesNegotiableNote': {
-      AppLanguage.en: 'Standard pricing shown. Final price negotiable upon inspection.',
-      AppLanguage.om: 'Gatiin barame agarsiifameera. Gatiin xumuraa mariidhaan murtaa\'a.',
-      AppLanguage.am: 'መደበኛ ዋጋ ተቀምጧል። የመጨረሻው ዋጋ ተሽከርካሪው ታይቶ በድርድር ይወሰናል።',
-    },
-    'deliveryModeStation': {
-      AppLanguage.en: 'Drive-In Station',
-      AppLanguage.om: 'Buufata Qajeelaa',
-      AppLanguage.am: 'ጣቢያው ድረስ መምጣት',
-    },
-    'deliveryModeValet': {
-      AppLanguage.en: 'Valet Pick-up & Return',
-      AppLanguage.om: 'Fudhatamee Deebifamu',
-      AppLanguage.am: 'ተወስዶ የሚመለስ',
-    },
-    'deliveryModeMobile': {
-      AppLanguage.en: 'VIP Mobile Van',
-      AppLanguage.om: 'Mobaayil Vaan VIP',
-      AppLanguage.am: 'ሞባይል ቫን',
     },
   };
 

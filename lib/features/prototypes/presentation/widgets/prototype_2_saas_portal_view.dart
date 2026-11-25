@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
@@ -9,8 +10,8 @@ import 'package:bishe_car_wash/features/booking_service/presentation/state/app_s
 import 'package:bishe_car_wash/features/prototypes/domain/models/prototype_model_type.dart';
 import 'prototype_live_ticket_view.dart';
 
-/// Model 2: SaaS dual-card portal.
-/// Apple Style 2: Pro Space Titanium (#161617 / #1D1D1F) with Electric Blue (#2997FF).
+/// Model 2: Modern SaaS dual-card portal.
+/// Displays Live Station Telemetry alongside an Express Booking card.
 class Prototype2SaasPortalView extends StatefulWidget {
   final ValueChanged<WashBooking>? onBookingComplete;
   final VoidCallback onOpenLounge;
@@ -85,15 +86,6 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
     final activePkg = _selectedPackage ?? (packages.isNotEmpty ? packages.first : null);
     final calculatedPrice = activePkg?.pricingByCarType[_selectedCarType] ?? 0.0;
 
-    // Apple Style 2 Tokens: Pro Space Titanium
-    const proCanvas = Color(0xFF161617);
-    const proCardBg = Color(0xFF1D1D1F);
-    const proTileSurface = Color(0xFF272729);
-    const proHairline = Color(0xFF333336);
-    const proElectricBlue = Color(0xFF2997FF);
-    const proTextWhite = Color(0xFFF5F5F7);
-    const proMuted = Color(0xFF86868B);
-
     const telemetry = StationTelemetrySnapshot(
       totalBays: 2,
       availableBays: 1,
@@ -102,19 +94,16 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
       activeWashersCount: 4,
     );
 
-    return Container(
-      color: proCanvas,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth > 720;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 700;
 
-          final telemetryCard = Container(
-            decoration: BoxDecoration(
-              color: proCardBg,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: proHairline),
-            ),
-            padding: const EdgeInsets.all(22),
+        final telemetryCard = Card(
+          elevation: 0,
+          color: const Color(0xFF0F172A),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -125,10 +114,9 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
                       child: Text(
                         state.tr('liveStationTelemetry'),
                         style: const TextStyle(
-                          color: proTextWhite,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.3,
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -136,85 +124,97 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: proElectricBlue.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(9999),
+                        color: const Color(0xFF10B981).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFF34D399)),
                       ),
-                      child: const Text(
-                        'Bishoftu Hub',
-                        style: TextStyle(
-                          color: proElectricBlue,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.circle, size: 8, color: Color(0xFF34D399)),
+                          SizedBox(width: 6),
+                          Text(
+                            'LIVE PULSE',
+                            style: TextStyle(
+                              color: Color(0xFF34D399),
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
                       child: _buildTelemetryMetric(
                         label: state.tr('bayAvailability'),
                         value: '${telemetry.availableBays} / ${telemetry.totalBays} Open',
+                        icon: Icons.local_car_wash_rounded,
+                        color: Colors.tealAccent,
                       ),
                     ),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: _buildTelemetryMetric(
                         label: state.tr('estWaitTime'),
-                        value: '~${telemetry.estimatedWaitMinutes} min',
+                        value: '~${telemetry.estimatedWaitMinutes} mins',
+                        icon: Icons.timer_outlined,
+                        color: Colors.amberAccent,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: _buildTelemetryMetric(
                         label: state.tr('activeQueue'),
-                        value: '${telemetry.activeQueueCount} in line',
+                        value: '${telemetry.activeQueueCount} Vehicles',
+                        icon: Icons.format_list_numbered_rounded,
+                        color: Colors.lightBlueAccent,
                       ),
                     ),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: _buildTelemetryMetric(
                         label: state.tr('staffOnDuty'),
                         value: '${telemetry.activeWashersCount} Washers',
+                        icon: Icons.people_outline_rounded,
+                        color: Colors.purpleAccent,
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-          );
+          ),
+        );
 
-          final bookingCard = Container(
-            decoration: BoxDecoration(
-              color: proCardBg,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: proHairline),
-            ),
-            padding: const EdgeInsets.all(22),
+        final bookingCard = Card(
+          elevation: 0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppColors.cardBorder),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                   state.tr('expressBookingPortal'),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.3,
-                    color: proTextWhite,
-                  ),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
 
                 // Vehicle Category Chips
                 Text(
                   state.tr('vehicleCategory'),
-                  style: const TextStyle(fontSize: 13, color: proMuted, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -222,176 +222,99 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
                   runSpacing: 8,
                   children: CarType.values.map((type) {
                     final isSel = type == _selectedCarType;
-                    return InkWell(
-                      onTap: () => setState(() => _selectedCarType = type),
-                      borderRadius: BorderRadius.circular(9999),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 160),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSel ? proElectricBlue : proTileSurface,
-                          borderRadius: BorderRadius.circular(9999),
-                          border: Border.all(
-                            color: isSel ? proElectricBlue : proHairline,
-                          ),
-                        ),
-                        child: Text(
-                          type.localizedName(lang),
-                          style: TextStyle(
-                            color: isSel ? Colors.white : proTextWhite,
-                            fontWeight: isSel ? FontWeight.w600 : FontWeight.w400,
-                            fontSize: 13,
-                          ),
-                        ),
+                    return ChoiceChip(
+                      label: Text(type.localizedName(lang)),
+                      selected: isSel,
+                      onSelected: (_) => setState(() => _selectedCarType = type),
+                      selectedColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: isSel ? Colors.white : AppColors.textPrimary,
+                        fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
                       ),
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
 
                 // Package Dropdown
                 Text(
                   state.tr('servicePackage'),
-                  style: const TextStyle(fontSize: 13, color: proMuted, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: proTileSurface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: proHairline),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<WashPackage>(
                       isExpanded: true,
-                      dropdownColor: proCardBg,
                       value: activePkg,
                       items: packages.map((pkg) {
                         return DropdownMenuItem(
                           value: pkg,
-                          child: Text(
-                            pkg.localizedName(lang),
-                            style: const TextStyle(color: proTextWhite, fontSize: 14),
-                          ),
+                          child: Text(pkg.localizedName(lang)),
                         );
                       }).toList(),
                       onChanged: (pkg) => setState(() => _selectedPackage = pkg),
                     ),
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
 
-                // Responsive Plate & Phone (Stacks on narrow screens to eliminate out-of-bounds overflow)
-                LayoutBuilder(
-                  builder: (context, fieldConstraints) {
-                    final stackFields = fieldConstraints.maxWidth < 360;
-                    final plateField = TextField(
-                      key: const Key('portal_plate_input'),
-                      controller: _plateController,
-                      style: const TextStyle(color: proTextWhite, fontWeight: FontWeight.w600),
-                      decoration: InputDecoration(
-                        labelText: state.tr('licensePlate'),
-                        labelStyle: const TextStyle(color: proMuted, fontSize: 13),
-                        filled: true,
-                        fillColor: proTileSurface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: proHairline),
+                // Plate & Phone Fields
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        key: const Key('portal_plate_input'),
+                        controller: _plateController,
+                        decoration: InputDecoration(
+                          labelText: state.tr('licensePlate'),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          isDense: true,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: proHairline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: proElectricBlue, width: 1.5),
-                        ),
-                        prefixIcon: const Icon(Icons.pin_rounded, color: proMuted, size: 20),
-                        isDense: true,
                       ),
-                    );
-
-                    final phoneField = TextField(
-                      key: const Key('portal_phone_input'),
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      style: const TextStyle(color: proTextWhite, fontWeight: FontWeight.w600),
-                      decoration: InputDecoration(
-                        labelText: state.tr('customerPhone'),
-                        labelStyle: const TextStyle(color: proMuted, fontSize: 13),
-                        filled: true,
-                        fillColor: proTileSurface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: proHairline),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        key: const Key('portal_phone_input'),
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          labelText: state.tr('customerPhone'),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          isDense: true,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: proHairline),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: proElectricBlue, width: 1.5),
-                        ),
-                        prefixIcon: const Icon(Icons.phone_rounded, color: proMuted, size: 20),
-                        isDense: true,
                       ),
-                    );
-
-                    if (stackFields) {
-                      return Column(
-                        children: [
-                          plateField,
-                          const SizedBox(height: 12),
-                          phoneField,
-                        ],
-                      );
-                    } else {
-                      return Row(
-                        children: [
-                          Expanded(child: plateField),
-                          const SizedBox(width: 12),
-                          Expanded(child: phoneField),
-                        ],
-                      );
-                    }
-                  },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
 
-                // Calculated Price Banner
+                // Dynamic Price Calculation Banner
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: proTileSurface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: proHairline),
+                    color: AppColors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Text(
-                          state.tr('calculatedTotal'),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: proMuted,
-                            fontSize: 14,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      Text(
+                        state.tr('calculatedTotal'),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(width: 8),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          '${calculatedPrice.toStringAsFixed(0)} ETB',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: proElectricBlue,
-                          ),
+                      Text(
+                        '${calculatedPrice.toStringAsFixed(0)} ETB',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
                         ),
                       ),
                     ],
@@ -402,80 +325,84 @@ class _Prototype2SaasPortalViewState extends State<Prototype2SaasPortalView> {
                 ElevatedButton(
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: proElectricBlue,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: const StadiumBorder(),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      state.tr('confirmBookingBtn'),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
+                  child: Text(
+                    state.tr('confirmBookingBtn'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
-          );
+          ),
+        );
 
-          if (isWide) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(flex: 5, child: telemetryCard),
-                  const SizedBox(width: 20),
-                  Expanded(flex: 6, child: bookingCard),
-                ],
-              ),
-            );
-          } else {
-            // Mobile View: Booking Card prioritized above the fold
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  bookingCard,
-                  const SizedBox(height: 16),
-                  telemetryCard,
-                ],
-              ),
-            );
-          }
-        },
-      ),
+        if (isWide) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 5, child: telemetryCard),
+                const SizedBox(width: 20),
+                Expanded(flex: 6, child: bookingCard),
+              ],
+            ),
+          );
+        } else {
+          // Mobile View: Booking Card prioritized above the fold per Nit 6
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                bookingCard,
+                const SizedBox(height: 16),
+                telemetryCard,
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 
   Widget _buildTelemetryMetric({
     required String label,
     required String value,
+    required IconData icon,
+    required Color color,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Color(0xFFF5F5F7),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.3,
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(10),
           ),
-          overflow: TextOverflow.ellipsis,
+          child: Icon(icon, color: color, size: 20),
         ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF86868B),
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

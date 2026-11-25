@@ -193,9 +193,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           ),
                         ),
 
-                        // Language selector and Staff Portals
-                        const Spacer(),
-
                         // Right: Relocated Cashier & Admin Entry (Top-Right Sandwich Menu)
                         PopupMenuButton<String>(
                           tooltip: state.tr('staffPortals'),

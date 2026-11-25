@@ -3,13 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/constants/app_theme.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
+import 'package:bishe_car_wash/features/prototypes/domain/models/prototype_model_type.dart';
 import 'package:bishe_car_wash/features/prototypes/data/mock_prototype_wash_repository.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/screens/prototype_evaluator_screen.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/screens/prototype_station_lounge_screen.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_1_stepper_view.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_2_saas_portal_view.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_3_express_kiosk_view.dart';
-import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_served_unified_clone_view.dart';
 import 'package:bishe_car_wash/features/prototypes/presentation/widgets/prototype_live_ticket_view.dart';
 
 void main() {
@@ -35,7 +35,7 @@ void main() {
     });
 
     testWidgets('PrototypeEvaluatorScreen renders top control bar and switches models cleanly', (tester) async {
-      tester.view.physicalSize = const Size(1300, 900);
+      tester.view.physicalSize = const Size(1000, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
@@ -52,83 +52,22 @@ void main() {
 
       // Top control bar exists
       expect(find.text('Prototype Evaluator'), findsOneWidget);
-      expect(find.text('Flagship: Served Clone'), findsOneWidget);
       expect(find.text('Model 1: Stepper'), findsOneWidget);
       expect(find.text('Model 2: SaaS Portal'), findsOneWidget);
       expect(find.text('Model 3: Express Kiosk'), findsOneWidget);
 
-      // Default active view is Flagship Served Clone
-      expect(find.byType(PrototypeServedUnifiedCloneView), findsOneWidget);
-
-      // Switch to Model 1
-      final model1Btn = find.text('Model 1: Stepper');
-      await tester.ensureVisible(model1Btn);
-      await tester.tap(model1Btn);
-      await tester.pumpAndSettle();
+      // Default active view is Model 1
       expect(find.byType(Prototype1StepperView), findsOneWidget);
 
       // Switch to Model 2
-      final model2Btn = find.text('Model 2: SaaS Portal');
-      await tester.ensureVisible(model2Btn);
-      await tester.tap(model2Btn);
+      await tester.tap(find.text('Model 2: SaaS Portal'));
       await tester.pumpAndSettle();
       expect(find.byType(Prototype2SaasPortalView), findsOneWidget);
 
       // Switch to Model 3
-      final model3Btn = find.text('Model 3: Express Kiosk');
-      await tester.ensureVisible(model3Btn);
-      await tester.tap(model3Btn);
+      await tester.tap(find.text('Model 3: Express Kiosk'));
       await tester.pumpAndSettle();
       expect(find.byType(Prototype3ExpressKioskView), findsOneWidget);
-    });
-
-    testWidgets('PrototypeServedUnifiedCloneView provides 1-screen booking and collapsible accordions', (tester) async {
-      tester.view.physicalSize = const Size(700, 2200);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        AppStateProvider(
-          notifier: state,
-          child: MaterialApp(
-            theme: AppTheme.lightTheme,
-            home: Scaffold(
-              body: PrototypeServedUnifiedCloneView(
-                onBookingComplete: (booking) {},
-                onOpenLounge: () {},
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Renders Car vs Carpet slider
-      expect(find.text('Car Washing Service'), findsOneWidget);
-      expect(find.text('Carpet Washing Service'), findsOneWidget);
-
-      // Renders Vehicle category and package selection
-      expect(find.text('Vehicle Category'), findsOneWidget);
-      expect(find.text('Service Package'), findsOneWidget);
-
-      // Renders collapsible sections
-      expect(find.text('Car Care & Detailing Reels'), findsOneWidget);
-      expect(find.text('Station Amenities'), findsOneWidget);
-      expect(find.text('Station Location & Hours'), findsOneWidget);
-      expect(find.text('Track Past or Active Wash'), findsOneWidget);
-
-      // Enter details and confirm booking directly in 1 screen
-      await tester.enterText(find.byKey(const Key('unified_plate_input')), 'ET-44321');
-      await tester.enterText(find.byKey(const Key('unified_phone_input')), '0912345678');
-      await tester.pumpAndSettle();
-
-      final confirmBtn = find.byType(ElevatedButton).first;
-      await tester.ensureVisible(confirmBtn);
-      await tester.tap(confirmBtn);
-      await tester.pumpAndSettle();
-
-      // Immediately renders live ticket without extra page hops
-      expect(find.byType(PrototypeLiveTicketView), findsOneWidget);
     });
 
     testWidgets('Prototype1StepperView completes 3-step booking and renders live ticket', (tester) async {
@@ -153,23 +92,23 @@ void main() {
       await tester.pumpAndSettle();
 
       // Step 1: Select vehicle
-      expect(find.text('Choose Vehicle'), findsOneWidget);
+      expect(find.text('Step 1: Choose Vehicle'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.directions_car_rounded).first);
       await tester.pumpAndSettle();
 
       // Advance to Step 2
-      await tester.tap(find.text('Next: Wash Package'));
+      await tester.tap(find.text('Next: Choose Package'));
       await tester.pumpAndSettle();
 
       // Step 2: Choose package
-      expect(find.text('Wash Package'), findsOneWidget);
+      expect(find.text('Step 2: Wash Package'), findsOneWidget);
       final nextContactBtn = find.text('Next: Contact Details');
       await tester.ensureVisible(nextContactBtn);
       await tester.tap(nextContactBtn);
       await tester.pumpAndSettle();
 
       // Step 3: Enter contact info
-      expect(find.text('Contact Details'), findsOneWidget);
+      expect(find.text('Step 3: Contact Details'), findsOneWidget);
       await tester.enterText(find.byKey(const Key('stepper_plate_input')), 'A12345');
       await tester.enterText(find.byKey(const Key('stepper_phone_input')), '0911223344');
       await tester.pumpAndSettle();
