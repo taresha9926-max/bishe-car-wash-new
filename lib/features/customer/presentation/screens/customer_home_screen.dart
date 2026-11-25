@@ -422,104 +422,9 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                     const SizedBox(height: 12),
                   ],
 
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () => _showLookupModal(context, state, isCarpet: isCarpet),
-                      icon: const Icon(Icons.search_rounded, size: 15, color: AppColors.liquidCyanNeon),
-                      label: Text(
-                        state.tr('lookingForEarlierBooking'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.liquidCyanNeon,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Compact Unified Quick Service & Assistance Dock
+                  _buildQuickAssistanceDock(context, state, isCarpet: isCarpet, isMobile: isMobile),
                   const SizedBox(height: 14),
-
-                  _buildPhoneBookingCard(context, state),
-                  const SizedBox(height: 12),
-
-                  isMobile
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            OutlinedButton.icon(
-                              onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                              icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
-                              label: Text(
-                                state.tr('openGoogleMaps'),
-                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1E293B),
-                                side: const BorderSide(color: AppColors.cardBorder),
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            OutlinedButton.icon(
-                              onPressed: () => CustomerFeedbackSheet.show(context),
-                              icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
-                              label: Text(
-                                state.tr('feedbackTab'),
-                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
-                                side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                                icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
-                                label: Text(
-                                  state.tr('openGoogleMaps'),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E293B),
-                                  side: const BorderSide(color: AppColors.cardBorder),
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => CustomerFeedbackSheet.show(context),
-                                icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
-                                label: Text(
-                                  state.tr('feedbackTab'),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
-                                  side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                  const SizedBox(height: 16),
 
                   _buildBishoftuLocationFooter(state, isCarpet: isCarpet),
                   const SizedBox(height: 18),
@@ -1060,6 +965,137 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuickAssistanceDock(
+    BuildContext context,
+    dynamic state, {
+    required bool isCarpet,
+    required bool isMobile,
+  }) {
+    final phone = state.customerPhoneBookingNumber as String;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111827),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cardBorder, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(
+              state.tr('quickAssistance'),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textSecondary,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              // 1. Live Order Tracking Lookup
+              Expanded(
+                child: _buildDockActionTile(
+                  icon: Icons.radar_rounded,
+                  color: AppColors.liquidCyanNeon,
+                  label: state.tr('trackOrderTile'),
+                  onTap: () => _showLookupModal(context, state, isCarpet: isCarpet),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // 2. Direct Phone Call to Station Gate
+              Expanded(
+                child: _buildDockActionTile(
+                  icon: Icons.phone_forwarded_rounded,
+                  color: AppColors.cashGreen,
+                  label: state.tr('callStationTile'),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${state.tr("callingStationPrefix")}: $phone...')),
+                    );
+                    UrlLauncherHelper.openUrl('tel:$phone');
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // 3. Google Maps Navigation
+              Expanded(
+                child: _buildDockActionTile(
+                  icon: Icons.location_on_rounded,
+                  color: const Color(0xFF38BDF8),
+                  label: state.tr('directionsTile'),
+                  onTap: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // 4. Rate & Feedback Sheet
+              Expanded(
+                child: _buildDockActionTile(
+                  icon: Icons.star_rounded,
+                  color: const Color(0xFFF59E0B),
+                  label: state.tr('feedbackTile'),
+                  onTap: () => CustomerFeedbackSheet.show(context),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDockActionTile({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.28), width: 1),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

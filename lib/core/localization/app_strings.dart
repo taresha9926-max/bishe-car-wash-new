@@ -2607,6 +2607,31 @@ class AppStrings {
       AppLanguage.om: 'Dhiqannaa Konkolaataa Koo Hordofi',
       AppLanguage.am: 'የመኪናዬን እጥበት ሁኔታ ተከታተል',
     },
+    'quickAssistance': {
+      AppLanguage.en: 'Quick Assistance & Actions',
+      AppLanguage.om: 'Deeggarsa Saffisaa fi Tajaajila',
+      AppLanguage.am: 'ፈጣን ድጋፍ እና አገልግሎቶች',
+    },
+    'trackOrderTile': {
+      AppLanguage.en: 'Track Wash',
+      AppLanguage.om: 'Hordofi',
+      AppLanguage.am: 'ሁኔታ ተከታተል',
+    },
+    'callStationTile': {
+      AppLanguage.en: 'Call Gate',
+      AppLanguage.om: 'Balbala Bilbili',
+      AppLanguage.am: 'ለጣቢያው ደውል',
+    },
+    'directionsTile': {
+      AppLanguage.en: 'Maps / GPS',
+      AppLanguage.om: 'Kaartaa / GPS',
+      AppLanguage.am: 'ካርታ / አቅጣጫ',
+    },
+    'feedbackTile': {
+      AppLanguage.en: 'Rate & Review',
+      AppLanguage.om: 'Madaali',
+      AppLanguage.am: 'ደረጃ ስጥ',
+    },
     'trackVehiclePrompt': {
       AppLanguage.en: 'Enter your plate number or phone to see your vehicle\'s live progress',
       AppLanguage.om: 'Haala dhiqannaa ilaaluuf gabatee makiinaa ykn bilbila keessan galchaa',
