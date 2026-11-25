@@ -196,12 +196,34 @@ class _StationQueueTabState extends State<StationQueueTab> {
         ),
         const SizedBox(height: 8),
 
-        // Queue Print & Export Actions Strip
+        // Queue Print, Refresh & Export Actions Strip
         Wrap(
           alignment: WrapAlignment.end,
           spacing: 8,
           runSpacing: 4,
           children: [
+            TextButton.icon(
+              icon: const Icon(Icons.refresh_rounded, size: 15, color: AppColors.liquidCyanNeon),
+              label: Text(state.tr('refresh'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.liquidCyanNeon)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed: () async {
+                await state.pollNewOnlineBookings();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.tr('refresh')),
+                      duration: const Duration(seconds: 1),
+                      backgroundColor: AppColors.primary,
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(width: 4),
             TextButton.icon(
               icon: const Icon(Icons.print_rounded, size: 15, color: AppColors.primary),
               label: Text(state.tr('print'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppColors.primary)),

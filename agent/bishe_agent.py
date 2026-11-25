@@ -640,7 +640,7 @@ CRITICAL RESPONSE RULES:
 
             contents.append({"role": "user", "parts": [{"text": question}]})
 
-            models_to_try = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash", "gemini-flash-latest"]
+            models_to_try = ["gemini-flash-lite-latest", "gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-latest", "gemini-3.8-flash"]
             payload = {
                 "contents": contents,
                 "generationConfig": {"temperature": 0.7, "maxOutputTokens": 2048}

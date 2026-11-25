@@ -63,10 +63,11 @@ class BisheAiExecutiveService {
   BisheAiExecutiveService._();
 
   static const List<String> _geminiModels = [
+    'gemini-flash-lite-latest',
+    'gemini-3.1-flash-lite',
     'gemini-3.5-flash-lite',
-    'gemini-3.5-flash',
-    'gemini-3.8-flash',
     'gemini-flash-latest',
+    'gemini-3.8-flash',
   ];
 
   /// Primary query entry point
@@ -644,6 +645,54 @@ TONE, STYLE & PLAIN-WRITING:
         query.contains('ትናንት') ||
         query.contains('ትላንት');
     final targetDate = isYesterday ? now.subtract(const Duration(days: 1)) : now;
+
+    // 0. Duty Execution: Cashier / Manager Instant Wash Booking
+    if (query.contains('book') ||
+        query.contains('መዝግብ') ||
+        query.contains('አስመዝግብ') ||
+        query.contains('ያስይዙ') ||
+        query.contains('አጥቡልኝ') ||
+        query.contains('ማስጠብ') ||
+        query.contains('galmeessi') ||
+        query.contains('qabadhaa')) {
+      final plateRegex = RegExp(r'\b([0-9]-[A-Za-z0-9]{4,8}|ET-?[0-9A-Za-z]{3,7}|AA-?[0-9A-Za-z]{3,7}|OR-?[0-9A-Za-z]{3,7}|[0-9]{4,5})\b', caseSensitive: false);
+      final match = plateRegex.firstMatch(rawQuery);
+      if (match != null) {
+        final plate = match.group(1)!;
+        return await executeToolBookWash(
+          licensePlate: plate,
+          carTypeStr: query.contains('suv') || query.contains('prado') ? 'SUV' : (query.contains('truck') ? 'truck' : 'automobile'),
+          packageIdStr: query.contains('gold') || query.contains('ጎልድ') ? 'pkg_gold' : (query.contains('plat') || query.contains('ፕላቲነም') ? 'pkg_platinum' : 'pkg_silver'),
+          targetBayStr: query.contains('bay 2') || query.contains('bay2') || query.contains('ቦታ 2') ? 'Bay 2' : 'Bay 1',
+          state: state,
+          lang: lang,
+        );
+      }
+    }
+
+    // 0. Duty Execution: Instant Payment Settlement
+    if (query.contains('settle') ||
+        query.contains('pay') ||
+        query.contains('ክፈል') ||
+        query.contains('ከፍሏል') ||
+        query.contains('ተከፍሏል') ||
+        query.contains('kaffali') ||
+        query.contains('kaffalame')) {
+      final plateRegex = RegExp(r'\b([0-9]-[A-Za-z0-9]{4,8}|ET-?[0-9A-Za-z]{3,7}|AA-?[0-9A-Za-z]{3,7}|OR-?[0-9A-Za-z]{3,7}|[0-9]{4,5})\b', caseSensitive: false);
+      final match = plateRegex.firstMatch(rawQuery);
+      if (match != null) {
+        final plateOrId = match.group(1)!;
+        String method = 'cash';
+        if (query.contains('telebirr') || query.contains('ቴሌብር') || query.contains('tele')) method = 'telebirr';
+        if (query.contains('cbe') || query.contains('ሲቢኢ') || query.contains('ንግድ ባንክ')) method = 'cbe';
+        return await executeToolSettlePayment(
+          plateOrId: plateOrId,
+          methodStr: method,
+          state: state,
+          lang: lang,
+        );
+      }
+    }
 
     // 0. Duty Execution: Cashier Daily Register Closing
     if (query.contains('close register') ||

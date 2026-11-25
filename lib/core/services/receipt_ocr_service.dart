@@ -8,10 +8,11 @@ class ReceiptOcrService {
   ReceiptOcrService._();
 
   static const List<String> _visionModels = [
-    'gemini-1.5-flash',
-    'gemini-2.0-flash',
-    'gemini-2.5-flash',
+    'gemini-flash-lite-latest',
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash-lite',
     'gemini-flash-latest',
+    'gemini-2.5-flash',
   ];
 
   /// Scans receipt base64 image for Telebirr / CBE transaction references
