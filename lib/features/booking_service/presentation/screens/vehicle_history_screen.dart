@@ -20,6 +20,7 @@ enum HistoryDateFilter {
   yesterday,
   thisWeek,
   thisMonth,
+  all,
   customRange;
 
   String localizedLabel(dynamic state) {
@@ -32,6 +33,8 @@ enum HistoryDateFilter {
         return state.tr('filterThisWeek');
       case HistoryDateFilter.thisMonth:
         return state.tr('filterThisMonth');
+      case HistoryDateFilter.all:
+        return state.tr('filterAll');
       case HistoryDateFilter.customRange:
         return state.tr('filterCustomRange');
     }
@@ -84,12 +87,12 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
   List<WashBooking> _filterBookings(List<WashBooking> allBookings) {
     // History contains bookings that are paid and/or completed, strictly segmented by service division
     final paidBookings = allBookings
-        .where((b) => b.payment.isPaid && (b.isCarpet == _viewCarpetMode))
+        .where((b) => (b.payment.isPaid || b.status == WashStatus.completed) && (b.isCarpet == _viewCarpetMode))
         .toList();
     final now = DateTime.now();
 
     final filteredByDate = paidBookings.where((b) {
-      final date = b.createdAt;
+      final date = (b.completedAt ?? b.payment.paidAt ?? b.createdAt).toLocal();
       switch (_dateFilter) {
         case HistoryDateFilter.today:
           return date.year == now.year && date.month == now.month && date.day == now.day;
@@ -102,6 +105,8 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           return date.isAfter(start) || date.isAtSameMomentAs(start);
         case HistoryDateFilter.thisMonth:
           return date.year == now.year && date.month == now.month;
+        case HistoryDateFilter.all:
+          return true;
         case HistoryDateFilter.customRange:
           if (_customDateRange == null) return true;
           final start = DateTime(_customDateRange!.start.year, _customDateRange!.start.month, _customDateRange!.start.day);
@@ -171,26 +176,29 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                     onTap: () => setState(() => _viewCarpetMode = false),
                     borderRadius: BorderRadius.circular(9),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                       decoration: BoxDecoration(
                         color: !_viewCarpetMode ? AppColors.primary : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: !_viewCarpetMode ? [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 4)] : null,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.directions_car_rounded, size: 16, color: !_viewCarpetMode ? Colors.white : AppColors.textSecondary),
-                          const SizedBox(width: 6),
-                          Text(
-                            state.tr('carWashHistoryTitle'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: !_viewCarpetMode ? Colors.white : AppColors.textSecondary,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.directions_car_rounded, size: 16, color: !_viewCarpetMode ? Colors.white : AppColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Text(
+                              state.tr('carWashHistoryTitle'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: !_viewCarpetMode ? Colors.white : AppColors.textSecondary,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -201,26 +209,29 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                     onTap: () => setState(() => _viewCarpetMode = true),
                     borderRadius: BorderRadius.circular(9),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                       decoration: BoxDecoration(
                         color: _viewCarpetMode ? const Color(0xFF7C3AED) : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
                         boxShadow: _viewCarpetMode ? [BoxShadow(color: const Color(0xFF7C3AED).withOpacity(0.3), blurRadius: 4)] : null,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.texture_rounded, size: 16, color: _viewCarpetMode ? Colors.white : AppColors.textSecondary),
-                          const SizedBox(width: 6),
-                          Text(
-                            state.tr('carpetWashHistoryTitle'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: _viewCarpetMode ? Colors.white : AppColors.textSecondary,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.texture_rounded, size: 16, color: _viewCarpetMode ? Colors.white : AppColors.textSecondary),
+                            const SizedBox(width: 6),
+                            Text(
+                              state.tr('carpetWashHistoryTitle'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: _viewCarpetMode ? Colors.white : AppColors.textSecondary,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -281,6 +292,9 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                       _customDateRange = picked;
                       _dateFilter = HistoryDateFilter.customRange;
                     });
+                    final rangeStart = DateTime(picked.start.year, picked.start.month, picked.start.day);
+                    final rangeEnd = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+                    await state.fetchBookingsForDateRange(rangeStart, rangeEnd);
                   }
                 } else {
                   setState(() => _dateFilter = filter);
@@ -529,6 +543,46 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
               return _buildHistoryCard(context, b, state);
             },
           ),
+        if (state.hasMoreOlderBookings) ...[
+          const SizedBox(height: 16),
+          Center(
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E293B),
+                foregroundColor: AppColors.liquidCyanNeon,
+                side: const BorderSide(color: AppColors.cardBorder),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: state.isLoadingOlderBookings
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.liquidCyanNeon),
+                    )
+                  : const Icon(Icons.cloud_download_rounded, size: 18),
+              label: Text(
+                state.isLoadingOlderBookings
+                    ? state.tr('loading')
+                    : '${state.tr("loadOlderBookings")} (+50)',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              onPressed: state.isLoadingOlderBookings
+                  ? null
+                  : () async {
+                      final added = await state.loadOlderBookings();
+                      if (context.mounted && added > 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${state.tr("loadedOlderBookingsPrefix")} $added ${state.tr("loadedOlderBookingsSuffix")}'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+            ),
+          ),
+        ],
       ],
     );
 

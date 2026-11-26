@@ -18,6 +18,7 @@ import '../../../cashier/presentation/screens/daily_closing_dialog.dart';
 import '../../../cashier/presentation/widgets/station_money_tab.dart';
 import '../../../cashier/presentation/widgets/station_queue_tab.dart';
 import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
+import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 
 /// Option 1 Operational Manager Action Desk:
 /// Immediate live Queue (with bay/washer dispatch), inline Cashier/Admin OTP banners,
@@ -41,7 +42,7 @@ class _OperationalManagerDashboardScreenState
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging && mounted) {
         setState(() {});
@@ -119,8 +120,14 @@ class _OperationalManagerDashboardScreenState
                       isMobile: isMobile,
                       onSwitchToTeamTab: () => _tabController.animateTo(2),
                     )
+                  else if (_tabController.index == 2)
+                    _buildTeamAndShowerTab(context, state, isMobile)
                   else
-                    _buildTeamAndShowerTab(context, state, isMobile),
+                    VehicleHistoryScreen(
+                      isEmbedded: true,
+                      isCarpetFilter: state.isCarpetDivisionActive,
+                      allowClearAll: false,
+                    ),
                   const SizedBox(height: 28),
                 ],
               ),
@@ -175,6 +182,11 @@ class _OperationalManagerDashboardScreenState
           _buildCompactTab(
             icon: Icons.groups_rounded,
             label: state.tr('cashierTabTeamShower'),
+            isMobile: isMobile,
+          ),
+          _buildCompactTab(
+            icon: Icons.history_rounded,
+            label: state.tr('cashierTabHistory'),
             isMobile: isMobile,
           ),
         ],

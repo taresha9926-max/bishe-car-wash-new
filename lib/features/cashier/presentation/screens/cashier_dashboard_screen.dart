@@ -16,6 +16,7 @@ import '../../domain/models/shower_record.dart';
 import '../widgets/station_money_tab.dart';
 import '../widgets/station_queue_tab.dart';
 import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
+import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import 'daily_closing_dialog.dart';
 
 /// Option 1 Cashier Action Desk: immediate live queue, unified money/closing desk,
@@ -36,7 +37,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging && mounted) {
         setState(() {});
@@ -114,8 +115,14 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                       isMobile: isMobile,
                       onSwitchToTeamTab: () => _tabController.animateTo(2),
                     )
+                  else if (_tabController.index == 2)
+                    _buildTeamAndShowerTab(context, state, isMobile)
                   else
-                    _buildTeamAndShowerTab(context, state, isMobile),
+                    VehicleHistoryScreen(
+                      isEmbedded: true,
+                      isCarpetFilter: state.isCarpetDivisionActive,
+                      allowClearAll: false,
+                    ),
                   const SizedBox(height: 28),
                 ],
               ),
@@ -183,6 +190,11 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
           _buildCompactTab(
             icon: Icons.groups_rounded,
             label: state.tr('cashierTabTeamShower'),
+            isMobile: isMobile,
+          ),
+          _buildCompactTab(
+            icon: Icons.history_rounded,
+            label: state.tr('cashierTabHistory'),
             isMobile: isMobile,
           ),
         ],

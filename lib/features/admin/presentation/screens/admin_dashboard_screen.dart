@@ -93,7 +93,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging && mounted) {
         setState(() {});
@@ -305,8 +305,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     )
                   else if (_tabController.index == 1)
                     _buildPricingAndTeamTab(context, state, isMobile)
+                  else if (_tabController.index == 2)
+                    _buildCustomersAndAdsTab(context, state, isMobile, digitalBookings)
                   else
-                    _buildCustomersAndAdsTab(context, state, isMobile, digitalBookings),
+                    const VehicleHistoryScreen(
+                      isEmbedded: true,
+                      allowClearAll: false,
+                    ),
 
                   const SizedBox(height: 28),
                 ],
@@ -561,6 +566,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             label: pendingFeedbackCount > 0
                 ? '${state.tr("adminTabCustomersAds")} ($pendingFeedbackCount)'
                 : '${state.tr("adminTabCustomersAds")} ($digitalCount)',
+            isMobile: isMobile,
+          ),
+          _buildCompactTab(
+            icon: Icons.history_rounded,
+            label: state.tr('cashierTabHistory'),
             isMobile: isMobile,
           ),
         ],

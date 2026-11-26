@@ -4352,6 +4352,11 @@ class AppStrings {
       AppLanguage.om: 'Garee & Shaaworii',
       AppLanguage.am: 'ቡድን እና ሻወር',
     },
+    'cashierTabHistory': {
+      AppLanguage.en: 'Wash History',
+      AppLanguage.om: 'Seenaa Dhiqannaa',
+      AppLanguage.am: 'የእጥበት ታሪክ',
+    },
     'cashierFilterAll': {
       AppLanguage.en: 'All',
       AppLanguage.om: 'Hunda',

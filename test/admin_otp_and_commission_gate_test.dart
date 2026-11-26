@@ -391,8 +391,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Exactly 3 streamlined tabs
-      expect(find.byType(Tab), findsNWidgets(3));
+      // Exactly 4 streamlined tabs (Overview, Pricing & Team, Customers & Ads, Wash History)
+      expect(find.byType(Tab), findsNWidgets(4));
       expect(find.text(state.tr('adminTabOverviewCash')), findsOneWidget);
       expect(find.text(state.tr('secondaryAdminRoleBadge')), findsOneWidget);
       expect(find.text(state.tr('superAdminRoleBadge')), findsNothing);

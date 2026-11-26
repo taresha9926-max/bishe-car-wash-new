@@ -28,6 +28,7 @@ import '../../../../core/widgets/financial_cash_flow_card.dart';
 import '../../../../core/widgets/storekeeper_chemical_reconciliation_card.dart';
 import '../../domain/models/monthly_overhead_expense.dart';
 import '../widgets/bishe_ai_executive_sheet.dart';
+import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 
 class AccountantDashboardScreen extends StatefulWidget {
   const AccountantDashboardScreen({super.key});
@@ -47,7 +48,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
   }
 
   @override
@@ -164,11 +165,12 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               unselectedLabelColor: AppColors.textSecondary,
               labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
-              tabs: const [
-                Tab(icon: Icon(Icons.verified_rounded, size: 17), text: 'Cashier & Bank Audits'),
-                Tab(icon: Icon(Icons.table_chart_rounded, size: 17), text: 'Washer Payroll & Matrix'),
-                Tab(icon: Icon(Icons.receipt_long_rounded, size: 17), text: 'Supplies & OpEx'),
-                Tab(icon: Icon(Icons.analytics_rounded, size: 17), text: 'P&L Statement'),
+              tabs: [
+                const Tab(icon: Icon(Icons.verified_rounded, size: 17), text: 'Cashier & Bank Audits'),
+                const Tab(icon: Icon(Icons.table_chart_rounded, size: 17), text: 'Washer Payroll & Matrix'),
+                const Tab(icon: Icon(Icons.receipt_long_rounded, size: 17), text: 'Supplies & OpEx'),
+                const Tab(icon: Icon(Icons.analytics_rounded, size: 17), text: 'P&L Statement'),
+                Tab(icon: const Icon(Icons.history_rounded, size: 17), text: state.tr('carWashHistoryTitle')),
               ],
             ),
           ),
@@ -180,6 +182,18 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 _buildCommissionsTab(context, state, isMobile),
                 _buildExpensesTab(context, state, isMobile),
                 _buildPnLTab(context, state, isMobile),
+                SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 24, vertical: 16),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1180),
+                      child: const VehicleHistoryScreen(
+                        isEmbedded: true,
+                        allowClearAll: false,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
