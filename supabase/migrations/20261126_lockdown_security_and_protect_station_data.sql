@@ -16,8 +16,7 @@
 --    - RPC execute on verify_staff_pin & update_staff_pin
 -- ====================================================================
 
--- 1. Permanently remove the dangerous reset/wipe function
-REVOKE ALL ON FUNCTION public.clear_all_bookings() FROM PUBLIC, anon, authenticated;
+-- 1. Permanently remove the dangerous reset/wipe function (if it exists)
 DROP FUNCTION IF EXISTS public.clear_all_bookings();
 
 -- 2. Remove all permissive DELETE policies on critical tables
@@ -28,15 +27,19 @@ DROP POLICY IF EXISTS "staff_credentials_public_delete" ON public.staff_credenti
 DROP POLICY IF EXISTS "Allow deleting sms_outbox" ON public.sms_outbox;
 
 -- 3. Explicitly block DELETE operations for anonymous / public access
+DROP POLICY IF EXISTS "wash_bookings_prevent_anon_delete" ON public.wash_bookings;
 CREATE POLICY "wash_bookings_prevent_anon_delete"
 ON public.wash_bookings FOR DELETE TO anon USING (false);
 
+DROP POLICY IF EXISTS "daily_closings_prevent_anon_delete" ON public.daily_closings;
 CREATE POLICY "daily_closings_prevent_anon_delete"
 ON public.daily_closings FOR DELETE TO anon USING (false);
 
+DROP POLICY IF EXISTS "commission_logs_prevent_anon_delete" ON public.commission_logs;
 CREATE POLICY "commission_logs_prevent_anon_delete"
 ON public.commission_logs FOR DELETE TO anon USING (false);
 
+DROP POLICY IF EXISTS "staff_credentials_prevent_anon_delete" ON public.staff_credentials;
 CREATE POLICY "staff_credentials_prevent_anon_delete"
 ON public.staff_credentials FOR DELETE TO anon USING (false);
 
