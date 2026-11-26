@@ -33,6 +33,9 @@ migrate_working_dir/
 # Symbol processing related
 app.*.symbols
 
+# Backups
+backups/
+
 # Env / Secrets
 .env*
 !.env.example
