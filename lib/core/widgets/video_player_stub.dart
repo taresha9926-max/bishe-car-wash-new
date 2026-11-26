@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../utils/url_launcher_helper.dart';
 
@@ -15,7 +15,7 @@ Widget createPlatformVideoPlayer({required String videoUrl, required VoidCallbac
     child: Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0A0C12), Color(0xFF161A26)],
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

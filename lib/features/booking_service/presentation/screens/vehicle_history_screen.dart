@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -269,7 +269,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
               ),
               selected: isSelected,
               selectedColor: _viewCarpetMode ? const Color(0xFF7C3AED) : AppColors.primary,
-              backgroundColor: const Color(0xFF161A26),
+              backgroundColor: const Color(0xFF1E293B),
               showCheckmark: false,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -309,7 +309,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFF10131C),
+            color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -394,7 +394,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                 : null,
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             filled: true,
-            fillColor: const Color(0xFF161A26),
+            fillColor: const Color(0xFF1E293B),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.cardBorder),
@@ -450,7 +450,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
                           },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFFFBBF24)),
+                    icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
                     tooltip: state.tr('exportCsv'),
                     constraints: const BoxConstraints(),
                     padding: const EdgeInsets.all(5),
@@ -521,7 +521,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: const Color(0xFF10131C),
+              color: const Color(0xFF111827),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.cardBorder, width: 1.2),
             ),
@@ -548,7 +548,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
           Center(
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF161A26),
+                backgroundColor: const Color(0xFF1E293B),
                 foregroundColor: AppColors.liquidCyanNeon,
                 side: const BorderSide(color: AppColors.cardBorder),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -630,7 +630,7 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -808,10 +808,10 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
             runSpacing: 4,
             children: [
               TextButton.icon(
-                icon: const Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFFFBBF24)),
+                icon: const Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFF38BDF8)),
                 label: Text(
                   state.tr('editBooking'),
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFFBBF24)),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8)),
                 ),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

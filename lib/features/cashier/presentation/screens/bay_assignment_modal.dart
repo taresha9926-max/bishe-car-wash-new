@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../admin/domain/models/staff_member.dart';
@@ -56,7 +56,7 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF10131C),
+        color: Color(0xFF111827),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -140,7 +140,7 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
                     margin: EdgeInsets.only(right: bayType != BayType.values.last ? 8 : 0),
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? bayType.color.withOpacity(0.20) : const Color(0xFF161A26),
+                      color: isSelected ? bayType.color.withOpacity(0.20) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected ? bayType.color : AppColors.cardBorder,
@@ -193,7 +193,7 @@ class _BayAssignmentModalState extends State<BayAssignmentModal> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<StaffMember>(
                 isExpanded: true,
-                dropdownColor: const Color(0xFF161A26),
+                dropdownColor: const Color(0xFF1E293B),
                 style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w600),
                 value: _selectedWasher,
                 items: washers.map((washer) {

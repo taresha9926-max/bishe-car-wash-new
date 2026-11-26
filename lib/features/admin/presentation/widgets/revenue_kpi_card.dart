@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class RevenueKPICard extends StatelessWidget {
   final String title;
@@ -23,8 +23,8 @@ class RevenueKPICard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFF161A26),
-            const Color(0xFF10131C),
+            const Color(0xFF1E293B),
+            const Color(0xFF111827),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

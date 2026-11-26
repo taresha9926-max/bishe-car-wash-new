@@ -20,10 +20,10 @@ class LanguageSwitcherAction extends StatelessWidget {
     final currentLang = state.currentLang;
     final isMobile = MediaQuery.sizeOf(context).width < 600;
 
-    final bgColor = const Color(0xFF161A26);
+    final bgColor = const Color(0xFF1E293B);
     final borderColor = AppColors.cardBorder;
-    const textColor = AppColors.textPrimary;
-    const iconColor = AppColors.warmGold;
+    const textColor = Colors.white;
+    const iconColor = Color(0xFF38BDF8);
 
     return Container(
       margin: margin ?? EdgeInsets.symmetric(vertical: isMobile ? 12 : 14, horizontal: 4),
@@ -36,7 +36,7 @@ class LanguageSwitcherAction extends StatelessWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: currentLang,
-          dropdownColor: const Color(0xFF161A26),
+          dropdownColor: const Color(0xFF1E293B),
           icon: const Icon(Icons.language_rounded, size: 15, color: iconColor),
           items: [
             DropdownMenuItem(

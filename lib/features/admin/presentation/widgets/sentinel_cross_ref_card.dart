@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -45,7 +45,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -299,7 +299,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF161A26),
+        color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -376,7 +376,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withValues(alpha: 0.15) : const Color(0xFF161A26),
+          color: isActive ? AppColors.primary.withValues(alpha: 0.15) : const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isActive ? AppColors.primary : Colors.transparent,
@@ -450,7 +450,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                         },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFFFBBF24)),
+                  icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
                   tooltip: state.tr('exportCsv'),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(6),
@@ -688,7 +688,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                     decoration: BoxDecoration(
                       color: _onlyUnmatchedSms
                           ? Colors.amber.shade900.withValues(alpha: 0.3)
-                          : const Color(0xFF161A26),
+                          : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
                         color: _onlyUnmatchedSms ? Colors.amber : Colors.white12,
@@ -734,7 +734,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
                         },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFFFBBF24)),
+                  icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
                   tooltip: state.tr('exportCsv'),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(5),
@@ -988,7 +988,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF10131C),
+                color: const Color(0xFF111827),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SelectableText(
@@ -1026,7 +1026,7 @@ class _SentinelCrossRefCardState extends State<SentinelCrossRefCard> {
       context: context,
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: const Color(0xFF161A26),
+        backgroundColor: const Color(0xFF1E293B),
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),

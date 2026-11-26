@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../booking_service/domain/models/car_type.dart';
@@ -34,7 +34,7 @@ class CarTypeSelector extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary.withOpacity(0.22) : const Color(0xFF10131C),
+                    color: isSelected ? AppColors.primary.withOpacity(0.22) : const Color(0xFF111827),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: isSelected ? AppColors.liquidCyanNeon : AppColors.cardBorder,

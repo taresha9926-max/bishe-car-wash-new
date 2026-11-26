@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -334,7 +334,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFFD97706), Color(0xFF92400E)]),
+        gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF115E59)]),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -486,7 +486,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     counterText: '',
                     hintText: state.tr('enterOtp'),
                     filled: true,
-                    fillColor: const Color(0xFF161A26),
+                    fillColor: const Color(0xFF1E293B),
                     contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     focusedBorder: OutlineInputBorder(
@@ -528,7 +528,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -1031,7 +1031,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : const Color(0xFF161A26),
+                color: isSelected ? AppColors.primary : const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: isSelected ? AppColors.primary : AppColors.cardBorder,
@@ -1104,7 +1104,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF161A26),
+                color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.amber.shade400.withValues(alpha: 0.5)),
               ),
@@ -1199,7 +1199,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   Widget _buildActionCard(_AdminActionItem op, bool isMobile) {
     return Material(
-      color: const Color(0xFF10131C),
+      color: const Color(0xFF111827),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: op.onTap,
@@ -1281,7 +1281,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -1410,7 +1410,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     else
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-                        decoration: BoxDecoration(color: const Color(0xFF161A26), borderRadius: BorderRadius.circular(6)),
+                        decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(6)),
                         child: Text(state.tr('noReceipt'), style: const TextStyle(fontSize: 9.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
                       ),
                   ],
@@ -1436,7 +1436,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: const Color(0xFF10131C),
+        backgroundColor: const Color(0xFF111827),
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         builder: (ctx) => SafeArea(
           child: ConstrainedBox(
@@ -1550,7 +1550,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 14 : 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -1671,7 +1671,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       width: double.infinity,
       padding: EdgeInsets.all(isMobile ? 14 : 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFFE2C55).withValues(alpha: 0.45), width: 1.2),
         boxShadow: [
@@ -1710,10 +1710,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                          decoration: BoxDecoration(color: AppColors.warmGold.withValues(alpha: 0.16), borderRadius: BorderRadius.circular(6)),
+                          decoration: BoxDecoration(color: const Color(0xFF00F2FE).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
                           child: Text(
                             isSuper ? state.tr('superAdminRoleBadge') : state.tr('secondaryAdminRoleBadge'),
-                            style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: AppColors.champagneGold),
+                            style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w900, color: Color(0xFF0284C7)),
                           ),
                         ),
                       ],
@@ -1768,7 +1768,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF161A26),
+                  color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: const Color(0xFFFE2C55).withValues(alpha: 0.35)),
                 ),
@@ -1827,10 +1827,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            backgroundColor: const Color(0xFF10131C),
+            backgroundColor: const Color(0xFF111827),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: Color(0x38F59E0B), width: 1.2),
+              side: const BorderSide(color: Color(0x3300E5FF), width: 1.2),
             ),
             title: Row(
               children: [
@@ -1892,7 +1892,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         return Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF161A26),
+                            color: const Color(0xFF1E293B),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: const Color(0xFF334155)),
                           ),
@@ -1903,7 +1903,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                                 child: Container(
                                   width: 44,
                                   height: 44,
-                                  color: const Color(0xFF0A0C12),
+                                  color: const Color(0xFF0F172A),
                                   child: reel.thumbnailUrl.isNotEmpty
                                       ? (reel.thumbnailUrl.startsWith('assets/')
                                           ? Image.asset(reel.thumbnailUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.music_note, color: Colors.grey))
@@ -2057,7 +2057,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isSel ? const Color(0xFFFE2C55).withValues(alpha: 0.18) : const Color(0xFF161A26),
+                  color: isSel ? const Color(0xFFFE2C55).withValues(alpha: 0.18) : const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: isSel ? const Color(0xFFFE2C55) : const Color(0xFF334155), width: isSel ? 1.5 : 1),
                 ),
@@ -2086,10 +2086,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           }
 
           return AlertDialog(
-            backgroundColor: const Color(0xFF10131C),
+            backgroundColor: const Color(0xFF111827),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
-              side: const BorderSide(color: Color(0x38F59E0B), width: 1.2),
+              side: const BorderSide(color: Color(0x3300E5FF), width: 1.2),
             ),
             title: Text(state.tr('manageReelsBtn'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
             content: ConstrainedBox(
@@ -2182,10 +2182,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (batchCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF10131C),
+        backgroundColor: const Color(0xFF111827),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Color(0x38F59E0B), width: 1.2),
+          side: const BorderSide(color: Color(0x3300E5FF), width: 1.2),
         ),
         title: const Text('Batch Paste TikTok Links', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
         content: ConstrainedBox(

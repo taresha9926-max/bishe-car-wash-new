@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -150,11 +150,11 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                       valueColor: AppColors.primary,
                     ),
                     const Divider(height: 16),
-                    _buildClosingRow('  • Vehicle Wash Revenue (15% Vatable):', '${CurrencyFormatter.format(state.todayVehicleRevenueETB)} (${state.totalCompletedCarsToday} cars)', valueColor: AppColors.champagneGold),
+                    _buildClosingRow('  • Vehicle Wash Revenue (15% Vatable):', '${CurrencyFormatter.format(state.todayVehicleRevenueETB)} (${state.totalCompletedCarsToday} cars)', valueColor: AppColors.primaryDark),
                     const SizedBox(height: 3),
-                    _buildClosingRow('  • Carpet Cleaning Revenue (VAT Exempt):', '${CurrencyFormatter.format(state.todayCarpetRevenueETB)} (${state.todayCarpetCleanedCount} carpets)', valueColor: const Color(0xFFA78BFA)),
+                    _buildClosingRow('  • Carpet Cleaning Revenue (VAT Exempt):', '${CurrencyFormatter.format(state.todayCarpetRevenueETB)} (${state.todayCarpetCleanedCount} carpets)', valueColor: const Color(0xFF6366F1)),
                     const SizedBox(height: 3),
-                    _buildClosingRow('  • Station Shower Revenue (VAT Exempt):', '${CurrencyFormatter.format(state.todayShowerRevenueETB)} (${state.todayShowerUserCount} users, 0% comm)', valueColor: AppColors.warmGold),
+                    _buildClosingRow('  • Station Shower Revenue (VAT Exempt):', '${CurrencyFormatter.format(state.todayShowerRevenueETB)} (${state.todayShowerUserCount} users, 0% comm)', valueColor: const Color(0xFF0284C7)),
                     if ((state.vatDeductedTodayETB as double) > 0) ...[
                       const SizedBox(height: 3),
                       _buildClosingRow('  • Car Wash 15% VAT Output (Gov Liability):', '- ${CurrencyFormatter.format(state.vatDeductedTodayETB)}', valueColor: Colors.deepPurple),
@@ -247,7 +247,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF161A26),
+                  color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
@@ -336,7 +336,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: _handoverMethod == 'manager_otp' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF161A26),
+                      color: _handoverMethod == 'manager_otp' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _handoverMethod == 'manager_otp' ? AppColors.primary : AppColors.cardBorder,
@@ -382,7 +382,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: _handoverMethod == 'admin_otp' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF161A26),
+                      color: _handoverMethod == 'admin_otp' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _handoverMethod == 'admin_otp' ? AppColors.primary : AppColors.cardBorder,
@@ -428,7 +428,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: _handoverMethod == 'bank_deposit' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF161A26),
+                      color: _handoverMethod == 'bank_deposit' ? AppColors.primary.withValues(alpha: 0.18) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _handoverMethod == 'bank_deposit' ? AppColors.primary : AppColors.cardBorder,
@@ -487,7 +487,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: _selectedAccountKey == 'account_a' ? AppColors.cbeBirrPurple.withValues(alpha: 0.25) : const Color(0xFF161A26),
+                                    color: _selectedAccountKey == 'account_a' ? AppColors.cbeBirrPurple.withValues(alpha: 0.25) : const Color(0xFF1E293B),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: _selectedAccountKey == 'account_a' ? AppColors.cbeBirrPurple : AppColors.cardBorder,
@@ -512,7 +512,7 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: _selectedAccountKey == 'account_b' ? const Color(0xFFEA580C).withValues(alpha: 0.25) : const Color(0xFF161A26),
+                                    color: _selectedAccountKey == 'account_b' ? const Color(0xFFEA580C).withValues(alpha: 0.25) : const Color(0xFF1E293B),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: _selectedAccountKey == 'account_b' ? const Color(0xFFEA580C) : AppColors.cardBorder,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/admin_dashboard_screen.dart';
@@ -188,7 +188,7 @@ class RoleShellScreen extends StatelessWidget {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  backgroundColor: const Color(0xFF161A26),
+                  backgroundColor: const Color(0xFF1E293B),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                     side: const BorderSide(color: Color(0xFF334155)),

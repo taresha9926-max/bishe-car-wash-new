@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -28,7 +28,7 @@ class BankDepositDialog extends StatefulWidget {
         backgroundColor: Colors.transparent,
         builder: (_) => Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF10131C),
+            color: Color(0xFF111827),
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             border: Border(
               top: BorderSide(color: AppColors.cardBorder, width: 1.4),
@@ -442,7 +442,7 @@ class _BankDepositDialogState extends State<BankDepositDialog> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.18) : const Color(0xFF161A26),
+            color: isSelected ? color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected ? color : AppColors.cardBorder,

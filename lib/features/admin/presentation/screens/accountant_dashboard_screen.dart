@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -87,10 +87,10 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFFB45309), Color(0xFFD97706)]),
+                gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF115E59)]),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFFF59E0B).withOpacity(0.25), blurRadius: 6, offset: const Offset(0, 2)),
+                  BoxShadow(color: Colors.teal.withOpacity(0.2), blurRadius: 6, offset: const Offset(0, 2)),
                 ],
               ),
               child: Row(
@@ -128,7 +128,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF10131C),
+              color: const Color(0xFF111827),
               border: Border(
                 bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2),
               ),
@@ -148,14 +148,14 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               dividerColor: Colors.transparent,
               indicator: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                  colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                    color: const Color(0xFF0D9488).withValues(alpha: 0.35),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -247,7 +247,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF0A0C12), Color(0xFF161A26)]),
+              gradient: const LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -292,7 +292,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                     label: Text(range == 'All' ? 'All Time' : range),
                     selected: isSel,
                     selectedColor: AppColors.primary,
-                    backgroundColor: const Color(0xFF161A26),
+                    backgroundColor: const Color(0xFF1E293B),
                     showCheckmark: false,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -340,11 +340,11 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                   ),
                   const SizedBox(width: 8),
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFFFBBF24)),
-                    label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFFFBBF24))),
+                    icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                    label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                      side: const BorderSide(color: Color(0xFFFBBF24), width: 1.1),
+                      side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     onPressed: () {
@@ -376,7 +376,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             padding: const EdgeInsets.all(14),
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF161A26),
+              color: const Color(0xFF1E293B),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: Colors.amber.shade700.withOpacity(0.6), width: 1.2),
             ),
@@ -418,7 +418,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A0C12),
+                          color: const Color(0xFF0F172A),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
                         ),
@@ -445,7 +445,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A0C12),
+                          color: const Color(0xFF0F172A),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
                         ),
@@ -456,7 +456,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                             const SizedBox(height: 2),
                             Text(
                               CurrencyFormatter.format(state.todayCarpetRevenueETB + state.todayShowerRevenueETB),
-                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFFFBBF24)),
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF38BDF8)),
                             ),
                             const SizedBox(height: 2),
                             const Text(
@@ -472,7 +472,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0A0C12),
+                          color: const Color(0xFF0F172A),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: AppColors.cardBorder.withOpacity(0.6)),
                         ),
@@ -642,7 +642,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                           return Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10131C),
+                              color: const Color(0xFF111827),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
                               boxShadow: [
@@ -729,7 +729,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -904,7 +904,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 children: c.providerBreakdown.entries.map((e) {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: const Color(0xFF161A26), borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.cardBorder)),
+                    decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(6), border: Border.all(color: AppColors.cardBorder)),
                     child: Text('${e.key}: ${CurrencyFormatter.format(e.value)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                   );
                 }).toList(),
@@ -930,7 +930,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
         boxShadow: [
@@ -968,7 +968,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
         boxShadow: [
@@ -1011,7 +1011,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
         boxShadow: [
@@ -1077,7 +1077,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             : Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF161A26),
+                  color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text('No photo', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
@@ -1186,11 +1186,11 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
-                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFFFBBF24)),
-                      label: Text(state.tr('exportPayroll'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFFFBBF24))),
+                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('exportPayroll'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                        side: const BorderSide(color: Color(0xFFFBBF24), width: 1.1),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () {
@@ -1232,9 +1232,9 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // 2. Expandable Action Card for Weekly Commission Submission Reports
           ExpandableActionCard(
-            icon: const Icon(Icons.assignment_turned_in_rounded, color: Color(0xFFD97706), size: 22),
-            iconBackgroundColor: const Color(0xFFD97706).withOpacity(0.12),
-            borderColor: const Color(0xFFD97706),
+            icon: const Icon(Icons.assignment_turned_in_rounded, color: Color(0xFF0D9488), size: 22),
+            iconBackgroundColor: const Color(0xFF0D9488).withOpacity(0.12),
+            borderColor: const Color(0xFF0D9488),
             title: 'Weekly Commission Submission Reports',
             subtitle: '${weeklyReports.length} submitted reports from Cashier',
             badge: Container(
@@ -1261,7 +1261,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                     children: weeklyReports.map((r) => Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10131C),
+                        color: const Color(0xFF111827),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
                         boxShadow: [
@@ -1356,7 +1356,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF334155), Color(0xFF0A0C12)]),
+              gradient: const LinearGradient(colors: [Color(0xFF334155), Color(0xFF0F172A)]),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -1447,11 +1447,11 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
-                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFFFBBF24)),
-                      label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFFFBBF24))),
+                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                        side: const BorderSide(color: Color(0xFFFBBF24), width: 1.1),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () {
@@ -1481,15 +1481,15 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
 
           // 1. Daily Consumed Supplies (Empty-for-Full Exchanges)
           ExpandableActionCard(
-            icon: const Icon(Icons.autorenew_rounded, color: Color(0xFFD97706), size: 22),
-            iconBackgroundColor: const Color(0xFFD97706).withOpacity(0.12),
-            borderColor: const Color(0xFFD97706),
+            icon: const Icon(Icons.autorenew_rounded, color: Color(0xFF0D9488), size: 22),
+            iconBackgroundColor: const Color(0xFF0D9488).withOpacity(0.12),
+            borderColor: const Color(0xFF0D9488),
             title: 'Daily Consumed Supplies (Empty-for-Full)',
             subtitle: 'Reported chemical usage from storekeeper',
             badge: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(color: const Color(0xFFD97706).withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
-              child: Text('${consumed.length} Consumed', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFFD97706))),
+              decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.12), borderRadius: BorderRadius.circular(6)),
+              child: Text('${consumed.length} Consumed', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF0D9488))),
             ),
             initiallyExpanded: false,
             child: consumed.isEmpty
@@ -1498,7 +1498,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                     children: consumed.map((t) => Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10131C),
+                        color: const Color(0xFF111827),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
                         boxShadow: [
@@ -1551,7 +1551,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                     children: restocks.map((t) => Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10131C),
+                        color: const Color(0xFF111827),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppColors.cardBorder.withOpacity(0.85)),
                         boxShadow: [
@@ -1948,11 +1948,11 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
-                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFFFBBF24)),
-                      label: Text(state.tr('exportStatement'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFFFBBF24))),
+                      icon: const Icon(Icons.download_rounded, size: 14, color: Color(0xFF38BDF8)),
+                      label: Text(state.tr('exportStatement'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                        side: const BorderSide(color: Color(0xFFFBBF24), width: 1.1),
+                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () {
@@ -2229,7 +2229,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : const Color(0xFF161A26),
+            color: isSelected ? AppColors.primary : const Color(0xFF1E293B),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected ? AppColors.primary : AppColors.cardBorder,
@@ -2274,7 +2274,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : const Color(0xFF161A26),
+            color: isSelected ? AppColors.primary : const Color(0xFF1E293B),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected ? AppColors.primary : AppColors.cardBorder,
@@ -2351,7 +2351,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder),
       ),

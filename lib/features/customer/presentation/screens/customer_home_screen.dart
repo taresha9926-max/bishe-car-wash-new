@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/constants/app_constants.dart';
 import 'package:bishe_car_wash/core/utils/auto_care_assets.dart';
@@ -80,7 +80,7 @@ class CustomerHomeScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10131C),
+                        color: const Color(0xFF111827),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.cardBorder),
                         boxShadow: [
@@ -123,7 +123,7 @@ class CustomerHomeScreen extends StatelessWidget {
                 const SizedBox(height: 18),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10131C),
+                    color: const Color(0xFF111827),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: AppColors.cardBorder, width: 1.4),
                     boxShadow: [
@@ -142,7 +142,7 @@ class CustomerHomeScreen extends StatelessWidget {
                           label: state.tr('carWashingService'),
                           imageUrl: AutoCareAssets.carSedanUrl,
                           fallbackIcon: Icons.local_car_wash_rounded,
-                          colors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                          colors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
                           onTap: () => _openDivisionScreen(context, isCarpet: false),
                         ),
                       ),
@@ -167,12 +167,12 @@ class CustomerHomeScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF1D1609), Color(0xFF10131C)],
+                        colors: [Color(0xFF0B2545), Color(0xFF111827)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0x44F59E0B), width: 1.2),
+                      border: Border.all(color: const Color(0x4400E5FF), width: 1.2),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.liquidCyanNeon.withOpacity(0.12),
@@ -358,7 +358,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10131C),
+                        color: const Color(0xFF111827),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.cardBorder),
                         boxShadow: [
@@ -455,7 +455,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                                 style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                               ),
                               style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color(0xFF161A26),
+                                backgroundColor: const Color(0xFF1E293B),
                                 side: const BorderSide(color: AppColors.cardBorder),
                                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -464,14 +464,14 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                             const SizedBox(height: 8),
                             OutlinedButton.icon(
                               onPressed: () => CustomerFeedbackSheet.show(context),
-                              icon: const Icon(Icons.star_rounded, size: 17, color: AppColors.warmGold),
+                              icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
                               label: Text(
                                 state.tr('feedbackTab'),
-                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.champagneGold),
+                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
                               ),
                               style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1E170A),
-                                side: const BorderSide(color: AppColors.warmGold, width: 1.2),
+                                backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
+                                side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
                                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
@@ -491,7 +491,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                                 ),
                                 style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF161A26),
+                                  backgroundColor: const Color(0xFF1E293B),
                                   side: const BorderSide(color: AppColors.cardBorder),
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -502,16 +502,16 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                             Expanded(
                               child: OutlinedButton.icon(
                                 onPressed: () => CustomerFeedbackSheet.show(context),
-                                icon: const Icon(Icons.star_rounded, size: 17, color: AppColors.warmGold),
+                                icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
                                 label: Text(
                                   state.tr('feedbackTab'),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.champagneGold),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
                                 ),
                                 style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E170A),
-                                  side: const BorderSide(color: AppColors.warmGold, width: 1.2),
+                                  backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
+                                  side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
                                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
@@ -546,7 +546,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.35), width: 1.2),
         boxShadow: [
@@ -626,7 +626,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF10131C),
+      backgroundColor: const Color(0xFF111827),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
@@ -673,7 +673,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                 decoration: InputDecoration(
                   hintText: isCarpet ? state.tr('carpetTagOrPhoneHint') : state.tr('plateOrPhoneHint'),
                   filled: true,
-                  fillColor: const Color(0xFF161A26),
+                  fillColor: const Color(0xFF1E293B),
                   prefixIcon: Icon(
                     isCarpet ? Icons.texture_rounded : Icons.directions_car_outlined,
                     color: AppColors.liquidCyanNeon,
@@ -719,7 +719,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     required String value,
     required bool isReady,
   }) {
-    final color = isReady ? AppColors.statusReady : AppColors.champagneGold;
+    final color = isReady ? AppColors.statusReady : AppColors.primaryDark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
@@ -773,7 +773,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF10131C),
+          color: const Color(0xFF111827),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: accentColor.withValues(alpha: 0.45), width: 1.6),
           boxShadow: [
@@ -860,7 +860,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     final accent = isCarpet ? const Color(0xFF4F46E5) : AppColors.primary;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -978,7 +978,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: wash.status.color.withValues(alpha: 0.6), width: 1.5),
         boxShadow: [
@@ -1124,7 +1124,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [

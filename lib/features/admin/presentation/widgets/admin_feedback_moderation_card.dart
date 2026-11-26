@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -42,7 +42,7 @@ class _AdminFeedbackModerationCardState extends State<AdminFeedbackModerationCar
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: pendingCount > 0 ? const Color(0xFFF59E0B) : AppColors.cardBorder,

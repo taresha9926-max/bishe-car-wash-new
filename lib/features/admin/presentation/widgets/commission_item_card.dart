@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/core/utils/date_formatter.dart';
@@ -22,7 +22,7 @@ class CommissionItemCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder),
         boxShadow: [

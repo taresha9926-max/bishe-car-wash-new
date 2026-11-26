@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -254,8 +254,8 @@ class _StationQueueTabState extends State<StationQueueTab> {
             ),
             const SizedBox(width: 8),
             TextButton.icon(
-              icon: const Icon(Icons.download_rounded, size: 15, color: Color(0xFFFBBF24)),
-              label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFFFBBF24))),
+              icon: const Icon(Icons.download_rounded, size: 15, color: Color(0xFF38BDF8)),
+              label: Text(state.tr('exportCsv'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8))),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 minimumSize: Size.zero,
@@ -304,7 +304,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
                   )
                 : null,
             filled: true,
-            fillColor: const Color(0xFF161A26),
+            fillColor: const Color(0xFF1E293B),
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
             border: OutlineInputBorder(
@@ -324,7 +324,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF10131C),
+              color: const Color(0xFF111827),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.cardBorder, width: 1.2),
               boxShadow: [
@@ -415,7 +415,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
       ),
       selected: isSelected,
       selectedColor: activeColor,
-      backgroundColor: const Color(0xFF161A26),
+      backgroundColor: const Color(0xFF1E293B),
       showCheckmark: false,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -435,7 +435,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: EdgeInsets.all(widget.isMobile ? 12 : 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _isPayReady(b) ? AppColors.cashGreen.withOpacity(0.65) : AppColors.cardBorder,
@@ -578,7 +578,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
                       const SizedBox(height: 4),
                       Text(
                         CurrencyFormatter.format(b.totalPrice),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.champagneGold),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
                       ),
                     ],
                   ),
@@ -671,13 +671,13 @@ class _StationQueueTabState extends State<StationQueueTab> {
                 ),
               OutlinedButton.icon(
                 onPressed: () => EditBookingDialog.show(context, b),
-                icon: const Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFFFBBF24)),
+                icon: const Icon(Icons.edit_note_rounded, size: 14, color: Color(0xFF38BDF8)),
                 label: Text(
                   state.tr('editBooking'),
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFFFBBF24)),
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFF38BDF8)),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFFBBF24)),
+                  side: const BorderSide(color: Color(0xFF38BDF8)),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -872,7 +872,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 10 : 14, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF10131C),
+          color: const Color(0xFF111827),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppColors.cardBorder, width: 1.2),
           boxShadow: [
@@ -956,7 +956,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 10 : 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -1240,7 +1240,7 @@ class _StationQueueTabState extends State<StationQueueTab> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161A26),
+        backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [

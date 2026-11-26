@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../admin/domain/models/daily_financial_closing.dart';
@@ -59,12 +59,11 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
           padding: EdgeInsets.all(widget.isMobile ? 14 : 18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF16130B), Color(0xFF10131C)],
+              colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.cardBorder, width: 1.2),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,7 +208,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
         // 6. Shift Closing Logs & Bank Deposits (Admin net profit / salary hidden for floor staff)
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF10131C),
+            color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -267,7 +266,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
     return Container(
       padding: EdgeInsets.all(isMobile ? 12 : 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -530,7 +529,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
     return Container(
       padding: EdgeInsets.all(isMobile ? 12 : 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -609,7 +608,7 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     decoration: BoxDecoration(
-                      color: hasPayments ? c.color.withValues(alpha: 0.15) : const Color(0xFF161A26),
+                      color: hasPayments ? c.color.withValues(alpha: 0.15) : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: hasPayments ? c.color.withValues(alpha: 0.35) : AppColors.cardBorder),
                     ),

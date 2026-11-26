@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../utils/auto_care_assets.dart';
 import '../utils/currency_formatter.dart';
@@ -46,7 +46,7 @@ class FinancialPnlStatementCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(isMobile ? 14 : 18),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -111,7 +111,7 @@ class FinancialPnlStatementCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF06070B), Color(0xFF10131C)],
+                colors: [Color(0xFF090D14), Color(0xFF111827)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

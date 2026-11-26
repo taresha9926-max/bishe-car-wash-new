@@ -178,9 +178,9 @@ class ReceiptImageHelper {
         margin: const EdgeInsets.all(12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF161A26),
+          color: const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.warmGold.withValues(alpha: 0.5), width: 1.5),
+          border: Border.all(color: AppColors.telebirrBlue.withValues(alpha: 0.5), width: 1.5),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.4),
@@ -301,9 +301,9 @@ class ReceiptImageHelper {
         child: Container(
           constraints: const BoxConstraints(maxWidth: 420),
           decoration: BoxDecoration(
-            color: const Color(0xFF10131C),
+            color: const Color(0xFF0F172A),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.warmGold.withValues(alpha: 0.5)),
+            border: Border.all(color: AppColors.telebirrBlue.withValues(alpha: 0.5)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.6),
@@ -354,7 +354,7 @@ class ReceiptImageHelper {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF161A26),
+                      backgroundColor: const Color(0xFF1E293B),
                       foregroundColor: Colors.white,
                       side: const BorderSide(color: Colors.white24),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

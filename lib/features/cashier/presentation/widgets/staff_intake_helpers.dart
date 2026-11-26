@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../admin/domain/models/staff_member.dart';
@@ -44,7 +44,7 @@ class StaffNegotiatedPriceCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   state.tr('negotiatedTotalPriceTitle'),
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.champagneGold),
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
                 ),
               ),
               TextButton(
@@ -76,7 +76,7 @@ class StaffNegotiatedPriceCard extends StatelessWidget {
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFF161A26),
+              fillColor: const Color(0xFF1E293B),
               suffixText: 'ETB',
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -111,7 +111,7 @@ class StaffWasherPickerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF10131C),
+        color: const Color(0xFF111827),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
       ),
@@ -134,11 +134,11 @@ class StaffWasherPickerCard extends StatelessWidget {
           DropdownButtonFormField<String?>(
             initialValue: validSelected,
             isExpanded: true,
-            dropdownColor: const Color(0xFF161A26),
+            dropdownColor: const Color(0xFF1E293B),
             style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w600),
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFF161A26),
+              fillColor: const Color(0xFF1E293B),
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               border: OutlineInputBorder(
@@ -218,7 +218,7 @@ class StaffDeliveryModeSelector extends StatelessWidget {
         ServiceType.atHomeMobile,
         isCarpet ? state.tr('carpetHomeTitle') : state.tr('atHomeMobile'),
         Icons.home_repair_service_rounded,
-        const Color(0xFFD97706),
+        const Color(0xFF0D9488),
       ),
     ];
 
@@ -246,7 +246,7 @@ class StaffDeliveryModeSelector extends StatelessWidget {
                   margin: EdgeInsets.only(right: mode != ServiceType.atHomeMobile ? 6 : 0),
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
                   decoration: BoxDecoration(
-                    color: isSelected ? color.withValues(alpha: 0.20) : const Color(0xFF161A26),
+                    color: isSelected ? color.withValues(alpha: 0.20) : const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isSelected ? color : AppColors.cardBorder,

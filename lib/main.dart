@@ -13,14 +13,14 @@ void main() {
   ErrorWidget.builder = (FlutterErrorDetails details) {
     debugPrint('Global ErrorWidget captured: ${details.exception}');
     return Material(
-      color: const Color(0xFF06070B),
+      color: const Color(0xFF0F172A),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.local_car_wash_rounded, color: Color(0xFFF59E0B), size: 48),
+              const Icon(Icons.local_car_wash_rounded, color: Color(0xFF007791), size: 48),
               const SizedBox(height: 16),
               const Text(
                 'BISHE Car Wash Station',
@@ -35,7 +35,7 @@ void main() {
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD97706),
+                  backgroundColor: const Color(0xFF007791),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),

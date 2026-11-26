@@ -24,7 +24,7 @@ class CombinedServiceHeaderBanner extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF0E1018), Color(0xFF18140D)],
+            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -32,8 +32,8 @@ class CombinedServiceHeaderBanner extends StatelessWidget {
           border: Border.all(color: AppColors.cardGlassBorder, width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 12,
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 10,
               offset: const Offset(0, 3),
             ),
           ],
@@ -53,7 +53,7 @@ class CombinedServiceHeaderBanner extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(9),
-                        border: Border.all(color: AppColors.warmGold, width: 1.5),
+                        border: Border.all(color: const Color(0xFF0284C7), width: 1.5),
                       ),
                       child: AutoCareAssets.buildPhotoThumbnail(
                         imageUrl: AutoCareAssets.carSedanUrl,
@@ -130,14 +130,14 @@ class CombinedServiceHeaderBanner extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                  colors: [Color(0xFF0F766E), Color(0xFF14B8A6)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                    color: const Color(0xFF14B8A6).withValues(alpha: 0.3),
                     blurRadius: 6,
                   ),
                 ],
