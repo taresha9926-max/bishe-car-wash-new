@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -148,7 +148,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                       prefixIcon: Icon(!state.isCarWashDivisionActive ? Icons.texture_rounded : Icons.directions_car_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
-                      fillColor: const Color(0xFF1E293B),
+                      fillColor: const Color(0xFF161A26),
                     ),
                     onSubmitted: (_) => _performSearch(state, isCarpet: !state.isCarWashDivisionActive),
                   ),
@@ -306,7 +306,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xFF111827),
+                color: const Color(0xFF10131C),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.cardBorder, width: 1.2),
                 boxShadow: [
@@ -375,7 +375,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF161A26),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4), width: 1.2),
                 ),
@@ -477,7 +477,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -802,7 +802,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
         height: 96,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A).withValues(alpha: 0.65),
+          color: const Color(0xFF0A0C12).withValues(alpha: 0.65),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: const Color(0xFF334155),
@@ -847,7 +847,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       height: 96,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF161A26),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCurrent
@@ -936,7 +936,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
         imagePath,
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => Container(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF161A26),
           child: const Center(
             child: Icon(Icons.directions_car_rounded, color: AppColors.primary, size: 22),
           ),
@@ -947,7 +947,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       imagePath,
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) => Container(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF161A26),
         child: const Center(
           child: Icon(Icons.broken_image_rounded, color: AppColors.textMuted, size: 22),
         ),

@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -237,8 +237,8 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
               ),
               const SizedBox(width: 8),
               TextButton.icon(
-                icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFF38BDF8)),
-                label: Text(state.tr('exportCsv'), style: const TextStyle(color: Color(0xFF38BDF8), fontWeight: FontWeight.bold, fontSize: 12)),
+                icon: const Icon(Icons.download_rounded, size: 16, color: Color(0xFFFBBF24)),
+                label: Text(state.tr('exportCsv'), style: const TextStyle(color: Color(0xFFFBBF24), fontWeight: FontWeight.bold, fontSize: 12)),
                 onPressed: () {
                   PrintExportHelper.exportCsv(
                     fileName: 'bishe_financial_report_${rangeStart.toIso8601String().split('T')[0]}_to_${rangeEnd.toIso8601String().split('T')[0]}.csv',
@@ -390,7 +390,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
               ),
               selected: isSelected,
               selectedColor: AppColors.primary,
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: const Color(0xFF161A26),
               showCheckmark: false,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -435,7 +435,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [

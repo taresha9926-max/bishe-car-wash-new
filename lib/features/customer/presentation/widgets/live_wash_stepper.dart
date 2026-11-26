@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../booking_service/domain/models/service_type.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
@@ -77,7 +77,7 @@ class LiveWashStepper extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isDone
                           ? AppColors.statusCompleted
-                          : (isCurrent ? AppColors.slateGlass : const Color(0xFF1E293B)),
+                          : (isCurrent ? AppColors.slateGlass : const Color(0xFF161A26)),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isCurrent
@@ -162,7 +162,7 @@ class LiveWashStepper extends StatelessWidget {
         : (isActive ? AppColors.liquidCyanNeon : const Color(0xFF475569));
     final bgColor = isDone
         ? AppColors.statusCompleted.withValues(alpha: 0.16)
-        : (isActive ? AppColors.liquidCyanNeon.withValues(alpha: 0.20) : const Color(0xFF1E293B));
+        : (isActive ? AppColors.liquidCyanNeon.withValues(alpha: 0.20) : const Color(0xFF161A26));
     final borderColor = isDone
         ? AppColors.statusCompleted.withValues(alpha: 0.5)
         : (isActive ? AppColors.liquidCyanNeon.withValues(alpha: 0.7) : const Color(0xFF334155));

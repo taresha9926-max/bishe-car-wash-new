@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -34,7 +34,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -217,7 +217,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                                             const SizedBox(width: 4),
                                             Text(
                                               CurrencyFormatter.formatShort(price),
-                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.champagneGold),
                                             ),
                                           ],
                                         ),
@@ -298,7 +298,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                                               style: const TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w800,
-                                                color: AppColors.primaryDark,
+                                                color: AppColors.champagneGold,
                                               ),
                                             ),
                                             const Text(
@@ -373,7 +373,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
         // 2. Detailing Services Manager (Atomic Dynamic Services)
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -477,7 +477,7 @@ class _PricingMatrixEditorState extends State<PricingMatrixEditor> {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: item.isActive ? AppColors.primaryDark : AppColors.textMuted,
+                                        color: item.isActive ? AppColors.champagneGold : AppColors.textMuted,
                                       ),
                                     ),
                                     const Text('edit', style: TextStyle(fontSize: 9, color: AppColors.textMuted)),

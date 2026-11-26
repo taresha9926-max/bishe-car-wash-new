@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -156,7 +156,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF111827),
+                            color: const Color(0xFF10131C),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.cardBorder),
                             boxShadow: [
@@ -170,7 +170,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: state.currentLang,
-                              dropdownColor: const Color(0xFF111827),
+                              dropdownColor: const Color(0xFF10131C),
                               icon: const Icon(Icons.language_rounded, size: 16, color: AppColors.liquidCyanNeon),
                               items: const [
                                 DropdownMenuItem(
@@ -201,7 +201,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                             side: const BorderSide(color: AppColors.cardBorder),
                           ),
                           elevation: 8,
-                          color: const Color(0xFF111827),
+                          color: const Color(0xFF10131C),
                           offset: const Offset(0, 42),
                           onSelected: (value) {
                             if (value == 'cashier') {
@@ -219,7 +219,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 12, vertical: 7),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF111827),
+                              color: const Color(0xFF10131C),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.35), width: 1.2),
                               boxShadow: [
@@ -441,7 +441,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                             child: Container(
                               padding: EdgeInsets.all(isMobile ? 15 : 20),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF111827),
+                                color: const Color(0xFF10131C),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: _isCustomerHovered ? AppColors.liquidCyanNeon : AppColors.cardBorder,
@@ -492,7 +492,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                                       Container(
                                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                                                         decoration: BoxDecoration(
-                                                          color: const Color(0xFF2563EB).withOpacity(0.12),
+                                                          color: AppColors.warmGold.withOpacity(0.15),
                                                           borderRadius: BorderRadius.circular(6),
                                                         ),
                                                         child: Text(
@@ -500,7 +500,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                                           style: const TextStyle(
                                                             fontSize: 8.5,
                                                             fontWeight: FontWeight.w900,
-                                                            color: Color(0xFF2563EB),
+                                                            color: AppColors.champagneGold,
                                                             letterSpacing: 0.4,
                                                           ),
                                                         ),
@@ -606,7 +606,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                                   Container(
                                                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                                     decoration: BoxDecoration(
-                                                      color: const Color(0xFF2563EB).withOpacity(0.12),
+                                                      color: AppColors.warmGold.withOpacity(0.15),
                                                       borderRadius: BorderRadius.circular(6),
                                                     ),
                                                     child: Text(
@@ -614,7 +614,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                                                       style: const TextStyle(
                                                         fontSize: 9.5,
                                                         fontWeight: FontWeight.w900,
-                                                        color: Color(0xFF2563EB),
+                                                        color: AppColors.champagneGold,
                                                         letterSpacing: 0.5,
                                                       ),
                                                     ),
@@ -705,7 +705,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: isMobile ? 14 : 18, vertical: isMobile ? 12 : 14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF111827),
+                          color: const Color(0xFF10131C),
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(color: AppColors.cardBorder, width: 1.2),
                           boxShadow: [
@@ -887,16 +887,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     final approvedCount = (state.approvedCustomerFeedback as List).length;
     return OutlinedButton.icon(
       onPressed: () => CustomerFeedbackSheet.show(context),
-      icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
+      icon: const Icon(Icons.star_rounded, size: 17, color: AppColors.warmGold),
       label: Text(
         approvedCount > 0 ? '${state.tr('feedbackTab')} ($approvedCount)' : state.tr('feedbackTab'),
         maxLines: 2,
         textAlign: TextAlign.center,
-        style: TextStyle(fontWeight: FontWeight.w800, fontSize: compact ? 12 : 13, color: const Color(0xFF92400E)),
+        style: TextStyle(fontWeight: FontWeight.w800, fontSize: compact ? 12 : 13, color: AppColors.champagneGold),
       ),
       style: OutlinedButton.styleFrom(
-        backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
-        side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
+        backgroundColor: const Color(0xFF1E170A),
+        side: const BorderSide(color: AppColors.warmGold, width: 1.2),
         padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 14, vertical: compact ? 12 : 13),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),

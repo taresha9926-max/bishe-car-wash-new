@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -71,7 +71,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 Expanded(
                   child: Text(
                     state.tr('superAdminOnlyNotice'),
-                    style: const TextStyle(fontSize: 11.5, color: AppColors.primaryDark, fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontSize: 11.5, color: AppColors.champagneGold, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -108,7 +108,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     ];
 
     return Container(
-      color: const Color(0xFF111827),
+      color: const Color(0xFF10131C),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       width: double.infinity,
       child: Wrap(
@@ -155,7 +155,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
 
   Widget _buildSearchBar(dynamic state) {
     return Container(
-      color: const Color(0xFF111827),
+      color: const Color(0xFF10131C),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: TextField(
         decoration: InputDecoration(
@@ -254,7 +254,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF0A0C12),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.cardBorder),
           ),
@@ -350,7 +350,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: item.isActive ? AppColors.cardBorder : Colors.white24, width: 1.2),
         boxShadow: [
@@ -462,7 +462,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                           const SizedBox(height: 2),
                           Text(
                             CurrencyFormatter.format(tariff),
-                            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900, color: AppColors.champagneGold),
                           ),
                         ],
                       ),
@@ -510,7 +510,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         return Colors.deepOrange;
       case 'specialty':
       default:
-        return const Color(0xFF0F766E);
+        return const Color(0xFFD97706);
     }
   }
 
@@ -916,7 +916,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -1026,7 +1026,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -1059,7 +1059,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 children: [
                   Text(
                     '${state.showerPricePerPerson.toStringAsFixed(0)} ETB',
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF0284C7)),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.champagneGold),
                   ),
                   const SizedBox(width: 6),
                   IconButton(
@@ -1084,7 +1084,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF111827),
+                color: const Color(0xFF10131C),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.cardBorder, width: 1.2),
                 boxShadow: [
@@ -1277,7 +1277,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -1289,7 +1289,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
             children: [
               _buildKpiStat('Total Items', '${items.length}', Icons.science_outlined, AppColors.primary),
               _buildKpiStat('Low Stock Alert', '$lowStockCount', Icons.warning_amber_rounded, lowStockCount > 0 ? Colors.orange : Colors.green),
-              _buildKpiStat('Stock Valuation', CurrencyFormatter.format(totalValuation), Icons.account_balance_wallet_outlined, const Color(0xFF0F766E)),
+              _buildKpiStat('Stock Valuation', CurrencyFormatter.format(totalValuation), Icons.account_balance_wallet_outlined, const Color(0xFFD97706)),
             ],
           ),
         ),
@@ -1314,7 +1314,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F766E),
+                backgroundColor: const Color(0xFFD97706),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1344,7 +1344,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: item.isLowStock ? Colors.orange.shade400 : AppColors.cardBorder,
@@ -1363,10 +1363,10 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F766E).withOpacity(0.1),
+                  color: const Color(0xFFD97706).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.science_rounded, size: 20, color: Color(0xFF0F766E)),
+                child: const Icon(Icons.science_rounded, size: 20, color: Color(0xFFD97706)),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1426,7 +1426,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                   Text(state.tr('unitCostEtb'), style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
                   Text(
                     CurrencyFormatter.format(item.unitCostEtb),
-                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Color(0xFF0F766E)),
+                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: Color(0xFFD97706)),
                   ),
                 ],
               ),
@@ -1450,8 +1450,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
             children: [
               TextButton.icon(
                 onPressed: () => _showEditConsumableDialog(context, state, item),
-                icon: const Icon(Icons.edit_outlined, size: 14, color: Color(0xFF0F766E)),
-                label: Text(state.tr('editConsumable'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF0F766E))),
+                icon: const Icon(Icons.edit_outlined, size: 14, color: Color(0xFFD97706)),
+                label: Text(state.tr('editConsumable'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFFD97706))),
                 style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
               ),
               const SizedBox(width: 8),
@@ -1513,7 +1513,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F766E), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
             onPressed: () async {
               final name = nameController.text.trim();
               if (name.isEmpty) return;
@@ -1593,7 +1593,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F766E), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
             onPressed: () async {
               final name = nameController.text.trim();
               if (name.isEmpty) return;
@@ -1675,7 +1675,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
@@ -1742,7 +1742,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -2179,7 +2179,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
           children: [
             Text(
               '${price.toStringAsFixed(0)} ETB/m²',
-              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Color(0xFF0369A1)),
+              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Color(0xFFB45309)),
             ),
             const SizedBox(width: 6),
             IconButton(
@@ -2254,7 +2254,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.35), width: 1.2),
         boxShadow: [
@@ -2405,7 +2405,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0284C7),
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
             onPressed: () {
@@ -2436,7 +2436,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isSelected ? AppColors.liquidCyanNeon : AppColors.cardBorder,
@@ -2490,7 +2490,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                               children: [
                                 Text(type.localizedName(state.currentLang).split(' ').first, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
                                 const SizedBox(height: 2),
-                                Text(CurrencyFormatter.format(price), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primaryDark)),
+                                Text(CurrencyFormatter.format(price), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.champagneGold)),
                                 Text(state.tr('edit'), style: const TextStyle(fontSize: 9, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
                               ],
                             ),
@@ -2622,7 +2622,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF0F766E), Color(0xFF0D9488)]),
+                  gradient: const LinearGradient(colors: [Color(0xFFD97706), Color(0xFFD97706)]),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(color: Colors.teal.withValues(alpha: 0.2), blurRadius: 6, offset: const Offset(0, 2)),

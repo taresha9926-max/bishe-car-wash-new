@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -141,7 +141,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -160,7 +160,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
           gradient: LinearGradient(
             colors: isCarpet
                 ? const [Color(0xFF7C3AED), Color(0xFF6D28D9)]
-                : const [Color(0xFF007791), Color(0xFF004D61)],
+                : const [Color(0xFFF59E0B), Color(0xFFD97706)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -250,7 +250,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -267,7 +267,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
+              gradient: const LinearGradient(colors: [Color(0xFFD97706), Color(0xFFB45309)]),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -390,7 +390,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                 alignment: Alignment.center,
                 child: Text(
                   '$_showerCount',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.champagneGold),
                 ),
               ),
               IconButton(
@@ -419,7 +419,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
               Expanded(
                 child: ChoiceChip(
                   selectedColor: AppColors.liquidCyanNeon.withValues(alpha: 0.25),
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: const Color(0xFF161A26),
                   side: BorderSide(
                     color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : AppColors.cardBorder,
                   ),
@@ -455,7 +455,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
               Expanded(
                 child: ChoiceChip(
                   selectedColor: const Color(0xFF0284C7).withValues(alpha: 0.25),
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: const Color(0xFF161A26),
                   side: BorderSide(
                     color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF0284C7) : AppColors.cardBorder,
                   ),
@@ -556,7 +556,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                 margin: const EdgeInsets.only(bottom: 6),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF161A26),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.cardBorder, width: 0.8),
                 ),
@@ -576,7 +576,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFF38BDF8)),
+                      icon: const Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFFFBBF24)),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: () => _showEditShowerDialog(context, state, s),
@@ -618,7 +618,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF161A26),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(state.tr('editRecord'), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           content: Column(
@@ -707,7 +707,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
       padding: EdgeInsets.all(isMobile ? 12 : 14),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF090D14), Color(0xFF111827)],
+          colors: [Color(0xFF06070B), Color(0xFF10131C)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -816,7 +816,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFF59E0B),
-                  foregroundColor: const Color(0xFF0F172A),
+                  foregroundColor: const Color(0xFF0A0C12),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,

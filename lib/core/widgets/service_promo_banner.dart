@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 
@@ -22,7 +22,7 @@ class _ServicePromoBannerState extends State<ServicePromoBanner> {
       subtitle: 'Premier deep exterior care near Lake Bishoftu',
       badge: 'TOP RATED',
       icon: Icons.auto_awesome_rounded,
-      gradient: [Color(0xFF007791), Color(0xFF0284C7)],
+      gradient: [Color(0xFFD97706), Color(0xFF92400E)],
     ),
     _PromoItem(
       title: 'Doorstep Mobile Van Service',

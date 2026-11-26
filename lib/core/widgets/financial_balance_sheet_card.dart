@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../utils/currency_formatter.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
@@ -72,7 +72,7 @@ class FinancialBalanceSheetCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(isMobile ? 14 : 18),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -173,7 +173,7 @@ class FinancialBalanceSheetCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF090D14),
+              color: const Color(0xFF06070B),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: isBalanced ? AppColors.statusReady.withValues(alpha: 0.4) : AppColors.statusCancelled),
             ),

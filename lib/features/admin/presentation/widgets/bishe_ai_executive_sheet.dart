@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/localization/app_strings.dart';
@@ -304,10 +304,10 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
       builder: (ctx) => AppStateProvider(
         notifier: state,
         child: AlertDialog(
-        backgroundColor: const Color(0xFF111827),
+        backgroundColor: const Color(0xFF10131C),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Color(0x3300E5FF), width: 1.2),
+          side: const BorderSide(color: Color(0x38F59E0B), width: 1.2),
         ),
         title: Row(
           children: [
@@ -399,7 +399,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF0A0C12),
             borderRadius: BorderRadius.vertical(
               top: const Radius.circular(24),
               bottom: isDesktop ? const Radius.circular(24) : Radius.zero,
@@ -425,7 +425,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               // 2. Horizontally scrollable quick-prompt chips
               _buildQuickPromptChips(state),
 
-              const Divider(height: 1, color: Color(0xFF1E293B)),
+              const Divider(height: 1, color: Color(0xFF161A26)),
 
               // 3. Chat Messages List
               Expanded(
@@ -470,9 +470,9 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
       decoration: const BoxDecoration(
-        color: Color(0xFF111827),
+        color: Color(0xFF10131C),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+        border: Border(bottom: BorderSide(color: Color(0xFF161A26))),
       ),
       child: Row(
         children: [
@@ -480,7 +480,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF007791), Color(0xFF00E5FF)],
+                colors: [Color(0xFFD97706), Color(0xFFF59E0B)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -758,7 +758,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     }
 
     return Container(
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFF0A0C12),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -767,8 +767,8 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: ActionChip(
-                backgroundColor: const Color(0xFF1E293B),
-                side: const BorderSide(color: Color(0x4400E5FF)),
+                backgroundColor: const Color(0xFF161A26),
+                side: const BorderSide(color: Color(0x44F59E0B)),
                 label: Text(
                   chip['label']!,
                   style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
@@ -808,7 +808,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isUser ? AppColors.primaryDark : const Color(0xFF1E293B),
+                color: isUser ? AppColors.primaryDark : const Color(0xFF161A26),
                 borderRadius: BorderRadius.circular(14).copyWith(
                   bottomLeft: !isUser ? Radius.zero : const Radius.circular(14),
                   bottomRight: isUser ? Radius.zero : const Radius.circular(14),
@@ -901,7 +901,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F172A),
+                              color: const Color(0xFF0A0C12),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(color: const Color(0xFF334155)),
                             ),
@@ -973,7 +973,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0F172A),
+                                color: const Color(0xFF0A0C12),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(color: const Color(0xFF334155)),
                               ),
@@ -1066,7 +1066,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF007791), AppColors.liquidCyanNeon],
+                colors: [Color(0xFFD97706), AppColors.liquidCyanNeon],
               ),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
@@ -1268,12 +1268,12 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF141E33), Color(0xFF0F172A)],
+                  colors: [Color(0xFF141E33), Color(0xFF0A0C12)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0x4400E5FF)),
+                border: Border.all(color: const Color(0x44F59E0B)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1322,7 +1322,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
             decoration: const BoxDecoration(
               color: Color(0xFF162038),
               borderRadius: BorderRadius.vertical(top: Radius.circular(11)),
-              border: Border(bottom: BorderSide(color: Color(0xFF1E293B))),
+              border: Border(bottom: BorderSide(color: Color(0xFF161A26))),
             ),
             child: Row(
               children: [
@@ -1361,7 +1361,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF161A26),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(color: const Color(0xFF334155)),
                     ),
@@ -1387,7 +1387,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                   // Header row
                   TableRow(
                     decoration: const BoxDecoration(
-                      color: Color(0xFF1E293B),
+                      color: Color(0xFF161A26),
                       borderRadius: BorderRadius.all(Radius.circular(6)),
                     ),
                     children: block.headers.map((h) => Padding(
@@ -1408,7 +1408,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                     TableRow(
                       decoration: BoxDecoration(
                         color: rIdx % 2 == 1 ? const Color(0xFF131D31) : Colors.transparent,
-                        border: const Border(bottom: BorderSide(color: Color(0xFF1E293B), width: 0.8)),
+                        border: const Border(bottom: BorderSide(color: Color(0xFF161A26), width: 0.8)),
                       ),
                       children: block.rows[rIdx].map((cell) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1503,7 +1503,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
         ),
         child: Text(
           cell.replaceAll('**', ''),
-          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF38BDF8)),
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFBBF24)),
         ),
       );
     }
@@ -1649,8 +1649,8 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
     return Container(
       padding: EdgeInsets.fromLTRB(12, 8, 12, MediaQuery.of(context).viewInsets.bottom + 10),
       decoration: const BoxDecoration(
-        color: Color(0xFF111827),
-        border: Border(top: BorderSide(color: Color(0xFF1E293B))),
+        color: Color(0xFF10131C),
+        border: Border(top: BorderSide(color: Color(0xFF161A26))),
       ),
       child: Row(
         children: [
@@ -1681,7 +1681,7 @@ class _BisheAiExecutiveSheetState extends State<BisheAiExecutiveSheet> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 filled: true,
-                fillColor: const Color(0xFF1E293B),
+                fillColor: const Color(0xFF161A26),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(

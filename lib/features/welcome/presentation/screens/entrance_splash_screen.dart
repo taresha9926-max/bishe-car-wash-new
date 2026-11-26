@@ -125,7 +125,7 @@ class _EntranceSplashScreenState extends State<EntranceSplashScreen>
                     center: const Alignment(0, -0.15),
                     radius: 1.1,
                     colors: [
-                      const Color(0xFF00384D).withValues(alpha: 0.45),
+                      const Color(0xFF3B2A0A).withValues(alpha: 0.55),
                       AppColors.midnightCanvas,
                     ],
                   ),

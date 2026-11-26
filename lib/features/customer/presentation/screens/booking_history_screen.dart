@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -58,7 +58,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
           if (!widget.lockDivision) ...[
             // Segmented Tabs: [ 🚗 My Car Washes ] | [ 🧼 My Carpet Cleanings ]
             Container(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Container(
               padding: const EdgeInsets.all(4),
@@ -168,7 +168,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF111827),
+                            color: const Color(0xFF10131C),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppColors.cardBorder, width: 1.2),
                             boxShadow: [
@@ -263,7 +263,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                                           style: const TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w800,
-                                            color: AppColors.primaryDark,
+                                            color: AppColors.champagneGold,
                                           ),
                                         ),
                                       ],

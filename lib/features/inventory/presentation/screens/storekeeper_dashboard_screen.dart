@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
@@ -96,7 +96,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF111827),
+              color: const Color(0xFF10131C),
               border: Border(
                 bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2),
               ),
@@ -116,14 +116,14 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               dividerColor: Colors.transparent,
               indicator: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF0D9488), Color(0xFF14B8A6)],
+                  colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0D9488).withValues(alpha: 0.35),
+                    color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -189,7 +189,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: const Color(0xFF161A26),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.7)),
             ),
@@ -201,10 +201,10 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0D9488).withValues(alpha: 0.15),
+                        color: const Color(0xFFD97706).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.flash_on_rounded, color: Color(0xFF14B8A6), size: 18),
+                      child: const Icon(Icons.flash_on_rounded, color: Color(0xFFF59E0B), size: 18),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -232,11 +232,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   runSpacing: 6,
                   children: [
                     OutlinedButton.icon(
-                      icon: const Icon(Icons.playlist_add_rounded, size: 15, color: Color(0xFF38BDF8)),
-                      label: Text(state.tr('issueInitialFloat'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF38BDF8))),
+                      icon: const Icon(Icons.playlist_add_rounded, size: 15, color: Color(0xFFFBBF24)),
+                      label: Text(state.tr('issueInitialFloat'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFFFBBF24))),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        side: const BorderSide(color: Color(0xFF38BDF8), width: 1.1),
+                        side: const BorderSide(color: Color(0xFFFBBF24), width: 1.1),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onPressed: () => _showInitialFloatDialog(context, state, allConsumables),
@@ -262,13 +262,13 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF111827),
+              color: const Color(0xFF10131C),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.4)),
+              border: Border.all(color: const Color(0xFFD97706).withValues(alpha: 0.4)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.person_pin_rounded, color: Color(0xFF14B8A6), size: 18),
+                const Icon(Icons.person_pin_rounded, color: Color(0xFFF59E0B), size: 18),
                 const SizedBox(width: 6),
                 Flexible(
                   flex: 2,
@@ -288,7 +288,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
+                        color: const Color(0xFF161A26),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: AppColors.cardBorder),
                       ),
@@ -412,7 +412,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           // 6. Today's Returned Empties & Exchanges Audit Timeline
           Row(
             children: [
-              const Icon(Icons.history_rounded, color: Color(0xFF38BDF8), size: 18),
+              const Icon(Icons.history_rounded, color: Color(0xFFFBBF24), size: 18),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -448,12 +448,12 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF161A26),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isOutOfStock
               ? Colors.red.withValues(alpha: 0.5)
-              : const Color(0xFF0D9488).withValues(alpha: 0.35),
+              : const Color(0xFFD97706).withValues(alpha: 0.35),
           width: 1.2,
         ),
         boxShadow: [
@@ -506,7 +506,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       ? Colors.red.withValues(alpha: 0.15)
                       : (item.isLowStock
                           ? Colors.amber.withValues(alpha: 0.15)
-                          : const Color(0xFF0D9488).withValues(alpha: 0.15)),
+                          : const Color(0xFFD97706).withValues(alpha: 0.15)),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -518,7 +518,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     fontWeight: FontWeight.w900,
                     color: isOutOfStock
                         ? Colors.redAccent
-                        : (item.isLowStock ? Colors.amber : const Color(0xFF14B8A6)),
+                        : (item.isLowStock ? Colors.amber : const Color(0xFFF59E0B)),
                   ),
                 ),
               ),
@@ -535,7 +535,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               const Spacer(),
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
+                  color: const Color(0xFF0A0C12),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.cardBorder),
                 ),
@@ -600,7 +600,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 overflow: TextOverflow.ellipsis,
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0D9488),
+                backgroundColor: const Color(0xFFD97706),
                 foregroundColor: Colors.white,
                 disabledBackgroundColor: Colors.grey.shade800,
                 disabledForegroundColor: Colors.white38,
@@ -638,7 +638,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${state.tr('exchangeSuccessMsg')} ($qty ${item.unit} ${item.name})'),
-          backgroundColor: const Color(0xFF0D9488),
+          backgroundColor: const Color(0xFFD97706),
           duration: const Duration(seconds: 6),
           action: latestTx != null
               ? SnackBarAction(
@@ -681,8 +681,8 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   label: Text(cat, style: TextStyle(fontSize: 10.5, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600, color: isSel ? Colors.white : AppColors.textSecondary)),
                   selected: isSel,
                   onSelected: (_) => setState(() => _slowCategoryFilter = cat),
-                  selectedColor: const Color(0xFF0D9488),
-                  backgroundColor: const Color(0xFF1E293B),
+                  selectedColor: const Color(0xFFD97706),
+                  backgroundColor: const Color(0xFF161A26),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   checkmarkColor: Colors.white,
                 ),
@@ -695,7 +695,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            color: const Color(0xFF161A26),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.6)),
           ),
@@ -728,7 +728,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 icon: const Icon(Icons.swap_horiz_rounded, size: 14),
                 label: const Text('Exchange', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D9488),
+                  backgroundColor: const Color(0xFFD97706),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -746,7 +746,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF161A26),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.7)),
       ),
@@ -758,7 +758,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           height: 38,
           borderRadius: 8,
           fallbackIcon: Icons.autorenew_rounded,
-          fallbackColor: const Color(0xFF14B8A6),
+          fallbackColor: const Color(0xFFF59E0B),
         ),
         title: Text(
           ex.itemName,
@@ -786,7 +786,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Row(
           children: [
@@ -856,7 +856,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         Container(
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
           ),
           child: Wrap(
@@ -922,7 +922,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   ElevatedButton.icon(
                     onPressed: () => _showAddConsumableDialog(context, state),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D9488),
+                      backgroundColor: const Color(0xFFD97706),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -954,7 +954,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     )
                   : null,
               filled: true,
-              fillColor: const Color(0xFF1E293B),
+              fillColor: const Color(0xFF161A26),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
@@ -967,7 +967,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             child: Row(
               children: ['All', 'Low Stock', 'Healthy'].map((flt) {
                 final isSel = _stockLevelFilter == flt;
-                Color chipColor = const Color(0xFF0D9488);
+                Color chipColor = const Color(0xFFD97706);
                 if (flt == 'Low Stock') chipColor = Colors.redAccent;
                 if (flt == 'Healthy') chipColor = Colors.green;
 
@@ -978,7 +978,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     selected: isSel,
                     onSelected: (_) => setState(() => _stockLevelFilter = flt),
                     selectedColor: chipColor,
-                    backgroundColor: const Color(0xFF1E293B),
+                    backgroundColor: const Color(0xFF161A26),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     checkmarkColor: Colors.white,
                   ),
@@ -994,7 +994,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
+              color: const Color(0xFF0A0C12),
               border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.6))),
             ),
             child: SingleChildScrollView(
@@ -1041,7 +1041,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF161A26),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isOutOfStock
@@ -1193,7 +1193,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         Container(
           padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 20, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF111827),
+            color: const Color(0xFF10131C),
             border: Border(bottom: BorderSide(color: AppColors.cardBorder.withValues(alpha: 0.8), width: 1.2)),
           ),
           child: Wrap(
@@ -1224,7 +1224,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   ElevatedButton.icon(
                     onPressed: () => _showAddFixedAssetDialog(context, state),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D9488),
+                      backgroundColor: const Color(0xFFD97706),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -1256,7 +1256,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     )
                   : null,
               filled: true,
-              fillColor: const Color(0xFF1E293B),
+              fillColor: const Color(0xFF161A26),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
@@ -1280,8 +1280,8 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     label: Text(label, style: TextStyle(fontSize: 10.5, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600, color: isSel ? Colors.white : AppColors.textSecondary)),
                     selected: isSel,
                     onSelected: (_) => setState(() => _assetConditionFilter = cond),
-                    selectedColor: cond == 'needsService' ? Colors.amber.shade800 : const Color(0xFF0D9488),
-                    backgroundColor: const Color(0xFF1E293B),
+                    selectedColor: cond == 'needsService' ? Colors.amber.shade800 : const Color(0xFFD97706),
+                    backgroundColor: const Color(0xFF161A26),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     checkmarkColor: Colors.white,
                   ),
@@ -1312,7 +1312,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF161A26),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isOperational
@@ -1379,7 +1379,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, size: 13, color: Color(0xFF14B8A6)),
+              const Icon(Icons.location_on_outlined, size: 13, color: Color(0xFFF59E0B)),
               const SizedBox(width: 4),
               Text(asset.assignedLocation, style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w700)),
               const SizedBox(width: 12),
@@ -1475,11 +1475,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Row(
           children: [
-            const Icon(Icons.person_pin_rounded, color: Color(0xFF14B8A6), size: 20),
+            const Icon(Icons.person_pin_rounded, color: Color(0xFFF59E0B), size: 20),
             const SizedBox(width: 8),
             Text(state.tr('receiverLabel'), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
           ],
@@ -1502,7 +1502,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   final isSel = _selectedReceiver == name;
                   return ActionChip(
                     label: Text(name, style: TextStyle(color: isSel ? Colors.white : Colors.white70, fontSize: 11, fontWeight: isSel ? FontWeight.w800 : FontWeight.w600)),
-                    backgroundColor: isSel ? const Color(0xFF0D9488) : const Color(0xFF0F172A),
+                    backgroundColor: isSel ? const Color(0xFFD97706) : const Color(0xFF0A0C12),
                     onPressed: () {
                       setState(() => _selectedReceiver = name);
                       Navigator.pop(ctx);
@@ -1518,7 +1518,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   labelText: 'Custom Receiver Name',
                   labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFF0A0C12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 ),
@@ -1538,7 +1538,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               }
               Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
             child: const Text('Set Receiver'),
           ),
         ],
@@ -1553,11 +1553,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Row(
           children: [
-            const Icon(Icons.swap_horiz_rounded, color: Color(0xFF14B8A6), size: 20),
+            const Icon(Icons.swap_horiz_rounded, color: Color(0xFFF59E0B), size: 20),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -1586,7 +1586,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   labelText: 'Quantity Exchanged (${item.unit})',
                   labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFF0A0C12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -1598,7 +1598,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   labelText: 'Notes (Optional)',
                   labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFF0A0C12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -1623,11 +1623,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               if (context.mounted) {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.tr('exchangeSuccessMsg')), backgroundColor: const Color(0xFF0D9488)),
+                  SnackBar(content: Text(state.tr('exchangeSuccessMsg')), backgroundColor: const Color(0xFFD97706)),
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
             child: Text(state.tr('confirmExchangeBtn'), style: const TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
@@ -1648,11 +1648,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         builder: (ctx, setDialogState) {
           final selItem = items.firstWhere((c) => c.id == selectedItemId, orElse: () => items.first);
           return AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: const Color(0xFF161A26),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             title: Row(
               children: [
-                const Icon(Icons.playlist_add_rounded, color: Color(0xFF38BDF8), size: 20),
+                const Icon(Icons.playlist_add_rounded, color: Color(0xFFFBBF24), size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(state.tr('issueInitialFloat'), style: const TextStyle(color: Colors.white, fontSize: 14.5, fontWeight: FontWeight.w800)),
@@ -1669,11 +1669,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
                     value: selectedItemId,
-                    dropdownColor: const Color(0xFF0F172A),
+                    dropdownColor: const Color(0xFF0A0C12),
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: const Color(0xFF0F172A),
+                      fillColor: const Color(0xFF0A0C12),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     ),
@@ -1691,7 +1691,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       labelText: 'Quantity to Issue (${selItem.unit})',
                       labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       filled: true,
-                      fillColor: const Color(0xFF0F172A),
+                      fillColor: const Color(0xFF0A0C12),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
@@ -1703,7 +1703,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       labelText: 'Receiver Name',
                       labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       filled: true,
-                      fillColor: const Color(0xFF0F172A),
+                      fillColor: const Color(0xFF0A0C12),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
@@ -1715,7 +1715,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       labelText: 'Notes (e.g. New washer assigned, monthly float)',
                       labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       filled: true,
-                      fillColor: const Color(0xFF0F172A),
+                      fillColor: const Color(0xFF0A0C12),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
@@ -1740,11 +1740,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   if (context.mounted) {
                     Navigator.pop(ctx);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Issued $qty ${selItem.unit} of ${selItem.name} successfully!'), backgroundColor: const Color(0xFF0D9488)),
+                      SnackBar(content: Text('Issued $qty ${selItem.unit} of ${selItem.name} successfully!'), backgroundColor: const Color(0xFFD97706)),
                     );
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
                 child: const Text('Confirm Issue', style: TextStyle(fontWeight: FontWeight.w800)),
               ),
             ],
@@ -1773,7 +1773,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           final totalCost = qty * unitCost;
 
           return AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: const Color(0xFF161A26),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             title: Row(
               children: [
@@ -1793,11 +1793,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       value: selectedItemId,
-                      dropdownColor: const Color(0xFF0F172A),
+                      dropdownColor: const Color(0xFF0A0C12),
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFF0A0C12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       ),
@@ -1821,7 +1821,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                         labelText: 'Quantity to Add (${selItem.unit}) *',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFF0A0C12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -1835,7 +1835,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                         labelText: 'Unit Cost (ETB) *',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFF0A0C12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -1864,7 +1864,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                         labelText: 'Supplier / Vendor',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFF0A0C12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -1881,7 +1881,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF0A0C12),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: invoiceName != null ? Colors.green : AppColors.cardBorder),
                         ),
@@ -1955,7 +1955,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
           final totalCost = qty * unitCost;
 
           return AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: const Color(0xFF161A26),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             title: Text('Receive: ${item.name}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
             content: SizedBox(
@@ -1973,7 +1973,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                         labelText: 'Quantity to Add (${item.unit}) *',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFF0A0C12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -1987,7 +1987,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                         labelText: 'Unit Cost (ETB) *',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFF0A0C12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -2015,7 +2015,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                         labelText: 'Supplier Name',
                         labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFF0A0C12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -2032,7 +2032,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                          color: invoiceName != null ? Colors.green.withValues(alpha: 0.15) : const Color(0xFF0A0C12),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: invoiceName != null ? Colors.green : AppColors.cardBorder),
                         ),
@@ -2102,7 +2102,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: const Text('Add Consumable Item', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
         content: SingleChildScrollView(
@@ -2144,7 +2144,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               }
               if (context.mounted) Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
             child: const Text('Save Item', style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
@@ -2157,7 +2157,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: Text('Decommission ${item.name}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
         content: Column(
@@ -2173,7 +2173,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 labelText: 'Reason for Decommissioning',
                 labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                 filled: true,
-                fillColor: const Color(0xFF0F172A),
+                fillColor: const Color(0xFF0A0C12),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
@@ -2200,7 +2200,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         title: const Text('Super Admin: Delete Consumable', style: TextStyle(color: Colors.redAccent, fontSize: 15, fontWeight: FontWeight.w800)),
         content: Text('Are you sure you want to permanently delete "${item.name}" from the database?', style: const TextStyle(color: Colors.white70, fontSize: 12)),
         actions: [
@@ -2229,7 +2229,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: const Text('Add Fixed Asset', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
         content: SingleChildScrollView(
@@ -2269,7 +2269,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
               }
               if (context.mounted) Navigator.pop(ctx);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
             child: const Text('Save Asset', style: TextStyle(fontWeight: FontWeight.w800)),
           ),
         ],
@@ -2286,7 +2286,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF161A26),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           title: Text('Edit ${asset.name}', style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
           content: Column(
@@ -2294,13 +2294,13 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             children: [
               DropdownButtonFormField<AssetCondition>(
                 value: selectedCondition,
-                dropdownColor: const Color(0xFF0F172A),
+                dropdownColor: const Color(0xFF0A0C12),
                 style: const TextStyle(color: Colors.white, fontSize: 12),
                 decoration: InputDecoration(
                   labelText: 'Working Condition',
                   labelStyle: const TextStyle(color: AppColors.textSecondary),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFF0A0C12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 items: AssetCondition.values.map((cond) {
@@ -2318,7 +2318,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   labelText: 'Assigned Location',
                   labelStyle: const TextStyle(color: AppColors.textSecondary),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFF0A0C12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -2330,7 +2330,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   labelText: 'Maintenance Notes',
                   labelStyle: const TextStyle(color: AppColors.textSecondary),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFF0A0C12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -2348,7 +2348,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                 await state.saveFixedAsset(updated);
                 if (context.mounted) Navigator.pop(ctx);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
               child: const Text('Update'),
             ),
           ],
@@ -2361,7 +2361,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         title: const Text('Super Admin: Delete Asset', style: TextStyle(color: Colors.redAccent, fontSize: 15, fontWeight: FontWeight.w800)),
         content: Text('Are you sure you want to permanently delete "${asset.name}" (${asset.id})?', style: const TextStyle(color: Colors.white70, fontSize: 12)),
         actions: [
@@ -2384,7 +2384,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFF161A26),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.cardBorder.withValues(alpha: 0.6)),
       ),

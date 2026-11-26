@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 
 /// Animated 3D chemical canister liquid level gauge with glowing meniscus line
@@ -43,7 +43,7 @@ class LiquidLevelGauge extends StatelessWidget {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFF0A0C12),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: statusColor.withValues(alpha: 0.5),

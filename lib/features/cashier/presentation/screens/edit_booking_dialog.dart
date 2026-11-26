@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/core/widgets/custom_button.dart';
 import 'package:bishe_car_wash/core/widgets/custom_text_field.dart';
@@ -77,7 +77,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
     final isCarpet = widget.booking.isCarpet;
 
     return Dialog(
-      backgroundColor: const Color(0xFF111827),
+      backgroundColor: const Color(0xFF10131C),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: const BorderSide(color: AppColors.cardBorder, width: 1.2),
@@ -99,12 +99,12 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: (isCarpet ? const Color(0xFF7C3AED) : const Color(0xFF0284C7)).withOpacity(0.18),
+                        color: (isCarpet ? const Color(0xFF7C3AED) : AppColors.warmGold).withOpacity(0.18),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         isCarpet ? Icons.texture_rounded : Icons.edit_note_rounded,
-                        color: isCarpet ? const Color(0xFFA78BFA) : const Color(0xFF38BDF8),
+                        color: isCarpet ? const Color(0xFFA78BFA) : const Color(0xFFFBBF24),
                         size: 24,
                       ),
                     ),
@@ -192,7 +192,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF161A26),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
@@ -200,7 +200,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                               child: DropdownButton<CarType>(
                                 value: _carType,
                                 isExpanded: true,
-                                dropdownColor: const Color(0xFF1E293B),
+                                dropdownColor: const Color(0xFF161A26),
                                 icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
                                 items: CarType.values.map((ct) {
                                   return DropdownMenuItem<CarType>(
@@ -233,7 +233,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF161A26),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
@@ -243,7 +243,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                                     ? state.packages.firstWhere((p) => p.id == _package.id)
                                     : (state.packages.isNotEmpty ? state.packages.first : _package),
                                 isExpanded: true,
-                                dropdownColor: const Color(0xFF1E293B),
+                                dropdownColor: const Color(0xFF161A26),
                                 icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
                                 items: state.packages.map((pkg) {
                                   return DropdownMenuItem<WashPackage>(
@@ -281,7 +281,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                                   child: Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: _carpetType == 'type_a' ? const Color(0xFF7C3AED).withOpacity(0.2) : const Color(0xFF1E293B),
+                                      color: _carpetType == 'type_a' ? const Color(0xFF7C3AED).withOpacity(0.2) : const Color(0xFF161A26),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
                                         color: _carpetType == 'type_a' ? const Color(0xFFA78BFA) : AppColors.cardBorder,
@@ -308,7 +308,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                                   child: Container(
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: _carpetType == 'type_b' ? const Color(0xFF7C3AED).withOpacity(0.2) : const Color(0xFF1E293B),
+                                      color: _carpetType == 'type_b' ? const Color(0xFF7C3AED).withOpacity(0.2) : const Color(0xFF161A26),
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
                                         color: _carpetType == 'type_b' ? const Color(0xFFA78BFA) : AppColors.cardBorder,
@@ -408,7 +408,7 @@ class _EditBookingDialogState extends State<EditBookingDialog> {
                       child: CustomButton(
                         text: state.tr('saveChanges'),
                         icon: Icons.check_circle_rounded,
-                        backgroundColor: const Color(0xFF0284C7),
+                        backgroundColor: AppColors.primary,
                         isLoading: _isSaving,
                         onPressed: _isSaving ? null : () => _handleSave(context),
                       ),

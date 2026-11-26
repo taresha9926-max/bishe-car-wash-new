@@ -21,7 +21,7 @@ class DualServiceEntranceTabBar extends StatelessWidget {
       padding: padding,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF111827),
+          color: const Color(0xFF10131C),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.cardBorder, width: 1.2),
           boxShadow: [
@@ -45,20 +45,20 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: isCarWash
                         ? const LinearGradient(
-                            colors: [Color(0xFF0284C7), Color(0xFF0369A1)],
+                            colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
                         : null,
-                    color: isCarWash ? null : const Color(0xFF0F172A).withValues(alpha: 0.5),
+                    color: isCarWash ? null : const Color(0xFF0A0C12).withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(12),
                     border: isCarWash
-                        ? Border.all(color: AppColors.liquidCyanNeon.withValues(alpha: 0.6), width: 1)
+                        ? Border.all(color: AppColors.champagneGold.withValues(alpha: 0.65), width: 1)
                         : null,
                     boxShadow: isCarWash
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF0284C7).withValues(alpha: 0.45),
+                              color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
                               blurRadius: 10,
                               offset: const Offset(0, 2),
                             ),
@@ -111,7 +111,7 @@ class DualServiceEntranceTabBar extends StatelessWidget {
                             end: Alignment.bottomRight,
                           )
                         : null,
-                    color: !isCarWash ? null : const Color(0xFF0F172A).withValues(alpha: 0.5),
+                    color: !isCarWash ? null : const Color(0xFF0A0C12).withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(12),
                     border: !isCarWash
                         ? Border.all(color: const Color(0xFFA78BFA).withValues(alpha: 0.6), width: 1)

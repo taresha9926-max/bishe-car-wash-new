@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -247,7 +247,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.primaryDark,
+                        color: AppColors.champagneGold,
                       ),
                     ),
                     Text(
@@ -363,7 +363,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF161A26),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: _isSplitPayment ? AppColors.primary : AppColors.cardBorder),
                 ),
@@ -959,7 +959,7 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? method.color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
+          color: isSelected ? method.color.withValues(alpha: 0.18) : const Color(0xFF161A26),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? method.color : AppColors.cardBorder,

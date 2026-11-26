@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/language_switcher_action.dart';
@@ -44,7 +44,7 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                  colors: [Color(0xFF161A26), Color(0xFF0A0C12)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -103,7 +103,7 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
                   label: Text(state.tr('all')),
                   onSelected: (_) => setState(() => _selectedWasherId = 'ALL'),
                   selectedColor: AppColors.primary,
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: const Color(0xFF161A26),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(color: _selectedWasherId == 'ALL' ? AppColors.primary : AppColors.cardBorder),
@@ -120,7 +120,7 @@ class _CommissionLogsScreenState extends State<CommissionLogsScreen> {
                     label: Text(w.name),
                     onSelected: (_) => setState(() => _selectedWasherId = w.id),
                     selectedColor: AppColors.primary,
-                    backgroundColor: const Color(0xFF1E293B),
+                    backgroundColor: const Color(0xFF161A26),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(color: isSel ? AppColors.primary : AppColors.cardBorder),

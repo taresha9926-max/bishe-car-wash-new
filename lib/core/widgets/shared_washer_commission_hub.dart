@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
 import 'package:bishe_car_wash/features/admin/domain/models/staff_member.dart';
@@ -98,7 +98,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _isExpanded
@@ -540,7 +540,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF161A26),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
@@ -584,7 +584,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
             margin: const EdgeInsets.only(bottom: 6),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: const Color(0xFF161A26),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isPresent ? AppColors.statusCompleted.withOpacity(0.35) : Colors.red.withOpacity(0.25),
@@ -700,7 +700,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                   ),
                   selected: !_adminShowLiveRoster,
                   selectedColor: AppColors.primary,
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: const Color(0xFF161A26),
                   showCheckmark: false,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -724,7 +724,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                   ),
                   selected: _adminShowLiveRoster,
                   selectedColor: AppColors.primary,
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: const Color(0xFF161A26),
                   showCheckmark: false,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -823,7 +823,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFF161A26),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: AppColors.cardBorder),
                     ),
@@ -899,7 +899,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
               )
             : Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF111827),
+                  color: const Color(0xFF10131C),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.cardBorder),
                 ),

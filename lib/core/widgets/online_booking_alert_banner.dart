@@ -63,12 +63,12 @@ class _OnlineBookingAlertBannerState extends State<OnlineBookingAlertBanner> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
+          colors: [Color(0xFFB45309), Color(0xFFD97706)],
         ),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0D9488).withValues(alpha: 0.28),
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.28),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -114,8 +114,8 @@ class _OnlineBookingAlertBannerState extends State<OnlineBookingAlertBanner> {
           const SizedBox(width: 8),
           TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFF1E293B),
-              foregroundColor: AppColors.liquidCyanNeon,
+              backgroundColor: const Color(0xFF161A26),
+              foregroundColor: AppColors.warmGold,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,

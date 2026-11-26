@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../core/utils/url_launcher_helper.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
@@ -95,7 +95,7 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: const Color(0xFF0A0C12),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -499,8 +499,8 @@ class _AdVideoShowcaseCardState extends State<AdVideoShowcaseCard> with SingleTi
         gradient: LinearGradient(
           colors: [
             Color(0xFF020617),
-            Color(0xFF0F172A),
-            Color(0xFF1E293B),
+            Color(0xFF0A0C12),
+            Color(0xFF161A26),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

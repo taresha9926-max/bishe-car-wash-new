@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -146,7 +146,7 @@ class _OperationalManagerDashboardScreenState
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -242,7 +242,7 @@ class _OperationalManagerDashboardScreenState
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF111827),
+        color: const Color(0xFF10131C),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1.2),
         boxShadow: [
@@ -259,7 +259,7 @@ class _OperationalManagerDashboardScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
+              gradient: const LinearGradient(colors: [Color(0xFFD97706), Color(0xFFB45309)]),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -382,7 +382,7 @@ class _OperationalManagerDashboardScreenState
                 alignment: Alignment.center,
                 child: Text(
                   '$_showerCount',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.champagneGold),
                 ),
               ),
               IconButton(
@@ -411,7 +411,7 @@ class _OperationalManagerDashboardScreenState
               Expanded(
                 child: ChoiceChip(
                   selectedColor: AppColors.liquidCyanNeon.withValues(alpha: 0.25),
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: const Color(0xFF161A26),
                   side: BorderSide(
                     color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : AppColors.cardBorder,
                   ),
@@ -447,7 +447,7 @@ class _OperationalManagerDashboardScreenState
               Expanded(
                 child: ChoiceChip(
                   selectedColor: const Color(0xFF0284C7).withValues(alpha: 0.25),
-                  backgroundColor: const Color(0xFF1E293B),
+                  backgroundColor: const Color(0xFF161A26),
                   side: BorderSide(
                     color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF0284C7) : AppColors.cardBorder,
                   ),
@@ -548,7 +548,7 @@ class _OperationalManagerDashboardScreenState
                 margin: const EdgeInsets.only(bottom: 6),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFF161A26),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.cardBorder, width: 0.8),
                 ),
@@ -568,7 +568,7 @@ class _OperationalManagerDashboardScreenState
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFF38BDF8)),
+                      icon: const Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFFFBBF24)),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       onPressed: () => _showEditShowerDialog(context, state, s),
@@ -613,7 +613,7 @@ class _OperationalManagerDashboardScreenState
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFF161A26),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(state.tr('editRecord'), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           content: Column(
@@ -796,7 +796,7 @@ class _OperationalManagerDashboardScreenState
                     hintText: state.tr('enterOtp'),
                     counterText: '',
                     filled: true,
-                    fillColor: const Color(0xFF1E293B),
+                    fillColor: const Color(0xFF161A26),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     isDense: true,
@@ -836,9 +836,9 @@ class _OperationalManagerDashboardScreenState
     return Container(
       padding: EdgeInsets.all(isMobile ? 12 : 16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF1E293B)]),
+        gradient: const LinearGradient(colors: [Color(0xFF0A0C12), Color(0xFF161A26)]),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF38BDF8).withValues(alpha: 0.65), width: 1.5),
+        border: Border.all(color: const Color(0xFFFBBF24).withValues(alpha: 0.65), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -848,10 +848,10 @@ class _OperationalManagerDashboardScreenState
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                  color: const Color(0xFFFBBF24).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.pin_rounded, color: Color(0xFF38BDF8), size: 22),
+                child: const Icon(Icons.pin_rounded, color: Color(0xFFFBBF24), size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -872,12 +872,12 @@ class _OperationalManagerDashboardScreenState
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF38BDF8).withValues(alpha: 0.2),
+                            color: const Color(0xFFFBBF24).withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             state.tr('pendingAdminReceipt'),
-                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFF38BDF8)),
+                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Color(0xFFFBBF24)),
                           ),
                         ),
                       ],
@@ -890,7 +890,7 @@ class _OperationalManagerDashboardScreenState
                       children: [
                         Text(
                           '[ ${adminPending.handoverOtp ?? '----'} ]',
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 4, color: Color(0xFF38BDF8)),
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 4, color: Color(0xFFFBBF24)),
                         ),
                         Text(
                           '${CurrencyFormatter.format(adminPending.handoverCashAmount)} ${state.tr("cashToAdminSuffix")}',
@@ -910,13 +910,13 @@ class _OperationalManagerDashboardScreenState
             children: [
               OutlinedButton.icon(
                 onPressed: () => _confirmAndUnlockNightShift(context, state),
-                icon: const Icon(Icons.lock_open_rounded, size: 13, color: Color(0xFF38BDF8)),
+                icon: const Icon(Icons.lock_open_rounded, size: 13, color: Color(0xFFFBBF24)),
                 label: Text(
                   state.tr('cancelHandoverAndAddCars'),
-                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF38BDF8)),
+                  style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFFFBBF24)),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF38BDF8)),
+                  side: const BorderSide(color: Color(0xFFFBBF24)),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -930,8 +930,8 @@ class _OperationalManagerDashboardScreenState
                   style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF38BDF8),
-                  foregroundColor: const Color(0xFF0F172A),
+                  backgroundColor: const Color(0xFFFBBF24),
+                  foregroundColor: const Color(0xFF0A0C12),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,

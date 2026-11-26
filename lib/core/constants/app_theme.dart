@@ -76,10 +76,10 @@ class AppTheme {
         indicatorSize: TabBarIndicatorSize.tab,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surfaceVariant,
         selectedColor: AppColors.primary,
-        disabledColor: const Color(0xFF0F172A),
-        labelStyle: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+        disabledColor: AppColors.midnightCanvas,
+        labelStyle: const TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w700),
         secondaryLabelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
         brightness: Brightness.dark,
         side: const BorderSide(color: AppColors.cardBorder, width: 1),

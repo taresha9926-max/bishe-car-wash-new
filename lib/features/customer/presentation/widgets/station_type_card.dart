@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -28,7 +28,7 @@ class StationTypeCard extends StatelessWidget {
     final isValet = serviceType == ServiceType.valetPickUp;
     final primaryAccent = isStation
         ? (isCarpet ? const Color(0xFF4F46E5) : AppColors.bay1Color)
-        : (isValet ? const Color(0xFF7C3AED) : (isCarpet ? const Color(0xFF0D9488) : AppColors.mobileVanColor));
+        : (isValet ? const Color(0xFF7C3AED) : (isCarpet ? const Color(0xFFD97706) : AppColors.mobileVanColor));
 
     final title = isCarpet
         ? (isStation
@@ -66,7 +66,7 @@ class StationTypeCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? primaryAccent.withOpacity(0.18) : const Color(0xFF111827),
+          color: isSelected ? primaryAccent.withOpacity(0.18) : const Color(0xFF10131C),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? primaryAccent : AppColors.cardBorder,

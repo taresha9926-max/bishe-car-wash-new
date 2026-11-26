@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -328,7 +328,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: _carpetType == 'type_a' ? const Color(0xFF7C3AED).withOpacity(0.18) : const Color(0xFF1E293B),
+                                    color: _carpetType == 'type_a' ? const Color(0xFF7C3AED).withOpacity(0.18) : const Color(0xFF161A26),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
                                       color: _carpetType == 'type_a' ? const Color(0xFFA78BFA) : AppColors.cardBorder,
@@ -360,7 +360,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: _carpetType == 'type_b' ? const Color(0xFF7C3AED).withOpacity(0.18) : const Color(0xFF1E293B),
+                                    color: _carpetType == 'type_b' ? const Color(0xFF7C3AED).withOpacity(0.18) : const Color(0xFF161A26),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
                                       color: _carpetType == 'type_b' ? const Color(0xFFA78BFA) : AppColors.cardBorder,
@@ -543,7 +543,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           Container(
                             constraints: const BoxConstraints(maxHeight: 220),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF161A26),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
@@ -571,7 +571,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 fontWeight: isChecked ? FontWeight.w800 : FontWeight.w600,
-                                                color: isChecked ? AppColors.primaryDark : AppColors.textPrimary,
+                                                color: isChecked ? AppColors.champagneGold : AppColors.textPrimary,
                                               ),
                                             ),
                                             const SizedBox(height: 1),
@@ -588,7 +588,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                       ),
                                       Text(
                                         CurrencyFormatter.format(itemPrice),
-                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
+                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.champagneGold),
                                       ),
                                     ],
                                   ),
@@ -617,14 +617,14 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF161A26),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 isExpanded: true,
-                                dropdownColor: const Color(0xFF1E293B),
+                                dropdownColor: const Color(0xFF161A26),
                                 value: _selectedPackage?.id,
                                 items: packages.map((pkg) {
                                   final pkgPrice = pkg.getPriceFor(_carType);
@@ -648,7 +648,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                                         ),
                                         Text(
                                           CurrencyFormatter.format(pkgPrice),
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primaryDark),
+                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.champagneGold),
                                         ),
                                       ],
                                     ),
@@ -767,7 +767,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w900,
-                                color: _isCarpetMode ? const Color(0xFF7C3AED) : AppColors.primaryDark,
+                                color: _isCarpetMode ? const Color(0xFFA78BFA) : AppColors.champagneGold,
                               ),
                             ),
                           ],
@@ -813,7 +813,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
         decoration: BoxDecoration(
-          color: selected ? color.withValues(alpha: 0.18) : const Color(0xFF1E293B),
+          color: selected ? color.withValues(alpha: 0.18) : const Color(0xFF161A26),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: selected ? color : AppColors.cardBorder, width: selected ? 1.6 : 1),
         ),

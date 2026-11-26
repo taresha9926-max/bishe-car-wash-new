@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:bishe_car_wash/core/constants/app_colors.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 
@@ -126,8 +126,8 @@ class _Automotive3DCarViewState extends State<Automotive3DCarView>
                 radius: 0.9,
                 colors: [
                   phaseColor.withValues(alpha: 0.22),
-                  const Color(0xFF0F172A).withValues(alpha: 0.95),
-                  const Color(0xFF090D14),
+                  const Color(0xFF0A0C12).withValues(alpha: 0.95),
+                  const Color(0xFF06070B),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
@@ -221,7 +221,7 @@ class _Automotive3DCarViewState extends State<Automotive3DCarView>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF161A26),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(color: AppColors.liquidCyanNeon, width: 1),
                             ),
@@ -251,7 +251,7 @@ class _Automotive3DCarViewState extends State<Automotive3DCarView>
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF111827).withValues(alpha: 0.85),
+                              color: const Color(0xFF10131C).withValues(alpha: 0.85),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: phaseColor.withValues(alpha: 0.5), width: 1),
                             ),
@@ -293,7 +293,7 @@ class _Automotive3DCarViewState extends State<Automotive3DCarView>
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF111827).withValues(alpha: 0.85),
+                                color: const Color(0xFF10131C).withValues(alpha: 0.85),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                               ),

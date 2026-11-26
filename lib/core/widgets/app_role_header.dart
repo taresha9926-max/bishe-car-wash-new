@@ -33,17 +33,17 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
   Color _getRoleAccentColor(UserRole role) {
     switch (role) {
       case UserRole.admin:
-        return const Color(0xFFF59E0B); // Amber / Gold
+        return AppColors.champagneGold; // Champagne Gold
       case UserRole.cashier:
         return const Color(0xFF10B981); // Emerald
       case UserRole.manager:
-        return const Color(0xFF6366F1); // Indigo
+        return const Color(0xFFA78BFA); // Soft Indigo
       case UserRole.accountant:
-        return const Color(0xFF38BDF8); // Sky Blue
+        return AppColors.warmGold; // Warm Gold
       case UserRole.storekeeper:
         return const Color(0xFF2DD4BF); // Teal
       case UserRole.customer:
-        return AppColors.accent;
+        return AppColors.warmGold; // Warm Brushed Gold
     }
   }
 
@@ -56,7 +56,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       elevation: 0,
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFF0A0C12),
       surfaceTintColor: Colors.transparent,
       iconTheme: const IconThemeData(color: Colors.white),
       centerTitle: false,
@@ -83,12 +83,12 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF0A192F), Color(0xFF172A45)],
+            colors: [Color(0xFF06070B), Color(0xFF15120C)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           border: Border(
-            bottom: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+            bottom: BorderSide(color: Color(0x33F59E0B), width: 1.2),
           ),
         ),
       ),
@@ -243,7 +243,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
             margin: EdgeInsets.symmetric(vertical: 12, horizontal: isMobile ? 2 : 6),
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
+              color: const Color(0xFF161A26),
               borderRadius: BorderRadius.circular(isMobile ? 10 : 20),
               border: Border.all(color: roleAccent.withValues(alpha: 0.5), width: 1.2),
             ),
@@ -251,7 +251,7 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
               initialValue: currentRole,
               tooltip: currentRole == UserRole.customer ? state.tr('staffPortals') : state.tr('staffPortals'),
               offset: const Offset(0, 42),
-              color: const Color(0xFF1E293B),
+              color: const Color(0xFF161A26),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               onSelected: (role) async {
                 if (role == currentRole) return;
@@ -368,10 +368,10 @@ class AppRoleHeader extends StatelessWidget implements PreferredSizeWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFF161A26),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF334155)),
+          side: const BorderSide(color: Color(0x38F59E0B)),
         ),
         title: Row(
           children: [

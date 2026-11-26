@@ -7,7 +7,7 @@ import 'package:bishe_car_wash/core/widgets/tactile_bounce.dart';
 class AppGlass {
   AppGlass._();
 
-  /// Standard dark slate glass card decoration with metallic cyan neon border.
+  /// Standard smoked carbon glass card decoration with brushed gold border.
   static BoxDecoration cardDecoration({
     Color? borderColor,
     double radius = 16,
@@ -20,8 +20,8 @@ class AppGlass {
       gradient: LinearGradient(
         colors: gradientColors ??
             const [
-              Color(0xFF162032),
-              Color(0xFF0F172A),
+              Color(0xFF161924),
+              Color(0xFF10131C),
             ],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -36,7 +36,7 @@ class AppGlass {
         ),
         if (glow)
           BoxShadow(
-            color: (glowColor ?? AppColors.liquidCyanNeon).withValues(alpha: 0.22),
+            color: (glowColor ?? AppColors.warmGold).withValues(alpha: 0.22),
             blurRadius: 18,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -73,7 +73,7 @@ class AppGlass {
       );
     }
     return BoxDecoration(
-      color: const Color(0xFF0F172A).withValues(alpha: 0.6),
+      color: const Color(0xFF0A0C12).withValues(alpha: 0.7),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
     );
@@ -85,10 +85,10 @@ class AppGlass {
     Color? borderColor,
   }) {
     return BoxDecoration(
-      color: const Color(0xFF111827),
+      color: const Color(0xFF10131C),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: borderColor ?? AppColors.liquidCyanNeon.withValues(alpha: 0.3),
+        color: borderColor ?? AppColors.warmGold.withValues(alpha: 0.32),
         width: 1.4,
       ),
       boxShadow: [
@@ -98,7 +98,7 @@ class AppGlass {
           offset: const Offset(0, 10),
         ),
         BoxShadow(
-          color: AppColors.liquidCyanNeon.withValues(alpha: 0.12),
+          color: AppColors.warmGold.withValues(alpha: 0.14),
           blurRadius: 24,
           offset: const Offset(0, 2),
         ),
