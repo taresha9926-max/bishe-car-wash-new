@@ -1,0 +1,4326 @@
+[
+  {
+    "day_index": 1,
+    "date_ec": "03-03-2017",
+    "date_gc_2024": "2024-11-12",
+    "date_gc_2026": "2026-11-12",
+    "weekday": "Tuesday",
+    "source_images": [
+      "media_1795632792931_611ed88a.jpg"
+    ],
+    "cars_count": 18,
+    "wash_revenue": 12500,
+    "shower_revenue": 200,
+    "carpet_revenue": 0,
+    "gross_total": 12700,
+    "expenses": [
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      },
+      {
+        "name": "ለአብርሃም (To Abraham)",
+        "amount": 1500
+      }
+    ],
+    "total_expenses": 1900,
+    "net_total": 10800,
+    "cbe_total": 6100,
+    "tele_total": 4100,
+    "cash_total": 600,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 4400,
+        "tele": 1700,
+        "total": 6100
+      },
+      "Alex": {
+        "cbe": 1700,
+        "tele": 2400,
+        "total": 4100
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "Suzuki",
+        "plate": "C91524",
+        "service": "Normal",
+        "start": "2:40",
+        "end": "3:50",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "Tucson",
+        "plate": "C37136",
+        "service": "Detail",
+        "start": "3:30",
+        "end": "",
+        "price": 0,
+        "payment": "Pending",
+        "washer": "",
+        "phone": "0972936..."
+      },
+      {
+        "no": 3,
+        "vehicle": "Pickup Hilux",
+        "plate": "102516",
+        "service": "Normal",
+        "start": "3:35",
+        "end": "4:43",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "BMW",
+        "plate": "A25132",
+        "service": "Normal",
+        "start": "3:40",
+        "end": "4:33",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "Pickup",
+        "plate": "28057",
+        "service": "Normal",
+        "start": "4:00",
+        "end": "7:20",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "0932024040"
+      },
+      {
+        "no": 6,
+        "vehicle": "Pickup Hilux",
+        "plate": "B50713",
+        "service": "Normal",
+        "start": "4:10",
+        "end": "5:55",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": "0926411071"
+      },
+      {
+        "no": 7,
+        "vehicle": "Pickup",
+        "plate": "—",
+        "service": "Normal",
+        "start": "5:00",
+        "end": "5:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Tucson",
+        "plate": "B07284",
+        "service": "Normal",
+        "start": "5:30",
+        "end": "6:07",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Corolla",
+        "plate": "0133",
+        "service": "Normal",
+        "start": "6:50",
+        "end": "8:11",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 10,
+        "vehicle": "Starex",
+        "plate": "A66942",
+        "service": "Normal",
+        "start": "7:00",
+        "end": "11:21",
+        "price": 1200,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "Suzuki",
+        "plate": "C08670",
+        "service": "Normal",
+        "start": "8:20",
+        "end": "9:38",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "0905426980"
+      },
+      {
+        "no": 12,
+        "vehicle": "Corolla",
+        "plate": "C48808",
+        "service": "Engine & Normal",
+        "start": "8:22",
+        "end": "10:31",
+        "price": 3200,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Suzuki",
+        "plate": "C03005",
+        "service": "Normal",
+        "start": "8:26",
+        "end": "9:53",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0913150847"
+      },
+      {
+        "no": 14,
+        "vehicle": "Bajaj",
+        "plate": "A28122",
+        "service": "Normal",
+        "start": "8:30",
+        "end": "9:00",
+        "price": 200,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "BYD",
+        "plate": "C89054",
+        "service": "Normal",
+        "start": "9:08",
+        "end": "10:43",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "Corolla",
+        "plate": "B21639",
+        "service": "Normal",
+        "start": "8:20",
+        "end": "10:49",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Pickup",
+        "plate": "1016",
+        "service": "Vacuum",
+        "start": "",
+        "end": "",
+        "price": 200,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Pickup Hilux",
+        "plate": "10163",
+        "service": "Normal",
+        "start": "11:10",
+        "end": "11:29",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 2,
+    "date_ec": "04-03-2017",
+    "date_gc_2024": "2024-11-13",
+    "date_gc_2026": "2026-11-13",
+    "weekday": "Wednesday",
+    "source_images": [
+      "media_1795632806157_cc819270.jpg"
+    ],
+    "cars_count": 19,
+    "wash_revenue": 11400,
+    "shower_revenue": 100,
+    "carpet_revenue": 0,
+    "gross_total": 11500,
+    "expenses": [
+      {
+        "name": "ለጉዩ ጓደኞች የተሰጠ (Staff allowance)",
+        "amount": 1000
+      },
+      {
+        "name": "ለአያ አካውንት ለቀለሙ የተላከ (Paint/Supplies)",
+        "amount": 4600
+      },
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 300
+      }
+    ],
+    "total_expenses": 5900,
+    "net_total": 5600,
+    "cbe_total": 3600,
+    "tele_total": 2000,
+    "cash_total": 0,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 3600,
+        "tele": 0,
+        "total": 3600
+      },
+      "Alex": {
+        "cbe": 0,
+        "tele": 2000,
+        "total": 2000
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "Pickup Hilux",
+        "plate": "08727",
+        "service": "Normal",
+        "start": "1:30",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0922389000"
+      },
+      {
+        "no": 2,
+        "vehicle": "Pickup Hilux",
+        "plate": "07537",
+        "service": "Normal",
+        "start": "1:40",
+        "end": "2:20",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Pickup",
+        "plate": "A59632",
+        "service": "Normal",
+        "start": "1:45",
+        "end": "3:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "BMW",
+        "plate": "C16291",
+        "service": "Normal",
+        "start": "2:30",
+        "end": "3:55",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "Corolla",
+        "plate": "C70703",
+        "service": "Normal",
+        "start": "",
+        "end": "9:01",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 6,
+        "vehicle": "BYD",
+        "plate": "AA B0904",
+        "service": "Normal",
+        "start": "2:48",
+        "end": "3:50",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 7,
+        "vehicle": "Pickup Leopard",
+        "plate": "00319",
+        "service": "Normal",
+        "start": "2:51",
+        "end": "4:00",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Suzuki",
+        "plate": "AA A2492",
+        "service": "Normal",
+        "start": "3:13",
+        "end": "4:44",
+        "price": 300,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Hilux Pickup",
+        "plate": "08718",
+        "service": "Normal",
+        "start": "3:25",
+        "end": "5:27",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 10,
+        "vehicle": "Vitz",
+        "plate": "A31840",
+        "service": "Normal",
+        "start": "4:48",
+        "end": "9:50",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "094155196..."
+      },
+      {
+        "no": 11,
+        "vehicle": "Corolla",
+        "plate": "AA 6600",
+        "service": "Normal",
+        "start": "4:56",
+        "end": "5:33",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "Suzuki",
+        "plate": "C14841",
+        "service": "Normal",
+        "start": "5:20",
+        "end": "5:51",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "DX",
+        "plate": "58837",
+        "service": "Normal",
+        "start": "7:00",
+        "end": "7:33",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "0935964347"
+      },
+      {
+        "no": 14,
+        "vehicle": "Corolla",
+        "plate": "B09194",
+        "service": "Normal",
+        "start": "9:10",
+        "end": "9:50",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "BYD",
+        "plate": "C79680",
+        "service": "Normal",
+        "start": "9:20",
+        "end": "11:41",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "BYD",
+        "plate": "C54936",
+        "service": "Normal",
+        "start": "9:20",
+        "end": "10:02",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Suzuki",
+        "plate": "C65163",
+        "service": "Normal",
+        "start": "9:20",
+        "end": "10:17",
+        "price": 400,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Creta",
+        "plate": "A37414",
+        "service": "Normal",
+        "start": "10:20",
+        "end": "11:13",
+        "price": 400,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Suzuki",
+        "plate": "C39242",
+        "service": "Normal",
+        "start": "10:30",
+        "end": "11:57",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 3,
+    "date_ec": "05-03-2017",
+    "date_gc_2024": "2024-11-14",
+    "date_gc_2026": "2026-11-14",
+    "weekday": "Thursday",
+    "source_images": [
+      "media_1795632819122_2dc6ba38.jpg"
+    ],
+    "cars_count": 30,
+    "wash_revenue": 22400,
+    "shower_revenue": 200,
+    "carpet_revenue": 0,
+    "gross_total": 22600,
+    "expenses": [
+      {
+        "name": "ባንክ የተላከ (Bank Transfer)",
+        "amount": 5000
+      },
+      {
+        "name": "የስልክ ካርድ (Airtime)",
+        "amount": 300
+      },
+      {
+        "name": "ለሰው የተሰጠ (Staff/Worker payout)",
+        "amount": 4250
+      },
+      {
+        "name": "የቀይ ጎማ አስገዥ (Red tyre cleaner)",
+        "amount": 1300
+      }
+    ],
+    "total_expenses": 10850,
+    "net_total": 11750,
+    "cbe_total": 9100,
+    "tele_total": 4800,
+    "cash_total": 8700,
+    "staff_payouts": {
+      "Brightn": {
+        "total": 5200
+      },
+      "Alex": {
+        "total": 4100
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "BYD",
+        "plate": "C81360",
+        "service": "Normal",
+        "start": "1:40",
+        "end": "2:30",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "Pickup Hilux",
+        "plate": "06901",
+        "service": "Normal",
+        "start": "1:40",
+        "end": "2:48",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Pickup Hilux",
+        "plate": "B19389",
+        "service": "Normal",
+        "start": "2:30",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "Yaris",
+        "plate": "C1662",
+        "service": "Normal",
+        "start": "2:50",
+        "end": "4:09",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "US-R",
+        "plate": "A26331",
+        "service": "Polish",
+        "start": "3:28",
+        "end": "5:16",
+        "price": 2200,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 6,
+        "vehicle": "Pickup Hilux",
+        "plate": "06929",
+        "service": "Normal",
+        "start": "3:30",
+        "end": "5:16",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 7,
+        "vehicle": "Corolla",
+        "plate": "B73083",
+        "service": "Normal",
+        "start": "3:50",
+        "end": "5:05",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Suzuki",
+        "plate": "C4011",
+        "service": "Normal",
+        "start": "4:00",
+        "end": "5:05",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Suzuki AWD",
+        "plate": "C91524",
+        "service": "Normal",
+        "start": "4:00",
+        "end": "5:10",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0912211586"
+      },
+      {
+        "no": 10,
+        "vehicle": "Attrage",
+        "plate": "AAA 4520",
+        "service": "Normal",
+        "start": "4:10",
+        "end": "5:10",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "BYD",
+        "plate": "AAA 8488",
+        "service": "Polish Normal",
+        "start": "4:20",
+        "end": "6:00",
+        "price": 2100,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911796483"
+      },
+      {
+        "no": 12,
+        "vehicle": "Corolla",
+        "plate": "B30351",
+        "service": "Normal",
+        "start": "4:20",
+        "end": "6:00",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Pickup Hilux",
+        "plate": "08927",
+        "service": "Normal",
+        "start": "4:28",
+        "end": "6:00",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0917898933"
+      },
+      {
+        "no": 14,
+        "vehicle": "DX",
+        "plate": "B66076",
+        "service": "Washer Free Gift",
+        "start": "4:52",
+        "end": "",
+        "price": 0,
+        "payment": "Free",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "Pickup",
+        "plate": "B29706",
+        "service": "Headlight & Normal",
+        "start": "4:52",
+        "end": "7:00",
+        "price": 2700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0945794186"
+      },
+      {
+        "no": 16,
+        "vehicle": "Suzuki",
+        "plate": "B69409",
+        "service": "Normal",
+        "start": "4:52",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Honda",
+        "plate": "C73313",
+        "service": "Normal Free Gift",
+        "start": "5:15",
+        "end": "5:45",
+        "price": 0,
+        "payment": "Free",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Pickup Hilux",
+        "plate": "011695",
+        "service": "Normal",
+        "start": "5:45",
+        "end": "6:55",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911492720"
+      },
+      {
+        "no": 19,
+        "vehicle": "Corolla",
+        "plate": "63448",
+        "service": "Carpet & Normal",
+        "start": "5:36",
+        "end": "10:07",
+        "price": 1700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0965222555"
+      },
+      {
+        "no": 20,
+        "vehicle": "Salvatio",
+        "plate": "—",
+        "service": "Salvatio",
+        "start": "5:40",
+        "end": "6:10",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "Corolla",
+        "plate": "39103",
+        "service": "Normal",
+        "start": "6:20",
+        "end": "7:40",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 22,
+        "vehicle": "Pickup Hilux",
+        "plate": "AAA 0320",
+        "service": "Normal",
+        "start": "6:40",
+        "end": "8:00",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 23,
+        "vehicle": "Corolla Vitz",
+        "plate": "C74012",
+        "service": "Polish Normal",
+        "start": "6:50",
+        "end": "8:30",
+        "price": 1500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 24,
+        "vehicle": "Yaris",
+        "plate": "B57248",
+        "service": "Normal",
+        "start": "7:00",
+        "end": "8:00",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 25,
+        "vehicle": "Corolla",
+        "plate": "B60883",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 800,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 26,
+        "vehicle": "Vitz",
+        "plate": "B25383",
+        "service": "Normal",
+        "start": "9:20",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 27,
+        "vehicle": "Suzuki",
+        "plate": "C70854",
+        "service": "Normal",
+        "start": "10:00",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 28,
+        "vehicle": "BYD",
+        "plate": "C19792",
+        "service": "Normal",
+        "start": "1:00",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 29,
+        "vehicle": "Highroof",
+        "plate": "5844",
+        "service": "Normal",
+        "start": "11:30",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 30,
+        "vehicle": "Plat",
+        "plate": "A46339",
+        "service": "Normal",
+        "start": "10:25",
+        "end": "11:05",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 4,
+    "date_ec": "06-03-2017",
+    "date_gc_2024": "2024-11-15",
+    "date_gc_2026": "2026-11-15",
+    "weekday": "Friday",
+    "source_images": [
+      "media_1795632830495_9b47030a.jpg",
+      "media_1795632841113_e741a6fe.jpg"
+    ],
+    "cars_count": 40,
+    "wash_revenue": 25700,
+    "shower_revenue": 1150,
+    "carpet_revenue": 0,
+    "gross_total": 26850,
+    "expenses": [
+      {
+        "name": "ኪያ እርቲስት የወለደው የሳምንት (Staff baby gift)",
+        "amount": 500
+      },
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      }
+    ],
+    "total_expenses": 900,
+    "net_total": 25950,
+    "cbe_total": 9400,
+    "tele_total": 7900,
+    "cash_total": 8650,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 7100,
+        "tele": 3200,
+        "total": 10300
+      },
+      "Alex": {
+        "cbe": 2300,
+        "tele": 4700,
+        "total": 7000
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "Vitz",
+        "plate": "B07627",
+        "service": "Normal",
+        "start": "1:30",
+        "end": "2:20",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "Vitz",
+        "plate": "B30497",
+        "service": "Normal",
+        "start": "1:45",
+        "end": "2:40",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Vitz",
+        "plate": "A67227",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "BYD",
+        "plate": "C53181",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "Pickup",
+        "plate": "42139",
+        "service": "Normal",
+        "start": "2:40",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 6,
+        "vehicle": "Yaris",
+        "plate": "C41487",
+        "service": "Normal",
+        "start": "2:45",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 7,
+        "vehicle": "Pickup",
+        "plate": "11083",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Corolla",
+        "plate": "B83447",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Peugeot",
+        "plate": "B99627",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 10,
+        "vehicle": "Suzuki",
+        "plate": "C14859",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "Jetour",
+        "plate": "C58321",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": "0929017893"
+      },
+      {
+        "no": 12,
+        "vehicle": "Corolla",
+        "plate": "A07854",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Landcruiser",
+        "plate": "C06751",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 550,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 14,
+        "vehicle": "Tank",
+        "plate": "C90426",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "BYD",
+        "plate": "C51346",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": "0911725803"
+      },
+      {
+        "no": 16,
+        "vehicle": "Suzuki",
+        "plate": "C27013",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Suzuki",
+        "plate": "C31752",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "BYD",
+        "plate": "C89054",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "DX",
+        "plate": "76665",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "Peugeot",
+        "plate": "A84605",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "Pickup",
+        "plate": "15437",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 22,
+        "vehicle": "DX",
+        "plate": "45973",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 23,
+        "vehicle": "Vitz",
+        "plate": "B29392",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 24,
+        "vehicle": "DX",
+        "plate": "A02151",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "0911728238"
+      },
+      {
+        "no": 25,
+        "vehicle": "BYD",
+        "plate": "C07253",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 26,
+        "vehicle": "BYD",
+        "plate": "AAA 3836",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 27,
+        "vehicle": "BYD",
+        "plate": "AAA 3902",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 28,
+        "vehicle": "Atoz",
+        "plate": "71022",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 29,
+        "vehicle": "BYD",
+        "plate": "C55133",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 30,
+        "vehicle": "Corolla",
+        "plate": "N36897",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 31,
+        "vehicle": "Suzuki",
+        "plate": "C00818",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 32,
+        "vehicle": "Corolla",
+        "plate": "A44457",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 33,
+        "vehicle": "Bajaj",
+        "plate": "A55996",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 1000,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 34,
+        "vehicle": "Bajaj",
+        "plate": "A48810",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 35,
+        "vehicle": "Corolla",
+        "plate": "A71435",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 400,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 36,
+        "vehicle": "Corolla",
+        "plate": "C48808",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 37,
+        "vehicle": "Bajaj",
+        "plate": "C87914",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 38,
+        "vehicle": "Pickup",
+        "plate": "C19223",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0913374118"
+      },
+      {
+        "no": 39,
+        "vehicle": "Pickup",
+        "plate": "0333",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 40,
+        "vehicle": "Nissan",
+        "plate": "A12614",
+        "service": "Polish",
+        "start": "",
+        "end": "",
+        "price": 1000,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "0966464530"
+      }
+    ]
+  },
+  {
+    "day_index": 5,
+    "date_ec": "07-03-2017",
+    "date_gc_2024": "2024-11-16",
+    "date_gc_2026": "2026-11-16",
+    "weekday": "Saturday",
+    "source_images": [
+      "media_1795632852544_347cbeea.jpg",
+      "media_1795632862770_3b952600.jpg"
+    ],
+    "cars_count": 27,
+    "wash_revenue": 20500,
+    "shower_revenue": 200,
+    "carpet_revenue": 900,
+    "gross_total": 21600,
+    "expenses": [
+      {
+        "name": "የካርኔት ኪስ ክፍያ (Receipt book pocket)",
+        "amount": 2500
+      },
+      {
+        "name": "ለአብርሃም የተሰጠው (To Abraham)",
+        "amount": 1900
+      },
+      {
+        "name": "ለስኳር እና ሻይ የተገዛበት (Sugar & tea)",
+        "amount": 350
+      },
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      }
+    ],
+    "total_expenses": 5150,
+    "net_total": 16450,
+    "cbe_total": 7200,
+    "tele_total": 5400,
+    "cash_total": 3850,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 4400,
+        "tele": 2500,
+        "total": 6900
+      },
+      "Alex": {
+        "cbe": 2800,
+        "tele": 2900,
+        "total": 5700
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "GMC",
+        "plate": "A46461",
+        "service": "Normal",
+        "start": "2:10",
+        "end": "2:40",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "Yaris",
+        "plate": "B57788",
+        "service": "Polish Normal",
+        "start": "2:40",
+        "end": "4:00",
+        "price": 1500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Corolla",
+        "plate": "B65110",
+        "service": "Polish Normal",
+        "start": "3:10",
+        "end": "4:30",
+        "price": 1500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "093272970..."
+      },
+      {
+        "no": 4,
+        "vehicle": "Pickup",
+        "plate": "10826",
+        "service": "Normal",
+        "start": "3:30",
+        "end": "4:45",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "09113727..."
+      },
+      {
+        "no": 5,
+        "vehicle": "Pickup",
+        "plate": "A41223",
+        "service": "Normal",
+        "start": "4:00",
+        "end": "5:00",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 6,
+        "vehicle": "Suzuki Dzire",
+        "plate": "C30355",
+        "service": "Normal Tyre Spray",
+        "start": "4:20",
+        "end": "5:00",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0911054694"
+      },
+      {
+        "no": 7,
+        "vehicle": "BYD",
+        "plate": "AAA 1483",
+        "service": "Normal",
+        "start": "4:40",
+        "end": "5:45",
+        "price": 900,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Vitz",
+        "plate": "B34284",
+        "service": "Normal",
+        "start": "5:00",
+        "end": "5:50",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Vitz",
+        "plate": "B70812",
+        "service": "Normal",
+        "start": "5:00",
+        "end": "6:00",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 10,
+        "vehicle": "Suzuki Dzire",
+        "plate": "C65196",
+        "service": "Normal",
+        "start": "5:00",
+        "end": "5:50",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "Hyundai Tucson",
+        "plate": "B79630",
+        "service": "Normal",
+        "start": "5:30",
+        "end": "6:40",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "BMW",
+        "plate": "B93711",
+        "service": "Normal",
+        "start": "5:40",
+        "end": "6:40",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Dolphin",
+        "plate": "91670",
+        "service": "Normal",
+        "start": "5:45",
+        "end": "6:40",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "09118072..."
+      },
+      {
+        "no": 14,
+        "vehicle": "Abadula",
+        "plate": "A15999",
+        "service": "Normal",
+        "start": "6:30",
+        "end": "7:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0978089926"
+      },
+      {
+        "no": 15,
+        "vehicle": "Pickup",
+        "plate": "B62778",
+        "service": "Normal",
+        "start": "6:30",
+        "end": "7:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "Pickup",
+        "plate": "74050",
+        "service": "Normal",
+        "start": "7:30",
+        "end": "8:20",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Volkswagen",
+        "plate": "C25124",
+        "service": "Normal",
+        "start": "7:50",
+        "end": "8:50",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Corolla",
+        "plate": "B42718",
+        "service": "Normal Carpet",
+        "start": "9:25",
+        "end": "11:30",
+        "price": 2000,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Bajaj",
+        "plate": "A03730",
+        "service": "Normal",
+        "start": "9:30",
+        "end": "10:10",
+        "price": 300,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "Yaris",
+        "plate": "157127",
+        "service": "Normal",
+        "start": "3:45",
+        "end": "11:00",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "Hyundai Tucson",
+        "plate": "B78855",
+        "service": "Normal",
+        "start": "3:45",
+        "end": "10:30",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 22,
+        "vehicle": "Pickup",
+        "plate": "09378",
+        "service": "Normal",
+        "start": "10:00",
+        "end": "11:20",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 23,
+        "vehicle": "Pickup",
+        "plate": "C37698",
+        "service": "Normal",
+        "start": "10:50",
+        "end": "11:50",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 24,
+        "vehicle": "Prado",
+        "plate": "0020",
+        "service": "Normal",
+        "start": "11:00",
+        "end": "12:00",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 25,
+        "vehicle": "Corolla",
+        "plate": "B77560",
+        "service": "Normal",
+        "start": "11:05",
+        "end": "12:00",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 26,
+        "vehicle": "Tucson",
+        "plate": "B07284",
+        "service": "Normal",
+        "start": "11:10",
+        "end": "12:00",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 27,
+        "vehicle": "Toyota",
+        "plate": "C54936",
+        "service": "Seats washed Normal",
+        "start": "11:20",
+        "end": "12:00",
+        "price": 1500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 6,
+    "date_ec": "08-03-2017",
+    "date_gc_2024": "2024-11-17",
+    "date_gc_2026": "2026-11-17",
+    "weekday": "Sunday",
+    "source_images": [
+      "media_1795632779987_ceb516b9.jpg"
+    ],
+    "cars_count": 21,
+    "wash_revenue": 20850,
+    "shower_revenue": 150,
+    "carpet_revenue": 0,
+    "gross_total": 21000,
+    "expenses": [
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      }
+    ],
+    "total_expenses": 400,
+    "net_total": 20600,
+    "cbe_total": 12650,
+    "tele_total": 2750,
+    "cash_total": 5200,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 9800,
+        "tele": 1200,
+        "total": 11000
+      },
+      "Alex": {
+        "cbe": 2850,
+        "tele": 1550,
+        "total": 4400
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "DX",
+        "plate": "35821",
+        "service": "Normal",
+        "start": "1:50",
+        "end": "2:50",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "Corolla",
+        "plate": "C24202",
+        "service": "Normal",
+        "start": "2:30",
+        "end": "3:40",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Yaris",
+        "plate": "B76419",
+        "service": "Normal",
+        "start": "2:40",
+        "end": "3:20",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "Pickup",
+        "plate": "C08654",
+        "service": "Normal",
+        "start": "3:10",
+        "end": "4:10",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "BYD",
+        "plate": "C62982",
+        "service": "Polish Normal",
+        "start": "3:30",
+        "end": "4:30",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 6,
+        "vehicle": "Corolla",
+        "plate": "68546",
+        "service": "Normal",
+        "start": "3:50",
+        "end": "4:50",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 7,
+        "vehicle": "Pickup",
+        "plate": "65519",
+        "service": "AC Cleaning Normal",
+        "start": "5:04",
+        "end": "",
+        "price": 1000,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Pickup Corolla",
+        "plate": "08844",
+        "service": "Normal",
+        "start": "5:20",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "BYD",
+        "plate": "B63254",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 10,
+        "vehicle": "Bajaj",
+        "plate": "79274",
+        "service": "Normal",
+        "start": "5:35",
+        "end": "",
+        "price": 250,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "Suzuki",
+        "plate": "C16978",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "Pickup",
+        "plate": "C11695",
+        "service": "Polish Normal",
+        "start": "5:55",
+        "end": "8:23",
+        "price": 2100,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "BYD",
+        "plate": "C80555",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "10:30",
+        "price": 5600,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 14,
+        "vehicle": "Corolla",
+        "plate": "82297",
+        "service": "Normal",
+        "start": "",
+        "end": "10:04",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "Hilux Pickup",
+        "plate": "A21411",
+        "service": "Light Normal",
+        "start": "",
+        "end": "",
+        "price": 2700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "Highroof",
+        "plate": "16821",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Landcruiser",
+        "plate": "B79846",
+        "service": "Normal",
+        "start": "9:50",
+        "end": "",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Corolla",
+        "plate": "B00816",
+        "service": "Polish Normal",
+        "start": "9:56",
+        "end": "",
+        "price": 1000,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Pickup",
+        "plate": "C81636",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "Suzuki",
+        "plate": "C46064",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "Glory",
+        "plate": "B83745",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 7,
+    "date_ec": "09-03-2017",
+    "date_gc_2024": "2024-11-18",
+    "date_gc_2026": "2026-11-18",
+    "weekday": "Monday",
+    "source_images": [
+      "media_1795632884503_e1056e70.jpg"
+    ],
+    "cars_count": 21,
+    "wash_revenue": 17300,
+    "shower_revenue": 250,
+    "carpet_revenue": 0,
+    "gross_total": 17550,
+    "expenses": [
+      {
+        "name": "ለአያ የተሰጠ ብር (Given to Aya)",
+        "amount": 5400
+      },
+      {
+        "name": "ለዮሴፍ የተሰጠ (Given to Yosef)",
+        "amount": 1000
+      },
+      {
+        "name": "ለሴራፊ የተሰጠ (Given to Serafi)",
+        "amount": 400
+      },
+      {
+        "name": "ለሰራተኛ የተሰጠ (Given to Staff)",
+        "amount": 400
+      }
+    ],
+    "total_expenses": 7200,
+    "net_total": 10350,
+    "cbe_total": 3000,
+    "tele_total": 5800,
+    "cash_total": 1550,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 3000,
+        "tele": 2000,
+        "total": 5000
+      },
+      "Alex": {
+        "cbe": 0,
+        "tele": 3800,
+        "total": 3800
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "Pickup Hilux",
+        "plate": "B30473",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "3:35",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "Highroof",
+        "plate": "AAL0661",
+        "service": "Normal",
+        "start": "2:24",
+        "end": "3:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Attrage",
+        "plate": "B92149",
+        "service": "Normal",
+        "start": "2:30",
+        "end": "3:33",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": "0910751146"
+      },
+      {
+        "no": 4,
+        "vehicle": "Suzuki",
+        "plate": "C07333",
+        "service": "Carpet Normal",
+        "start": "3:50",
+        "end": "5:22",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "BYD",
+        "plate": "C51846",
+        "service": "Normal",
+        "start": "4:33",
+        "end": "5:20",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911725803"
+      },
+      {
+        "no": 6,
+        "vehicle": "Pickup Hilux",
+        "plate": "98524",
+        "service": "Normal",
+        "start": "4:48",
+        "end": "5:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911258859"
+      },
+      {
+        "no": 7,
+        "vehicle": "Pickup Hilux",
+        "plate": "C26466",
+        "service": "Normal",
+        "start": "",
+        "end": "6:22",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911924759"
+      },
+      {
+        "no": 8,
+        "vehicle": "Yaris",
+        "plate": "B58548",
+        "service": "Normal",
+        "start": "6:10",
+        "end": "6:58",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "DX",
+        "plate": "A97863",
+        "service": "Carpet Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 10,
+        "vehicle": "Jetour",
+        "plate": "C69616",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "",
+        "price": 2100,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "0964364593"
+      },
+      {
+        "no": 11,
+        "vehicle": "Corolla",
+        "plate": "—",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "Bajaj",
+        "plate": "A21366",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Bajaj",
+        "plate": "A55996",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 14,
+        "vehicle": "DX",
+        "plate": "90751",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "Pickup Hilux",
+        "plate": "AAA 0320",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "Highroof",
+        "plate": "A26626",
+        "service": "Carpet Normal",
+        "start": "",
+        "end": "",
+        "price": 2000,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Laptop / Mat",
+        "plate": "—",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 100,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Bajaj",
+        "plate": "—",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 200,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Corolla",
+        "plate": "B39100",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "BYD",
+        "plate": "C57835",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "Bajaj",
+        "plate": "—",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 200,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 8,
+    "date_ec": "10-03-2017",
+    "date_gc_2024": "2024-11-19",
+    "date_gc_2026": "2026-11-19",
+    "weekday": "Tuesday",
+    "source_images": [
+      "media_1795632894897_8c8886e4.jpg"
+    ],
+    "cars_count": 19,
+    "wash_revenue": 12900,
+    "shower_revenue": 150,
+    "carpet_revenue": 0,
+    "gross_total": 13050,
+    "expenses": [
+      {
+        "name": "ለአብርሃም የተሰጠ (To Abraham)",
+        "amount": 500
+      },
+      {
+        "name": "ለሳሙና የተገዛበት ማጠቢያ (Wash soap)",
+        "amount": 250
+      },
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      },
+      {
+        "name": "ለሻይ የተሰጠ (Tea allowance)",
+        "amount": 50
+      },
+      {
+        "name": "ለሻይ የባንክ የተላከ (Tea via bank)",
+        "amount": 100
+      }
+    ],
+    "total_expenses": 1300,
+    "net_total": 11750,
+    "cbe_total": 5100,
+    "tele_total": 4150,
+    "cash_total": 2500,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 4900,
+        "tele": 3000,
+        "total": 7900
+      },
+      "Alex": {
+        "cbe": 200,
+        "tele": 1150,
+        "total": 1350
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "Corolla",
+        "plate": "A44457",
+        "service": "Polish Normal",
+        "start": "3:35",
+        "end": "",
+        "price": 1500,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": "0910752328"
+      },
+      {
+        "no": 2,
+        "vehicle": "Tucson",
+        "plate": "B73054",
+        "service": "Carpet Roof Deep Normal",
+        "start": "4:43",
+        "end": "",
+        "price": 2900,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0911050312"
+      },
+      {
+        "no": 3,
+        "vehicle": "Yaris",
+        "plate": "A67227",
+        "service": "Polish Normal",
+        "start": "3:50",
+        "end": "5:00",
+        "price": 800,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "Corolla",
+        "plate": "B28175",
+        "service": "Normal",
+        "start": "4:05",
+        "end": "6:21",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "Corolla",
+        "plate": "0133",
+        "service": "Normal",
+        "start": "4:20",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0910758175"
+      },
+      {
+        "no": 6,
+        "vehicle": "Suzuki",
+        "plate": "C03175",
+        "service": "Normal",
+        "start": "5:00",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0912229613"
+      },
+      {
+        "no": 7,
+        "vehicle": "I.D.7",
+        "plate": "C53181",
+        "service": "Normal",
+        "start": "5:10",
+        "end": "6:30",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Bajaj",
+        "plate": "A33812",
+        "service": "Normal",
+        "start": "4:30",
+        "end": "5:24",
+        "price": 200,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Suzuki",
+        "plate": "C03005",
+        "service": "Normal",
+        "start": "5:30",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0913159847"
+      },
+      {
+        "no": 10,
+        "vehicle": "Bajaj",
+        "plate": "—",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 400,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "Bajaj",
+        "plate": "—",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "10.7",
+        "plate": "B32023",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Bajaj",
+        "plate": "17059",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 14,
+        "vehicle": "Bajaj",
+        "plate": "29983",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "Pickup Hilux",
+        "plate": "10864",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "BYD",
+        "plate": "11334",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "BYD",
+        "plate": "03631",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 1000,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Bajaj",
+        "plate": "A17061",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 250,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "BYD",
+        "plate": "AAA 1954",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 9,
+    "date_ec": "11-03-2017",
+    "date_gc_2024": "2024-11-20",
+    "date_gc_2026": "2026-11-20",
+    "weekday": "Wednesday",
+    "source_images": [
+      "media_1795632904746_34629b72.jpg",
+      "media_1795632914344_013027b7.jpg"
+    ],
+    "cars_count": 28,
+    "wash_revenue": 26500,
+    "shower_revenue": 150,
+    "carpet_revenue": 0,
+    "gross_total": 26650,
+    "expenses": [
+      {
+        "name": "ለኪያ እርቲስት የተሰጠ (Staff baby allowance)",
+        "amount": 800
+      },
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      }
+    ],
+    "total_expenses": 1200,
+    "net_total": 25450,
+    "cbe_total": 8500,
+    "tele_total": 8550,
+    "cash_total": 8400,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 8500,
+        "tele": 7300,
+        "cash": 8400,
+        "total": 24200
+      },
+      "Alex": {
+        "cbe": 0,
+        "tele": 1250,
+        "cash": 0,
+        "total": 1250
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "Prado",
+        "plate": "C61572",
+        "service": "Normal",
+        "start": "1:00",
+        "end": "3:50",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "BYD",
+        "plate": "C84018",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "3:00",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Corolla",
+        "plate": "B64699",
+        "service": "Polish Normal",
+        "start": "3:00",
+        "end": "4:58",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "Corolla",
+        "plate": "C84453",
+        "service": "Polish Normal",
+        "start": "3:50",
+        "end": "5:25",
+        "price": 1800,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "0911387466"
+      },
+      {
+        "no": 5,
+        "vehicle": "Tucson",
+        "plate": "B99455",
+        "service": "Detailing",
+        "start": "4:00",
+        "end": "7:45",
+        "price": 5000,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911236971"
+      },
+      {
+        "no": 6,
+        "vehicle": "Tucson",
+        "plate": "B79630",
+        "service": "Normal",
+        "start": "4:07",
+        "end": "7:27",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911427821"
+      },
+      {
+        "no": 7,
+        "vehicle": "BYD",
+        "plate": "C90782",
+        "service": "Normal",
+        "start": "4:30",
+        "end": "6:20",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Landcruiser",
+        "plate": "54955",
+        "service": "Normal",
+        "start": "4:35",
+        "end": "5:38",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Honda",
+        "plate": "AA 4520",
+        "service": "Polish Normal",
+        "start": "4:42",
+        "end": "6:30",
+        "price": 2100,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "0911415811"
+      },
+      {
+        "no": 10,
+        "vehicle": "DX",
+        "plate": "69412",
+        "service": "Normal",
+        "start": "6:45",
+        "end": "8:24",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "0934917208"
+      },
+      {
+        "no": 11,
+        "vehicle": "Bajaj",
+        "plate": "A06385",
+        "service": "Normal",
+        "start": "",
+        "end": "7:45",
+        "price": 350,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "Pickup",
+        "plate": "B77039",
+        "service": "Polish Normal",
+        "start": "7:30",
+        "end": "10:19",
+        "price": 2100,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Bajaj",
+        "plate": "11889",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 350,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 14,
+        "vehicle": "Pickup",
+        "plate": "61709",
+        "service": "Normal",
+        "start": "8:20",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "Yaris",
+        "plate": "B17368",
+        "service": "Normal",
+        "start": "8:20",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "Corolla",
+        "plate": "A3689",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Isuzu",
+        "plate": "07631",
+        "service": "Normal",
+        "start": "",
+        "end": "10:58",
+        "price": 1000,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "BYD",
+        "plate": "C54996",
+        "service": "Normal",
+        "start": "",
+        "end": "10:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Landcruiser",
+        "plate": "C06751",
+        "service": "Normal",
+        "start": "",
+        "end": "10:58",
+        "price": 600,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "Suzuki",
+        "plate": "C81702",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "11:45",
+        "price": 1500,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "DX",
+        "plate": "76665",
+        "service": "Normal",
+        "start": "10:30",
+        "end": "12:09",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 22,
+        "vehicle": "Pickup Hilux",
+        "plate": "A36400",
+        "service": "Normal",
+        "start": "10:40",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 23,
+        "vehicle": "Corolla",
+        "plate": "A35697",
+        "service": "Normal",
+        "start": "",
+        "end": "11:54",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 24,
+        "vehicle": "Vitz",
+        "plate": "B65677",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 25,
+        "vehicle": "Vitz",
+        "plate": "A87736",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 26,
+        "vehicle": "Bajaj",
+        "plate": "73159",
+        "service": "Normal",
+        "start": "",
+        "end": "12:05",
+        "price": 300,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 27,
+        "vehicle": "Pickup Hilux",
+        "plate": "39002",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 28,
+        "vehicle": "Corolla",
+        "plate": "—",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 10,
+    "date_ec": "12-03-2017",
+    "date_gc_2024": "2024-11-21",
+    "date_gc_2026": "2026-11-21",
+    "weekday": "Thursday",
+    "source_images": [
+      "media_1795632924782_ccfb4404.jpg",
+      "media_1795632935389_6afab830.jpg"
+    ],
+    "cars_count": 32,
+    "wash_revenue": 30800,
+    "shower_revenue": 300,
+    "carpet_revenue": 0,
+    "gross_total": 31100,
+    "expenses": [
+      {
+        "name": "ለመልእክት የተሰጠ (Errands allowance)",
+        "amount": 300
+      },
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      },
+      {
+        "name": "ለአብርሃም የተሰጠ (To Abraham)",
+        "amount": 500
+      },
+      {
+        "name": "ለስኳር እና ሻይ/ማጣፈጫ (Sugar, tea & treats)",
+        "amount": 350
+      }
+    ],
+    "total_expenses": 1550,
+    "net_total": 29550,
+    "cbe_total": 21500,
+    "tele_total": 5400,
+    "boa_total": 1500,
+    "cash_total": 1150,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 14700,
+        "tele": 1900,
+        "boa": 1500,
+        "total": 18100
+      },
+      "Alex": {
+        "cbe": 6800,
+        "tele": 3500,
+        "total": 10300
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "Pickup Hilux",
+        "plate": "04317",
+        "service": "Normal",
+        "start": "2:30",
+        "end": "4:37",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "Fortuner",
+        "plate": "C22911",
+        "service": "Normal",
+        "start": "2:40",
+        "end": "3:59",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Pickup Hilux",
+        "plate": "04039",
+        "service": "Normal",
+        "start": "2:45",
+        "end": "4:15",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "Suzuki",
+        "plate": "C16978",
+        "service": "Carpet Normal",
+        "start": "2:56",
+        "end": "",
+        "price": 2100,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "0954679003"
+      },
+      {
+        "no": 5,
+        "vehicle": "Pickup Hilux",
+        "plate": "C11695",
+        "service": "Normal",
+        "start": "3:49",
+        "end": "4:49",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 6,
+        "vehicle": "Suzuki",
+        "plate": "B69409",
+        "service": "Normal",
+        "start": "4:20",
+        "end": "4:58",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0921993958"
+      },
+      {
+        "no": 7,
+        "vehicle": "BYD",
+        "plate": "AAA 868",
+        "service": "Normal",
+        "start": "4:20",
+        "end": "5:20",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0958879444"
+      },
+      {
+        "no": 8,
+        "vehicle": "Landcruiser",
+        "plate": "A26331",
+        "service": "Normal",
+        "start": "4:23",
+        "end": "5:55",
+        "price": 2100,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "BYD",
+        "plate": "AA A4007",
+        "service": "Normal",
+        "start": "4:23",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": "0966241159"
+      },
+      {
+        "no": 10,
+        "vehicle": "Corolla",
+        "plate": "C49926",
+        "service": "Normal",
+        "start": "4:23",
+        "end": "5:30",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "Highroof",
+        "plate": "96653",
+        "service": "Normal",
+        "start": "4:23",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0941152184"
+      },
+      {
+        "no": 12,
+        "vehicle": "Corolla",
+        "plate": "A82380",
+        "service": "Normal",
+        "start": "5:00",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Yaris",
+        "plate": "C07008",
+        "service": "Normal",
+        "start": "5:30",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 14,
+        "vehicle": "Suzuki",
+        "plate": "C51878",
+        "service": "Seat Normal",
+        "start": "5:41",
+        "end": "",
+        "price": 1000,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911361550"
+      },
+      {
+        "no": 15,
+        "vehicle": "Suzuki",
+        "plate": "C81072",
+        "service": "Normal Polish",
+        "start": "5:57",
+        "end": "",
+        "price": 3500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "Yaris",
+        "plate": "B98941",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Yaris",
+        "plate": "C44684",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 400,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Corolla",
+        "plate": "C50210",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Pickup",
+        "plate": "C08654",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "Tucson",
+        "plate": "C73318",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "Corolla",
+        "plate": "B01765",
+        "service": "Detail",
+        "start": "",
+        "end": "",
+        "price": 5000,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 22,
+        "vehicle": "Suzuki",
+        "plate": "C65196",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 23,
+        "vehicle": "Vitz",
+        "plate": "06369",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 24,
+        "vehicle": "Vitz",
+        "plate": "C13117",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 25,
+        "vehicle": "Pickup",
+        "plate": "A82393",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 26,
+        "vehicle": "Yaris",
+        "plate": "B04929",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 27,
+        "vehicle": "Corolla",
+        "plate": "A76692",
+        "service": "Polish Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 28,
+        "vehicle": "Highroof",
+        "plate": "B01277",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 29,
+        "vehicle": "Corolla",
+        "plate": "B92577",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0913699863"
+      },
+      {
+        "no": 30,
+        "vehicle": "Corolla",
+        "plate": "—",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 31,
+        "vehicle": "Pickup Suzuki",
+        "plate": "C14841",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 32,
+        "vehicle": "BYD",
+        "plate": "AAA 3778",
+        "service": "Normal",
+        "start": "1:40",
+        "end": "2:40",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 11,
+    "date_ec": "13-03-2017",
+    "date_gc_2024": "2024-11-22",
+    "date_gc_2026": "2026-11-22",
+    "weekday": "Friday",
+    "source_images": [
+      "media_1795694333712_1f5f3819.jpg"
+    ],
+    "cars_count": 31,
+    "wash_revenue": 20900,
+    "shower_revenue": 0,
+    "carpet_revenue": 0,
+    "gross_total": 20900,
+    "expenses": [
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      }
+    ],
+    "total_expenses": 400,
+    "net_total": 20500,
+    "cbe_total": 8300,
+    "tele_total": 5600,
+    "cash_total": 6600,
+    "staff_payouts": {
+      "Brightn": {
+        "total": 12500
+      },
+      "Alex": {
+        "total": 8000
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "DX",
+        "plate": "58838",
+        "service": "Normal",
+        "start": "1:30",
+        "end": "2:40",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "DX",
+        "plate": "46291",
+        "service": "Normal",
+        "start": "1:40",
+        "end": "2:45",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Yaris",
+        "plate": "AA 11073",
+        "service": "Normal",
+        "start": "1:55",
+        "end": "6:35",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "Jetour",
+        "plate": "C5332",
+        "service": "Normal",
+        "start": "2:25",
+        "end": "4:22",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "Peugeot",
+        "plate": "B99627",
+        "service": "Normal",
+        "start": "2:40",
+        "end": "6:14",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0912829055"
+      },
+      {
+        "no": 6,
+        "vehicle": "Corolla",
+        "plate": "A81435",
+        "service": "Normal",
+        "start": "2:40",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 7,
+        "vehicle": "Tucson",
+        "plate": "B73054",
+        "service": "Normal",
+        "start": "3:18",
+        "end": "4:34",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911050312"
+      },
+      {
+        "no": 8,
+        "vehicle": "DX",
+        "plate": "11611",
+        "service": "Normal",
+        "start": "3:30",
+        "end": "4:37",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Yaris",
+        "plate": "C41487",
+        "service": "Normal",
+        "start": "3:35",
+        "end": "",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": "0911667990"
+      },
+      {
+        "no": 10,
+        "vehicle": "Vitz",
+        "plate": "B19216",
+        "service": "Normal",
+        "start": "3:40",
+        "end": "5:10",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "0913349646"
+      },
+      {
+        "no": 11,
+        "vehicle": "BYD",
+        "plate": "C70854",
+        "service": "Normal",
+        "start": "3:55",
+        "end": "5:05",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "Corolla",
+        "plate": "A07854",
+        "service": "Normal",
+        "start": "4:08",
+        "end": "11:32",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "092907893"
+      },
+      {
+        "no": 13,
+        "vehicle": "Suzuki",
+        "plate": "C13195",
+        "service": "Seat Normal",
+        "start": "4:08",
+        "end": "8:30",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0923342245"
+      },
+      {
+        "no": 14,
+        "vehicle": "Hilux Pickup",
+        "plate": "B41695",
+        "service": "Normal",
+        "start": "4:41",
+        "end": "6:00",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "Pickup Hilux",
+        "plate": "62237",
+        "service": "Normal",
+        "start": "4:41",
+        "end": "6:51",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": "0973772581"
+      },
+      {
+        "no": 16,
+        "vehicle": "BYD",
+        "plate": "AAA 8311",
+        "service": "Normal",
+        "start": "4:41",
+        "end": "11:32",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "0912782677"
+      },
+      {
+        "no": 17,
+        "vehicle": "Pickup Hilux",
+        "plate": "08701",
+        "service": "Normal",
+        "start": "4:55",
+        "end": "7:59",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Pickup Hilux",
+        "plate": "A01426",
+        "service": "Normal",
+        "start": "4:55",
+        "end": "",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Suzuki",
+        "plate": "C00818",
+        "service": "Normal",
+        "start": "4:55",
+        "end": "7:25",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "Vitz",
+        "plate": "B66894",
+        "service": "Normal",
+        "start": "5:18",
+        "end": "7:28",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0910588783"
+      },
+      {
+        "no": 21,
+        "vehicle": "BYD",
+        "plate": "C54936",
+        "service": "Normal",
+        "start": "6:19",
+        "end": "7:25",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": "0911852699"
+      },
+      {
+        "no": 22,
+        "vehicle": "DX",
+        "plate": "66454",
+        "service": "Polish Normal",
+        "start": "6:25",
+        "end": "8:30",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 23,
+        "vehicle": "Suzuki",
+        "plate": "C49363",
+        "service": "Normal",
+        "start": "7:09",
+        "end": "9:54",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 24,
+        "vehicle": "Pickup Hilux",
+        "plate": "09625",
+        "service": "Normal",
+        "start": "",
+        "end": "8:44",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 25,
+        "vehicle": "Pickup",
+        "plate": "06903",
+        "service": "Normal",
+        "start": "",
+        "end": "8:44",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 26,
+        "vehicle": "Pickup",
+        "plate": "A66603",
+        "service": "Normal",
+        "start": "",
+        "end": "9:32",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 27,
+        "vehicle": "Corolla",
+        "plate": "A44457",
+        "service": "Normal",
+        "start": "",
+        "end": "9:25",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 28,
+        "vehicle": "Suzuki",
+        "plate": "C35380",
+        "service": "Normal",
+        "start": "",
+        "end": "10:20",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 29,
+        "vehicle": "Corolla",
+        "plate": "C83547",
+        "service": "Normal",
+        "start": "",
+        "end": "9:25",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 30,
+        "vehicle": "Pickup",
+        "plate": "10946",
+        "service": "Normal",
+        "start": "8:30",
+        "end": "10:49",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 31,
+        "vehicle": "BYD",
+        "plate": "AAB0269",
+        "service": "Polish Normal",
+        "start": "9:15",
+        "end": "10:18",
+        "price": 1500,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      }
+    ]
+  },
+  {
+    "day_index": 12,
+    "date_ec": "14-03-2017",
+    "date_gc_2024": "2024-11-23",
+    "date_gc_2026": "2026-11-23",
+    "weekday": "Saturday",
+    "source_images": [
+      "media_1795694345965_cd181c3b.jpg"
+    ],
+    "cars_count": 27,
+    "wash_revenue": 25300,
+    "shower_revenue": 100,
+    "carpet_revenue": 0,
+    "gross_total": 25400,
+    "expenses": [
+      {
+        "name": "የስልክ የቀን ክፍያ (Airtime)",
+        "amount": 400
+      },
+      {
+        "name": "የዕቃ አቅርቦት እና Delivery (Supplies & Delivery)",
+        "amount": 2000
+      }
+    ],
+    "total_expenses": 2400,
+    "net_total": 23000,
+    "cbe_total": 14600,
+    "tele_total": 4900,
+    "cash_total": 3500,
+    "staff_payouts": {
+      "Brightn": {
+        "cbe": 11200,
+        "tele": 4900,
+        "total": 16100
+      },
+      "Alex": {
+        "cbe": 3400,
+        "tele": 0,
+        "total": 3400
+      }
+    },
+    "vehicles": [
+      {
+        "no": 1,
+        "vehicle": "KIA",
+        "plate": "B10472",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "5:20",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 2,
+        "vehicle": "BZ",
+        "plate": "C51846",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "3:20",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 3,
+        "vehicle": "Yaris",
+        "plate": "B70812",
+        "service": "Normal",
+        "start": "2:30",
+        "end": "3:30",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 4,
+        "vehicle": "Bajaj",
+        "plate": "A55996",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "3:10",
+        "price": 350,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 5,
+        "vehicle": "Bajaj",
+        "plate": "A00186",
+        "service": "Normal",
+        "start": "2:20",
+        "end": "2:50",
+        "price": 200,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 6,
+        "vehicle": "Pickup",
+        "plate": "06457",
+        "service": "Normal",
+        "start": "3:55",
+        "end": "4:50",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 7,
+        "vehicle": "Damas Dzire",
+        "plate": "47644",
+        "service": "Normal",
+        "start": "4:20",
+        "end": "5:40",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 8,
+        "vehicle": "Suzuki Dzire",
+        "plate": "B07743",
+        "service": "Polish Detail",
+        "start": "4:30",
+        "end": "6:00",
+        "price": 6000,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 9,
+        "vehicle": "Bajaj",
+        "plate": "39998",
+        "service": "Normal",
+        "start": "4:50",
+        "end": "6:00",
+        "price": 350,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 10,
+        "vehicle": "Yaris",
+        "plate": "A15887",
+        "service": "Normal",
+        "start": "4:50",
+        "end": "5:50",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 11,
+        "vehicle": "Pickup",
+        "plate": "05736",
+        "service": "Normal",
+        "start": "5:00",
+        "end": "6:10",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 12,
+        "vehicle": "Corolla Dzire",
+        "plate": "C24823",
+        "service": "Normal",
+        "start": "5:10",
+        "end": "6:00",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 13,
+        "vehicle": "Suzuki",
+        "plate": "C03575",
+        "service": "Polish Normal",
+        "start": "7:00",
+        "end": "8:00",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 14,
+        "vehicle": "Yaris",
+        "plate": "A76138",
+        "service": "Headlight Normal",
+        "start": "7:10",
+        "end": "8:20",
+        "price": 2500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 15,
+        "vehicle": "Tank",
+        "plate": "C90426",
+        "service": "Normal",
+        "start": "7:00",
+        "end": "8:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 16,
+        "vehicle": "Pickup",
+        "plate": "08588",
+        "service": "Normal",
+        "start": "6:30",
+        "end": "7:50",
+        "price": 700,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 17,
+        "vehicle": "Yaris Dzire",
+        "plate": "A39227",
+        "service": "Polish Normal",
+        "start": "8:20",
+        "end": "10:00",
+        "price": 2000,
+        "payment": "Telebirr",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 18,
+        "vehicle": "Suzuki",
+        "plate": "C30355",
+        "service": "Normal",
+        "start": "8:20",
+        "end": "9:30",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 19,
+        "vehicle": "Hyundai",
+        "plate": "A29714",
+        "service": "Normal",
+        "start": "8:30",
+        "end": "9:30",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 20,
+        "vehicle": "Corolla",
+        "plate": "B6897",
+        "service": "Normal",
+        "start": "9:40",
+        "end": "10:30",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 21,
+        "vehicle": "Pickup",
+        "plate": "C7698",
+        "service": "Normal",
+        "start": "9:50",
+        "end": "10:30",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 22,
+        "vehicle": "Hyundai",
+        "plate": "C13356",
+        "service": "Normal",
+        "start": "10:00",
+        "end": "11:30",
+        "price": 500,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 23,
+        "vehicle": "Corolla Dzire",
+        "plate": "B11964",
+        "service": "Body wash Normal",
+        "start": "11:30",
+        "end": "12:30",
+        "price": 500,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 24,
+        "vehicle": "Suzuki Dzire",
+        "plate": "B99391",
+        "service": "Polish Normal",
+        "start": "11:40",
+        "end": "12:40",
+        "price": 1500,
+        "payment": "CBE",
+        "washer": "Brightn",
+        "phone": ""
+      },
+      {
+        "no": 25,
+        "vehicle": "Suzuki Swift",
+        "plate": "C64882",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 500,
+        "payment": "Telebirr",
+        "washer": "",
+        "phone": "0911807..."
+      },
+      {
+        "no": 26,
+        "vehicle": "Pickup",
+        "plate": "10826",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "Cash",
+        "washer": "",
+        "phone": ""
+      },
+      {
+        "no": 27,
+        "vehicle": "Pickup",
+        "plate": "10418",
+        "service": "Normal",
+        "start": "",
+        "end": "",
+        "price": 700,
+        "payment": "CBE",
+        "washer": "",
+        "phone": ""
+      }
+    ]
+  }
+]
