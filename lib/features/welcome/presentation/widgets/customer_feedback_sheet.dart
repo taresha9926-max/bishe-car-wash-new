@@ -7,7 +7,9 @@ import '../../domain/models/customer_feedback.dart';
 /// Modal bottom sheet allowing customers to submit 1-4 star feedback & opinions
 /// and browse Admin-approved feedback ("Show Customers Suggestions") expanded by default.
 class CustomerFeedbackSheet extends StatefulWidget {
-  const CustomerFeedbackSheet({super.key});
+  final bool embedded;
+
+  const CustomerFeedbackSheet({super.key, this.embedded = false});
 
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet(
@@ -90,78 +92,10 @@ class _CustomerFeedbackSheetState extends State<CustomerFeedbackSheet> {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final approved = state.approvedCustomerFeedback;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.9,
-        maxWidth: 640,
-      ),
-      margin: EdgeInsets.only(bottom: bottomInset),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle + Header
-          Container(
-            padding: const EdgeInsets.fromLTRB(18, 10, 12, 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF111827),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              border: Border(bottom: BorderSide(color: AppColors.cardBorder)),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  width: 38,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B).withOpacity(0.14),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.star_rounded, color: Color(0xFFD97706), size: 22),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        state.tr('customerFeedbackHeader'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          // Scrollable Body: Submit Form + Approved List
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+    final formAndSuggestions = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
                   // 1. Satisfaction & Opinion Submission Card
                   Container(
                     padding: const EdgeInsets.all(14),
@@ -472,7 +406,89 @@ class _CustomerFeedbackSheetState extends State<CustomerFeedbackSheet> {
                           )),
                   ],
                 ],
-              ),
+    );
+
+    if (widget.embedded) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: formAndSuggestions,
+          ),
+        ),
+      );
+    }
+
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.9,
+        maxWidth: 640,
+      ),
+      margin: EdgeInsets.only(bottom: bottomInset),
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle + Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(18, 10, 12, 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF111827),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              border: Border(bottom: BorderSide(color: AppColors.cardBorder)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 38,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B).withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.star_rounded, color: Color(0xFFD97706), size: 22),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        state.tr('customerFeedbackHeader'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Scrollable Body: Submit Form + Approved List
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+              child: formAndSuggestions,
             ),
           ),
         ],

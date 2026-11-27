@@ -60,6 +60,10 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   final Set<String> _selectedServiceIds = {};
   bool _useCustomChecklist = true;
   WashPackage? _selectedPackage;
+  bool _isCustomExpanded = false;
+  bool _isPresetExpanded = false;
+  bool _isCarpetTypeExpanded = false;
+  bool _isCarpetDimensionsExpanded = false;
 
   late bool _isCarpet;
   String _carpetType = 'type_a';
@@ -71,8 +75,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   final _plateController = TextEditingController();
   final _addressController = TextEditingController();
   final _gpsController = TextEditingController();
-  final _tipController = TextEditingController();
-  double _tipAmount = 0.0;
   String _selectedBishoftuArea = AppConstants.bishoftuAreas.first;
   bool _isSubmitting = false;
 
@@ -109,7 +111,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     _gpsController.dispose();
     _lengthController.dispose();
     _widthController.dispose();
-    _tipController.dispose();
     super.dispose();
   }
 
@@ -141,7 +142,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     }
   }
 
-  void _advanceFromStep1(dynamic state) {
+  void _advanceFromMergedStep1(dynamic state) {
     if (_selectedServiceType.requiresLocation &&
         _addressController.text.trim().isEmpty &&
         _gpsController.text.trim().isEmpty) {
@@ -153,10 +154,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       );
       return;
     }
-    _setStep(2);
-  }
-
-  void _advanceFromStep2(dynamic state) {
     if (!_isCarpet && _useCustomChecklist && _selectedServiceIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -166,7 +163,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
       );
       return;
     }
-    _setStep(3);
+    _setStep(2);
   }
 
   @override
@@ -179,7 +176,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         ? _calculateCustomTotal(state)
         : (effectivePackage?.getPriceFor(_selectedCarType) ?? 0.0)) + deliveryAddonFee;
     final currentPrice = widget.initialCustomPrice ?? (_isCarpet ? carpetPrice : carPrice);
-    final grandTotal = currentPrice + _tipAmount;
+    final grandTotal = currentPrice;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -204,9 +201,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
                   _buildStepProgressHeader(state),
                   const SizedBox(height: 16),
 
-                  if (_currentStep == 1) _buildStep1ServiceMode(context, state),
-                  if (_currentStep == 2) _buildStep2ServiceSelection(context, state, effectivePackage, currentPrice),
-                  if (_currentStep == 3) _buildStep3CustomerAndSummary(context, state, effectivePackage, currentPrice, grandTotal),
+                  if (_currentStep == 1) _buildMergedStep1(context, state, effectivePackage, currentPrice),
+                  if (_currentStep == 2) _buildStep3CustomerAndSummary(context, state, effectivePackage, currentPrice, grandTotal),
                   const SizedBox(height: 28),
                 ],
               ),
@@ -218,14 +214,9 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   }
 
   Widget _buildStepProgressHeader(dynamic state) {
-    String title;
-    if (_currentStep == 1) {
-      title = state.tr('step1ModeInstruction');
-    } else if (_currentStep == 2) {
-      title = state.tr(_isCarpet ? 'step2CarpetInstruction' : 'step2CarInstruction');
-    } else {
-      title = state.tr(_isCarpet ? 'step3CarpetDetailsInstruction' : 'step3DetailsInstruction');
-    }
+    final title = _currentStep == 1
+        ? state.tr(_isCarpet ? 'mergedCarpetInstruction' : 'mergedCarInstruction')
+        : state.tr(_isCarpet ? 'step2CarpetDetailsInstruction' : 'step2DetailsInstruction');
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -245,15 +236,14 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [1, 2, 3].map((step) {
-              final isDone = step < _currentStep;
-              final isCurrent = step == _currentStep;
+            children: [1, 2].map((step) {
+              final active = step <= _currentStep;
               return Expanded(
                 child: Container(
                   height: 6,
-                  margin: EdgeInsets.only(right: step < 3 ? 6 : 0),
+                  margin: EdgeInsets.only(right: step < 2 ? 6 : 0),
                   decoration: BoxDecoration(
-                    color: (isDone || isCurrent) ? AppColors.primary : const Color(0xFF1E293B),
+                    color: active ? AppColors.primary : const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -270,69 +260,123 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     );
   }
 
-  Widget _buildStep2ServiceSelection(
+  Widget _buildMergedStep1(
     BuildContext context,
     dynamic state,
     WashPackage? effectivePackage,
     double currentPrice,
   ) {
+    final customTotal = _calculateCustomTotal(state);
+    final presetTotal = effectivePackage?.getPriceFor(_selectedCarType) ?? 0.0;
+    final deliveryFee = state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Top Section: Expandable Service Delivery Mode Cards ("How should we serve you?")
+        Text(
+          state.tr('howShouldWeServeYou'),
+          style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+        ),
+        const SizedBox(height: 10),
+        _buildExpandableServiceModeCard(
+          serviceType: ServiceType.walkInStation,
+          availableCapacity: state.availableBaysCount,
+          state: state,
+        ),
+        const SizedBox(height: 10),
+        _buildExpandableServiceModeCard(
+          serviceType: ServiceType.valetPickUp,
+          availableCapacity: 1,
+          state: state,
+        ),
+        const SizedBox(height: 10),
+        _buildExpandableServiceModeCard(
+          serviceType: ServiceType.atHomeMobile,
+          availableCapacity: state.isMobileVanAvailable ? 1 : 0,
+          state: state,
+        ),
+
+        const SizedBox(height: 18),
+
+        // Below Top: Vehicle Size + Expandable Custom Detailing / Preset Packages (or Carpet Type & Dimensions)
         if (!_isCarpet) ...[
+          Text(
+            state.tr('pickVehicleAndWashTitle'),
+            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 10),
           CarTypeSelector(
             selectedType: _selectedCarType,
             onSelected: (type) => setState(() => _selectedCarType = type),
           ),
-          const SizedBox(height: 16),
-
-          // Dual Tab Bar - Custom Detailing vs Preset Service Packages
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.cardBorder),
-            ),
-            child: Row(
-              children: [
-                _buildServiceModeTabButton(
-                  icon: Icons.checklist_rounded,
-                  label: state.tr('customDetailingTab'),
-                  selected: _useCustomChecklist,
-                  onTap: () => setState(() => _useCustomChecklist = true),
-                ),
-                const SizedBox(width: 4),
-                _buildServiceModeTabButton(
-                  icon: Icons.inventory_2_outlined,
-                  label: state.tr('presetPackagesTab'),
-                  selected: !_useCustomChecklist,
-                  onTap: () {
-                    setState(() {
-                      _useCustomChecklist = false;
-                      _selectedPackage ??= state.packages.isNotEmpty ? state.packages.first : null;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          if (_useCustomChecklist)
-            ...state.activeServiceItems.map((item) => _buildCustomServiceCheckbox(state, item))
-          else
-            ...state.packages.map((pkg) => _buildPresetPackageCard(state, pkg, effectivePackage)),
-        ] else ...[
-          _buildCarpetTypeSelector(state),
           const SizedBox(height: 14),
-          _buildCarpetDimensionsCard(state, currentPrice),
+          _buildExpandableWashSection(
+            icon: Icons.checklist_rounded,
+            title: state.tr('customDetailingTab'),
+            summary: '${_selectedServiceIds.length} • ${CurrencyFormatter.format(customTotal)}',
+            isActiveMode: _useCustomChecklist,
+            isExpanded: _isCustomExpanded,
+            onToggle: () {
+              setState(() {
+                _useCustomChecklist = true;
+                _isCustomExpanded = !_isCustomExpanded;
+                if (_isCustomExpanded) _isPresetExpanded = false;
+              });
+            },
+            children: state.activeServiceItems
+                .map<Widget>((item) => _buildCustomServiceCheckbox(state, item))
+                .toList(),
+          ),
+          const SizedBox(height: 10),
+          _buildExpandableWashSection(
+            icon: Icons.inventory_2_outlined,
+            title: state.tr('presetPackagesTab'),
+            summary: '${effectivePackage?.localizedName(state.currentLang) ?? ''} • ${CurrencyFormatter.format(presetTotal)}',
+            isActiveMode: !_useCustomChecklist,
+            isExpanded: _isPresetExpanded,
+            onToggle: () {
+              setState(() {
+                _useCustomChecklist = false;
+                _selectedPackage ??= state.packages.isNotEmpty ? state.packages.first : null;
+                _isPresetExpanded = !_isPresetExpanded;
+                if (_isPresetExpanded) _isCustomExpanded = false;
+              });
+            },
+            children: state.packages
+                .map<Widget>((pkg) => _buildPresetPackageCard(state, pkg, effectivePackage))
+                .toList(),
+          ),
+        ] else ...[
+          Text(
+            state.tr('pickCarpetTypeAndSizeTitle'),
+            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 10),
+          _buildExpandableWashSection(
+            icon: Icons.texture_rounded,
+            title: state.tr(_carpetType == 'type_b' ? 'carpetTypeB' : 'carpetTypeA'),
+            summary: '${state.getCarpetPricePerSqM(_carpetType, _selectedServiceType).toStringAsFixed(0)} ETB / m²',
+            isActiveMode: true,
+            isExpanded: _isCarpetTypeExpanded,
+            onToggle: () => setState(() => _isCarpetTypeExpanded = !_isCarpetTypeExpanded),
+            children: [_buildCarpetTypeSelector(state)],
+          ),
+          const SizedBox(height: 10),
+          _buildExpandableWashSection(
+            icon: Icons.straighten_rounded,
+            title: state.tr('carpetDimensionsTitle'),
+            summary: '${_lengthController.text.trim()}m × ${_widthController.text.trim()}m (${_carpetArea.toStringAsFixed(1)} m²)',
+            isActiveMode: true,
+            isExpanded: _isCarpetDimensionsExpanded,
+            onToggle: () => setState(() => _isCarpetDimensionsExpanded = !_isCarpetDimensionsExpanded),
+            children: [_buildCarpetDimensionsCard(state, currentPrice)],
+          ),
         ],
 
         const SizedBox(height: 14),
 
-        // Simple Total Preview + "Prices are negotiable"
+        // Total Preview + "Prices are negotiable"
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(14),
@@ -354,20 +398,25 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    state.tr('estimatedTotalLabel'),
-                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                  Expanded(
+                    child: Text(
+                      state.tr('estimatedTotalLabel'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     CurrencyFormatter.format(currentPrice),
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
                   ),
                 ],
               ),
-              if ((state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double) > 0) ...[
+              if (deliveryFee > 0) ...[
                 const SizedBox(height: 4),
                 Text(
-                  '${state.tr("deliveryAddonIncluded")}: +${CurrencyFormatter.format(state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double)}',
+                  '${state.tr("deliveryAddonIncluded")}: +${CurrencyFormatter.format(deliveryFee)}',
                   style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary),
                 ),
               ],
@@ -378,69 +427,151 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         ),
         const SizedBox(height: 16),
 
-        Row(
-          children: [
-            OutlinedButton.icon(
-              onPressed: () => _setStep(1),
-              icon: const Icon(Icons.arrow_back_rounded, size: 17),
-              label: Text(state.tr('backStep'), style: const TextStyle(fontWeight: FontWeight.w700)),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E293B),
-                side: const BorderSide(color: AppColors.cardBorder),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: CustomButton(
-                text: state.tr('nextStep'),
-                icon: Icons.arrow_forward_rounded,
-                onPressed: () => _advanceFromStep2(state),
-              ),
-            ),
-          ],
+        CustomButton(
+          text: state.tr('nextStep'),
+          icon: Icons.arrow_forward_rounded,
+          onPressed: () => _advanceFromMergedStep1(state),
         ),
       ],
     );
   }
 
-  Widget _buildServiceModeTabButton({
-    required IconData icon,
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
+  Widget _buildExpandableServiceModeCard({
+    required ServiceType serviceType,
+    required int availableCapacity,
+    required dynamic state,
   }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: selected ? Colors.white : AppColors.textSecondary),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: selected ? Colors.white : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final isSelected = _selectedServiceType == serviceType;
+    final showLocation = isSelected && serviceType.requiresLocation;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        StationTypeCard(
+          serviceType: serviceType,
+          isCarpet: _isCarpet,
+          isSelected: isSelected,
+          availableCapacity: availableCapacity,
+          onTap: () => setState(() => _selectedServiceType = serviceType),
         ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          child: showLocation
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: ServiceLocationPickerCard(
+                    state: state,
+                    serviceType: serviceType,
+                    isCarpet: _isCarpet,
+                    selectedArea: _selectedBishoftuArea,
+                    onAreaChanged: (val) => setState(() => _selectedBishoftuArea = val),
+                    addressController: _addressController,
+                    gpsController: _gpsController,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExpandableWashSection({
+    required IconData icon,
+    required String title,
+    required String summary,
+    required bool isActiveMode,
+    required bool isExpanded,
+    required VoidCallback onToggle,
+    required List<Widget> children,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isActiveMode ? AppColors.primary.withOpacity(0.12) : const Color(0xFF111827),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isActiveMode ? AppColors.liquidCyanNeon : AppColors.cardBorder,
+          width: isActiveMode ? 1.5 : 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (isActiveMode ? AppColors.liquidCyanNeon : AppColors.primary).withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, size: 18, color: isActiveMode ? AppColors.liquidCyanNeon : AppColors.textSecondary),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: isActiveMode ? AppColors.liquidCyanNeon : Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          summary,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: isActiveMode ? AppColors.liquidCyanNeon : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOutCubic,
+            child: isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Divider(color: Color(0xFF1E293B), height: 12),
+                        ...children,
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }
@@ -734,10 +865,15 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${state.tr("carpetTotalArea")}: ${_carpetArea.toStringAsFixed(1)} m²',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF4338CA)),
+                Expanded(
+                  child: Text(
+                    '${state.tr("carpetTotalArea")}: ${_carpetArea.toStringAsFixed(1)} m²',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF4338CA)),
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   CurrencyFormatter.format(carpetPrice),
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF312E81)),
@@ -747,57 +883,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildStep1ServiceMode(BuildContext context, dynamic state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        StationTypeCard(
-          serviceType: ServiceType.walkInStation,
-          isCarpet: _isCarpet,
-          isSelected: _selectedServiceType == ServiceType.walkInStation,
-          availableCapacity: state.availableBaysCount,
-          onTap: () => setState(() => _selectedServiceType = ServiceType.walkInStation),
-        ),
-        const SizedBox(height: 10),
-        StationTypeCard(
-          serviceType: ServiceType.valetPickUp,
-          isCarpet: _isCarpet,
-          isSelected: _selectedServiceType == ServiceType.valetPickUp,
-          availableCapacity: 1,
-          onTap: () => setState(() => _selectedServiceType = ServiceType.valetPickUp),
-        ),
-        const SizedBox(height: 10),
-        StationTypeCard(
-          serviceType: ServiceType.atHomeMobile,
-          isCarpet: _isCarpet,
-          isSelected: _selectedServiceType == ServiceType.atHomeMobile,
-          availableCapacity: state.isMobileVanAvailable ? 1 : 0,
-          onTap: () => setState(() => _selectedServiceType = ServiceType.atHomeMobile),
-        ),
-
-        if (_selectedServiceType.requiresLocation) ...[
-          const SizedBox(height: 16),
-          ServiceLocationPickerCard(
-            state: state,
-            serviceType: _selectedServiceType,
-            isCarpet: _isCarpet,
-            selectedArea: _selectedBishoftuArea,
-            onAreaChanged: (val) => setState(() => _selectedBishoftuArea = val),
-            addressController: _addressController,
-            gpsController: _gpsController,
-          ),
-        ],
-        const SizedBox(height: 20),
-
-        CustomButton(
-          text: state.tr('nextStep'),
-          icon: Icons.arrow_forward_rounded,
-          onPressed: () => _advanceFromStep1(state),
-        ),
-      ],
     );
   }
 
@@ -869,77 +954,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         ),
         const SizedBox(height: 14),
 
-        // Optional Washer Gratuity / Tip
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.amber.shade50.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.amber.shade300),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.volunteer_activism_rounded, size: 16, color: Colors.amber.shade900),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      state.tr('washersTip'),
-                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Colors.amber.shade900),
-                    ),
-                  ),
-                  if (_tipAmount > 0)
-                    Text(
-                      '+ETB ${_tipAmount.toStringAsFixed(0)}',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.amber.shade900),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  for (final tipVal in [50, 100, 200])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: ChoiceChip(
-                        label: Text('+$tipVal'),
-                        selected: _tipAmount == tipVal.toDouble(),
-                        onSelected: (selected) {
-                          setState(() {
-                            _tipAmount = selected ? tipVal.toDouble() : 0.0;
-                            _tipController.text = _tipAmount > 0 ? _tipAmount.toStringAsFixed(0) : '';
-                          });
-                        },
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    ),
-                  Expanded(
-                    child: SizedBox(
-                      height: 38,
-                      child: TextField(
-                        controller: _tipController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: state.tr('customTip'),
-                          hintStyle: const TextStyle(fontSize: 11),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                          isDense: true,
-                        ),
-                        onChanged: (val) => setState(() => _tipAmount = double.tryParse(val) ?? 0.0),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-
         // Order Summary Card
         Container(
           padding: const EdgeInsets.all(16),
@@ -979,7 +993,15 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${state.tr("total")}:', style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                  Expanded(
+                    child: Text(
+                      '${state.tr("total")}:',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Text(
                     CurrencyFormatter.format(grandTotal),
                     style: const TextStyle(color: AppColors.oromiaGold, fontWeight: FontWeight.w900, fontSize: 20),
@@ -1007,7 +1029,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         Row(
           children: [
             OutlinedButton.icon(
-              onPressed: _isSubmitting ? null : () => _setStep(2),
+              onPressed: _isSubmitting ? null : () => _setStep(1),
               icon: const Icon(Icons.arrow_back_rounded, size: 17),
               label: Text(state.tr('backStep'), style: const TextStyle(fontWeight: FontWeight.w700)),
               style: OutlinedButton.styleFrom(
@@ -1097,7 +1119,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
         carpetAreaSqMeters: _isCarpet ? _carpetArea : null,
         carpetDimensions: _isCarpet ? '${_lengthController.text.trim()}m x ${_widthController.text.trim()}m' : null,
         customTotalPrice: totalPrice,
-        tipAmount: _tipAmount,
         selectedServices: selectedServiceNames,
       );
 

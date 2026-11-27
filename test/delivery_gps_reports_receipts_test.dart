@@ -48,21 +48,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Step 0 shows division tabs only -> tap Car Washing Service -> reveals Wash My Car hub
+      // Tap Car Washing Service -> bypasses intermediate hub directly into NewBookingScreen
       expect(find.text(state.tr('whatToWashToday')), findsOneWidget);
       expect(find.text(state.tr('washMyCarTitle')), findsNothing);
       await tester.tap(find.text(state.tr('carWashingService')));
       await tester.pumpAndSettle();
 
-      // Division hub stays clean (delivery choices live cleanly inside Step 1 of booking)
+      // NewBookingScreen Step 1 presents all 3 Car delivery modes immediately
       expect(find.text(state.tr('washMyCarTitle')), findsOneWidget);
-      expect(find.text(state.tr('chooseDeliveryQuick')), findsNothing);
-      expect(find.text(state.tr('washMyCarpetTitle')), findsNothing);
-
-      // Tap Car CTA -> Step 1 shows all 3 Car delivery modes
-      await tester.tap(find.text(state.tr('startCarBooking')));
-      await tester.pumpAndSettle();
-
       expect(find.text(state.tr('driveInStation')), findsOneWidget);
       expect(find.text(state.tr('atHomeMobile')), findsOneWidget);
       expect(find.text(state.tr('serviceValetPickUp')), findsOneWidget);

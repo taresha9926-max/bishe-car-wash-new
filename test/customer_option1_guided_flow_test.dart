@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/constants/app_theme.dart';
+import 'package:bishe_car_wash/features/auth_roles/presentation/screens/role_shell_screen.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
@@ -9,12 +10,14 @@ import 'package:bishe_car_wash/features/booking_service/presentation/state/app_s
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/payment_process_dialog.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
+import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
+import 'package:bishe_car_wash/features/welcome/presentation/widgets/ad_video_showcase_card.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Option 1 Simplified Customer Hub & 3-Step Booking Tests', () {
+  group('Refactored Customer Flow, Bottom Tabs & Merged 2-Step Booking Tests', () {
     late AppStateNotifier state;
 
     setUp(() async {
@@ -22,7 +25,30 @@ void main() {
       await state.loadData();
     });
 
-    testWidgets('CustomerHomeScreen displays only division selector first, then opens Wash My Car or Wash My Carpet screen', (tester) async {
+    testWidgets('Splash completion lands directly on CustomerHomeScreen bypassing WelcomeScreen', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const RoleShellScreen(),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      state.completeEntranceSplash();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CustomerHomeScreen), findsOneWidget);
+      expect(find.text(state.tr('whatToWashToday')), findsOneWidget);
+    });
+
+    testWidgets('CustomerHomeScreen opens NewBookingScreen directly without intermediate hub and puts Track + TikTok Ad in bottom tab', (tester) async {
       tester.view.physicalSize = const Size(375, 812);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -37,52 +63,57 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Step 0: ONLY "What would you like to wash today?" with Car & Carpet tabs
-      expect(find.text('What would you like to wash today?'), findsOneWidget);
+      // Default Wash tab: "What would you like to wash today?" + Car & Carpet tabs, no rolling banner, top AI icon
+      expect(find.text(state.tr('whatToWashToday')), findsOneWidget);
       expect(find.text(state.tr('carWashingService')), findsOneWidget);
       expect(find.text(state.tr('carpetWashingService')), findsOneWidget);
-      expect(find.text('Wash My Car'), findsNothing);
-      expect(find.text('Wash My Carpet'), findsNothing);
-      expect(find.text(state.tr('stationBaysTitle')), findsNothing);
+      expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
       expect(find.text(state.tr('trackMyCar')), findsNothing);
 
-      // Tap Car Washing Service -> navigates to Wash My Car screen
+      // Tap Car Washing Service -> opens NewBookingScreen directly (bypassing old division hub)
       await tester.tap(find.text(state.tr('carWashingService')));
       await tester.pumpAndSettle();
-      expect(find.text('Wash My Car'), findsOneWidget);
-      expect(find.text('Prices are negotiable'), findsOneWidget);
-      expect(find.text(state.tr('chooseDeliveryQuick')), findsNothing);
-      expect(find.text('Wash My Carpet'), findsNothing);
-      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsNothing);
+      expect(find.byType(NewBookingScreen), findsOneWidget);
+      expect(find.text(state.tr('washMyCarTitle')), findsOneWidget);
+      expect(find.text(state.tr('pricesAreNegotiable')), findsOneWidget);
+      expect(find.text(state.tr('howShouldWeServeYou')), findsOneWidget);
 
-      // Navigate back -> tap Carpet Washing Service -> navigates to Wash My Carpet screen
+      // Navigate back -> tap Carpet Washing Service -> opens NewBookingScreen(isCarpet: true) directly
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('What would you like to wash today?'), findsOneWidget);
+      expect(find.text(state.tr('whatToWashToday')), findsOneWidget);
 
       await tester.tap(find.text(state.tr('carpetWashingService')));
       await tester.pumpAndSettle();
-      expect(find.text('Wash My Carpet'), findsOneWidget);
-      expect(find.text('Prices are negotiable'), findsOneWidget);
-      expect(find.text(state.tr('carpetDeliveryOptionsTitle')), findsNothing);
-      expect(find.text('Wash My Car'), findsNothing);
-      expect(find.text(state.tr('stationBaysTitle')), findsNothing);
-      expect(find.text(state.tr('trackMyCar')), findsNothing);
+      expect(find.byType(NewBookingScreen), findsOneWidget);
+      expect(find.text(state.tr('washMyCarpetTitle')), findsOneWidget);
+      expect(find.text(state.tr('pricesAreNegotiable')), findsOneWidget);
 
-      // Verify Home button in header actively navigates back from division screen to root
-      final homeBtn = find.byIcon(Icons.home_rounded);
-      expect(homeBtn, findsOneWidget);
-      await tester.tap(homeBtn);
+      // Navigate back -> tap Track bottom tab -> reveals Track My Vehicle + TikTok Ad card
+      await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('What would you like to wash today?'), findsOneWidget);
+      await tester.tap(find.text(state.tr('bottomTabTrack')));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text(state.tr('trackMyCar')), findsWidgets);
+      expect(find.byType(AdVideoShowcaseCard), findsOneWidget);
 
-      tester.view.reset();
+      // Tap Station bottom tab -> reveals Call & Google Maps
+      await tester.tap(find.text(state.tr('bottomTabStation')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('openGoogleMaps')), findsOneWidget);
+      expect(find.text(state.tr('phoneCallBooking')), findsOneWidget);
+
+      // Tap Feedback bottom tab -> reveals CustomerFeedbackSheet embedded
+      await tester.tap(find.text(state.tr('bottomTabFeedback')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('rateExperienceQuestion')), findsOneWidget);
     });
 
-    testWidgets('NewBookingScreen navigates Step 1 -> Step 2 -> Step 3 cleanly for Car Wash and Carpet Washing', (tester) async {
+    testWidgets('NewBookingScreen merges Step 1+2 with expandable sections and removes tip field on final step', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
+
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,
@@ -94,23 +125,36 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 1 of 3: How should we serve you?'), findsOneWidget);
+      // Merged screen 1: delivery modes at top, vehicle size & expandable wash cards below
+      expect(find.text(state.tr('mergedCarInstruction')), findsOneWidget);
+      expect(find.text(state.tr('howShouldWeServeYou')), findsOneWidget);
+      expect(find.text(state.tr('pickVehicleAndWashTitle')), findsOneWidget);
+      expect(find.text(state.tr('customDetailingTab')), findsOneWidget);
+      expect(find.text(state.tr('presetPackagesTab')), findsOneWidget);
 
-      await tester.ensureVisible(find.text('Next Step'));
-      await tester.tap(find.text('Next Step'));
+      // Clicking Custom Detailing expands service checkboxes
+      await tester.ensureVisible(find.text(state.tr('customDetailingTab')));
+      await tester.tap(find.text(state.tr('customDetailingTab')));
+      await tester.pumpAndSettle();
+      expect(find.byType(CheckboxListTile), findsWidgets);
+
+      // Clicking Preset Service Packages expands preset package list
+      await tester.ensureVisible(find.text(state.tr('presetPackagesTab')));
+      await tester.tap(find.text(state.tr('presetPackagesTab')));
+      await tester.pumpAndSettle();
+      expect(find.byType(Radio<String>), findsWidgets);
+
+      // Next Step advances to Final Step (no tip field)
+      await tester.ensureVisible(find.text(state.tr('nextStep')));
+      await tester.tap(find.text(state.tr('nextStep')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 2 of 3: Pick vehicle size & wash service'), findsOneWidget);
-      expect(find.text('Prices are negotiable'), findsOneWidget);
+      expect(find.text(state.tr('step2DetailsInstruction')), findsOneWidget);
+      expect(find.text(state.tr('pricesAreNegotiable')), findsOneWidget);
+      expect(find.text(state.tr('washersTip')), findsNothing);
+      expect(find.text(state.tr('customTip')), findsNothing);
 
-      await tester.ensureVisible(find.text('Next Step'));
-      await tester.tap(find.text('Next Step'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Step 3 of 3: Your name, phone and plate number'), findsOneWidget);
-      expect(find.text('Prices are negotiable'), findsOneWidget);
-
-      // Same Step 1 -> Step 2 -> Step 3 sequence applies to Carpet Washing Service
+      // Same merged structure applies to Carpet Washing Service
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,
@@ -123,21 +167,29 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 1 of 3: How should we serve you?'), findsOneWidget);
+      expect(find.text(state.tr('mergedCarpetInstruction')), findsOneWidget);
+      expect(find.text(state.tr('howShouldWeServeYou')), findsOneWidget);
+      expect(find.text(state.tr('pickCarpetTypeAndSizeTitle')), findsOneWidget);
 
-      await tester.ensureVisible(find.text('Next Step'));
-      await tester.tap(find.text('Next Step'));
+      // Expand carpet dimensions card cleanly
+      await tester.ensureVisible(find.text(state.tr('carpetDimensionsTitle')));
+      await tester.tap(find.text(state.tr('carpetDimensionsTitle')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 2 of 3: Pick carpet type & size'), findsOneWidget);
-      expect(find.text('Prices are negotiable'), findsOneWidget);
-
-      await tester.ensureVisible(find.text('Next Step'));
-      await tester.tap(find.text('Next Step'));
+      await tester.ensureVisible(find.text(state.tr('nextStep')));
+      await tester.tap(find.text(state.tr('nextStep')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Step 3 of 3: Your name, phone & carpet tag'), findsOneWidget);
-      tester.view.reset();
+      expect(find.text(state.tr('step2CarpetDetailsInstruction')), findsOneWidget);
+      expect(find.text(state.tr('washersTip')), findsNothing);
+
+      // Submitting booking on final step restores LiveTrackingScreen at end of booking
+      await tester.enterText(find.byType(TextFormField).first, 'Gemechu T.');
+      await tester.ensureVisible(find.text(state.tr('bookCarpetCleaning')));
+      await tester.tap(find.text(state.tr('bookCarpetCleaning')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LiveTrackingScreen), findsOneWidget);
     });
 
     testWidgets('PaymentProcessDialog allows Cashier to enter negotiated station price', (tester) async {
@@ -177,18 +229,24 @@ void main() {
       expect(updated.payment.method, equals(PaymentMethod.cash));
     });
 
-    test('Trilingual labels for Option 1 and Prices are negotiable are complete', () {
+    test('Trilingual labels for Customer Home bottom tabs and merged steps are complete', () {
       for (final lang in ['EN', 'OM', 'AM']) {
         state.setLanguage(lang);
         expect(state.tr('pricesAreNegotiable'), isNotEmpty);
         expect(state.tr('whatToWashToday'), isNotEmpty);
         expect(state.tr('washMyCarTitle'), isNotEmpty);
         expect(state.tr('washMyCarpetTitle'), isNotEmpty);
-        expect(state.tr('step1ModeInstruction'), isNotEmpty);
-        expect(state.tr('step2CarInstruction'), isNotEmpty);
-        expect(state.tr('step2CarpetInstruction'), isNotEmpty);
-        expect(state.tr('step3DetailsInstruction'), isNotEmpty);
-        expect(state.tr('step3CarpetDetailsInstruction'), isNotEmpty);
+        expect(state.tr('howShouldWeServeYou'), isNotEmpty);
+        expect(state.tr('mergedCarInstruction'), isNotEmpty);
+        expect(state.tr('mergedCarpetInstruction'), isNotEmpty);
+        expect(state.tr('pickVehicleAndWashTitle'), isNotEmpty);
+        expect(state.tr('pickCarpetTypeAndSizeTitle'), isNotEmpty);
+        expect(state.tr('step2DetailsInstruction'), isNotEmpty);
+        expect(state.tr('step2CarpetDetailsInstruction'), isNotEmpty);
+        expect(state.tr('bottomTabWash'), isNotEmpty);
+        expect(state.tr('bottomTabTrack'), isNotEmpty);
+        expect(state.tr('bottomTabStation'), isNotEmpty);
+        expect(state.tr('bottomTabFeedback'), isNotEmpty);
         expect(state.tr('finalNegotiatedPriceEtb'), isNotEmpty);
       }
     });

@@ -7,6 +7,7 @@ import 'package:bishe_car_wash/core/widgets/app_role_header.dart';
 import 'package:bishe_car_wash/core/widgets/responsive_layout.dart';
 import 'package:bishe_car_wash/core/widgets/status_badge.dart';
 import 'package:bishe_car_wash/core/widgets/tactile_bounce.dart';
+import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/service_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_booking.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_dispatcher.dart';
@@ -15,21 +16,41 @@ import 'package:bishe_car_wash/features/booking_service/presentation/state/app_s
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/new_booking_screen.dart';
-import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable_price_badge.dart';
+import 'package:bishe_car_wash/features/welcome/presentation/widgets/ad_video_showcase_card.dart';
 import 'package:bishe_car_wash/features/welcome/presentation/widgets/customer_feedback_sheet.dart';
-import 'package:bishe_car_wash/features/welcome/presentation/widgets/welcome_service_carousel_banner.dart';
-import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 
-/// Step 0 Customer Entry: asks "What would you like to wash today?" with ONLY
-/// the Car Washing Service and Carpet Washing Service tabs, then navigates to
-/// the selected service screen ("Wash My Car" or "Wash My Carpet").
-class CustomerHomeScreen extends StatelessWidget {
-  const CustomerHomeScreen({super.key});
+/// Direct customer dashboard after Splash:
+/// - Tab 0 (Wash): "What would you like to wash today?" + Car & Carpet tabs opening booking directly
+/// - Tab 1 (Track): Restored "Track My Vehicle / Carpet" lookup + Active Wash + TikTok Ad Reels
+/// - Tab 2 (Station): Live Bay Queue + Phone Call Booking + Google Maps + Bishoftu Info
+/// - Tab 3 (Feedback): Customer ratings & suggestions
+class CustomerHomeScreen extends StatefulWidget {
+  final int initialTabIndex;
 
-  void _openDivisionScreen(
-    BuildContext context, {
-    required bool isCarpet,
-  }) {
+  const CustomerHomeScreen({super.key, this.initialTabIndex = 0});
+
+  @override
+  State<CustomerHomeScreen> createState() => _CustomerHomeScreenState();
+}
+
+class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
+  late int _selectedTabIndex;
+  bool _trackIsCarpet = false;
+  final TextEditingController _trackController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTabIndex = widget.initialTabIndex.clamp(0, 3);
+  }
+
+  @override
+  void dispose() {
+    _trackController.dispose();
+    super.dispose();
+  }
+
+  void _openDirectBooking(BuildContext context, {required bool isCarpet}) {
     final state = AppStateProvider.read(context);
     state.setActiveServiceDivision(
       isCarpet ? ActiveServiceDivision.carpetWash : ActiveServiceDivision.carWash,
@@ -37,9 +58,29 @@ class CustomerHomeScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => _CustomerDivisionHubScreen(isCarpet: isCarpet),
+        builder: (_) => NewBookingScreen(isCarpet: isCarpet),
       ),
     );
+  }
+
+  void _handleTrackLookup(BuildContext context, dynamic state, {required bool isCarpet}) {
+    final query = _trackController.text.trim();
+    if (query.isEmpty) return;
+    final found = state.findBookingByPhoneOrPlate(query, isCarpet: isCarpet);
+    if (found != null) {
+      state.setActiveTrackingBooking(found.id);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => LiveTrackingScreen(bookingId: found.id)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.primaryDark,
+          content: Text(state.tr('noActiveWashFound')),
+        ),
+      );
+    }
   }
 
   @override
@@ -48,12 +89,25 @@ class CustomerHomeScreen extends StatelessWidget {
     final isDesktop = ResponsiveLayout.isDesktop(context);
     final isMobile = ResponsiveLayout.isMobile(context);
 
+    final activeWash = state.activeTrackingBooking;
+    final displayActiveWash = (activeWash != null &&
+            activeWash.status != WashStatus.pending &&
+            activeWash.status != WashStatus.cancelled)
+        ? activeWash
+        : null;
+
+    final queueAhead = state.bookings
+        .where((b) =>
+            !b.isCarpet &&
+            b.status != WashStatus.completed &&
+            b.status != WashStatus.cancelled)
+        .toList();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppRoleHeader(
         title: state.tr('appName'),
-        showBackButton: true,
-        onBack: () => state.goToWelcome(),
+        showBackButton: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 21),
@@ -62,55 +116,77 @@ class CustomerHomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
+      body: switch (_selectedTabIndex) {
+        1 => _buildTrackTab(context, state, isDesktop: isDesktop, activeWash: displayActiveWash),
+        2 => _buildStationTab(context, state, isDesktop: isDesktop, isMobile: isMobile, queueAhead: queueAhead),
+        3 => const CustomerFeedbackSheet(embedded: true),
+        _ => _buildWashTab(context, state, isDesktop: isDesktop, queueAhead: queueAhead, activeWash: displayActiveWash),
+      },
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0A192F), Color(0xFF0F172A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          border: Border(
+            top: BorderSide(color: Color(0xFF1E293B), width: 1.5),
+          ),
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _selectedTabIndex,
+          onTap: (index) => setState(() => _selectedTabIndex = index),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: _selectedTabIndex == 1
+              ? const Color(0xFFFE2C55)
+              : (_selectedTabIndex == 3 ? AppColors.oromiaGold : AppColors.liquidCyanNeon),
+          unselectedItemColor: AppColors.textSecondary,
+          selectedLabelStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
+          unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.local_car_wash_rounded),
+              label: state.tr('bottomTabWash'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.radar_rounded),
+              label: state.tr('bottomTabTrack'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.storefront_rounded),
+              label: state.tr('bottomTabStation'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.star_rounded),
+              label: state.tr('bottomTabFeedback'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWashTab(
+    BuildContext context,
+    dynamic state, {
+    required bool isDesktop,
+    required List<WashBooking> queueAhead,
+    required WashBooking? activeWash,
+  }) {
+    return RefreshIndicator(
+      onRefresh: () => state.loadData(),
+      child: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 18),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    onTap: () => state.goToWelcome(),
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF111827),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.cardBorder),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.arrow_back_rounded, size: 15, color: AppColors.primary),
-                          const SizedBox(width: 6),
-                          Text(
-                            state.tr('welcomeHub'),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                WelcomeServiceCarouselBanner(isMobile: isMobile),
-                const SizedBox(height: 18),
                 Text(
                   state.tr('whatToWashToday'),
                   textAlign: TextAlign.center,
@@ -143,7 +219,7 @@ class CustomerHomeScreen extends StatelessWidget {
                           imageUrl: AutoCareAssets.carSedanUrl,
                           fallbackIcon: Icons.local_car_wash_rounded,
                           colors: const [Color(0xFF0284C7), Color(0xFF0369A1)],
-                          onTap: () => _openDivisionScreen(context, isCarpet: false),
+                          onTap: () => _openDirectBooking(context, isCarpet: false),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -153,73 +229,224 @@ class CustomerHomeScreen extends StatelessWidget {
                           imageUrl: AutoCareAssets.carpetTypeAUrl,
                           fallbackIcon: Icons.texture_rounded,
                           colors: const [Color(0xFF7C3AED), Color(0xFF6D28D9)],
-                          onTap: () => _openDivisionScreen(context, isCarpet: true),
+                          onTap: () => _openDirectBooking(context, isCarpet: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildCompactLiveStatusCard(state, queueAhead),
+                if (activeWash != null) ...[
+                  const SizedBox(height: 14),
+                  _buildActiveWashCard(context, state, activeWash),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTrackTab(
+    BuildContext context,
+    dynamic state, {
+    required bool isDesktop,
+    required WashBooking? activeWash,
+  }) {
+    final matchingActiveWash = (activeWash != null && activeWash.isCarpet == _trackIsCarpet)
+        ? activeWash
+        : null;
+
+    return RefreshIndicator(
+      onRefresh: () => state.loadData(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Switch between tracking Car vs Carpet cleanly
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.cardBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _trackIsCarpet = false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: !_trackIsCarpet ? AppColors.primary : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              state.tr('trackMyCar'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: !_trackIsCarpet ? Colors.white : AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _trackIsCarpet = true),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: _trackIsCarpet ? const Color(0xFF4F46E5) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              state.tr('trackMyCarpet'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                color: _trackIsCarpet ? Colors.white : AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 14),
-                // Interactive Customer AI Concierge Banner
-                BounceTappable(
-                  onTap: () => BisheAiExecutiveSheet.show(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF0B2545), Color(0xFF111827)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                if (matchingActiveWash != null) ...[
+                  _buildActiveWashCard(context, state, matchingActiveWash),
+                  const SizedBox(height: 14),
+                ],
+                _buildVehicleLookupCard(context, state, isCarpet: _trackIsCarpet),
+                const SizedBox(height: 16),
+                const AdVideoShowcaseCard(),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStationTab(
+    BuildContext context,
+    dynamic state, {
+    required bool isDesktop,
+    required bool isMobile,
+    required List<WashBooking> queueAhead,
+  }) {
+    return RefreshIndicator(
+      onRefresh: () => state.loadData(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 16),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildCompactLiveStatusCard(state, queueAhead),
+                const SizedBox(height: 14),
+                _buildPhoneBookingCard(context, state),
+                const SizedBox(height: 12),
+                isMobile
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
+                            icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
+                            label: Text(
+                              state.tr('openGoogleMaps'),
+                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1E293B),
+                              side: const BorderSide(color: AppColors.cardBorder),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            onPressed: () => state.goToWelcome(),
+                            icon: const Icon(Icons.home_rounded, size: 17, color: AppColors.liquidCyanNeon),
+                            label: Text(
+                              state.tr('welcomeHub'),
+                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.liquidCyanNeon),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: const Color(0xFF111827),
+                              side: const BorderSide(color: AppColors.cardBorder),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
+                              icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
+                              label: Text(
+                                state.tr('openGoogleMaps'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1E293B),
+                                side: const BorderSide(color: AppColors.cardBorder),
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => state.goToWelcome(),
+                              icon: const Icon(Icons.home_rounded, size: 17, color: AppColors.liquidCyanNeon),
+                              label: Text(
+                                state.tr('welcomeHub'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.liquidCyanNeon),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: const Color(0xFF111827),
+                                side: const BorderSide(color: AppColors.cardBorder),
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0x4400E5FF), width: 1.2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.liquidCyanNeon.withOpacity(0.12),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.liquidCyanNeon.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.auto_awesome_rounded, color: AppColors.liquidCyanNeon, size: 22),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                state.tr('askBisheAiConcierge'),
-                                style: const TextStyle(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                state.tr('aiConciergeBannerSub'),
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Color(0xFF94A3B8),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right_rounded, color: AppColors.liquidCyanNeon, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 16),
+                _buildBishoftuLocationFooter(state),
               ],
             ),
           ),
@@ -277,256 +504,6 @@ class CustomerHomeScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CustomerDivisionHubScreen extends StatefulWidget {
-  final bool isCarpet;
-
-  const _CustomerDivisionHubScreen({required this.isCarpet});
-
-  @override
-  State<_CustomerDivisionHubScreen> createState() => _CustomerDivisionHubScreenState();
-}
-
-class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> {
-  final TextEditingController _trackController = TextEditingController();
-
-  @override
-  void dispose() {
-    _trackController.dispose();
-    super.dispose();
-  }
-
-  void _startGuidedBooking(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => NewBookingScreen(isCarpet: widget.isCarpet),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = AppStateProvider.of(context);
-    final isCarpet = widget.isCarpet;
-    final activeWash = state.activeTrackingBooking;
-    final matchingActiveWash = (activeWash != null &&
-            activeWash.isCarpet == isCarpet &&
-            activeWash.status != WashStatus.pending &&
-            activeWash.status != WashStatus.cancelled)
-        ? activeWash
-        : null;
-    final isDesktop = ResponsiveLayout.isDesktop(context);
-    final isMobile = ResponsiveLayout.isMobile(context);
-    final queueAhead = state.bookings
-        .where((b) =>
-            !b.isCarpet &&
-            b.status != WashStatus.completed &&
-            b.status != WashStatus.cancelled)
-        .toList();
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppRoleHeader(
-        title: isCarpet ? state.tr('carpetWashingService') : state.tr('carWashingService'),
-        showBackButton: true,
-        onBack: () => Navigator.of(context).pop(),
-        onHomePressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => state.loadData(),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 28 : 16, vertical: 14),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 880),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  InkWell(
-                    onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF111827),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.cardBorder),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.35),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.arrow_back_rounded, size: 15, color: AppColors.primary),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              state.tr('whatToWashToday'),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (!isCarpet) ...[
-                    _buildCompactLiveStatusCard(state, queueAhead),
-                    const SizedBox(height: 14),
-                    _buildDivisionHubCard(
-                      context: context,
-                      title: state.tr('washMyCarTitle'),
-                      subtitle: state.tr('washMyCarSub'),
-                      ctaLabel: state.tr('startCarBooking'),
-                      imageUrl: AutoCareAssets.carSedanUrl,
-                      fallbackIcon: Icons.directions_car_filled_rounded,
-                      accentColor: AppColors.primary,
-                      onTap: () => _startGuidedBooking(context),
-                    ),
-                  ] else ...[
-                    _buildDivisionHubCard(
-                      context: context,
-                      title: state.tr('washMyCarpetTitle'),
-                      subtitle: state.tr('washMyCarpetSub'),
-                      ctaLabel: state.tr('startCarpetBooking'),
-                      imageUrl: AutoCareAssets.carpetTypeAUrl,
-                      fallbackIcon: Icons.texture_rounded,
-                      accentColor: const Color(0xFF4F46E5),
-                      onTap: () => _startGuidedBooking(context),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-
-                  if (matchingActiveWash != null) ...[
-                    _buildActiveWashCard(context, state, matchingActiveWash),
-                    const SizedBox(height: 12),
-                  ],
-
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () => _showLookupModal(context, state, isCarpet: isCarpet),
-                      icon: const Icon(Icons.search_rounded, size: 15, color: AppColors.liquidCyanNeon),
-                      label: Text(
-                        state.tr('lookingForEarlierBooking'),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.liquidCyanNeon,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  _buildPhoneBookingCard(context, state),
-                  const SizedBox(height: 12),
-
-                  isMobile
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            OutlinedButton.icon(
-                              onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                              icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
-                              label: Text(
-                                state.tr('openGoogleMaps'),
-                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1E293B),
-                                side: const BorderSide(color: AppColors.cardBorder),
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            OutlinedButton.icon(
-                              onPressed: () => CustomerFeedbackSheet.show(context),
-                              icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
-                              label: Text(
-                                state.tr('feedbackTab'),
-                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
-                                side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => UrlLauncherHelper.openUrl(AppConstants.googleMapsLocationUrl),
-                                icon: const Icon(Icons.location_on_rounded, size: 17, color: AppColors.statusPending),
-                                label: Text(
-                                  state.tr('openGoogleMaps'),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1E293B),
-                                  side: const BorderSide(color: AppColors.cardBorder),
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => CustomerFeedbackSheet.show(context),
-                                icon: const Icon(Icons.star_rounded, size: 17, color: Color(0xFFD97706)),
-                                label: Text(
-                                  state.tr('feedbackTab'),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFEF3C7).withOpacity(0.55),
-                                  side: const BorderSide(color: Color(0xFFF59E0B), width: 1.2),
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                  const SizedBox(height: 16),
-
-                  _buildBishoftuLocationFooter(state, isCarpet: isCarpet),
-                  const SizedBox(height: 18),
-                ],
-              ),
-            ),
-          ),
         ),
       ),
     );
@@ -622,240 +599,6 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     );
   }
 
-  void _showLookupModal(BuildContext context, dynamic state, {required bool isCarpet}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF111827),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-            left: 20,
-            right: 20,
-            top: 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    state.tr('enterPlateOrPhone'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white70, size: 20),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                state.tr('onlyOwnVehicleNotice'),
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _trackController,
-                textCapitalization: TextCapitalization.characters,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
-                decoration: InputDecoration(
-                  hintText: isCarpet ? state.tr('carpetTagOrPhoneHint') : state.tr('plateOrPhoneHint'),
-                  filled: true,
-                  fillColor: const Color(0xFF1E293B),
-                  prefixIcon: Icon(
-                    isCarpet ? Icons.texture_rounded : Icons.directions_car_outlined,
-                    color: AppColors.liquidCyanNeon,
-                  ),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onSubmitted: (_) {
-                  Navigator.pop(ctx);
-                  _handleTrackVehicle(context, state, isCarpet: isCarpet);
-                },
-              ),
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                height: 46,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    _handleTrackVehicle(context, state, isCarpet: isCarpet);
-                  },
-                  icon: const Icon(Icons.radar_rounded, size: 18),
-                  label: Text(
-                    state.tr('trackNow'),
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isCarpet ? const Color(0xFF4F46E5) : AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildEtaPill({
-    required IconData icon,
-    required String title,
-    required String value,
-    required bool isReady,
-  }) {
-    final color = isReady ? AppColors.statusReady : AppColors.primaryDark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: isReady ? AppColors.statusReady.withOpacity(0.08) : AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isReady ? AppColors.statusReady.withOpacity(0.4) : AppColors.cardBorder,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: color),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 3),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: color),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDivisionHubCard({
-    required BuildContext context,
-    required String title,
-    required String subtitle,
-    required String ctaLabel,
-    required String imageUrl,
-    required IconData fallbackIcon,
-    required Color accentColor,
-    required VoidCallback onTap,
-  }) {
-    return BounceTappable(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF111827),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: accentColor.withValues(alpha: 0.45), width: 1.6),
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withValues(alpha: 0.16),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.45),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                AutoCareAssets.buildPhotoThumbnail(
-                  imageUrl: imageUrl,
-                  width: 62,
-                  height: 62,
-                  borderRadius: 14,
-                  fallbackIcon: fallbackIcon,
-                  fallbackColor: accentColor,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const NegotiablePriceBadge(),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: onTap,
-                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                label: Text(
-                  ctaLabel,
-                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accentColor,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildVehicleLookupCard(BuildContext context, dynamic state, {bool isCarpet = false}) {
     final accent = isCarpet ? const Color(0xFF4F46E5) : AppColors.primary;
     return Container(
@@ -927,7 +670,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
                       fillColor: AppColors.surfaceVariant,
                       filled: true,
                     ),
-                    onSubmitted: (_) => _handleTrackVehicle(context, state, isCarpet: isCarpet),
+                    onSubmitted: (_) => _handleTrackLookup(context, state, isCarpet: isCarpet),
                   ),
                 ),
               ),
@@ -935,7 +678,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
               SizedBox(
                 height: 48,
                 child: ElevatedButton.icon(
-                  onPressed: () => _handleTrackVehicle(context, state, isCarpet: isCarpet),
+                  onPressed: () => _handleTrackLookup(context, state, isCarpet: isCarpet),
                   icon: const Icon(Icons.radar_rounded, size: 16),
                   label: Text(state.tr('trackNow'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
                   style: ElevatedButton.styleFrom(
@@ -952,26 +695,6 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
         ],
       ),
     );
-  }
-
-  void _handleTrackVehicle(BuildContext context, dynamic state, {bool isCarpet = false}) {
-    final query = _trackController.text.trim();
-    if (query.isEmpty) return;
-    final found = state.findBookingByPhoneOrPlate(query, isCarpet: isCarpet);
-    if (found != null) {
-      state.setActiveTrackingBooking(found.id);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => LiveTrackingScreen(bookingId: found.id)),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.primaryDark,
-          content: Text(state.tr('noActiveWashFound')),
-        ),
-      );
-    }
   }
 
   Widget _buildActiveWashCard(BuildContext context, dynamic state, WashBooking wash) {
@@ -1119,7 +842,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
     );
   }
 
-  Widget _buildBishoftuLocationFooter(dynamic state, {bool isCarpet = false}) {
+  Widget _buildBishoftuLocationFooter(dynamic state) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -1136,7 +859,7 @@ class _CustomerDivisionHubScreenState extends State<_CustomerDivisionHubScreen> 
         ],
       ),
       child: Text(
-        '${isCarpet ? state.tr("carpetWashingService") : state.tr("appName")} • ${state.tr("bishoftu")}\n${isCarpet ? state.tr("carpetTrustFooter") : state.tr("customerTrustPill")} • ${state.customerPhoneBookingNumber}',
+        '${state.tr("appName")} • ${state.tr("bishoftu")}\n${state.tr("customerTrustPill")} • ${state.customerPhoneBookingNumber}',
         style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.4),
       ),
     );

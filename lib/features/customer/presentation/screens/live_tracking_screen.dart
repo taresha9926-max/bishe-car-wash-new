@@ -968,7 +968,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           children: [
             Icon(icon, size: 14, color: AppColors.textMuted),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 3),

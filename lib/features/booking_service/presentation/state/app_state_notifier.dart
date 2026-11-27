@@ -62,7 +62,8 @@ class AppStateNotifier extends ChangeNotifier {
 
   void completeEntranceSplash() {
     _hasSeenEntranceSplash = true;
-    _isWelcomeActive = true;
+    _currentRole = UserRole.customer;
+    _isWelcomeActive = false;
     notifyListeners();
   }
 

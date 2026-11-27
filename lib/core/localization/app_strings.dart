@@ -1360,6 +1360,66 @@ class AppStrings {
       AppLanguage.om: 'Tarkaanfii 1/3: Akkamitti isin tajaajillu?',
       AppLanguage.am: 'ደረጃ 1 ከ 3፡ አገልግሎቱን እንዴት ማግኘት ይፈልጋሉ?',
     },
+    'howShouldWeServeYou': {
+      AppLanguage.en: 'How should we serve you?',
+      AppLanguage.om: 'Akkamitti isin tajaajillu?',
+      AppLanguage.am: 'አገልግሎቱን እንዴት ማግኘት ይፈልጋሉ?',
+    },
+    'mergedCarInstruction': {
+      AppLanguage.en: 'Step 1 of 2: Service mode, vehicle size & wash service',
+      AppLanguage.om: 'Tarkaanfii 1/2: Haala tajaajilaa, gosa konkolaataa & dhiqannaa',
+      AppLanguage.am: 'ደረጃ 1 ከ 2፡ የአገልግሎት ሁኔታ፣ የመኪና መጠን እና እጥበት ይምረጡ',
+    },
+    'mergedCarpetInstruction': {
+      AppLanguage.en: 'Step 1 of 2: Service mode, carpet type & dimensions',
+      AppLanguage.om: 'Tarkaanfii 1/2: Haala tajaajilaa, gosa karpeetii & bal\'ina',
+      AppLanguage.am: 'ደረጃ 1 ከ 2፡ የአገልግሎት ሁኔታ፣ የምንጣፍ አይነት እና መጠን ይምረጡ',
+    },
+    'pickVehicleAndWashTitle': {
+      AppLanguage.en: 'Pick vehicle size & wash service',
+      AppLanguage.om: 'Gosa konkolaataa fi tajaajila dhiqannaa filadhaa',
+      AppLanguage.am: 'የመኪናውን መጠን እና የእጥበት አገልግሎት ይምረጡ',
+    },
+    'pickCarpetTypeAndSizeTitle': {
+      AppLanguage.en: 'Pick carpet type & dimensions',
+      AppLanguage.om: 'Gosa karpeetii fi bal\'ina filadhaa',
+      AppLanguage.am: 'የምንጣፍ አይነት እና መጠን ይምረጡ',
+    },
+    'tapToExpandOptions': {
+      AppLanguage.en: 'Tap to expand & select options',
+      AppLanguage.om: 'Filannoowwan banuuf tuqaa',
+      AppLanguage.am: 'ዝርዝር አማራጮችን ለመክፈት ይጫኑ',
+    },
+    'bottomTabWash': {
+      AppLanguage.en: 'Wash',
+      AppLanguage.om: 'Dhiqannaa',
+      AppLanguage.am: 'እጥበት',
+    },
+    'bottomTabTrack': {
+      AppLanguage.en: 'Track',
+      AppLanguage.om: 'Hordoffii',
+      AppLanguage.am: 'ክትትል',
+    },
+    'bottomTabStation': {
+      AppLanguage.en: 'Station',
+      AppLanguage.om: 'Buufata',
+      AppLanguage.am: 'ማዕከል',
+    },
+    'bottomTabFeedback': {
+      AppLanguage.en: 'Feedback',
+      AppLanguage.om: 'Yaada',
+      AppLanguage.am: 'አስተያየት',
+    },
+    'step2DetailsInstruction': {
+      AppLanguage.en: 'Step 2 of 2: Your name, phone and plate number',
+      AppLanguage.om: 'Tarkaanfii 2/2: Maqaa, bilbila fi lakkoofsa taargaa keessan',
+      AppLanguage.am: 'ደረጃ 2 ከ 2፡ ስም፣ ስልክ እና የሰሌዳ ቁጥርዎን ያስገቡ',
+    },
+    'step2CarpetDetailsInstruction': {
+      AppLanguage.en: 'Step 2 of 2: Your name, phone & carpet tag',
+      AppLanguage.om: 'Tarkaanfii 2/2: Maqaa, bilbila fi koodii karpeetii keessan',
+      AppLanguage.am: 'ደረጃ 2 ከ 2፡ ስም፣ ስልክ እና የምንጣፍ መለያ ቁጥርዎን ያስገቡ',
+    },
     'step2CarInstruction': {
       AppLanguage.en: 'Step 2 of 3: Pick vehicle size & wash service',
       AppLanguage.om: 'Tarkaanfii 2/3: Gosa konkolaataa fi tajaajila filadhaa',

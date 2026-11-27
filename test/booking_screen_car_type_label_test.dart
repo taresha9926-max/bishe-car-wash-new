@@ -37,11 +37,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Advance through Wizard Steps to Step 3 (Customer Details)
-    await tester.ensureVisible(find.text('Next Step'));
-    await tester.tap(find.text('Next Step'));
-    await tester.pumpAndSettle();
-
+    // Advance from merged Step 1+2 to Step 2 of 2 (Customer Details)
     await tester.ensureVisible(find.text('Next Step'));
     await tester.tap(find.text('Next Step'));
     await tester.pumpAndSettle();
