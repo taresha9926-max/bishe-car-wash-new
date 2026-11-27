@@ -17,12 +17,11 @@ import 'package:bishe_car_wash/features/booking_service/presentation/state/app_s
 import 'package:bishe_car_wash/features/customer/presentation/screens/live_tracking_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/car_type_selector.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/negotiable_price_badge.dart';
-import 'package:bishe_car_wash/features/customer/presentation/widgets/station_type_card.dart';
 
-/// Guided 3-step customer booking wizard:
-/// Step 1: Pick service delivery mode (+ location if Pick-up / Mobile Van)
-/// Step 2: Pick vehicle/carpet & services (with standard ETB prices + "Prices are negotiable")
-/// Step 3: Enter Name, Phone & Plate/Tag -> Confirm
+/// Single-screen customer booking flow mirroring staff intake:
+/// - Top row: "How should we serve you?" (3 compact cards in a row + expanding Location/GPS)
+/// - Middle: Vehicle size row + expandable Custom Detailing / Preset Packages (or Carpet Type row + expandable Dimensions)
+/// - Bottom: Inline Name, Phone (Optional), Plate/Tag + Summary -> Book Now -> LiveTrackingScreen
 class NewBookingScreen extends StatefulWidget {
   final ServiceType? initialServiceType;
   final CarType? initialCarType;
@@ -53,7 +52,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
-  int _currentStep = 1;
   late ServiceType _selectedServiceType;
   late CarType _selectedCarType;
 
@@ -62,7 +60,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
   WashPackage? _selectedPackage;
   bool _isCustomExpanded = false;
   bool _isPresetExpanded = false;
-  bool _isCarpetTypeExpanded = false;
   bool _isCarpetDimensionsExpanded = false;
 
   late bool _isCarpet;
@@ -131,41 +128,6 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     return total;
   }
 
-  void _setStep(int step) {
-    setState(() => _currentStep = step);
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-      );
-    }
-  }
-
-  void _advanceFromMergedStep1(dynamic state) {
-    if (_selectedServiceType.requiresLocation &&
-        _addressController.text.trim().isEmpty &&
-        _gpsController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.orange.shade800,
-          content: Text(state.tr('deliveryModeRequiredAddress')),
-        ),
-      );
-      return;
-    }
-    if (!_isCarpet && _useCustomChecklist && _selectedServiceIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.orange.shade800,
-          content: Text(state.tr('selectAtLeastOneService')),
-        ),
-      );
-      return;
-    }
-    _setStep(2);
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
@@ -198,11 +160,7 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildStepProgressHeader(state),
-                  const SizedBox(height: 16),
-
-                  if (_currentStep == 1) _buildMergedStep1(context, state, effectivePackage, currentPrice),
-                  if (_currentStep == 2) _buildStep3CustomerAndSummary(context, state, effectivePackage, currentPrice, grandTotal),
+                  _buildMergedSingleScreenContent(context, state, effectivePackage, currentPrice, grandTotal),
                   const SizedBox(height: 28),
                 ],
               ),
@@ -213,93 +171,53 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     );
   }
 
-  Widget _buildStepProgressHeader(dynamic state) {
-    final title = _currentStep == 1
-        ? state.tr(_isCarpet ? 'mergedCarpetInstruction' : 'mergedCarInstruction')
-        : state.tr(_isCarpet ? 'step2CarpetDetailsInstruction' : 'step2DetailsInstruction');
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [1, 2].map((step) {
-              final active = step <= _currentStep;
-              return Expanded(
-                child: Container(
-                  height: 6,
-                  margin: EdgeInsets.only(right: step < 2 ? 6 : 0),
-                  decoration: BoxDecoration(
-                    color: active ? AppColors.primary : const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMergedStep1(
+  Widget _buildMergedSingleScreenContent(
     BuildContext context,
     dynamic state,
     WashPackage? effectivePackage,
     double currentPrice,
+    double grandTotal,
   ) {
     final customTotal = _calculateCustomTotal(state);
     final presetTotal = effectivePackage?.getPriceFor(_selectedCarType) ?? 0.0;
     final deliveryFee = state.getDeliveryAddonFee(_selectedServiceType, isCarpet: _isCarpet) as double;
+    final serviceSummary = _isCarpet
+        ? '${state.tr("carpetService")}: ${_carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
+        : (_useCustomChecklist
+            ? '${_selectedServiceIds.length} ${state.tr("customWashServices")}'
+            : (effectivePackage?.localizedName(state.currentLang) ?? ''));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Top Section: Expandable Service Delivery Mode Cards ("How should we serve you?")
+        // 1. Top Row: "How should we serve you?" (3 compact cards side-by-side in a Row + expanding GPS/Address)
         Text(
           state.tr('howShouldWeServeYou'),
           style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
         ),
         const SizedBox(height: 10),
-        _buildExpandableServiceModeCard(
-          serviceType: ServiceType.walkInStation,
-          availableCapacity: state.availableBaysCount,
-          state: state,
+        _buildServiceModeRow(state),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          child: _selectedServiceType.requiresLocation
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ServiceLocationPickerCard(
+                    state: state,
+                    serviceType: _selectedServiceType,
+                    isCarpet: _isCarpet,
+                    selectedArea: _selectedBishoftuArea,
+                    onAreaChanged: (val) => setState(() => _selectedBishoftuArea = val),
+                    addressController: _addressController,
+                    gpsController: _gpsController,
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
-        const SizedBox(height: 10),
-        _buildExpandableServiceModeCard(
-          serviceType: ServiceType.valetPickUp,
-          availableCapacity: 1,
-          state: state,
-        ),
-        const SizedBox(height: 10),
-        _buildExpandableServiceModeCard(
-          serviceType: ServiceType.atHomeMobile,
-          availableCapacity: state.isMobileVanAvailable ? 1 : 0,
-          state: state,
-        ),
-
         const SizedBox(height: 18),
 
-        // Below Top: Vehicle Size + Expandable Custom Detailing / Preset Packages (or Carpet Type & Dimensions)
+        // 2. Vehicle Size Row & Expandable Custom Detailing / Preset Packages (or Carpet Type Row & Expandable Dimensions)
         if (!_isCarpet) ...[
           Text(
             state.tr('pickVehicleAndWashTitle'),
@@ -353,16 +271,8 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 10),
-          _buildExpandableWashSection(
-            icon: Icons.texture_rounded,
-            title: state.tr(_carpetType == 'type_b' ? 'carpetTypeB' : 'carpetTypeA'),
-            summary: '${state.getCarpetPricePerSqM(_carpetType, _selectedServiceType).toStringAsFixed(0)} ETB / m²',
-            isActiveMode: true,
-            isExpanded: _isCarpetTypeExpanded,
-            onToggle: () => setState(() => _isCarpetTypeExpanded = !_isCarpetTypeExpanded),
-            children: [_buildCarpetTypeSelector(state)],
-          ),
-          const SizedBox(height: 10),
+          _buildCarpetTypeSelector(state),
+          const SizedBox(height: 12),
           _buildExpandableWashSection(
             icon: Icons.straighten_rounded,
             title: state.tr('carpetDimensionsTitle'),
@@ -373,17 +283,15 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
             children: [_buildCarpetDimensionsCard(state, currentPrice)],
           ),
         ],
+        const SizedBox(height: 16),
 
-        const SizedBox(height: 14),
-
-        // Total Preview + "Prices are negotiable"
+        // 3. Merged Customer Details Card (Name/Car Type, Phone Optional, Plate/Tag)
         Container(
-          width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: const Color(0xFF111827),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.45), width: 1.4),
+            border: Border.all(color: AppColors.cardBorder, width: 1.2),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.45),
@@ -395,83 +303,220 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              CustomTextField(
+                controller: _nameController,
+                label: state.tr('fullNameOrCarType'),
+                hint: 'e.g. Girma Tadesse / Toyota Vitz',
+                prefixIcon: Icons.person_outline,
+                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterNameOrCarType') : null,
+              ),
+              const SizedBox(height: 12),
+              CustomTextField(
+                controller: _phoneController,
+                label: '${state.tr('customerPhone')} (${state.tr('optional')})',
+                hint: '+251 91 234 5678',
+                keyboardType: TextInputType.phone,
+                prefixIcon: Icons.phone_android,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty || val.trim() == '+251 9' || val.trim() == '+251') {
+                    return null;
+                  }
+                  return val.length < 9 ? state.tr('enterValidPhone') : null;
+                },
+              ),
+              const SizedBox(height: 12),
+              CustomTextField(
+                controller: _plateController,
+                label: _isCarpet ? state.tr('carpetTrackingTag') : state.tr('licensePlate'),
+                hint: _isCarpet ? 'e.g. CPT-8941' : 'e.g. 3-B78945 ET',
+                prefixIcon: _isCarpet ? Icons.texture_rounded : Icons.tag,
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? (_isCarpet ? state.tr('enterCarpetTag') : state.tr('enterPlate'))
+                    : null,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+
+        // 4. Order Summary Card + Book Now CTA (mirrors Cashier minus Assign Bay, Negotiated Price edit & Tip)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
-                      state.tr('estimatedTotalLabel'),
-                      maxLines: 1,
+                      serviceSummary,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                     ),
                   ),
-                  const SizedBox(width: 8),
                   Text(
                     CurrencyFormatter.format(currentPrice),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
                   ),
                 ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _isCarpet
+                    ? '${_carpetArea.toStringAsFixed(1)} m² (${_lengthController.text.trim()}m × ${_widthController.text.trim()}m) • ${_selectedServiceType.localizedName(state.currentLang, isCarpet: true)}'
+                    : '${_selectedCarType.localizedName(state.currentLang)} • ${_selectedServiceType.localizedName(state.currentLang)}',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
               if (deliveryFee > 0) ...[
                 const SizedBox(height: 4),
                 Text(
                   '${state.tr("deliveryAddonIncluded")}: +${CurrencyFormatter.format(deliveryFee)}',
-                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary),
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.liquidCyanNeon),
                 ),
               ],
-              const SizedBox(height: 8),
-              const NegotiablePriceBadge(),
+              const SizedBox(height: 10),
+              const NegotiablePriceBadge(onDark: true),
+              const Divider(color: Colors.white24, height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${state.tr("total")}:',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    CurrencyFormatter.format(grandTotal),
+                    style: const TextStyle(color: AppColors.oromiaGold, fontWeight: FontWeight.w900, fontSize: 20),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.info_outline, color: AppColors.oromiaGold, size: 17),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _isCarpet ? state.tr('carpetPaymentAtGateNote') : state.tr('paymentAtGateNote'),
+                      style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.3),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
         const SizedBox(height: 16),
 
         CustomButton(
-          text: state.tr('nextStep'),
-          icon: Icons.arrow_forward_rounded,
-          onPressed: () => _advanceFromMergedStep1(state),
+          text: '${_isCarpet ? state.tr('bookCarpetCleaning') : state.tr('bookNow')} • ${CurrencyFormatter.format(grandTotal)}',
+          icon: Icons.bookmark_added_rounded,
+          isLoading: _isSubmitting,
+          onPressed: _handleBookingSubmit,
         ),
       ],
     );
   }
 
-  Widget _buildExpandableServiceModeCard({
-    required ServiceType serviceType,
-    required int availableCapacity,
-    required dynamic state,
-  }) {
-    final isSelected = _selectedServiceType == serviceType;
-    final showLocation = isSelected && serviceType.requiresLocation;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        StationTypeCard(
-          serviceType: serviceType,
-          isCarpet: _isCarpet,
-          isSelected: isSelected,
-          availableCapacity: availableCapacity,
-          onTap: () => setState(() => _selectedServiceType = serviceType),
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          child: showLocation
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: ServiceLocationPickerCard(
-                    state: state,
-                    serviceType: serviceType,
-                    isCarpet: _isCarpet,
-                    selectedArea: _selectedBishoftuArea,
-                    onAreaChanged: (val) => setState(() => _selectedBishoftuArea = val),
-                    addressController: _addressController,
-                    gpsController: _gpsController,
+  Widget _buildServiceModeRow(dynamic state) {
+    final modes = [
+      (
+        ServiceType.walkInStation,
+        _isCarpet ? state.tr('carpetStationService') : state.tr('driveInStation'),
+        Icons.storefront_rounded,
+        _isCarpet ? const Color(0xFF4F46E5) : AppColors.bay1Color,
+      ),
+      (
+        ServiceType.valetPickUp,
+        _isCarpet ? state.tr('carpetValetTitle') : state.tr('serviceValetPickUp'),
+        Icons.directions_car_rounded,
+        const Color(0xFF7C3AED),
+      ),
+      (
+        ServiceType.atHomeMobile,
+        _isCarpet ? state.tr('carpetHomeTitle') : state.tr('atHomeMobile'),
+        Icons.home_repair_service_rounded,
+        _isCarpet ? const Color(0xFF0D9488) : AppColors.mobileVanColor,
+      ),
+    ];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: modes.map((entry) {
+        final mode = entry.$1;
+        final label = entry.$2 as String;
+        final icon = entry.$3;
+        final color = entry.$4;
+        final isSelected = _selectedServiceType == mode;
+        final addon = state.getDeliveryAddonFee(mode, isCarpet: _isCarpet) as double;
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedServiceType = mode),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: EdgeInsets.only(right: mode != ServiceType.atHomeMobile ? 8 : 0),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? color.withValues(alpha: 0.20) : const Color(0xFF111827),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isSelected ? color : AppColors.cardBorder,
+                  width: isSelected ? 2 : 1.2,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.28),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 22, color: isSelected ? color : AppColors.textSecondary),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: isSelected ? color : Colors.white,
+                    ),
                   ),
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
+                  const SizedBox(height: 4),
+                  Text(
+                    addon > 0 ? '+${addon.toStringAsFixed(0)} ETB' : state.tr('availableNow'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: addon > 0 ? color : AppColors.statusReady,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -886,176 +931,29 @@ class _NewBookingScreenState extends State<NewBookingScreen> {
     );
   }
 
-  Widget _buildStep3CustomerAndSummary(
-    BuildContext context,
-    dynamic state,
-    WashPackage? effectivePackage,
-    double currentPrice,
-    double grandTotal,
-  ) {
-    final serviceSummary = _isCarpet
-        ? '${state.tr("carpetService")}: ${_carpetType == "type_b" ? state.tr("carpetTypeB") : state.tr("carpetTypeA")}'
-        : (_useCustomChecklist
-            ? '${_selectedServiceIds.length} ${state.tr("customWashServices")}'
-            : (effectivePackage?.localizedName(state.currentLang) ?? ''));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF111827),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.cardBorder, width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.45),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              CustomTextField(
-                controller: _nameController,
-                label: state.tr('fullNameOrCarType'),
-                hint: 'e.g. Girma Tadesse / Toyota Vitz',
-                prefixIcon: Icons.person_outline,
-                validator: (val) => val == null || val.trim().isEmpty ? state.tr('enterNameOrCarType') : null,
-              ),
-              const SizedBox(height: 12),
-              CustomTextField(
-                controller: _phoneController,
-                label: '${state.tr('customerPhone')} (${state.tr('optional')})',
-                hint: '+251 91 234 5678',
-                keyboardType: TextInputType.phone,
-                prefixIcon: Icons.phone_android,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty || val.trim() == '+251 9' || val.trim() == '+251') {
-                    return null;
-                  }
-                  return val.length < 9 ? state.tr('enterValidPhone') : null;
-                },
-              ),
-              const SizedBox(height: 12),
-              CustomTextField(
-                controller: _plateController,
-                label: _isCarpet ? state.tr('carpetTrackingTag') : state.tr('licensePlate'),
-                hint: _isCarpet ? 'e.g. CPT-8941' : 'e.g. 3-B78945 ET',
-                prefixIcon: _isCarpet ? Icons.texture_rounded : Icons.tag,
-                validator: (val) => val == null || val.trim().isEmpty
-                    ? (_isCarpet ? state.tr('enterCarpetTag') : state.tr('enterPlate'))
-                    : null,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-
-        // Order Summary Card
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.primaryDark,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      serviceSummary,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Text(
-                    CurrencyFormatter.format(currentPrice),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _isCarpet
-                    ? '${_carpetArea.toStringAsFixed(1)} m² (${_lengthController.text.trim()}m × ${_widthController.text.trim()}m) • ${_selectedServiceType.localizedName(state.currentLang, isCarpet: true)}'
-                    : '${_selectedCarType.localizedName(state.currentLang)} • ${_selectedServiceType.localizedName(state.currentLang)}',
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-              const SizedBox(height: 10),
-              const NegotiablePriceBadge(onDark: true),
-              const Divider(color: Colors.white24, height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${state.tr("total")}:',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    CurrencyFormatter.format(grandTotal),
-                    style: const TextStyle(color: AppColors.oromiaGold, fontWeight: FontWeight.w900, fontSize: 20),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(Icons.info_outline, color: AppColors.oromiaGold, size: 17),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _isCarpet ? state.tr('carpetPaymentAtGateNote') : state.tr('paymentAtGateNote'),
-                      style: const TextStyle(color: Colors.white, fontSize: 11.5, height: 1.3),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 18),
-
-        Row(
-          children: [
-            OutlinedButton.icon(
-              onPressed: _isSubmitting ? null : () => _setStep(1),
-              icon: const Icon(Icons.arrow_back_rounded, size: 17),
-              label: Text(state.tr('backStep'), style: const TextStyle(fontWeight: FontWeight.w700)),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E293B),
-                side: const BorderSide(color: AppColors.cardBorder),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: CustomButton(
-                text: _isCarpet ? state.tr('bookCarpetCleaning') : state.tr('bookNow'),
-                isLoading: _isSubmitting,
-                onPressed: _handleBookingSubmit,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Future<void> _handleBookingSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
     final state = AppStateProvider.read(context);
+    if (_selectedServiceType.requiresLocation &&
+        _addressController.text.trim().isEmpty &&
+        _gpsController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange.shade800,
+          content: Text(state.tr('deliveryModeRequiredAddress')),
+        ),
+      );
+      return;
+    }
+    if (!_isCarpet && _useCustomChecklist && _selectedServiceIds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange.shade800,
+          content: Text(state.tr('selectAtLeastOneService')),
+        ),
+      );
+      return;
+    }
+    if (!_formKey.currentState!.validate()) return;
 
     final activePackage = _selectedPackage ?? (state.packages.isNotEmpty ? state.packages.first : null);
     if (!_isCarpet && !_useCustomChecklist && activePackage == null) return;

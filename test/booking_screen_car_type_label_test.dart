@@ -37,10 +37,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Advance from merged Step 1+2 to Step 2 of 2 (Customer Details)
-    await tester.ensureVisible(find.text('Next Step'));
-    await tester.tap(find.text('Next Step'));
-    await tester.pumpAndSettle();
+    // Single booking screen shows Customer Details inline immediately (no Next Step wizard)
 
     // Verify English label
     expect(find.text('Full Name or Car Type'), findsOneWidget);

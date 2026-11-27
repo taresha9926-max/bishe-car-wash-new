@@ -109,7 +109,7 @@ void main() {
       expect(find.text(state.tr('rateExperienceQuestion')), findsOneWidget);
     });
 
-    testWidgets('NewBookingScreen merges Step 1+2 with expandable sections and removes tip field on final step', (tester) async {
+    testWidgets('NewBookingScreen renders single screen mirroring Cashier intake minus Assign Bay, Final Price edit & Tip', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -125,12 +125,26 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Merged screen 1: delivery modes at top, vehicle size & expandable wash cards below
-      expect(find.text(state.tr('mergedCarInstruction')), findsOneWidget);
+      // Single screen: delivery mode row at top, vehicle size & expandable wash cards below, customer fields inline
       expect(find.text(state.tr('howShouldWeServeYou')), findsOneWidget);
+      expect(find.text(state.tr('driveInStation')), findsOneWidget);
+      expect(find.text(state.tr('serviceValetPickUp')), findsOneWidget);
+      expect(find.text(state.tr('atHomeMobile')), findsOneWidget);
       expect(find.text(state.tr('pickVehicleAndWashTitle')), findsOneWidget);
       expect(find.text(state.tr('customDetailingTab')), findsOneWidget);
       expect(find.text(state.tr('presetPackagesTab')), findsOneWidget);
+      expect(find.text(state.tr('fullNameOrCarType')), findsOneWidget);
+      expect(find.text('${state.tr('customerPhone')} (${state.tr('optional')})'), findsOneWidget);
+      expect(find.text(state.tr('licensePlate')), findsOneWidget);
+      expect(find.text(state.tr('pricesAreNegotiable')), findsOneWidget);
+
+      // Excluded Cashier-only & unwanted controls
+      expect(find.text(state.tr('nextStep')), findsNothing);
+      expect(find.text(state.tr('assignVehicle')), findsNothing);
+      expect(find.text(state.tr('assignWasherDuringBooking')), findsNothing);
+      expect(find.text(state.tr('negotiatedTotalPriceTitle')), findsNothing);
+      expect(find.text(state.tr('washersTip')), findsNothing);
+      expect(find.text(state.tr('customTip')), findsNothing);
 
       // Clicking Custom Detailing expands service checkboxes
       await tester.ensureVisible(find.text(state.tr('customDetailingTab')));
@@ -144,17 +158,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(Radio<String>), findsWidgets);
 
-      // Next Step advances to Final Step (no tip field)
-      await tester.ensureVisible(find.text(state.tr('nextStep')));
-      await tester.tap(find.text(state.tr('nextStep')));
-      await tester.pumpAndSettle();
-
-      expect(find.text(state.tr('step2DetailsInstruction')), findsOneWidget);
-      expect(find.text(state.tr('pricesAreNegotiable')), findsOneWidget);
-      expect(find.text(state.tr('washersTip')), findsNothing);
-      expect(find.text(state.tr('customTip')), findsNothing);
-
-      // Same merged structure applies to Carpet Washing Service
+      // Same single-screen layout applies to Carpet Washing Service
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,
@@ -167,26 +171,27 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text(state.tr('mergedCarpetInstruction')), findsOneWidget);
       expect(find.text(state.tr('howShouldWeServeYou')), findsOneWidget);
+      expect(find.text(state.tr('carpetStationService')), findsOneWidget);
+      expect(find.text(state.tr('carpetValetTitle')), findsOneWidget);
+      expect(find.text(state.tr('carpetHomeTitle')), findsOneWidget);
       expect(find.text(state.tr('pickCarpetTypeAndSizeTitle')), findsOneWidget);
+      expect(find.text(state.tr('fullNameOrCarType')), findsOneWidget);
+      expect(find.text(state.tr('carpetTrackingTag')), findsOneWidget);
+      expect(find.text(state.tr('nextStep')), findsNothing);
+      expect(find.text(state.tr('washersTip')), findsNothing);
 
       // Expand carpet dimensions card cleanly
       await tester.ensureVisible(find.text(state.tr('carpetDimensionsTitle')));
       await tester.tap(find.text(state.tr('carpetDimensionsTitle')));
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text(state.tr('nextStep')));
-      await tester.tap(find.text(state.tr('nextStep')));
-      await tester.pumpAndSettle();
-
-      expect(find.text(state.tr('step2CarpetDetailsInstruction')), findsOneWidget);
-      expect(find.text(state.tr('washersTip')), findsNothing);
-
-      // Submitting booking on final step restores LiveTrackingScreen at end of booking
+      // Submitting booking directly opens LiveTrackingScreen at end of booking
+      await tester.ensureVisible(find.byType(TextFormField).first);
       await tester.enterText(find.byType(TextFormField).first, 'Gemechu T.');
-      await tester.ensureVisible(find.text(state.tr('bookCarpetCleaning')));
-      await tester.tap(find.text(state.tr('bookCarpetCleaning')));
+      final bookBtn = find.textContaining(state.tr('bookCarpetCleaning'));
+      await tester.ensureVisible(bookBtn);
+      await tester.tap(bookBtn);
       await tester.pumpAndSettle();
 
       expect(find.byType(LiveTrackingScreen), findsOneWidget);
