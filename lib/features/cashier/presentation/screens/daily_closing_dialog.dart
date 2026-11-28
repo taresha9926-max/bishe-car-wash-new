@@ -155,6 +155,8 @@ class _DailyClosingDialogState extends State<DailyClosingDialog> {
                     _buildClosingRow('  • Carpet Cleaning Revenue (VAT Exempt):', '${CurrencyFormatter.format(state.todayCarpetRevenueETB)} (${state.todayCarpetCleanedCount} carpets)', valueColor: const Color(0xFF6366F1)),
                     const SizedBox(height: 3),
                     _buildClosingRow('  • Station Shower Revenue (VAT Exempt):', '${CurrencyFormatter.format(state.todayShowerRevenueETB)} (${state.todayShowerUserCount} users, 0% comm)', valueColor: const Color(0xFF0284C7)),
+                    const SizedBox(height: 3),
+                    _buildClosingRow('  • Retail Merchandise Sales (0% comm):', '${CurrencyFormatter.format(state.todayRetailRevenueETB)} (${state.todayRetailSalesCount} items)', valueColor: const Color(0xFFF59E0B)),
                     if ((state.vatDeductedTodayETB as double) > 0) ...[
                       const SizedBox(height: 3),
                       _buildClosingRow('  • Car Wash 15% VAT Output (Gov Liability):', '- ${CurrencyFormatter.format(state.vatDeductedTodayETB)}', valueColor: Colors.deepPurple),

@@ -24,6 +24,7 @@ import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.
 import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/retail_sale_record.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
 
 class SupabaseWashRepositoryImpl implements IWashRepository {
@@ -56,6 +57,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
       'carpetRevenue': closing.carpetRevenue,
       'showerUsersCount': closing.showerUsersCount,
       'showerRevenue': closing.showerRevenue,
+      'retailSalesCount': closing.retailSalesCount,
+      'retailRevenue': closing.retailRevenue,
+      'retailCogs': closing.retailCogs,
       'totalTipsAmount': closing.totalTipsAmount,
     };
     final tag = '$_handoverMetaPrefix${jsonEncode(meta)}]';
@@ -89,6 +93,9 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
           carpetRevenue: (decoded['carpetRevenue'] as num?)?.toDouble() ?? base.carpetRevenue,
           showerUsersCount: (decoded['showerUsersCount'] as num?)?.toInt() ?? base.showerUsersCount,
           showerRevenue: (decoded['showerRevenue'] as num?)?.toDouble() ?? base.showerRevenue,
+          retailSalesCount: (decoded['retailSalesCount'] as num?)?.toInt() ?? base.retailSalesCount,
+          retailRevenue: (decoded['retailRevenue'] as num?)?.toDouble() ?? base.retailRevenue,
+          retailCogs: (decoded['retailCogs'] as num?)?.toDouble() ?? base.retailCogs,
           totalTipsAmount: (decoded['totalTipsAmount'] as num?)?.toDouble() ?? base.totalTipsAmount,
           commissionPool: base.commissionPool,
           netStationProfit: base.netStationProfit,
@@ -2035,6 +2042,32 @@ class SupabaseWashRepositoryImpl implements IWashRepository {
 
   @override
   Future<void> recordStockTransaction(StockTransaction tx) => _fallbackLocalRepo.recordStockTransaction(tx);
+
+  @override
+  Future<List<RetailSaleRecord>> getRetailSales() async {
+    final rawJson = await _getStaffConfigPayload('app_config_retail_sales');
+    if (rawJson != null) {
+      try {
+        final dynamic decoded = jsonDecode(rawJson);
+        if (decoded is List) {
+          return decoded
+              .whereType<Map>()
+              .map((e) => RetailSaleRecord.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
+        }
+      } catch (e) {
+        debugPrint('Supabase decode retail sales exception: $e');
+      }
+    }
+    return _fallbackLocalRepo.getRetailSales();
+  }
+
+  @override
+  Future<void> saveRetailSales(List<RetailSaleRecord> sales) async {
+    final bounded = sales.take(120).map((s) => s.toJson()).toList();
+    await _saveStaffConfigPayload('app_config_retail_sales', jsonEncode(bounded));
+    await _fallbackLocalRepo.saveRetailSales(sales);
+  }
 
   // --- DIGITAL PAYMENTS & SENTINEL (SUPABASE + CACHED FALLBACK) ---
   @override

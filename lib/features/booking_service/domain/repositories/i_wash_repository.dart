@@ -17,6 +17,7 @@ import 'package:bishe_car_wash/features/inventory/domain/models/consumable_item.
 import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/retail_sale_record.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
 
 /// Domain port for active bookings, washing bay allocations, and payment processing.
@@ -134,6 +135,8 @@ abstract class IInventoryRepository {
   Future<void> saveDailyHandover(DailyHandover handover);
   Future<List<StockTransaction>> getStockTransactions();
   Future<void> recordStockTransaction(StockTransaction tx);
+  Future<List<RetailSaleRecord>> getRetailSales();
+  Future<void> saveRetailSales(List<RetailSaleRecord> sales);
 }
 
 /// Domain port for digital payments, bank incoming credit verification, and sentinel health.

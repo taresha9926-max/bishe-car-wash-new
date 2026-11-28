@@ -156,6 +156,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     final periodCarBookings = periodBookings.where((b) => !b.isCarpet).toList();
     final periodCarpetBookings = periodBookings.where((b) => b.isCarpet).toList();
     final periodShowers = state.showerRecords.where((s) => inRange(s.recordedAt)).toList();
+    final periodRetail = state.retailSales.where((r) => inRange(r.recordedAt)).toList();
 
     final carRevenue = periodCarBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
     final carpetRevenue = periodCarpetBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
@@ -165,18 +166,24 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     final showerCash = periodShowers
         .where((s) => s.paymentMethod == PaymentMethod.cash)
         .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final retailRevenue = periodRetail.fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+    final retailCount = periodRetail.fold<int>(0, (sum, r) => sum + r.quantity);
+    final retailCogs = periodRetail.fold<double>(0.0, (sum, r) => sum + r.totalCost);
+    final retailCash = periodRetail
+        .where((r) => r.paymentMethod == PaymentMethod.cash)
+        .fold<double>(0.0, (sum, r) => sum + r.totalAmount);
     final directBankCredits = (_periodFilter == FinancialReportFilter.today) ? (state.todayDirectBankCreditsETB as double) : 0.0;
 
-    final grossRevenue = carRevenue + carpetRevenue + totalTips + showerRevenue;
+    final grossRevenue = carRevenue + carpetRevenue + totalTips + showerRevenue + retailRevenue;
     final serviceCash = periodBookings
         .where((b) => b.payment.method == PaymentMethod.cash)
         .fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice) + b.payment.tipAmount);
-    final cashRevenue = serviceCash + showerCash;
+    final cashRevenue = serviceCash + showerCash + retailCash;
     final digitalRevenue = grossRevenue - cashRevenue;
     final vatDeducted = (carRevenue + carpetRevenue) * 0.15;
     final netServiceRevenue = (carRevenue + carpetRevenue) - vatDeducted;
     final commissionDeducted = (netServiceRevenue * state.teamCommissionRate) + totalTips;
-    final netStationProfit = (grossRevenue - vatDeducted) - commissionDeducted;
+    final netStationProfit = (grossRevenue - vatDeducted) - commissionDeducted - retailCogs;
 
     final periodPettyCash = state.pettyCashExpenses
         .where((e) => inRange(e.loggedAt))
@@ -185,7 +192,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         .where((t) =>
             inRange(t.date) &&
             (t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
-        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
+        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb) + retailCogs;
 
     final periodDeposits = state.bankDeposits.where((d) => inRange(d.depositedAt)).toList();
     final totalCashDeposited = periodDeposits.fold<double>(0.0, (sum, d) => sum + d.amount);
@@ -221,6 +228,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                       ['Vehicle Wash Subtotal', '${periodCarBookings.length} washes', CurrencyFormatter.format(carRevenue)],
                       ['Carpet Wash Subtotal', '${periodCarpetBookings.length} orders', CurrencyFormatter.format(carpetRevenue)],
                       ['Shower Service Subtotal', '$showerCount users', CurrencyFormatter.format(showerRevenue)],
+                      ['Retail Sales Subtotal', '$retailCount items', CurrencyFormatter.format(retailRevenue)],
                       ['Customer Tips (100% Washers)', '${periodBookings.where((b) => b.payment.tipAmount > 0).length} tips', CurrencyFormatter.format(totalTips)],
                       ['Direct Bank Mobile Credits', 'Sentinel phone', CurrencyFormatter.format(directBankCredits)],
                       ['Gross Revenue (Combined)', 'Total station intake', CurrencyFormatter.format(grossRevenue)],
@@ -247,6 +255,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
                       ['Vehicle Wash Subtotal', '${periodCarBookings.length} washes', carRevenue],
                       ['Carpet Wash Subtotal', '${periodCarpetBookings.length} orders', carpetRevenue],
                       ['Shower Service Subtotal', '$showerCount users', showerRevenue],
+                      ['Retail Sales Subtotal', '$retailCount items', retailRevenue],
                       ['Customer Tips', '${periodBookings.where((b) => b.payment.tipAmount > 0).length} tips', totalTips],
                       ['Direct Bank Mobile Credits', 'Sentinel phone', directBankCredits],
                       ['Gross Revenue', 'Total intake', grossRevenue],
@@ -284,6 +293,8 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
             carpetCount: periodCarpetBookings.length,
             showerRevenue: showerRevenue,
             showerCount: showerCount,
+            retailRevenue: retailRevenue,
+            retailCount: retailCount,
             tipsTotal: totalTips,
           ),
         ),
@@ -508,12 +519,15 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     required int carpetCount,
     required double showerRevenue,
     required int showerCount,
+    required double retailRevenue,
+    required int retailCount,
     required double tipsTotal,
   }) {
     final rows = [
       (label: state.tr('carWashSubtotal'), detail: '$carCount ${state.tr("carsWashed")}', amount: CurrencyFormatter.format(carRevenue), color: const Color(0xFF1E3A8A)),
       (label: state.tr('carpetWashSubtotal'), detail: '$carpetCount ${state.tr("myCarpetCleanings")}', amount: CurrencyFormatter.format(carpetRevenue), color: const Color(0xFF7C3AED)),
       (label: state.tr('showerSubtotal'), detail: '$showerCount ${state.tr("showerUsers")}', amount: CurrencyFormatter.format(showerRevenue), color: const Color(0xFF0284C7)),
+      (label: state.tr('retailSalesSubtotal'), detail: '$retailCount ${state.tr("retailUnitsLabel")}', amount: CurrencyFormatter.format(retailRevenue), color: const Color(0xFFF59E0B)),
       if (tipsTotal > 0)
         (label: state.tr('washerTipsSubtotal'), detail: '100% Washers', amount: CurrencyFormatter.format(tipsTotal), color: Colors.amber.shade900),
     ];

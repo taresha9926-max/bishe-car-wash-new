@@ -12,6 +12,7 @@ import '../../../booking_service/domain/models/wash_package.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../../inventory/domain/models/consumable_item.dart';
 import '../../../inventory/domain/models/fixed_asset.dart';
+import '../../../inventory/domain/models/retail_item.dart';
 import '../../../admin/domain/models/monthly_overhead_expense.dart';
 
 /// Centralized Super Admin Hub to manage, edit prices, add new entries,
@@ -42,7 +43,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _activeTab = widget.initialTabIndex.clamp(0, 4);
+    _activeTab = widget.initialTabIndex.clamp(0, 5);
   }
 
   @override
@@ -105,6 +106,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       {'label': state.tr('consumablesPricing'), 'icon': Icons.science_outlined, 'count': state.consumables.length},
       {'label': state.tr('fixedAssetsValuation'), 'icon': Icons.precision_manufacturing_rounded, 'count': state.fixedAssets.length},
       {'label': state.tr('monthlyOverheadsTab'), 'icon': Icons.account_balance_wallet_rounded, 'count': state.monthlyOverheads.length},
+      {'label': state.tr('retailSalesTab'), 'icon': Icons.shopping_bag_rounded, 'count': state.allRetailItems.length},
     ];
 
     return Container(
@@ -194,6 +196,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
         return _buildFixedAssetsTab(context, state);
       case 4:
         return _buildMonthlyOverheadsTab(context, state);
+      case 5:
+        return _buildRetailItemsTab(context, state);
       default:
         return const SizedBox.shrink();
     }
@@ -2959,6 +2963,295 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               Navigator.pop(dialogCtx);
               final appState = AppStateProvider.read(context);
               await appState.deleteOverheadExpense(item.id);
+            },
+              child: Text(state.tr('deleteService')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= TAB 6: RETAIL MERCHANDISE PRICING & CATALOG =================
+
+  Widget _buildRetailItemsTab(BuildContext context, dynamic state) {
+    final List<RetailItem> items = state.allRetailItems;
+    final filtered = items.where((i) {
+      if (_searchQuery.isEmpty) return true;
+      return i.name.toLowerCase().contains(_searchQuery) ||
+          i.nameAmharic.toLowerCase().contains(_searchQuery) ||
+          i.nameOromoo.toLowerCase().contains(_searchQuery) ||
+          i.category.toLowerCase().contains(_searchQuery);
+    }).toList();
+
+    final retailValuation = items.fold<double>(0.0, (sum, i) => sum + (i.currentStock * i.sellingPriceEtb));
+    final lowStockCount = items.where((i) => i.isLowStock).length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF111827),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.cardBorder, width: 1.2),
+          ),
+          child: Row(
+            children: [
+              Expanded(child: _buildKpiStat(state.tr('retailSalesTab'), '${items.length}', Icons.shopping_bag_rounded, const Color(0xFFF59E0B))),
+              Expanded(child: _buildKpiStat('Low Stock', '$lowStockCount', Icons.warning_amber_rounded, lowStockCount > 0 ? Colors.orange : Colors.green)),
+              Expanded(child: _buildKpiStat('Retail Value', CurrencyFormatter.formatShort(retailValuation), Icons.payments_rounded, AppColors.cashGreen)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    state.tr('retailSalesTitle'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                  ),
+                  Text(
+                    state.tr('retailSalesSub'),
+                    style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD97706),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              icon: const Icon(Icons.add, size: 16),
+              label: Text(state.tr('addRetailItem'), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+              onPressed: () => _showRetailItemDialog(context, state),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (filtered.isEmpty)
+          _buildEmptyState(state, state.tr('noRetailItemsAvailable'))
+        else
+          ...filtered.map((item) => _buildRetailItemCard(context, state, item)),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildRetailItemCard(BuildContext context, dynamic state, RetailItem item) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111827),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: item.isLowStock ? Colors.orange.shade400 : AppColors.cardBorder,
+          width: item.isLowStock ? 1.4 : 1.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF59E0B).withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.shopping_bag_rounded, color: Color(0xFFF59E0B), size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
+                if (item.nameAmharic.isNotEmpty)
+                  Text(
+                    item.nameAmharic,
+                    style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                  ),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    Text(
+                      CurrencyFormatter.format(item.sellingPriceEtb),
+                      style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900, color: AppColors.cashGreen),
+                    ),
+                    Text(
+                      '${state.tr("inStockLabel")}: ${item.currentStock}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: item.isLowStock ? Colors.orange : AppColors.textSecondary,
+                      ),
+                    ),
+                    if (item.unitCostEtb > 0)
+                      Text(
+                        'Cost: ${CurrencyFormatter.formatShort(item.unitCostEtb)}',
+                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_rounded, size: 18, color: Color(0xFF38BDF8)),
+            onPressed: () => _showRetailItemDialog(context, state, existing: item),
+          ),
+          if (state.isSuperAdmin)
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+              onPressed: () => _showDeleteRetailItemDialog(context, state, item),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showRetailItemDialog(BuildContext context, dynamic state, {RetailItem? existing}) {
+    final nameCtrl = TextEditingController(text: existing?.name ?? '');
+    final amCtrl = TextEditingController(text: existing?.nameAmharic ?? '');
+    final omCtrl = TextEditingController(text: existing?.nameOromoo ?? '');
+    final priceCtrl = TextEditingController(text: existing != null ? existing.sellingPriceEtb.toStringAsFixed(0) : '');
+    final costCtrl = TextEditingController(text: existing != null ? existing.unitCostEtb.toStringAsFixed(0) : '0');
+    final stockCtrl = TextEditingController(text: existing != null ? '${existing.currentStock}' : '0');
+    bool isActive = existing?.isActive ?? true;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (dialogCtx, setDlgState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: Text(existing == null ? state.tr('addRetailItem') : itemLabel(existing)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomTextField(
+                  controller: nameCtrl,
+                  label: 'Item Name (English)',
+                  hint: 'e.g. Dash board cream',
+                  prefixIcon: Icons.shopping_bag_outlined,
+                ),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  controller: amCtrl,
+                  label: 'Item Name (Amharic)',
+                  hint: 'ለምሳሌ፡ ዳሽ ቦርድ ክሬም',
+                  prefixIcon: Icons.translate_rounded,
+                ),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  controller: omCtrl,
+                  label: 'Item Name (Afaan Oromoo)',
+                  hint: 'Fkn: Kireemii Daashboordii',
+                  prefixIcon: Icons.language_rounded,
+                ),
+                const SizedBox(height: 8),
+                CustomTextField(
+                  controller: priceCtrl,
+                  label: state.tr('sellingPriceLabel'),
+                  hint: '1800',
+                  keyboardType: TextInputType.number,
+                  prefixIcon: Icons.payments_outlined,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        controller: costCtrl,
+                        label: 'Unit Cost (ETB)',
+                        hint: '0',
+                        keyboardType: TextInputType.number,
+                        prefixIcon: Icons.price_change_outlined,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: CustomTextField(
+                        controller: stockCtrl,
+                        label: state.tr('inStockLabel'),
+                        hint: '0',
+                        keyboardType: TextInputType.number,
+                        prefixIcon: Icons.inventory_2_outlined,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                SwitchListTile.adaptive(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Active for Sale', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  value: isActive,
+                  onChanged: (v) => setDlgState(() => isActive = v),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                final price = double.tryParse(priceCtrl.text.trim());
+                if (name.isEmpty || price == null || price <= 0) return;
+                final updated = RetailItem(
+                  id: existing?.id ?? 'RTL-${DateTime.now().millisecondsSinceEpoch}',
+                  name: name,
+                  nameAmharic: amCtrl.text.trim(),
+                  nameOromoo: omCtrl.text.trim().isEmpty ? name : omCtrl.text.trim(),
+                  category: existing?.category ?? 'Retail Sales',
+                  sellingPriceEtb: price,
+                  unitCostEtb: double.tryParse(costCtrl.text.trim()) ?? 0.0,
+                  currentStock: int.tryParse(stockCtrl.text.trim()) ?? 0,
+                  minThreshold: existing?.minThreshold ?? 3,
+                  isActive: isActive,
+                );
+                Navigator.pop(dialogCtx);
+                await AppStateProvider.read(context).addOrUpdateRetailItem(updated);
+              },
+              child: Text(state.tr('save')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String itemLabel(RetailItem item) => '${item.name} (${CurrencyFormatter.format(item.sellingPriceEtb)})';
+
+  void _showDeleteRetailItemDialog(BuildContext context, dynamic state, RetailItem item) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Retail Item'),
+        content: Text('${item.name} (${CurrencyFormatter.format(item.sellingPriceEtb)})'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              await AppStateProvider.read(context).deleteRetailItem(item.id);
             },
             child: Text(state.tr('deleteService')),
           ),

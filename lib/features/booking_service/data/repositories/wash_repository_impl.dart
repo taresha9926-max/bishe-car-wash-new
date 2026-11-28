@@ -23,6 +23,7 @@ import 'package:bishe_car_wash/features/inventory/domain/models/daily_handover.d
 import 'package:bishe_car_wash/features/inventory/domain/models/stock_transaction.dart';
 import 'package:bishe_car_wash/features/inventory/data/datasources/initial_inventory_seed.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/retail_sale_record.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
 
 class WashRepositoryImpl implements IWashRepository {
@@ -762,6 +763,20 @@ class WashRepositoryImpl implements IWashRepository {
   @override
   Future<void> recordStockTransaction(StockTransaction tx) async {
     _stockTransactions.insert(0, tx);
+  }
+
+  final List<RetailSaleRecord> _retailSales = [];
+
+  @override
+  Future<List<RetailSaleRecord>> getRetailSales() async {
+    return List.unmodifiable(_retailSales);
+  }
+
+  @override
+  Future<void> saveRetailSales(List<RetailSaleRecord> sales) async {
+    _retailSales
+      ..clear()
+      ..addAll(sales);
   }
 
   // --- DIGITAL PAYMENTS & SENTINEL ---

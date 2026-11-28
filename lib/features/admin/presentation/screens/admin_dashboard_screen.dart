@@ -210,11 +210,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         .length;
 
     final filteredShowers = state.showerRecords.where((s) => _matchesFilter(s.recordedAt)).toList();
+    final filteredRetail = state.retailSales.where((r) => _matchesFilter(r.recordedAt)).toList();
     final serviceRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
     final tipsRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
     final showerRevenue = filteredShowers.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final retailRevenue = filteredRetail.fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+    final retailCogs = filteredRetail.fold<double>(0.0, (sum, r) => sum + r.totalCost);
     final directBank = (_selectedFilter == AdminTimeFilter.today) ? (state.todayDirectBankCreditsETB as double) : 0.0;
-    final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue;
+    final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue + retailRevenue;
 
     final totalPettyCash = state.pettyCashExpenses
         .where((e) => _matchesFilter(e.loggedAt))
@@ -223,7 +226,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         .where((t) =>
             _matchesFilter(t.date) &&
             (t.type == 'receiveStock' || t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
-        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
+        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb) + retailCogs;
     final vehicleWashRev = paidBookings.where((b) => !b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final carpetWashRev = paidBookings.where((b) => b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     // 15% VAT applies exclusively to Car Wash; Carpet and Shower are VAT exempt

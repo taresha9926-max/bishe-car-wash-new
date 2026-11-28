@@ -28,7 +28,9 @@ import 'package:bishe_car_wash/features/booking_service/domain/models/wash_packa
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/repositories/i_wash_repository.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/bank_incoming_transaction.dart';
+import 'package:bishe_car_wash/features/cashier/domain/models/retail_sale_record.dart';
 import 'package:bishe_car_wash/features/cashier/domain/models/sentinel_config.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/retail_item.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/customer_feedback.dart';
 import 'package:bishe_car_wash/features/welcome/domain/models/tiktok_ad_video.dart';
 import 'package:bishe_car_wash/features/inventory/domain/models/fixed_asset.dart';
@@ -691,6 +693,7 @@ class AppStateNotifier extends ChangeNotifier {
     _pendingApprovals.clear();
     _consumables = List.from(InitialInventorySeed.getConsumables());
     _showerRecords.clear();
+    _retailSales.clear();
     _isDailyCommissionDisbursedToday = false;
     _disbursedCommissionPoolAmount = 0.0;
     _hasNewCashierClosingAlert = false;
@@ -788,6 +791,143 @@ class AppStateNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- Retail Merchandise Catalog & Direct Sales State ---
+  List<RetailItem> _retailItems = List.from(RetailItem.getDefaultOfficialItems());
+  List<RetailItem> get retailItems => List.unmodifiable(_retailItems.where((i) => i.isActive));
+  List<RetailItem> get allRetailItems => List.unmodifiable(_retailItems);
+
+  final List<RetailSaleRecord> _retailSales = [];
+  List<RetailSaleRecord> get retailSales => List.unmodifiable(_retailSales);
+
+  Future<RetailSaleRecord> recordRetailSale({
+    required RetailItem item,
+    required int quantity,
+    required PaymentMethod paymentMethod,
+    required String cashierName,
+    String? role,
+    String? customerName,
+    String? customerPhone,
+    String? receiptScreenshot,
+    String? transactionRef,
+    String? notes,
+  }) async {
+    final effectiveQty = quantity < 1 ? 1 : quantity;
+    final effectiveRole = role ?? (currentRole == UserRole.manager ? 'operationalManager' : 'cashier');
+    final record = RetailSaleRecord(
+      id: 'RET-${DateTime.now().millisecondsSinceEpoch}',
+      itemId: item.id,
+      itemName: item.name,
+      quantity: effectiveQty,
+      unitPrice: item.sellingPriceEtb,
+      unitCost: item.unitCostEtb,
+      totalAmount: effectiveQty * item.sellingPriceEtb,
+      paymentMethod: paymentMethod,
+      recordedAt: DateTime.now(),
+      recordedBy: cashierName,
+      recordedByRole: effectiveRole,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      receiptScreenshot: receiptScreenshot,
+      transactionRef: transactionRef,
+      notes: notes,
+    );
+    _retailSales.insert(0, record);
+
+    final idx = _retailItems.indexWhere((r) => r.id == item.id);
+    if (idx != -1 && _retailItems[idx].currentStock > 0) {
+      final current = _retailItems[idx];
+      final remaining = current.currentStock > effectiveQty ? current.currentStock - effectiveQty : 0;
+      _retailItems[idx] = current.copyWith(currentStock: remaining);
+    }
+    notifyListeners();
+
+    await _repository.saveRetailSales(_retailSales);
+    await _persistPricingConfig();
+    return record;
+  }
+
+  Future<void> updateRetailSale({
+    required String id,
+    int? quantity,
+    PaymentMethod? paymentMethod,
+    String? notes,
+  }) async {
+    final idx = _retailSales.indexWhere((s) => s.id == id);
+    if (idx == -1) return;
+    final existing = _retailSales[idx];
+    final newQty = (quantity ?? existing.quantity) < 1 ? 1 : (quantity ?? existing.quantity);
+    final newMethod = paymentMethod ?? existing.paymentMethod;
+    _retailSales[idx] = existing.copyWith(
+      quantity: newQty,
+      totalAmount: newQty * existing.unitPrice,
+      paymentMethod: newMethod,
+      notes: notes ?? existing.notes,
+    );
+    notifyListeners();
+    await _repository.saveRetailSales(_retailSales);
+  }
+
+  Future<void> deleteRetailSale(String id) async {
+    _retailSales.removeWhere((s) => s.id == id);
+    notifyListeners();
+    await _repository.saveRetailSales(_retailSales);
+  }
+
+  Future<void> addOrUpdateRetailItem(RetailItem item) async {
+    final idx = _retailItems.indexWhere((r) => r.id == item.id);
+    if (idx != -1) {
+      _retailItems[idx] = item;
+    } else {
+      _retailItems.add(item);
+    }
+    notifyListeners();
+    await _persistPricingConfig();
+  }
+
+  Future<bool> deleteRetailItem(String id) async {
+    if (!isSuperAdmin) return false;
+    _retailItems.removeWhere((r) => r.id == id);
+    notifyListeners();
+    await _persistPricingConfig();
+    return true;
+  }
+
+  Future<void> restockRetailItem({
+    required String itemId,
+    required int addedQuantity,
+    double? unitCostEtb,
+    String supplier = '',
+    String recordedBy = 'Storekeeper',
+    String notes = '',
+  }) async {
+    final idx = _retailItems.indexWhere((r) => r.id == itemId);
+    if (idx == -1 || addedQuantity <= 0) return;
+    final current = _retailItems[idx];
+    final effectiveCost = unitCostEtb ?? current.unitCostEtb;
+    _retailItems[idx] = current.copyWith(
+      currentStock: current.currentStock + addedQuantity,
+      unitCostEtb: effectiveCost,
+    );
+    final tx = StockTransaction(
+      id: 'STX-RTL-${DateTime.now().millisecondsSinceEpoch}',
+      date: DateTime.now(),
+      itemId: current.id,
+      itemName: current.name,
+      type: 'receiveStock',
+      quantity: addedQuantity.toDouble(),
+      unit: 'Units',
+      unitCostEtb: effectiveCost,
+      totalCostEtb: addedQuantity * effectiveCost,
+      supplier: supplier,
+      recordedBy: recordedBy,
+      notes: notes.isEmpty ? 'Retail shop restock: ${current.name}' : notes,
+    );
+    _stockTransactions.insert(0, tx);
+    notifyListeners();
+    await _persistPricingConfig();
+    await _repository.recordStockTransaction(tx);
+  }
+
   // --- VAT & Post-VAT Revenue Helpers ---
   static const double vatRate = 0.15;
 
@@ -854,6 +994,7 @@ class AppStateNotifier extends ChangeNotifier {
       'carpetTypeAPrice': _carpetTypeAStationPrice,
       'carpetTypeBPrice': _carpetTypeBStationPrice,
       'teamCommissionRate': _teamCommissionRate,
+      'retailItems': _retailItems.map((r) => r.toJson()).toList(),
     });
   }
 
@@ -1111,6 +1252,41 @@ class AppStateNotifier extends ChangeNotifier {
     }).fold(0.0, (sum, s) => sum + s.totalAmount);
   }
 
+  int get todayRetailSalesCount {
+    final now = DateTime.now();
+    return _retailSales
+        .where((r) => _isSameDay(r.recordedAt, now))
+        .fold(0, (sum, r) => sum + r.quantity);
+  }
+
+  double get todayRetailRevenueETB {
+    final now = DateTime.now();
+    return _retailSales
+        .where((r) => _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalAmount);
+  }
+
+  double get todayRetailCashETB {
+    final now = DateTime.now();
+    return _retailSales
+        .where((r) => r.isCash && _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalAmount);
+  }
+
+  double get todayRetailDigitalETB {
+    final now = DateTime.now();
+    return _retailSales
+        .where((r) => r.isDigital && _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalAmount);
+  }
+
+  double get todayRetailCogsETB {
+    final now = DateTime.now();
+    return _retailSales
+        .where((r) => _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalCost);
+  }
+
   double get todayCustomerTipsETB {
     final now = DateTime.now();
     return _bookings
@@ -1229,16 +1405,14 @@ class AppStateNotifier extends ChangeNotifier {
     return role == 'operationalmanager' || role == 'manager';
   }
 
-  bool _isCashierShower(ShowerRecord s) {
-    final role = (s.recordedByRole ?? '').toLowerCase();
-    if (role == 'operationalmanager' || role == 'manager') return false;
-    return true;
-  }
-
-  bool _isManagerShower(ShowerRecord s) {
-    final role = (s.recordedByRole ?? '').toLowerCase();
+  bool _isManagerRoleStr(String? rawRole) {
+    final role = (rawRole ?? '').toLowerCase();
     return role == 'operationalmanager' || role == 'manager';
   }
+
+  bool _isCashierShower(ShowerRecord s) => !_isManagerRoleStr(s.recordedByRole);
+
+  bool _isManagerShower(ShowerRecord s) => _isManagerRoleStr(s.recordedByRole);
 
   bool _isSameDay(DateTime a, DateTime b) {
     final al = a.toLocal();
@@ -1263,7 +1437,10 @@ class AppStateNotifier extends ChangeNotifier {
     final showerCash = _showerRecords
         .where((s) => s.isCash && _isCashierShower(s) && _isSameDay(s.recordedAt, now))
         .fold(0.0, (sum, s) => sum + s.totalAmount);
-    return bookCash + showerCash;
+    final retailCash = _retailSales
+        .where((r) => r.isCash && !_isManagerRoleStr(r.recordedByRole) && _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalAmount);
+    return bookCash + showerCash + retailCash;
   }
 
   double get managerTodayCashETB {
@@ -1283,7 +1460,10 @@ class AppStateNotifier extends ChangeNotifier {
     final showerCash = _showerRecords
         .where((s) => s.isCash && _isManagerShower(s) && _isSameDay(s.recordedAt, now))
         .fold(0.0, (sum, s) => sum + s.totalAmount);
-    return bookCash + showerCash;
+    final retailCash = _retailSales
+        .where((r) => r.isCash && _isManagerRoleStr(r.recordedByRole) && _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalAmount);
+    return bookCash + showerCash + retailCash;
   }
 
   double get cashierTodayDigitalETB {
@@ -1303,7 +1483,10 @@ class AppStateNotifier extends ChangeNotifier {
     final showerDig = _showerRecords
         .where((s) => s.isDigital && _isCashierShower(s) && _isSameDay(s.recordedAt, now))
         .fold(0.0, (sum, s) => sum + s.totalAmount);
-    return bookDig + showerDig;
+    final retailDig = _retailSales
+        .where((r) => r.isDigital && !_isManagerRoleStr(r.recordedByRole) && _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalAmount);
+    return bookDig + showerDig + retailDig;
   }
 
   double get managerTodayDigitalETB {
@@ -1323,7 +1506,10 @@ class AppStateNotifier extends ChangeNotifier {
     final showerDig = _showerRecords
         .where((s) => s.isDigital && _isManagerShower(s) && _isSameDay(s.recordedAt, now))
         .fold(0.0, (sum, s) => sum + s.totalAmount);
-    return bookDig + showerDig;
+    final retailDig = _retailSales
+        .where((r) => r.isDigital && _isManagerRoleStr(r.recordedByRole) && _isSameDay(r.recordedAt, now))
+        .fold(0.0, (sum, r) => sum + r.totalAmount);
+    return bookDig + showerDig + retailDig;
   }
 
   double get cashierTodayRevenueETB => cashierTodayCashETB + cashierTodayDigitalETB;
@@ -1791,6 +1977,11 @@ class AppStateNotifier extends ChangeNotifier {
       if (end != null && s.recordedAt.isAfter(end)) continue;
       result[s.paymentMethod] = (result[s.paymentMethod] ?? 0.0) + s.totalAmount;
     }
+    for (final r in _retailSales) {
+      if (start != null && r.recordedAt.isBefore(start)) continue;
+      if (end != null && r.recordedAt.isAfter(end)) continue;
+      result[r.paymentMethod] = (result[r.paymentMethod] ?? 0.0) + r.totalAmount;
+    }
     return result;
   }
 
@@ -1810,6 +2001,11 @@ class AppStateNotifier extends ChangeNotifier {
       if (start != null && s.recordedAt.isBefore(start)) continue;
       if (end != null && s.recordedAt.isAfter(end)) continue;
       result[s.paymentMethod] = (result[s.paymentMethod] ?? 0) + 1;
+    }
+    for (final r in _retailSales) {
+      if (start != null && r.recordedAt.isBefore(start)) continue;
+      if (end != null && r.recordedAt.isAfter(end)) continue;
+      result[r.paymentMethod] = (result[r.paymentMethod] ?? 0) + 1;
     }
     return result;
   }
@@ -2233,6 +2429,7 @@ class AppStateNotifier extends ChangeNotifier {
     final isManager = shiftType == 'night' || closedByRole == 'operationalManager';
     final rolePaidToday = paidToday.where((b) => isManager ? _isManagerBooking(b) : _isCashierBooking(b)).toList();
     final roleShowerRecords = _showerRecords.where((s) => (isManager ? _isManagerShower(s) : _isCashierShower(s)) && _isSameDay(s.recordedAt, now)).toList();
+    final roleRetailRecords = _retailSales.where((r) => (isManager ? _isManagerRoleStr(r.recordedByRole) : !_isManagerRoleStr(r.recordedByRole)) && _isSameDay(r.recordedAt, now)).toList();
 
     final vehiclePaid = rolePaidToday.where((b) => !b.isCarpet).toList();
     final carpetPaid = rolePaidToday.where((b) => b.isCarpet).toList();
@@ -2240,19 +2437,23 @@ class AppStateNotifier extends ChangeNotifier {
     final vehicleRev = vehiclePaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final carpetRev = carpetPaid.fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final showerRev = roleShowerRecords.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final retailRev = roleRetailRecords.fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+    final retailCount = roleRetailRecords.fold<int>(0, (sum, r) => sum + r.quantity);
+    final retailCogs = roleRetailRecords.fold<double>(0.0, (sum, r) => sum + r.totalCost);
     final tipsRev = rolePaidToday.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
 
     final serviceGross = vehicleRev + carpetRev;
-    final gross = serviceGross + showerRev + tipsRev;
+    final gross = serviceGross + showerRev + retailRev + tipsRev;
 
     final serviceCash = rolePaidToday.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
     final showerCash = roleShowerRecords.where((s) => s.isCash).fold<double>(0.0, (sum, s) => sum + s.totalAmount);
-    final cash = serviceCash + showerCash;
+    final retailCash = roleRetailRecords.where((r) => r.isCash).fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+    final cash = serviceCash + showerCash + retailCash;
     final digital = gross - cash;
 
     final netServiceRev = netWashRevenueAfterVat(serviceGross);
     final comm = (netServiceRev * teamCommissionRate) + tipsRev;
-    final net = (netServiceRev - (netServiceRev * teamCommissionRate)) + showerRev;
+    final net = (netServiceRev - (netServiceRev * teamCommissionRate)) + showerRev + (retailRev - retailCogs);
     final deposited = totalCashDepositedTodayETB;
     final petty = todayPettyCashExpensesETB;
     final remainingCash = isManager ? managerCustodyCashETB : cashierDrawerBalanceETB;
@@ -2261,8 +2462,9 @@ class AppStateNotifier extends ChangeNotifier {
     for (final m in PaymentMethod.values) {
       final amt = rolePaidToday.where((b) => b.payment.method == m).fold<double>(0.0, (sum, b) => sum + b.totalPrice + b.payment.tipAmount);
       final showerAmt = roleShowerRecords.where((s) => s.paymentMethod == m).fold<double>(0.0, (sum, s) => sum + s.totalAmount);
-      if (amt + showerAmt > 0) {
-        breakdown[m.shortName] = amt + showerAmt;
+      final retailAmt = roleRetailRecords.where((r) => r.paymentMethod == m).fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+      if (amt + showerAmt + retailAmt > 0) {
+        breakdown[m.shortName] = amt + showerAmt + retailAmt;
       }
     }
 
@@ -2363,6 +2565,9 @@ class AppStateNotifier extends ChangeNotifier {
       carpetRevenue: carpetRev,
       showerUsersCount: todayShowerUserCount,
       showerRevenue: showerRev,
+      retailSalesCount: retailCount,
+      retailRevenue: retailRev,
+      retailCogs: retailCogs,
       totalTipsAmount: tipsRev,
       commissionPool: comm,
       netStationProfit: net,
@@ -2618,7 +2823,21 @@ class AppStateNotifier extends ChangeNotifier {
         _carpetTypeAStationPrice = (pricingConfig['carpetTypeAPrice'] as num?)?.toDouble() ?? _carpetTypeAStationPrice;
         _carpetTypeBStationPrice = (pricingConfig['carpetTypeBPrice'] as num?)?.toDouble() ?? _carpetTypeBStationPrice;
         _teamCommissionRate = (pricingConfig['teamCommissionRate'] as num?)?.toDouble() ?? _teamCommissionRate;
+        final rawRetail = pricingConfig['retailItems'];
+        if (rawRetail is List && rawRetail.isNotEmpty) {
+          _retailItems = rawRetail
+              .whereType<Map>()
+              .map((e) => RetailItem.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
+        }
       }
+
+      try {
+        final loadedRetailSales = await _repository.getRetailSales();
+        _retailSales
+          ..clear()
+          ..addAll(loadedRetailSales);
+      } catch (_) {}
 
       if (_geminiApiKey == null || _geminiApiKey!.isEmpty) {
         final remoteKey = results[12] as String?;

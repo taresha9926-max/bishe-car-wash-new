@@ -15,6 +15,7 @@ import '../../../../core/widgets/storekeeper_chemical_reconciliation_card.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/consumable_item.dart';
 import '../../domain/models/fixed_asset.dart';
+import '../../domain/models/retail_item.dart';
 import '../../domain/models/stock_transaction.dart';
 import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 
@@ -42,6 +43,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
   // Tab 3 (Fixed Assets) state
   final TextEditingController _assetSearchCtrl = TextEditingController();
   String _assetConditionFilter = 'All';
+  bool _showRetailShopStock = false;
 
   // Fast-turnover item codes
   static const Set<String> _fastItemIds = {
@@ -1020,6 +1022,9 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             ),
           ),
 
+        // Retail Shop Inventory (Station Merchandise for Customer Sale)
+        _buildRetailStockSection(context, state, isMobile),
+
         // Consumables List
         Padding(
           padding: EdgeInsets.all(isMobile ? 12 : 16),
@@ -1129,8 +1134,11 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               OutlinedButton.icon(
                 onPressed: () => _showReceiveStockDialog(context, state, item),
@@ -1142,21 +1150,18 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   foregroundColor: Colors.greenAccent,
                 ),
               ),
-              const SizedBox(width: 8),
               TextButton.icon(
                 onPressed: () => _showDecommissionConsumableDialog(context, state, item),
                 icon: const Icon(Icons.archive_outlined, size: 14),
                 label: const Text('Decommission', style: TextStyle(fontSize: 11)),
                 style: TextButton.styleFrom(foregroundColor: Colors.orange.shade400),
               ),
-              if (state.isSuperAdmin) ...[
-                const SizedBox(width: 6),
+              if (state.isSuperAdmin)
                 IconButton(
                   icon: const Icon(Icons.delete_outline, size: 17, color: Colors.redAccent),
                   tooltip: 'Super Admin Permanent Delete',
                   onPressed: () => _showDeleteConsumableDialog(context, state, item),
                 ),
-              ],
             ],
           ),
         ],
@@ -2451,6 +2456,178 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
         a.condition.displayName,
         a.notes,
       ]).toList(),
+    );
+  }
+
+  Widget _buildRetailStockSection(BuildContext context, dynamic state, bool isMobile) {
+    final retailItems = state.allRetailItems as List<RetailItem>;
+    if (retailItems.isEmpty) return const SizedBox.shrink();
+    final lowRetailCount = retailItems.where((r) => r.isLowStock).length;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(isMobile ? 12 : 16, 10, isMobile ? 12 : 16, 0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF111827),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: _showRetailShopStock ? const Color(0xFFF59E0B).withValues(alpha: 0.5) : AppColors.cardBorder,
+            width: 1.2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                onTap: () => setState(() => _showRetailShopStock = !_showRetailShopStock),
+                leading: const Icon(Icons.shopping_bag_rounded, color: Color(0xFFF59E0B)),
+                title: Text(
+                  '${state.tr("retailStockSection")} (${retailItems.length})',
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white),
+                ),
+                subtitle: Text(
+                  lowRetailCount > 0 ? '$lowRetailCount low stock' : state.tr('healthyStock'),
+                  style: TextStyle(fontSize: 11, color: lowRetailCount > 0 ? Colors.orange : Colors.green),
+                ),
+                trailing: Icon(
+                  _showRetailShopStock ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            if (_showRetailShopStock) ...[
+              const Divider(height: 1, color: AppColors.cardBorder),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: retailItems.map((item) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: item.isLowStock ? Colors.orange.withValues(alpha: 0.5) : AppColors.cardBorder,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.localizedName(state.currentLang),
+                                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.white),
+                                ),
+                                Text(
+                                  '${CurrencyFormatter.format(item.sellingPriceEtb)} • ${state.tr("inStockLabel")}: ${item.currentStock}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: item.isLowStock ? Colors.orangeAccent : AppColors.cashGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () => _showRestockRetailItemDialog(context, state, item),
+                            icon: const Icon(Icons.add_box_rounded, size: 14, color: Color(0xFFF59E0B)),
+                            label: Text(
+                              state.tr('restockRetailItem'),
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFFF59E0B)),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFFF59E0B)),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRestockRetailItemDialog(BuildContext context, dynamic state, RetailItem item) {
+    final qtyCtrl = TextEditingController(text: '10');
+    final costCtrl = TextEditingController(text: item.unitCostEtb > 0 ? item.unitCostEtb.toStringAsFixed(0) : '');
+    final supplierCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dlgCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('${state.tr("restockRetailItem")}: ${item.name}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: qtyCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: '${state.tr("qtyLabel")} (+)',
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: costCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Unit Cost (ETB, optional)',
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: supplierCtrl,
+              decoration: InputDecoration(
+                labelText: 'Supplier (optional)',
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dlgCtx), child: Text(state.tr('cancel'))),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD97706), foregroundColor: Colors.white),
+            onPressed: () async {
+              final qty = int.tryParse(qtyCtrl.text.trim()) ?? 0;
+              if (qty <= 0) return;
+              final unitCost = double.tryParse(costCtrl.text.trim());
+              final staff = (state.activeStaffFullName != null && (state.activeStaffFullName as String).isNotEmpty)
+                  ? state.activeStaffFullName as String
+                  : 'Storekeeper';
+              Navigator.pop(dlgCtx);
+              await AppStateProvider.read(context).restockRetailItem(
+                itemId: item.id,
+                addedQuantity: qty,
+                unitCostEtb: unitCost,
+                supplier: supplierCtrl.text.trim(),
+                recordedBy: staff,
+              );
+            },
+            child: Text(state.tr('save')),
+          ),
+        ],
+      ),
     );
   }
 }

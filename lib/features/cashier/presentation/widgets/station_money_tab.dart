@@ -8,6 +8,7 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../screens/bank_deposit_dialog.dart';
 import '../screens/daily_closing_dialog.dart';
 import '../screens/petty_cash_dialog.dart';
+import 'station_retail_pos_card.dart';
 
 /// Shared Station Money & Shift Closing workbench used by both Cashier
 /// (day shift closing, no custody carry) and Operational Manager
@@ -178,6 +179,10 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
 
         // 2. Station Today KPI Strip
         _buildShiftSummaryBanner(state, widget.isMobile),
+        const SizedBox(height: 12),
+
+        // 2b. Retail Item Sales POS (Shared across Cashier Day & Manager Night shifts)
+        StationRetailPosCard(isManager: widget.isManager),
         const SizedBox(height: 12),
 
         // 3. Closing & Financial Actions (Bank Deposit, Petty Cash, Prerequisite-Gated Shift Closing) + Digital Breakdown

@@ -6601,6 +6601,101 @@ class AppStrings {
       AppLanguage.om: 'Liankiin viidiyoo ammayyuu hin qophoofne',
       AppLanguage.am: 'የቪዲዮ ማያያዣ ገና አልተዘጋጀም',
     },
+    'retailSalesTitle': {
+      AppLanguage.en: 'Retail Item Sales',
+      AppLanguage.om: 'Gurgurtaa Meeshaalee',
+      AppLanguage.am: 'የዕቃዎች ሽያጭ (POS)',
+    },
+    'retailSalesSub': {
+      AppLanguage.en: 'Car care products, perfumes & microfiber towels',
+      AppLanguage.om: 'Meeshaalee kunuunsa konkolaataa fi foothaawwan',
+      AppLanguage.am: 'የመኪና መዋቢያ፣ ሽቶ እና ማይክሮፋይበር ፎጣዎች',
+    },
+    'retailSalesSubtotal': {
+      AppLanguage.en: 'Retail Sales Subtotal',
+      AppLanguage.om: 'Ida\'ama Gurgurtaa Meeshaalee',
+      AppLanguage.am: 'የዕቃዎች ሽያጭ ድምር',
+    },
+    'retailUnitsLabel': {
+      AppLanguage.en: 'items sold',
+      AppLanguage.om: 'meeshaalee gurguraman',
+      AppLanguage.am: 'የተሸጡ ዕቃዎች',
+    },
+    'recordRetailSale': {
+      AppLanguage.en: 'Record Sale',
+      AppLanguage.om: 'Gurgurtaa Galmeessi',
+      AppLanguage.am: 'ሽያጭ መዝግብ',
+    },
+    'retailSaleRecordedToast': {
+      AppLanguage.en: 'Retail item sale recorded!',
+      AppLanguage.om: 'Gurgurtaan meeshaa galmaa\'eera!',
+      AppLanguage.am: 'የዕቃ ሽያጭ ተመዝግቧል!',
+    },
+    'recentRetailSales': {
+      AppLanguage.en: 'Recent Item Sales',
+      AppLanguage.om: 'Gurgurtaa Dhihoo',
+      AppLanguage.am: 'የቅርብ ጊዜ ሽያጮች',
+    },
+    'retailSalesTab': {
+      AppLanguage.en: 'Retail Sales',
+      AppLanguage.om: 'Gurgurtaa',
+      AppLanguage.am: 'ሽያጮች',
+    },
+    'addRetailItem': {
+      AppLanguage.en: 'Add Retail Item',
+      AppLanguage.om: 'Meeshaa Haaraa Dabali',
+      AppLanguage.am: 'አዲስ የሚሸጥ ዕቃ ጨምር',
+    },
+    'retailStockSection': {
+      AppLanguage.en: 'Retail Shop Stock',
+      AppLanguage.om: 'Kuusaa Meeshaalee Gurgurtaa',
+      AppLanguage.am: 'የሚሸጡ ዕቃዎች ክምችት',
+    },
+    'restockRetailItem': {
+      AppLanguage.en: 'Restock',
+      AppLanguage.om: 'Kuusaa Guuti',
+      AppLanguage.am: 'ክምችት ጨምር',
+    },
+    'sellingPriceLabel': {
+      AppLanguage.en: 'Selling Price (ETB)',
+      AppLanguage.om: 'Gatii Gurgurtaa (ETB)',
+      AppLanguage.am: 'የመሸጫ ዋጋ (ብር)',
+    },
+    'stationShopTitle': {
+      AppLanguage.en: 'Station Care & Accessories Shop',
+      AppLanguage.om: 'Suuqii Meeshaalee Buufataa',
+      AppLanguage.am: 'በማዕከሉ የሚሸጡ ዕቃዎች',
+    },
+    'availableAtCashierDesk': {
+      AppLanguage.en: 'Available for purchase at Cashier Desk',
+      AppLanguage.om: 'Kaasharii biratti argama',
+      AppLanguage.am: 'በካሸር ዴስክ መግዛት ይችላሉ',
+    },
+    'buyerOptionalHint': {
+      AppLanguage.en: 'Customer / Plate (optional)',
+      AppLanguage.om: 'Maqaa / Gabatee (dirqama miti)',
+      AppLanguage.am: 'ደንበኛ / ሰሌዳ (አማራጭ)',
+    },
+    'qtyLabel': {
+      AppLanguage.en: 'Qty',
+      AppLanguage.om: 'Baay\'ina',
+      AppLanguage.am: 'ብዛት',
+    },
+    'inStockLabel': {
+      AppLanguage.en: 'In Stock',
+      AppLanguage.om: 'Kuusaa Keessa',
+      AppLanguage.am: 'በመጋዘን',
+    },
+    'retailTxRefHint': {
+      AppLanguage.en: 'Transaction Ref (optional)',
+      AppLanguage.om: 'Lakkoofsa Ragaa (dirqama miti)',
+      AppLanguage.am: 'የግብይት ቁጥር (አማራጭ)',
+    },
+    'noRetailItemsAvailable': {
+      AppLanguage.en: 'No retail items configured yet',
+      AppLanguage.om: 'Meeshaan gurgurtaa hin qophoofne',
+      AppLanguage.am: 'የሚሸጡ ዕቃዎች ገና አልተጨመሩም',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

@@ -33,6 +33,9 @@ class DailyFinancialClosing {
   final double carpetRevenue;
   final int showerUsersCount;
   final double showerRevenue;
+  final int retailSalesCount;
+  final double retailRevenue;
+  final double retailCogs;
   final double totalTipsAmount;
 
   const DailyFinancialClosing({
@@ -70,6 +73,9 @@ class DailyFinancialClosing {
     this.carpetRevenue = 0.0,
     this.showerUsersCount = 0,
     this.showerRevenue = 0.0,
+    this.retailSalesCount = 0,
+    this.retailRevenue = 0.0,
+    this.retailCogs = 0.0,
     this.totalTipsAmount = 0.0,
   });
 
@@ -88,6 +94,9 @@ class DailyFinancialClosing {
     double? carpetRevenue,
     int? showerUsersCount,
     double? showerRevenue,
+    int? retailSalesCount,
+    double? retailRevenue,
+    double? retailCogs,
     double? totalTipsAmount,
   }) {
     return DailyFinancialClosing(
@@ -125,6 +134,9 @@ class DailyFinancialClosing {
       carpetRevenue: carpetRevenue ?? this.carpetRevenue,
       showerUsersCount: showerUsersCount ?? this.showerUsersCount,
       showerRevenue: showerRevenue ?? this.showerRevenue,
+      retailSalesCount: retailSalesCount ?? this.retailSalesCount,
+      retailRevenue: retailRevenue ?? this.retailRevenue,
+      retailCogs: retailCogs ?? this.retailCogs,
       totalTipsAmount: totalTipsAmount ?? this.totalTipsAmount,
     );
   }
@@ -161,6 +173,9 @@ class DailyFinancialClosing {
       'bankAccountName': bankAccountName,
       'bankAccountNumber': bankAccountNumber,
       'depositSlipRef': depositSlipRef,
+      'retailSalesCount': retailSalesCount,
+      'retailRevenue': retailRevenue,
+      'retailCogs': retailCogs,
     };
   }
 
@@ -196,6 +211,9 @@ class DailyFinancialClosing {
       bankAccountName: map['bankAccountName'],
       bankAccountNumber: map['bankAccountNumber'],
       depositSlipRef: map['depositSlipRef'],
+      retailSalesCount: (map['retailSalesCount'] as num?)?.toInt() ?? 0,
+      retailRevenue: (map['retailRevenue'] as num?)?.toDouble() ?? 0.0,
+      retailCogs: (map['retailCogs'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

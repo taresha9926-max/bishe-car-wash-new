@@ -455,12 +455,12 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                             Text(state.tr('vatExempt'), style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
                             const SizedBox(height: 2),
                             Text(
-                              CurrencyFormatter.format(state.todayCarpetRevenueETB + state.todayShowerRevenueETB),
+                              CurrencyFormatter.format(state.todayCarpetRevenueETB + state.todayShowerRevenueETB + state.todayRetailRevenueETB),
                               style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF38BDF8)),
                             ),
                             const SizedBox(height: 2),
                             const Text(
-                              'Carpet & Shower (0%)',
+                              'Carpet, Shower & Retail (0%)',
                               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10, color: Color(0xFF94A3B8)),
                             ),
                           ],
@@ -1666,8 +1666,17 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final showerRevenue = (state.showerRecords as List)
         .where((s) => isInRange(s.recordedAt))
         .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
-    final grossRevenue = vehicleWashRevenue + carpetWashRevenue + showerRevenue;
-    final totalNetRevenue = vehicleNet + carpetWashRevenue + showerRevenue;
+    final retailRecords = (state.retailSales as List)
+        .where((r) => isInRange(r.recordedAt))
+        .toList();
+    final retailRevenue = retailRecords.fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+    final retailCash = retailRecords
+        .where((r) => r.isCash == true)
+        .fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+    final retailDigital = retailRevenue - retailCash;
+    final retailCogs = retailRecords.fold<double>(0.0, (sum, r) => sum + (r.totalCost as double));
+    final grossRevenue = vehicleWashRevenue + carpetWashRevenue + showerRevenue + retailRevenue;
+    final totalNetRevenue = vehicleNet + carpetWashRevenue + showerRevenue + retailRevenue;
 
     final cashCarWash = paidBookings
         .where((b) => !b.isCarpet && b.payment.method == PaymentMethod.cash)
@@ -1681,8 +1690,8 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final digitalCarpet = paidBookings
         .where((b) => b.isCarpet && b.payment.method != PaymentMethod.cash)
         .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final totalDigitalInflows = digitalCarWash + digitalCarpet;
-    final totalCashOnHand = cashCarWash + cashCarpet + showerRevenue;
+    final totalDigitalInflows = digitalCarWash + digitalCarpet + retailDigital;
+    final totalCashOnHand = cashCarWash + cashCarpet + showerRevenue + retailCash;
 
     final carsWashedCount = paidBookings.where((b) => !b.isCarpet).length;
     final carpetsWashedCount = paidBookings.where((b) => b.isCarpet).length;
@@ -1700,7 +1709,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     // NEVER deduct warehouse inventory restocks (receiveStock)
     final suppliesCost = (state.stockTransactions as List<StockTransaction>)
         .where((t) => isInRange(t.date) && (t.type == 'emptyExchangeConsumption' || t.type == 'dailyConsumption'))
-        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb);
+        .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb) + retailCogs;
 
     final pettyCost = (state.pettyCashExpenses as List<PettyCashExpense>)
         .where((p) => isInRange(p.loggedAt))
@@ -1887,6 +1896,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                               ['Gross Vehicle Revenue', 'Revenue', CurrencyFormatter.format(vehicleWashRevenue), 'Direct customer wash'],
                               ['Carpet Cleaning Revenue', 'Revenue', CurrencyFormatter.format(carpetWashRevenue), 'Zero VAT exempt'],
                               ['Shower Service Revenue', 'Revenue', CurrencyFormatter.format(showerRevenue), 'Zero VAT exempt'],
+                              ['Retail Merchandise Sales', 'Revenue', CurrencyFormatter.format(retailRevenue), 'Direct product sales'],
                               ['Total Gross Station Revenue', 'Gross Revenue', CurrencyFormatter.format(grossRevenue), 'All revenue streams'],
                               ['15% VAT Statutory Deductions', 'Tax Deduction', CurrencyFormatter.format(vehicleVat), 'Ministry of Revenues'],
                               ['Total Net Business Revenue', 'Net Revenue', CurrencyFormatter.format(totalNetRevenue), 'Gross − VAT'],
@@ -1964,6 +1974,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                               ['Gross Vehicle Revenue', 'Revenue', vehicleWashRevenue, 'Direct customer wash'],
                               ['Carpet Cleaning Revenue', 'Revenue', carpetWashRevenue, 'Zero VAT exempt'],
                               ['Shower Service Revenue', 'Revenue', showerRevenue, 'Zero VAT exempt'],
+                              ['Retail Merchandise Sales', 'Revenue', retailRevenue, 'Direct product sales'],
                               ['Total Gross Revenue', 'Gross Revenue', grossRevenue, 'All services'],
                               ['15% VAT Statutory', 'Tax', vehicleVat, 'Ministry of Revenues'],
                               ['Total Net Business Revenue', 'Net Revenue', totalNetRevenue, 'Gross − VAT'],
@@ -2146,6 +2157,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
             _buildPnLLine('   ↳ Net Car Wash Revenue', CurrencyFormatter.format(vehicleNet), Colors.green.shade600, false),
             _buildPnLLine('2. Carpet Washing Services (VAT Exempt 0%)', CurrencyFormatter.format(carpetWashRevenue), Colors.green.shade600, false),
             _buildPnLLine('3. Shower Services Facility (VAT Exempt 0%)', CurrencyFormatter.format(showerRevenue), Colors.green.shade600, false),
+            _buildPnLLine('4. Retail Merchandise Sales (ሽያጮች)', CurrencyFormatter.format(retailRevenue), Colors.amber.shade400, false),
             const Divider(thickness: 0.8, height: 12, color: Colors.white24),
             _buildPnLLine('TOTAL NET OPERATING REVENUE', CurrencyFormatter.format(totalNetRevenue), Colors.green.shade800, true),
             const SizedBox(height: 10),
