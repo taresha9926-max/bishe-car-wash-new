@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../booking_service/presentation/state/app_state_notifier.dart';
 
-/// Shared 5-tab Bottom App Bar for Station Desks (Cashier Day Shift &
-/// Operational Manager Night Shift) providing one-tap access to Queue, Money,
-/// Daily Washer Pool, Shower, and Wash History in both Car and Carpet modes.
+/// Shared 4-item Bottom App Bar for Cashier (Day Shift) and Operational Manager (Night Shift).
+/// Eliminates redundant top navigation: Queue / Service View, Money / Closing, Daily Washer Pool, Wash History.
 class StationBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTap;
@@ -27,160 +27,153 @@ class StationBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = isCarpet ? const Color(0xFFA78BFA) : AppColors.liquidCyanNeon;
+    final deskDiv = state.stationDeskDivision as StationDeskDivision;
+    final IconData primaryIcon;
+    final Color primaryColor;
+    final String primaryBadge;
 
-    final items = <_StationNavItem>[
-      _StationNavItem(
-        index: 0,
-        icon: Icons.directions_car_filled_rounded,
+    switch (deskDiv) {
+      case StationDeskDivision.carWash:
+        primaryIcon = Icons.directions_car_filled_rounded;
+        primaryColor = AppColors.primary;
+        primaryBadge = '$activeQueueCount';
+        break;
+      case StationDeskDivision.carpetWash:
+        primaryIcon = Icons.texture_rounded;
+        primaryColor = const Color(0xFF7C3AED);
+        primaryBadge = '$activeQueueCount';
+        break;
+      case StationDeskDivision.shower:
+        primaryIcon = Icons.shower_rounded;
+        primaryColor = const Color(0xFF0EA5E9);
+        primaryBadge = '${state.todayShowerUserCount}';
+        break;
+      case StationDeskDivision.retail:
+        primaryIcon = Icons.shopping_bag_rounded;
+        primaryColor = const Color(0xFFD97706);
+        primaryBadge = '${state.todayRetailSalesCount}';
+        break;
+    }
+
+    final items = [
+      _NavItemData(
+        key: const ValueKey('station_bottom_tab_0'),
+        icon: primaryIcon,
         label: state.tr('cashierTabQueue') as String,
-        tooltip: state.tr('cashierTabQueue') as String,
-        badgeCount: activeQueueCount,
+        badge: primaryBadge,
+        activeColor: primaryColor,
       ),
-      _StationNavItem(
-        index: 1,
+      _NavItemData(
+        key: const ValueKey('station_bottom_tab_1'),
         icon: Icons.account_balance_wallet_rounded,
         label: isManager
             ? state.tr('managerTabHandoverClose') as String
             : state.tr('cashierTabMoney') as String,
-        tooltip: isManager
-            ? state.tr('managerTabHandoverClose') as String
-            : state.tr('cashierTabMoney') as String,
-        amountChip: CurrencyFormatter.formatShort(drawerOrCustodyCash),
+        badge: CurrencyFormatter.formatShort(drawerOrCustodyCash),
+        activeColor: const Color(0xFF0EA5E9),
       ),
-      _StationNavItem(
-        index: 2,
+      _NavItemData(
+        key: const ValueKey('station_bottom_tab_2'),
         icon: Icons.groups_rounded,
         label: state.tr('bottomTabPool') as String,
-        tooltip: state.tr('dailyWasherCommissionPool') as String,
+        activeColor: const Color(0xFF10B981),
       ),
-      _StationNavItem(
-        index: 3,
-        icon: Icons.shower_rounded,
-        label: state.tr('bottomTabShower') as String,
-        tooltip: state.tr('bottomTabShower') as String,
-      ),
-      _StationNavItem(
-        index: 4,
+      _NavItemData(
+        key: const ValueKey('station_bottom_tab_3'),
         icon: Icons.history_rounded,
         label: state.tr('cashierTabHistory') as String,
-        tooltip: state.tr('cashierTabHistory') as String,
+        activeColor: const Color(0xFFF59E0B),
       ),
     ];
 
     return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A1628),
-        border: Border(
-          top: BorderSide(
-            color: accent.withValues(alpha: 0.28),
-            width: 1.2,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A),
+        border: Border(top: BorderSide(color: AppColors.cardBorder, width: 1.2)),
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        child: SizedBox(
+          height: 64,
           child: Row(
-            children: items.map((item) {
-              final isSelected = item.index == selectedIndex;
+            children: List.generate(items.length, (i) {
+              final item = items[i];
+              final selected = selectedIndex == i;
               return Expanded(
-                child: Tooltip(
-                  message: item.tooltip,
+                child: Material(
+                  color: Colors.transparent,
                   child: InkWell(
-                    key: ValueKey('station_bottom_tab_${item.index}'),
-                    onTap: () => onTap(item.index),
-                    borderRadius: BorderRadius.circular(12),
+                    key: item.key,
+                    onTap: () => onTap(i),
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+                      duration: const Duration(milliseconds: 160),
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? accent.withValues(alpha: 0.16)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        border: isSelected
-                            ? Border.all(color: accent.withValues(alpha: 0.45), width: 1)
-                            : null,
+                        color: selected ? item.activeColor.withValues(alpha: 0.14) : Colors.transparent,
+                        border: Border(
+                          top: BorderSide(
+                            color: selected ? item.activeColor : Colors.transparent,
+                            width: 2.5,
+                          ),
+                        ),
                       ),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Stack(
                             clipBehavior: Clip.none,
                             children: [
                               Icon(
                                 item.icon,
-                                size: 20,
-                                color: isSelected ? accent : AppColors.textSecondary,
+                                size: 21,
+                                color: selected ? item.activeColor : AppColors.textMuted,
                               ),
-                              if (item.badgeCount != null && item.badgeCount! > 0)
+                              if (item.badge != null)
                                 Positioned(
+                                  right: -22,
                                   top: -5,
-                                  right: -10,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                                     decoration: BoxDecoration(
-                                      color: accent,
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: selected ? item.activeColor : const Color(0xFF1E293B),
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                        color: selected ? item.activeColor : AppColors.cardBorder,
+                                        width: 0.8,
+                                      ),
                                     ),
                                     child: Text(
-                                      '${item.badgeCount}',
-                                      style: const TextStyle(
-                                        color: Color(0xFF060E1A),
-                                        fontSize: 8.5,
-                                        fontWeight: FontWeight.w900,
-                                        height: 1.0,
+                                      item.badge!,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w800,
+                                        color: selected ? Colors.white : AppColors.textSecondary,
                                       ),
                                     ),
                                   ),
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            item.label,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 9.8,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                              color: isSelected ? Colors.white : AppColors.textSecondary,
-                              height: 1.08,
-                            ),
-                          ),
-                          if (item.amountChip != null) ...[
-                            const SizedBox(height: 1),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                item.amountChip!,
-                                maxLines: 1,
-                                style: TextStyle(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: isSelected ? accent : AppColors.cashGreen,
-                                  height: 1.0,
-                                ),
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              item.label,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                                color: selected ? Colors.white : AppColors.textMuted,
                               ),
                             ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
               );
-            }).toList(),
+            }),
           ),
         ),
       ),
@@ -188,20 +181,18 @@ class StationBottomNavBar extends StatelessWidget {
   }
 }
 
-class _StationNavItem {
-  final int index;
+class _NavItemData {
+  final Key key;
   final IconData icon;
   final String label;
-  final String tooltip;
-  final int? badgeCount;
-  final String? amountChip;
+  final String? badge;
+  final Color activeColor;
 
-  const _StationNavItem({
-    required this.index,
+  const _NavItemData({
+    required this.key,
     required this.icon,
     required this.label,
-    required this.tooltip,
-    this.badgeCount,
-    this.amountChip,
+    required this.activeColor,
+    this.badge,
   });
 }

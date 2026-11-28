@@ -85,16 +85,21 @@ void main() {
       expect(find.text(state.tr('dailyWasherCommissionPool')), findsOneWidget);
       expect(find.text(state.tr('markAllPresent')), findsOneWidget);
       expect(find.text(state.tr('assignedCommissionShare')), findsNothing);
-      expect(find.text(state.tr('stationShowerService')), findsNothing);
 
-      // Switch to Shower tab on Bottom App Bar -> Station Shower card only
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_3')));
+      // Switch to Shower via Top Card -> ONLY Station Shower card shown with digital photo options
+      await tester.tap(find.byKey(const ValueKey('desk_service_card_shower')));
       await tester.pumpAndSettle();
-      expect(find.text(state.tr('stationShowerService')), findsOneWidget);
+      expect(find.text(state.tr('stationShowerService')), findsAtLeastNWidgets(2));
       expect(find.text(state.tr('markAllPresent')), findsNothing);
+      expect(find.text(state.tr('newWalkIn')), findsNothing);
+      await tester.ensureVisible(find.text(state.tr('payTelebirr')));
+      await tester.tap(find.text(state.tr('payTelebirr')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('takePhoto')), findsOneWidget);
+      expect(find.text(state.tr('uploadPhoto')), findsOneWidget);
 
-      // Switch to Wash History tab on Bottom App Bar -> hides Clear All and Yesterday/Week/Month filters
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_4')));
+      // Switch to Wash History tab on Bottom App Bar (index 3) -> hides Clear All and Yesterday/Week/Month filters
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_3')));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('clearAllBookings')), findsNothing);
       expect(find.text(state.tr('safeCashierModeNotice')), findsOneWidget);
@@ -105,12 +110,13 @@ void main() {
       expect(find.text(state.tr('filterThisWeek')), findsNothing);
       expect(find.text(state.tr('filterThisMonth')), findsNothing);
 
-      // Open New Vehicle Booking from Queue -> includes Register Phone Booking inside
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_0')));
+      // Return to Car Wash card & open New Vehicle Booking -> strictly vehicle registration (no Carpet Drop-Off cross-tab)
+      await tester.tap(find.byKey(const ValueKey('desk_service_card_car')));
       await tester.pumpAndSettle();
       await tester.tap(find.text(state.tr('newWalkIn')));
       await tester.pumpAndSettle();
       expect(find.byType(WalkInRegistrationScreen), findsOneWidget);
+      expect(find.text(state.tr('carpetDropOff')), findsNothing);
       expect(find.text(state.tr('registerPhoneBooking')), findsOneWidget);
     });
 

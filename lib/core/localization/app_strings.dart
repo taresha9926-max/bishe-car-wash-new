@@ -6696,6 +6696,86 @@ class AppStrings {
       AppLanguage.om: 'Meeshaan gurgurtaa hin qophoofne',
       AppLanguage.am: 'የሚሸጡ ዕቃዎች ገና አልተጨመሩም',
     },
+    'lowStockLabel': {
+      AppLanguage.en: 'Low Stock',
+      AppLanguage.om: 'Kuusaa Xiqqaa',
+      AppLanguage.am: 'ዝቅተኛ ክምችት',
+    },
+    'retailValueLabel': {
+      AppLanguage.en: 'Retail Value',
+      AppLanguage.om: 'Gatii Kuusaa',
+      AppLanguage.am: 'ጠቅላላ የዕቃ ዋጋ',
+    },
+    'unitCostEtbLabel': {
+      AppLanguage.en: 'Unit Cost (ETB)',
+      AppLanguage.om: 'Gatii Bittaa (ETB)',
+      AppLanguage.am: 'የግዢ ዋጋ (ብር)',
+    },
+    'unitPriceLabel': {
+      AppLanguage.en: 'Unit Price',
+      AppLanguage.om: 'Gatii Tokkoo',
+      AppLanguage.am: 'የአንዱ ዋጋ',
+    },
+    'costShortLabel': {
+      AppLanguage.en: 'Cost',
+      AppLanguage.om: 'Baasii',
+      AppLanguage.am: 'ወጪ',
+    },
+    'itemNameEnLabel': {
+      AppLanguage.en: 'Item Name (English)',
+      AppLanguage.om: 'Maqaa Meeshaa (Ingiliffa)',
+      AppLanguage.am: 'የዕቃው ስም (በእንግሊዝኛ)',
+    },
+    'itemNameAmLabel': {
+      AppLanguage.en: 'Item Name (Amharic)',
+      AppLanguage.om: 'Maqaa Meeshaa (Amaariffa)',
+      AppLanguage.am: 'የዕቃው ስም (በአማርኛ)',
+    },
+    'itemNameOmLabel': {
+      AppLanguage.en: 'Item Name (Afaan Oromoo)',
+      AppLanguage.om: 'Maqaa Meeshaa (Afaan Oromoo)',
+      AppLanguage.am: 'የዕቃው ስም (በኦሮምኛ)',
+    },
+    'activeForSaleLabel': {
+      AppLanguage.en: 'Active for Sale',
+      AppLanguage.om: 'Gurgurtaaf Qophii',
+      AppLanguage.am: 'ለሽያጭ ዝግጁ',
+    },
+    'deleteRetailItemTitle': {
+      AppLanguage.en: 'Delete Retail Item',
+      AppLanguage.om: 'Meeshaa Gurgurtaa Haqii',
+      AppLanguage.am: 'የሚሸጥ ዕቃ ሰርዝ',
+    },
+    'manageRetailItemsCard': {
+      AppLanguage.en: 'Retail Items & Prices',
+      AppLanguage.om: 'Meeshaalee & Gatiiwwan',
+      AppLanguage.am: 'የሚሸጡ ዕቃዎች እና ዋጋ',
+    },
+    'manageRetailItemsSub': {
+      AppLanguage.en: 'Add new items, edit unit prices & delete products',
+      AppLanguage.om: 'Meeshaa haaraa dabali, gatii sirreessi, haqii',
+      AppLanguage.am: 'አዲስ ዕቃ ይጨምሩ፣ ዋጋ ያስተካክሉ ወይም ይሰርዙ',
+    },
+    'phoneCarpetIntakeSub': {
+      AppLanguage.en: 'Phone intake for carpet cleaning (Station / Valet / Home)',
+      AppLanguage.om: 'Galmee bilbilaa dhiqa karpeetii (Buufata / Fudhachuu / Mana)',
+      AppLanguage.am: 'የምንጣፍ እጥበት የስልክ ምዝገባ (ጣቢያ / ማመላለሻ / ቤት)',
+    },
+    'duplicateReceiptNotice': {
+      AppLanguage.en: 'Duplicate receipt blocked — already used for',
+      AppLanguage.om: 'Nagaheen irra deddeebi\'eera — kanaan dura kan itti fayyadame',
+      AppLanguage.am: 'ይህ የደረሰኝ ቁጥር ቀደም ብሎ ጥቅም ላይ ውሏል፦',
+    },
+    'strictSentinelRequiredNotice': {
+      AppLanguage.en: 'Bank credit SMS must be received by Sentinel before completing.',
+      AppLanguage.om: 'Xumuruuf ergaan SMS baankii Sentinel bira gahuu qaba.',
+      AppLanguage.am: 'ክፍያውን ለማጠናቀቅ የባንክ ኤስኤምኤስ መድረሱ መረጋገጥ አለበት።',
+    },
+    'tapItemToSellHint': {
+      AppLanguage.en: 'Tap any item below to view unit price & checkout',
+      AppLanguage.om: 'Gatii tokkoo fi kaffaltiif meeshaa tuqi',
+      AppLanguage.am: 'ዋጋ ለማየት እና ሽያጭ ለመፈጸም ዕቃውን ይንኩ',
+    },
   };
 
   static const Map<String, Map<AppLanguage, List<String>>> _packageFeatures = {

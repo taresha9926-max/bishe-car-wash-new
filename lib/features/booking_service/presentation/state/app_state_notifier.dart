@@ -45,6 +45,13 @@ enum ActiveServiceDivision {
   carpetWash,
 }
 
+enum StationDeskDivision {
+  carWash,
+  carpetWash,
+  shower,
+  retail,
+}
+
 class AppStateNotifier extends ChangeNotifier {
   final IWashRepository _repository;
 
@@ -78,11 +85,37 @@ class AppStateNotifier extends ChangeNotifier {
   ActiveServiceDivision _activeServiceDivision = ActiveServiceDivision.carWash;
   ActiveServiceDivision get activeServiceDivision => _activeServiceDivision;
 
+  // Four-Service Station Desk View: Car Wash, Carpet Wash, Shower, Retail Sales
+  StationDeskDivision _stationDeskDivision = StationDeskDivision.carWash;
+  StationDeskDivision get stationDeskDivision => _stationDeskDivision;
+
   void setActiveServiceDivision(ActiveServiceDivision division) {
-    if (_activeServiceDivision != division) {
+    final deskDiv = division == ActiveServiceDivision.carpetWash
+        ? StationDeskDivision.carpetWash
+        : StationDeskDivision.carWash;
+    if (_activeServiceDivision != division || _stationDeskDivision != deskDiv) {
       _activeServiceDivision = division;
+      _stationDeskDivision = deskDiv;
       notifyListeners();
     }
+  }
+
+  void selectStationDeskDivision(StationDeskDivision division) {
+    bool changed = false;
+    if (_stationDeskDivision != division) {
+      _stationDeskDivision = division;
+      changed = true;
+    }
+    if (division == StationDeskDivision.carWash &&
+        _activeServiceDivision != ActiveServiceDivision.carWash) {
+      _activeServiceDivision = ActiveServiceDivision.carWash;
+      changed = true;
+    } else if (division == StationDeskDivision.carpetWash &&
+        _activeServiceDivision != ActiveServiceDivision.carpetWash) {
+      _activeServiceDivision = ActiveServiceDivision.carpetWash;
+      changed = true;
+    }
+    if (changed) notifyListeners();
   }
 
   bool get isCarWashDivisionActive => _activeServiceDivision == ActiveServiceDivision.carWash;
@@ -885,11 +918,47 @@ class AppStateNotifier extends ChangeNotifier {
   }
 
   Future<bool> deleteRetailItem(String id) async {
-    if (!isSuperAdmin) return false;
+    if (!isSuperAdmin && _currentRole != UserRole.admin) return false;
     _retailItems.removeWhere((r) => r.id == id);
     notifyListeners();
     await _persistPricingConfig();
     return true;
+  }
+
+  /// Resolves a retail item's localized name using the active language (EN / OM / AM).
+  String retailItemLocalizedName(String itemId, {String? fallback}) {
+    final item = _retailItems.where((r) => r.id == itemId).firstOrNull ??
+        RetailItem.getDefaultOfficialItems().where((r) => r.id == itemId).firstOrNull;
+    if (item != null) return item.localizedName(_currentLang);
+    if (fallback != null && fallback.isNotEmpty) return fallback;
+    return itemId;
+  }
+
+  /// Checks car/carpet bookings, retail sales, and shower records for an already claimed transaction ref.
+  String? findDuplicateReceiptOwner(String refCode, {String? excludeBookingId}) {
+    final clean = refCode.trim().toLowerCase();
+    if (clean.isEmpty) return null;
+    final dupBooking = _bookings
+        .where((b) =>
+            b.id != excludeBookingId &&
+            (b.payment.transactionRef?.trim().toLowerCase() == clean))
+        .firstOrNull;
+    if (dupBooking != null) {
+      return '${dupBooking.licensePlate} (${dupBooking.customerName})';
+    }
+    final dupRetail = _retailSales
+        .where((r) => r.transactionRef?.trim().toLowerCase() == clean)
+        .firstOrNull;
+    if (dupRetail != null) {
+      return retailItemLocalizedName(dupRetail.itemId, fallback: dupRetail.itemName);
+    }
+    final dupShower = _showerRecords
+        .where((s) => s.transactionRef?.trim().toLowerCase() == clean)
+        .firstOrNull;
+    if (dupShower != null) {
+      return tr('stationShowerService');
+    }
+    return null;
   }
 
   Future<void> restockRetailItem({

@@ -365,19 +365,20 @@ void main() {
       expect(find.text(state.tr('dailyFinancialReportsTab')), findsOneWidget);
       // Handover custody card stays hidden until Cashier actually hands over cash
       expect(find.text(state.tr('dayShiftHandoverCashLabel')), findsNothing);
-      expect(find.text(state.tr('stationShowerService')), findsNothing);
+      // Bottom tab 3 is Wash History (4 tabs total; Shower lives in top 4-card bar)
+      expect(find.byKey(const ValueKey('station_bottom_tab_4')), findsNothing);
 
-      // Switch to Tab 2 (Daily Washer Pool) -> Washer hub visible, Station Shower separated
+      // Switch to Tab 2 (Daily Washer Pool) -> Washer hub visible
       await tester.tap(find.byKey(const ValueKey('station_bottom_tab_2')));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('markAllPresent')), findsOneWidget);
       expect(find.text(state.tr('assignedCommissionShare')), findsNothing);
-      expect(find.text(state.tr('stationShowerService')), findsNothing);
 
-      // Switch to Tab 3 (Shower) -> Station Shower present
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_3')));
+      // Tap Top Shower Card -> Station Shower card expanded alone
+      await tester.tap(find.byKey(const ValueKey('desk_service_card_shower')));
       await tester.pumpAndSettle();
-      expect(find.text(state.tr('stationShowerService')), findsOneWidget);
+      expect(find.text(state.tr('stationShowerService')), findsAtLeastNWidgets(2));
+      expect(find.textContaining(state.tr('recordShowerEntry')), findsAtLeastNWidgets(1));
     });
 
     testWidgets('Streamlined 3-Tab Admin renders cleanly on mobile without Secondary Admin badge leaks', (tester) async {

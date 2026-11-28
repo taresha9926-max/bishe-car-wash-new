@@ -86,18 +86,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(state.tr('netStationProfit')), findsNothing);
 
-      // Switch to Daily Washer Pool tab on Bottom App Bar -> only attendance & commissions, no Assigned Commission Share list & no Shower
+      // Switch to Daily Washer Pool tab on Bottom App Bar -> only attendance & commissions, no Assigned Commission Share list & no Shower panel
       await tester.tap(find.byKey(const ValueKey('station_bottom_tab_2')));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('dailyWasherCommissionPool')), findsOneWidget);
       expect(find.text(state.tr('markAllPresent')), findsOneWidget);
       expect(find.text(state.tr('assignedCommissionShare')), findsNothing);
-      expect(find.text(state.tr('stationShowerService')), findsNothing);
+      expect(find.textContaining(state.tr('recordShowerEntry')), findsNothing);
 
-      // Switch to Shower tab on Bottom App Bar -> Shower +2 increments properly (+2 => 5 from initial 1)
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_3')));
+      // Switch to Shower via Top Card -> ONLY Shower Service expanded (no queue/walk-in) & Telebirr reveals photo verification
+      await tester.tap(find.byKey(const ValueKey('desk_service_card_shower')));
       await tester.pumpAndSettle();
-      expect(find.text(state.tr('stationShowerService')), findsOneWidget);
+      expect(find.text(state.tr('stationShowerService')), findsAtLeastNWidgets(2));
+      expect(find.text(state.tr('newWalkIn')), findsNothing);
       expect(find.text(state.tr('markAllPresent')), findsNothing);
       await tester.tap(find.text('+2'));
       await tester.pumpAndSettle();
@@ -105,8 +106,14 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('5'), findsOneWidget);
 
-      // Switch to Wash History tab on Bottom App Bar -> Today / All / Custom Range only; Clear All hidden
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_4')));
+      await tester.ensureVisible(find.text(state.tr('payTelebirr')));
+      await tester.tap(find.text(state.tr('payTelebirr')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('takePhoto')), findsOneWidget);
+      expect(find.text(state.tr('uploadPhoto')), findsOneWidget);
+
+      // Switch to Wash History tab on Bottom App Bar (now tab index 3) -> Today / All / Custom Range only; Clear All hidden
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_3')));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('clearAllBookings')), findsNothing);
       expect(find.text(state.tr('safeCashierModeNotice')), findsOneWidget);
@@ -117,14 +124,20 @@ void main() {
       expect(find.text(state.tr('filterThisWeek')), findsNothing);
       expect(find.text(state.tr('filterThisMonth')), findsNothing);
 
-      // Open New Vehicle Booking -> Register Phone Booking lives inside it
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_0')));
+      // Return to Car Wash card & open New Vehicle Booking -> strictly vehicle registration (no Carpet Drop-Off cross-tab)
+      await tester.tap(find.byKey(const ValueKey('desk_service_card_car')));
       await tester.pumpAndSettle();
       await tester.tap(find.text(state.tr('newWalkIn')));
       await tester.pumpAndSettle();
       expect(find.byType(WalkInRegistrationScreen), findsOneWidget);
       expect(find.text(state.tr('newWalkIn')), findsOneWidget);
+      expect(find.text(state.tr('carpetDropOff')), findsNothing);
       expect(find.text(state.tr('registerPhoneBooking')), findsOneWidget);
+
+      // Register Phone Booking inside New Vehicle Booking is also strictly locked to Car Wash (no Carpet Drop-Off toggle)
+      await tester.tap(find.text(state.tr('registerPhoneBooking')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('carpetDropOff')), findsNothing);
     });
 
     testWidgets('Status progression unlocks Collect Payment dialog cleanly and Carpet delivery mode is preserved', (tester) async {

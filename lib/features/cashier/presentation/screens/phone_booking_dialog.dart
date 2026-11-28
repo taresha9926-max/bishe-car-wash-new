@@ -167,7 +167,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                         ),
                         Text(
                           _isCarpetMode
-                              ? 'Phone intake for carpet cleaning (Station / Valet / Home)'
+                              ? state.tr('phoneCarpetIntakeSub')
                               : state.tr('phoneIntakeDeliverySub'),
                           style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                         ),
@@ -181,95 +181,6 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
                 ],
               ),
               const Divider(height: 20),
-
-              // Service Selector Toggle: Vehicle vs Carpet
-              Container(
-                margin: const EdgeInsets.only(bottom: 14),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          if (_isCarpetMode) {
-                            setState(() {
-                              _isCarpetMode = false;
-                              if (_plateController.text.startsWith('CPT-')) {
-                                _plateController.clear();
-                              }
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: !_isCarpetMode ? AppColors.primary : Colors.transparent,
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.directions_car_rounded, size: 16, color: !_isCarpetMode ? Colors.white : AppColors.textSecondary),
-                              const SizedBox(width: 6),
-                              Text(
-                                state.tr('carWash'),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12,
-                                  color: !_isCarpetMode ? Colors.white : AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          if (!_isCarpetMode) {
-                            setState(() {
-                              _isCarpetMode = true;
-                              if (!_plateController.text.startsWith('CPT-')) {
-                                _plateController.text = 'CPT-${(DateTime.now().millisecondsSinceEpoch % 10000)}';
-                              }
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _isCarpetMode ? const Color(0xFF7C3AED) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(9),
-                          ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.texture_rounded, size: 16, color: _isCarpetMode ? Colors.white : AppColors.textSecondary),
-                              const SizedBox(width: 6),
-                              Text(
-                                state.tr('carpetDropOff'),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12,
-                                  color: _isCarpetMode ? Colors.white : AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
               // Form Scrollable Body
               Expanded(

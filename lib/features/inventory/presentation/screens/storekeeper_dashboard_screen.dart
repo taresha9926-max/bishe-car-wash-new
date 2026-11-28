@@ -2489,7 +2489,7 @@ class _StorekeeperDashboardScreenState extends State<StorekeeperDashboardScreen>
                   style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white),
                 ),
                 subtitle: Text(
-                  lowRetailCount > 0 ? '$lowRetailCount low stock' : state.tr('healthyStock'),
+                  lowRetailCount > 0 ? '$lowRetailCount ${state.tr("lowStockLabel")}' : state.tr('healthyStock'),
                   style: TextStyle(fontSize: 11, color: lowRetailCount > 0 ? Colors.orange : Colors.green),
                 ),
                 trailing: Icon(

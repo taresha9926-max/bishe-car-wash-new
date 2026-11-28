@@ -1,30 +1,27 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
-import '../../../../core/utils/print_export_helper.dart';
 import '../../../../core/widgets/app_role_header.dart';
 import '../../../../core/widgets/closing_sync_warning_banner.dart';
-import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/dual_service_entrance_tab_bar.dart';
 import '../../../../core/widgets/online_booking_alert_banner.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/bay_station.dart';
-import '../../../booking_service/domain/models/payment_info.dart';
+import '../../../booking_service/presentation/state/app_state_notifier.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
-import '../../../cashier/domain/models/shower_record.dart';
 import '../../../cashier/presentation/screens/daily_closing_dialog.dart';
 import '../../../cashier/presentation/widgets/station_bottom_nav_bar.dart';
 import '../../../cashier/presentation/widgets/station_money_tab.dart';
 import '../../../cashier/presentation/widgets/station_queue_tab.dart';
+import '../../../cashier/presentation/widgets/station_retail_pos_card.dart';
+import '../../../cashier/presentation/widgets/station_shower_card.dart';
 import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 
-/// Option 1 Operational Manager Action Desk:
-/// Immediate live Queue (with bay/washer dispatch), inline Cashier/Admin OTP banners,
-/// bottom app bar navigation, clean Handover & Night Close desk, separated
-/// Daily Washer Commission Pool & Shower tabs, and Safe History.
+/// Option 1 Operational Manager Action Desk (Night Shift):
+/// Mirrors Day Shift 4-service cards (Car Wash, Carpet Wash, Shower, Retail Sales),
+/// bottom 4-tab bar, inline Cashier/Admin OTP banners, and Handover & Night Close desk.
 class OperationalManagerDashboardScreen extends StatefulWidget {
   const OperationalManagerDashboardScreen({super.key});
 
@@ -38,8 +35,6 @@ class _OperationalManagerDashboardScreenState
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _managerInlineOtpController = TextEditingController();
   int _selectedTabIndex = 0;
-  int _showerCount = 1;
-  PaymentMethod _showerPaymentMethod = PaymentMethod.cash;
 
   @override
   void dispose() {
@@ -67,6 +62,9 @@ class _OperationalManagerDashboardScreenState
     final van = bays.firstWhere((b) => b.type == BayType.mobileVan, orElse: () => const StationBay(type: BayType.mobileVan));
 
     final activeDivisionQueue = getActiveDivisionQueue(state.bookings, state.isCarpetDivisionActive);
+    final deskDivision = state.stationDeskDivision;
+    final isWashDivision =
+        deskDivision == StationDeskDivision.carWash || deskDivision == StationDeskDivision.carpetWash;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -97,21 +95,30 @@ class _OperationalManagerDashboardScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const DualServiceEntranceTabBar(padding: EdgeInsets.only(bottom: 12)),
+                  DualServiceEntranceTabBar(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    onServiceSelected: () => _selectBottomTab(0),
+                  ),
                   _buildHandoverStatusBanners(context, state, isMobile),
                   const ClosingSyncWarningBanner(),
-                  PrimaryIntakeActionRow(isMobile: isMobile),
-                  const SizedBox(height: 12),
-                  if (_selectedTabIndex == 0)
-                    StationQueueTab(
-                      divisionQueue: activeDivisionQueue,
-                      bay1: bay1,
-                      bay2: bay2,
-                      van: van,
-                      isMobile: isMobile,
-                      isManager: true,
-                    )
-                  else if (_selectedTabIndex == 1)
+                  if (_selectedTabIndex == 0) ...[
+                    if (isWashDivision) ...[
+                      const OnlineBookingAlertBanner(),
+                      PrimaryIntakeActionRow(isMobile: isMobile),
+                      const SizedBox(height: 12),
+                      StationQueueTab(
+                        divisionQueue: activeDivisionQueue,
+                        bay1: bay1,
+                        bay2: bay2,
+                        van: van,
+                        isMobile: isMobile,
+                        isManager: true,
+                      ),
+                    ] else if (deskDivision == StationDeskDivision.shower)
+                      const StationShowerCard(isManager: true)
+                    else
+                      const StationRetailPosCard(isManager: true),
+                  ] else if (_selectedTabIndex == 1)
                     StationMoneyTab(
                       isManager: true,
                       isMobile: isMobile,
@@ -126,8 +133,6 @@ class _OperationalManagerDashboardScreenState
                       respectInitiallyExpanded: true,
                       showAssignedShareList: false,
                     )
-                  else if (_selectedTabIndex == 3)
-                    _buildStationShowerCard(context, state)
                   else
                     VehicleHistoryScreen(
                       isEmbedded: true,
@@ -144,471 +149,11 @@ class _OperationalManagerDashboardScreenState
       bottomNavigationBar: StationBottomNavBar(
         selectedIndex: _selectedTabIndex,
         onTap: _selectBottomTab,
-        isCarpet: state.isCarpetDivisionActive as bool,
+        isCarpet: state.isCarpetDivisionActive,
         activeQueueCount: activeDivisionQueue.length,
-        drawerOrCustodyCash: state.managerCustodyCashETB as double,
+        drawerOrCustodyCash: state.managerCustodyCashETB,
         isManager: true,
         state: state,
-      ),
-    );
-  }
-
-  // ===========================================================================
-  // TAB 3: STATION PUBLIC SHOWER
-  // ===========================================================================
-
-  Widget _buildStationShowerCard(BuildContext context, dynamic state) {
-    final showerPrice = state.showerPricePerPerson as double;
-    final totalToPay = _showerCount * showerPrice;
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.shower_rounded, color: Colors.white, size: 24),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            state.tr('stationShowerService'),
-                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.white),
-                          ),
-                          Text(
-                            '${showerPrice.toStringAsFixed(0)} ETB ${state.tr("perPerson")} • ${state.tr("showerCommissionNotice")}',
-                            style: const TextStyle(fontSize: 11, color: Colors.white70),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${state.todayShowerUserCount} ${state.tr("showerUsers")}',
-                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Colors.white),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.print_rounded, size: 16, color: Colors.white),
-                      tooltip: state.tr('printReport'),
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.all(5),
-                      onPressed: state.showerRecords.isEmpty
-                          ? null
-                          : () {
-                              PrintExportHelper.printTableReport(
-                                title: 'Station Shower Service Admissions',
-                                subtitle: 'BISHE Car Wash Station',
-                                headers: ['ID', 'Persons', 'Method', 'Total (ETB)', 'Cashier', 'Time'],
-                                rows: (state.showerRecords as List<ShowerRecord>).map((s) => [
-                                  s.id.substring(0, math.min(8, s.id.length)),
-                                  s.userCount,
-                                  s.paymentMethod.name.toUpperCase(),
-                                  s.totalAmount.toStringAsFixed(2),
-                                  s.recordedBy,
-                                  s.recordedAt.toLocal().toString().split('.')[0],
-                                ]).toList(),
-                              );
-                            },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.download_rounded, size: 16, color: Colors.white),
-                      tooltip: state.tr('exportCsv'),
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.all(5),
-                      onPressed: state.showerRecords.isEmpty
-                          ? null
-                          : () {
-                              PrintExportHelper.exportCsv(
-                                fileName: 'bishe_shower_log_${DateTime.now().toIso8601String().split('T')[0]}.csv',
-                                headers: ['ID', 'Persons', 'Method', 'Total (ETB)', 'Cashier', 'Time'],
-                                rows: (state.showerRecords as List<ShowerRecord>).map((s) => [
-                                  s.id,
-                                  s.userCount,
-                                  s.paymentMethod.name,
-                                  s.totalAmount,
-                                  s.recordedBy,
-                                  s.recordedAt.toIso8601String(),
-                                ]).toList(),
-                              );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Shower log exported to CSV'), duration: Duration(seconds: 2)),
-                              );
-                            },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            state.tr('numberOfPersons'),
-            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              IconButton(
-                onPressed: _showerCount > 1 ? () => setState(() => _showerCount--) : null,
-                icon: const Icon(Icons.remove_circle_outline, color: AppColors.primary),
-              ),
-              Container(
-                width: 48,
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '$_showerCount',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
-                ),
-              ),
-              IconButton(
-                onPressed: () => setState(() => _showerCount++),
-                icon: const Icon(Icons.add_circle_outline, color: AppColors.primary),
-              ),
-              for (final n in [1, 2, 5])
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  onPressed: () => setState(() => _showerCount += n),
-                  child: Text('+$n'),
-                ),
-              if (_showerCount > 1)
-                TextButton(
-                  onPressed: () => setState(() => _showerCount = 1),
-                  child: Text(state.tr('clear'), style: const TextStyle(fontSize: 11)),
-                ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: ChoiceChip(
-                  selectedColor: AppColors.liquidCyanNeon.withValues(alpha: 0.25),
-                  backgroundColor: const Color(0xFF1E293B),
-                  side: BorderSide(
-                    color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : AppColors.cardBorder,
-                  ),
-                  label: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.payments_rounded,
-                        size: 15,
-                        color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : Colors.white70,
-                      ),
-                      const SizedBox(width: 5),
-                      Flexible(
-                        child: Text(
-                          state.tr('payCash'),
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: _showerPaymentMethod == PaymentMethod.cash ? AppColors.liquidCyanNeon : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  selected: _showerPaymentMethod == PaymentMethod.cash,
-                  onSelected: (val) {
-                    if (val) setState(() => _showerPaymentMethod = PaymentMethod.cash);
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ChoiceChip(
-                  selectedColor: const Color(0xFF0284C7).withValues(alpha: 0.25),
-                  backgroundColor: const Color(0xFF1E293B),
-                  side: BorderSide(
-                    color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF0284C7) : AppColors.cardBorder,
-                  ),
-                  label: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.phone_android_rounded,
-                        size: 15,
-                        color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF38BDF8) : Colors.white70,
-                      ),
-                      const SizedBox(width: 5),
-                      Flexible(
-                        child: Text(
-                          state.tr('payTelebirr'),
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: _showerPaymentMethod == PaymentMethod.telebirr ? const Color(0xFF38BDF8) : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  selected: _showerPaymentMethod == PaymentMethod.telebirr,
-                  onSelected: (val) {
-                    if (val) setState(() => _showerPaymentMethod = PaymentMethod.telebirr);
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          CustomButton(
-            text: '${state.tr("recordShowerEntry")} • ${CurrencyFormatter.format(totalToPay)}',
-            icon: Icons.check_circle_rounded,
-            backgroundColor: const Color(0xFF0284C7),
-            onPressed: () async {
-              final recordedCount = _showerCount;
-              final managerName = state.activeStaffFullName ?? 'Operational Manager';
-              await state.recordShowerEntry(
-                userCount: recordedCount,
-                paymentMethod: _showerPaymentMethod,
-                cashierName: managerName,
-                role: 'operationalManager',
-              );
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: AppColors.statusCompleted,
-                    content: Text('${state.tr("showerRecordedToast")}: $recordedCount (${CurrencyFormatter.format(totalToPay)})'),
-                  ),
-                );
-                setState(() => _showerCount = 1);
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildShowerStatTile(
-                  state.tr('showerTotalRevenue'),
-                  CurrencyFormatter.format(state.todayShowerRevenueETB as double),
-                  const Color(0xFF0284C7),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildShowerStatTile(
-                  state.tr('cashCollected'),
-                  CurrencyFormatter.format(state.todayShowerCashETB as double),
-                  AppColors.cashGreen,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildShowerStatTile(
-                  state.tr('digitalPay'),
-                  CurrencyFormatter.format(state.todayShowerDigitalETB as double),
-                  AppColors.telebirrBlue,
-                ),
-              ),
-            ],
-          ),
-          if ((state.showerRecords as List<ShowerRecord>).isNotEmpty) ...[
-            const SizedBox(height: 12),
-            const Divider(height: 1, color: AppColors.cardBorder),
-            const SizedBox(height: 8),
-            Text(
-              state.tr('recentShowerEntries'),
-              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 6),
-            ...((state.showerRecords as List<ShowerRecord>).take(5)).map((s) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.cardBorder, width: 0.8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      s.isCash ? Icons.payments_rounded : Icons.phone_android_rounded,
-                      size: 14,
-                      color: s.isCash ? AppColors.cashGreen : AppColors.telebirrBlue,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '${s.userCount} ${state.tr("showerUsers")} • ${CurrencyFormatter.format(s.totalAmount)} (${s.isCash ? state.tr("payCash") : state.tr("payTelebirr")}) • ${s.recordedBy}',
-                        style: const TextStyle(fontSize: 11, color: Colors.white70),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFF38BDF8)),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onPressed: () => _showEditShowerDialog(context, state, s),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildShowerStatTile(String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
-          const SizedBox(height: 2),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: color),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditShowerDialog(BuildContext context, dynamic state, ShowerRecord s) {
-    int userCount = s.userCount;
-    PaymentMethod method = s.paymentMethod;
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(state.tr('editRecord'), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Text(state.tr('showerUsers'), style: const TextStyle(color: Colors.white70)),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline, color: Colors.white70),
-                    onPressed: userCount > 1 ? () => setDlgState(() => userCount--) : null,
-                  ),
-                  Text('$userCount', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline, color: Colors.white70),
-                    onPressed: () => setDlgState(() => userCount++),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  ChoiceChip(
-                    label: Text(state.tr('payCash')),
-                    selected: method == PaymentMethod.cash,
-                    onSelected: (val) {
-                      if (val) setDlgState(() => method = PaymentMethod.cash);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: Text(state.tr('payTelebirr')),
-                    selected: method == PaymentMethod.telebirr,
-                    onSelected: (val) {
-                      if (val) setDlgState(() => method = PaymentMethod.telebirr);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                await state.deleteShowerRecord(s.id);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.tr('recordDeletedToast')), backgroundColor: Colors.redAccent),
-                  );
-                }
-              },
-              child: Text(state.tr('deleteRecord'), style: const TextStyle(color: Colors.redAccent)),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                await state.updateShowerRecord(
-                  id: s.id,
-                  userCount: userCount,
-                  paymentMethod: method,
-                );
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.tr('bookingUpdatedToast')), backgroundColor: AppColors.cashGreen),
-                  );
-                }
-              },
-              child: Text(state.tr('saveChanges')),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -623,7 +168,6 @@ class _OperationalManagerDashboardScreenState
 
     return Column(
       children: [
-        const OnlineBookingAlertBanner(),
         if (pendingCashier != null) ...[
           _buildPendingCashierOtpCard(context, state, pendingCashier, isMobile),
           const SizedBox(height: 12),

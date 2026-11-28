@@ -698,6 +698,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PricingManagementScreen())),
       ),
       _AdminActionItem(
+        title: state.tr('manageRetailItemsCard'),
+        subtitle: state.tr('manageRetailItemsSub'),
+        icon: Icons.shopping_bag_rounded,
+        imageUrl: AutoCareAssets.carCockpitUrl,
+        color: const Color(0xFFD97706),
+        badge: '${state.allRetailItems.length}',
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PricingManagementScreen(initialTabIndex: 5))),
+      ),
+      _AdminActionItem(
         title: state.tr('staffPayroll'),
         subtitle: state.tr('staffPayrollSub'),
         icon: Icons.badge_rounded,

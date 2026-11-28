@@ -5,6 +5,7 @@ import '../../../../core/utils/auto_care_assets.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/language_switcher_action.dart';
+import '../../../auth_roles/domain/models/user_role.dart';
 import '../../../booking_service/domain/models/car_type.dart';
 import '../../../booking_service/domain/models/car_wash_service_item.dart';
 import '../../../booking_service/domain/models/service_type.dart';
@@ -2999,8 +3000,8 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
           child: Row(
             children: [
               Expanded(child: _buildKpiStat(state.tr('retailSalesTab'), '${items.length}', Icons.shopping_bag_rounded, const Color(0xFFF59E0B))),
-              Expanded(child: _buildKpiStat('Low Stock', '$lowStockCount', Icons.warning_amber_rounded, lowStockCount > 0 ? Colors.orange : Colors.green)),
-              Expanded(child: _buildKpiStat('Retail Value', CurrencyFormatter.formatShort(retailValuation), Icons.payments_rounded, AppColors.cashGreen)),
+              Expanded(child: _buildKpiStat(state.tr('lowStockLabel'), '$lowStockCount', Icons.warning_amber_rounded, lowStockCount > 0 ? Colors.orange : Colors.green)),
+              Expanded(child: _buildKpiStat(state.tr('retailValueLabel'), CurrencyFormatter.formatShort(retailValuation), Icons.payments_rounded, AppColors.cashGreen)),
             ],
           ),
         ),
@@ -3075,14 +3076,9 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.name,
+                  item.localizedName(state.currentLang),
                   style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                 ),
-                if (item.nameAmharic.isNotEmpty)
-                  Text(
-                    item.nameAmharic,
-                    style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
-                  ),
                 const SizedBox(height: 4),
                 Wrap(
                   spacing: 8,
@@ -3102,7 +3098,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     ),
                     if (item.unitCostEtb > 0)
                       Text(
-                        'Cost: ${CurrencyFormatter.formatShort(item.unitCostEtb)}',
+                        '${state.tr("costShortLabel")}: ${CurrencyFormatter.formatShort(item.unitCostEtb)}',
                         style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                       ),
                   ],
@@ -3114,7 +3110,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
             icon: const Icon(Icons.edit_rounded, size: 18, color: Color(0xFF38BDF8)),
             onPressed: () => _showRetailItemDialog(context, state, existing: item),
           ),
-          if (state.isSuperAdmin)
+          if (state.isSuperAdmin || state.currentRole == UserRole.admin)
             IconButton(
               icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
               onPressed: () => _showDeleteRetailItemDialog(context, state, item),
@@ -3138,28 +3134,28 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
       builder: (dialogCtx) => StatefulBuilder(
         builder: (dialogCtx, setDlgState) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          title: Text(existing == null ? state.tr('addRetailItem') : itemLabel(existing)),
+          title: Text(existing == null ? state.tr('addRetailItem') : itemLabel(state, existing)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CustomTextField(
                   controller: nameCtrl,
-                  label: 'Item Name (English)',
+                  label: state.tr('itemNameEnLabel'),
                   hint: 'e.g. Dash board cream',
                   prefixIcon: Icons.shopping_bag_outlined,
                 ),
                 const SizedBox(height: 8),
                 CustomTextField(
                   controller: amCtrl,
-                  label: 'Item Name (Amharic)',
+                  label: state.tr('itemNameAmLabel'),
                   hint: 'ለምሳሌ፡ ዳሽ ቦርድ ክሬም',
                   prefixIcon: Icons.translate_rounded,
                 ),
                 const SizedBox(height: 8),
                 CustomTextField(
                   controller: omCtrl,
-                  label: 'Item Name (Afaan Oromoo)',
+                  label: state.tr('itemNameOmLabel'),
                   hint: 'Fkn: Kireemii Daashboordii',
                   prefixIcon: Icons.language_rounded,
                 ),
@@ -3177,7 +3173,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                     Expanded(
                       child: CustomTextField(
                         controller: costCtrl,
-                        label: 'Unit Cost (ETB)',
+                        label: state.tr('unitCostEtbLabel'),
                         hint: '0',
                         keyboardType: TextInputType.number,
                         prefixIcon: Icons.price_change_outlined,
@@ -3198,7 +3194,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
                 const SizedBox(height: 6),
                 SwitchListTile.adaptive(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Active for Sale', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  title: Text(state.tr('activeForSaleLabel'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                   value: isActive,
                   onChanged: (v) => setDlgState(() => isActive = v),
                 ),
@@ -3236,15 +3232,16 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
     );
   }
 
-  String itemLabel(RetailItem item) => '${item.name} (${CurrencyFormatter.format(item.sellingPriceEtb)})';
+  String itemLabel(dynamic state, RetailItem item) =>
+      '${item.localizedName(state.currentLang)} (${CurrencyFormatter.format(item.sellingPriceEtb)})';
 
   void _showDeleteRetailItemDialog(BuildContext context, dynamic state, RetailItem item) {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Retail Item'),
-        content: Text('${item.name} (${CurrencyFormatter.format(item.sellingPriceEtb)})'),
+        title: Text(state.tr('deleteRetailItemTitle')),
+        content: Text(itemLabel(state, item)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(dialogCtx), child: Text(state.tr('cancel'))),
           ElevatedButton(

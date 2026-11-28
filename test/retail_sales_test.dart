@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bishe_car_wash/core/constants/app_theme.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/core/utils/currency_formatter.dart';
+import 'package:bishe_car_wash/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/pricing_management_screen.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
@@ -11,6 +12,7 @@ import 'package:bishe_car_wash/features/booking_service/presentation/state/app_s
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/customer/presentation/screens/customer_home_screen.dart';
+import 'package:bishe_car_wash/features/inventory/domain/models/retail_item.dart';
 import 'package:bishe_car_wash/features/inventory/presentation/screens/storekeeper_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/manager/presentation/screens/operational_manager_dashboard_screen.dart';
 
@@ -95,12 +97,12 @@ void main() {
       expect(state.todayRetailSalesCount, equals(3));
     });
 
-    testWidgets('Cashier and Operational Manager desks symmetrically record retail sales inside Money tab without mobile overflow', (tester) async {
+    testWidgets('Cashier and Operational Manager top Retail cards use expandable list with digital photo verification and zero mobile overflow', (tester) async {
       tester.view.physicalSize = const Size(360, 780);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      // Cashier Desk test
+      // Cashier Desk test: Retail Item Sales lives in Top 4 Service Cards (removed from Money tab)
       state.switchRole(UserRole.cashier);
       await tester.pumpWidget(
         AppStateProvider(
@@ -109,24 +111,43 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+
       await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
+      expect(find.text(state.tr('tapItemToSellHint')), findsNothing);
 
-      await tester.ensureVisible(find.text(state.tr('retailSalesTitle')));
-      await tester.tap(find.text(state.tr('retailSalesTitle')));
+      // Tap Top Retail Item Sales Card
+      await tester.tap(find.byKey(const ValueKey('desk_service_card_retail')));
       await tester.pumpAndSettle();
-      expect(find.text('Dash board cream'), findsAtLeastNWidgets(1));
-      await tester.ensureVisible(find.text('Car Perfume Gold Infusion'));
-      await tester.tap(find.text('Car Perfume Gold Infusion'));
+      expect(find.text(state.tr('newWalkIn')), findsNothing);
+      expect(find.text('Dash board cream'), findsOneWidget);
+      expect(find.text(CurrencyFormatter.format(1800.0)), findsOneWidget);
+
+      // Expand Car Perfume Gold Infusion accordion row, increment qty, inspect digital photo proof controls, then record Cash sale
+      await tester.ensureVisible(find.byKey(const ValueKey('retail_item_row_RTL-002')));
+      await tester.tap(find.byKey(const ValueKey('retail_item_row_RTL-002')));
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.byIcon(Icons.add_circle_outline).first);
       await tester.tap(find.byIcon(Icons.add_circle_outline).first);
       await tester.pumpAndSettle();
+
+      // Switch briefly to Telebirr to verify Take Photo / Upload Photo / Transaction Ref controls appear inside expanded row
+      await tester.ensureVisible(find.text(state.tr('payTelebirr')));
+      await tester.tap(find.text(state.tr('payTelebirr')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('takePhoto')), findsOneWidget);
+      expect(find.text(state.tr('uploadPhoto')), findsOneWidget);
+      expect(find.text(state.tr('transactionRef')), findsOneWidget);
+
+      await tester.ensureVisible(find.text(state.tr('payCash')));
+      await tester.tap(find.text(state.tr('payCash')));
+      await tester.pumpAndSettle();
+
       await tester.ensureVisible(find.textContaining(state.tr('recordRetailSale')));
       await tester.tap(find.textContaining(state.tr('recordRetailSale')));
       await tester.pumpAndSettle();
       expect(state.cashierDrawerBalanceETB, equals(2000.0));
-      expect(find.textContaining('2× Car Perfume Gold Infusion'), findsOneWidget);
+      expect(find.text('2× Car Perfume Gold Infusion'), findsOneWidget);
 
       // Operational Manager symmetry check
       state.switchRole(UserRole.manager);
@@ -137,13 +158,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
+      await tester.tap(find.byKey(const ValueKey('desk_service_card_retail')));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text(state.tr('retailSalesTitle')));
-      await tester.tap(find.text(state.tr('retailSalesTitle')));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Microfiber towel small'));
-      await tester.tap(find.text('Microfiber towel small'));
+      await tester.ensureVisible(find.byKey(const ValueKey('retail_item_row_RTL-007')));
+      await tester.tap(find.byKey(const ValueKey('retail_item_row_RTL-007')));
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.textContaining(state.tr('recordRetailSale')));
       await tester.tap(find.textContaining(state.tr('recordRetailSale')));
@@ -151,12 +169,42 @@ void main() {
       expect(state.todayRetailRevenueETB, equals(2900.0));
     });
 
-    testWidgets('Super Admin Pricing Hub Tab 6 & Customer Station Shop display official items', (tester) async {
+    testWidgets('Admin can add, edit, and delete retail items and EN/OM/AM language switches item names cleanly', (tester) async {
       tester.view.physicalSize = const Size(420, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      state.setSuperAdminStatus(true);
+      // Regular Admin can add/edit/delete retail items & navigate from Admin Pricing tab
+      state.switchRole(UserRole.admin);
+      state.setSuperAdminStatus(false);
+
+      await tester.pumpWidget(
+        AppStateProvider(
+          notifier: state,
+          child: MaterialApp(theme: AppTheme.lightTheme, home: const AdminDashboardScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Tab).at(1));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('manageRetailItemsCard')), findsOneWidget);
+
+      const customItem = RetailItem(
+        id: 'RTL-TEST-CUSTOM',
+        name: 'Glass Cleaner Spray',
+        nameAmharic: 'የመስታወት ማጽጃ',
+        nameOromoo: 'Qulqulleessaa Daawitii',
+        sellingPriceEtb: 750.0,
+      );
+      await state.addOrUpdateRetailItem(customItem);
+      expect(state.allRetailItems.any((r) => r.id == 'RTL-TEST-CUSTOM'), isTrue);
+
+      await state.addOrUpdateRetailItem(customItem.copyWith(sellingPriceEtb: 800.0));
+      expect(state.allRetailItems.firstWhere((r) => r.id == 'RTL-TEST-CUSTOM').sellingPriceEtb, equals(800.0));
+      expect(await state.deleteRetailItem('RTL-TEST-CUSTOM'), isTrue);
+      expect(state.allRetailItems.any((r) => r.id == 'RTL-TEST-CUSTOM'), isFalse);
+
+      // Language toggle EN -> AM -> OM switches item labels without hardcoded EN+AM stacking
       await tester.pumpWidget(
         AppStateProvider(
           notifier: state,
@@ -165,8 +213,21 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Dash board cream'), findsOneWidget);
+      expect(find.text('ዳሽ ቦርድ ክሬም'), findsNothing);
       expect(find.text(CurrencyFormatter.format(1800.0)), findsOneWidget);
-      expect(find.text('Microfiber towel small'), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline_rounded), findsNWidgets(7));
+
+      state.setLanguage('AM');
+      await tester.pumpAndSettle();
+      expect(find.text('ዳሽ ቦርድ ክሬም'), findsOneWidget);
+      expect(find.text('Dash board cream'), findsNothing);
+
+      state.setLanguage('OM');
+      await tester.pumpAndSettle();
+      expect(find.text('Kireemii Daashboordii'), findsOneWidget);
+      expect(find.text('ዳሽ ቦርድ ክሬም'), findsNothing);
+      state.setLanguage('EN');
+      await tester.pumpAndSettle();
 
       // Customer Portal Station Tab (Tab 2)
       state.switchRole(UserRole.customer);
@@ -181,7 +242,7 @@ void main() {
       expect(find.text(state.tr('stationShopTitle')), findsOneWidget);
       expect(find.text('Dog skin (Wsha koda)'), findsOneWidget);
 
-      // Storekeeper Retail Shop Stock section (desktop layout ensures Tab 1 renders unclipped)
+      // Storekeeper Retail Shop Stock section
       tester.view.physicalSize = const Size(900, 900);
       await tester.pumpAndSettle();
       state.switchRole(UserRole.storekeeper);
@@ -221,6 +282,22 @@ void main() {
         'inStockLabel',
         'retailTxRefHint',
         'noRetailItemsAvailable',
+        'lowStockLabel',
+        'retailValueLabel',
+        'unitCostEtbLabel',
+        'unitPriceLabel',
+        'costShortLabel',
+        'itemNameEnLabel',
+        'itemNameAmLabel',
+        'itemNameOmLabel',
+        'activeForSaleLabel',
+        'deleteRetailItemTitle',
+        'manageRetailItemsCard',
+        'manageRetailItemsSub',
+        'phoneCarpetIntakeSub',
+        'duplicateReceiptNotice',
+        'strictSentinelRequiredNotice',
+        'tapItemToSellHint',
       ];
       for (final key in keys) {
         final en = AppStrings.get(key, AppLanguage.en);

@@ -62,12 +62,12 @@ void main() {
 
     testWidgets('Cashier all tabs on mobile', (tester) async {
       notifier.switchRole(UserRole.cashier);
-      await testAllTabs(tester, const CashierDashboardScreen(), 5, mobileSize);
+      await testAllTabs(tester, const CashierDashboardScreen(), 4, mobileSize);
     });
 
     testWidgets('Operational Manager all tabs on mobile', (tester) async {
       notifier.switchRole(UserRole.manager);
-      await testAllTabs(tester, const OperationalManagerDashboardScreen(), 5, mobileSize);
+      await testAllTabs(tester, const OperationalManagerDashboardScreen(), 4, mobileSize);
     });
 
     testWidgets('Accountant all tabs on mobile', (tester) async {
@@ -91,12 +91,12 @@ void main() {
 
     testWidgets('Cashier all tabs on desktop', (tester) async {
       notifier.switchRole(UserRole.cashier);
-      await testAllTabs(tester, const CashierDashboardScreen(), 5, desktopSize);
+      await testAllTabs(tester, const CashierDashboardScreen(), 4, desktopSize);
     });
 
     testWidgets('Operational Manager all tabs on desktop', (tester) async {
       notifier.switchRole(UserRole.manager);
-      await testAllTabs(tester, const OperationalManagerDashboardScreen(), 5, desktopSize);
+      await testAllTabs(tester, const OperationalManagerDashboardScreen(), 4, desktopSize);
     });
 
     testWidgets('Accountant all tabs on desktop', (tester) async {

@@ -1062,20 +1062,18 @@ class _PaymentProcessDialogState extends State<PaymentProcessDialog> {
     // Check against live incoming bank transactions
     final cleanRef = (refCode ?? '').trim().toLowerCase();
 
-    // Strict Double Receipt Reference Protection
+    // Strict Double Receipt Reference Protection (Bookings, Retail, and Shower)
     if (isDigitalOrSplitDigital && cleanRef.isNotEmpty) {
-      // 1. Block if another station booking already claimed this reference
-      final duplicateBooking = state.bookings.where((b) =>
-        b.id != widget.booking.id &&
-        b.payment.transactionRef != null &&
-        b.payment.transactionRef!.trim().toLowerCase() == cleanRef
-      ).firstOrNull;
+      final dupOwner = state.findDuplicateReceiptOwner(
+        refCode!,
+        excludeBookingId: widget.booking.id,
+      ) as String?;
 
-      if (duplicateBooking != null) {
+      if (dupOwner != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '🚨 DUPLICATE RECEIPT BLOCKED: Reference "$refCode" was already used for ${duplicateBooking.licensePlate} (${duplicateBooking.customerName})! Reusing receipts is strictly prohibited.',
+              '🚨 ${state.tr("duplicateReceiptNotice")} $dupOwner',
             ),
             backgroundColor: Colors.red.shade900,
             duration: const Duration(seconds: 6),
