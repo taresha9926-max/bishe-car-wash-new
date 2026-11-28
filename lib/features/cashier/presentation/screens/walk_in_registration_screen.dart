@@ -16,6 +16,7 @@ import '../../../booking_service/domain/models/wash_package.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/customer/presentation/widgets/car_type_selector.dart';
 import '../widgets/staff_intake_helpers.dart';
+import 'phone_booking_dialog.dart';
 
 class WalkInRegistrationScreen extends StatefulWidget {
   final BayType? preselectedBay;
@@ -134,7 +135,11 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(state.tr('walkInTitle')),
+        title: Text(
+          _isCarpetMode
+              ? state.tr('carpetIntakeRegister')
+              : state.tr('newWalkIn'),
+        ),
         actions: const [
           LanguageSwitcherAction(isDark: false),
         ],
@@ -175,7 +180,50 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 12),
+
+              // Relocated Phone Booking Entry inside New Vehicle / Carpet Booking
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final created = await PhoneBookingDialog.show(
+                      context,
+                      initialCarpetMode: _isCarpetMode,
+                    );
+                    if (created == true && context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  icon: Icon(
+                    Icons.phone_in_talk_rounded,
+                    size: 18,
+                    color: _isCarpetMode ? const Color(0xFFA78BFA) : AppColors.liquidCyanNeon,
+                  ),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      state.tr('registerPhoneBooking'),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: _isCarpetMode ? const Color(0xFFC4B5FD) : AppColors.liquidCyanNeon,
+                      ),
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: const Color(0xFF111827),
+                    side: BorderSide(
+                      color: (_isCarpetMode ? const Color(0xFF8B5CF6) : AppColors.liquidCyanNeon)
+                          .withValues(alpha: 0.45),
+                      width: 1.2,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
 
               // Service Selector Toggle: Vehicle vs Carpet
               Container(
@@ -339,11 +387,12 @@ class _WalkInRegistrationScreenState extends State<WalkInRegistrationScreen> {
 
                 // 3. Service Selection Mode & Checklist
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      state.tr('servicePackages'),
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    Expanded(
+                      child: Text(
+                        state.tr('servicePackages'),
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      ),
                     ),
                   ],
                 ),

@@ -4,12 +4,14 @@ import 'package:bishe_car_wash/core/constants/app_theme.dart';
 import 'package:bishe_car_wash/core/localization/app_strings.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/booking_service/data/repositories/wash_repository_impl.dart';
+import 'package:bishe_car_wash/features/booking_service/domain/models/bay_station.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/car_type.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/payment_info.dart';
 import 'package:bishe_car_wash/features/booking_service/domain/models/wash_status.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_notifier.dart';
 import 'package:bishe_car_wash/features/booking_service/presentation/state/app_state_provider.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/daily_closing_dialog.dart';
+import 'package:bishe_car_wash/features/cashier/presentation/screens/walk_in_registration_screen.dart';
 import 'package:bishe_car_wash/features/manager/presentation/screens/operational_manager_dashboard_screen.dart';
 
 void main() {
@@ -47,18 +49,27 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Immediate active Queue & zero false Confirmed banner on empty shift
+      // Immediate active Queue, no Mobile Van mini-card, no front Phone Booking button
       expect(find.text('AA-44110'), findsOneWidget);
       expect(find.text('Start Wash'), findsOneWidget);
       expect(find.text(state.tr('handoverConfirmed')), findsNothing);
+      expect(find.text(BayType.mobileVan.localizedName('en')), findsNothing);
+      expect(find.text(state.tr('registerPhoneBooking')), findsNothing);
+      expect(find.text(state.tr('newWalkIn')), findsOneWidget);
 
-      // Switch to Handover & Close tab
-      await tester.tap(find.byType(Tab).at(1));
+      // Carpet parity for Operational Manager
+      state.setActiveServiceDivision(ActiveServiceDivision.carpetWash);
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('carpetIntakeRegister')), findsOneWidget);
+      expect(find.text(state.tr('carpetValetDriver')), findsNothing);
+      state.setActiveServiceDivision(ActiveServiceDivision.carWash);
       await tester.pumpAndSettle();
 
-      // Safe History hides Clear All Bookings
-      expect(find.text(state.tr('clearAllBookings')), findsNothing);
-      expect(find.text(state.tr('safeCashierModeNotice')), findsOneWidget);
+      // Switch to Handover & Close tab on Bottom App Bar -> redundant History removed
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('carWashHistoryTitle')), findsNothing);
+      expect(find.text(state.tr('carpetWashHistoryTitle')), findsNothing);
 
       // Open Night Closing dialog cleanly on mobile (zero header/dividend overflow)
       await tester.ensureVisible(find.text(state.tr('initiateNightShiftClosing')));
@@ -68,11 +79,39 @@ void main() {
       await tester.tap(find.byIcon(Icons.close_rounded));
       await tester.pumpAndSettle();
 
-      // Switch to Team tab (expanded immediately on mobile)
-      await tester.ensureVisible(find.byType(Tab).at(2));
-      await tester.tap(find.byType(Tab).at(2));
+      // Switch to Daily Washer Pool tab on Bottom App Bar (no Shower, no Assigned Commission Share list)
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_2')));
       await tester.pumpAndSettle();
+      expect(find.text(state.tr('dailyWasherCommissionPool')), findsOneWidget);
       expect(find.text(state.tr('markAllPresent')), findsOneWidget);
+      expect(find.text(state.tr('assignedCommissionShare')), findsNothing);
+      expect(find.text(state.tr('stationShowerService')), findsNothing);
+
+      // Switch to Shower tab on Bottom App Bar -> Station Shower card only
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_3')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('stationShowerService')), findsOneWidget);
+      expect(find.text(state.tr('markAllPresent')), findsNothing);
+
+      // Switch to Wash History tab on Bottom App Bar -> hides Clear All and Yesterday/Week/Month filters
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_4')));
+      await tester.pumpAndSettle();
+      expect(find.text(state.tr('clearAllBookings')), findsNothing);
+      expect(find.text(state.tr('safeCashierModeNotice')), findsOneWidget);
+      expect(find.text(state.tr('filterToday')), findsOneWidget);
+      expect(find.text(state.tr('filterAll')), findsOneWidget);
+      expect(find.text(state.tr('filterCustomRange')), findsOneWidget);
+      expect(find.text(state.tr('filterYesterday')), findsNothing);
+      expect(find.text(state.tr('filterThisWeek')), findsNothing);
+      expect(find.text(state.tr('filterThisMonth')), findsNothing);
+
+      // Open New Vehicle Booking from Queue -> includes Register Phone Booking inside
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_0')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(state.tr('newWalkIn')));
+      await tester.pumpAndSettle();
+      expect(find.byType(WalkInRegistrationScreen), findsOneWidget);
+      expect(find.text(state.tr('registerPhoneBooking')), findsOneWidget);
     });
 
     testWidgets('Inline Cashier OTP verification & Night Shift zero double-counting', (tester) async {

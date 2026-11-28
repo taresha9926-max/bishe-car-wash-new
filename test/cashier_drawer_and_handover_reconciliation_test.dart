@@ -139,7 +139,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Switch to Money Tab
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
 
       // Before closing, Deposit to Bank is enabled
@@ -212,7 +212,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Before OTP acceptance: Manager tab shows strictly 0 ETB custody cash!
-      expect(find.text('${state.tr("managerTabHandoverClose")} (${CurrencyFormatter.formatShort(0.0)})'), findsOneWidget);
+      expect(find.text(state.tr('managerTabHandoverClose')), findsOneWidget);
+      expect(find.text(CurrencyFormatter.formatShort(0.0)), findsOneWidget);
       expect(state.managerCustodyCashETB, equals(0.0));
 
       // Manager OTP Card must show exact handover amount
@@ -228,11 +229,11 @@ void main() {
 
       // Banner clears and Manager tab updates to 1.0k ETB
       expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
-      expect(find.text('${state.tr("managerTabHandoverClose")} (${CurrencyFormatter.formatShort(1000.0)})'), findsOneWidget);
+      expect(find.text(CurrencyFormatter.formatShort(1000.0)), findsOneWidget);
       expect(state.managerCustodyCashETB, equals(1000.0));
 
       // Switch to Money & Handover Tab
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
 
       // Manager custody cash shows 1,000 ETB and deposit button is enabled for Manager!
@@ -284,7 +285,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Switch to Money Tab
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
 
       // Deposit to Bank is enabled before night handover
@@ -312,7 +313,7 @@ void main() {
       expect(find.text(state.tr('drawerEmptyHandedOver')), findsWidgets);
 
       // 5. Switch back to Queue tab to see Admin Handover Banner
-      await tester.tap(find.byType(Tab).at(0));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_0')));
       await tester.pumpAndSettle();
 
       expect(find.text(state.tr('adminNightHandoverCode')), findsOneWidget);
@@ -331,7 +332,7 @@ void main() {
       expect(state.managerCustodyCashETB, equals(500.0));
 
       // Money tab re-enables deposit button
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
       expect(tester.widget<ElevatedButton>(depositFinder).onPressed, isNotNull);
     });

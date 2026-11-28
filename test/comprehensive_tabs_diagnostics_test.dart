@@ -4,6 +4,7 @@ import 'package:bishe_car_wash/core/constants/app_theme.dart';
 import 'package:bishe_car_wash/features/auth_roles/domain/models/user_role.dart';
 import 'package:bishe_car_wash/features/auth_roles/presentation/screens/role_shell_screen.dart';
 import 'package:bishe_car_wash/features/cashier/presentation/screens/cashier_dashboard_screen.dart';
+import 'package:bishe_car_wash/features/manager/presentation/screens/operational_manager_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/accountant_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:bishe_car_wash/features/inventory/presentation/screens/storekeeper_dashboard_screen.dart';
@@ -40,9 +41,19 @@ void main() {
 
     final tabFinders = find.byType(Tab);
     final count = tabFinders.evaluate().length;
-    for (int i = 0; i < count; i++) {
-      await tester.tap(tabFinders.at(i));
-      await tester.pumpAndSettle();
+    if (count > 0) {
+      for (int i = 0; i < count; i++) {
+        await tester.tap(tabFinders.at(i));
+        await tester.pumpAndSettle();
+      }
+    } else {
+      for (int i = 0; i < tabCount; i++) {
+        final bottomKey = find.byKey(ValueKey('station_bottom_tab_$i'));
+        if (bottomKey.evaluate().isNotEmpty) {
+          await tester.tap(bottomKey);
+          await tester.pumpAndSettle();
+        }
+      }
     }
   }
 
@@ -51,7 +62,12 @@ void main() {
 
     testWidgets('Cashier all tabs on mobile', (tester) async {
       notifier.switchRole(UserRole.cashier);
-      await testAllTabs(tester, const CashierDashboardScreen(), 4, mobileSize);
+      await testAllTabs(tester, const CashierDashboardScreen(), 5, mobileSize);
+    });
+
+    testWidgets('Operational Manager all tabs on mobile', (tester) async {
+      notifier.switchRole(UserRole.manager);
+      await testAllTabs(tester, const OperationalManagerDashboardScreen(), 5, mobileSize);
     });
 
     testWidgets('Accountant all tabs on mobile', (tester) async {
@@ -75,7 +91,12 @@ void main() {
 
     testWidgets('Cashier all tabs on desktop', (tester) async {
       notifier.switchRole(UserRole.cashier);
-      await testAllTabs(tester, const CashierDashboardScreen(), 4, desktopSize);
+      await testAllTabs(tester, const CashierDashboardScreen(), 5, desktopSize);
+    });
+
+    testWidgets('Operational Manager all tabs on desktop', (tester) async {
+      notifier.switchRole(UserRole.manager);
+      await testAllTabs(tester, const OperationalManagerDashboardScreen(), 5, desktopSize);
     });
 
     testWidgets('Accountant all tabs on desktop', (tester) async {

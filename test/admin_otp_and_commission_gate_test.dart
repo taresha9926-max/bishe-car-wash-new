@@ -132,7 +132,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Open Money tab -> tap Closing button -> strict prerequisite prompt appears
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
 
       await tester.ensureVisible(find.text(state.tr('confirmDailyClosing')));
@@ -355,7 +355,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Switch to Tab 1 (Money & Handover)
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
 
       expect(find.text(state.tr('physicalCashInDrawer')), findsOneWidget);
@@ -367,10 +367,16 @@ void main() {
       expect(find.text(state.tr('dayShiftHandoverCashLabel')), findsNothing);
       expect(find.text(state.tr('stationShowerService')), findsNothing);
 
-      // Switch to Tab 2 (Team & Shower) -> Washer hub visible, Station Shower present
-      await tester.tap(find.byType(Tab).at(2));
+      // Switch to Tab 2 (Daily Washer Pool) -> Washer hub visible, Station Shower separated
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_2')));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('markAllPresent')), findsOneWidget);
+      expect(find.text(state.tr('assignedCommissionShare')), findsNothing);
+      expect(find.text(state.tr('stationShowerService')), findsNothing);
+
+      // Switch to Tab 3 (Shower) -> Station Shower present
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_3')));
+      await tester.pumpAndSettle();
       expect(find.text(state.tr('stationShowerService')), findsOneWidget);
     });
 

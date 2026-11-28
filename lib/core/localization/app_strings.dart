@@ -1667,9 +1667,9 @@ class AppStrings {
       AppLanguage.am: 'የገንዘብ ያዥ የሥራ ሰሌዳ',
     },
     'newWalkIn': {
-      AppLanguage.en: 'New Walk-In Entry',
-      AppLanguage.om: 'Galmee Haaraa',
-      AppLanguage.am: 'አዲስ መኪና አስመዝግብ',
+      AppLanguage.en: 'New Vehicle Booking',
+      AppLanguage.om: 'Ajaja Konkolaataa Haaraa',
+      AppLanguage.am: 'አዲስ የመኪና እጥበት ይመዝግቡ',
     },
     'todayRevenue': {
       AppLanguage.en: 'Today Revenue',
@@ -4133,9 +4133,9 @@ class AppStrings {
       AppLanguage.am: 'የምንጣፍ እጥበት ተራ',
     },
     'carpetIntakeRegister': {
-      AppLanguage.en: 'Register Carpet Intake',
-      AppLanguage.om: 'Karpeetii Haaraa Galmeessi',
-      AppLanguage.am: 'አዲስ ምንጣፍ መዝግብ',
+      AppLanguage.en: 'New Carpet Booking',
+      AppLanguage.om: 'Ajaja Karpeetii Haaraa',
+      AppLanguage.am: 'አዲስ የምንጣፍ እጥበት ይመዝግቡ',
     },
     'carpetTagNumber': {
       AppLanguage.en: 'Tag Number',
@@ -4411,6 +4411,16 @@ class AppStrings {
       AppLanguage.en: 'Team & Shower',
       AppLanguage.om: 'Garee & Shaaworii',
       AppLanguage.am: 'ቡድን እና ሻወር',
+    },
+    'bottomTabPool': {
+      AppLanguage.en: 'Daily Washer Pool',
+      AppLanguage.om: 'Kuusaa Guyyaa',
+      AppLanguage.am: 'ዕለታዊ ኮሚሽን',
+    },
+    'bottomTabShower': {
+      AppLanguage.en: 'Shower',
+      AppLanguage.om: 'Shaaworii',
+      AppLanguage.am: 'ሻወር',
     },
     'cashierTabHistory': {
       AppLanguage.en: 'Wash History',

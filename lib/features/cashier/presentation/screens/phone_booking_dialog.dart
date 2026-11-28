@@ -20,8 +20,8 @@ class PhoneBookingDialog extends StatefulWidget {
 
   const PhoneBookingDialog({super.key, this.initialCarpetMode});
 
-  static Future<void> show(BuildContext context, {bool? initialCarpetMode}) {
-    return showDialog(
+  static Future<bool?> show(BuildContext context, {bool? initialCarpetMode}) {
+    return showDialog<bool>(
       context: context,
       barrierDismissible: true,
       builder: (_) => PhoneBookingDialog(initialCarpetMode: initialCarpetMode),
@@ -949,7 +949,7 @@ class _PhoneBookingDialogState extends State<PhoneBookingDialog> {
       }
 
       if (context.mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
         final tagLabel = _isCarpetMode ? 'Carpet order ${booking.licensePlate}' : 'Phone booking ${booking.licensePlate}';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

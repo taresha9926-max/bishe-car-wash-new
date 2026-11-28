@@ -169,7 +169,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
       expect(find.textContaining(state.tr('shiftHandoverMethodTitle')), findsNothing);
       expect(find.text(state.tr('confirmDailyClosingOtp')), findsNothing);
@@ -182,10 +182,10 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('Money & Closing ('), findsOneWidget);
+      expect(find.text(state.tr('managerTabHandoverClose')), findsOneWidget);
       expect(find.textContaining('Handover & Close'), findsNothing);
       expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('cashierHandoverTitle')), findsNothing);
       expect(find.text(state.tr('nightClosingSubDesc')), findsNothing);
@@ -253,7 +253,7 @@ void main() {
       expect(state.pendingCashierHandover, isNull);
       expect(find.text(state.tr('acceptCashierHandover')), findsNothing);
       expect(find.text(state.tr('handoverVerifiedTitle')), findsNothing);
-      await tester.tap(find.byType(Tab).at(1));
+      await tester.tap(find.byKey(const ValueKey('station_bottom_tab_1')));
       await tester.pumpAndSettle();
       expect(find.text(state.tr('cashierHandoverTitle')), findsNothing);
       expect(find.text(state.tr('nightClosingSubDesc')), findsNothing);

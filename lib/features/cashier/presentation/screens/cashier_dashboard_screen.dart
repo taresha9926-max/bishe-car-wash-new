@@ -13,6 +13,7 @@ import '../../../booking_service/domain/models/bay_station.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../../domain/models/shower_record.dart';
+import '../widgets/station_bottom_nav_bar.dart';
 import '../widgets/station_money_tab.dart';
 import '../widgets/station_queue_tab.dart';
 import 'package:bishe_car_wash/features/admin/presentation/widgets/bishe_ai_executive_sheet.dart';
@@ -20,7 +21,7 @@ import '../../../booking_service/presentation/screens/vehicle_history_screen.dar
 import 'daily_closing_dialog.dart';
 
 /// Option 1 Cashier Action Desk: immediate live queue, unified money/closing desk,
-/// and expanded team & shower workbench without hidden nested accordions.
+/// bottom app bar navigation, and separated Daily Washer Commission Pool & Shower views.
 class CashierDashboardScreen extends StatefulWidget {
   const CashierDashboardScreen({super.key});
 
@@ -28,27 +29,23 @@ class CashierDashboardScreen extends StatefulWidget {
   State<CashierDashboardScreen> createState() => _CashierDashboardScreenState();
 }
 
-class _CashierDashboardScreenState extends State<CashierDashboardScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _CashierDashboardScreenState extends State<CashierDashboardScreen> {
+  final ScrollController _scrollController = ScrollController();
+  int _selectedTabIndex = 0;
   int _showerCount = 1;
   PaymentMethod _showerPaymentMethod = PaymentMethod.cash;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging && mounted) {
-        setState(() {});
-      }
-    });
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _selectBottomTab(int index) {
+    setState(() => _selectedTabIndex = index);
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
   }
 
   @override
@@ -82,6 +79,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
       body: RefreshIndicator(
         onRefresh: () => state.loadData(),
         child: SingleChildScrollView(
+          controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(
             horizontal: isDesktop ? 28 : (isMobile ? 12 : 20),
@@ -99,9 +97,7 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                     _buildPendingOtpBanner(context, state, pendingHandover, isMobile),
                   PrimaryIntakeActionRow(isMobile: isMobile),
                   const SizedBox(height: 12),
-                  _buildActionTabBar(state, activeDivisionQueue.length, isMobile),
-                  const SizedBox(height: 14),
-                  if (_tabController.index == 0)
+                  if (_selectedTabIndex == 0)
                     StationQueueTab(
                       divisionQueue: activeDivisionQueue,
                       bay1: bay1,
@@ -109,14 +105,23 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
                       van: van,
                       isMobile: isMobile,
                     )
-                  else if (_tabController.index == 1)
+                  else if (_selectedTabIndex == 1)
                     StationMoneyTab(
                       isManager: false,
                       isMobile: isMobile,
-                      onSwitchToTeamTab: () => _tabController.animateTo(2),
+                      onSwitchToTeamTab: () => setState(() => _selectedTabIndex = 2),
                     )
-                  else if (_tabController.index == 2)
-                    _buildTeamAndShowerTab(context, state, isMobile)
+                  else if (_selectedTabIndex == 2)
+                    SharedWasherCommissionHub(
+                      state: state,
+                      role: WasherHubRole.cashier,
+                      isMobile: isMobile,
+                      initiallyExpanded: true,
+                      respectInitiallyExpanded: true,
+                      showAssignedShareList: false,
+                    )
+                  else if (_selectedTabIndex == 3)
+                    _buildStationShowerCard(context, state)
                   else
                     VehicleHistoryScreen(
                       isEmbedded: true,
@@ -130,118 +135,21 @@ class _CashierDashboardScreenState extends State<CashierDashboardScreen>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildActionTabBar(dynamic state, int activeCount, bool isMobile) {
-    final isCarpet = state.isCarpetDivisionActive as bool;
-    final activeColor = isCarpet ? const Color(0xFF7C3AED) : AppColors.primary;
-    final drawerCash = state.cashierDrawerBalanceETB as double;
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111827),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorder, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.45),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TabBar(
-        controller: _tabController,
-        dividerColor: Colors.transparent,
-        indicatorSize: TabBarIndicatorSize.tab,
-        indicator: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isCarpet
-                ? const [Color(0xFF7C3AED), Color(0xFF6D28D9)]
-                : const [Color(0xFF007791), Color(0xFF004D61)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: (isCarpet ? const Color(0xFF7C3AED) : AppColors.primary).withValues(alpha: 0.35),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        labelColor: Colors.white,
-        unselectedLabelColor: AppColors.textSecondary,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 2),
-        tabs: [
-          _buildCompactTab(
-            icon: Icons.directions_car_filled_rounded,
-            label: '${state.tr("cashierTabQueue")} ($activeCount)',
-            isMobile: isMobile,
-          ),
-          _buildCompactTab(
-            icon: Icons.account_balance_wallet_rounded,
-            label: '${state.tr("cashierTabMoney")} (${CurrencyFormatter.formatShort(drawerCash)})',
-            isMobile: isMobile,
-          ),
-          _buildCompactTab(
-            icon: Icons.groups_rounded,
-            label: state.tr('cashierTabTeamShower'),
-            isMobile: isMobile,
-          ),
-          _buildCompactTab(
-            icon: Icons.history_rounded,
-            label: state.tr('cashierTabHistory'),
-            isMobile: isMobile,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Tab _buildCompactTab({required IconData icon, required String label, required bool isMobile}) {
-    return Tab(
-      height: 40,
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: isMobile ? 15 : 16),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 12 : 12.5),
-            ),
-          ],
-        ),
+      bottomNavigationBar: StationBottomNavBar(
+        selectedIndex: _selectedTabIndex,
+        onTap: _selectBottomTab,
+        isCarpet: state.isCarpetDivisionActive as bool,
+        activeQueueCount: activeDivisionQueue.length,
+        drawerOrCustodyCash: state.cashierDrawerBalanceETB as double,
+        isManager: false,
+        state: state,
       ),
     );
   }
 
   // ===========================================================================
-  // TAB 2: TEAM ATTENDANCE & STATION SHOWER
+  // TAB 3: STATION PUBLIC SHOWER
   // ===========================================================================
-
-  Widget _buildTeamAndShowerTab(BuildContext context, dynamic state, bool isMobile) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildStationShowerCard(context, state),
-        const SizedBox(height: 14),
-        SharedWasherCommissionHub(
-          state: state,
-          role: WasherHubRole.cashier,
-          isMobile: isMobile,
-          initiallyExpanded: true,
-          respectInitiallyExpanded: true,
-        ),
-      ],
-    );
-  }
 
   Widget _buildStationShowerCard(BuildContext context, dynamic state) {
     final showerPrice = state.showerPricePerPerson as double;

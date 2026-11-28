@@ -15,6 +15,7 @@ class SharedWasherCommissionHub extends StatefulWidget {
   final bool isMobile;
   final bool initiallyExpanded;
   final bool respectInitiallyExpanded;
+  final bool showAssignedShareList;
 
   const SharedWasherCommissionHub({
     super.key,
@@ -23,6 +24,7 @@ class SharedWasherCommissionHub extends StatefulWidget {
     required this.isMobile,
     this.initiallyExpanded = true,
     this.respectInitiallyExpanded = false,
+    this.showAssignedShareList = true,
   });
 
   @override
@@ -496,7 +498,7 @@ class _SharedWasherCommissionHubState extends State<SharedWasherCommissionHub>
         ),
 
         // Dividends breakdown list (if any)
-        if (dividends.isNotEmpty) ...[
+        if (widget.showAssignedShareList && dividends.isNotEmpty) ...[
           Text(
             state.tr('assignedCommissionShare'),
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary),

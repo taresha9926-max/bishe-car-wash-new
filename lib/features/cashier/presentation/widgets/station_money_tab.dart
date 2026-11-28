@@ -4,7 +4,6 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../admin/domain/models/daily_financial_closing.dart';
 import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/presentation/screens/financial_reports_view.dart';
-import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
 import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../screens/bank_deposit_dialog.dart';
 import '../screens/daily_closing_dialog.dart';
@@ -190,22 +189,9 @@ class _StationMoneyTabState extends State<StationMoneyTab> {
           latestDayClosing,
           isClosed,
         ),
-        const SizedBox(height: 16),
-
-        // 5. Safe Today/Filtered Paid Receipts History (No bulk-delete danger for Cashier/Manager)
-        Text(
-          state.isCarpetDivisionActive ? state.tr('carpetWashHistoryTitle') : state.tr('carWashHistoryTitle'),
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 8),
-        VehicleHistoryScreen(
-          isEmbedded: true,
-          isCarpetFilter: state.isCarpetDivisionActive,
-          allowClearAll: false,
-        ),
         const SizedBox(height: 14),
 
-        // 6. Shift Closing Logs & Bank Deposits (Admin net profit / salary hidden for floor staff)
+        // 5. Shift Closing Logs & Bank Deposits (Admin net profit / salary hidden for floor staff)
         Container(
           decoration: BoxDecoration(
             color: const Color(0xFF111827),

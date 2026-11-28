@@ -14,12 +14,11 @@ import '../../../booking_service/presentation/state/app_state_provider.dart';
 import '../screens/bay_assignment_modal.dart';
 import '../screens/edit_booking_dialog.dart';
 import '../screens/payment_process_dialog.dart';
-import '../screens/phone_booking_dialog.dart';
 import '../screens/walk_in_registration_screen.dart';
 
 enum QueueStageFilter { all, onlineBookers, waiting, inProgress, payReady }
 
-/// Shared two-button Walk-In & Phone intake bar used by Cashier & Operational Manager.
+/// Shared single-button intake bar ("New Vehicle Booking" / "New Carpet Booking") used by Cashier & Operational Manager.
 class PrimaryIntakeActionRow extends StatelessWidget {
   final bool isMobile;
 
@@ -29,57 +28,34 @@ class PrimaryIntakeActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
     final isCarpet = state.isCarpetDivisionActive;
-    final walkInColor = isCarpet ? const Color(0xFF7C3AED) : AppColors.primary;
+    final bookingColor = isCarpet ? const Color(0xFF7C3AED) : AppColors.primary;
 
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => WalkInRegistrationScreen(initialCarpetMode: isCarpet),
-                ),
-              );
-            },
-            icon: Icon(isCarpet ? Icons.texture_rounded : Icons.add_road_rounded, size: isMobile ? 18 : 20),
-            label: Text(
-              isCarpet ? state.tr('carpetIntakeRegister') : state.tr('newWalkIn'),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 12.5 : 13.5),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WalkInRegistrationScreen(initialCarpetMode: isCarpet),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: walkInColor,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 16, vertical: isMobile ? 13 : 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              elevation: 0,
-            ),
-          ),
+          );
+        },
+        icon: Icon(isCarpet ? Icons.texture_rounded : Icons.add_road_rounded, size: isMobile ? 18 : 20),
+        label: Text(
+          isCarpet ? state.tr('carpetIntakeRegister') : state.tr('newWalkIn'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 13 : 14),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () => PhoneBookingDialog.show(context, initialCarpetMode: isCarpet),
-            icon: Icon(Icons.phone_in_talk_rounded, size: isMobile ? 18 : 20),
-            label: Text(
-              state.tr('registerPhoneBooking'),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: isMobile ? 12.5 : 13.5),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 16, vertical: isMobile ? 13 : 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              elevation: 0,
-            ),
-          ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: bookingColor,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 18, vertical: isMobile ? 13 : 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: 0,
         ),
-      ],
+      ),
     );
   }
 }
@@ -867,7 +843,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
       final carpetActive = bookings.where((b) => b.isCarpet && b.status != WashStatus.cancelled && !((b.status == WashStatus.completed || b.status == WashStatus.readyForPickup) && b.payment.isPaid)).toList();
       final washing = carpetActive.where((b) => b.status == WashStatus.washing || b.status == WashStatus.assignedToBay || b.status == WashStatus.pending).toList();
       final drying = carpetActive.where((b) => b.status == WashStatus.drying).toList();
-      final valet = carpetActive.where((b) => b.serviceType.requiresLocation && b.status != WashStatus.completed).toList();
 
       return Container(
         padding: EdgeInsets.symmetric(horizontal: widget.isMobile ? 10 : 14, vertical: 10),
@@ -902,15 +877,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
                 icon: Icons.dry_cleaning_rounded,
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildMiniBayCard(
-                title: state.tr('carpetValetDriver'),
-                isFree: valet.isEmpty,
-                statusText: valet.isEmpty ? state.tr('availableNow') : '${valet.length} ${state.tr("activeLabel")}',
-                icon: Icons.local_shipping_rounded,
-              ),
-            ),
           ],
         ),
       );
@@ -918,15 +884,12 @@ class _StationQueueTabState extends State<StationQueueTab> {
 
     WashBooking? active1;
     WashBooking? active2;
-    WashBooking? activeVan;
     for (final b in bookings) {
       if (!b.isCarpet && (b.status == WashStatus.washing || b.status == WashStatus.drying || b.status == WashStatus.assignedToBay)) {
         if (b.assignedBay == BayType.bay1 && active1 == null) {
           active1 = b;
         } else if (b.assignedBay == BayType.bay2 && active2 == null) {
           active2 = b;
-        } else if ((b.assignedBay == BayType.mobileVan || b.serviceType == ServiceType.atHomeMobile) && activeVan == null) {
-          activeVan = b;
         }
       }
     }
@@ -937,7 +900,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
 
     final isBay1Free = active1 == null && widget.bay1.isVacant;
     final isBay2Free = active2 == null && widget.bay2.isVacant;
-    final isVanFree = activeVan == null && widget.van.isVacant;
 
     Color getBayStatusColor(bool isFree, WashBooking? activeBooking) {
       if (isFree || activeBooking == null) return AppColors.statusReady;
@@ -986,16 +948,6 @@ class _StationQueueTabState extends State<StationQueueTab> {
               statusText: bayStatusText(isBay2Free, active2?.licensePlate ?? widget.bay2.activeLicensePlate),
               icon: BayType.bay2.icon,
               statusColor: getBayStatusColor(isBay2Free, active2),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _buildMiniBayCard(
-              title: BayType.mobileVan.localizedName(langCode),
-              isFree: isVanFree,
-              statusText: bayStatusText(isVanFree, activeVan?.licensePlate ?? widget.van.activeLicensePlate),
-              icon: BayType.mobileVan.icon,
-              statusColor: getBayStatusColor(isVanFree, activeVan),
             ),
           ),
         ],

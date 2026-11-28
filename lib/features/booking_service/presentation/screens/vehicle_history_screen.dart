@@ -17,9 +17,6 @@ import '../../../cashier/presentation/screens/edit_booking_dialog.dart';
 
 enum HistoryDateFilter {
   today,
-  yesterday,
-  thisWeek,
-  thisMonth,
   all,
   customRange;
 
@@ -27,12 +24,6 @@ enum HistoryDateFilter {
     switch (this) {
       case HistoryDateFilter.today:
         return state.tr('filterToday');
-      case HistoryDateFilter.yesterday:
-        return state.tr('filterYesterday');
-      case HistoryDateFilter.thisWeek:
-        return state.tr('filterThisWeek');
-      case HistoryDateFilter.thisMonth:
-        return state.tr('filterThisMonth');
       case HistoryDateFilter.all:
         return state.tr('filterAll');
       case HistoryDateFilter.customRange:
@@ -96,15 +87,6 @@ class _VehicleHistoryScreenState extends State<VehicleHistoryScreen> {
       switch (_dateFilter) {
         case HistoryDateFilter.today:
           return date.year == now.year && date.month == now.month && date.day == now.day;
-        case HistoryDateFilter.yesterday:
-          final y = now.subtract(const Duration(days: 1));
-          return date.year == y.year && date.month == y.month && date.day == y.day;
-        case HistoryDateFilter.thisWeek:
-          final monday = now.subtract(Duration(days: now.weekday - 1));
-          final start = DateTime(monday.year, monday.month, monday.day);
-          return date.isAfter(start) || date.isAtSameMomentAs(start);
-        case HistoryDateFilter.thisMonth:
-          return date.year == now.year && date.month == now.month;
         case HistoryDateFilter.all:
           return true;
         case HistoryDateFilter.customRange:
