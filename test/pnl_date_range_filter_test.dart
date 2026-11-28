@@ -36,25 +36,24 @@ void main() {
       await tester.tap(find.byType(Tab).at(3), warnIfMissed: false);
       await tester.pumpAndSettle();
 
-      // Verify all 4 Date Range Filter chips are present
+      // Verify all 3 Date Range Filter chips are present: Today, All Time, Custom Range
       expect(find.text(state.tr('filterToday')), findsOneWidget);
-      expect(find.text(state.tr('filterThisWeek')), findsOneWidget);
-      expect(find.text(state.tr('filterThisMonth')), findsOneWidget);
+      expect(find.text(state.tr('filterAllTime')), findsOneWidget);
       expect(find.text(state.tr('filterCustomRange')), findsOneWidget);
 
       // Default is Today (1-day daily accrual)
       expect(find.text('TODAY NET OPERATING PROFIT (EBITDA)'), findsOneWidget);
       expect(find.textContaining('DAILY ACCRUED OPERATING OVERHEADS'), findsOneWidget);
 
-      // Tap 'This Month (Monthly)'
-      await tester.tap(find.text(state.tr('filterThisMonth')));
+      // Tap 'All Time'
+      await tester.tap(find.text(state.tr('filterAllTime')));
       await tester.pumpAndSettle();
 
-      // Verify header switches to full monthly budget
-      expect(find.text('THIS MONTH NET OPERATING PROFIT (EBITDA)'), findsOneWidget);
-      expect(find.textContaining('FULL MONTHLY OPERATING OVERHEADS'), findsOneWidget);
+      // Verify header switches to all-time benchmark
+      expect(find.text('ALL TIME NET OPERATING PROFIT (EBITDA)'), findsOneWidget);
+      expect(find.textContaining('FULL MONTHLY'), findsOneWidget);
 
-      // Tap 'Today (Daily)' back
+      // Tap 'Today' back
       await tester.tap(find.text(state.tr('filterToday')));
       await tester.pumpAndSettle();
 

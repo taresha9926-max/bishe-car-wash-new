@@ -40,8 +40,9 @@ class AccountantDashboardScreen extends StatefulWidget {
 class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  String _auditDateRange = 'All'; // All, Today, This Week, This Month
-  String _pnlDateRange = 'Today'; // Today, This Week, This Month, Custom Range
+  String _auditDateRange = 'Today'; // Today, All, Custom Range
+  DateTimeRange? _auditCustomRange;
+  String _pnlDateRange = 'Today'; // Today, All, Custom Range
   DateTimeRange? _pnlCustomRange;
   int _selectedFinancialStatementView = 0; // 0 = P&L, 1 = Balance Sheet, 2 = Cash Flow, 3 = Chemical Audit
 
@@ -218,14 +219,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
       case 'Today':
         predicate = (d) => d.year == now.year && d.month == now.month && d.day == now.day;
         break;
-      case 'This Week':
-        final monday = now.subtract(Duration(days: now.weekday - 1));
-        final startMonday = DateTime(monday.year, monday.month, monday.day);
-        predicate = (d) => d.isAfter(startMonday) || d.isAtSameMomentAs(startMonday);
+      case 'Custom Range':
+        if (_auditCustomRange != null) {
+          final start = DateTime(_auditCustomRange!.start.year, _auditCustomRange!.start.month, _auditCustomRange!.start.day);
+          final end = DateTime(_auditCustomRange!.end.year, _auditCustomRange!.end.month, _auditCustomRange!.end.day, 23, 59, 59);
+          predicate = (d) => !d.isBefore(start) && !d.isAfter(end);
+        } else {
+          predicate = (d) => d.year == now.year && d.month == now.month && d.day == now.day;
+        }
         break;
-      case 'This Month':
-        predicate = (d) => d.year == now.year && d.month == now.month;
-        break;
+      case 'All':
       default:
         predicate = (d) => true;
     }
@@ -286,10 +289,16 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: ['All', 'Today', 'This Week', 'This Month'].map((range) {
+                children: ['Today', 'All', 'Custom Range'].map((range) {
                   final isSel = _auditDateRange == range;
+                  String label = range == 'All'
+                      ? state.tr('filterAllTime')
+                      : (range == 'Today' ? state.tr('filterToday') : state.tr('filterCustomRange'));
+                  if (range == 'Custom Range' && _auditCustomRange != null) {
+                    label = '${_auditCustomRange!.start.day}/${_auditCustomRange!.start.month} - ${_auditCustomRange!.end.day}/${_auditCustomRange!.end.month}';
+                  }
                   return ChoiceChip(
-                    label: Text(range == 'All' ? 'All Time' : range),
+                    label: Text(label),
                     selected: isSel,
                     selectedColor: AppColors.primary,
                     backgroundColor: const Color(0xFF1E293B),
@@ -303,7 +312,31 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                       fontWeight: FontWeight.w700,
                       color: isSel ? Colors.white : AppColors.textSecondary,
                     ),
-                    onSelected: (_) => setState(() => _auditDateRange = range),
+                    onSelected: (_) async {
+                      if (range == 'Custom Range') {
+                        final picked = await showDateRangePicker(
+                          context: context,
+                          firstDate: DateTime(2022),
+                          lastDate: now.add(const Duration(days: 365)),
+                          initialDateRange: _auditCustomRange ??
+                              DateTimeRange(
+                                start: now.subtract(const Duration(days: 7)),
+                                end: now,
+                              ),
+                        );
+                        if (picked != null && mounted) {
+                          setState(() {
+                            _auditCustomRange = picked;
+                            _auditDateRange = 'Custom Range';
+                          });
+                          final start = DateTime(picked.start.year, picked.start.month, picked.start.day);
+                          final end = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+                          state.fetchBookingsForDateRange(start, end);
+                        }
+                      } else {
+                        setState(() => _auditDateRange = range);
+                      }
+                    },
                   );
                 }).toList(),
               ),
@@ -371,7 +404,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
           ),
           const SizedBox(height: 16),
 
-          // Ministry of Revenues • VAT & Tax Segregation Audit Card
+          // Statutory Tax & VAT Segregation Audit Card
           Container(
             padding: const EdgeInsets.all(14),
             margin: const EdgeInsets.only(bottom: 16),
@@ -1619,15 +1652,9 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     int rangeDays = 1;
 
     switch (_pnlDateRange) {
-      case 'This Week':
-        final monday = now.subtract(Duration(days: now.weekday - 1));
-        rangeStart = DateTime(monday.year, monday.month, monday.day);
+      case 'All':
+        rangeStart = DateTime(2022, 1, 1);
         rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
-        rangeDays = 7;
-        break;
-      case 'This Month':
-        rangeStart = DateTime(now.year, now.month, 1);
-        rangeEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
         rangeDays = 30;
         break;
       case 'Custom Range':
@@ -1649,7 +1676,10 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
         break;
     }
 
-    bool isInRange(DateTime dt) => !dt.isBefore(rangeStart) && !dt.isAfter(rangeEnd);
+    bool isInRange(DateTime dt) {
+      if (_pnlDateRange == 'All') return true;
+      return !dt.isBefore(rangeStart) && !dt.isAfter(rangeEnd);
+    }
 
     final bookingsList = (state.bookings as List).cast<WashBooking>();
     final paidBookings = bookingsList.where((WashBooking b) {
@@ -1690,8 +1720,12 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     final digitalCarpet = paidBookings
         .where((b) => b.isCarpet && b.payment.method != PaymentMethod.cash)
         .fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    final totalDigitalInflows = digitalCarWash + digitalCarpet + retailDigital;
-    final totalCashOnHand = cashCarWash + cashCarpet + showerRevenue + retailCash;
+    final showerCash = (state.showerRecords as List)
+        .where((s) => isInRange(s.recordedAt) && s.isCash == true)
+        .fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final showerDigital = showerRevenue - showerCash;
+    final totalDigitalInflows = digitalCarWash + digitalCarpet + showerDigital + retailDigital;
+    final totalCashOnHand = cashCarWash + cashCarpet + showerCash + retailCash;
 
     final carsWashedCount = paidBookings.where((b) => !b.isCarpet).length;
     final carpetsWashedCount = paidBookings.where((b) => b.isCarpet).length;
@@ -1731,13 +1765,9 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
     String heroTitle;
     String heroSubtitle;
     switch (_pnlDateRange) {
-      case 'This Week':
-        heroTitle = 'THIS WEEK NET OPERATING PROFIT (EBITDA)';
-        heroSubtitle = 'Gross Revenue − Direct COGS − 7-Day Accrued Overheads (Rent, Utilities, Staff Salaries) & Machinery Depreciation';
-        break;
-      case 'This Month':
-        heroTitle = 'THIS MONTH NET OPERATING PROFIT (EBITDA)';
-        heroSubtitle = 'Gross Revenue − Direct COGS − Full Monthly Fixed Overheads (Rent, Utilities, Staff Salaries) & Machinery Depreciation';
+      case 'All':
+        heroTitle = 'ALL TIME NET OPERATING PROFIT (EBITDA)';
+        heroSubtitle = 'Gross Revenue − Direct COGS − 30-Day Benchmark Overheads (Rent, Utilities, Staff Salaries) & Machinery Depreciation';
         break;
       case 'Custom Range':
         heroTitle = 'PERIOD NET OPERATING PROFIT ($rangeDays DAYS)';
@@ -1767,27 +1797,10 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                 onTap: () => setState(() => _pnlDateRange = 'Today'),
               ),
               _buildPnlFilterChip(
-                label: state.tr('filterThisWeek'),
-                icon: Icons.view_week_rounded,
-                isSelected: _pnlDateRange == 'This Week',
-                onTap: () {
-                  setState(() => _pnlDateRange = 'This Week');
-                  final monday = now.subtract(Duration(days: now.weekday - 1));
-                  final startMonday = DateTime(monday.year, monday.month, monday.day);
-                  final endSunday = startMonday.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-                  state.fetchBookingsForDateRange(startMonday, endSunday);
-                },
-              ),
-              _buildPnlFilterChip(
-                label: state.tr('filterThisMonth'),
-                icon: Icons.calendar_month_rounded,
-                isSelected: _pnlDateRange == 'This Month',
-                onTap: () {
-                  setState(() => _pnlDateRange = 'This Month');
-                  final startMonth = DateTime(now.year, now.month, 1);
-                  final endMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-                  state.fetchBookingsForDateRange(startMonth, endMonth);
-                },
+                label: state.tr('filterAllTime'),
+                icon: Icons.all_inclusive_rounded,
+                isSelected: _pnlDateRange == 'All',
+                onTap: () => setState(() => _pnlDateRange = 'All'),
               ),
               _buildPnlFilterChip(
                 label: _pnlDateRange == 'Custom Range' && _pnlCustomRange != null
@@ -1898,7 +1911,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                               ['Shower Service Revenue', 'Revenue', CurrencyFormatter.format(showerRevenue), 'Zero VAT exempt'],
                               ['Retail Merchandise Sales', 'Revenue', CurrencyFormatter.format(retailRevenue), 'Direct product sales'],
                               ['Total Gross Station Revenue', 'Gross Revenue', CurrencyFormatter.format(grossRevenue), 'All revenue streams'],
-                              ['15% VAT Statutory Deductions', 'Tax Deduction', CurrencyFormatter.format(vehicleVat), 'Ministry of Revenues'],
+                              ['15% VAT Statutory Deductions', 'Tax Deduction', CurrencyFormatter.format(vehicleVat), 'Statutory Tax & VAT'],
                               ['Total Net Business Revenue', 'Net Revenue', CurrencyFormatter.format(totalNetRevenue), 'Gross − VAT'],
                               ['Washer Team Commission Pool', 'Direct COGS', CurrencyFormatter.format(commissionPaid), 'Labor cost'],
                               ['Supplies & Chemical Usage', 'Direct COGS', CurrencyFormatter.format(suppliesCost), 'Consumables'],
@@ -1976,7 +1989,7 @@ class _AccountantDashboardScreenState extends State<AccountantDashboardScreen>
                               ['Shower Service Revenue', 'Revenue', showerRevenue, 'Zero VAT exempt'],
                               ['Retail Merchandise Sales', 'Revenue', retailRevenue, 'Direct product sales'],
                               ['Total Gross Revenue', 'Gross Revenue', grossRevenue, 'All services'],
-                              ['15% VAT Statutory', 'Tax', vehicleVat, 'Ministry of Revenues'],
+                              ['15% VAT Statutory', 'Tax', vehicleVat, 'Statutory Tax & VAT'],
                               ['Total Net Business Revenue', 'Net Revenue', totalNetRevenue, 'Gross − VAT'],
                               ['Washer Commission Pool', 'COGS', commissionPaid, 'Direct labor'],
                               ['Supplies & Soap Usage', 'COGS', suppliesCost, 'Chemical swaps'],

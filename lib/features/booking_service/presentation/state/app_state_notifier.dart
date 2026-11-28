@@ -1428,8 +1428,8 @@ class AppStateNotifier extends ChangeNotifier {
   /// Wash revenue after deducting 15% VAT (Car wash net + 100% exempt Carpet revenue).
   double get netServiceRevenueTodayETB => netVehicleRevenueTodayETB + todayCarpetRevenueETB;
 
-  /// Net collected business revenue excl. VAT & tips (Net Wash + Carpet + Shower).
-  double get netBusinessRevenueTodayETB => netServiceRevenueTodayETB + todayShowerRevenueETB;
+  /// Net collected business revenue excl. VAT & tips (Net Wash + Carpet + Shower + Retail).
+  double get netBusinessRevenueTodayETB => netServiceRevenueTodayETB + todayShowerRevenueETB + todayRetailRevenueETB;
 
   /// Daily prorated facility & house rent accrual (Monthly Rent ÷ 30 days).
   double get dailyFacilityRentAccrualETB {
@@ -2520,7 +2520,7 @@ class AppStateNotifier extends ChangeNotifier {
     final cash = serviceCash + showerCash + retailCash;
     final digital = gross - cash;
 
-    final netServiceRev = netWashRevenueAfterVat(serviceGross);
+    final netServiceRev = netWashRevenueAfterVat(vehicleRev) + carpetRev;
     final comm = (netServiceRev * teamCommissionRate) + tipsRev;
     final net = (netServiceRev - (netServiceRev * teamCommissionRate)) + showerRev + (retailRev - retailCogs);
     final deposited = totalCashDepositedTodayETB;

@@ -1095,6 +1095,61 @@ class AppStrings {
       AppLanguage.om: 'Yeroo Hunda',
       AppLanguage.am: 'ሁሉንም ጊዜ',
     },
+    'kpiTotalRevenue': {
+      AppLanguage.en: 'Total Revenue',
+      AppLanguage.om: 'Galii Waliigalaa',
+      AppLanguage.am: 'ጠቅላላ ገቢ',
+    },
+    'kpiWasherCommission': {
+      AppLanguage.en: 'Washer Commission Pool',
+      AppLanguage.om: 'Kuusaa Komishiinii Dhiqtootaa',
+      AppLanguage.am: 'የአጣቢዎች ኮሚሽን ገንዳ',
+    },
+    'kpiCarsWashed': {
+      AppLanguage.en: 'Cars Washed',
+      AppLanguage.om: 'Konkolaattota Dhiqaman',
+      AppLanguage.am: 'የታጠቡ መኪኖች',
+    },
+    'kpiCarpetsWashed': {
+      AppLanguage.en: 'Carpets Washed',
+      AppLanguage.om: 'Afata Dhiqaman',
+      AppLanguage.am: 'የታጠቡ ምንጣፎች',
+    },
+    'kpiShowersTaken': {
+      AppLanguage.en: 'Showers Taken',
+      AppLanguage.om: 'Dhiqannaa Qaamaa',
+      AppLanguage.am: 'የተወሰዱ ሻወሮች',
+    },
+    'kpiRetailSold': {
+      AppLanguage.en: 'Retail Merchandise Sold',
+      AppLanguage.om: 'Meeshaalee Gurguraman',
+      AppLanguage.am: 'የተሸጡ ሸቀጦች',
+    },
+    'kpiLiquidity': {
+      AppLanguage.en: 'Cash & Bank Liquidity',
+      AppLanguage.om: 'Qarshii fi Baankii',
+      AppLanguage.am: 'የጥሬ ገንዘብ እና ባንክ ፈሳሽነት',
+    },
+    'kpiStationHealth': {
+      AppLanguage.en: 'Station Health & Sentinel',
+      AppLanguage.om: 'Fayyaa Buufataa & Seentineel',
+      AppLanguage.am: 'የጣቢያው ጤና እና ሴንቲኔል',
+    },
+    'expandSection': {
+      AppLanguage.en: 'Click to Expand',
+      AppLanguage.om: 'Bal\'isuuf Tuqi',
+      AppLanguage.am: 'ለመዘርጋት ይጫኑ',
+    },
+    'collapseSection': {
+      AppLanguage.en: 'Click to Collapse',
+      AppLanguage.om: 'Dachaasuuf Tuqi',
+      AppLanguage.am: 'ለማጠፍ ይጫኑ',
+    },
+    'openAccountantHub': {
+      AppLanguage.en: 'Open Accountant Audit Hub',
+      AppLanguage.om: 'Wiirtuu Oodiitii Hojjetaa Herregaa Bani',
+      AppLanguage.am: 'የሂሳብ ባለሙያ ኦዲት ማዕከል ክፈት',
+    },
     'teamCommissionDistribution': {
       AppLanguage.en: '15% Team Commission Seniority Distribution',
       AppLanguage.om: 'Qoqqoodama Komishiinii Garee 15% Sadarkaan',
@@ -1727,7 +1782,7 @@ class AppStrings {
       AppLanguage.am: 'የመኪኖች ተራ ዝርዝር',
     },
     'filterAll': {
-      AppLanguage.en: 'All Active',
+      AppLanguage.en: 'All',
       AppLanguage.om: 'Hunda',
       AppLanguage.am: 'ሁሉም',
     },
@@ -4553,14 +4608,14 @@ class AppStrings {
       AppLanguage.am: 'የጣቢያው ቦታ፣ የመታጠቢያ ክፍል እና የቢሮ ኪራይ',
     },
     'vatAuditCard': {
-      AppLanguage.en: 'Ministry of Revenues • VAT Audit',
-      AppLanguage.om: 'Ministeera Galiiwwanii • Oodiitii VAT',
-      AppLanguage.am: 'የገቢዎች ሚኒስቴር • የቫት ኦዲት',
+      AppLanguage.en: 'Statutory Tax & VAT Audit',
+      AppLanguage.om: 'Oodiitii Taaksii & VAT',
+      AppLanguage.am: 'ህጋዊ የታክስ እና ቫት ኦዲት',
     },
     'vatSummaryNotice': {
-      AppLanguage.en: 'Car wash services are vatable (15%). Carpet and shower services are VAT exempted (0%).',
-      AppLanguage.om: 'Tajaajilli dhiqannaa konkolaataa VAT (15%) qaba. Tajaajilli afataafi dhiqannaa qaamaa VAT irraa bilisa (0%).',
-      AppLanguage.am: 'የመኪና እጥበት አገልግሎቶች 15% ቫት የሚከፈልባቸው ሲሆን፣ ምንጣፍና ሻወር ከቫት ነፃ (0%) ናቸው።',
+      AppLanguage.en: 'Car wash services are vatable (15%). Carpet, shower, and retail sales are VAT exempted (0%).',
+      AppLanguage.om: 'Tajaajilli dhiqannaa konkolaataa VAT (15%) qaba. Afata, dhiqannaa qaamaafi meeshaaleen gurguraa VAT irraa bilisa (0%).',
+      AppLanguage.am: 'የመኪና እጥበት አገልግሎቶች 15% ቫት የሚከፈልባቸው ሲሆን፣ ምንጣፍ፣ ሻወር እና ሸቀጦች ሽያጭ ከቫት ነፃ (0%) ናቸው።',
     },
     'exportVatReport': {
       AppLanguage.en: 'Export VAT Declaration',

@@ -12,6 +12,7 @@ import '../../../../core/widgets/financial_pnl_statement_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/shared_washer_commission_hub.dart';
 import '../../../booking_service/domain/models/wash_booking.dart';
+import '../../../booking_service/domain/models/payment_info.dart';
 import '../../../booking_service/domain/models/wash_status.dart';
 import '../../../booking_service/presentation/screens/financial_reports_view.dart';
 import '../../../booking_service/presentation/screens/vehicle_history_screen.dart';
@@ -20,24 +21,22 @@ import '../../../welcome/domain/models/tiktok_ad_video.dart';
 import '../widgets/admin_feedback_moderation_card.dart';
 import '../widgets/bishe_ai_executive_sheet.dart';
 import '../widgets/sentinel_cross_ref_card.dart';
+import 'accountant_dashboard_screen.dart';
 import 'credentials_management_screen.dart';
 import 'pricing_management_screen.dart';
 import 'staff_management_screen.dart';
 
 enum AdminTimeFilter {
   today,
-  thisWeek,
-  thisMonth,
+  all,
   customRange;
 
   String localizedLabel(dynamic state, [DateTimeRange? selectedRange]) {
     switch (this) {
       case AdminTimeFilter.today:
         return state.tr('filterToday');
-      case AdminTimeFilter.thisWeek:
-        return state.tr('filterThisWeek');
-      case AdminTimeFilter.thisMonth:
-        return state.tr('filterThisMonth');
+      case AdminTimeFilter.all:
+        return state.tr('filterAllTime');
       case AdminTimeFilter.customRange:
         if (selectedRange != null) {
           return '${selectedRange.start.day}/${selectedRange.start.month} - ${selectedRange.end.day}/${selectedRange.end.month}';
@@ -90,6 +89,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   final _adminNightOtpController = TextEditingController();
   bool _phoneControllerInitialized = false;
 
+  // Collapsible Accordion State on Executive Home (Tab 0)
+  bool _isPnlExpanded = false;
+  bool _isSentinelExpanded = false;
+  bool _isCommissionPoolExpanded = false;
+  bool _isFeedbackAndMediaExpanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -119,13 +124,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     switch (_selectedFilter) {
       case AdminTimeFilter.today:
         return localDt.year == now.year && localDt.month == now.month && localDt.day == now.day;
-      case AdminTimeFilter.thisWeek:
-        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        final startMonday = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-        final endSunday = startMonday.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-        return !localDt.isBefore(startMonday) && !localDt.isAfter(endSunday);
-      case AdminTimeFilter.thisMonth:
-        return localDt.year == now.year && localDt.month == now.month;
+      case AdminTimeFilter.all:
+        return true;
       case AdminTimeFilter.customRange:
         final range = _selectedCustomRange ??
             DateTimeRange(
@@ -142,10 +142,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     switch (_selectedFilter) {
       case AdminTimeFilter.today:
         return FinancialReportFilter.today;
-      case AdminTimeFilter.thisWeek:
-        return FinancialReportFilter.thisWeek;
-      case AdminTimeFilter.thisMonth:
-        return FinancialReportFilter.thisMonth;
+      case AdminTimeFilter.all:
+        return FinancialReportFilter.all;
       case AdminTimeFilter.customRange:
         return FinancialReportFilter.customRange;
     }
@@ -156,12 +154,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     switch (_selectedFilter) {
       case AdminTimeFilter.today:
         return '${state.tr("filterToday")} (${now.day}/${now.month}/${now.year})';
-      case AdminTimeFilter.thisWeek:
-        final mon = now.subtract(Duration(days: now.weekday - 1));
-        final sun = mon.add(const Duration(days: 6));
-        return '${state.tr("filterThisWeek")} (${mon.day}/${mon.month} - ${sun.day}/${sun.month}/${sun.year})';
-      case AdminTimeFilter.thisMonth:
-        return '${state.tr("filterThisMonth")} (${now.month}/${now.year})';
+      case AdminTimeFilter.all:
+        return state.tr('filterAllTime');
       case AdminTimeFilter.customRange:
         final r = _selectedCustomRange;
         return r == null
@@ -174,9 +168,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     switch (_selectedFilter) {
       case AdminTimeFilter.today:
         return 1;
-      case AdminTimeFilter.thisWeek:
-        return 7;
-      case AdminTimeFilter.thisMonth:
+      case AdminTimeFilter.all:
         return 30;
       case AdminTimeFilter.customRange:
         final r = _selectedCustomRange;
@@ -206,18 +198,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         .where((b) => b.payment.isPaid && _matchesFilter(b.payment.paidAt ?? b.createdAt))
         .toList();
     final completedCars = allBookings
-        .where((b) => b.status == WashStatus.completed && _matchesFilter(b.completedAt ?? b.createdAt))
+        .where((b) => !b.isCarpet && b.status == WashStatus.completed && _matchesFilter(b.completedAt ?? b.createdAt))
+        .length;
+    final carpetsWashedCount = allBookings
+        .where((b) => b.isCarpet && b.status == WashStatus.completed && _matchesFilter(b.completedAt ?? b.createdAt))
         .length;
 
     final filteredShowers = state.showerRecords.where((s) => _matchesFilter(s.recordedAt)).toList();
-    final filteredRetail = state.retailSales.where((r) => _matchesFilter(r.recordedAt)).toList();
-    final serviceRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
-    final tipsRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
+    final showerUserCount = filteredShowers.fold<int>(0, (sum, s) => sum + s.userCount);
     final showerRevenue = filteredShowers.fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+    final showerCash = filteredShowers.where((s) => s.paymentMethod == PaymentMethod.cash).fold<double>(0.0, (sum, s) => sum + s.totalAmount);
+
+    final filteredRetail = state.retailSales.where((r) => _matchesFilter(r.recordedAt)).toList();
+    final retailItemsCount = filteredRetail.fold<int>(0, (sum, r) => sum + r.quantity);
     final retailRevenue = filteredRetail.fold<double>(0.0, (sum, r) => sum + r.totalAmount);
     final retailCogs = filteredRetail.fold<double>(0.0, (sum, r) => sum + r.totalCost);
-    final directBank = (_selectedFilter == AdminTimeFilter.today) ? (state.todayDirectBankCreditsETB as double) : 0.0;
+    final retailCash = filteredRetail.where((r) => r.paymentMethod == PaymentMethod.cash).fold<double>(0.0, (sum, r) => sum + r.totalAmount);
+
+    final serviceRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice));
+    final tipsRevenue = paidBookings.fold<double>(0.0, (sum, b) => sum + b.payment.tipAmount);
     final totalRevenue = serviceRevenue + tipsRevenue + showerRevenue + retailRevenue;
+
+    final serviceCash = paidBookings.where((b) => b.payment.method == PaymentMethod.cash).fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice) + b.payment.tipAmount);
+    final totalCashRevenue = serviceCash + showerCash + retailCash;
+    final totalDigitalRevenue = totalRevenue - totalCashRevenue;
 
     final totalPettyCash = state.pettyCashExpenses
         .where((e) => _matchesFilter(e.loggedAt))
@@ -229,7 +233,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         .fold<double>(0.0, (sum, t) => sum + t.totalCostEtb) + retailCogs;
     final vehicleWashRev = paidBookings.where((b) => !b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
     final carpetWashRev = paidBookings.where((b) => b.isCarpet).fold<double>(0.0, (sum, b) => sum + b.totalPrice);
-    // 15% VAT applies exclusively to Car Wash; Carpet and Shower are VAT exempt
+    // 15% VAT applies exclusively to Car Wash; Carpet, Shower & Retail are VAT exempt
     final vatDeducted = vehicleWashRev * 0.15;
     final netServiceRevenue = (vehicleWashRev - vatDeducted) + carpetWashRev;
     final commissionPool = (netServiceRevenue * state.teamCommissionRate) + tipsRevenue;
@@ -298,11 +302,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       context,
                       state,
                       isMobile,
-                      completedCars,
-                      totalRevenue,
-                      commissionPool,
-                      totalPettyCash,
-                      totalSupplies,
+                      completedCars: completedCars,
+                      carpetsWashedCount: carpetsWashedCount,
+                      showerUserCount: showerUserCount,
+                      retailItemsCount: retailItemsCount,
+                      totalRevenue: totalRevenue,
+                      vehicleWashRev: vehicleWashRev,
+                      carpetWashRev: carpetWashRev,
+                      showerRevenue: showerRevenue,
+                      retailRevenue: retailRevenue,
+                      commissionPool: commissionPool,
+                      totalPettyCash: totalPettyCash,
+                      totalSupplies: totalSupplies,
+                      totalCashRevenue: totalCashRevenue,
+                      totalDigitalRevenue: totalDigitalRevenue,
                       digitalBookings: digitalBookings,
                       vatDeducted: vatDeducted,
                     )
@@ -602,18 +615,326 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   }
 
   // ===========================================================================
-  // TAB 0: OVERVIEW & CASH
+  // TAB 0: OVERVIEW & CASH (EXECUTIVE HOME)
   // ===========================================================================
+
+  Widget _buildKpiCard({
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required bool isMobile,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: EdgeInsets.all(isMobile ? 10 : 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: 0.35), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 16),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: color.withValues(alpha: 0.9),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKpiGrid({
+    required BuildContext context,
+    required dynamic state,
+    required bool isMobile,
+    required double totalRevenue,
+    required double vehicleWashRev,
+    required double carpetWashRev,
+    required double showerRevenue,
+    required double retailRevenue,
+    required double commissionPool,
+    required int completedCars,
+    required int carpetsWashedCount,
+    required int showerUserCount,
+    required int retailItemsCount,
+    required double totalCashRevenue,
+    required double totalDigitalRevenue,
+  }) {
+    final sentinel = state.sentinelConfig;
+    final isSentinelOnline = sentinel?.isOnline == true;
+    final sentinelBattery = sentinel?.batteryLevel ?? 100;
+
+    final cards = [
+      _buildKpiCard(
+        title: state.tr('kpiTotalRevenue'),
+        value: CurrencyFormatter.format(totalRevenue),
+        subtitle: 'Car: ${CurrencyFormatter.format(vehicleWashRev)} • Carpet: ${CurrencyFormatter.format(carpetWashRev)} • Retail: ${CurrencyFormatter.format(retailRevenue)}',
+        icon: Icons.account_balance_wallet_rounded,
+        color: const Color(0xFFF59E0B),
+        isMobile: isMobile,
+      ),
+      _buildKpiCard(
+        title: state.tr('kpiWasherCommission'),
+        value: CurrencyFormatter.format(commissionPool),
+        subtitle: '15% on Net Car + Carpet',
+        icon: Icons.groups_rounded,
+        color: const Color(0xFF10B981),
+        isMobile: isMobile,
+      ),
+      _buildKpiCard(
+        title: state.tr('kpiCarsWashed'),
+        value: '$completedCars Cars',
+        subtitle: '15% VAT Inclusive',
+        icon: Icons.directions_car_rounded,
+        color: const Color(0xFF06B6D4),
+        isMobile: isMobile,
+      ),
+      _buildKpiCard(
+        title: state.tr('kpiCarpetsWashed'),
+        value: '$carpetsWashedCount Carpets',
+        subtitle: '0% VAT Exempt',
+        icon: Icons.layers_rounded,
+        color: const Color(0xFF8B5CF6),
+        isMobile: isMobile,
+      ),
+      _buildKpiCard(
+        title: state.tr('kpiShowersTaken'),
+        value: '$showerUserCount Users',
+        subtitle: '0% VAT Exempt',
+        icon: Icons.shower_rounded,
+        color: const Color(0xFF38BDF8),
+        isMobile: isMobile,
+      ),
+      _buildKpiCard(
+        title: state.tr('kpiRetailSold'),
+        value: '$retailItemsCount Items',
+        subtitle: '0% VAT Exempt',
+        icon: Icons.shopping_bag_rounded,
+        color: const Color(0xFFF97316),
+        isMobile: isMobile,
+      ),
+      _buildKpiCard(
+        title: state.tr('kpiLiquidity'),
+        value: CurrencyFormatter.format(totalCashRevenue + totalDigitalRevenue),
+        subtitle: 'Drawer: ${CurrencyFormatter.format(state.cashierDrawerBalanceETB)} • Bank: ${CurrencyFormatter.format(totalDigitalRevenue)}',
+        icon: Icons.monetization_on_rounded,
+        color: const Color(0xFF22C55E),
+        isMobile: isMobile,
+      ),
+      _buildKpiCard(
+        title: state.tr('kpiStationHealth'),
+        value: isSentinelOnline ? 'Sentinel Online' : 'Sentinel Idle',
+        subtitle: 'Battery $sentinelBattery% • Bays Online',
+        icon: Icons.verified_user_rounded,
+        color: isSentinelOnline ? const Color(0xFF34D399) : const Color(0xFFEF4444),
+        isMobile: isMobile,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth < 600 ? 2 : (constraints.maxWidth < 1000 ? 3 : 4);
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: isMobile ? 1.45 : 1.7,
+          children: cards,
+        );
+      },
+    );
+  }
+
+  Widget _buildExpandableAccordionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required String badgeText,
+    required bool isExpanded,
+    required VoidCallback onToggle,
+    required Widget child,
+    required bool isMobile,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isExpanded ? color.withValues(alpha: 0.6) : AppColors.cardBorder,
+          width: isExpanded ? 1.4 : 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, color: color, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: isMobile ? 13 : 14.5,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: color.withValues(alpha: 0.4)),
+                    ),
+                    child: Text(
+                      badgeText,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    color: Colors.white70,
+                    size: 22,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (isExpanded) ...[
+            const Divider(height: 1, color: Color(0xFF334155)),
+            Padding(
+              padding: EdgeInsets.all(isMobile ? 10 : 16),
+              child: child,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   Widget _buildOverviewAndCashTab(
     BuildContext context,
     dynamic state,
-    bool isMobile,
-    int completedCars,
-    double totalRevenue,
-    double commissionPool,
-    double totalPettyCash,
-    double totalSupplies, {
+    bool isMobile, {
+    required int completedCars,
+    required int carpetsWashedCount,
+    required int showerUserCount,
+    required int retailItemsCount,
+    required double totalRevenue,
+    required double vehicleWashRev,
+    required double carpetWashRev,
+    required double showerRevenue,
+    required double retailRevenue,
+    required double commissionPool,
+    required double totalPettyCash,
+    required double totalSupplies,
+    required double totalCashRevenue,
+    required double totalDigitalRevenue,
     List<WashBooking> digitalBookings = const [],
     double vatDeducted = 0.0,
   }) {
@@ -623,16 +944,30 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         _buildExecutiveBanner(state, isMobile),
         const SizedBox(height: 12),
 
-        // Live Sentinel Cross-Reference & Digital Bank Transactions Hub
-        SentinelCrossRefCard(digitalBookings: digitalBookings, isMobile: isMobile),
-        const SizedBox(height: 12),
-
         _buildTimeFilterBar(state),
         const SizedBox(height: 12),
 
-        const ClosingSyncWarningBanner(),
+        // 8-Card Executive KPI Glance Grid
+        _buildKpiGrid(
+          context: context,
+          state: state,
+          isMobile: isMobile,
+          totalRevenue: totalRevenue,
+          vehicleWashRev: vehicleWashRev,
+          carpetWashRev: carpetWashRev,
+          showerRevenue: showerRevenue,
+          retailRevenue: retailRevenue,
+          commissionPool: commissionPool,
+          completedCars: completedCars,
+          carpetsWashedCount: carpetsWashedCount,
+          showerUserCount: showerUserCount,
+          retailItemsCount: retailItemsCount,
+          totalCashRevenue: totalCashRevenue,
+          totalDigitalRevenue: totalDigitalRevenue,
+        ),
+        const SizedBox(height: 14),
 
-        // Quick Financial Reports & Wash History shortcuts
+        // Action Toolbar: Financial Reports & Accountant Audit Hub
         _buildActionPairRow(
           isMobile: isMobile,
           items: [
@@ -654,30 +989,101 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ),
             _AdminActionItem(
-              title: state.tr('washHistory'),
-              subtitle: state.tr('washHistoryAuditDesc'),
-              icon: Icons.history_edu_rounded,
-              imageUrl: AutoCareAssets.welcomeHeroUrl,
-              color: AppColors.telebirrBlue,
-              badge: '$completedCars',
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VehicleHistoryScreen())),
+              title: state.tr('openAccountantHub'),
+              subtitle: '4-Service Live Audit & VAT Segregation',
+              icon: Icons.account_balance_rounded,
+              imageUrl: AutoCareAssets.cbeLogoUrl,
+              color: AppColors.primary,
+              badge: 'Audit Hub',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AccountantDashboardScreen(),
+                ),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
 
-        // Full Profit & Loss Statement synchronized with selected Date / Date Range filter
-        FinancialPnlStatementCard(
-          state: state,
+        // Collapsible Accordion 1: Profit & Loss Statement & VAT Breakdown
+        _buildExpandableAccordionCard(
+          title: state.tr('pnlStatementTitle'),
+          subtitle: 'Period: ${_selectedRangeSubtitle(state)} • VAT: 15% Car, 0% Exempt Carpet/Shower/Retail',
+          icon: Icons.analytics_rounded,
+          color: AppColors.primary,
+          badgeText: _isPnlExpanded ? state.tr('collapseSection') : state.tr('expandSection'),
+          isExpanded: _isPnlExpanded,
+          onToggle: () => setState(() => _isPnlExpanded = !_isPnlExpanded),
           isMobile: isMobile,
-          periodSubtitle: _selectedRangeSubtitle(state),
-          totalRevenue: totalRevenue,
-          vatDeducted: vatDeducted,
-          commissionPool: commissionPool,
-          totalPettyCash: totalPettyCash,
-          totalSupplies: totalSupplies,
-          rangeDays: _selectedRangeDays,
+          child: FinancialPnlStatementCard(
+            state: state,
+            isMobile: isMobile,
+            periodSubtitle: _selectedRangeSubtitle(state),
+            totalRevenue: totalRevenue,
+            vatDeducted: vatDeducted,
+            commissionPool: commissionPool,
+            totalPettyCash: totalPettyCash,
+            totalSupplies: totalSupplies,
+            rangeDays: _selectedRangeDays,
+          ),
         ),
+
+        // Collapsible Accordion 2: Live Sentinel Bank SMS & Receipts Reconciler
+        _buildExpandableAccordionCard(
+          title: 'Sentinel Bank SMS & Receipts Reconciler',
+          subtitle: 'CBE, Awash & Telebirr automated SMS reconciliation',
+          icon: Icons.phonelink_ring_rounded,
+          color: AppColors.liquidCyanNeon,
+          badgeText: '${digitalBookings.length} Digital Txns',
+          isExpanded: _isSentinelExpanded,
+          onToggle: () => setState(() => _isSentinelExpanded = !_isSentinelExpanded),
+          isMobile: isMobile,
+          child: SentinelCrossRefCard(digitalBookings: digitalBookings, isMobile: isMobile),
+        ),
+
+        // Collapsible Accordion 3: Daily Washer Commission Pool & Attendance
+        _buildExpandableAccordionCard(
+          title: state.tr('teamCommissionDistribution'),
+          subtitle: 'Washer dividends calculation & attendance roster',
+          icon: Icons.groups_rounded,
+          color: AppColors.oromiaGold,
+          badgeText: CurrencyFormatter.format(commissionPool),
+          isExpanded: _isCommissionPoolExpanded,
+          onToggle: () => setState(() => _isCommissionPoolExpanded = !_isCommissionPoolExpanded),
+          isMobile: isMobile,
+          child: SharedWasherCommissionHub(
+            state: state,
+            role: WasherHubRole.admin,
+            isMobile: isMobile,
+            initiallyExpanded: true,
+            respectInitiallyExpanded: true,
+          ),
+        ),
+
+        // Collapsible Accordion 4: Customer Feedback Moderation & TikTok Commercials
+        _buildExpandableAccordionCard(
+          title: state.tr('adminTabCustomersAds'),
+          subtitle: 'Customer reviews approval, TikTok reels, and cashier SMS config',
+          icon: Icons.campaign_rounded,
+          color: AppColors.secondary,
+          badgeText: '${(state.pendingCustomerFeedback as List).length} Reviews',
+          isExpanded: _isFeedbackAndMediaExpanded,
+          onToggle: () => setState(() => _isFeedbackAndMediaExpanded = !_isFeedbackAndMediaExpanded),
+          isMobile: isMobile,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AdminFeedbackModerationCard(),
+              const SizedBox(height: 14),
+              _buildCashierSmsConfigCard(context, state, isMobile),
+              const SizedBox(height: 14),
+              _buildTikTokCommercialReelsManagerCard(context, state, isMobile),
+            ],
+          ),
+        ),
+
+        const ClosingSyncWarningBanner(),
       ],
     );
   }
@@ -1026,14 +1432,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               } else {
                 setState(() => _selectedFilter = filter);
                 final now = DateTime.now();
-                if (filter == AdminTimeFilter.thisWeek) {
-                  final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-                  final start = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-                  final end = start.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-                  state.fetchBookingsForDateRange(start, end);
-                } else if (filter == AdminTimeFilter.thisMonth) {
-                  final start = DateTime(now.year, now.month, 1);
-                  final end = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+                if (filter == AdminTimeFilter.all) {
+                  state.fetchBookingsForDateRange(DateTime(2022), now.add(const Duration(days: 1)));
+                } else {
+                  final start = DateTime(now.year, now.month, now.day);
+                  final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
                   state.fetchBookingsForDateRange(start, end);
                 }
               }
@@ -1252,10 +1655,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         ),
                   if (op.badge != null) ...[
                     const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(color: op.color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                      child: Text(op.badge!, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: op.color)),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: op.color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
+                        child: Text(
+                          op.badge!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: op.color),
+                        ),
+                      ),
                     ),
                   ],
                 ],

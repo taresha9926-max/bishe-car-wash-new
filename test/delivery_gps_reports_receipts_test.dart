@@ -391,17 +391,11 @@ void main() {
       expect(find.text(state.tr('weeklyCommissionReport')), findsNothing);
       expect(find.text(state.tr('washerPayrollTitle')), findsNothing);
 
-      // Tap This Week -> dynamic title updates to Weekly
-      await tester.ensureVisible(find.text(state.tr('filterThisWeek')));
-      await tester.tap(find.text(state.tr('filterThisWeek')));
+      // Tap All Time -> dynamic title updates to All Time
+      await tester.ensureVisible(find.text(state.tr('filterAllTime')));
+      await tester.tap(find.text(state.tr('filterAllTime')));
       await tester.pumpAndSettle();
-      expect(find.text(state.tr('consolidatedWeeklyTitle')), findsAtLeastNWidgets(1));
-
-      // Tap This Month -> dynamic title updates to Monthly
-      await tester.ensureVisible(find.text(state.tr('filterThisMonth')));
-      await tester.tap(find.text(state.tr('filterThisMonth')));
-      await tester.pumpAndSettle();
-      expect(find.text(state.tr('consolidatedMonthlyTitle')), findsAtLeastNWidgets(1));
+      expect(find.text(state.tr('filterAllTime')), findsAtLeastNWidgets(1));
 
       // Embedded custom range test
       final customStart = DateTime(2026, 11, 1);
@@ -532,9 +526,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tab 0 has date filters & P&L without KPI grid / Shift Handover Desk
-      expect(find.text(state.tr('filterThisWeek')), findsOneWidget);
-      expect(find.text(state.tr('filterThisMonth')), findsOneWidget);
+      // Tab 0 has date filters: Today, All Time, Custom Range
+      expect(find.text(state.tr('filterToday')), findsOneWidget);
+      expect(find.text(state.tr('filterAllTime')), findsOneWidget);
       expect(find.text(state.tr('filterCustomRange')), findsOneWidget);
       expect(find.text(state.tr('cashierHandoverTitle')), findsNothing);
 

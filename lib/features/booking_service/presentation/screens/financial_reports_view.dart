@@ -15,21 +15,15 @@ import '../state/app_state_provider.dart';
 
 enum FinancialReportFilter {
   today,
-  yesterday,
-  thisWeek,
-  thisMonth,
+  all,
   customRange;
 
   String localizedLabel(dynamic state) {
     switch (this) {
       case FinancialReportFilter.today:
         return state.tr('filterToday');
-      case FinancialReportFilter.yesterday:
-        return state.tr('filterYesterday');
-      case FinancialReportFilter.thisWeek:
-        return state.tr('filterThisWeek');
-      case FinancialReportFilter.thisMonth:
-        return state.tr('filterThisMonth');
+      case FinancialReportFilter.all:
+        return state.tr('filterAllTime');
       case FinancialReportFilter.customRange:
         return state.tr('filterCustomRange');
     }
@@ -70,12 +64,9 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
   String _consolidatedTitle(dynamic state, DateTime rangeStart, DateTime rangeEnd) {
     switch (_periodFilter) {
       case FinancialReportFilter.today:
-      case FinancialReportFilter.yesterday:
         return state.tr('consolidatedDailyTitle');
-      case FinancialReportFilter.thisWeek:
-        return state.tr('consolidatedWeeklyTitle');
-      case FinancialReportFilter.thisMonth:
-        return state.tr('consolidatedMonthlyTitle');
+      case FinancialReportFilter.all:
+        return state.tr('filterAllTime');
       case FinancialReportFilter.customRange:
         final label = '${_formatDate(rangeStart)} - ${_formatDate(rangeEnd)}';
         return '${state.tr("consolidatedCustomPrefix")} [$label] ${state.tr("consolidatedCustomSuffix")}';
@@ -97,19 +88,9 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         rangeStart = DateTime(now.year, now.month, now.day);
         rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
         break;
-      case FinancialReportFilter.yesterday:
-        final y = now.subtract(const Duration(days: 1));
-        rangeStart = DateTime(y.year, y.month, y.day);
-        rangeEnd = DateTime(y.year, y.month, y.day, 23, 59, 59);
-        break;
-      case FinancialReportFilter.thisWeek:
-        final monday = now.subtract(Duration(days: now.weekday - 1));
-        rangeStart = DateTime(monday.year, monday.month, monday.day);
-        rangeEnd = rangeStart.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-        break;
-      case FinancialReportFilter.thisMonth:
-        rangeStart = DateTime(now.year, now.month, 1);
-        rangeEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      case FinancialReportFilter.all:
+        rangeStart = DateTime(2022, 1, 1);
+        rangeEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
         break;
       case FinancialReportFilter.customRange:
         if (_customRange != null) {
@@ -125,13 +106,9 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     final int rangeDays;
     switch (_periodFilter) {
       case FinancialReportFilter.today:
-      case FinancialReportFilter.yesterday:
         rangeDays = 1;
         break;
-      case FinancialReportFilter.thisWeek:
-        rangeDays = 7;
-        break;
-      case FinancialReportFilter.thisMonth:
+      case FinancialReportFilter.all:
         rangeDays = 30;
         break;
       case FinancialReportFilter.customRange:
@@ -144,6 +121,7 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
     }
 
     bool inRange(DateTime dt) {
+      if (_periodFilter == FinancialReportFilter.all) return true;
       final localDt = dt.toLocal();
       return (localDt.isAfter(rangeStart) || localDt.isAtSameMomentAs(rangeStart)) &&
           (localDt.isBefore(rangeEnd) || localDt.isAtSameMomentAs(rangeEnd));
@@ -180,8 +158,8 @@ class _FinancialReportsViewState extends State<FinancialReportsView> {
         .fold<double>(0.0, (sum, b) => sum + (b.payment.amount > 0 ? b.payment.amount : b.totalPrice) + b.payment.tipAmount);
     final cashRevenue = serviceCash + showerCash + retailCash;
     final digitalRevenue = grossRevenue - cashRevenue;
-    final vatDeducted = (carRevenue + carpetRevenue) * 0.15;
-    final netServiceRevenue = (carRevenue + carpetRevenue) - vatDeducted;
+    final vatDeducted = carRevenue * 0.15;
+    final netServiceRevenue = (carRevenue - vatDeducted) + carpetRevenue;
     final commissionDeducted = (netServiceRevenue * state.teamCommissionRate) + totalTips;
     final netStationProfit = (grossRevenue - vatDeducted) - commissionDeducted - retailCogs;
 
